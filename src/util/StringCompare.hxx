@@ -34,6 +34,12 @@
 
 #include <inline/compiler.h>
 
+static inline bool
+StringIsEmpty(const char *string) noexcept
+{
+	return *string == 0;
+}
+
 gcc_pure gcc_nonnull_all
 static inline bool
 StringStartsWith(const char *haystack, StringView needle) noexcept
