@@ -92,4 +92,8 @@ gcc_nonnull_all
 void
 StripRight(char *p);
 
+gcc_nonnull_all
+char *
+Strip(char *p);
+
 #endif

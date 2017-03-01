@@ -75,3 +75,11 @@ StripRight(char *p)
 	size_t new_length = StripRight(p, old_length);
 	p[new_length] = 0;
 }
+
+char *
+Strip(char *p)
+{
+	p = StripLeft(p);
+	StripRight(p);
+	return p;
+}
