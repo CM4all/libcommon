@@ -36,3 +36,16 @@ util = static_library('util',
     libinline,
   ])
 util_dep = declare_dependency(link_with: util)
+
+event = static_library('event',
+  'src/event/Loop.cxx',
+  'src/event/ShutdownListener.cxx',
+  'src/event/CleanupTimer.cxx',
+  'src/event/DeferEvent.cxx',
+  'src/event/SignalEvent.cxx',
+  include_directories: inc,
+  dependencies: [
+    libinline,
+    libevent,
+    util_dep,
+  ])
