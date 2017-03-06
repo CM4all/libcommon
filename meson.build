@@ -18,6 +18,7 @@ add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
 boost = dependency('boost', version: '>= 1.54')
 libevent = dependency('libevent', version: '>= 2.0.19')
 libcurl = dependency('libcurl', version: '>= 7.38')
+libpq = dependency('libpq', version: '>= 8.4')
 libsystemd = dependency('libsystemd')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
@@ -77,4 +78,15 @@ curl = static_library('curl',
     libcurl,
     libinline,
     event_dep,
+  ])
+
+pg = static_library('pg',
+  'src/pg/Array.cxx',
+  'src/pg/Connection.cxx',
+  'src/pg/AsyncConnection.cxx',
+  'src/pg/Result.cxx',
+  include_directories: inc,
+  dependencies: [
+    libpq,
+    libinline,
   ])
