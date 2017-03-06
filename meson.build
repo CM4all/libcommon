@@ -2,6 +2,8 @@ project('CM4all libcommon', 'cpp', version: '0.1',
   default_options : ['cpp_std=c++14'])
 
 add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
+  '-DPACKAGE="' + meson.project_name() + '"',
+  '-DVERSION="' + meson.project_version() + '"',
   '-Wall',
   '-Wextra',
   '-Wwrite-strings', '-Wcast-qual', '-Wcast-align', '-Wfloat-equal',
@@ -15,6 +17,7 @@ add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
 
 boost = dependency('boost', version: '>= 1.54')
 libevent = dependency('libevent', version: '>= 2.0.19')
+libcurl = dependency('libcurl', version: '>= 7.38')
 libsystemd = dependency('libsystemd')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
@@ -48,6 +51,7 @@ event = static_library('event',
     libevent,
     util_dep,
   ])
+event_dep = declare_dependency(link_with: event)
 
 net = static_library('net',
   'src/net/SocketAddress.cxx',
@@ -62,3 +66,15 @@ net = static_library('net',
     libinline, libsocket,
   ])
 net_dep = declare_dependency(link_with: net)
+
+curl = static_library('curl',
+  'src/curl/Version.cxx',
+  'src/curl/Request.cxx',
+  'src/curl/Global.cxx',
+  'src/curl/Init.cxx',
+  include_directories: inc,
+  dependencies: [
+    libcurl,
+    libinline,
+    event_dep,
+  ])
