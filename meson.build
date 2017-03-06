@@ -9,9 +9,8 @@ add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
   '-Wmissing-declarations', '-Wmissing-noreturn', '-Wmissing-format-attribute',
   '-Wredundant-decls', '-Wno-long-long', '-Wundef',
   '-Wunused',
-  '-pedantic',
   '-Wno-non-virtual-dtor',
-  '-Werror', '-pedantic-errors',
+  '-Werror',
   language: 'cpp')
 
 boost = dependency('boost', version: '>= 1.54')
@@ -49,3 +48,17 @@ event = static_library('event',
     libevent,
     util_dep,
   ])
+
+net = static_library('net',
+  'src/net/SocketAddress.cxx',
+  'src/net/StaticSocketAddress.cxx',
+  'src/net/AllocatedSocketAddress.cxx',
+  'src/net/Resolver.cxx',
+  'src/net/Parser.cxx',
+  'src/net/Interface.cxx',
+  'src/net/SocketDescriptor.cxx',
+  include_directories: inc,
+  dependencies: [
+    libinline, libsocket,
+  ])
+net_dep = declare_dependency(link_with: net)
