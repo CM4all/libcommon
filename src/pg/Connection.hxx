@@ -13,6 +13,7 @@
 #include <inline/compiler.h>
 
 #include <postgresql/libpq-fe.h>
+#include <postgresql/pg_config.h>
 
 #include <new>
 #include <memory>
@@ -301,9 +302,11 @@ public:
         SendQuery(false, query, params...);
     }
 
+#if PG_VERSION_NUM >= 90200
     void SetSingleRowMode() {
         PQsetSingleRowMode(conn);
     }
+#endif
 
     PgResult ReceiveResult() {
         assert(IsDefined());
