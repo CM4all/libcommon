@@ -73,6 +73,12 @@ public:
 	}
 
 	/**
+	 * Ask the kernel whether this is a valid file descriptor.
+	 */
+	gcc_pure
+	bool IsValid() const;
+
+	/**
 	 * Returns the file descriptor.  This may only be called if
 	 * IsDefined() returns true.
 	 */

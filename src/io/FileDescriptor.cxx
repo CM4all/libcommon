@@ -62,6 +62,12 @@
 #endif
 
 bool
+FileDescriptor::IsValid() const
+{
+	return IsDefined() && fcntl(fd, F_GETFL) >= 0;
+}
+
+bool
 FileDescriptor::Open(const char *pathname, int flags, mode_t mode)
 {
 	fd = ::open(pathname, flags | O_NOCTTY | O_CLOEXEC, mode);
