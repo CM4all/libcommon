@@ -54,6 +54,14 @@ event = static_library('event',
   ])
 event_dep = declare_dependency(link_with: event)
 
+io = static_library('io',
+  'src/io/FileDescriptor.cxx',
+  include_directories: inc,
+  dependencies: [
+    libinline,
+  ])
+io_dep = declare_dependency(link_with: io)
+
 net = static_library('net',
   'src/net/SocketAddress.cxx',
   'src/net/StaticSocketAddress.cxx',
