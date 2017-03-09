@@ -2,8 +2,8 @@
  * author: Max Kellermann <mk@cm4all.com>
  */
 
-#ifndef SOCKET_DESCRIPTOR_SOCKET_HXX
-#define SOCKET_DESCRIPTOR_SOCKET_HXX
+#ifndef UNIQUE_SOCKET_DESCRIPTOR_SOCKET_HXX
+#define UNIQUE_SOCKET_DESCRIPTOR_SOCKET_HXX
 
 #include <inline/compiler.h>
 
@@ -18,22 +18,22 @@ class StaticSocketAddress;
 /**
  * Wrapper for a socket file descriptor.
  */
-class SocketDescriptor {
+class UniqueSocketDescriptor {
     int fd = -1;
 
 public:
-    SocketDescriptor() = default;
+    UniqueSocketDescriptor() = default;
 
-    explicit SocketDescriptor(int _fd):fd(_fd) {
+    explicit UniqueSocketDescriptor(int _fd):fd(_fd) {
         assert(fd >= 0);
     }
 
-    SocketDescriptor(SocketDescriptor &&other)
+    UniqueSocketDescriptor(UniqueSocketDescriptor &&other)
         :fd(std::exchange(other.fd, -1)) {}
 
-    ~SocketDescriptor();
+    ~UniqueSocketDescriptor();
 
-    SocketDescriptor &operator=(SocketDescriptor &&src) {
+    UniqueSocketDescriptor &operator=(UniqueSocketDescriptor &&src) {
         std::swap(fd, src.fd);
         return *this;
     }
@@ -48,7 +48,7 @@ public:
         return fd;
     }
 
-    bool operator==(const SocketDescriptor &other) const {
+    bool operator==(const UniqueSocketDescriptor &other) const {
         return fd == other.fd;
     }
 
@@ -92,7 +92,7 @@ public:
     /**
      * @return an "undefined" instance on error
      */
-    SocketDescriptor Accept(StaticSocketAddress &address) const;
+    UniqueSocketDescriptor Accept(StaticSocketAddress &address) const;
 
     /**
      * @return false on error (with errno set)

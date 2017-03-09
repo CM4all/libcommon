@@ -2,7 +2,7 @@
  * author: Max Kellermann <mk@cm4all.com>
  */
 
-#include "SocketDescriptor.hxx"
+#include "UniqueSocketDescriptor.hxx"
 #include "SocketAddress.hxx"
 #include "StaticSocketAddress.hxx"
 
@@ -14,14 +14,14 @@
 #include <netinet/tcp.h>
 #include <string.h>
 
-SocketDescriptor::~SocketDescriptor()
+UniqueSocketDescriptor::~UniqueSocketDescriptor()
 {
     if (IsDefined())
         Close();
 }
 
 void
-SocketDescriptor::Close()
+UniqueSocketDescriptor::Close()
 {
     assert(IsDefined());
 
@@ -30,7 +30,7 @@ SocketDescriptor::Close()
 }
 
 bool
-SocketDescriptor::Create(int domain, int type, int protocol)
+UniqueSocketDescriptor::Create(int domain, int type, int protocol)
 {
     assert(!IsDefined());
 
@@ -40,7 +40,7 @@ SocketDescriptor::Create(int domain, int type, int protocol)
 }
 
 bool
-SocketDescriptor::Bind(SocketAddress address)
+UniqueSocketDescriptor::Bind(SocketAddress address)
 {
     assert(IsDefined());
 
@@ -48,7 +48,7 @@ SocketDescriptor::Bind(SocketAddress address)
 }
 
 bool
-SocketDescriptor::SetOption(int level, int name,
+UniqueSocketDescriptor::SetOption(int level, int name,
                             const void *value, size_t size)
 {
     assert(IsDefined());
@@ -57,54 +57,54 @@ SocketDescriptor::SetOption(int level, int name,
 }
 
 bool
-SocketDescriptor::SetReuseAddress(bool value)
+UniqueSocketDescriptor::SetReuseAddress(bool value)
 {
     return SetBoolOption(SOL_SOCKET, SO_REUSEADDR, value);
 }
 
 bool
-SocketDescriptor::SetReusePort(bool value)
+UniqueSocketDescriptor::SetReusePort(bool value)
 {
     return SetBoolOption(SOL_SOCKET, SO_REUSEPORT, value);
 }
 
 bool
-SocketDescriptor::SetTcpDeferAccept(const int &seconds)
+UniqueSocketDescriptor::SetTcpDeferAccept(const int &seconds)
 {
     return SetOption(IPPROTO_TCP, TCP_DEFER_ACCEPT, &seconds, sizeof(seconds));
 }
 
 bool
-SocketDescriptor::SetV6Only(bool value)
+UniqueSocketDescriptor::SetV6Only(bool value)
 {
     return SetBoolOption(IPPROTO_IPV6, IPV6_V6ONLY, value);
 }
 
 bool
-SocketDescriptor::SetBindToDevice(const char *name)
+UniqueSocketDescriptor::SetBindToDevice(const char *name)
 {
     return SetOption(SOL_SOCKET, SO_BINDTODEVICE, name, strlen(name));
 }
 
 bool
-SocketDescriptor::SetTcpFastOpen(int qlen)
+UniqueSocketDescriptor::SetTcpFastOpen(int qlen)
 {
     return SetOption(SOL_TCP, TCP_FASTOPEN, &qlen, sizeof(qlen));
 }
 
-SocketDescriptor
-SocketDescriptor::Accept(StaticSocketAddress &address) const
+UniqueSocketDescriptor
+UniqueSocketDescriptor::Accept(StaticSocketAddress &address) const
 {
     assert(IsDefined());
 
     address.size = address.GetCapacity();
     int result = accept4(fd, address, &address.size,
                          SOCK_CLOEXEC|SOCK_NONBLOCK);
-    return SocketDescriptor(result);
+    return UniqueSocketDescriptor(result);
 }
 
 bool
-SocketDescriptor::Connect(const SocketAddress address)
+UniqueSocketDescriptor::Connect(const SocketAddress address)
 {
     assert(IsDefined());
 
@@ -112,7 +112,7 @@ SocketDescriptor::Connect(const SocketAddress address)
 }
 
 int
-SocketDescriptor::GetError()
+UniqueSocketDescriptor::GetError()
 {
     assert(IsDefined());
 
@@ -125,7 +125,7 @@ SocketDescriptor::GetError()
 }
 
 StaticSocketAddress
-SocketDescriptor::GetLocalAddress() const
+UniqueSocketDescriptor::GetLocalAddress() const
 {
     assert(IsDefined());
 
