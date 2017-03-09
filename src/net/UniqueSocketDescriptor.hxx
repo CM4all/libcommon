@@ -8,6 +8,7 @@
 #include <inline/compiler.h>
 
 #include <algorithm>
+#include <utility>
 
 #include <assert.h>
 #include <stddef.h>
@@ -57,9 +58,7 @@ public:
     int Steal() {
         assert(IsDefined());
 
-        int result = fd;
-        fd = -1;
-        return result;
+        return std::exchange(fd, -1);
     }
 
     /**
