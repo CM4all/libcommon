@@ -152,6 +152,7 @@ public:
 #endif
 
 	SocketDescriptor Accept();
+	SocketDescriptor AcceptNonBlock(StaticSocketAddress &address) const;
 
 	bool Connect(SocketAddress address);
 

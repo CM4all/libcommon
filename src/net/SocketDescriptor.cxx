@@ -67,6 +67,18 @@ SocketDescriptor::Accept()
 		: Undefined();
 }
 
+SocketDescriptor
+SocketDescriptor::AcceptNonBlock(StaticSocketAddress &address) const
+{
+#if defined(__linux__) && !defined(__BIONIC__) && !defined(KOBO)
+	int connection_fd = ::accept4(Get(), address, &address.size,
+				      SOCK_CLOEXEC|SOCK_NONBLOCK);
+#else
+	int connection_fd = ::accept(Get(), address, &address.size);
+#endif
+	return SocketDescriptor(connection_fd);
+}
+
 bool
 SocketDescriptor::Connect(SocketAddress address)
 {

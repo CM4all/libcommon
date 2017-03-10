@@ -41,7 +41,6 @@
  */
 class StaticSocketAddress {
 	friend class SocketDescriptor;
-	friend class UniqueSocketDescriptor;
 
 public:
 	typedef SocketAddress::size_type size_type;
