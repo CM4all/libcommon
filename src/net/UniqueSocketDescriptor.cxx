@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 
 UniqueSocketDescriptor
-UniqueSocketDescriptor::Accept(StaticSocketAddress &address) const
+UniqueSocketDescriptor::AcceptNonBlock(StaticSocketAddress &address) const
 {
     assert(IsDefined());
 

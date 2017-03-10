@@ -46,7 +46,7 @@ public:
     /**
      * @return an "undefined" instance on error
      */
-    UniqueSocketDescriptor Accept(StaticSocketAddress &address) const;
+    UniqueSocketDescriptor AcceptNonBlock(StaticSocketAddress &address) const;
 };
 
 #endif
