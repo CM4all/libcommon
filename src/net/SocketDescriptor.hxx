@@ -113,6 +113,11 @@ public:
 	 */
 	bool Create(int domain, int type, int protocol);
 
+	/**
+	 * Like Create(), but enable non-blocking mode.
+	 */
+	bool CreateNonBlock(int domain, int type, int protocol);
+
 	bool Bind(SocketAddress address);
 
 #ifdef __linux__

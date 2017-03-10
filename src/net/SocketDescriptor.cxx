@@ -96,6 +96,23 @@ SocketDescriptor::Create(int domain, int type, int protocol)
 }
 
 bool
+SocketDescriptor::CreateNonBlock(int domain, int type, int protocol)
+{
+#ifdef __linux__
+	type |= SOCK_NONBLOCK;
+#endif
+
+	if (!Create(domain, type, protocol))
+		return false;
+
+#ifndef __linux__
+	SetNonBlocking();
+#endif
+
+	return true;
+}
+
+bool
 SocketDescriptor::Bind(SocketAddress address)
 {
 	return bind(Get(), address.GetAddress(), address.GetSize()) == 0;
