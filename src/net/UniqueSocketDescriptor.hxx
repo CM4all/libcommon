@@ -32,7 +32,10 @@ public:
     UniqueSocketDescriptor(UniqueSocketDescriptor &&other)
         :fd(std::exchange(other.fd, -1)) {}
 
-    ~UniqueSocketDescriptor();
+    ~UniqueSocketDescriptor() {
+        if (IsDefined())
+            Close();
+    }
 
     UniqueSocketDescriptor &operator=(UniqueSocketDescriptor &&src) {
         std::swap(fd, src.fd);

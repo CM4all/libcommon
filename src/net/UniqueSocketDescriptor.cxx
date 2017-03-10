@@ -14,12 +14,6 @@
 #include <netinet/tcp.h>
 #include <string.h>
 
-UniqueSocketDescriptor::~UniqueSocketDescriptor()
-{
-    if (IsDefined())
-        Close();
-}
-
 void
 UniqueSocketDescriptor::Close()
 {
