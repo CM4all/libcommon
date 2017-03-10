@@ -118,6 +118,30 @@ public:
 	 */
 	bool CreateNonBlock(int domain, int type, int protocol);
 
+	int GetError();
+
+	bool SetOption(int level, int name, const void *value, size_t size);
+
+	bool SetBoolOption(int level, int name, bool _value) {
+		const int value = _value;
+		return SetOption(level, name, &value, sizeof(value));
+	}
+
+#ifdef __linux__
+	bool SetReuseAddress(bool value=true);
+	bool SetReusePort(bool value=true);
+
+	bool SetTcpDeferAccept(const int &seconds);
+	bool SetV6Only(bool value);
+
+	/**
+	 * Setter for SO_BINDTODEVICE.
+	 */
+	bool SetBindToDevice(const char *name);
+
+	bool SetTcpFastOpen(int qlen=16);
+#endif
+
 	bool Bind(SocketAddress address);
 
 #ifdef __linux__
@@ -130,6 +154,9 @@ public:
 	SocketDescriptor Accept();
 
 	bool Connect(SocketAddress address);
+
+	gcc_pure
+	StaticSocketAddress GetLocalAddress() const;
 
 	ssize_t Read(void *buffer, size_t length);
 	ssize_t Write(const void *buffer, size_t length);

@@ -38,6 +38,11 @@
 #include <ws2tcpip.h>
 #endif
 
+#include <errno.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <string.h>
+
 #ifndef HAVE_POSIX
 
 void
@@ -112,6 +117,68 @@ SocketDescriptor::CreateNonBlock(int domain, int type, int protocol)
 	return true;
 }
 
+int
+SocketDescriptor::GetError()
+{
+	assert(IsDefined());
+
+	int s_err = 0;
+	socklen_t s_err_size = sizeof(s_err);
+	return getsockopt(fd, SOL_SOCKET, SO_ERROR,
+			  (char *)&s_err, &s_err_size) == 0
+		? s_err
+		: errno;
+}
+
+bool
+SocketDescriptor::SetOption(int level, int name,
+			    const void *value, size_t size)
+{
+	assert(IsDefined());
+
+	return setsockopt(fd, level, name, value, size) == 0;
+}
+
+#ifdef __linux__
+
+bool
+SocketDescriptor::SetReuseAddress(bool value)
+{
+	return SetBoolOption(SOL_SOCKET, SO_REUSEADDR, value);
+}
+
+bool
+SocketDescriptor::SetReusePort(bool value)
+{
+	return SetBoolOption(SOL_SOCKET, SO_REUSEPORT, value);
+}
+
+bool
+SocketDescriptor::SetTcpDeferAccept(const int &seconds)
+{
+	return SetOption(IPPROTO_TCP, TCP_DEFER_ACCEPT, &seconds, sizeof(seconds));
+}
+
+bool
+SocketDescriptor::SetV6Only(bool value)
+{
+	return SetBoolOption(IPPROTO_IPV6, IPV6_V6ONLY, value);
+}
+
+bool
+SocketDescriptor::SetBindToDevice(const char *name)
+{
+	return SetOption(SOL_SOCKET, SO_BINDTODEVICE, name, strlen(name));
+}
+
+bool
+SocketDescriptor::SetTcpFastOpen(int qlen)
+{
+	return SetOption(SOL_TCP, TCP_FASTOPEN, &qlen, sizeof(qlen));
+}
+
+#endif
+
 bool
 SocketDescriptor::Bind(SocketAddress address)
 {
@@ -129,6 +196,20 @@ SocketDescriptor::AutoBind()
 }
 
 #endif
+
+StaticSocketAddress
+SocketDescriptor::GetLocalAddress() const
+{
+	assert(IsDefined());
+
+	StaticSocketAddress result;
+	result.size = result.GetCapacity();
+	if (getsockname(fd, result, &result.size) < 0)
+		result.Clear();
+
+	return result;
+}
+
 
 ssize_t
 SocketDescriptor::Read(void *buffer, size_t length)

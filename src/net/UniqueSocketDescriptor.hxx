@@ -7,15 +7,9 @@
 
 #include "SocketDescriptor.hxx"
 
-#include <inline/compiler.h>
-
 #include <algorithm>
 #include <utility>
 
-#include <assert.h>
-#include <stddef.h>
-
-class SocketAddress;
 class StaticSocketAddress;
 
 /**
@@ -49,35 +43,10 @@ public:
         return fd == other.fd;
     }
 
-    bool SetOption(int level, int name, const void *value, size_t size);
-
-    bool SetBoolOption(int level, int name, bool _value) {
-        const int value = _value;
-        return SetOption(level, name, &value, sizeof(value));
-    }
-
-    bool SetReuseAddress(bool value=true);
-    bool SetReusePort(bool value=true);
-
-    bool SetTcpDeferAccept(const int &seconds);
-    bool SetV6Only(bool value);
-
-    /**
-     * Setter for SO_BINDTODEVICE.
-     */
-    bool SetBindToDevice(const char *name);
-
-    bool SetTcpFastOpen(int qlen=16);
-
     /**
      * @return an "undefined" instance on error
      */
     UniqueSocketDescriptor Accept(StaticSocketAddress &address) const;
-
-    int GetError();
-
-    gcc_pure
-    StaticSocketAddress GetLocalAddress() const;
 };
 
 #endif

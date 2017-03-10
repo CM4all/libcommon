@@ -40,6 +40,7 @@
  * An OO wrapper for struct sockaddr_storage.
  */
 class StaticSocketAddress {
+	friend class SocketDescriptor;
 	friend class UniqueSocketDescriptor;
 
 public:
