@@ -166,6 +166,18 @@ SocketDescriptor::SetReusePort(bool value)
 }
 
 bool
+SocketDescriptor::SetNoDelay(bool value)
+{
+	return SetBoolOption(IPPROTO_TCP, TCP_NODELAY, value);
+}
+
+bool
+SocketDescriptor::SetCork(bool value)
+{
+	return SetBoolOption(IPPROTO_TCP, TCP_CORK, value);
+}
+
+bool
 SocketDescriptor::SetTcpDeferAccept(const int &seconds)
 {
 	return SetOption(IPPROTO_TCP, TCP_DEFER_ACCEPT, &seconds, sizeof(seconds));

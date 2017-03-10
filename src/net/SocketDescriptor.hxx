@@ -130,6 +130,8 @@ public:
 #ifdef __linux__
 	bool SetReuseAddress(bool value=true);
 	bool SetReusePort(bool value=true);
+	bool SetNoDelay(bool value=true);
+	bool SetCork(bool value=true);
 
 	bool SetTcpDeferAccept(const int &seconds);
 	bool SetV6Only(bool value);
