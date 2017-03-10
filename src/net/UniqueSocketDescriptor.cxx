@@ -30,7 +30,7 @@ UniqueSocketDescriptor::Close()
 }
 
 bool
-UniqueSocketDescriptor::Create(int domain, int type, int protocol)
+UniqueSocketDescriptor::CreateNonBlock(int domain, int type, int protocol)
 {
     assert(!IsDefined());
 

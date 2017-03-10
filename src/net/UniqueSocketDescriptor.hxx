@@ -64,7 +64,7 @@ public:
     /**
      * @return false on error (with errno set)
      */
-    bool Create(int domain, int type, int protocol);
+    bool CreateNonBlock(int domain, int type, int protocol);
 
     bool Bind(SocketAddress address);
 
