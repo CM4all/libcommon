@@ -3,43 +3,14 @@
  */
 
 #include "UniqueSocketDescriptor.hxx"
-#include "SocketAddress.hxx"
 #include "StaticSocketAddress.hxx"
 
 #include <errno.h>
-#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <string.h>
-
-void
-UniqueSocketDescriptor::Close()
-{
-    assert(IsDefined());
-
-    close(fd);
-    fd = -1;
-}
-
-bool
-UniqueSocketDescriptor::CreateNonBlock(int domain, int type, int protocol)
-{
-    assert(!IsDefined());
-
-    type |= SOCK_CLOEXEC|SOCK_NONBLOCK;
-    fd = socket(domain, type, protocol);
-    return fd >= 0;
-}
-
-bool
-UniqueSocketDescriptor::Bind(SocketAddress address)
-{
-    assert(IsDefined());
-
-    return bind(fd, address.GetAddress(), address.GetSize()) == 0;
-}
 
 bool
 UniqueSocketDescriptor::SetOption(int level, int name,
@@ -95,14 +66,6 @@ UniqueSocketDescriptor::Accept(StaticSocketAddress &address) const
     int result = accept4(fd, address, &address.size,
                          SOCK_CLOEXEC|SOCK_NONBLOCK);
     return UniqueSocketDescriptor(result);
-}
-
-bool
-UniqueSocketDescriptor::Connect(const SocketAddress address)
-{
-    assert(IsDefined());
-
-    return connect(fd, address.GetAddress(), address.GetSize()) == 0;
 }
 
 int

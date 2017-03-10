@@ -5,6 +5,8 @@
 #ifndef UNIQUE_SOCKET_DESCRIPTOR_SOCKET_HXX
 #define UNIQUE_SOCKET_DESCRIPTOR_SOCKET_HXX
 
+#include "SocketDescriptor.hxx"
+
 #include <inline/compiler.h>
 
 #include <algorithm>
@@ -19,18 +21,19 @@ class StaticSocketAddress;
 /**
  * Wrapper for a socket file descriptor.
  */
-class UniqueSocketDescriptor {
-    int fd = -1;
-
+class UniqueSocketDescriptor : public SocketDescriptor {
 public:
-    UniqueSocketDescriptor() = default;
+    UniqueSocketDescriptor()
+        :SocketDescriptor(SocketDescriptor::Undefined()) {}
 
-    explicit UniqueSocketDescriptor(int _fd):fd(_fd) {
-        assert(fd >= 0);
-    }
+    explicit UniqueSocketDescriptor(SocketDescriptor _fd)
+        :SocketDescriptor(_fd) {}
+    explicit UniqueSocketDescriptor(FileDescriptor _fd)
+        :SocketDescriptor(_fd) {}
+    explicit UniqueSocketDescriptor(int _fd):SocketDescriptor(_fd) {}
 
     UniqueSocketDescriptor(UniqueSocketDescriptor &&other)
-        :fd(std::exchange(other.fd, -1)) {}
+        :SocketDescriptor(std::exchange(other.fd, -1)) {}
 
     ~UniqueSocketDescriptor() {
         if (IsDefined())
@@ -42,34 +45,9 @@ public:
         return *this;
     }
 
-    bool IsDefined() const {
-        return fd >= 0;
-    }
-
-    int Get() const {
-        assert(IsDefined());
-
-        return fd;
-    }
-
     bool operator==(const UniqueSocketDescriptor &other) const {
         return fd == other.fd;
     }
-
-    void Close();
-
-    int Steal() {
-        assert(IsDefined());
-
-        return std::exchange(fd, -1);
-    }
-
-    /**
-     * @return false on error (with errno set)
-     */
-    bool CreateNonBlock(int domain, int type, int protocol);
-
-    bool Bind(SocketAddress address);
 
     bool SetOption(int level, int name, const void *value, size_t size);
 
@@ -95,11 +73,6 @@ public:
      * @return an "undefined" instance on error
      */
     UniqueSocketDescriptor Accept(StaticSocketAddress &address) const;
-
-    /**
-     * @return false on error (with errno set)
-     */
-    bool Connect(const SocketAddress address);
 
     int GetError();
 
