@@ -71,6 +71,7 @@ net = static_library('net',
   'src/net/Interface.cxx',
   'src/net/SocketDescriptor.cxx',
   'src/net/UniqueSocketDescriptor.cxx',
+  'src/net/ServerSocket.cxx',
   include_directories: inc,
   dependencies: [
     libinline, libsocket,
