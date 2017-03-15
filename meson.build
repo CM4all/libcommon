@@ -20,6 +20,7 @@ libevent = dependency('libevent', version: '>= 2.0.19')
 libcurl = dependency('libcurl', version: '>= 7.38')
 libpq = dependency('libpq', version: '>= 8.4')
 libsystemd = dependency('libsystemd')
+liblua = dependency('luajit')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
 
@@ -39,6 +40,16 @@ util = static_library('util',
     libinline,
   ])
 util_dep = declare_dependency(link_with: util)
+
+lua = static_library('lua',
+  'src/lua/Error.cxx',
+  'src/lua/RunFile.cxx',
+  'src/lua/State.cxx',
+  dependencies: [
+    liblua,
+  ]
+)
+lua_dep = declare_dependency(link_with: lua)
 
 event = static_library('event',
   'src/event/Loop.cxx',
