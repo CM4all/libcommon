@@ -67,6 +67,7 @@ event_dep = declare_dependency(link_with: event)
 
 io = static_library('io',
   'src/io/FileDescriptor.cxx',
+  'src/io/WriteFile.cxx',
   include_directories: inc,
   dependencies: [
     libinline,
