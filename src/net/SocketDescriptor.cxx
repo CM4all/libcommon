@@ -70,6 +70,7 @@ SocketDescriptor::Accept()
 SocketDescriptor
 SocketDescriptor::AcceptNonBlock(StaticSocketAddress &address) const
 {
+	address.SetMaxSize();
 #if defined(__linux__) && !defined(__BIONIC__) && !defined(KOBO)
 	int connection_fd = ::accept4(Get(), address, &address.size,
 				      SOCK_CLOEXEC|SOCK_NONBLOCK);
