@@ -19,7 +19,8 @@ public:
     ShutdownListener(EventLoop &loop, Callback _callback);
 
     ~ShutdownListener() {
-        Disable();
+        if (event.IsDefined())
+            Disable();
     }
 
     ShutdownListener(const ShutdownListener &) = delete;
