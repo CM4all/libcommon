@@ -31,6 +31,10 @@ public:
 
     ~SignalEvent();
 
+    bool IsDefined() const {
+        return fd >= 0;
+    }
+
     void Add(int signo) {
         assert(fd < 0);
 
