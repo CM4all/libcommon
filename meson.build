@@ -20,6 +20,7 @@ libevent = dependency('libevent', version: '>= 2.0.19')
 libcurl = dependency('libcurl', version: '>= 7.38')
 libpq = dependency('libpq', version: '>= 8.4')
 libsystemd = dependency('libsystemd')
+libdbus = dependency('dbus-1')
 liblua = dependency('luajit')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
@@ -122,6 +123,15 @@ pg = static_library('pg',
     libinline,
   ])
 pg_dep = declare_dependency(link_with: pg)
+
+odbus = static_library('odbus',
+  'src/odbus/Message.cxx',
+  include_directories: inc,
+  dependencies: [
+    libdbus,
+    libinline,
+  ])
+odbus_dep = declare_dependency(link_with: odbus)
 
 translation = static_library('translation',
   'src/translation/PReader.cxx',
