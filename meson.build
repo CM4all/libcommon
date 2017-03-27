@@ -1,5 +1,9 @@
-project('CM4all libcommon', 'cpp', version: '0.1',
-  default_options : ['cpp_std=c++14'])
+project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
+  default_options: [
+    'c_std=c99',
+    'cpp_std=c++14'
+  ],
+)
 
 add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
   '-DPACKAGE="' + meson.project_name() + '"',
@@ -21,9 +25,11 @@ libcurl = dependency('libcurl', version: '>= 7.38')
 libpq = dependency('libpq', version: '>= 8.4')
 libsystemd = dependency('libsystemd')
 libdbus = dependency('dbus-1')
+libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
+libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
 libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.3')
 
 inc = include_directories('src', 'fake')
@@ -37,6 +43,7 @@ util = static_library('util',
   'src/util/StringParser.cxx',
   'src/util/StringUtil.cxx',
   'src/util/StringView.cxx',
+  'src/util/djbhash.c',
   include_directories: inc,
   dependencies: [
     libinline,
@@ -83,6 +90,16 @@ io = static_library('io',
     libinline,
   ])
 io_dep = declare_dependency(link_with: io)
+
+system = static_library('system',
+  'src/system/bind_mount.c',
+  include_directories: inc,
+  dependencies: [
+    libinline,
+    util_dep,
+    io_dep,
+  ])
+system_dep = declare_dependency(link_with: system)
 
 net = static_library('net',
   'src/net/SocketAddress.cxx',
@@ -132,6 +149,40 @@ odbus = static_library('odbus',
     libinline,
   ])
 odbus_dep = declare_dependency(link_with: odbus)
+
+spawn = static_library('spawn',
+  'src/spawn/SeccompFilter.cxx',
+  'src/spawn/Systemd.cxx',
+  'src/spawn/Prepared.cxx',
+  'src/spawn/Registry.cxx',
+  'src/spawn/Direct.cxx',
+  'src/spawn/Interface.cxx',
+  'src/spawn/Local.cxx',
+  'src/spawn/NamespaceOptions.cxx',
+  'src/spawn/mount_list.cxx',
+  'src/spawn/JailConfig.cxx',
+  'src/spawn/JailParams.cxx',
+  'src/spawn/ChildOptions.cxx',
+  'src/spawn/CgroupOptions.cxx',
+  'src/spawn/UidGid.cxx',
+  'src/spawn/ResourceLimits.cxx',
+  'src/spawn/RefenceOptions.cxx',
+  'src/spawn/Server.cxx',
+  'src/spawn/Launch.cxx',
+  'src/spawn/Client.cxx',
+  'src/spawn/Glue.cxx',
+  include_directories: inc,
+  dependencies: [
+    libdbus,
+    libseccomp,
+    libsystemd,
+    libinline,
+    libdaemon,
+    adata_dep,
+    io_dep,
+    odbus_dep,
+  ])
+spawn_dep = declare_dependency(link_with: spawn)
 
 translation = static_library('translation',
   'src/translation/PReader.cxx',
