@@ -41,6 +41,14 @@ util = static_library('util',
   ])
 util_dep = declare_dependency(link_with: util)
 
+adata = static_library('adata',
+  'src/adata/ExpandableStringList.cxx',
+  include_directories: inc,
+  dependencies: [
+    libinline,
+  ])
+adata_dep = declare_dependency(link_with: adata)
+
 lua = static_library('lua',
   'src/lua/Error.cxx',
   'src/lua/RunFile.cxx',
