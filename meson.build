@@ -24,7 +24,7 @@ liblua = dependency('luajit')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
 
-inc = include_directories('src')
+inc = include_directories('src', 'fake')
 
 util = static_library('util',
   'src/util/AllocatedString.cxx',
