@@ -9,7 +9,7 @@
 #include "Server.hxx"
 #include "system/Error.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "util/PrintException.cxx"
+#include "util/PrintException.hxx"
 
 #include <sched.h>
 #include <unistd.h>
