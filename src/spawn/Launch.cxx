@@ -3,6 +3,7 @@
  */
 
 #include "Launch.hxx"
+#include "Config.hxx"
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
 #include "Server.hxx"
@@ -64,14 +65,16 @@ RunSpawnServer2(void *p)
 
     CgroupState cgroup_state;
 
-    try {
-        cgroup_state =
-            CreateSystemdScope("cm4all-beng-spawn.scope",
-                               "The cm4all-beng-proxy child process spawner",
-                               real_pid, true);
-    } catch (const std::runtime_error &e) {
-        fprintf(stderr, "Failed to create systemd scope: ");
-        PrintException(e);
+    if (!ctx.config.systemd_scope.empty()) {
+        try {
+            cgroup_state =
+                CreateSystemdScope(ctx.config.systemd_scope.c_str(),
+                                   ctx.config.systemd_scope_description.c_str(),
+                                   real_pid, true);
+        } catch (const std::runtime_error &e) {
+            fprintf(stderr, "Failed to create systemd scope: ");
+            PrintException(e);
+        }
     }
 
     RunSpawnServer(ctx.config, cgroup_state, ctx.fd);

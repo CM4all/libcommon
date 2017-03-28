@@ -15,6 +15,14 @@
  * Configuration for the spawner.
  */
 struct SpawnConfig {
+    /**
+     * If non-empty, then a new systemd scope is created for the
+     * spawner process.
+     */
+    std::string systemd_scope;
+
+    std::string systemd_scope_description;
+
     UidGid default_uid_gid;
 
     std::set<uid_t> allowed_uids;
