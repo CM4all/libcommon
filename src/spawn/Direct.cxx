@@ -43,7 +43,8 @@ static void
 Exec(const char *path, const PreparedChildProcess &p,
      const SpawnConfig &config, const CgroupState &cgroup_state)
 {
-    p.cgroup.Apply(cgroup_state);
+    if (!p.cgroup.Apply(cgroup_state))
+        _exit(EXIT_FAILURE);
 
     if (!p.refence.Apply())
         _exit(EXIT_FAILURE);

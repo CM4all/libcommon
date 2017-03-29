@@ -48,17 +48,19 @@ CgroupOptions::Set(AllocatorPtr alloc, StringView _name, StringView _value)
     set_head = new_set;
 }
 
-static void
+static bool
 WriteFile(const char *path, const char *data)
 {
     if (TryWriteExistingFile(path, data) == WriteFileResult::ERROR) {
         fprintf(stderr, "write('%s') failed: %s\n",
                 path, strerror(errno));
-        _exit(2);
+        return false;
     }
+
+    return true;
 }
 
-static void
+static bool
 MoveToNewCgroup(const char *mount_base_path, const char *controller,
                 const char *delegated_group, const char *sub_group)
 {
@@ -69,7 +71,7 @@ MoveToNewCgroup(const char *mount_base_path, const char *controller,
                  mount_base_path, controller,
                  delegated_group, sub_group) >= max_path) {
         fprintf(stderr, "Path is too long");
-        _exit(2);
+        return false;
     }
 
     if (mkdir(path, 0777) < 0) {
@@ -80,23 +82,23 @@ MoveToNewCgroup(const char *mount_base_path, const char *controller,
         default:
             fprintf(stderr, "mkdir('%s') failed: %s\n",
                     path, strerror(errno));
-            _exit(2);
+            return false;
         }
     }
 
     strcat(path, "/cgroup.procs");
-    WriteFile(path, "0");
+    return WriteFile(path, "0");
 }
 
-void
+bool
 CgroupOptions::Apply(const CgroupState &state) const
 {
     if (name == nullptr)
-        return;
+        return true;
 
     if (!state.IsEnabled()) {
         fprintf(stderr, "Control groups are disabled\n");
-        _exit(2);
+        return false;
     }
 
     const auto mount_base_path = "/sys/fs/cgroup";
@@ -116,7 +118,7 @@ CgroupOptions::Apply(const CgroupState &state) const
         if (i == state.controllers.end()) {
             fprintf(stderr, "cgroup controller '%s' is unavailable\n",
                     controller.c_str());
-            _exit(2);
+            return false;
         }
 
         const std::string &mount_point = i->second;
@@ -128,11 +130,14 @@ CgroupOptions::Apply(const CgroupState &state) const
                      state.group_path.c_str(), name,
                      set->name) >= (int)sizeof(path)) {
             fprintf(stderr, "Path is too long");
-            _exit(2);
+            return false;
         }
 
-        WriteFile(path, set->value);
+        if (!WriteFile(path, set->value))
+            return false;
     }
+
+    return true;
 }
 
 char *

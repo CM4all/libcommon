@@ -30,7 +30,7 @@ struct CgroupOptions {
 
     void Set(AllocatorPtr alloc, StringView name, StringView value);
 
-    void Apply(const CgroupState &state) const;
+    bool Apply(const CgroupState &state) const;
 
     char *MakeId(char *p) const;
 };
