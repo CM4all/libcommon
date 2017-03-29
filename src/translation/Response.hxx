@@ -22,7 +22,7 @@
 #include "header_forward.hxx"
 #endif
 #if TRANSLATION_ENABLE_EXECUTE
-#include "ExpandableStringList.hxx"
+#include "adata/ExpandableStringList.hxx"
 #include "spawn/ChildOptions.hxx"
 #endif
 
