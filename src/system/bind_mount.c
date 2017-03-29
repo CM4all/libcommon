@@ -10,13 +10,13 @@
 #include <errno.h>
 #include <unistd.h>
 
-void
+bool
 bind_mount(const char *source, const char *target, int flags)
 {
     if (mount(source, target, NULL, MS_BIND, NULL) < 0) {
         fprintf(stderr, "bind_mount('%s', '%s') failed: %s\n",
                 source, target, strerror(errno));
-        _exit(2);
+        return false;
     }
 
     /* wish we could just pass additional flags to the first mount
@@ -33,6 +33,8 @@ bind_mount(const char *source, const char *target, int flags)
          mount(NULL, target, NULL, MS_REMOUNT|MS_BIND|MS_NOEXEC|flags, NULL) < 0)) {
         fprintf(stderr, "remount('%s') failed: %s\n",
                 target, strerror(errno));
-        _exit(2);
+        return false;
     }
+
+    return true;
 }

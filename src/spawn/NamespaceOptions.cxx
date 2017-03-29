@@ -157,7 +157,8 @@ NamespaceOptions::Setup(const SpawnConfig &config,
            kernel's mount object (flag MNT_LOCKED) in our namespace;
            without this, the kernel would not allow an unprivileged
            process to pivot_root to it */
-        bind_mount(new_root, new_root, MS_NOSUID|MS_RDONLY);
+        if (!bind_mount(new_root, new_root, MS_NOSUID|MS_RDONLY))
+            _exit(2);
 
         /* release a reference to the old root */
         if (chdir(new_root) < 0) {
@@ -198,7 +199,8 @@ NamespaceOptions::Setup(const SpawnConfig &config,
         assert(home != nullptr);
         assert(*home == '/');
 
-        bind_mount(home + 1, mount_home, MS_NOSUID|MS_NODEV);
+        if (!bind_mount(home + 1, mount_home, MS_NOSUID|MS_NODEV))
+            _exit(2);
     }
 
     MountList::ApplyAll(mounts);

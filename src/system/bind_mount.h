@@ -7,9 +7,11 @@
 
 #ifdef __cplusplus
 extern "C" {
+#else
+#include <stdbool.h>
 #endif
 
-void
+bool
 bind_mount(const char *source, const char *target, int flags);
 
 #ifdef __cplusplus

@@ -72,7 +72,8 @@ MountList::Apply() const
     if (!exec)
         flags |= MS_NOEXEC;
 
-    bind_mount(source, target, flags);
+    if (!bind_mount(source, target, flags))
+        _exit(2);
 }
 
 void
