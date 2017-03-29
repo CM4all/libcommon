@@ -44,7 +44,10 @@ Exec(const char *path, const PreparedChildProcess &p,
      const SpawnConfig &config, const CgroupState &cgroup_state)
 {
     p.cgroup.Apply(cgroup_state);
-    p.refence.Apply();
+
+    if (!p.refence.Apply())
+        _exit(EXIT_FAILURE);
+
     p.ns.Setup(config, p.uid_gid);
     p.rlimits.Apply();
 

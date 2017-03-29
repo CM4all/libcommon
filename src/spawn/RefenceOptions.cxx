@@ -37,7 +37,7 @@ RefenceOptions::MakeId(char *p) const
     return p;
 }
 
-inline void
+inline bool
 RefenceOptions::Apply(FileDescriptor fd) const
 {
     // TODO: set name, script
@@ -50,7 +50,7 @@ RefenceOptions::Apply(FileDescriptor fd) const
         ssize_t nbytes = fd.Write(p, n - p);
         if (nbytes < 0) {
             perror("Failed to write to Refence");
-            _exit(2);
+            return false;
         }
 
         if (n == end)
@@ -58,20 +58,22 @@ RefenceOptions::Apply(FileDescriptor fd) const
 
         p = n + 1;
     }
+
+    return true;
 }
 
-void
+bool
 RefenceOptions::Apply() const
 {
     if (IsEmpty())
-        return;
+        return true;
 
     constexpr auto path = "/proc/cm4all/refence/self";
     UniqueFileDescriptor fd;
     if (!fd.Open(path, O_WRONLY)) {
         perror("Failed to open Refence");
-        _exit(2);
+        return false;
     }
 
-    Apply(fd.ToFileDescriptor());
+    return Apply(fd.ToFileDescriptor());
 }

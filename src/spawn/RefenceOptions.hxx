@@ -34,12 +34,12 @@ public:
 
     char *MakeId(char *p) const;
 
-    void Apply() const;
+    bool Apply() const;
 
 private:
     unsigned GetHash() const;
 
-    void Apply(FileDescriptor fd) const;
+    bool Apply(FileDescriptor fd) const;
 };
 
 #endif
