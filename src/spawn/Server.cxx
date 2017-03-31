@@ -17,6 +17,7 @@
 #include "util/DeleteDisposer.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"
+#include "util/PrintException.hxx"
 
 #include <daemon/log.h>
 
@@ -311,11 +312,14 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 {
     const auto &config = process.GetConfig();
 
-    if (!p.uid_gid.IsEmpty() && !config.Verify(p.uid_gid)) {
-        daemon_log(1, "uid/gid not allowed: %d/%d\n",
-                   int(p.uid_gid.uid), int(p.uid_gid.gid));
-        SendExit(id, W_EXITCODE(0xff, 0));
-        return;
+    if (!p.uid_gid.IsEmpty()) {
+        try {
+            config.Verify(p.uid_gid);
+        } catch (const std::exception &e) {
+            PrintException(e);
+            SendExit(id, W_EXITCODE(0xff, 0));
+            return;
+        }
     }
 
     if (p.uid_gid.IsEmpty() && config.default_uid_gid.IsEmpty()) {

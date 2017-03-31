@@ -256,9 +256,8 @@ SpawnServerClient::SpawnChildProcess(const char *name,
        necessary, and the only way to have it secure); this one is
        only here for the developer to see the error earlier in the
        call chain */
-    if (!p.uid_gid.IsEmpty() && !config.Verify(p.uid_gid))
-        throw FormatRuntimeError("uid/gid not allowed: %d/%d",
-                                 int(p.uid_gid.uid), int(p.uid_gid.gid));
+    if (!p.uid_gid.IsEmpty())
+        config.Verify(p.uid_gid);
 
     CheckOrAbort();
 

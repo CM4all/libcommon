@@ -6,6 +6,7 @@
 #define BENG_PROXY_SPAWN_CONFIG_HXX
 
 #include "UidGid.hxx"
+#include "util/RuntimeError.hxx"
 
 #include <inline/compiler.h>
 
@@ -43,37 +44,33 @@ struct SpawnConfig {
      */
     bool ignore_userns = false;
 
-    gcc_pure
-    bool VerifyUid(uid_t uid) const {
-        return allowed_uids.find(uid) != allowed_uids.end();
+    void VerifyUid(uid_t uid) const {
+        if (allowed_uids.find(uid) == allowed_uids.end())
+            throw FormatRuntimeError("uid %d is not allowed", int(uid));
     }
 
-    gcc_pure
-    bool VerifyGid(gid_t gid) const {
-        return allowed_gids.find(gid) != allowed_gids.end();
+    void VerifyGid(gid_t gid) const {
+        if (allowed_gids.find(gid) == allowed_gids.end())
+            throw FormatRuntimeError("gid %d is not allowed", int(gid));
     }
 
     template<typename I>
-    gcc_pure
-    bool VerifyGroups(I begin, I end) const {
+    void VerifyGroups(I begin, I end) const {
         for (I i = begin; i != end; ++i) {
             if (*i == 0)
-                return true;
+                return;
 
-            if (!VerifyGid(*i))
-                return false;
+            VerifyGid(*i);
         }
-
-        return true;
     }
 
-    gcc_pure
-    bool Verify(const UidGid &uid_gid) const {
+    void Verify(const UidGid &uid_gid) const {
         if (allow_any_uid_gid)
-            return true;
+            return;
 
-        return VerifyUid(uid_gid.uid) && VerifyGid(uid_gid.gid) &&
-            VerifyGroups(uid_gid.groups.begin(), uid_gid.groups.end());
+        VerifyUid(uid_gid.uid);
+        VerifyGid(uid_gid.gid);
+        VerifyGroups(uid_gid.groups.begin(), uid_gid.groups.end());
     }
 };
 
