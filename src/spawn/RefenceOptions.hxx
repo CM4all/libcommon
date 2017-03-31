@@ -34,12 +34,15 @@ public:
 
     char *MakeId(char *p) const;
 
-    bool Apply() const;
+    /**
+     * Throws std::system_error on error.
+     */
+    void Apply() const;
 
 private:
     unsigned GetHash() const;
 
-    bool Apply(FileDescriptor fd) const;
+    void Apply(FileDescriptor fd) const;
 };
 
 #endif

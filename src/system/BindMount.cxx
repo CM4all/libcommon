@@ -3,6 +3,7 @@
  */
 
 #include "BindMount.hxx"
+#include "system/Error.hxx"
 
 #include <sys/mount.h>
 #include <stdio.h>
@@ -10,14 +11,11 @@
 #include <errno.h>
 #include <unistd.h>
 
-bool
+void
 BindMount(const char *source, const char *target, int flags)
 {
-    if (mount(source, target, nullptr, MS_BIND, nullptr) < 0) {
-        fprintf(stderr, "bind_mount('%s', '%s') failed: %s\n",
-                source, target, strerror(errno));
-        return false;
-    }
+    if (mount(source, target, nullptr, MS_BIND, nullptr) < 0)
+        throw FormatErrno("bind_mount('%s', '%s') failed", source, target);
 
     /* wish we could just pass additional flags to the first mount
        call, but unfortunately that doesn't work, the kernel ignores
@@ -32,11 +30,6 @@ BindMount(const char *source, const char *target, int flags)
         (errno != EPERM ||
          (flags & MS_NOEXEC) != 0 ||
          mount(nullptr, target, nullptr, MS_REMOUNT|MS_BIND|MS_NOEXEC|flags,
-               nullptr) < 0)) {
-        fprintf(stderr, "remount('%s') failed: %s\n",
-                target, strerror(errno));
-        return false;
-    }
-
-    return true;
+               nullptr) < 0))
+        throw FormatErrno("remount('%s') failed", target);
 }

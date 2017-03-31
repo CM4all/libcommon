@@ -30,7 +30,10 @@ struct CgroupOptions {
 
     void Set(AllocatorPtr alloc, StringView name, StringView value);
 
-    bool Apply(const CgroupState &state) const;
+    /**
+     * Throws std::runtime_error on error.
+     */
+    void Apply(const CgroupState &state) const;
 
     char *MakeId(char *p) const;
 };

@@ -8,6 +8,7 @@
 #include "AllocatorPtr.hxx"
 #include "system/pivot_root.h"
 #include "system/BindMount.hxx"
+#include "system/Error.hxx"
 #include "io/WriteFile.hxx"
 #include "util/ScopeExit.hxx"
 
@@ -91,11 +92,8 @@ NamespaceOptions::GetCloneFlags(const SpawnConfig &config, int flags) const
 static void
 write_file(const char *path, const char *data)
 {
-    if (TryWriteExistingFile(path, data) == WriteFileResult::ERROR) {
-        fprintf(stderr, "write('%s') failed: %s\n",
-                path, strerror(errno));
-        _exit(2);
-    }
+    if (TryWriteExistingFile(path, data) == WriteFileResult::ERROR)
+        throw FormatErrno("write('%s') failed", path);
 }
 
 static void
@@ -157,31 +155,22 @@ NamespaceOptions::Setup(const SpawnConfig &config,
            kernel's mount object (flag MNT_LOCKED) in our namespace;
            without this, the kernel would not allow an unprivileged
            process to pivot_root to it */
-        if (!BindMount(new_root, new_root, MS_NOSUID|MS_RDONLY))
-            _exit(2);
+        BindMount(new_root, new_root, MS_NOSUID|MS_RDONLY);
 
         /* release a reference to the old root */
-        if (chdir(new_root) < 0) {
-            fprintf(stderr, "chdir('%s') failed: %s\n",
-                    new_root, strerror(errno));
-            _exit(2);
-        }
+        if (chdir(new_root) < 0)
+            throw FormatErrno("chdir('%s') failed", new_root);
 
         /* enter the new root */
         int result = my_pivot_root(new_root, put_old);
-        if (result < 0) {
-            fprintf(stderr, "pivot_root('%s') failed: %s\n",
-                    new_root, strerror(-result));
-            _exit(2);
-        }
+        if (result < 0)
+            throw FormatErrno(-result, "pivot_root('%s') failed", new_root);
     }
 
     if (mount_proc &&
-        mount("none", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV|MS_RDONLY, nullptr) < 0) {
-        fprintf(stderr, "mount('/proc') failed: %s\n",
-                strerror(errno));
-        _exit(2);
-    }
+        mount("none", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV|MS_RDONLY,
+              nullptr) < 0)
+        throw MakeErrno("mount('/proc') failed");
 
     if (mount_home != nullptr || mounts != nullptr) {
         /* go to /mnt so we can refer to the old directories with a
@@ -189,46 +178,33 @@ NamespaceOptions::Setup(const SpawnConfig &config,
 
         const char *path = new_root != nullptr ? "/mnt" : "/";
 
-        if (chdir(path) < 0) {
-            fprintf(stderr, "chdir('%s') failed: %s\n", path, strerror(errno));
-            _exit(2);
-        }
+        if (chdir(path) < 0)
+            throw FormatErrno("chdir('%s') failed", path);
     }
 
     if (mount_home != nullptr) {
         assert(home != nullptr);
         assert(*home == '/');
 
-        if (!BindMount(home + 1, mount_home, MS_NOSUID|MS_NODEV))
-            _exit(2);
+        BindMount(home + 1, mount_home, MS_NOSUID|MS_NODEV);
     }
 
     MountList::ApplyAll(mounts);
 
-    if (new_root != nullptr && (mount_home != nullptr || mounts != nullptr)) {
+    if (new_root != nullptr && (mount_home != nullptr || mounts != nullptr) &&
         /* back to the new root */
-        if (chdir("/") < 0) {
-            fprintf(stderr, "chdir('/') failed: %s\n", strerror(errno));
-            _exit(2);
-        }
-    }
+        chdir("/") < 0)
+        throw MakeErrno("chdir('/') failed");
 
-    if (new_root != nullptr) {
+    if (new_root != nullptr &&
         /* get rid of the old root */
-        if (umount2(put_old, MNT_DETACH) < 0) {
-            fprintf(stderr, "umount('%s') failed: %s",
-                    put_old, strerror(errno));
-            _exit(2);
-        }
-    }
+        umount2(put_old, MNT_DETACH) < 0)
+        throw FormatErrno("umount('%s') failed: %s", put_old);
 
     if (mount_tmpfs != nullptr &&
         mount("none", mount_tmpfs, "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
-              "size=16M,nr_inodes=256,mode=700") < 0) {
-        fprintf(stderr, "mount(tmpfs, '%s') failed: %s\n",
-                mount_tmpfs, strerror(errno));
-        _exit(2);
-    }
+              "size=16M,nr_inodes=256,mode=700") < 0)
+        throw FormatErrno("mount(tmpfs, '%s') failed", mount_tmpfs);
 
     if (mount_tmp_tmpfs != nullptr) {
         const char *options = "size=16M,nr_inodes=256,mode=1777";
@@ -239,18 +215,13 @@ NamespaceOptions::Setup(const SpawnConfig &config,
         }
 
         if (mount("none", "/tmp", "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
-                  options) < 0) {
-            fprintf(stderr, "mount('/tmp') failed: %s\n",
-                    strerror(errno));
-            _exit(2);
-        }
+                  options) < 0)
+            throw MakeErrno("mount('/tmp') failed");
     }
 
     if (hostname != nullptr &&
-        sethostname(hostname, strlen(hostname)) < 0) {
-        fprintf(stderr, "sethostname() failed: %s", strerror(errno));
-        _exit(2);
-    }
+        sethostname(hostname, strlen(hostname)) < 0)
+        throw MakeErrno("sethostname() failed");
 }
 
 char *

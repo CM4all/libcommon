@@ -3,29 +3,26 @@
  */
 
 #include "ResourceLimits.hxx"
+#include "system/Error.hxx"
 #include "util/djbhash.h"
 
 #include <assert.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
 
 inline void
 ResourceLimit::Get(int resource)
 {
-    if (getrlimit(resource, this) < 0) {
-            fprintf(stderr, "getrlimit(%d) failed: %s\n",
-                    resource, strerror(errno));
-            _exit(2);
-    }
+    if (getrlimit(resource, this) < 0)
+        throw FormatErrno("getrlimit(%d) failed", resource);
 }
 
-inline bool
+inline void
 ResourceLimit::Set(int resource) const
 {
-    return setrlimit(resource, this) == 0;
+    if (setrlimit(resource, this) < 0)
+        throw FormatErrno("setrlimit(%d, %lu, %lu) failed",
+                          resource, (unsigned long)rlim_cur,
+                          (unsigned long)rlim_max);
 }
 
 inline void
@@ -97,14 +94,7 @@ rlimit_apply(int resource, const ResourceLimit &r)
 
     ResourceLimit buffer;
     const auto &r2 = complete_rlimit(resource, r, buffer);
-
-    if (!r2.Set(resource)) {
-        fprintf(stderr, "setrlimit(%d, %lu, %lu) failed: %s\n",
-                resource, (unsigned long)r2.rlim_cur,
-                (unsigned long)r2.rlim_max,
-                strerror(errno));
-        _exit(2);
-    }
+    r2.Set(resource);
 }
 
 void

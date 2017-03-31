@@ -87,6 +87,9 @@ struct NamespaceOptions {
     gcc_pure
     int GetCloneFlags(const SpawnConfig &config, int flags) const;
 
+    /**
+     * Throws std::system_error on error.
+     */
     void Setup(const SpawnConfig &config, const UidGid &uid_gid) const;
 
     char *MakeId(char *p) const;

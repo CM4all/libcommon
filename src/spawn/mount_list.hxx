@@ -63,9 +63,16 @@ struct MountList {
                           const MatchInfo &match_info);
 #endif
 
+    /**
+     * Throws std::system_error on error.
+     */
     void Apply() const;
 
     static MountList *CloneAll(AllocatorPtr alloc, const MountList *src);
+
+    /**
+     * Throws std::system_error on error.
+     */
     static void ApplyAll(const MountList *m);
 };
 

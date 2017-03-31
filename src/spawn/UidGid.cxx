@@ -57,28 +57,17 @@ UidGid::MakeId(char *p) const
 void
 UidGid::Apply() const
 {
-    if (gid != 0 && setregid(gid, gid) < 0) {
-        fprintf(stderr, "failed to setgid %d: %s\n",
-                int(gid), strerror(errno));
-        _exit(EXIT_FAILURE);
-    }
+    if (gid != 0 && setregid(gid, gid) < 0)
+        throw FormatErrno("setgid(%d) failed", int(gid));
 
     if (HasGroups()) {
-        if (setgroups(CountGroups(), &groups.front()) < 0) {
-            fprintf(stderr, "setgroups() failed: %s\n", strerror(errno));
-            _exit(EXIT_FAILURE);
-        }
+        if (setgroups(CountGroups(), &groups.front()) < 0)
+            throw MakeErrno("setgroups() failed");
     } else if (gid != 0) {
-        if (setgroups(0, &gid) < 0) {
-            fprintf(stderr, "setgroups(%d) failed: %s\n",
-                    int(gid), strerror(errno));
-            _exit(EXIT_FAILURE);
-        }
+        if (setgroups(0, &gid) < 0)
+            throw FormatErrno("setgroups(%d) failed", int(gid));
     }
 
-    if (uid != 0 && setreuid(uid, uid) < 0) {
-        fprintf(stderr, "failed to setuid %d: %s\n",
-                int(uid), strerror(errno));
-        _exit(EXIT_FAILURE);
-    }
+    if (uid != 0 && setreuid(uid, uid) < 0)
+        throw FormatErrno("setuid(%d) failed", int(uid));
 }

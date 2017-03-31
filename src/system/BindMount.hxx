@@ -5,7 +5,10 @@
 #ifndef BIND_MOUNT_HXX
 #define BIND_MOUNT_HXX
 
-bool
+/**
+ * Throws std::system_error on error.
+ */
+void
 BindMount(const char *source, const char *target, int flags);
 
 #endif

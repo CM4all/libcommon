@@ -21,10 +21,21 @@ struct ResourceLimit : rlimit {
         return rlim_cur != UNDEFINED && rlim_max != UNDEFINED;
     }
 
+    /**
+     * Throws std::system_error on error.
+     */
     void Get(int resource);
-    bool Set(int resource) const;
+
+    /**
+     * Throws std::system_error on error.
+     */
+    void Set(int resource) const;
 
     void OverrideFrom(const ResourceLimit &src);
+
+    /**
+     * Throws std::system_error on error.
+     */
     void CompleteFrom(int resource, const ResourceLimit &src);
 };
 
@@ -40,6 +51,9 @@ struct ResourceLimits {
 
     char *MakeId(char *p) const;
 
+    /**
+     * Throws std::system_error on error.
+     */
     void Apply() const;
 
     bool Parse(const char *s);

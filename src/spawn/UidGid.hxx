@@ -47,6 +47,9 @@ struct UidGid {
 
     char *MakeId(char *p) const;
 
+    /**
+     * Throws std::system_error on error.
+     */
     void Apply() const;
 };
 

@@ -7,6 +7,7 @@
 #include "Config.hxx"
 #include "SeccompFilter.hxx"
 #include "io/FileDescriptor.hxx"
+#include "util/PrintException.hxx"
 
 #include <inline/compiler.h>
 
@@ -42,12 +43,9 @@ gcc_noreturn
 static void
 Exec(const char *path, const PreparedChildProcess &p,
      const SpawnConfig &config, const CgroupState &cgroup_state)
-{
-    if (!p.cgroup.Apply(cgroup_state))
-        _exit(EXIT_FAILURE);
-
-    if (!p.refence.Apply())
-        _exit(EXIT_FAILURE);
+try {
+    p.cgroup.Apply(cgroup_state);
+    p.refence.Apply();
 
     p.ns.Setup(config, p.uid_gid);
     p.rlimits.Apply();
@@ -118,6 +116,9 @@ Exec(const char *path, const PreparedChildProcess &p,
            const_cast<char *const*>(p.env.raw()));
 
     fprintf(stderr, "failed to execute %s: %s\n", path, strerror(errno));
+    _exit(EXIT_FAILURE);
+} catch (const std::exception &e) {
+    PrintException(e);
     _exit(EXIT_FAILURE);
 }
 
