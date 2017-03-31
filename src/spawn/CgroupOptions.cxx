@@ -8,7 +8,6 @@
 #include "mount_list.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/pivot_root.h"
-#include "system/bind_mount.h"
 #include "io/WriteFile.hxx"
 #include "util/StringView.hxx"
 

@@ -3,7 +3,7 @@
  */
 
 #include "mount_list.hxx"
-#include "system/bind_mount.h"
+#include "system/BindMount.hxx"
 #include "AllocatorPtr.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -72,7 +72,7 @@ MountList::Apply() const
     if (!exec)
         flags |= MS_NOEXEC;
 
-    if (!bind_mount(source, target, flags))
+    if (!BindMount(source, target, flags))
         _exit(2);
 }
 

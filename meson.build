@@ -92,7 +92,7 @@ io = static_library('io',
 io_dep = declare_dependency(link_with: io)
 
 system = static_library('system',
-  'src/system/bind_mount.c',
+  'src/system/BindMount.cxx',
   include_directories: inc,
   dependencies: [
     libinline,
