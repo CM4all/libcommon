@@ -321,7 +321,7 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 
     if (!p.uid_gid.IsEmpty()) {
         try {
-            if (process.Verify(p))
+            if (!process.Verify(p))
                 config.Verify(p.uid_gid);
         } catch (const std::exception &e) {
             PrintException(e);
