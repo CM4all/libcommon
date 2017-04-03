@@ -14,13 +14,11 @@
 class MultiWriteBuffer {
     static constexpr size_t MAX_BUFFERS = 8;
 
-    unsigned i, n;
+    unsigned i = 0, n = 0;
 
     std::array<WriteBuffer, MAX_BUFFERS> buffers;
 
 public:
-    MultiWriteBuffer():i(0), n(0) {}
-
     typedef WriteBuffer::Result Result;
 
     void Push(const void *buffer, size_t size) {
