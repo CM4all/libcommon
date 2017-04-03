@@ -14,6 +14,7 @@
 SpawnServerClient *
 StartSpawnServer(const SpawnConfig &config,
                  ChildProcessRegistry &child_process_registry,
+                 SpawnHook *hook,
                  std::function<void()> post_clone)
 {
     int sv[2];
@@ -25,7 +26,7 @@ StartSpawnServer(const SpawnConfig &config,
 
     pid_t pid;
     try {
-        pid = LaunchSpawnServer(config, sv[0],
+        pid = LaunchSpawnServer(config, hook, sv[0],
                                 [close_fd, post_clone](){
                                     close(close_fd);
                                     post_clone();

@@ -21,6 +21,8 @@
 struct LaunchSpawnServerContext {
     const SpawnConfig &config;
 
+    SpawnHook *hook;
+
     int fd;
 
     std::function<void()> post_clone;
@@ -77,19 +79,19 @@ RunSpawnServer2(void *p)
         }
     }
 
-    RunSpawnServer(ctx.config, cgroup_state, ctx.fd);
+    RunSpawnServer(ctx.config, cgroup_state, ctx.hook, ctx.fd);
     return 0;
 }
 
 pid_t
-LaunchSpawnServer(const SpawnConfig &config, int fd,
+LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook, int fd,
                   std::function<void()> post_clone)
 {
     UniqueFileDescriptor read_pipe, write_pipe;
     if (!UniqueFileDescriptor::CreatePipe(read_pipe, write_pipe))
         throw MakeErrno("pipe() failed");
 
-    LaunchSpawnServerContext ctx{config, fd, std::move(post_clone),
+    LaunchSpawnServerContext ctx{config, hook, fd, std::move(post_clone),
             read_pipe.ToFileDescriptor(), write_pipe.ToFileDescriptor()};
 
     char stack[32768];

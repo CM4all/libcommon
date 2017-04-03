@@ -10,9 +10,10 @@
 #include <sys/types.h>
 
 struct SpawnConfig;
+class SpawnHook;
 
 pid_t
-LaunchSpawnServer(const SpawnConfig &config, int fd,
+LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook, int fd,
                   std::function<void()> post_clone);
 
 #endif

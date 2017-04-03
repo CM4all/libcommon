@@ -8,6 +8,7 @@
 #include "Parser.hxx"
 #include "Builder.hxx"
 #include "Prepared.hxx"
+#include "Hook.hxx"
 #include "mount_list.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
@@ -181,6 +182,7 @@ SpawnServerConnection::OnChildProcessExit(int id, int status,
 class SpawnServerProcess {
     const SpawnConfig config;
     const CgroupState &cgroup_state;
+    SpawnHook *const hook;
 
     EventLoop loop;
 
@@ -192,8 +194,9 @@ class SpawnServerProcess {
 
 public:
     SpawnServerProcess(const SpawnConfig &_config,
-                       const CgroupState &_cgroup_state)
-        :config(_config), cgroup_state(_cgroup_state),
+                       const CgroupState &_cgroup_state,
+                       SpawnHook *_hook)
+        :config(_config), cgroup_state(_cgroup_state), hook(_hook),
          child_process_registry(loop) {}
 
     const SpawnConfig &GetConfig() const {
@@ -210,6 +213,10 @@ public:
 
     ChildProcessRegistry &GetChildProcessRegistry() {
         return child_process_registry;
+    }
+
+    bool Verify(const PreparedChildProcess &p) const {
+        return hook != nullptr && hook->Verify(p);
     }
 
     void AddConnection(int fd) {
@@ -314,7 +321,8 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 
     if (!p.uid_gid.IsEmpty()) {
         try {
-            config.Verify(p.uid_gid);
+            if (process.Verify(p))
+                config.Verify(p.uid_gid);
         } catch (const std::exception &e) {
             PrintException(e);
             SendExit(id, W_EXITCODE(0xff, 0));
@@ -632,9 +640,10 @@ SpawnServerProcess::Run()
 
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
+               SpawnHook *hook,
                int fd)
 {
-    SpawnServerProcess process(config, cgroup_state);
+    SpawnServerProcess process(config, cgroup_state, hook);
     process.AddConnection(fd);
     process.Run();
 }

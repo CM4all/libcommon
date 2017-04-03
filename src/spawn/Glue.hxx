@@ -10,10 +10,12 @@
 struct SpawnConfig;
 class SpawnServerClient;
 class ChildProcessRegistry;
+class SpawnHook;
 
 SpawnServerClient *
 StartSpawnServer(const SpawnConfig &config,
                  ChildProcessRegistry &child_process_registry,
+                 SpawnHook *hook,
                  std::function<void()> post_clone);
 
 #endif

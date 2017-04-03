@@ -7,9 +7,11 @@
 
 struct SpawnConfig;
 struct CgroupState;
+class SpawnHook;
 
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
+               SpawnHook *hook,
                int fd);
 
 #endif
