@@ -41,5 +41,9 @@ StartSpawnServer(const SpawnConfig &config,
 
     close(sv[0]);
     return new SpawnServerClient(child_process_registry.GetEventLoop(),
-                                 config, sv[1]);
+                                 config, sv[1],
+                                 /* don't verify if there is a hook,
+                                    because the hook may have its own
+                                    overriding rules */
+                                 hook == nullptr);
 }

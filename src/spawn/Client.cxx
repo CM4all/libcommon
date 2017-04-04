@@ -25,10 +25,12 @@
 static constexpr size_t MAX_FDS = 8;
 
 SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
-                                     const SpawnConfig &_config, int _fd)
+                                     const SpawnConfig &_config, int _fd,
+                                     bool _verify)
     :config(_config), fd(_fd),
      read_event(event_loop, fd, EV_READ|EV_PERSIST,
-                BIND_THIS_METHOD(OnSocketEvent))
+                BIND_THIS_METHOD(OnSocketEvent)),
+     verify(_verify)
 {
     read_event.Add();
 }
@@ -258,7 +260,7 @@ SpawnServerClient::SpawnChildProcess(const char *name,
        necessary, and the only way to have it secure); this one is
        only here for the developer to see the error earlier in the
        call chain */
-    if (!p.uid_gid.IsEmpty())
+    if (verify && !p.uid_gid.IsEmpty())
         config.Verify(p.uid_gid);
 
     CheckOrAbort();

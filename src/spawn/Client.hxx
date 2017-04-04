@@ -34,11 +34,18 @@ class SpawnServerClient final : public SpawnService {
 
     SocketEvent read_event;
 
+    /**
+     * Call UidGid::Verify() before sending the spawn request to the
+     * server?
+     */
+    const bool verify;
+
     bool shutting_down = false;
 
 public:
     explicit SpawnServerClient(EventLoop &event_loop,
-                               const SpawnConfig &_config, int _fd);
+                               const SpawnConfig &_config, int _fd,
+                               bool _verify=true);
     ~SpawnServerClient();
 
     void ReplaceSocket(int new_fd);
