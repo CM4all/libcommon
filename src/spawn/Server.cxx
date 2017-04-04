@@ -524,6 +524,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
         case SpawnExecCommand::CHROOT:
             p.chroot = payload.ReadString();
             break;
+
+        case SpawnExecCommand::HOOK_INFO:
+            p.hook_info = payload.ReadString();
+            break;
         }
     }
 

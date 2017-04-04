@@ -217,6 +217,8 @@ Serialize(SpawnSerializer &s, const UidGid &uid_gid)
 static void
 Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 {
+    s.WriteOptionalString(SpawnExecCommand::HOOK_INFO, p.hook_info);
+
     for (const char *i : p.args)
         s.WriteString(SpawnExecCommand::ARG, i);
 

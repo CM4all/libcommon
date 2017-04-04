@@ -40,6 +40,7 @@ enum class SpawnExecCommand : uint8_t {
     CGROUP_SET,
     PRIORITY,
     CHROOT,
+    HOOK_INFO,
 };
 
 enum class SpawnResponseCommand : uint16_t {

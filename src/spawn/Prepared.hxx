@@ -21,6 +21,12 @@ class UniqueFileDescriptor;
 template<typename T> struct ConstBuffer;
 
 struct PreparedChildProcess {
+    /**
+     * An opaque string which may be used by SpawnHook methods.  For
+     * example, it may be a template name.
+     */
+    const char *hook_info = nullptr;
+
     StaticArray<const char *, 32> args;
     StaticArray<const char *, 32> env;
     int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1, control_fd = -1;
