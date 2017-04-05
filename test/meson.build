@@ -5,3 +5,7 @@ test('TestPgDecodeArray', executable('TestPgDecodeArray',
 test('TestPgEncodeArray', executable('TestPgEncodeArray',
   'TestPgEncodeArray.cxx',
   dependencies: [pg_dep]))
+
+test('TestHttpList', executable('TestHttpList',
+  'TestHttpList.cxx',
+  dependencies: [libinline, http_dep]))

@@ -50,6 +50,15 @@ util = static_library('util',
   ])
 util_dep = declare_dependency(link_with: util)
 
+http = static_library('http',
+  'src/http/List.cxx',
+  include_directories: inc,
+  dependencies: [
+    libinline,
+    util_dep,
+  ])
+http_dep = declare_dependency(link_with: http)
+
 adata = static_library('adata',
   'src/adata/ExpandableStringList.cxx',
   include_directories: inc,
