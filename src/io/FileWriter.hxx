@@ -62,6 +62,14 @@ public:
 	}
 
 	/**
+	 * Attempt to allocate space on the file system.  This may
+	 * speed up following writes, and may reduce file system
+	 * fragmentation.  This is a hint, and there is no error
+	 * checking.
+	 */
+	void Allocate(off_t size);
+
+	/**
 	 * Throws std::runtime_error on error.
 	 */
 	void Write(const void *data, size_t size);

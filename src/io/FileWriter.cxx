@@ -65,6 +65,12 @@ FileWriter::FileWriter(const char *_path)
 }
 
 void
+FileWriter::Allocate(off_t size)
+{
+	fallocate(fd.Get(), FALLOC_FL_KEEP_SIZE, 0, size);
+}
+
+void
 FileWriter::Write(const void *data, size_t size)
 {
 	ssize_t nbytes = fd.Write(data, size);
