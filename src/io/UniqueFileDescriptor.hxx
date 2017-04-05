@@ -132,9 +132,8 @@ public:
 	using FileDescriptor::CreateInotify;
 #endif
 
-	void Close() {
-		if (IsDefined())
-			FileDescriptor::Close();
+	bool Close() {
+		return IsDefined() && FileDescriptor::Close();
 	}
 
 	using FileDescriptor::Rewind;
