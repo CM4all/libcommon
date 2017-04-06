@@ -51,6 +51,14 @@ util = static_library('util',
   ])
 util_dep = declare_dependency(link_with: util)
 
+time = static_library('time',
+  'src/time/gmtime.c',
+  include_directories: inc,
+  dependencies: [
+    libinline,
+  ])
+time_dep = declare_dependency(link_with: time)
+
 http = static_library('http',
   'src/http/List.cxx',
   include_directories: inc,
