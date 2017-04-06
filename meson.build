@@ -43,6 +43,7 @@ util = static_library('util',
   'src/util/StringParser.cxx',
   'src/util/StringUtil.cxx',
   'src/util/StringView.cxx',
+  'src/util/HexFormat.c',
   'src/util/djbhash.c',
   include_directories: inc,
   dependencies: [
