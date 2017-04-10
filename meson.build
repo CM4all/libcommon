@@ -62,6 +62,7 @@ time_dep = declare_dependency(link_with: time)
 http = static_library('http',
   'src/http/List.cxx',
   'src/http/Date.cxx',
+  'src/http/Range.cxx',
   include_directories: inc,
   dependencies: [
     libinline,
