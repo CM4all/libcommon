@@ -137,6 +137,9 @@ public:
 	}
 
 	using FileDescriptor::Rewind;
+	using FileDescriptor::Seek;
+	using FileDescriptor::Skip;
+	using FileDescriptor::Tell;
 	using FileDescriptor::GetSize;
 	using FileDescriptor::Read;
 	using FileDescriptor::Write;
