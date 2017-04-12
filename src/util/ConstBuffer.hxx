@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2013-2016 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -101,6 +101,13 @@ struct ConstBuffer {
 	constexpr ConstBuffer(std::nullptr_t):data(nullptr), size(0) {}
 
 	constexpr ConstBuffer(pointer_type _data, size_type _size)
+		:data(_data), size(_size) {}
+
+	/**
+	 * Convert array to ConstBuffer instance.
+	 */
+	template<size_type _size>
+	constexpr ConstBuffer(const T (&_data)[_size])
 		:data(_data), size(_size) {}
 
 	constexpr static ConstBuffer Null() {
