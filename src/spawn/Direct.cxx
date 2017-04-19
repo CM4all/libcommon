@@ -41,7 +41,7 @@ CheckedDup2(int oldfd, int newfd)
 
 gcc_noreturn
 static void
-Exec(const char *path, const PreparedChildProcess &p,
+Exec(const char *path, PreparedChildProcess &&p,
      const SpawnConfig &config, const CgroupState &cgroup_state)
 try {
     p.cgroup.Apply(cgroup_state);
@@ -124,15 +124,15 @@ try {
 
 struct SpawnChildProcessContext {
     const SpawnConfig &config;
-    const PreparedChildProcess &params;
+    PreparedChildProcess &&params;
     const CgroupState &cgroup_state;
 
     const char *path;
 
-    SpawnChildProcessContext(PreparedChildProcess &_params,
+    SpawnChildProcessContext(PreparedChildProcess &&_params,
                              const SpawnConfig &_config,
                              const CgroupState &_cgroup_state)
-        :config(_config), params(_params),
+        :config(_config), params(std::move(_params)),
          cgroup_state(_cgroup_state),
          path(_params.Finish()) {}
 };
@@ -142,7 +142,7 @@ spawn_fn(void *_ctx)
 {
     auto &ctx = *(SpawnChildProcessContext *)_ctx;
 
-    Exec(ctx.path, ctx.params, ctx.config, ctx.cgroup_state);
+    Exec(ctx.path, std::move(ctx.params), ctx.config, ctx.cgroup_state);
 }
 
 pid_t
@@ -152,7 +152,7 @@ SpawnChildProcess(PreparedChildProcess &&params, const SpawnConfig &config,
     int clone_flags = SIGCHLD;
     clone_flags = params.ns.GetCloneFlags(config, clone_flags);
 
-    SpawnChildProcessContext ctx(params, config, cgroup_state);
+    SpawnChildProcessContext ctx(std::move(params), config, cgroup_state);
 
     char stack[8192];
     long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags, &ctx);
