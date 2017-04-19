@@ -27,6 +27,14 @@ struct PreparedChildProcess {
      */
     const char *hook_info = nullptr;
 
+    /**
+     * A function pointer which will be called instead of executing a
+     * new program with execve().
+     *
+     * @return the process exit status
+     */
+    int (*exec_function)(PreparedChildProcess &&p) = nullptr;
+
     StaticArray<const char *, 32> args;
     StaticArray<const char *, 32> env;
     int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1, control_fd = -1;

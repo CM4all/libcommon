@@ -112,11 +112,15 @@ try {
                 path, e.what());
     }
 
-    execve(path, const_cast<char *const*>(p.args.raw()),
-           const_cast<char *const*>(p.env.raw()));
+    if (p.exec_function != nullptr) {
+        _exit(p.exec_function(std::move(p)));
+    } else {
+        execve(path, const_cast<char *const*>(p.args.raw()),
+               const_cast<char *const*>(p.env.raw()));
 
-    fprintf(stderr, "failed to execute %s: %s\n", path, strerror(errno));
-    _exit(EXIT_FAILURE);
+        fprintf(stderr, "failed to execute %s: %s\n", path, strerror(errno));
+        _exit(EXIT_FAILURE);
+    }
 } catch (const std::exception &e) {
     PrintException(e);
     _exit(EXIT_FAILURE);
