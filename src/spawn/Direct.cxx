@@ -142,12 +142,7 @@ spawn_fn(void *_ctx)
 {
     auto &ctx = *(SpawnChildProcessContext *)_ctx;
 
-    try {
-        Exec(ctx.path, ctx.params, ctx.config, ctx.cgroup_state);
-    } catch (const std::exception &e) {
-        fprintf(stderr, "%s\n", e.what());
-        _exit(EXIT_FAILURE);
-    }
+    Exec(ctx.path, ctx.params, ctx.config, ctx.cgroup_state);
 }
 
 pid_t
