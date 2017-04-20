@@ -219,6 +219,8 @@ Serialize(SpawnSerializer &s, const UidGid &uid_gid)
 static void
 Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 {
+    assert(p.exec_function == nullptr); // not supported
+
     s.WriteOptionalString(SpawnExecCommand::HOOK_INFO, p.hook_info);
 
     for (const char *i : p.args)
