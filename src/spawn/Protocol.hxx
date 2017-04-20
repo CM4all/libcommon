@@ -20,6 +20,7 @@ enum class SpawnExecCommand : uint8_t {
     STDOUT,
     STDERR,
     CONTROL,
+    TTY,
     REFENCE,
     USER_NS,
     PID_NS,

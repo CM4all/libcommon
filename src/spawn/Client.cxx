@@ -250,6 +250,9 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 
     if (p.no_new_privs)
         s.Write(SpawnExecCommand::NO_NEW_PRIVS);
+
+    if (p.tty)
+        s.Write(SpawnExecCommand::TTY);
 }
 
 int

@@ -421,6 +421,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
             p.SetControl(fds.Get().Steal());
             break;
 
+        case SpawnExecCommand::TTY:
+            p.tty = true;
+            break;
+
         case SpawnExecCommand::REFENCE:
             p.refence.Set(payload.ReadString());
             break;

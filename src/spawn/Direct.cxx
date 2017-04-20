@@ -21,6 +21,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <sys/prctl.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
 
 #ifndef PR_SET_NO_NEW_PRIVS
 #define PR_SET_NO_NEW_PRIVS 38
@@ -37,6 +39,16 @@ static void
 CheckedDup2(int oldfd, int newfd)
 {
     CheckedDup2(FileDescriptor(oldfd), FileDescriptor(newfd));
+}
+
+static void
+DisconnectTty()
+{
+    FileDescriptor fd;
+    if (fd.Open("/dev/tty", O_RDWR)) {
+        (void) ioctl(fd.Get(), TIOCNOTTY, nullptr);
+        fd.Close();
+    }
 }
 
 gcc_noreturn
@@ -93,7 +105,17 @@ try {
     CheckedDup2(stderr_fd, STDERR_FILENO);
     CheckedDup2(p.control_fd, CONTROL_FILENO);
 
+    if (p.tty)
+        DisconnectTty();
+
     setsid();
+
+    if (p.tty) {
+        assert(p.stdin_fd >= 0);
+        assert(p.stdin_fd == p.stdout_fd);
+
+        if (ioctl(*ttyfd, TIOCSCTTY, NULL) < 0)
+    }
 
     try {
         SeccompFilter sf(SCMP_ACT_ALLOW);

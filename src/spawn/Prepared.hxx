@@ -70,6 +70,12 @@ struct PreparedChildProcess {
     bool no_new_privs = false;
 
     /**
+     * Make #stdin_fd and #stdout_fd (which must be equal) the
+     * controlling TTY?
+     */
+    bool tty = false;
+
+    /**
      * String allocations for SetEnv().
      */
     std::forward_list<std::string> strings;
