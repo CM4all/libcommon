@@ -56,6 +56,12 @@ try {
         _exit(EXIT_FAILURE);
     }
 
+    if (p.chdir != nullptr && chdir(p.chdir) < 0) {
+        fprintf(stderr, "chdir('%s') failed: %s\n",
+                p.chdir, strerror(errno));
+        _exit(EXIT_FAILURE);
+    }
+
     if (p.priority != 0 &&
         setpriority(PRIO_PROCESS, getpid(), p.priority) < 0) {
         fprintf(stderr, "setpriority() failed: %s\n", strerror(errno));

@@ -62,6 +62,11 @@ struct PreparedChildProcess {
      */
     const char *chroot = nullptr;
 
+    /**
+     * Change the working directory.
+     */
+    const char *chdir = nullptr;
+
     bool no_new_privs = false;
 
     /**
