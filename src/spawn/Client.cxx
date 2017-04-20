@@ -244,6 +244,7 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
     Serialize(s, p.uid_gid);
 
     s.WriteOptionalString(SpawnExecCommand::CHROOT, p.chroot);
+    s.WriteOptionalString(SpawnExecCommand::CHDIR, p.chdir);
 
     if (p.no_new_privs)
         s.Write(SpawnExecCommand::NO_NEW_PRIVS);
