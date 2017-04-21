@@ -94,6 +94,7 @@ event = static_library('event',
   'src/event/CleanupTimer.cxx',
   'src/event/DeferEvent.cxx',
   'src/event/SignalEvent.cxx',
+  'src/event/SocketWrapper.cxx',
   include_directories: inc,
   dependencies: [
     libinline,
