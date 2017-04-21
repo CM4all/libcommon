@@ -6,6 +6,7 @@
 #define EVENT_BASE_HXX
 
 #include "DeferEvent.hxx"
+#include "util/BindMethod.hxx"
 
 #include <event.h>
 
@@ -41,6 +42,11 @@ class EventLoop {
                                                          &DeferEvent::siblings>,
                            boost::intrusive::constant_time_size<false>> defer;
 
+#ifndef NDEBUG
+    typedef BoundMethod<void()> PostCallback;
+    PostCallback post_callback = nullptr;
+#endif
+
     bool quit;
 
 public:
@@ -63,25 +69,43 @@ public:
         event_reinit(event_base);
     }
 
+#ifndef NDEBUG
+    /**
+     * Set a callback function which will be invoked each time an even
+     * has been handled.  This is debug-only and may be used to inject
+     * regular debug checks.
+     */
+    void SetPostCallback(PostCallback new_value) {
+        post_callback = new_value;
+    }
+#endif
+
     void Dispatch() {
         quit = false;
 
         RunDeferred();
-        while (Loop(EVLOOP_ONCE) && !quit)
+        while (Loop(EVLOOP_ONCE) && !quit) {
             RunDeferred();
+            RunPost();
+        }
     }
 
     bool LoopNonBlock() {
-        return RunDeferred() && Loop(EVLOOP_NONBLOCK) && RunDeferred();
+        return RunDeferred() && Loop(EVLOOP_NONBLOCK) &&
+            RunDeferred() &&
+            RunPost();
     }
 
     bool LoopOnce() {
-        return RunDeferred() && Loop(EVLOOP_ONCE) && RunDeferred();
+        return RunDeferred() && Loop(EVLOOP_ONCE) &&
+            RunDeferred() &&
+            RunPost();
     }
 
     bool LoopOnceNonBlock() {
         return RunDeferred() && Loop(EVLOOP_ONCE|EVLOOP_NONBLOCK) &&
-            RunDeferred();
+            RunDeferred() &&
+            RunPost();
     }
 
     void Break() {
@@ -102,6 +126,14 @@ private:
     }
 
     bool RunDeferred();
+
+    bool RunPost() {
+#ifndef NDEBUG
+        if (post_callback)
+            post_callback();
+#endif
+        return true;
+    }
 };
 
 #endif
