@@ -114,7 +114,10 @@ try {
         assert(p.stdin_fd >= 0);
         assert(p.stdin_fd == p.stdout_fd);
 
-        if (ioctl(*ttyfd, TIOCSCTTY, NULL) < 0)
+        if (ioctl(p.stdin_fd, TIOCSCTTY, nullptr) < 0) {
+            perror("Failed to set the controlling terminal");
+            _exit(EXIT_FAILURE);
+        }
     }
 
     try {
