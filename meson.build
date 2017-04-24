@@ -138,6 +138,7 @@ net = static_library('net',
   'src/net/djb/NetstringClient.cxx',
   'src/net/djb/NetstringInput.cxx',
   'src/net/djb/NetstringGenerator.cxx',
+  'src/net/Buffered.cxx',
   include_directories: inc,
   dependencies: [
     libinline, libsocket,
