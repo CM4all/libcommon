@@ -34,6 +34,14 @@ public:
             Close();
     }
 
+    /**
+     * Release ownership and return the descriptor as an unmanaged
+     * #SocketDescriptor instance.
+     */
+    SocketDescriptor Release() {
+        return std::exchange(*(SocketDescriptor *)this, Undefined());
+    }
+
     UniqueSocketDescriptor &operator=(UniqueSocketDescriptor &&src) {
         std::swap(fd, src.fd);
         return *this;
