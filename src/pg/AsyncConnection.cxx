@@ -160,8 +160,17 @@ AsyncPgConnection::Connect()
 {
     assert(state == State::UNINITIALIZED);
 
-    StartConnect(conninfo.c_str());
     state = State::CONNECTING;
+
+    try {
+        StartConnect(conninfo.c_str());
+    } catch (const std::runtime_error &e) {
+        PgConnection::Disconnect();
+        handler.OnError("Failed to connect to database", e.what());
+        Error();
+        return;
+    }
+
     PollConnect();
 }
 
