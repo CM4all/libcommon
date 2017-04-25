@@ -32,11 +32,11 @@ SocketWrapper::WriteEventCallback(unsigned events)
 }
 
 void
-SocketWrapper::Init(int _fd, FdType _fd_type)
+SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type)
 {
-    assert(_fd >= 0);
+    assert(_fd.IsDefined());
 
-    fd = SocketDescriptor::FromFileDescriptor(FileDescriptor(_fd));
+    fd = _fd;
     fd_type = _fd_type;
 
     read_event.Set(fd.Get(), EV_READ|EV_PERSIST);
@@ -46,7 +46,7 @@ SocketWrapper::Init(int _fd, FdType _fd_type)
 void
 SocketWrapper::Init(SocketWrapper &&src)
 {
-    Init(src.fd.Get(), src.fd_type);
+    Init(src.fd, src.fd_type);
     src.Abandon();
 }
 

@@ -60,7 +60,7 @@ public:
         return read_event.GetEventLoop();
     }
 
-    void Init(int _fd, FdType _fd_type);
+    void Init(SocketDescriptor _fd, FdType _fd_type);
 
     /**
      * Move the socket from another #SocketWrapper instance.  This
