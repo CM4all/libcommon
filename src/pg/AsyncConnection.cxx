@@ -9,7 +9,7 @@ AsyncPgConnection::AsyncPgConnection(EventLoop &event_loop,
                                      AsyncPgConnectionHandler &_handler)
     :conninfo(_conninfo), schema(_schema),
      handler(_handler),
-     socket_event(event_loop, BIND_THIS_METHOD(OnSocketEvent)),
+     socket_event(event_loop, -1, 0, BIND_THIS_METHOD(OnSocketEvent)),
      reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer))
 {
 }
