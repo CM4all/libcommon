@@ -158,7 +158,7 @@ AsyncPgConnection::PollNotify()
 void
 AsyncPgConnection::Connect()
 {
-    assert(state == State::UNINITIALIZED);
+    assert(state == State::UNINITIALIZED || state == State::WAITING);
 
     state = State::CONNECTING;
 
@@ -203,7 +203,6 @@ AsyncPgConnection::ScheduleReconnect()
     /* attempt to reconnect every 10 seconds */
     static constexpr struct timeval delay{ 10, 0 };
 
-    assert(IsDefined());
     assert(state == State::DISCONNECTED);
 
     state = State::WAITING;
@@ -239,5 +238,10 @@ AsyncPgConnection::OnReconnectTimer()
 {
     assert(state == State::WAITING);
 
-    Reconnect();
+    if (socket_event.GetFd() < 0)
+        /* there was never a socket, i.e. StartConnect() has failed
+           (maybe due to a DNS failure) - retry that method */
+        Connect();
+    else
+        Reconnect();
 }
