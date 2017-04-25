@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2015 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -235,6 +235,18 @@ SocketDescriptor::GetLocalAddress() const
 	return result;
 }
 
+StaticSocketAddress
+SocketDescriptor::GetPeerAddress() const
+{
+	assert(IsDefined());
+
+	StaticSocketAddress result;
+	result.size = result.GetCapacity();
+	if (getpeername(fd, result, &result.size) < 0)
+		result.Clear();
+
+	return result;
+}
 
 ssize_t
 SocketDescriptor::Read(void *buffer, size_t length)

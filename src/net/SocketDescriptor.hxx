@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2015 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -160,6 +160,9 @@ public:
 
 	gcc_pure
 	StaticSocketAddress GetLocalAddress() const;
+
+	gcc_pure
+	StaticSocketAddress GetPeerAddress() const;
 
 	ssize_t Read(void *buffer, size_t length);
 	ssize_t Write(const void *buffer, size_t length);
