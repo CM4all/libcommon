@@ -49,6 +49,7 @@ template<typename T, const char *name>
 struct Class {
 	typedef T value_type;
 	typedef T *pointer_type;
+	typedef T &reference_type;
 
 	/**
 	 * Register the Lua metatable and leave it on the stack.  This
@@ -95,6 +96,15 @@ struct Class {
 	gcc_pure
 	static pointer_type Check(lua_State *L, int idx) {
 		return (pointer_type)luaL_checkudata(L, idx, name);
+	}
+
+	/**
+	 * Extract the native value from the Lua object on the
+	 * stack.  Raise a Lua error if the type is wrong.
+	 */
+	gcc_pure
+	static reference_type Cast(lua_State *L, int idx) {
+		return *(pointer_type)luaL_checkudata(L, idx, name);
 	}
 
 private:
