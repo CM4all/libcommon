@@ -80,9 +80,12 @@ adata_dep = declare_dependency(link_with: adata)
 
 lua = static_library('lua',
   'src/lua/Error.cxx',
+  'src/lua/Panic.cxx',
   'src/lua/RunFile.cxx',
   'src/lua/State.cxx',
+  include_directories: inc,
   dependencies: [
+    libinline,
     liblua,
   ]
 )
