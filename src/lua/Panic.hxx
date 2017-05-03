@@ -30,6 +30,8 @@
 #ifndef LUA_PANIC_HXX
 #define LUA_PANIC_HXX
 
+#include "Error.hxx"
+
 #include <inline/compiler.h>
 
 extern "C" {
@@ -65,6 +67,21 @@ private:
 	gcc_noreturn
 	static int PanicHandler(lua_State *L);
 };
+
+/**
+ * Call a function, and if a Lua panic occurs during that, convert it
+ * to a C++ exception and throw it.
+ */
+template<typename F>
+auto
+WithPanicHandler(lua_State *L, F &&f)
+{
+	Lua::ScopePanicHandler panic(L);
+	if (setjmp(panic.j) != 0)
+		throw PopError(L);
+
+	return f();
+}
 
 }
 
