@@ -91,11 +91,26 @@ struct Class {
 
 	/**
 	 * Extract the native pointer from the Lua object on the
-	 * stack.  Raise a Lua error if the type is wrong.
+	 * stack.  Returns nullptr if the type is wrong.
 	 */
 	gcc_pure
 	static pointer_type Check(lua_State *L, int idx) {
-		return (pointer_type)luaL_checkudata(L, idx, name);
+		const ScopeCheckStack check_stack(L);
+
+		void *p = lua_touserdata(L, idx);
+		if (p == nullptr)
+			return nullptr;
+
+		if (lua_getmetatable(L, idx) == 0)
+			return nullptr;
+
+		lua_getfield(L, LUA_REGISTRYINDEX, name);
+		bool equal = lua_rawequal(L, -1, -2);
+		lua_pop(L, 2);
+		if (!equal)
+			return nullptr;
+
+		return pointer_type(p);
 	}
 
 	/**
