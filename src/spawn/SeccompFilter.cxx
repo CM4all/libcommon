@@ -14,13 +14,15 @@ SeccompFilter::SeccompFilter(uint32_t def_action)
 void
 SeccompFilter::Reset(uint32_t def_action)
 {
-    if (seccomp_reset(ctx, def_action) < 0)
-        throw std::runtime_error("seccomp_reset() failed");
+    int error = seccomp_reset(ctx, def_action);
+    if (error < 0)
+        throw MakeErrno(-error, "seccomp_reset() failed");
 }
 
 void
 SeccompFilter::Load() const
 {
-    if (seccomp_load(ctx) < 0)
-        throw std::runtime_error("seccomp_load() failed");
+    int error = seccomp_load(ctx);
+    if (error < 0)
+        throw MakeErrno(-error, "seccomp_load() failed");
 }

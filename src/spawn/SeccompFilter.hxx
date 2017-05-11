@@ -5,6 +5,8 @@
 #ifndef SECCOMP_FILTER_HXX
 #define SECCOMP_FILTER_HXX
 
+#include "system/Error.hxx"
+
 #include "seccomp.h"
 
 #include <stdexcept>
@@ -34,9 +36,10 @@ public:
 
     template<typename... Args>
     void AddRule(uint32_t action, int syscall, Args... args) {
-        if (seccomp_rule_add(ctx, action, syscall, sizeof...(args),
-                             std::forward<Args>(args)...) < 0)
-            throw std::runtime_error("seccomp_rule_add() failed");
+        int error = seccomp_rule_add(ctx, action, syscall, sizeof...(args),
+                                     std::forward<Args>(args)...);
+        if (error < 0)
+            throw FormatErrno(-error, "seccomp_rule_add(%d) failed", syscall);
     }
 };
 
