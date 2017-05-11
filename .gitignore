@@ -1,1 +1,5 @@
 /build/
+
+*.o
+.dirstamp
+.deps/
