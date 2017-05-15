@@ -6,6 +6,7 @@
 #include "Prepared.hxx"
 #include "Config.hxx"
 #include "SeccompFilter.hxx"
+#include "SyscallFilter.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/PrintException.hxx"
 
@@ -123,19 +124,7 @@ try {
     try {
         Seccomp::Filter sf(SCMP_ACT_ALLOW);
 
-        /* forbid a bunch of dangerous system calls */
-
-        sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(init_module));
-        sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(delete_module));
-        sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(reboot));
-        sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(settimeofday));
-        sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(adjtimex));
-        sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(swapon));
-        sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(swapoff));
-
-        /* ptrace() is dangerous because it allows breaking out of
-           namespaces */
-        sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(ptrace));
+        BuildSyscallFilter(sf);
 
         sf.Load();
     } catch (const std::runtime_error &e) {

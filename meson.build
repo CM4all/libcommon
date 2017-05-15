@@ -184,6 +184,7 @@ odbus_dep = declare_dependency(link_with: odbus)
 
 spawn = static_library('spawn',
   'src/spawn/SeccompFilter.cxx',
+  'src/spawn/SyscallFilter.cxx',
   'src/spawn/Systemd.cxx',
   'src/spawn/Prepared.cxx',
   'src/spawn/Registry.cxx',
