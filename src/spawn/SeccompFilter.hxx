@@ -11,21 +11,23 @@
 
 #include <stdexcept>
 
-class SeccompFilter {
+namespace Seccomp {
+
+class Filter {
     const scmp_filter_ctx ctx;
 
 public:
     /**
      * Throws std::runtime_error on error.
      */
-    explicit SeccompFilter(uint32_t def_action);
+    explicit Filter(uint32_t def_action);
 
-    ~SeccompFilter() {
+    ~Filter() {
         seccomp_release(ctx);
     }
 
-    SeccompFilter(const SeccompFilter &) = delete;
-    SeccompFilter &operator=(const SeccompFilter &) = delete;
+    Filter(const Filter &) = delete;
+    Filter &operator=(const Filter &) = delete;
 
     /**
      * Throws std::runtime_error on error.
@@ -42,6 +44,8 @@ public:
             throw FormatErrno(-error, "seccomp_rule_add(%d) failed", syscall);
     }
 };
+
+} // namespace Seccomp
 
 #endif
 

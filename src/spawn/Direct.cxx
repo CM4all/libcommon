@@ -121,7 +121,7 @@ try {
     }
 
     try {
-        SeccompFilter sf(SCMP_ACT_ALLOW);
+        Seccomp::Filter sf(SCMP_ACT_ALLOW);
 
         /* forbid a bunch of dangerous system calls */
 

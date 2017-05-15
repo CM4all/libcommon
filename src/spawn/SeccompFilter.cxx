@@ -4,7 +4,9 @@
 
 #include "SeccompFilter.hxx"
 
-SeccompFilter::SeccompFilter(uint32_t def_action)
+namespace Seccomp {
+
+Filter::Filter(uint32_t def_action)
     :ctx(seccomp_init(def_action))
 {
     if (ctx == nullptr)
@@ -12,7 +14,7 @@ SeccompFilter::SeccompFilter(uint32_t def_action)
 }
 
 void
-SeccompFilter::Reset(uint32_t def_action)
+Filter::Reset(uint32_t def_action)
 {
     int error = seccomp_reset(ctx, def_action);
     if (error < 0)
@@ -20,9 +22,11 @@ SeccompFilter::Reset(uint32_t def_action)
 }
 
 void
-SeccompFilter::Load() const
+Filter::Load() const
 {
     int error = seccomp_load(ctx);
     if (error < 0)
         throw MakeErrno(-error, "seccomp_load() failed");
 }
+
+} // namespace Seccomp
