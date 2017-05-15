@@ -15,4 +15,11 @@ namespace Seccomp { class Filter; }
 void
 BuildSyscallFilter(Seccomp::Filter &sf);
 
+/**
+ * Add rules which return EPERM upon attempting to create a new
+ * user namespace.
+ */
+void
+ForbidUserNamespace(Seccomp::Filter &sf);
+
 #endif

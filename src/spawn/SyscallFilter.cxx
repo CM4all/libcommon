@@ -74,3 +74,21 @@ BuildSyscallFilter(Seccomp::Filter &sf)
     for (auto i : forbidden_syscalls)
         sf.AddRule(SCMP_ACT_KILL, i);
 }
+
+static void
+ForbidNamespace(Seccomp::Filter &sf, int one_namespace_flag)
+{
+    using Seccomp::Arg;
+
+    sf.AddRule(SCMP_ACT_ERRNO(EPERM), SCMP_SYS(unshare),
+               (Arg(0) & one_namespace_flag) == one_namespace_flag);
+
+    sf.AddRule(SCMP_ACT_ERRNO(EPERM), SCMP_SYS(clone),
+               (Arg(0) & one_namespace_flag) == one_namespace_flag);
+}
+
+void
+ForbidUserNamespace(Seccomp::Filter &sf)
+{
+    ForbidNamespace(sf, CLONE_NEWUSER);
+}
