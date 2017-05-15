@@ -3006,6 +3006,16 @@ TranslateParser::HandleRegularPacket(enum beng_translation_command command,
         break;
 #endif
 
+    case TRANSLATE_FORBID_USER_NS:
+        if (child_options == nullptr || child_options->forbid_user_ns)
+            throw std::runtime_error("misplaced FORBID_USER_NS packet");
+
+        if (payload_length != 0)
+            throw std::runtime_error("malformed FORBID_USER_NS packet");
+
+        child_options->forbid_user_ns = true;
+        return;
+
     case TRANSLATE_NO_NEW_PRIVS:
         if (child_options == nullptr || child_options->no_new_privs)
             throw std::runtime_error("misplaced NO_NEW_PRIVS packet");
