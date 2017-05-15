@@ -66,7 +66,7 @@ public:
     }
 
     auto operator!=(scmp_datum_t datum) const {
-        return Cmp(SCMP_CMP_EQ, datum);
+        return Cmp(SCMP_CMP_NE, datum);
     }
 
     auto operator<(scmp_datum_t datum) const {
