@@ -248,6 +248,9 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
     s.WriteOptionalString(SpawnExecCommand::CHROOT, p.chroot);
     s.WriteOptionalString(SpawnExecCommand::CHDIR, p.chdir);
 
+    if (p.forbid_user_ns)
+        s.Write(SpawnExecCommand::FORBID_USER_NS);
+
     if (p.no_new_privs)
         s.Write(SpawnExecCommand::NO_NEW_PRIVS);
 

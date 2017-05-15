@@ -496,6 +496,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
             Read(payload, p.uid_gid);
             break;
 
+        case SpawnExecCommand::FORBID_USER_NS:
+            p.forbid_user_ns = true;
+            break;
+
         case SpawnExecCommand::NO_NEW_PRIVS:
             p.no_new_privs = true;
             break;

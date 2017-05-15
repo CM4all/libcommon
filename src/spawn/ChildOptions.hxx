@@ -52,6 +52,8 @@ struct ChildOptions {
      */
     bool stderr_null = false;
 
+    bool forbid_user_ns = false;
+
     bool no_new_privs = false;
 
     ChildOptions() = default;
@@ -69,6 +71,7 @@ struct ChildOptions {
 #endif
          uid_gid(src.uid_gid),
          stderr_null(src.stderr_null),
+         forbid_user_ns(src.forbid_user_ns),
          no_new_privs(src.no_new_privs) {}
 
     ChildOptions(AllocatorPtr alloc, const ChildOptions &src);

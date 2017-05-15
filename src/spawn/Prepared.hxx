@@ -67,6 +67,8 @@ struct PreparedChildProcess {
      */
     const char *chdir = nullptr;
 
+    bool forbid_user_ns = false;
+
     bool no_new_privs = false;
 
     /**
