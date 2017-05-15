@@ -36,6 +36,9 @@ public:
 
     void Load() const;
 
+    void AddArch(uint32_t arch_token);
+    void AddSecondaryArchs() noexcept;
+
     template<typename... Args>
     void AddRule(uint32_t action, int syscall, Args... args) {
         int error = seccomp_rule_add(ctx, action, syscall, sizeof...(args),
