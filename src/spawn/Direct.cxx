@@ -123,6 +123,7 @@ try {
 
     try {
         Seccomp::Filter sf(SCMP_ACT_ALLOW);
+        sf.AddSecondaryArchs();
 
         BuildSyscallFilter(sf);
 
