@@ -45,6 +45,64 @@ public:
     }
 };
 
+/**
+ * Reference to a system call argument.
+ */
+class Arg {
+    unsigned arg;
+
+public:
+    explicit Arg(unsigned _arg):arg(_arg) {}
+
+    auto Cmp(enum scmp_compare op, scmp_datum_t datum) const {
+        return SCMP_CMP(arg, op, datum);
+    }
+
+    auto operator==(scmp_datum_t datum) const {
+        return Cmp(SCMP_CMP_EQ, datum);
+    }
+
+    auto operator!=(scmp_datum_t datum) const {
+        return Cmp(SCMP_CMP_EQ, datum);
+    }
+
+    auto operator<(scmp_datum_t datum) const {
+        return Cmp(SCMP_CMP_LT, datum);
+    }
+
+    auto operator>(scmp_datum_t datum) const {
+        return Cmp(SCMP_CMP_GT, datum);
+    }
+
+    auto operator<=(scmp_datum_t datum) const {
+        return Cmp(SCMP_CMP_LE, datum);
+    }
+
+    auto operator>=(scmp_datum_t datum) const {
+        return Cmp(SCMP_CMP_GE, datum);
+    }
+
+    auto operator&(scmp_datum_t mask) const {
+        return MaskedArg(arg, mask);
+    }
+
+private:
+    /**
+     * Internal helper class.  Do not use directly.
+     */
+    class MaskedArg {
+        unsigned arg;
+        scmp_datum_t mask;
+
+    public:
+        MaskedArg(unsigned _arg, scmp_datum_t _mask):arg(_arg), mask(_mask) {}
+
+        auto operator==(scmp_datum_t datum) const {
+            return SCMP_CMP(arg, SCMP_CMP_MASKED_EQ, mask, datum);
+        }
+    };
+};
+
 } // namespace Seccomp
 
 #endif
