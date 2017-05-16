@@ -27,50 +27,30 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef STRING_COMPARE_HXX
-#define STRING_COMPARE_HXX
+#include "StringCompare.hxx"
 
-#include "StringView.hxx"
-
-#include <inline/compiler.h>
-
-static inline bool
-StringIsEmpty(const char *string) noexcept
-{
-	return *string == 0;
-}
-
-gcc_pure gcc_nonnull_all
-static inline bool
-StringStartsWith(const char *haystack, StringView needle) noexcept
-{
-	return strncmp(haystack, needle.data, needle.size) == 0;
-}
-
-gcc_pure
 bool
-StringEndsWith(const char *haystack, const char *needle) noexcept;
-
-/**
- * Returns the portion of the string after a prefix.  If the string
- * does not begin with the specified prefix, this function returns
- * nullptr.
- */
-gcc_pure gcc_nonnull_all
-static inline const char *
-StringAfterPrefix(const char *haystack, StringView needle) noexcept
+StringEndsWith(const char *haystack, const char *needle) noexcept
 {
-	return StringStartsWith(haystack, needle)
-		? haystack + needle.size
+	const size_t haystack_length = strlen(haystack);
+	const size_t needle_length = strlen(needle);
+
+	return haystack_length >= needle_length &&
+		memcmp(haystack + haystack_length - needle_length,
+		       needle, needle_length) == 0;
+}
+
+const char *
+FindStringSuffix(const char *p, const char *suffix) noexcept
+{
+	const size_t p_length = strlen(p);
+	const size_t suffix_length = strlen(suffix);
+
+	if (p_length < suffix_length)
+		return nullptr;
+
+	const char *q = p + p_length - suffix_length;
+	return memcmp(q, suffix, suffix_length) == 0
+		? q
 		: nullptr;
 }
-
-/**
- * Check if the given string ends with the specified suffix.  If yes,
- * returns the position of the suffix, and nullptr otherwise.
- */
-gcc_pure
-const char *
-FindStringSuffix(const char *p, const char *suffix) noexcept;
-
-#endif
