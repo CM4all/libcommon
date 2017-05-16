@@ -33,7 +33,7 @@
 #include <string.h>
 
 const char *
-StripLeft(const char *p)
+StripLeft(const char *p) noexcept
 {
 	while (IsWhitespaceNotNull(*p))
 		++p;
@@ -42,7 +42,7 @@ StripLeft(const char *p)
 }
 
 const char *
-StripLeft(const char *p, const char *end)
+StripLeft(const char *p, const char *end) noexcept
 {
 	while (p < end && IsWhitespaceOrNull(*p))
 		++p;
@@ -51,7 +51,7 @@ StripLeft(const char *p, const char *end)
 }
 
 const char *
-StripRight(const char *p, const char *end)
+StripRight(const char *p, const char *end) noexcept
 {
 	while (end > p && IsWhitespaceOrNull(end[-1]))
 		--end;
@@ -60,7 +60,7 @@ StripRight(const char *p, const char *end)
 }
 
 size_t
-StripRight(const char *p, size_t length)
+StripRight(const char *p, size_t length) noexcept
 {
 	while (length > 0 && IsWhitespaceOrNull(p[length - 1]))
 		--length;
@@ -69,7 +69,7 @@ StripRight(const char *p, size_t length)
 }
 
 void
-StripRight(char *p)
+StripRight(char *p) noexcept
 {
 	size_t old_length = strlen(p);
 	size_t new_length = StripRight(p, old_length);
@@ -77,7 +77,7 @@ StripRight(char *p)
 }
 
 char *
-Strip(char *p)
+Strip(char *p) noexcept
 {
 	p = StripLeft(p);
 	StripRight(p);

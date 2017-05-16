@@ -42,11 +42,11 @@
  */
 gcc_pure gcc_nonnull_all
 const char *
-StripLeft(const char *p);
+StripLeft(const char *p) noexcept;
 
 gcc_pure gcc_nonnull_all
 static inline char *
-StripLeft(char *p)
+StripLeft(char *p) noexcept
 {
 	return const_cast<char *>(StripLeft((const char *)p));
 }
@@ -57,21 +57,21 @@ StripLeft(char *p)
  */
 gcc_pure
 const char *
-StripLeft(const char *p, const char *end);
+StripLeft(const char *p, const char *end) noexcept;
 
 /**
  * Determine the string's end as if it was stripped on the right side.
  */
 gcc_pure
 const char *
-StripRight(const char *p, const char *end);
+StripRight(const char *p, const char *end) noexcept;
 
 /**
  * Determine the string's end as if it was stripped on the right side.
  */
 gcc_pure
 static inline char *
-StripRight(char *p, char *end)
+StripRight(char *p, char *end) noexcept
 {
 	return const_cast<char *>(StripRight((const char *)p,
 					     (const char *)end));
@@ -83,17 +83,17 @@ StripRight(char *p, char *end)
  */
 gcc_pure
 size_t
-StripRight(const char *p, size_t length);
+StripRight(const char *p, size_t length) noexcept;
 
 /**
  * Strips trailing whitespace.
  */
 gcc_nonnull_all
 void
-StripRight(char *p);
+StripRight(char *p) noexcept;
 
 gcc_nonnull_all
 char *
-Strip(char *p);
+Strip(char *p) noexcept;
 
 #endif
