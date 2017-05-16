@@ -28,6 +28,7 @@
  */
 
 #include "AllocatedSocketAddress.hxx"
+#include "util/StringView.hxx"
 
 #include <string.h>
 
@@ -68,6 +69,12 @@ AllocatedSocketAddress::SetSize(size_type new_size) noexcept
 }
 
 #ifdef HAVE_UN
+
+StringView
+AllocatedSocketAddress::GetLocalRaw() const
+{
+	return SocketAddress(*this).GetLocalRaw();
+}
 
 void
 AllocatedSocketAddress::SetLocal(const char *path) noexcept

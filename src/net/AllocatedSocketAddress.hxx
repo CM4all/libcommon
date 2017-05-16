@@ -139,6 +139,12 @@ public:
 
 #ifdef HAVE_UN
 	/**
+	 * @see SocketAddress::GetLocalRaw()
+	 */
+	gcc_pure
+	StringView GetLocalRaw() const;
+
+	/**
 	 * Make this a "local" address (UNIX domain socket).  If the path
 	 * begins with a '@', then the rest specifies an "abstract" local
 	 * address.

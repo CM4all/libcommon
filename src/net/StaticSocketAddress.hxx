@@ -102,6 +102,14 @@ public:
 		address.ss_family = AF_UNSPEC;
 	}
 
+#ifdef HAVE_UN
+	/**
+	 * @see SocketAddress::GetLocalRaw()
+	 */
+	gcc_pure
+	StringView GetLocalRaw() const;
+#endif
+
 #ifdef HAVE_TCP
 	/**
 	 * Extract the port number.  Returns 0 if not applicable.

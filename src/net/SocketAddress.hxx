@@ -42,6 +42,8 @@
 #include <sys/socket.h>
 #endif
 
+struct StringView;
+
 /**
  * An OO wrapper for struct sockaddr.
  */
@@ -94,6 +96,17 @@ public:
 	bool IsDefined() const noexcept {
 		return GetFamily() != AF_UNSPEC;
 	}
+
+#ifdef HAVE_UN
+	/**
+	 * Extract the local socket path (which may begin with a null
+	 * byte, denoting an "abstract" socket).  The return value's
+	 * "size" attribute includes the null terminator.  Returns
+	 * nullptr if not applicable.
+	 */
+	gcc_pure
+	StringView GetLocalRaw() const;
+#endif
 
 #ifdef HAVE_TCP
 	/**

@@ -28,6 +28,7 @@
  */
 
 #include "StaticSocketAddress.hxx"
+#include "util/StringView.hxx"
 
 #include <algorithm>
 
@@ -49,6 +50,16 @@ StaticSocketAddress::operator=(SocketAddress other)
 	memcpy(&address, other.GetAddress(), size);
 	return *this;
 }
+
+#ifdef HAVE_UN
+
+StringView
+StaticSocketAddress::GetLocalRaw() const
+{
+	return SocketAddress(*this).GetLocalRaw();
+}
+
+#endif
 
 #ifdef HAVE_TCP
 
