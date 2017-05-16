@@ -47,6 +47,11 @@ StringStartsWith(const char *haystack, StringView needle) noexcept
 	return strncmp(haystack, needle.data, needle.size) == 0;
 }
 
+/**
+ * Returns the portion of the string after a prefix.  If the string
+ * does not begin with the specified prefix, this function returns
+ * nullptr.
+ */
 gcc_pure gcc_nonnull_all
 static inline const char *
 StringAfterPrefix(const char *haystack, StringView needle) noexcept
