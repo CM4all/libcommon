@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2015 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2013-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,14 +36,14 @@
 
 gcc_pure gcc_nonnull_all
 static inline bool
-StringStartsWith(const char *haystack, StringView needle)
+StringStartsWith(const char *haystack, StringView needle) noexcept
 {
 	return strncmp(haystack, needle.data, needle.size) == 0;
 }
 
 gcc_pure gcc_nonnull_all
 static inline const char *
-StringAfterPrefix(const char *haystack, StringView needle)
+StringAfterPrefix(const char *haystack, StringView needle) noexcept
 {
 	return StringStartsWith(haystack, needle)
 		? haystack + needle.size
