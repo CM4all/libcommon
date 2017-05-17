@@ -35,7 +35,9 @@
 #include <sys/un.h>
 #endif
 
+#ifdef HAVE_TCP
 #include <netinet/in.h>
+#endif
 
 AllocatedSocketAddress &
 AllocatedSocketAddress::operator=(SocketAddress src) noexcept
@@ -84,6 +86,8 @@ AllocatedSocketAddress::SetLocal(const char *path) noexcept
 
 #endif
 
+#ifdef HAVE_TCP
+
 bool
 AllocatedSocketAddress::SetPort(unsigned port) noexcept
 {
@@ -108,3 +112,5 @@ AllocatedSocketAddress::SetPort(unsigned port) noexcept
 
 	return false;
 }
+
+#endif

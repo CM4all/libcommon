@@ -147,6 +147,7 @@ public:
 	void SetLocal(const char *path) noexcept;
 #endif
 
+#ifdef HAVE_TCP
 	/**
 	 * Extract the port number.  Returns 0 if not applicable.
 	 */
@@ -171,6 +172,7 @@ public:
 	AllocatedSocketAddress WithPort(unsigned port) const noexcept {
 		return WithPort(*this, port);
 	}
+#endif
 
 private:
 	void SetSize(size_type new_size) noexcept;

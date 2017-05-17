@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2016 Max Kellermann <max@duempel.org>
+ * Copyright (C) 2012-2017 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,7 +33,10 @@
 
 #include <assert.h>
 #include <string.h>
+
+#ifdef HAVE_TCP
 #include <netinet/in.h>
+#endif
 
 StaticSocketAddress &
 StaticSocketAddress::operator=(SocketAddress other)
@@ -49,6 +52,8 @@ StaticSocketAddress::operator==(const StaticSocketAddress &other) const
 	return size == other.size &&
 		memcmp(&address, &other.address, size) == 0;
 }
+
+#ifdef HAVE_TCP
 
 bool
 StaticSocketAddress::SetPort(unsigned port)
@@ -71,3 +76,5 @@ StaticSocketAddress::SetPort(unsigned port)
 
 	return false;
 }
+
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2015 Max Kellermann <max@duempel.org>
+ * Copyright (C) 2012-2017 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,8 +29,11 @@
 
 #include "SocketAddress.hxx"
 
-#include <netinet/in.h>
 #include <string.h>
+
+#ifdef HAVE_TCP
+#include <netinet/in.h>
+#endif
 
 bool
 SocketAddress::operator==(SocketAddress other) const

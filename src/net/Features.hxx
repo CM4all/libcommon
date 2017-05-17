@@ -6,5 +6,6 @@
 #define NET_FEATURES_HXX
 
 #define HAVE_UN
+#define HAVE_TCP
 
 #endif

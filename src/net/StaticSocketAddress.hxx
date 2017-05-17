@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2016 Max Kellermann <max@duempel.org>
+ * Copyright (C) 2012-2017 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,6 +31,7 @@
 #define STATIC_SOCKET_ADDRESS_HXX
 
 #include "SocketAddress.hxx"
+#include "Features.hxx"
 
 #include <inline/compiler.h>
 
@@ -101,6 +102,7 @@ public:
 		address.ss_family = AF_UNSPEC;
 	}
 
+#ifdef HAVE_TCP
 	/**
 	 * Extract the port number.  Returns 0 if not applicable.
 	 */
@@ -114,6 +116,7 @@ public:
 	 * a port number
 	 */
 	bool SetPort(unsigned port);
+#endif
 
 	gcc_pure
 	bool operator==(const StaticSocketAddress &other) const;
