@@ -127,6 +127,10 @@ public:
 		return value[i];
 	}
 
+	const reference_type operator[](size_type i) const {
+		return value[i];
+	}
+
 	bool empty() const {
 		return *value == SENTINEL;
 	}
