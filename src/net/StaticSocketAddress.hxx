@@ -119,7 +119,9 @@ public:
 #endif
 
 	gcc_pure
-	bool operator==(const StaticSocketAddress &other) const;
+	bool operator==(SocketAddress other) const {
+		return (SocketAddress)*this == other;
+	}
 
 	bool operator!=(const StaticSocketAddress &other) const {
 		return !(*this == other);
