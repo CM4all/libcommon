@@ -39,7 +39,7 @@
 #include <netinet/in.h>
 
 AllocatedSocketAddress &
-AllocatedSocketAddress::operator=(SocketAddress src)
+AllocatedSocketAddress::operator=(SocketAddress src) noexcept
 {
 	if (src.IsNull()) {
 		Clear();
@@ -52,7 +52,7 @@ AllocatedSocketAddress::operator=(SocketAddress src)
 }
 
 void
-AllocatedSocketAddress::SetSize(size_type new_size)
+AllocatedSocketAddress::SetSize(size_type new_size) noexcept
 {
 	if (size == new_size)
 		return;
@@ -65,7 +65,7 @@ AllocatedSocketAddress::SetSize(size_type new_size)
 #ifdef HAVE_UN
 
 void
-AllocatedSocketAddress::SetLocal(const char *path)
+AllocatedSocketAddress::SetLocal(const char *path) noexcept
 {
 	const bool is_abstract = *path == '@';
 
@@ -86,7 +86,7 @@ AllocatedSocketAddress::SetLocal(const char *path)
 #endif
 
 bool
-AllocatedSocketAddress::SetPort(unsigned port)
+AllocatedSocketAddress::SetPort(unsigned port) noexcept
 {
 	if (IsNull())
 		return false;
