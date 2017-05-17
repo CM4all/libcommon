@@ -45,6 +45,8 @@ SocketAddress::operator==(SocketAddress other) const noexcept
 	return size == other.size && memcmp(address, other.address, size) == 0;
 }
 
+#ifdef HAVE_TCP
+
 bool
 SocketAddress::IsV6Any() const noexcept
 {
@@ -70,3 +72,5 @@ SocketAddress::GetPort() const noexcept
 		return 0;
 	}
 }
+
+#endif

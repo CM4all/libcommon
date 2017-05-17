@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2017 Max Kellermann <max@duempel.org>
+ * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -95,13 +95,13 @@ public:
 		return GetFamily() != AF_UNSPEC;
 	}
 
+#ifdef HAVE_TCP
 	/**
 	 * Is this the IPv6 wildcard address (in6addr_any)?
 	 */
 	gcc_pure
 	bool IsV6Any() const noexcept;
 
-#ifdef HAVE_TCP
 	/**
 	 * Extract the port number.  Returns 0 if not applicable.
 	 */
