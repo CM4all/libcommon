@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2016 Max Kellermann <max@duempel.org>
+ * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,7 +29,6 @@
 
 #include "AllocatedSocketAddress.hxx"
 
-#include <assert.h>
 #include <string.h>
 
 #ifdef HAVE_UN
