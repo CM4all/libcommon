@@ -40,13 +40,13 @@
 #endif
 
 bool
-SocketAddress::operator==(SocketAddress other) const
+SocketAddress::operator==(SocketAddress other) const noexcept
 {
 	return size == other.size && memcmp(address, other.address, size) == 0;
 }
 
 bool
-SocketAddress::IsV6Any() const
+SocketAddress::IsV6Any() const noexcept
 {
     return GetFamily() == AF_INET6 &&
 	    memcmp(&((const struct sockaddr_in6 *)(const void *)GetAddress())->sin6_addr,
@@ -54,7 +54,7 @@ SocketAddress::IsV6Any() const
 }
 
 unsigned
-SocketAddress::GetPort() const
+SocketAddress::GetPort() const noexcept
 {
 	if (IsNull())
 		return 0;
