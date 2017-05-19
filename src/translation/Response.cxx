@@ -147,6 +147,7 @@ TranslateResponse::Clear()
 
     session = nullptr;
 #endif
+    pool = nullptr;
 #if TRANSLATION_ENABLE_HTTP
     internal_redirect = nullptr;
 #endif
@@ -334,6 +335,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     realm_from_auth_base = src.realm_from_auth_base;
     session = nullptr;
 #endif
+
+    pool = alloc.CheckDup(src.pool);
 
 #if TRANSLATION_ENABLE_HTTP
     internal_redirect = alloc.Dup(src.internal_redirect);

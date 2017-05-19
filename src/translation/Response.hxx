@@ -211,6 +211,8 @@ struct TranslateResponse {
     ConstBuffer<void> session;
 #endif
 
+    const char *pool;
+
 #if TRANSLATION_ENABLE_HTTP
     /**
      * The payload of the #TRANSLATE_INTERNAL_REDIRECT packet.  If
