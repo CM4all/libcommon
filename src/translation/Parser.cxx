@@ -1759,10 +1759,8 @@ TranslateParser::HandleRegularPacket(enum beng_translation_command command,
 
         response.vary.data = (const uint16_t *)_payload;
         response.vary.size = payload_length / sizeof(response.vary.data[0]);
-        return;
-#else
-        break;
 #endif
+        return;
 
     case TRANSLATE_INVALIDATE:
 #if TRANSLATION_ENABLE_CACHE
@@ -1773,10 +1771,8 @@ TranslateParser::HandleRegularPacket(enum beng_translation_command command,
         response.invalidate.data = (const uint16_t *)_payload;
         response.invalidate.size = payload_length /
             sizeof(response.invalidate.data[0]);
-        return;
-#else
-        break;
 #endif
+        return;
 
     case TRANSLATE_BASE:
 #if TRANSLATION_ENABLE_RADDRESS
