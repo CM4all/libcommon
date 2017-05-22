@@ -120,10 +120,14 @@ PreparedChildProcess::Finish()
     assert(!args.full());
     assert(!env.full());
 
-    const char *path = args.front();
-    const char *slash = strrchr(path, '/');
-    if (slash != nullptr && slash[1] != 0)
-        args.front() = slash + 1;
+    const char *path = exec_path;
+
+    if (path == nullptr) {
+        path = args.front();
+        const char *slash = strrchr(path, '/');
+        if (slash != nullptr && slash[1] != 0)
+            args.front() = slash + 1;
+    }
 
     args.push_back(nullptr);
     env.push_back(nullptr);

@@ -35,6 +35,12 @@ struct PreparedChildProcess {
      */
     int (*exec_function)(PreparedChildProcess &&p) = nullptr;
 
+    /**
+     * This program will be executed (unless #exec_function is set).
+     * If this is nullptr, then args.front() will be used.
+     */
+    const char *exec_path = nullptr;
+
     StaticArray<const char *, 32> args;
     StaticArray<const char *, 32> env;
     int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1, control_fd = -1;
