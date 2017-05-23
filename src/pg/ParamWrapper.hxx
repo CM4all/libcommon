@@ -186,6 +186,19 @@ struct PgParamWrapper<const std::list<std::string> *> {
 template<typename... Params>
 class PgParamCollector;
 
+template<>
+class PgParamCollector<> {
+public:
+    static constexpr size_t Count() {
+        return 0;
+    }
+
+    template<typename O>
+    size_t Fill(O) const {
+        return 0;
+    }
+};
+
 template<typename T>
 class PgParamCollector<T> {
     PgParamWrapper<T> wrapper;
