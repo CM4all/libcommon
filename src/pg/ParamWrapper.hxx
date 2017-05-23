@@ -9,6 +9,7 @@
 #include "Array.hxx"
 
 #include <iterator>
+#include <cinttypes>
 #include <cstdio>
 #include <cstddef>
 
@@ -76,6 +77,28 @@ struct PgParamWrapper<int> {
 
     PgParamWrapper(int i) {
         sprintf(buffer, "%i", i);
+    }
+
+    const char *GetValue() const {
+        return buffer;
+    }
+
+    static constexpr bool IsBinary() {
+        return false;
+    }
+
+    size_t GetSize() const {
+        /* ignored for text columns */
+        return 0;
+    }
+};
+
+template<>
+struct PgParamWrapper<int64_t> {
+    char buffer[32];
+
+    PgParamWrapper(int64_t i) {
+        sprintf(buffer, "%" PRId64, i);
     }
 
     const char *GetValue() const {
