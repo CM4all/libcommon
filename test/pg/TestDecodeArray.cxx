@@ -1,4 +1,4 @@
-#include "../src/pg/Array.hxx"
+#include "../../src/pg/Array.hxx"
 
 #include <stdlib.h>
 #include <stdio.h>
