@@ -5,7 +5,7 @@
 #include <string.h>
 
 static void check_decode(const char *input, const char *const* expected) {
-    std::list<std::string> a = pg_decode_array(input);
+    std::list<std::string> a = Pg::DecodeArray(input);
 
     unsigned i = 0;
     for (const auto &v : a) {

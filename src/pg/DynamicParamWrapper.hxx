@@ -13,11 +13,13 @@
 #include <cstddef>
 #include <cstdio>
 
-template<typename T>
-struct PgDynamicParamWrapper {
-    PgParamWrapper<T> wrapper;
+namespace Pg {
 
-    PgDynamicParamWrapper(const T &t):wrapper(t) {}
+template<typename T>
+struct DynamicParamWrapper {
+    ParamWrapper<T> wrapper;
+
+    DynamicParamWrapper(const T &t):wrapper(t) {}
 
     constexpr static size_t Count(gcc_unused const T &t) {
         return 1;
@@ -33,10 +35,10 @@ struct PgDynamicParamWrapper {
 };
 
 template<typename T>
-struct PgDynamicParamWrapper<std::vector<T>> {
-    std::vector<PgDynamicParamWrapper<T>> items;
+struct DynamicParamWrapper<std::vector<T>> {
+    std::vector<DynamicParamWrapper<T>> items;
 
-    constexpr PgDynamicParamWrapper(const std::vector<T> &params)
+    constexpr DynamicParamWrapper(const std::vector<T> &params)
         :items(params.begin(), params.end()) {}
 
     constexpr static size_t Count(gcc_unused const std::vector<T> &v) {
@@ -57,5 +59,7 @@ struct PgDynamicParamWrapper<std::vector<T>> {
         return total;
     }
 };
+
+} /* namespace Pg */
 
 #endif

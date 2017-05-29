@@ -9,24 +9,26 @@
 
 #include <exception>
 
-class PgError final : public std::exception {
-    PgResult result;
+namespace Pg {
+
+class Error final : public std::exception {
+    Result result;
 
 public:
-    PgError(const PgError &other) = delete;
-    PgError(PgError &&other)
+    Error(const Error &other) = delete;
+    Error(Error &&other)
         :result(std::move(other.result)) {}
-    explicit PgError(PgResult &&_result)
+    explicit Error(Result &&_result)
         :result(std::move(_result)) {}
 
-    PgError &operator=(const PgError &other) = delete;
+    Error &operator=(const Error &other) = delete;
 
-    PgError &operator=(PgError &&other) {
+    Error &operator=(Error &&other) {
         result = std::move(other.result);
         return *this;
     }
 
-    PgError &operator=(PgResult &&other) {
+    Error &operator=(Result &&other) {
         result = std::move(other);
         return *this;
     }
@@ -41,5 +43,7 @@ public:
         return result.GetErrorMessage();
     }
 };
+
+} /* namespace Pg */
 
 #endif

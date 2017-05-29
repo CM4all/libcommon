@@ -8,7 +8,7 @@ static void
 check_encode(const std::list<std::string> &input,
              const char *expected)
 {
-    std::string result = pg_encode_array(input);
+    std::string result = Pg::EncodeArray(input);
 
     if (strcmp(result.c_str(), expected) != 0) {
         fprintf(stderr, "got '%s', expected '%s'\n",

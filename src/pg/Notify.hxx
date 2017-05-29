@@ -11,22 +11,24 @@
 
 #include <algorithm>
 
+namespace Pg {
+
 /**
  * A thin C++ wrapper for a PGnotify pointer.
  */
-class PgNotify {
+class Notify {
     PGnotify *notify;
 
 public:
-    PgNotify():notify(nullptr) {}
-    explicit PgNotify(PGnotify *_notify):notify(_notify) {}
+    Notify():notify(nullptr) {}
+    explicit Notify(PGnotify *_notify):notify(_notify) {}
 
-    PgNotify(const PgNotify &other) = delete;
-    PgNotify(PgNotify &&other):notify(other.notify) {
+    Notify(const Notify &other) = delete;
+    Notify(Notify &&other):notify(other.notify) {
         other.notify = nullptr;
     }
 
-    ~PgNotify() {
+    ~Notify() {
         if (notify != nullptr)
             PQfreemem(notify);
     }
@@ -35,8 +37,8 @@ public:
         return notify != nullptr;
     }
 
-    PgNotify &operator=(const PgNotify &other) = delete;
-    PgNotify &operator=(PgNotify &&other) {
+    Notify &operator=(const Notify &other) = delete;
+    Notify &operator=(Notify &&other) {
         std::swap(notify, other.notify);
         return *this;
     }
@@ -49,5 +51,7 @@ public:
         return notify;
     }
 };
+
+} /* namespace Pg */
 
 #endif

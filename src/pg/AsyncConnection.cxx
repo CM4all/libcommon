@@ -4,9 +4,11 @@
 
 #include "AsyncConnection.hxx"
 
-AsyncPgConnection::AsyncPgConnection(EventLoop &event_loop,
-                                     const char *_conninfo, const char *_schema,
-                                     AsyncPgConnectionHandler &_handler)
+namespace Pg {
+
+AsyncConnection::AsyncConnection(EventLoop &event_loop,
+                                 const char *_conninfo, const char *_schema,
+                                 AsyncConnectionHandler &_handler)
     :conninfo(_conninfo), schema(_schema),
      handler(_handler),
      socket_event(event_loop, -1, 0, BIND_THIS_METHOD(OnSocketEvent)),
@@ -15,7 +17,7 @@ AsyncPgConnection::AsyncPgConnection(EventLoop &event_loop,
 }
 
 void
-AsyncPgConnection::Error()
+AsyncConnection::Error()
 {
     assert(state == State::CONNECTING ||
            state == State::RECONNECTING ||
@@ -39,7 +41,7 @@ AsyncPgConnection::Error()
 }
 
 void
-AsyncPgConnection::Poll(PostgresPollingStatusType status)
+AsyncConnection::Poll(PostgresPollingStatusType status)
 {
     switch (status) {
     case PGRES_POLLING_FAILED:
@@ -87,25 +89,25 @@ AsyncPgConnection::Poll(PostgresPollingStatusType status)
 }
 
 void
-AsyncPgConnection::PollConnect()
+AsyncConnection::PollConnect()
 {
     assert(IsDefined());
     assert(state == State::CONNECTING);
 
-    Poll(PgConnection::PollConnect());
+    Poll(Connection::PollConnect());
 }
 
 void
-AsyncPgConnection::PollReconnect()
+AsyncConnection::PollReconnect()
 {
     assert(IsDefined());
     assert(state == State::RECONNECTING);
 
-    Poll(PgConnection::PollReconnect());
+    Poll(Connection::PollReconnect());
 }
 
 inline void
-AsyncPgConnection::PollResult()
+AsyncConnection::PollResult()
 {
     while (!IsBusy()) {
         auto result = ReceiveResult();
@@ -125,7 +127,7 @@ AsyncPgConnection::PollResult()
 }
 
 void
-AsyncPgConnection::PollNotify()
+AsyncConnection::PollNotify()
 {
     assert(IsDefined());
     assert(state == State::READY);
@@ -134,7 +136,7 @@ AsyncPgConnection::PollNotify()
 
     ConsumeInput();
 
-    PgNotify notify;
+    Notify notify;
     switch (GetStatus()) {
     case CONNECTION_OK:
         PollResult();
@@ -156,7 +158,7 @@ AsyncPgConnection::PollNotify()
 }
 
 void
-AsyncPgConnection::Connect()
+AsyncConnection::Connect()
 {
     assert(state == State::UNINITIALIZED || state == State::WAITING);
 
@@ -165,7 +167,7 @@ AsyncPgConnection::Connect()
     try {
         StartConnect(conninfo.c_str());
     } catch (const std::runtime_error &e) {
-        PgConnection::Disconnect();
+        Connection::Disconnect();
         handler.OnError("Failed to connect to database", e.what());
         Error();
         return;
@@ -175,7 +177,7 @@ AsyncPgConnection::Connect()
 }
 
 void
-AsyncPgConnection::Reconnect()
+AsyncConnection::Reconnect()
 {
     assert(state != State::UNINITIALIZED);
 
@@ -186,19 +188,19 @@ AsyncPgConnection::Reconnect()
 }
 
 void
-AsyncPgConnection::Disconnect()
+AsyncConnection::Disconnect()
 {
     if (state == State::UNINITIALIZED)
         return;
 
     socket_event.Delete();
     reconnect_timer.Cancel();
-    PgConnection::Disconnect();
+    Connection::Disconnect();
     state = State::DISCONNECTED;
 }
 
 void
-AsyncPgConnection::ScheduleReconnect()
+AsyncConnection::ScheduleReconnect()
 {
     /* attempt to reconnect every 10 seconds */
     static constexpr struct timeval delay{ 10, 0 };
@@ -210,7 +212,7 @@ AsyncPgConnection::ScheduleReconnect()
 }
 
 inline void
-AsyncPgConnection::OnSocketEvent(unsigned)
+AsyncConnection::OnSocketEvent(unsigned)
 {
     switch (state) {
     case State::UNINITIALIZED:
@@ -234,7 +236,7 @@ AsyncPgConnection::OnSocketEvent(unsigned)
 }
 
 inline void
-AsyncPgConnection::OnReconnectTimer()
+AsyncConnection::OnReconnectTimer()
 {
     assert(state == State::WAITING);
 
@@ -245,3 +247,5 @@ AsyncPgConnection::OnReconnectTimer()
     else
         Reconnect();
 }
+
+} /* namespace Pg */

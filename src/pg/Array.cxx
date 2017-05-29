@@ -11,8 +11,10 @@
 #include <assert.h>
 #include <string.h>
 
+namespace Pg {
+
 std::list<std::string>
-pg_decode_array(const char *p)
+DecodeArray(const char *p)
 {
     std::list<std::string> dest;
 
@@ -82,3 +84,5 @@ pg_decode_array(const char *p)
 
     return dest;
 }
+
+} /* namespace Pg */

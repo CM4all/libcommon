@@ -13,9 +13,11 @@
 #include <cstdio>
 #include <cstddef>
 
+namespace Pg {
+
 template<typename T, typename Enable=void>
-struct PgParamWrapper {
-    PgParamWrapper(const T &t);
+struct ParamWrapper {
+    ParamWrapper(const T &t);
     const char *GetValue() const;
 
     /**
@@ -32,10 +34,10 @@ struct PgParamWrapper {
 };
 
 template<>
-struct PgParamWrapper<PgBinaryValue> {
-    PgBinaryValue value;
+struct ParamWrapper<BinaryValue> {
+    BinaryValue value;
 
-    constexpr PgParamWrapper(PgBinaryValue _value)
+    constexpr ParamWrapper(BinaryValue _value)
         :value(_value) {}
 
     constexpr const char *GetValue() const {
@@ -52,10 +54,10 @@ struct PgParamWrapper<PgBinaryValue> {
 };
 
 template<>
-struct PgParamWrapper<const char *> {
+struct ParamWrapper<const char *> {
     const char *value;
 
-    constexpr PgParamWrapper(const char *_value):value(_value) {}
+    constexpr ParamWrapper(const char *_value):value(_value) {}
 
     constexpr const char *GetValue() const {
         return value;
@@ -72,10 +74,10 @@ struct PgParamWrapper<const char *> {
 };
 
 template<>
-struct PgParamWrapper<int> {
+struct ParamWrapper<int> {
     char buffer[16];
 
-    PgParamWrapper(int i) {
+    ParamWrapper(int i) {
         sprintf(buffer, "%i", i);
     }
 
@@ -94,10 +96,10 @@ struct PgParamWrapper<int> {
 };
 
 template<>
-struct PgParamWrapper<int64_t> {
+struct ParamWrapper<int64_t> {
     char buffer[32];
 
-    PgParamWrapper(int64_t i) {
+    ParamWrapper(int64_t i) {
         sprintf(buffer, "%" PRId64, i);
     }
 
@@ -116,10 +118,10 @@ struct PgParamWrapper<int64_t> {
 };
 
 template<>
-struct PgParamWrapper<unsigned> {
+struct ParamWrapper<unsigned> {
     char buffer[16];
 
-    PgParamWrapper(unsigned i) {
+    ParamWrapper(unsigned i) {
         sprintf(buffer, "%u", i);
     }
 
@@ -138,10 +140,10 @@ struct PgParamWrapper<unsigned> {
 };
 
 template<>
-struct PgParamWrapper<bool> {
+struct ParamWrapper<bool> {
     const char *value;
 
-    constexpr PgParamWrapper(bool _value):value(_value ? "t" : "f") {}
+    constexpr ParamWrapper(bool _value):value(_value ? "t" : "f") {}
 
     static constexpr bool IsBinary() {
         return false;
@@ -161,13 +163,13 @@ struct PgParamWrapper<bool> {
  * Specialization for STL container types of std::string instances.
  */
 template<typename T>
-struct PgParamWrapper<T,
+struct ParamWrapper<T,
                       std::enable_if_t<std::is_same<typename T::value_type,
                                                     std::string>::value>> {
     std::string value;
 
-    PgParamWrapper(const T &list)
-      :value(pg_encode_array(list)) {}
+    ParamWrapper(const T &list)
+      :value(EncodeArray(list)) {}
 
     static constexpr bool IsBinary() {
         return false;
@@ -184,12 +186,12 @@ struct PgParamWrapper<T,
 };
 
 template<>
-struct PgParamWrapper<const std::list<std::string> *> {
+struct ParamWrapper<const std::list<std::string> *> {
     std::string value;
 
-    PgParamWrapper(const std::list<std::string> *list)
+    ParamWrapper(const std::list<std::string> *list)
       :value(list != nullptr
-             ? pg_encode_array(*list)
+             ? EncodeArray(*list)
              : std::string()) {}
 
     static constexpr bool IsBinary() {
@@ -207,10 +209,10 @@ struct PgParamWrapper<const std::list<std::string> *> {
 };
 
 template<typename... Params>
-class PgParamCollector;
+class ParamCollector;
 
 template<>
-class PgParamCollector<> {
+class ParamCollector<> {
 public:
     static constexpr size_t Count() {
         return 0;
@@ -223,11 +225,11 @@ public:
 };
 
 template<typename T>
-class PgParamCollector<T> {
-    PgParamWrapper<T> wrapper;
+class ParamCollector<T> {
+    ParamWrapper<T> wrapper;
 
 public:
-    explicit PgParamCollector(const T &t):wrapper(t) {}
+    explicit ParamCollector(const T &t):wrapper(t) {}
 
     static constexpr size_t Count() {
         return 1;
@@ -252,12 +254,12 @@ public:
 };
 
 template<typename T, typename... Rest>
-class PgParamCollector<T, Rest...> {
-    PgParamCollector<T> first;
-    PgParamCollector<Rest...> rest;
+class ParamCollector<T, Rest...> {
+    ParamCollector<T> first;
+    ParamCollector<Rest...> rest;
 
 public:
-    explicit PgParamCollector(const T &t, Rest... _rest)
+    explicit ParamCollector(const T &t, Rest... _rest)
         :first(t), rest(_rest...) {}
 
     static constexpr size_t Count() {
@@ -286,30 +288,32 @@ public:
 };
 
 template<typename... Params>
-class PgTextParamArray {
-    PgParamCollector<Params...> collector;
+class TextParamArray {
+    ParamCollector<Params...> collector;
 
 public:
     static constexpr size_t count = decltype(collector)::Count();
     const char *values[count];
 
-    explicit PgTextParamArray(Params... params):collector(params...) {
+    explicit TextParamArray(Params... params):collector(params...) {
         collector.Fill(values);
     }
 };
 
 template<typename... Params>
-class PgBinaryParamArray {
-    PgParamCollector<Params...> collector;
+class BinaryParamArray {
+    ParamCollector<Params...> collector;
 
 public:
     static constexpr size_t count = decltype(collector)::Count();
     const char *values[count];
     int lengths[count], formats[count];
 
-    explicit PgBinaryParamArray(Params... params):collector(params...) {
+    explicit BinaryParamArray(Params... params):collector(params...) {
         collector.Fill(values, lengths, formats);
     }
 };
+
+} /* namespace Pg */
 
 #endif

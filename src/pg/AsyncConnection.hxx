@@ -11,7 +11,9 @@
 
 #include <cassert>
 
-class AsyncPgConnectionHandler {
+namespace Pg {
+
+class AsyncConnectionHandler {
 public:
     virtual void OnConnect() = 0;
 
@@ -28,9 +30,9 @@ public:
     virtual void OnError(const char *prefix, const char *error) = 0;
 };
 
-class AsyncPgResultHandler {
+class AsyncResultHandler {
 public:
-    virtual void OnResult(PgResult &&result) = 0;
+    virtual void OnResult(Result &&result) = 0;
     virtual void OnResultEnd() = 0;
     virtual void OnResultError() {
         OnResultEnd();
@@ -42,15 +44,15 @@ public:
  * reconnects automatically and provides an asynchronous notify
  * handler.
  */
-class AsyncPgConnection : public PgConnection {
+class AsyncConnection : public Connection {
     const std::string conninfo;
     const std::string schema;
 
-    AsyncPgConnectionHandler &handler;
+    AsyncConnectionHandler &handler;
 
     enum class State {
          /**
-          * The PgConnection has not been initialized yet.  Call Connect().
+          * The Connection has not been initialized yet.  Call Connect().
           */
         UNINITIALIZED,
 
@@ -72,7 +74,7 @@ class AsyncPgConnection : public PgConnection {
         /**
          * Connection is ready to be used.  As soon as the socket
          * becomes readable, notifications will be received and
-         * forwarded to AsyncPgConnectionHandler::OnNotify().
+         * forwarded to AsyncConnectionHandler::OnNotify().
          */
         READY,
 
@@ -102,18 +104,18 @@ class AsyncPgConnection : public PgConnection {
      */
     TimerEvent reconnect_timer;
 
-    AsyncPgResultHandler *result_handler = nullptr;
+    AsyncResultHandler *result_handler = nullptr;
 
 public:
     /**
      * Construct the object, but do not initiate the connect yet.
      * Call Connect() to do that.
      */
-    AsyncPgConnection(EventLoop &event_loop,
-                      const char *conninfo, const char *schema,
-                      AsyncPgConnectionHandler &handler);
+    AsyncConnection(EventLoop &event_loop,
+                    const char *conninfo, const char *schema,
+                    AsyncConnectionHandler &handler);
 
-    ~AsyncPgConnection() {
+    ~AsyncConnection() {
         Disconnect();
     }
 
@@ -148,12 +150,12 @@ public:
     }
 
     template<typename... Params>
-    void SendQuery(AsyncPgResultHandler &_handler, Params... params) {
+    void SendQuery(AsyncResultHandler &_handler, Params... params) {
         assert(IsIdle());
 
         result_handler = &_handler;
 
-        PgConnection::SendQuery(params...);
+        Connection::SendQuery(params...);
     }
 
     void CheckNotify() {
@@ -182,5 +184,7 @@ private:
     void OnSocketEvent(unsigned events);
     void OnReconnectTimer();
 };
+
+} /* namespace Pg */
 
 #endif

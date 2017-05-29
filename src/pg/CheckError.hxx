@@ -8,18 +8,22 @@
 #include "Result.hxx"
 #include "Error.hxx"
 
+namespace Pg {
+
 /**
- * Check if the #PgResult contains an error state, and throw a
- * #PgError based on this condition.  If the #PgResult did not contain
+ * Check if the #Result contains an error state, and throw a
+ * #Error based on this condition.  If the #Result did not contain
  * an error, it is returned as-is.
  */
-static inline PgResult
-CheckError(PgResult &&result)
+static inline Result
+CheckError(Result &&result)
 {
     if (result.IsError())
-        throw PgError(std::move(result));
+        throw Error(std::move(result));
 
     return std::move(result);
 }
+
+} /* namespace Pg */
 
 #endif

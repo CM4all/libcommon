@@ -4,8 +4,10 @@
 
 #include "Result.hxx"
 
+namespace Pg {
+
 std::string
-PgResult::GetOnlyStringChecked() const
+Result::GetOnlyStringChecked() const
 {
     if (!IsQuerySuccessful() || GetRowCount() == 0)
         return std::string();
@@ -16,3 +18,5 @@ PgResult::GetOnlyStringChecked() const
 
     return value;
 }
+
+} /* namespace Pg */

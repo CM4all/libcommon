@@ -11,13 +11,15 @@
 
 #include <cstddef>
 
-struct PgBinaryValue : ConstBuffer<void> {
-    PgBinaryValue() = default;
+namespace Pg {
 
-    constexpr PgBinaryValue(ConstBuffer<void> _buffer)
+struct BinaryValue : ConstBuffer<void> {
+    BinaryValue() = default;
+
+    constexpr BinaryValue(ConstBuffer<void> _buffer)
         :ConstBuffer<void>(_buffer) {}
 
-    constexpr PgBinaryValue(const void *_value, size_t _size)
+    constexpr BinaryValue(const void *_value, size_t _size)
         :ConstBuffer<void>(_value, _size) {}
 
     gcc_pure
@@ -25,5 +27,7 @@ struct PgBinaryValue : ConstBuffer<void> {
         return size == 1 && data != nullptr && *(const bool *)data;
     }
 };
+
+} /* namespace Pg */
 
 #endif

@@ -10,15 +10,17 @@
 #include <list>
 #include <string>
 
+namespace Pg {
+
 /**
  * Throws std::invalid_argument on syntax error.
  */
 std::list<std::string>
-pg_decode_array(const char *p);
+DecodeArray(const char *p);
 
 template<typename L>
 std::string
-pg_encode_array(const L &src)
+EncodeArray(const L &src)
 {
     if (src.empty())
         return "{}";
@@ -46,5 +48,7 @@ pg_encode_array(const L &src)
     dest.push_back('}');
     return dest;
 }
+
+} /* namespace Pg */
 
 #endif

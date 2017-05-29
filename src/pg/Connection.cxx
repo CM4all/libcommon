@@ -6,8 +6,10 @@
 
 #include <string.h>
 
+namespace Pg {
+
 void
-PgConnection::Connect(const char *conninfo)
+Connection::Connect(const char *conninfo)
 {
     assert(!IsDefined());
 
@@ -20,7 +22,7 @@ PgConnection::Connect(const char *conninfo)
 }
 
 void
-PgConnection::StartConnect(const char *conninfo)
+Connection::StartConnect(const char *conninfo)
 {
     assert(!IsDefined());
 
@@ -33,14 +35,14 @@ PgConnection::StartConnect(const char *conninfo)
 }
 
 bool
-PgConnection::SetSchema(const char *schema)
+Connection::SetSchema(const char *schema)
 {
     std::string sql = "SET SCHEMA '" + Escape(schema) + "'";
     return Execute(sql.c_str()).IsCommandSuccessful();
 }
 
 void
-PgConnection::SendQuery(const char *query)
+Connection::SendQuery(const char *query)
 {
     assert(IsDefined());
     assert(query != nullptr);
@@ -50,7 +52,7 @@ PgConnection::SendQuery(const char *query)
 }
 
 void
-PgConnection::_SendQuery(bool result_binary, const char *query,
+Connection::_SendQuery(bool result_binary, const char *query,
                          size_t n_params, const char *const*values,
                          const int *lengths, const int *formats)
 {
@@ -63,7 +65,7 @@ PgConnection::_SendQuery(bool result_binary, const char *query,
 }
 
 std::string
-PgConnection::Escape(const char *p, size_t length) const
+Connection::Escape(const char *p, size_t length) const
 {
     assert(p != nullptr || length == 0);
 
@@ -76,9 +78,11 @@ PgConnection::Escape(const char *p, size_t length) const
 }
 
 std::string
-PgConnection::Escape(const char *p) const
+Connection::Escape(const char *p) const
 {
     assert(p != nullptr);
 
     return Escape(p, strlen(p));
 }
+
+} /* namespace Pg */

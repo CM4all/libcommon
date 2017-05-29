@@ -16,22 +16,24 @@
 #include <string>
 #include <algorithm>
 
+namespace Pg {
+
 /**
  * A thin C++ wrapper for a PGresult pointer.
  */
-class PgResult {
+class Result {
     PGresult *result;
 
 public:
-    PgResult():result(nullptr) {}
-    explicit PgResult(PGresult *_result):result(_result) {}
+    Result():result(nullptr) {}
+    explicit Result(PGresult *_result):result(_result) {}
 
-    PgResult(const PgResult &other) = delete;
-    PgResult(PgResult &&other):result(other.result) {
+    Result(const Result &other) = delete;
+    Result(Result &&other):result(other.result) {
         other.result = nullptr;
     }
 
-    ~PgResult() {
+    ~Result() {
         if (result != nullptr)
             ::PQclear(result);
     }
@@ -40,8 +42,8 @@ public:
         return result != nullptr;
     }
 
-    PgResult &operator=(const PgResult &other) = delete;
-    PgResult &operator=(PgResult &&other) {
+    Result &operator=(const Result &other) = delete;
+    Result &operator=(Result &&other) {
         std::swap(result, other.result);
         return *this;
     }
@@ -163,10 +165,10 @@ public:
     }
 
     gcc_pure
-    PgBinaryValue GetBinaryValue(unsigned row, unsigned column) const {
+    BinaryValue GetBinaryValue(unsigned row, unsigned column) const {
         assert(IsColumnBinary(column));
 
-        return PgBinaryValue(GetValue(row, column),
+        return BinaryValue(GetValue(row, column),
                              GetValueLength(row, column));
     }
 
@@ -231,12 +233,12 @@ public:
         }
 
         gcc_pure
-        PgBinaryValue GetBinaryValue(unsigned column) const {
+        BinaryValue GetBinaryValue(unsigned column) const {
             assert(result != nullptr);
             assert(row < (unsigned)::PQntuples(result));
             assert(column < (unsigned)::PQnfields(result));
 
-            return PgBinaryValue(GetValue(column), GetValueLength(column));
+            return BinaryValue(GetValue(column), GetValueLength(column));
         }
     };
 
@@ -250,5 +252,7 @@ public:
         return iterator{result, GetRowCount()};
     }
 };
+
+} /* namespace Pg */
 
 #endif
