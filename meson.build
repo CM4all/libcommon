@@ -163,6 +163,7 @@ curl = static_library('curl',
   ])
 
 pg = static_library('pg',
+  'src/pg/Serial.cxx',
   'src/pg/Array.cxx',
   'src/pg/Connection.cxx',
   'src/pg/AsyncConnection.cxx',

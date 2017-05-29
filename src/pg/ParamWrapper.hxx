@@ -5,6 +5,7 @@
 #ifndef PG_PARAM_WRAPPER_HXX
 #define PG_PARAM_WRAPPER_HXX
 
+#include "Serial.hxx"
 #include "BinaryValue.hxx"
 #include "Array.hxx"
 
@@ -31,6 +32,28 @@ struct ParamWrapper {
      * IsBinary() returns true and the value is non-nullptr.
      */
     size_t GetSize() const;
+};
+
+template<>
+struct ParamWrapper<Serial> {
+    char buffer[16];
+
+    ParamWrapper(Serial s) {
+        sprintf(buffer, "%" PRIpgserial, s.get());
+    }
+
+    const char *GetValue() const {
+        return buffer;
+    }
+
+    static constexpr bool IsBinary() {
+        return false;
+    }
+
+    size_t GetSize() const {
+        /* ignored for text columns */
+        return 0;
+    }
 };
 
 template<>
