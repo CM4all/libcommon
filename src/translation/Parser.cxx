@@ -3122,6 +3122,18 @@ TranslateParser::HandleRegularPacket(enum beng_translation_command command,
 
         response.pool = payload;
         return;
+
+    case TRANSLATE_MESSAGE:
+#if TRANSLATION_ENABLE_HTTP
+        if (payload_length > 1024 ||
+            !is_valid_nonempty_string(payload, payload_length))
+            throw std::runtime_error("malformed MESSAGE packet");
+
+        response.message = payload;
+        return;
+#else
+        break;
+#endif
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

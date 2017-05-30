@@ -90,6 +90,8 @@ TranslateResponse::Clear()
     redirect = expand_redirect = nullptr;
     bounce = nullptr;
 
+    message = nullptr;
+
     scheme = nullptr;
     host = nullptr;
     uri = expand_uri = nullptr;
@@ -261,6 +263,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     redirect = alloc.CheckDup(src.redirect);
     expand_redirect = alloc.CheckDup(src.expand_redirect);
     bounce = alloc.CheckDup(src.bounce);
+    message = alloc.CheckDup(src.message);
     scheme = alloc.CheckDup(src.scheme);
     host = alloc.CheckDup(src.host);
     uri = alloc.CheckDup(src.uri);
