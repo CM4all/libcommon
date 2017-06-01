@@ -30,7 +30,7 @@ liblua = dependency('luajit')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
 libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
-libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.15')
+libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.17')
 
 inc = include_directories('src', 'fake')
 

@@ -3134,6 +3134,13 @@ TranslateParser::HandleRegularPacket(enum beng_translation_command command,
 #else
         break;
 #endif
+
+    case TRANSLATE_CANONICAL_HOST:
+        if (!is_valid_nonempty_string(payload, payload_length))
+            throw std::runtime_error("malformed CANONICAL_HOST packet");
+
+        response.canonical_host = payload;
+        return;
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);
