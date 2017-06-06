@@ -94,8 +94,14 @@ struct PreparedChildProcess {
     PreparedChildProcess(const PreparedChildProcess &) = delete;
     PreparedChildProcess &operator=(const PreparedChildProcess &) = delete;
 
+    /**
+     * @return true on success, false if the #args array is full
+     */
     bool InsertWrapper(ConstBuffer<const char *> w);
 
+    /**
+     * @return true on success, false if the #args array is full
+     */
     bool Append(const char *arg) {
         assert(arg != nullptr);
 
@@ -106,6 +112,9 @@ struct PreparedChildProcess {
         return true;
     }
 
+    /**
+     * @return true on success, false if the #env array is full
+     */
     bool PutEnv(const char *p) {
         if (env.size() + 1 >= env.capacity())
             return false;
@@ -114,6 +123,9 @@ struct PreparedChildProcess {
         return true;
     }
 
+    /**
+     * @return true on success, false if the #env array is full
+     */
     bool SetEnv(const char *name, const char *value);
 
     void SetStdin(int fd);
