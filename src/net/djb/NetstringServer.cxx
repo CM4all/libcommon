@@ -18,7 +18,7 @@ static constexpr timeval busy_timeout{5, 0};
 NetstringServer::NetstringServer(EventLoop &event_loop,
                                  UniqueSocketDescriptor &&_fd)
     :fd(std::move(_fd)),
-     event(event_loop, fd.Get(), EV_READ|EV_TIMEOUT|EV_PERSIST,
+     event(event_loop, fd.Get(), EV_READ|EV_PERSIST,
            BIND_THIS_METHOD(OnEvent)),
      input(16 * 1024 * 1024) {
     event.Add(busy_timeout);

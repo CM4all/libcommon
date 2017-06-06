@@ -43,7 +43,7 @@ NetstringClient::Request(int _out_fd, int _in_fd,
     for (const auto &i : data)
         write.Push(i.data, i.size);
 
-    event.Set(out_fd, EV_WRITE|EV_TIMEOUT|EV_PERSIST);
+    event.Set(out_fd, EV_WRITE|EV_PERSIST);
     event.Add(send_timeout);
 }
 
@@ -60,7 +60,7 @@ try {
 
         case MultiWriteBuffer::Result::FINISHED:
             event.Delete();
-            event.Set(in_fd, EV_READ|EV_TIMEOUT|EV_PERSIST);
+            event.Set(in_fd, EV_READ|EV_PERSIST);
             event.Add(recv_timeout);
             break;
         }
