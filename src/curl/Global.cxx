@@ -68,7 +68,7 @@ public:
 
 	void Schedule(unsigned events) {
 		socket_event.Delete();
-		socket_event.Set(fd, events|EV_PERSIST);
+		socket_event.Set(fd, events|SocketEvent::PERSIST);
 		socket_event.Add();
 	}
 
@@ -83,8 +83,8 @@ private:
 	void OnSocketReady(unsigned events);
 
 	static constexpr int LibEventToCurlCSelect(unsigned flags) {
-		return (flags & EV_READ ? CURL_CSELECT_IN : 0) |
-			(flags & EV_WRITE ? CURL_CSELECT_OUT : 0);
+		return (flags & SocketEvent::READ ? CURL_CSELECT_IN : 0) |
+			(flags & SocketEvent::WRITE ? CURL_CSELECT_OUT : 0);
 	}
 
 	gcc_const
@@ -94,13 +94,13 @@ private:
 			return 0;
 
 		case CURL_POLL_IN:
-			return EV_READ;
+			return SocketEvent::READ;
 
 		case CURL_POLL_OUT:
-			return EV_WRITE;
+			return SocketEvent::WRITE;
 
 		case CURL_POLL_INOUT:
-			return EV_READ|EV_WRITE;
+			return SocketEvent::READ|SocketEvent::WRITE;
 		}
 
 		assert(false);

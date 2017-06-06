@@ -14,7 +14,7 @@ SocketWrapper::ReadEventCallback(unsigned events)
 {
     assert(IsValid());
 
-    if (events & EV_TIMEOUT)
+    if (events & SocketEvent::TIMEOUT)
         handler.OnSocketTimeout();
     else
         handler.OnSocketRead();
@@ -25,7 +25,7 @@ SocketWrapper::WriteEventCallback(unsigned events)
 {
     assert(IsValid());
 
-    if (events & EV_TIMEOUT)
+    if (events & SocketEvent::TIMEOUT)
         handler.OnSocketTimeout();
     else
         handler.OnSocketWrite();
@@ -39,8 +39,8 @@ SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type)
     fd = _fd;
     fd_type = _fd_type;
 
-    read_event.Set(fd.Get(), EV_READ|EV_PERSIST);
-    write_event.Set(fd.Get(), EV_WRITE|EV_PERSIST);
+    read_event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
+    write_event.Set(fd.Get(), SocketEvent::WRITE|SocketEvent::PERSIST);
 }
 
 void

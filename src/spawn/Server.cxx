@@ -246,7 +246,7 @@ private:
 SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
                                              int _fd)
     :process(_process), fd(_fd),
-     event(process.GetEventLoop(), fd, EV_READ|EV_PERSIST,
+     event(process.GetEventLoop(), fd, SocketEvent::READ|SocketEvent::PERSIST,
            BIND_THIS_METHOD(ReadEventCallback)) {
     event.Add();
 }

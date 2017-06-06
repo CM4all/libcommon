@@ -27,7 +27,7 @@ SignalEvent::Enable()
     if (fd < 0)
         throw MakeErrno("signalfd() failed");
 
-    event.Set(fd, EV_READ|EV_PERSIST);
+    event.Set(fd, SocketEvent::READ|SocketEvent::PERSIST);
     event.Add();
 
     sigprocmask(SIG_BLOCK, &mask, nullptr);

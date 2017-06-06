@@ -136,12 +136,12 @@ public:
 
     gcc_pure
     bool IsReadPending() const {
-        return read_event.IsPending(EV_READ);
+        return read_event.IsPending(SocketEvent::READ);
     }
 
     gcc_pure
     bool IsWritePending() const {
-        return write_event.IsPending(EV_WRITE);
+        return write_event.IsPending(SocketEvent::WRITE);
     }
 
     ssize_t ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer);

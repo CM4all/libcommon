@@ -28,7 +28,7 @@ SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
                                      const SpawnConfig &_config, int _fd,
                                      bool _verify)
     :config(_config), fd(_fd),
-     read_event(event_loop, fd, EV_READ|EV_PERSIST,
+     read_event(event_loop, fd, SocketEvent::READ|SocketEvent::PERSIST,
                 BIND_THIS_METHOD(OnSocketEvent)),
      verify(_verify)
 {
@@ -55,7 +55,7 @@ SpawnServerClient::ReplaceSocket(int new_fd)
 
     fd = new_fd;
 
-    read_event.Set(fd, EV_READ|EV_PERSIST);
+    read_event.Set(fd, SocketEvent::READ|SocketEvent::PERSIST);
     read_event.Add();
 }
 

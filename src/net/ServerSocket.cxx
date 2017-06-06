@@ -34,7 +34,7 @@ ServerSocket::Listen(UniqueSocketDescriptor &&_fd)
     assert(_fd.IsDefined());
 
     fd = std::move(_fd);
-    event.Set(fd.Get(), EV_READ|EV_PERSIST);
+    event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
     AddEvent();
 }
 

@@ -43,16 +43,16 @@ NetstringClient::Request(int _out_fd, int _in_fd,
     for (const auto &i : data)
         write.Push(i.data, i.size);
 
-    event.Set(out_fd, EV_WRITE|EV_PERSIST);
+    event.Set(out_fd, SocketEvent::WRITE|SocketEvent::PERSIST);
     event.Add(send_timeout);
 }
 
 void
 NetstringClient::OnEvent(unsigned events)
 try {
-    if (events & EV_TIMEOUT) {
+    if (events & SocketEvent::TIMEOUT) {
         throw std::runtime_error("Connect timeout");
-    } else if (events & EV_WRITE) {
+    } else if (events & SocketEvent::WRITE) {
         switch (write.Write(out_fd)) {
         case MultiWriteBuffer::Result::MORE:
             event.Add(&send_timeout);
@@ -60,11 +60,11 @@ try {
 
         case MultiWriteBuffer::Result::FINISHED:
             event.Delete();
-            event.Set(in_fd, EV_READ|EV_PERSIST);
+            event.Set(in_fd, SocketEvent::READ|SocketEvent::PERSIST);
             event.Add(recv_timeout);
             break;
         }
-    } else if (events & EV_READ) {
+    } else if (events & SocketEvent::READ) {
         switch (input.Receive(in_fd)) {
         case NetstringInput::Result::MORE:
             event.Add(&busy_timeout);

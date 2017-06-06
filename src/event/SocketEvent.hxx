@@ -19,6 +19,11 @@ class SocketEvent {
     const Callback callback;
 
 public:
+    static constexpr unsigned READ = EV_READ;
+    static constexpr unsigned WRITE = EV_WRITE;
+    static constexpr unsigned PERSIST = EV_PERSIST;
+    static constexpr unsigned TIMEOUT = EV_TIMEOUT;
+
     SocketEvent(EventLoop &_event_loop, Callback _callback)
         :event_loop(_event_loop), callback(_callback) {}
 

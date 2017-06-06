@@ -50,12 +50,12 @@ AsyncConnection::Poll(PostgresPollingStatusType status)
         break;
 
     case PGRES_POLLING_READING:
-        socket_event.Set(GetSocket(), EV_READ);
+        socket_event.Set(GetSocket(), SocketEvent::READ);
         socket_event.Add();
         break;
 
     case PGRES_POLLING_WRITING:
-        socket_event.Set(GetSocket(), EV_WRITE);
+        socket_event.Set(GetSocket(), SocketEvent::WRITE);
         socket_event.Add();
         break;
 
@@ -69,7 +69,7 @@ AsyncConnection::Poll(PostgresPollingStatusType status)
         }
 
         state = State::READY;
-        socket_event.Set(GetSocket(), EV_READ|EV_PERSIST);
+        socket_event.Set(GetSocket(), SocketEvent::READ|SocketEvent::PERSIST);
         socket_event.Add();
 
         handler.OnConnect();
