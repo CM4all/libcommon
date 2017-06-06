@@ -99,7 +99,7 @@ struct PreparedChildProcess {
     bool Append(const char *arg) {
         assert(arg != nullptr);
 
-        if (args.size() + 1 >= env.capacity())
+        if (args.size() + 1 >= args.capacity())
             return false;
 
         args.push_back(arg);
