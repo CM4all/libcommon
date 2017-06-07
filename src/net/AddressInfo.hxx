@@ -36,9 +36,6 @@
 
 #include <netdb.h>
 
-class AllocatedSocketAddress;
-struct addrinfo;
-
 class AddressInfoList {
 	struct addrinfo *value = nullptr;
 
