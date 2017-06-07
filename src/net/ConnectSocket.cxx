@@ -64,15 +64,12 @@ ConnectSocket::Connect(const SocketAddress address)
     assert(!fd.IsDefined());
 
     try {
-        fd = ::Connect(address);
+        WaitConnected(::Connect(address), connect_timeout);
+        return true;
     } catch (...) {
         handler.OnSocketConnectError(std::current_exception());
         return false;
     }
-
-    event.Set(fd.Get(), SocketEvent::WRITE);
-    event.Add(connect_timeout);
-    return true;
 }
 
 void
