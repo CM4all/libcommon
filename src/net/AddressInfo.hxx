@@ -33,6 +33,7 @@
 #include "SocketAddress.hxx"
 
 #include <algorithm>
+#include <utility>
 
 #include <netdb.h>
 
@@ -43,9 +44,8 @@ public:
 	AddressInfoList() = default;
 	explicit AddressInfoList(struct addrinfo *_value):value(_value) {}
 
-	AddressInfoList(AddressInfoList &&src):value(src.value) {
-		src.value = nullptr;
-	}
+	AddressInfoList(AddressInfoList &&src)
+		:value(std::exchange(src.value, nullptr)) {}
 
 	~AddressInfoList() {
 		freeaddrinfo(value);
