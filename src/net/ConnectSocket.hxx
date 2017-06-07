@@ -13,6 +13,7 @@
 
 class Error;
 class SocketAddress;
+class AddressInfo;
 
 class ConnectSocketHandler {
 public:
@@ -41,6 +42,14 @@ public:
     }
 
     bool Connect(SocketAddress address);
+
+    bool Connect(const AddressInfo &address,
+                 const struct timeval *timeout);
+
+    bool Connect(const AddressInfo &address,
+                 const struct timeval &timeout) {
+        return Connect(address, &timeout);
+    }
 
     /**
      * Wait until the given socket is connected (this method returns

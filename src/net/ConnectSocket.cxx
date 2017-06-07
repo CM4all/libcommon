@@ -5,6 +5,7 @@
 #include "ConnectSocket.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/SocketAddress.hxx"
+#include "AddressInfo.hxx"
 #include "system/Error.hxx"
 
 #include <stdexcept>
@@ -65,6 +66,35 @@ ConnectSocket::Connect(const SocketAddress address)
 
     try {
         WaitConnected(::Connect(address), connect_timeout);
+        return true;
+    } catch (...) {
+        handler.OnSocketConnectError(std::current_exception());
+        return false;
+    }
+}
+
+static UniqueSocketDescriptor
+Connect(const AddressInfo &address)
+{
+    UniqueSocketDescriptor fd;
+    if (!fd.CreateNonBlock(address.GetFamily(), address.GetType(),
+                           address.GetProtocol()))
+        throw MakeErrno("Failed to create socket");
+
+    if (!fd.Connect(address) && errno != EINPROGRESS)
+        throw MakeErrno("Failed to connect");
+
+    return fd;
+}
+
+bool
+ConnectSocket::Connect(const AddressInfo &address,
+                       const struct timeval *timeout)
+{
+    assert(!fd.IsDefined());
+
+    try {
+        WaitConnected(::Connect(address), timeout);
         return true;
     } catch (...) {
         handler.OnSocketConnectError(std::current_exception());
