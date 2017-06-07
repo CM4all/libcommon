@@ -39,22 +39,22 @@
 class AllocatedSocketAddress;
 struct addrinfo;
 
-class AddressInfo {
+class AddressInfoList {
 	struct addrinfo *value = nullptr;
 
 public:
-	AddressInfo() = default;
-	explicit AddressInfo(struct addrinfo *_value):value(_value) {}
+	AddressInfoList() = default;
+	explicit AddressInfoList(struct addrinfo *_value):value(_value) {}
 
-	AddressInfo(AddressInfo &&src):value(src.value) {
+	AddressInfoList(AddressInfoList &&src):value(src.value) {
 		src.value = nullptr;
 	}
 
-	~AddressInfo() {
+	~AddressInfoList() {
 		freeaddrinfo(value);
 	}
 
-	AddressInfo &operator=(AddressInfo &&src) {
+	AddressInfoList &operator=(AddressInfoList &&src) {
 		std::swap(value, src.value);
 		return *this;
 	}

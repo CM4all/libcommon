@@ -6,9 +6,9 @@
 #define NET_RESOLVER_HXX
 
 struct addrinfo;
-class AddressInfo;
+class AddressInfoList;
 
-AddressInfo
+AddressInfoList
 Resolve(const char *host_and_port, int default_port,
         const struct addrinfo *hints);
 

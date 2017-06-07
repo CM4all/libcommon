@@ -9,7 +9,7 @@
 
 #include <stdexcept>
 
-AddressInfo
+AddressInfoList
 Resolve(const char *host_and_port, int default_port,
         const struct addrinfo *hints)
 {
@@ -24,5 +24,5 @@ Resolve(const char *host_and_port, int default_port,
         throw std::runtime_error(msg);
     }
 
-    return AddressInfo(ai);
+    return AddressInfoList(ai);
 }
