@@ -12,7 +12,7 @@
 #include <cassert>
 
 class MultiWriteBuffer {
-    static constexpr size_t MAX_BUFFERS = 8;
+    static constexpr size_t MAX_BUFFERS = 32;
 
     unsigned i = 0, n = 0;
 
