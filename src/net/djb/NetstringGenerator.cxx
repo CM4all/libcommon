@@ -4,9 +4,9 @@
 
 #include "NetstringGenerator.hxx"
 #include "util/ConstBuffer.hxx"
+#include "util/StringView.hxx"
 
 #include <cstddef>
-#include <cstdio>
 
 template<typename L>
 static inline size_t
@@ -21,8 +21,7 @@ GetTotalSize(const L &list)
 void
 NetstringGenerator::operator()(std::list<ConstBuffer<void>> &list, bool comma)
 {
-    list.emplace_front(header_buffer, sprintf(header_buffer, "%zu:",
-                                              GetTotalSize(list)));
+    list.emplace_front(header(GetTotalSize(list)).ToVoid());
 
     if (comma)
         list.emplace_back(",", 1);

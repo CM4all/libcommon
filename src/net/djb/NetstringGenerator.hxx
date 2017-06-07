@@ -5,12 +5,14 @@
 #ifndef NETSTRING_GENERATOR_HXX
 #define NETSTRING_GENERATOR_HXX
 
+#include "NetstringHeader.hxx"
+
 #include <list>
 
 template<typename T> struct ConstBuffer;
 
 class NetstringGenerator {
-    char header_buffer[32];
+    NetstringHeader header;
 
 public:
     /**
