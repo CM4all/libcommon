@@ -91,6 +91,10 @@ public:
 #ifdef HAVE_POSIX
 	using FileDescriptor::SetNonBlocking;
 	using FileDescriptor::SetBlocking;
+	using FileDescriptor::EnableCloseOnExec;
+	using FileDescriptor::DisableCloseOnExec;
+	using FileDescriptor::Duplicate;
+	using FileDescriptor::CheckDuplicate;
 	using FileDescriptor::Close;
 #else
 	/**
