@@ -7,6 +7,7 @@
 
 #include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
+#include "util/Cancellable.hxx"
 
 #include <exception>
 
@@ -23,7 +24,7 @@ public:
 /**
  * A class that connects to a SocketAddress.
  */
-class ConnectSocket {
+class ConnectSocket final : public Cancellable {
     ConnectSocketHandler &handler;
 
     UniqueSocketDescriptor fd;
@@ -39,8 +40,6 @@ public:
         return fd.IsDefined();
     }
 
-    void Cancel();
-
     bool Connect(SocketAddress address);
 
     /**
@@ -55,6 +54,9 @@ public:
                        const struct timeval &timeout) {
         WaitConnected(std::move(_fd), &timeout);
     }
+
+    /* virtual methods from Cancellable */
+    void Cancel() override;
 
 private:
     void OnEvent(unsigned events);
