@@ -28,7 +28,7 @@ public:
  * netstring.
  */
 class NetstringClient final {
-    int out_fd, in_fd;
+    int out_fd = -1, in_fd = -1;
 
     SocketEvent event;
 

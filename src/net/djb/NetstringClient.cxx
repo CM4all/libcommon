@@ -11,8 +11,7 @@ static constexpr timeval busy_timeout{5, 0};
 
 NetstringClient::NetstringClient(EventLoop &event_loop, size_t max_size,
                                  NetstringClientHandler &_handler)
-    :out_fd(-1), in_fd(-1),
-     event(event_loop, BIND_THIS_METHOD(OnEvent)),
+    :event(event_loop, BIND_THIS_METHOD(OnEvent)),
      input(max_size), handler(_handler) {}
 
 NetstringClient::~NetstringClient()
