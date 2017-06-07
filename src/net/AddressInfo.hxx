@@ -37,6 +37,30 @@
 
 #include <netdb.h>
 
+class AddressInfo : addrinfo {
+	/* this class cannot be instantiated, it can only be cast from
+	   a struct addrinfo pointer */
+	AddressInfo() = delete;
+	~AddressInfo() = delete;
+
+public:
+	constexpr int GetFamily() const {
+		return ai_family;
+	}
+
+	constexpr int GetType() const {
+		return ai_socktype;
+	}
+
+	constexpr int GetProtocol() const {
+		return ai_protocol;
+	}
+
+	constexpr operator SocketAddress() const {
+		return {ai_addr, ai_addrlen};
+	}
+};
+
 class AddressInfoList {
 	struct addrinfo *value = nullptr;
 
@@ -60,12 +84,8 @@ public:
 		return value == nullptr;
 	}
 
-	SocketAddress front() const {
-		return {value->ai_addr, value->ai_addrlen};
-	}
-
-	const struct addrinfo *operator->() const {
-		return value;
+	const AddressInfo &front() const {
+		return *(const AddressInfo *)value;
 	}
 
 	class const_iterator {
@@ -88,12 +108,12 @@ public:
 			return *this;
 		}
 
-		SocketAddress operator*() const {
-			return {cursor->ai_addr, cursor->ai_addrlen};
+		constexpr const AddressInfo &operator*() const {
+			return *(const AddressInfo *)cursor;
 		}
 
-		const struct addrinfo *operator->() const {
-			return cursor;
+		constexpr const AddressInfo *operator->() const {
+			return (const AddressInfo *)cursor;
 		}
 	};
 
