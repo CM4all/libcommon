@@ -9,6 +9,7 @@
 
 #include <stdexcept>
 
+#include <assert.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
@@ -31,10 +32,17 @@ ConnectSocket::ConnectSocket(EventLoop &_event_loop,
 
 ConnectSocket::~ConnectSocket()
 {
-    if (fd.IsDefined()) {
-        event.Delete();
-        fd.Close();
-    }
+    if (IsPending())
+        Cancel();
+}
+
+void
+ConnectSocket::Cancel()
+{
+    assert(IsPending());
+
+    event.Delete();
+    fd.Close();
 }
 
 static UniqueSocketDescriptor

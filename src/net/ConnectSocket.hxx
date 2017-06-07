@@ -35,6 +35,12 @@ public:
                            ConnectSocketHandler &_handler);
     ~ConnectSocket();
 
+    bool IsPending() const {
+        return fd.IsDefined();
+    }
+
+    void Cancel();
+
     bool Connect(SocketAddress address);
 
 private:
