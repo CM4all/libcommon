@@ -43,6 +43,19 @@ public:
 
     bool Connect(SocketAddress address);
 
+    /**
+     * Wait until the given socket is connected (this method returns
+     * immediately and invokes the #ConnectSocketHandler on completion
+     * or error).
+     */
+    void WaitConnected(UniqueSocketDescriptor &&_fd,
+                       const struct timeval *timeout);
+
+    void WaitConnected(UniqueSocketDescriptor &&_fd,
+                       const struct timeval &timeout) {
+        WaitConnected(std::move(_fd), &timeout);
+    }
+
 private:
     void OnEvent(unsigned events);
 };

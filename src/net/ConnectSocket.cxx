@@ -76,6 +76,17 @@ ConnectSocket::Connect(const SocketAddress address)
 }
 
 void
+ConnectSocket::WaitConnected(UniqueSocketDescriptor &&_fd,
+                             const struct timeval *timeout)
+{
+    assert(!fd.IsDefined());
+
+    fd = std::move(_fd);
+    event.Set(fd.Get(), SocketEvent::WRITE);
+    event.Add(timeout);
+}
+
+void
 ConnectSocket::OnEvent(unsigned events)
 {
     if (events & SocketEvent::TIMEOUT) {
