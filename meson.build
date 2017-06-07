@@ -145,6 +145,7 @@ net = static_library('net',
   'src/net/djb/NetstringInput.cxx',
   'src/net/djb/NetstringHeader.cxx',
   'src/net/djb/NetstringGenerator.cxx',
+  'src/net/djb/QmqpClient.cxx',
   'src/net/Buffered.cxx',
   include_directories: inc,
   dependencies: [
