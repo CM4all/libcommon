@@ -37,3 +37,34 @@ ResolveConnectSocket(const char *host_and_port, int default_port,
 
     return s;
 }
+
+static UniqueSocketDescriptor
+ResolveConnectSocket(const char *host_and_port, int default_port,
+                     int socktype,
+                     std::chrono::duration<int, std::milli> timeout)
+{
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_flags = AI_ADDRCONFIG;
+    hints.ai_socktype = socktype;
+
+    return ResolveConnectSocket(host_and_port, default_port, hints, timeout);
+}
+
+UniqueSocketDescriptor
+ResolveConnectStreamSocket(const char *host_and_port, int default_port,
+                           std::chrono::duration<int, std::milli> timeout)
+{
+    return ResolveConnectSocket(host_and_port, default_port, SOCK_STREAM,
+                                timeout);
+}
+
+UniqueSocketDescriptor
+ResolveConnectDatagramSocket(const char *host_and_port, int default_port)
+{
+    /* hard-coded zero timeout, because "connecting" a datagram socket
+       cannot block */
+
+    return ResolveConnectSocket(host_and_port, default_port, SOCK_DGRAM,
+                                std::chrono::seconds(0));
+}
