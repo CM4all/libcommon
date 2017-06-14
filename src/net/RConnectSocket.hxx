@@ -8,6 +8,14 @@
 struct addrinfo;
 class UniqueSocketDescriptor;
 
+/**
+ * Resolve a host name and connect to the first resulting address
+ * (synchronously).
+ *
+ * Throws std::runtime_error on error.
+ *
+ * @return the connected socket (non-blocking)
+ */
 UniqueSocketDescriptor
 ResolveConnectSocket(const char *host_and_port, int default_port,
                      const struct addrinfo &hints);
