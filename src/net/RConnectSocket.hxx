@@ -5,6 +5,8 @@
 #ifndef RESOLVE_CONNECT_SOCKET_HXX
 #define RESOLVE_CONNECT_SOCKET_HXX
 
+#include <chrono>
+
 struct addrinfo;
 class UniqueSocketDescriptor;
 
@@ -18,6 +20,7 @@ class UniqueSocketDescriptor;
  */
 UniqueSocketDescriptor
 ResolveConnectSocket(const char *host_and_port, int default_port,
-                     const struct addrinfo &hints);
+                     const struct addrinfo &hints,
+                     std::chrono::duration<int, std::milli> timeout=std::chrono::seconds(60));
 
 #endif

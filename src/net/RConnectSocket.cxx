@@ -10,7 +10,8 @@
 
 UniqueSocketDescriptor
 ResolveConnectSocket(const char *host_and_port, int default_port,
-                     const struct addrinfo &hints)
+                     const struct addrinfo &hints,
+                     std::chrono::duration<int, std::milli> timeout)
 {
     const auto ail = Resolve(host_and_port, default_port, &hints);
     const auto &ai = ail.front();
@@ -23,7 +24,7 @@ ResolveConnectSocket(const char *host_and_port, int default_port,
         if (errno != EINPROGRESS)
             throw MakeErrno("Failed to connect");
 
-        int w = s.WaitWritable(60000);
+        int w = s.WaitWritable(timeout.count());
         if (w < 0)
             throw MakeErrno("Connect wait error");
         else if (w == 0)
