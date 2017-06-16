@@ -5,6 +5,7 @@
 #include "ResourceLimits.hxx"
 #include "system/Error.hxx"
 #include "util/djbhash.h"
+#include "util/CharUtil.hxx"
 
 #include <assert.h>
 #include <stdio.h>
@@ -195,6 +196,10 @@ ResourceLimits::Parse(const char *s)
             */
 
         default:
+            if (IsWhitespaceFast(ch))
+                /* ignore whitespace */
+                continue;
+
             return false;
         }
 
