@@ -6,7 +6,7 @@
 
 #include "Response.hxx"
 #if TRANSLATION_ENABLE_WIDGET
-#include "widget_view.hxx"
+#include "widget/View.hxx"
 #endif
 #if TRANSLATION_ENABLE_CACHE
 #include "uri/uri_base.hxx"

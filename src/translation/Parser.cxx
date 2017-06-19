@@ -11,7 +11,7 @@
 #include "css_processor.hxx"
 #endif
 #if TRANSLATION_ENABLE_WIDGET
-#include "widget_class.hxx"
+#include "widget/Class.hxx"
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 #include "file_address.hxx"
