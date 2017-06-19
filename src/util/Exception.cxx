@@ -40,6 +40,8 @@ AppendNestedMessage(std::string &result, T &&e,
 		result += separator;
 		result += nested.what();
 		AppendNestedMessage(result, nested, fallback, separator);
+	} catch (const std::nested_exception &ne) {
+		AppendNestedMessage(result, ne, fallback, separator);
 	} catch (...) {
 		result += separator;
 		result += fallback;
@@ -63,6 +65,8 @@ GetFullMessage(const std::exception_ptr &ep,
 		std::rethrow_exception(ep);
 	} catch (const std::exception &e) {
 		return GetFullMessage(e, fallback, separator);
+	} catch (const std::nested_exception &ne) {
+		return GetFullMessage(ne.nested_ptr(), fallback, separator);
 	} catch (...) {
 		return fallback;
 	}
