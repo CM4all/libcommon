@@ -29,12 +29,13 @@
 
 #include "Exception.hxx"
 
+template<typename T>
 static void
-AppendNestedMessage(std::string &result, const std::exception &e,
+AppendNestedMessage(std::string &result, T &&e,
 		    const char *fallback, const char *separator)
 {
 	try {
-		std::rethrow_if_nested(e);
+		std::rethrow_if_nested(std::forward<T>(e));
 	} catch (const std::exception &nested) {
 		result += separator;
 		result += nested.what();
