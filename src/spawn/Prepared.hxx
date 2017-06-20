@@ -18,6 +18,7 @@
 #include <assert.h>
 
 class UniqueFileDescriptor;
+class UniqueSocketDescriptor;
 template<typename T> struct ConstBuffer;
 
 struct PreparedChildProcess {
@@ -137,6 +138,11 @@ struct PreparedChildProcess {
     void SetStdout(UniqueFileDescriptor &&fd);
     void SetStderr(UniqueFileDescriptor &&fd);
     void SetControl(UniqueFileDescriptor &&fd);
+
+    void SetStdin(UniqueSocketDescriptor &&fd);
+    void SetStdout(UniqueSocketDescriptor &&fd);
+    void SetStderr(UniqueSocketDescriptor &&fd);
+    void SetControl(UniqueSocketDescriptor &&fd);
 
     /**
      * Finish this object and return the executable path.

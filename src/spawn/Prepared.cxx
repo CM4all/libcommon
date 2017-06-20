@@ -4,6 +4,7 @@
 
 #include "Prepared.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "util/ConstBuffer.hxx"
 
 #include <string.h>
@@ -109,6 +110,30 @@ PreparedChildProcess::SetStderr(UniqueFileDescriptor &&fd)
 
 void
 PreparedChildProcess::SetControl(UniqueFileDescriptor &&fd)
+{
+    SetControl(fd.Steal());
+}
+
+void
+PreparedChildProcess::SetStdin(UniqueSocketDescriptor &&fd)
+{
+    SetStdin(fd.Steal());
+}
+
+void
+PreparedChildProcess::SetStdout(UniqueSocketDescriptor &&fd)
+{
+    SetStdout(fd.Steal());
+}
+
+void
+PreparedChildProcess::SetStderr(UniqueSocketDescriptor &&fd)
+{
+    SetStderr(fd.Steal());
+}
+
+void
+PreparedChildProcess::SetControl(UniqueSocketDescriptor &&fd)
 {
     SetControl(fd.Steal());
 }
