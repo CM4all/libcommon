@@ -43,6 +43,11 @@ struct NamespaceOptions {
      */
     bool mount_proc = false;
 
+    /**
+     * Mount /dev/pts?
+     */
+    bool mount_pts = false;
+
     const char *pivot_root = nullptr;
 
     const char *home = nullptr;
