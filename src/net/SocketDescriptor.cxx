@@ -222,6 +222,12 @@ SocketDescriptor::AutoBind()
 
 #endif
 
+bool
+SocketDescriptor::Listen(int backlog)
+{
+	return listen(Get(), backlog) == 0;
+}
+
 StaticSocketAddress
 SocketDescriptor::GetLocalAddress() const
 {

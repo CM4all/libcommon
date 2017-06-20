@@ -85,7 +85,7 @@ MakeListener(const SocketAddress address,
         break;
     }
 
-    if (listen(fd.Get(), 64) < 0)
+    if (!fd.Listen(64))
         throw MakeErrno("Failed to listen");
 
     return fd;

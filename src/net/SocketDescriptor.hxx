@@ -157,6 +157,8 @@ public:
 	bool AutoBind();
 #endif
 
+	bool Listen(int backlog);
+
 	SocketDescriptor Accept();
 	SocketDescriptor AcceptNonBlock(StaticSocketAddress &address) const;
 
