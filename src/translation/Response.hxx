@@ -350,6 +350,10 @@ struct TranslateResponse {
         const char *path;
     } validate_mtime;
 
+    TranslateResponse() = default;
+    TranslateResponse(TranslateResponse &&) = default;
+    TranslateResponse &operator=(TranslateResponse &&) = default;
+
     void Clear();
 
     bool Wants(uint16_t cmd) const {
