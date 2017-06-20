@@ -60,6 +60,8 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
+    const char *shell;
+
     const char *execute;
 
     /**

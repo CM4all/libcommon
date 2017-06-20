@@ -3141,6 +3141,20 @@ TranslateParser::HandleRegularPacket(enum beng_translation_command command,
 
         response.canonical_host = payload;
         return;
+
+    case TRANSLATE_SHELL:
+#if TRANSLATION_ENABLE_EXECUTE
+        if (!is_valid_absolute_path(payload, payload_length))
+            throw std::runtime_error("malformed SHELL packet");
+
+        if (response.shell != nullptr)
+            throw std::runtime_error("duplicate SHELL packet");
+
+        response.shell = payload;
+        return;
+#else
+        break;
+#endif
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

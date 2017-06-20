@@ -37,6 +37,7 @@ TranslateResponse::Clear()
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
+    shell = nullptr;
     execute = nullptr;
     child_options = ChildOptions();
 #endif
@@ -241,6 +242,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
+    shell = alloc.CheckDup(src.shell);
     execute = alloc.CheckDup(src.execute);
     args = ExpandableStringList(alloc, src.args);
     child_options = ChildOptions(alloc, src.child_options);
