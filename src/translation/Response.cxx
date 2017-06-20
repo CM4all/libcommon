@@ -36,6 +36,8 @@ TranslateResponse::Clear()
     status = 0;
 #endif
 
+    token = nullptr;
+
 #if TRANSLATION_ENABLE_EXECUTE
     shell = nullptr;
     execute = nullptr;
@@ -240,6 +242,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #if TRANSLATION_ENABLE_HTTP
     status = src.status;
 #endif
+
+    token = alloc.CheckDup(src.token);
 
 #if TRANSLATION_ENABLE_EXECUTE
     shell = alloc.CheckDup(src.shell);

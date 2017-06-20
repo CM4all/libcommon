@@ -3155,6 +3155,12 @@ TranslateParser::HandleRegularPacket(enum beng_translation_command command,
 #else
         break;
 #endif
+
+    case TRANSLATE_TOKEN:
+        if (has_null_byte(payload, payload_length))
+            throw std::runtime_error("malformed TOKEN packet");
+        response.token = payload;
+        return;
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

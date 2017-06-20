@@ -59,6 +59,8 @@ struct TranslateResponse {
     int status;
 #endif
 
+    const char *token;
+
 #if TRANSLATION_ENABLE_EXECUTE
     const char *shell;
 
