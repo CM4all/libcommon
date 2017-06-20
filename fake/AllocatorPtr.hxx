@@ -47,6 +47,10 @@ public:
         return p;
     }
 
+    const char *CheckDup(const char *src) {
+        return src != nullptr ? Dup(src) : nullptr;
+    }
+
     template<typename... Args>
     char *Concat(Args&&... args) {
         const size_t length = ConcatLength(args...);
@@ -111,7 +115,7 @@ public:
     }
 
     const char *CheckDup(const char *src) {
-        return src != nullptr ? allocator.Dup(src) : nullptr;
+        return allocator.CheckDup(src);
     }
 
     template<typename... Args>
