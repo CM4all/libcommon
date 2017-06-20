@@ -168,7 +168,7 @@ NamespaceOptions::Setup(const SpawnConfig &config,
     }
 
     if (mount_proc &&
-        mount("none", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV|MS_RDONLY,
+        mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV|MS_RDONLY,
               nullptr) < 0)
         throw MakeErrno("mount('/proc') failed");
 
