@@ -1,18 +1,16 @@
 #include "../../src/http/List.hxx"
 
-#include <assert.h>
+#include <gtest/gtest.h>
 
-int
-main(int, char **)
+TEST(HttpListTest, Contains)
 {
-    assert(http_list_contains("foo", "foo"));
-    assert(!http_list_contains("foo", "bar"));
-    assert(http_list_contains("foo,bar", "bar"));
-    assert(http_list_contains("bar,foo", "bar"));
-    assert(!http_list_contains("bar,foo", "bart"));
-    assert(!http_list_contains("foo,bar", "bart"));
-    assert(http_list_contains("bar,foo", "\"bar\""));
-    assert(http_list_contains("\"bar\",\"foo\"", "\"bar\""));
-    assert(http_list_contains("\"bar\",\"foo\"", "bar"));
-    return 0;
+    ASSERT_TRUE(http_list_contains("foo", "foo"));
+    ASSERT_TRUE(!http_list_contains("foo", "bar"));
+    ASSERT_TRUE(http_list_contains("foo,bar", "bar"));
+    ASSERT_TRUE(http_list_contains("bar,foo", "bar"));
+    ASSERT_TRUE(!http_list_contains("bar,foo", "bart"));
+    ASSERT_TRUE(!http_list_contains("foo,bar", "bart"));
+    ASSERT_TRUE(http_list_contains("bar,foo", "\"bar\""));
+    ASSERT_TRUE(http_list_contains("\"bar\",\"foo\"", "\"bar\""));
+    ASSERT_TRUE(http_list_contains("\"bar\",\"foo\"", "bar"));
 }

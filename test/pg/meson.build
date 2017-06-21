@@ -1,7 +1,4 @@
-test('TestDecodeArray', executable('TestDecodeArray',
+test('TestArray', executable('TestArray',
   'TestDecodeArray.cxx',
-  dependencies: [pg_dep]))
-
-test('TestEncodeArray', executable('TestEncodeArray',
   'TestEncodeArray.cxx',
-  dependencies: [pg_dep]))
+  dependencies: [gtest, pg_dep]))

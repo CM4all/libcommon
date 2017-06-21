@@ -32,6 +32,19 @@ libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
 libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
 libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.22')
 
+gtest = declare_dependency(
+  dependencies: [dependency('gtest', main: true)],
+  compile_args: [
+    '-Wno-undef',
+    '-Wno-suggest-attribute=format',
+    '-Wno-suggest-attribute=noreturn',
+    '-Wno-missing-declarations',
+
+    # needed on Jessie for gtest's IsNullLiteralHelper
+    '-Wno-conversion-null',
+  ],
+)
+
 inc = include_directories('src', 'fake')
 
 util = static_library('util',
