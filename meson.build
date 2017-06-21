@@ -19,7 +19,7 @@ add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
   '-Werror',
   language: 'cpp')
 
-boost = dependency('boost', version: '>= 1.54')
+boost = dependency('boost', modules: ['system', 'filesystem'], version: '>= 1.54')
 libevent = dependency('libevent', version: '>= 2.0.19')
 libcurl = dependency('libcurl', version: '>= 7.38')
 libpq = dependency('libpq', version: '>= 8.4')
