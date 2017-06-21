@@ -113,6 +113,8 @@ io = static_library('io',
   'src/io/WriteBuffer.cxx',
   'src/io/MultiWriteBuffer.cxx',
   'src/io/FileWriter.cxx',
+  'src/io/LineParser.cxx',
+  'src/io/ConfigParser.cxx',
   include_directories: inc,
   dependencies: [
     libinline,
