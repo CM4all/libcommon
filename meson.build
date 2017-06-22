@@ -112,6 +112,7 @@ event = static_library('event',
   'src/event/DeferEvent.cxx',
   'src/event/SignalEvent.cxx',
   'src/event/SocketWrapper.cxx',
+  'src/event/PipeLineReader.cxx',
   include_directories: inc,
   dependencies: [
     libinline,
