@@ -185,12 +185,12 @@ LineParser::NextPositiveInteger()
 {
     const char *string = NextValue();
     if (string == nullptr)
-        return 0;
+        throw Error("Positive integer expected");
 
     char *endptr;
     unsigned long l = strtoul(string, &endptr, 10);
     if (endptr == string || *endptr != 0)
-        return 0;
+        throw Error("Positive integer expected");
 
     return (unsigned)l;
 }
