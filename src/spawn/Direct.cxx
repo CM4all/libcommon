@@ -24,6 +24,7 @@
 #include <sys/prctl.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #ifndef PR_SET_NO_NEW_PRIVS
 #define PR_SET_NO_NEW_PRIVS 38
@@ -52,11 +53,41 @@ DisconnectTty()
     }
 }
 
+static void
+UnignoreSignals()
+{
+    /* restore all signals which were set to SIG_IGN by
+       RunSpawnServer2() and others */
+    static constexpr int signals[] = {
+        SIGHUP,
+        SIGINT, SIGQUIT,
+        SIGPIPE,
+        SIGTERM,
+        SIGUSR1, SIGUSR2,
+        SIGCHLD,
+        SIGTRAP,
+    };
+
+    for (auto i : signals)
+        signal(i, SIG_DFL);
+}
+
+static void
+UnblockSignals()
+{
+    sigset_t mask;
+    sigfillset(&mask);
+    sigprocmask(SIG_UNBLOCK, &mask, nullptr);
+}
+
 gcc_noreturn
 static void
 Exec(const char *path, PreparedChildProcess &&p,
      const SpawnConfig &config, const CgroupState &cgroup_state)
 try {
+    UnignoreSignals();
+    UnblockSignals();
+
     p.cgroup.Apply(cgroup_state);
     p.refence.Apply();
 
