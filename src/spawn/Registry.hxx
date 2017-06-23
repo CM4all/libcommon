@@ -99,6 +99,10 @@ public:
         return event_loop;
     }
 
+    void Disable() {
+        sigchld_event.Disable();
+    }
+
     bool IsEmpty() const {
         return children.empty();
     }
