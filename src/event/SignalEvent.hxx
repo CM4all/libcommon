@@ -11,6 +11,14 @@
 #include <assert.h>
 #include <signal.h>
 
+/**
+ * Listen for signals delivered to this process, and then invoke a
+ * callback.
+ *
+ * After constructing an instance, call Add() to add signals to listen
+ * on.  When done, call Enable().  After that, Add() must not be
+ * called again.
+ */
 class SignalEvent {
     int fd = -1;
 
