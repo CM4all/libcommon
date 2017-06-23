@@ -16,8 +16,10 @@ SignalEvent::SignalEvent(EventLoop &loop, Callback _callback)
 
 SignalEvent::~SignalEvent()
 {
-    if (fd >= 0)
+    if (fd >= 0) {
+        Disable();
         close(fd);
+    }
 }
 
 void

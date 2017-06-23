@@ -18,11 +18,6 @@ class ShutdownListener {
 public:
     ShutdownListener(EventLoop &loop, Callback _callback);
 
-    ~ShutdownListener() {
-        if (event.IsDefined())
-            Disable();
-    }
-
     ShutdownListener(const ShutdownListener &) = delete;
     ShutdownListener &operator=(const ShutdownListener &) = delete;
 
