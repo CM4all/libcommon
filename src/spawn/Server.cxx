@@ -496,6 +496,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
             Read(payload, p.uid_gid);
             break;
 
+        case SpawnExecCommand::IOPRIO_IDLE:
+            p.ioprio_idle = true;
+            break;
+
         case SpawnExecCommand::FORBID_USER_NS:
             p.forbid_user_ns = true;
             break;

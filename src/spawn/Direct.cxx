@@ -8,6 +8,7 @@
 #include "SeccompFilter.hxx"
 #include "SyscallFilter.hxx"
 #include "io/FileDescriptor.hxx"
+#include "system/IOPrio.hxx"
 #include "util/PrintException.hxx"
 
 #include <inline/compiler.h>
@@ -111,6 +112,9 @@ try {
         fprintf(stderr, "setpriority() failed: %s\n", strerror(errno));
         _exit(EXIT_FAILURE);
     }
+
+    if (p.ioprio_idle)
+        ioprio_set_idle();
 
     if (!p.uid_gid.IsEmpty())
         p.uid_gid.Apply();

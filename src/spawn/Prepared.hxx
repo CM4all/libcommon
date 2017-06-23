@@ -74,6 +74,13 @@ struct PreparedChildProcess {
      */
     const char *chdir = nullptr;
 
+    /**
+     * Select the "idle" I/O scheduling class.
+     *
+     * @see ioprio_set(2)
+     */
+    bool ioprio_idle = false;
+
     bool forbid_user_ns = false;
 
     bool no_new_privs = false;

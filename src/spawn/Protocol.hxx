@@ -41,6 +41,7 @@ enum class SpawnExecCommand : uint8_t {
     CGROUP,
     CGROUP_SET,
     PRIORITY,
+    IOPRIO_IDLE,
     CHROOT,
     CHDIR,
     HOOK_INFO,
