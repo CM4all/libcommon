@@ -75,6 +75,14 @@ struct PreparedChildProcess {
     const char *chdir = nullptr;
 
     /**
+     * Select the "idle" CPU scheduling policy.  With this policy, the
+     * "priority" value is ignored.
+     *
+     * @see sched(7)
+     */
+    bool sched_idle = false;
+
+    /**
      * Select the "idle" I/O scheduling class.
      *
      * @see ioprio_set(2)

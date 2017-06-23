@@ -107,6 +107,11 @@ try {
         _exit(EXIT_FAILURE);
     }
 
+    if (p.sched_idle) {
+        static struct sched_param sched_param;
+        sched_setscheduler(0, SCHED_IDLE, &sched_param);
+    }
+
     if (p.priority != 0 &&
         setpriority(PRIO_PROCESS, getpid(), p.priority) < 0) {
         fprintf(stderr, "setpriority() failed: %s\n", strerror(errno));

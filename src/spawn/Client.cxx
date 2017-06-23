@@ -248,6 +248,9 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
     s.WriteOptionalString(SpawnExecCommand::CHROOT, p.chroot);
     s.WriteOptionalString(SpawnExecCommand::CHDIR, p.chdir);
 
+    if (p.sched_idle)
+        s.Write(SpawnExecCommand::SCHED_IDLE_);
+
     if (p.ioprio_idle)
         s.Write(SpawnExecCommand::IOPRIO_IDLE);
 
