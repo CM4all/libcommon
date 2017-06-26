@@ -7,6 +7,7 @@
 #include "Config.hxx"
 #include "SeccompFilter.hxx"
 #include "SyscallFilter.hxx"
+#include "Init.hxx"
 #include "io/FileDescriptor.hxx"
 #include "system/IOPrio.hxx"
 #include "util/PrintException.hxx"
@@ -138,6 +139,16 @@ try {
             stdout_fd = journal_fd;
         if (stderr_fd < 0)
             stderr_fd = journal_fd;
+    }
+
+    if (p.ns.enable_pid) {
+        setsid();
+
+        const auto pid = SpawnInitFork();
+        assert(pid >= 0);
+
+        if (pid > 0)
+            _exit(SpawnInit(pid));
     }
 
     constexpr int CONTROL_FILENO = 3;
