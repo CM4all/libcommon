@@ -19,7 +19,7 @@
 #include "lhttp_address.hxx"
 #include "http_address.hxx"
 #include "cgi_address.hxx"
-#include "nfs_address.hxx"
+#include "nfs/Address.hxx"
 #endif
 #include "spawn/ChildOptions.hxx"
 #include "spawn/mount_list.hxx"
