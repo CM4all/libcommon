@@ -7,7 +7,7 @@
 #include "Builder.hxx"
 #include "Parser.hxx"
 #include "Prepared.hxx"
-#include "mount_list.hxx"
+#include "MountList.hxx"
 #include "ExitListener.hxx"
 #include "system/Error.hxx"
 #include "util/RuntimeError.hxx"

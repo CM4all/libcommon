@@ -2,7 +2,7 @@
  * author: Max Kellermann <mk@cm4all.com>
  */
 
-#include "mount_list.hxx"
+#include "MountList.hxx"
 #include "system/BindMount.hxx"
 #include "AllocatorPtr.hxx"
 

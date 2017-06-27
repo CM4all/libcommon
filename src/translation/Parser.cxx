@@ -22,7 +22,7 @@
 #include "nfs/Address.hxx"
 #endif
 #include "spawn/ChildOptions.hxx"
-#include "spawn/mount_list.hxx"
+#include "spawn/MountList.hxx"
 #include "spawn/ResourceLimits.hxx"
 #if TRANSLATION_ENABLE_JAILCGI
 #include "spawn/JailParams.hxx"

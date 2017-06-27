@@ -4,7 +4,7 @@
 
 #include "NamespaceOptions.hxx"
 #include "Config.hxx"
-#include "mount_list.hxx"
+#include "MountList.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/pivot_root.h"
 #include "system/BindMount.hxx"

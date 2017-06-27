@@ -9,7 +9,7 @@
 #include "Builder.hxx"
 #include "Prepared.hxx"
 #include "Hook.hxx"
-#include "mount_list.hxx"
+#include "MountList.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
 #include "ExitListener.hxx"

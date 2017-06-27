@@ -5,7 +5,6 @@
 #include "CgroupOptions.hxx"
 #include "CgroupState.hxx"
 #include "Config.hxx"
-#include "mount_list.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
 #include "io/WriteFile.hxx"
