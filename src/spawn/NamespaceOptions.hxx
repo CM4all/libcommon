@@ -48,6 +48,14 @@ struct NamespaceOptions {
      */
     bool mount_pts = false;
 
+    /**
+     * Bind-mount the old /dev/pts?
+     *
+     * Note that #MountList cannot be used here because it enforces
+     * MS_NODEV.
+     */
+    bool bind_mount_pts = false;
+
     const char *pivot_root = nullptr;
 
     const char *home = nullptr;

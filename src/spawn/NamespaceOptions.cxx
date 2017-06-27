@@ -38,6 +38,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
      enable_mount(src.enable_mount),
      mount_proc(src.mount_proc),
      mount_pts(src.mount_pts),
+     bind_mount_pts(src.bind_mount_pts),
      pivot_root(alloc.CheckDup(src.pivot_root)),
      home(alloc.CheckDup(src.home)),
 #if TRANSLATION_ENABLE_EXPAND
@@ -173,6 +174,9 @@ NamespaceOptions::Setup(const SpawnConfig &config,
               nullptr) < 0)
         throw MakeErrno("mount('/proc') failed");
 
+    if (bind_mount_pts)
+        BindMount("/mnt/dev/pts", "/dev/pts", MS_NOSUID|MS_NOEXEC);
+
     if (mount_pts &&
         mount("devpts", "/dev/pts", "devpts", MS_NOEXEC|MS_NOSUID,
               nullptr) < 0)
@@ -258,6 +262,9 @@ NamespaceOptions::MakeId(char *p) const
 
         if (mount_pts)
             p = (char *)mempcpy(p, ";pts", 4);
+
+        if (bind_mount_pts)
+            p = (char *)mempcpy(p, ";bpts", 4);
 
         if (mount_home != nullptr) {
             p = (char *)mempcpy(p, ";h:", 3);
