@@ -5,6 +5,7 @@
 #include "Local.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
+#include "Prepared.hxx"
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
 
@@ -15,6 +16,9 @@ LocalSpawnService::SpawnChildProcess(const char *name,
                                      PreparedChildProcess &&params,
                                      ExitListener *listener)
 {
+    if (params.uid_gid.IsEmpty())
+        params.uid_gid = config.default_uid_gid;
+
     pid_t pid = ::SpawnChildProcess(std::move(params), config, CgroupState());
     if (pid < 0)
         throw MakeErrno("clone() failed");

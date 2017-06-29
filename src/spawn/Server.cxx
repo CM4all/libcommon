@@ -331,10 +331,14 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
         }
     }
 
-    if (p.uid_gid.IsEmpty() && config.default_uid_gid.IsEmpty()) {
-        daemon_log(1, "No uid/gid specified\n");
-        SendExit(id, W_EXITCODE(0xff, 0));
-        return;
+    if (p.uid_gid.IsEmpty()) {
+        if (config.default_uid_gid.IsEmpty()) {
+            daemon_log(1, "No uid/gid specified\n");
+            SendExit(id, W_EXITCODE(0xff, 0));
+            return;
+        }
+
+        p.uid_gid = config.default_uid_gid;
     }
 
     pid_t pid;

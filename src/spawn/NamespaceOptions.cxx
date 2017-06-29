@@ -127,16 +127,12 @@ deny_setgroups()
 
 void
 NamespaceOptions::Setup(const SpawnConfig &config,
-                        const UidGid &_uid_gid) const
+                        const UidGid &uid_gid) const
 {
     /* set up UID/GID mapping in the old /proc */
     if (enable_user && !config.ignore_userns) {
         // TODO: rewrite the namespace_superuser workaround
         deny_setgroups();
-
-        const auto &uid_gid = !_uid_gid.IsEmpty()
-            ? _uid_gid
-            : config.default_uid_gid;
 
         if (uid_gid.gid != 0)
             setup_gid_map(uid_gid.gid);

@@ -124,8 +124,6 @@ try {
 
     if (!p.uid_gid.IsEmpty())
         p.uid_gid.Apply();
-    else if (config.ignore_userns)
-        config.default_uid_gid.Apply();
 
     if (p.no_new_privs)
         prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
