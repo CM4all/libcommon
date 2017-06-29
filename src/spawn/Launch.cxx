@@ -36,7 +36,7 @@ struct LaunchSpawnServerContext {
      */
     FileDescriptor read_pipe, write_pipe;
 
-    bool pid_namespace = true;
+    bool pid_namespace;
 };
 
 static int
@@ -124,7 +124,8 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook, int fd,
         pid = clone(RunSpawnServer2, stack + sizeof(stack),
                     CLONE_IO | SIGCHLD,
                     &ctx);
-    }
+    } else
+        ctx.pid_namespace = true;
 
     if (pid < 0)
         throw MakeErrno("clone() failed");
