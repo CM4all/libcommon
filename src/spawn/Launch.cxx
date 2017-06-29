@@ -8,6 +8,7 @@
 #include "CgroupState.hxx"
 #include "Server.hxx"
 #include "system/Error.hxx"
+#include "system/ProcessName.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
 
@@ -56,8 +57,7 @@ RunSpawnServer2(void *p)
         real_pid = getpid();
     ctx.read_pipe.Close();
 
-    const char *name = "spawn";
-    prctl(PR_SET_NAME, (unsigned long)name, 0, 0, 0);
+    SetProcessName("spawn");
 
     if (ctx.pid_namespace) {
         /* if the spawner runs in its own PID namespace, we need to
