@@ -106,7 +106,7 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook, int fd,
         throw MakeErrno("pipe() failed");
 
     LaunchSpawnServerContext ctx{config, hook, fd, std::move(post_clone),
-            read_pipe.ToFileDescriptor(), write_pipe.ToFileDescriptor()};
+            read_pipe.ToFileDescriptor(), write_pipe.ToFileDescriptor(), true};
 
     char stack[32768];
 
@@ -124,8 +124,7 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook, int fd,
         pid = clone(RunSpawnServer2, stack + sizeof(stack),
                     CLONE_IO | SIGCHLD,
                     &ctx);
-    } else
-        ctx.pid_namespace = true;
+    }
 
     if (pid < 0)
         throw MakeErrno("clone() failed");
