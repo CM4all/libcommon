@@ -54,9 +54,33 @@ UidGid::MakeId(char *p) const
     return p;
 }
 
+static bool
+IsUid(uid_t uid)
+{
+    uid_t ruid, euid, suid;
+    return getresuid(&ruid, &euid, &suid) == 0 &&
+        uid == ruid && uid == euid && uid == suid;
+}
+
+static bool
+IsGid(gid_t gid)
+{
+    gid_t rgid, egid, sgid;
+    return getresgid(&rgid, &egid, &sgid) == 0 &&
+        gid == rgid && gid == egid && gid == sgid;
+}
+
 void
 UidGid::Apply() const
 {
+    if ((uid == 0 || IsUid(uid)) &&
+        (gid == 0 || IsGid(gid)))
+        /* skip if we're already the configured (unprivileged)
+           uid/gid; also don't try setgroups(), because that will fail
+           anyway if we're unprivileged; unprivileged operation is
+           only for debugging anyway, so that's ok */
+        return;
+
     if (gid != 0 && setregid(gid, gid) < 0)
         throw FormatErrno("setgid(%d) failed", int(gid));
 
