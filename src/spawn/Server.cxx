@@ -19,6 +19,7 @@
 #include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"
 #include "util/PrintException.hxx"
+#include "util/Exception.hxx"
 
 #include <daemon/log.h>
 
@@ -336,10 +337,14 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
         return;
     }
 
-    pid_t pid = SpawnChildProcess(std::move(p), config,
-                                  process.GetCgroupState());
-    if (pid < 0) {
-        daemon_log(1, "Failed to spawn child process: %s\n", strerror(-pid));
+    pid_t pid;
+
+    try {
+        pid = SpawnChildProcess(std::move(p), config,
+                                process.GetCgroupState());
+    } catch (...) {
+        daemon_log(1, "Failed to spawn child process: %s\n",
+                   GetFullMessage(std::current_exception()).c_str());
         SendExit(id, W_EXITCODE(0xff, 0));
         return;
     }

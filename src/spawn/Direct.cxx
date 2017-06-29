@@ -236,7 +236,7 @@ SpawnChildProcess(PreparedChildProcess &&params, const SpawnConfig &config,
     char stack[8192];
     long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags, &ctx);
     if (pid < 0)
-        pid = -errno;
+        throw MakeErrno("clone() failed");
 
     return pid;
 }

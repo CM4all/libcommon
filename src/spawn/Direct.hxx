@@ -12,7 +12,9 @@ struct SpawnConfig;
 struct CgroupState;
 
 /**
- * @return the process id, or a negative errno value
+ * Throws exception on error.
+ *
+ * @return the process id
  */
 pid_t
 SpawnChildProcess(PreparedChildProcess &&params, const SpawnConfig &config,
