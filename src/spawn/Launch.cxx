@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <sys/prctl.h>
 #include <sys/signal.h>
+#include <sys/mount.h>
 
 struct LaunchSpawnServerContext {
     const SpawnConfig &config;
@@ -34,6 +35,8 @@ struct LaunchSpawnServerContext {
      * send it to systemd.
      */
     FileDescriptor read_pipe, write_pipe;
+
+    bool pid_namespace = true;
 };
 
 static int
@@ -55,6 +58,17 @@ RunSpawnServer2(void *p)
 
     const char *name = "spawn";
     prctl(PR_SET_NAME, (unsigned long)name, 0, 0, 0);
+
+    if (ctx.pid_namespace) {
+        /* if the spawner runs in its own PID namespace, we need to
+           mount a new /proc for that namespace; first make the
+           existing /proc a "slave" mount (to avoid propagating the
+           new /proc into the parent namespace), and mount the new
+           /proc */
+        mount(nullptr, "/", nullptr, MS_SLAVE|MS_REC, nullptr);
+        umount2("/proc", MNT_DETACH);
+        mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV, nullptr);
+    }
 
     /* ignore all signals which may stop us; shut down only when all
        sockets are closed */
@@ -95,13 +109,18 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook, int fd,
             read_pipe.ToFileDescriptor(), write_pipe.ToFileDescriptor()};
 
     char stack[32768];
+
+    /* try to run the spawner in a new PID namespace; to be able to
+       mount a new /proc for this namespace, we need a mount namespace
+       (CLONE_NEWNS) as well */
     int pid = clone(RunSpawnServer2, stack + sizeof(stack),
-                    CLONE_NEWPID | CLONE_IO | SIGCHLD,
+                    CLONE_NEWPID | CLONE_NEWNS | CLONE_IO | SIGCHLD,
                     &ctx);
     if (pid < 0) {
         /* try again without CLONE_NEWPID */
         fprintf(stderr, "Failed to create spawner PID namespace (%s), trying without\n",
                 strerror(errno));
+        ctx.pid_namespace = false;
         pid = clone(RunSpawnServer2, stack + sizeof(stack),
                     CLONE_IO | SIGCHLD,
                     &ctx);
