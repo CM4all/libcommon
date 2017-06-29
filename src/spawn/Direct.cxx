@@ -89,6 +89,20 @@ try {
     UnignoreSignals();
     UnblockSignals();
 
+    int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
+    if (stdout_fd < 0 || stderr_fd < 0) {
+        /* if no log destination was specified, log to the systemd
+           journal */
+        /* note: this must be done before NamespaceOptions::Setup(),
+           because inside the new root, we don't have access to
+           /run/systemd/journal/stdout */
+        int journal_fd = sd_journal_stream_fd(p.args.front(), LOG_INFO, true);
+        if (stdout_fd < 0)
+            stdout_fd = journal_fd;
+        if (stderr_fd < 0)
+            stderr_fd = journal_fd;
+    }
+
     p.cgroup.Apply(cgroup_state);
     p.refence.Apply();
 
@@ -126,17 +140,6 @@ try {
 
     if (p.no_new_privs)
         prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
-
-    int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
-    if (stdout_fd < 0 || stderr_fd < 0) {
-        /* if no log destination was specified, log to the systemd
-           journal */
-        int journal_fd = sd_journal_stream_fd(p.args.front(), LOG_INFO, true);
-        if (stdout_fd < 0)
-            stdout_fd = journal_fd;
-        if (stderr_fd < 0)
-            stderr_fd = journal_fd;
-    }
 
     if (p.ns.enable_pid) {
         setsid();
