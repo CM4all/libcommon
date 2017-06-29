@@ -16,6 +16,8 @@
 #include "pexpand.hxx"
 #endif
 
+#include <set>
+
 #include <assert.h>
 #include <sched.h>
 #include <unistd.h>
@@ -128,11 +130,25 @@ void
 NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid,
                                  int pid) const
 {
-    char path[64], buffer[64];
+    char path[64], buffer[1024];
 
-    const int gid = uid_gid.gid;
+    /* collect all gids (including supplementary groups) in a std::set
+       to eliminate duplicates, and then map them all into the new
+       user namespace */
+    std::set<int> gids;
+    gids.emplace(uid_gid.gid);
+    for (unsigned i = 0; uid_gid.groups[i] != 0; ++i)
+        gids.emplace(uid_gid.groups[i]);
+
+    size_t position = 0;
+    for (int i : gids) {
+        if (position + 64 > sizeof(buffer))
+            break;
+
+        position += sprintf(buffer + position, "%d %d 1\n", i, i);
+    }
+
     sprintf(path, "/proc/%d/gid_map", pid);
-    sprintf(buffer, "%d %d 1", gid, gid);
     write_file(path, buffer);
 
     const int uid = uid_gid.uid;
