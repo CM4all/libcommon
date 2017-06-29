@@ -5,6 +5,10 @@
 #include "SyscallFilter.hxx"
 #include "SeccompFilter.hxx"
 
+#include <set>
+
+#include <sys/socket.h>
+
 /**
  * The system calls which are forbidden unconditionally.
  */
@@ -78,6 +82,35 @@ static constexpr int forbidden_syscalls[] = {
     SCMP_SYS(vm86old),
 };
 
+/* using a std::set to make sure the list is sorted; now if only there
+   was a way to sort a constexpr array at compile time... */
+static const std::set<scmp_datum_t> allowed_socket_domains = {
+    AF_LOCAL, AF_INET, AF_INET6
+};
+
+static void
+AddRange(Seccomp::Filter &sf, uint32_t action, int syscall,
+         Seccomp::Arg arg, scmp_datum_t begin, scmp_datum_t end)
+{
+    for (auto i = begin; i != end; ++i)
+        sf.AddRule(action, syscall, arg == i);
+}
+
+static void
+AddInverted(Seccomp::Filter &sf, uint32_t action, int syscall,
+            Seccomp::Arg arg, const std::set<scmp_datum_t> &whitelist)
+{
+    auto i = whitelist.begin();
+
+    sf.AddRule(action, syscall, arg < *i);
+
+    for (auto next = std::next(i), end = whitelist.end();
+         next != end; i = next++)
+        AddRange(sf, action, syscall, arg, *i + 1, *end);
+
+    sf.AddRule(action, syscall, arg > *i);
+}
+
 void
 BuildSyscallFilter(Seccomp::Filter &sf)
 {
@@ -96,6 +129,11 @@ BuildSyscallFilter(Seccomp::Filter &sf)
                 throw;
         }
     }
+
+    /* allow only a few socket domains */
+
+    AddInverted(sf, SCMP_ACT_ERRNO(EAFNOSUPPORT), SCMP_SYS(socket),
+                Seccomp::Arg(0), allowed_socket_domains);
 }
 
 static void
