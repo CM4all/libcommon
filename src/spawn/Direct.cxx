@@ -4,7 +4,6 @@
 
 #include "Direct.hxx"
 #include "Prepared.hxx"
-#include "Config.hxx"
 #include "SeccompFilter.hxx"
 #include "SyscallFilter.hxx"
 #include "Init.hxx"
@@ -85,7 +84,7 @@ UnblockSignals()
 gcc_noreturn
 static void
 Exec(const char *path, PreparedChildProcess &&p,
-     const SpawnConfig &config, const CgroupState &cgroup_state)
+     const CgroupState &cgroup_state)
 try {
     UnignoreSignals();
     UnblockSignals();
@@ -93,7 +92,7 @@ try {
     p.cgroup.Apply(cgroup_state);
     p.refence.Apply();
 
-    p.ns.Setup(config, p.uid_gid);
+    p.ns.Setup(p.uid_gid);
     p.rlimits.Apply();
 
     if (p.chroot != nullptr && chroot(p.chroot) < 0) {
@@ -200,7 +199,6 @@ try {
 }
 
 struct SpawnChildProcessContext {
-    const SpawnConfig &config;
     PreparedChildProcess &&params;
     const CgroupState &cgroup_state;
 
@@ -213,9 +211,8 @@ struct SpawnChildProcessContext {
     UniqueFileDescriptor wait_pipe_r, wait_pipe_w;
 
     SpawnChildProcessContext(PreparedChildProcess &&_params,
-                             const SpawnConfig &_config,
                              const CgroupState &_cgroup_state)
-        :config(_config), params(std::move(_params)),
+        :params(std::move(_params)),
          cgroup_state(_cgroup_state),
          path(_params.Finish()) {}
 };
@@ -235,17 +232,17 @@ spawn_fn(void *_ctx)
             _exit(EXIT_FAILURE);
     }
 
-    Exec(ctx.path, std::move(ctx.params), ctx.config, ctx.cgroup_state);
+    Exec(ctx.path, std::move(ctx.params), ctx.cgroup_state);
 }
 
 pid_t
-SpawnChildProcess(PreparedChildProcess &&params, const SpawnConfig &config,
+SpawnChildProcess(PreparedChildProcess &&params,
                   const CgroupState &cgroup_state)
 {
     int clone_flags = SIGCHLD;
-    clone_flags = params.ns.GetCloneFlags(config, clone_flags);
+    clone_flags = params.ns.GetCloneFlags(clone_flags);
 
-    SpawnChildProcessContext ctx(std::move(params), config, cgroup_state);
+    SpawnChildProcessContext ctx(std::move(params), cgroup_state);
 
     if (params.ns.enable_user && geteuid() == 0) {
         /* we'll set up the uid/gid mapping from the privileged

@@ -3,7 +3,7 @@
  */
 
 #include "NamespaceOptions.hxx"
-#include "Config.hxx"
+#include "UidGid.hxx"
 #include "MountList.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/pivot_root.h"
@@ -72,10 +72,9 @@ NamespaceOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 #endif
 
 int
-NamespaceOptions::GetCloneFlags(const SpawnConfig &config, int flags) const
+NamespaceOptions::GetCloneFlags(int flags) const
 {
-    // TODO: rewrite the namespace_superuser workaround
-    if (enable_user && !config.ignore_userns)
+    if (enable_user)
         flags |= CLONE_NEWUSER;
     if (enable_pid)
         flags |= CLONE_NEWPID;
@@ -143,12 +142,10 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid,
 }
 
 void
-NamespaceOptions::Setup(const SpawnConfig &config,
-                        const UidGid &uid_gid) const
+NamespaceOptions::Setup(const UidGid &uid_gid) const
 {
     /* set up UID/GID mapping in the old /proc */
-    if (enable_user && !config.ignore_userns) {
-        // TODO: rewrite the namespace_superuser workaround
+    if (enable_user) {
         deny_setgroups();
 
         if (uid_gid.gid != 0)

@@ -8,7 +8,6 @@
 #include <sys/types.h>
 
 struct PreparedChildProcess;
-struct SpawnConfig;
 struct CgroupState;
 
 /**
@@ -17,7 +16,7 @@ struct CgroupState;
  * @return the process id
  */
 pid_t
-SpawnChildProcess(PreparedChildProcess &&params, const SpawnConfig &config,
+SpawnChildProcess(PreparedChildProcess &&params,
                   const CgroupState &cgroup_state);
 
 #endif

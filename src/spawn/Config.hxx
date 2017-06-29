@@ -36,14 +36,6 @@ struct SpawnConfig {
      */
     bool allow_any_uid_gid = false;
 
-    /**
-     * Ignore the user namespaces setting?  This is used as a
-     * workaround to allow the spawner run as root.
-     *
-     * TODO: replace this workaround
-     */
-    bool ignore_userns = false;
-
     void VerifyUid(uid_t uid) const {
         if (allowed_uids.find(uid) == allowed_uids.end())
             throw FormatRuntimeError("uid %d is not allowed", int(uid));

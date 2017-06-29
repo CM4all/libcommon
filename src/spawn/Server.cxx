@@ -344,7 +344,7 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
     pid_t pid;
 
     try {
-        pid = SpawnChildProcess(std::move(p), config,
+        pid = SpawnChildProcess(std::move(p),
                                 process.GetCgroupState());
     } catch (...) {
         daemon_log(1, "Failed to spawn child process: %s\n",

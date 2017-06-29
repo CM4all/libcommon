@@ -98,7 +98,7 @@ struct NamespaceOptions {
 #endif
 
     gcc_pure
-    int GetCloneFlags(const SpawnConfig &config, int flags) const;
+    int GetCloneFlags(int flags) const;
 
     void SetupUidGidMap(const UidGid &uid_gid,
                         int pid) const;
@@ -106,7 +106,7 @@ struct NamespaceOptions {
     /**
      * Throws std::system_error on error.
      */
-    void Setup(const SpawnConfig &config, const UidGid &uid_gid) const;
+    void Setup(const UidGid &uid_gid) const;
 
     char *MakeId(char *p) const;
 };
