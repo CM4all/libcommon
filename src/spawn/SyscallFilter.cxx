@@ -83,8 +83,19 @@ BuildSyscallFilter(Seccomp::Filter &sf)
 {
     /* forbid a bunch of dangerous system calls */
 
-    for (auto i : forbidden_syscalls)
-        sf.AddRule(SCMP_ACT_KILL, i);
+    for (auto i : forbidden_syscalls) {
+        try {
+            sf.AddRule(SCMP_ACT_KILL, i);
+        } catch (const std::system_error &e) {
+            if (e.code().category() == ErrnoCategory() &&
+                e.code().value() == EFAULT) {
+                /* system call not supported by this kernel - ignore
+                   this problem silently, because an unsupported
+                   syscall doesn't need to be filtered */
+            } else
+                throw;
+        }
+    }
 }
 
 static void
