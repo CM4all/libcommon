@@ -126,6 +126,23 @@ deny_setgroups()
 }
 
 void
+NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid,
+                                 int pid) const
+{
+    char path[64], buffer[64];
+
+    const int gid = uid_gid.gid;
+    sprintf(path, "/proc/%d/gid_map", pid);
+    sprintf(buffer, "%d %d 1", gid, gid);
+    write_file(path, buffer);
+
+    const int uid = uid_gid.uid;
+    sprintf(path, "/proc/%d/uid_map", pid);
+    sprintf(buffer, "%d %d 1", uid, uid);
+    write_file(path, buffer);
+}
+
+void
 NamespaceOptions::Setup(const SpawnConfig &config,
                         const UidGid &uid_gid) const
 {

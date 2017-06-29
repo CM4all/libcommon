@@ -8,7 +8,7 @@
 #include "SeccompFilter.hxx"
 #include "SyscallFilter.hxx"
 #include "Init.hxx"
-#include "io/FileDescriptor.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "system/IOPrio.hxx"
 #include "util/PrintException.hxx"
 
@@ -206,6 +206,12 @@ struct SpawnChildProcessContext {
 
     const char *path;
 
+    /**
+     * A pipe used by the child process to wait for the parent to set
+     * it up (e.g. uid/gid mappings).
+     */
+    UniqueFileDescriptor wait_pipe_r, wait_pipe_w;
+
     SpawnChildProcessContext(PreparedChildProcess &&_params,
                              const SpawnConfig &_config,
                              const CgroupState &_cgroup_state)
@@ -219,6 +225,16 @@ spawn_fn(void *_ctx)
 {
     auto &ctx = *(SpawnChildProcessContext *)_ctx;
 
+    if (ctx.wait_pipe_r.IsDefined()) {
+        /* wait for the parent to set us up */
+
+        ctx.wait_pipe_w.Close();
+
+        char buffer;
+        if (ctx.wait_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
+            _exit(EXIT_FAILURE);
+    }
+
     Exec(ctx.path, std::move(ctx.params), ctx.config, ctx.cgroup_state);
 }
 
@@ -231,10 +247,29 @@ SpawnChildProcess(PreparedChildProcess &&params, const SpawnConfig &config,
 
     SpawnChildProcessContext ctx(std::move(params), config, cgroup_state);
 
+    if (params.ns.enable_user && geteuid() == 0) {
+        /* we'll set up the uid/gid mapping from the privileged
+           parent; create a pipe to synchronize this with the child */
+
+        if (!UniqueFileDescriptor::CreatePipe(ctx.wait_pipe_r, ctx.wait_pipe_w))
+            throw MakeErrno("pipe() failed");
+
+        /* don't do it again inside the child process by disabling the
+           feature on the child's copy */
+        ctx.params.ns.enable_user = false;
+    }
+
     char stack[8192];
     long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags, &ctx);
     if (pid < 0)
         throw MakeErrno("clone() failed");
+
+    if (ctx.wait_pipe_w.IsDefined()) {
+        /* set up the child's uid/gid mapping and wake it up */
+        ctx.wait_pipe_r.Close();
+        ctx.params.ns.SetupUidGidMap(ctx.params.uid_gid, pid);
+        ctx.wait_pipe_w.Close();
+    }
 
     return pid;
 }
