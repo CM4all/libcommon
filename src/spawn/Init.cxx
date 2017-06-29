@@ -4,6 +4,7 @@
 
 #include "Init.hxx"
 #include "system/Error.hxx"
+#include "system/ProcessName.hxx"
 #include "io/FileDescriptor.hxx"
 
 #include <sys/wait.h>
@@ -55,6 +56,8 @@ SpawnInitFork()
     if (pid == 0) {
         sigprocmask(SIG_UNBLOCK, &init_signal_mask, nullptr);
     } else {
+        SetProcessName("init");
+
         CloseAllFiles();
 
         if (!init_signal_fd.CreateSignalFD(&init_signal_mask))
