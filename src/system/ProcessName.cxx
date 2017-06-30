@@ -33,9 +33,10 @@ SetProcessName(const char *name)
 {
     prctl(PR_SET_NAME, (unsigned long)name, 0, 0, 0);
 
-    if (process_name.argc > 0) {
+    if (process_name.argc > 0 && process_name.argv[0] != nullptr) {
         for (int i = 1; i < process_name.argc; ++i)
-            memset(process_name.argv[i], 0, strlen(process_name.argv[i]));
+            if (process_name.argv[i] != nullptr)
+                memset(process_name.argv[i], 0, strlen(process_name.argv[i]));
 
         strncpy(process_name.argv[0], name, process_name.max_length);
     }
