@@ -30,6 +30,8 @@
 #ifndef EXCEPTION_HXX
 #define EXCEPTION_HXX
 
+#include "util/Compiler.h"
+
 #include <exception>
 #include <string>
 
@@ -39,12 +41,14 @@
  * the std::exception_ptr itself.
  */
 template<typename T>
+gcc_noreturn
 inline void
 ThrowException(T &&t)
 {
 	throw t;
 }
 
+gcc_noreturn
 inline void
 ThrowException(std::exception_ptr ep)
 {
