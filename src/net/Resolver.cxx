@@ -4,10 +4,9 @@
 
 #include "Resolver.hxx"
 #include "AddressInfo.hxx"
+#include "util/RuntimeError.hxx"
 
 #include <socket/resolver.h>
-
-#include <stdexcept>
 
 AddressInfoList
 Resolve(const char *host_and_port, int default_port,
@@ -16,13 +15,9 @@ Resolve(const char *host_and_port, int default_port,
     struct addrinfo *ai;
     int result = socket_resolve_host_port(host_and_port, default_port,
                                           hints, &ai);
-    if (result != 0) {
-        char msg[512];
-        snprintf(msg, sizeof(msg),
-                 "Failed to resolve '%s': %s",
-                 host_and_port, gai_strerror(result));
-        throw std::runtime_error(msg);
-    }
+    if (result != 0)
+        throw FormatRuntimeError("Failed to resolve '%s': %s",
+                                 host_and_port, gai_strerror(result));
 
     return AddressInfoList(ai);
 }
