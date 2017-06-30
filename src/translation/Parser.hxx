@@ -111,24 +111,32 @@ class TranslateParser {
     AddressList *address_list;
 #endif
 
-    ExpandableStringList::Builder env_builder, args_builder, params_builder;
+    ExpandableStringList::Builder env_builder, args_builder;
+
+#if TRANSLATION_ENABLE_RADDRESS
+    ExpandableStringList::Builder params_builder;
 
     /**
      * Default port for #TRANSLATE_ADDRESS_STRING.
      */
     int default_port;
+#endif
 
+#if TRANSLATION_ENABLE_WIDGET
     /** the current widget view */
     WidgetView *view;
 
     /** pointer to the tail of the transformation view linked list */
     WidgetView **widget_view_tail;
+#endif
 
+#if TRANSLATION_ENABLE_TRANSFORMATION
     /** the current transformation */
     Transformation *transformation;
 
     /** pointer to the tail of the transformation linked list */
     Transformation **transformation_tail;
+#endif
 
 public:
     explicit TranslateParser(AllocatorPtr _alloc
