@@ -202,7 +202,9 @@ TranslateResponse::Clear()
     vary = nullptr;
     invalidate = nullptr;
 #endif
+#if TRANSLATION_ENABLE_WANT
     want = nullptr;
+#endif
 #if TRANSLATION_ENABLE_RADDRESS
     file_not_found = nullptr;
     content_type = nullptr;
@@ -398,7 +400,9 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     vary = alloc.Dup(src.vary);
     invalidate = alloc.Dup(src.invalidate);
 #endif
+#if TRANSLATION_ENABLE_WANT
     want = alloc.Dup(src.want);
+#endif
 #if TRANSLATION_ENABLE_RADDRESS
     file_not_found = alloc.Dup(src.file_not_found);
     content_type = alloc.CheckDup(src.content_type);

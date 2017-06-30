@@ -322,7 +322,10 @@ struct TranslateResponse {
     ConstBuffer<uint16_t> vary;
     ConstBuffer<uint16_t> invalidate;
 #endif
+
+#if TRANSLATION_ENABLE_WANT
     ConstBuffer<uint16_t> want;
+#endif
 
 #if TRANSLATION_ENABLE_RADDRESS
     ConstBuffer<void> file_not_found;
@@ -360,11 +363,13 @@ struct TranslateResponse {
 
     void Clear();
 
+#if TRANSLATION_ENABLE_WANT
     bool Wants(uint16_t cmd) const {
         assert(protocol_version >= 1);
 
         return want.Contains(cmd);
     }
+#endif
 
 #if TRANSLATION_ENABLE_CACHE
     gcc_pure
