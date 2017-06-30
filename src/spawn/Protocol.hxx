@@ -49,6 +49,11 @@ enum class SpawnExecCommand : uint8_t {
 };
 
 enum class SpawnResponseCommand : uint16_t {
+    /**
+     * Indicates that cgroups are available.
+     */
+    CGROUPS_AVAILABLE,
+
     EXIT,
 };
 

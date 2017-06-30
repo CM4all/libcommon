@@ -40,6 +40,8 @@ class SpawnServerClient final : public SpawnService {
      */
     const bool verify;
 
+    bool cgroups = false;
+
     bool shutting_down = false;
 
 public:
@@ -47,6 +49,18 @@ public:
                                const SpawnConfig &_config, int _fd,
                                bool _verify=true);
     ~SpawnServerClient();
+
+    /**
+     * Does the server support cgroups?  This requires a systemd new
+     * enough to implement the cgroup management protocol.
+     *
+     * Note that this information is only available after receiving
+     * the SpawnResponseCommand::CGROUPS_AVAILABLE packet.  Don't rely
+     * on its value right after creating the spawner.
+     */
+    bool SupportsCgroups() const {
+        return cgroups;
+    }
 
     void ReplaceSocket(int new_fd);
 

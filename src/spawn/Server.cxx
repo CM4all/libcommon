@@ -10,6 +10,7 @@
 #include "Prepared.hxx"
 #include "Hook.hxx"
 #include "MountList.hxx"
+#include "CgroupState.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
 #include "ExitListener.hxx"
@@ -676,6 +677,14 @@ RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
                SpawnHook *hook,
                int fd)
 {
+    if (cgroup_state.IsEnabled()) {
+        /* tell the client that the cgroups feature is available;
+           there is no other way for the client to know if we don't
+           tell him; see SpawnServerClient::SupportsCgroups() */
+        static constexpr auto cmd = SpawnResponseCommand::CGROUPS_AVAILABLE;
+        send(fd, &cmd, sizeof(cmd), MSG_NOSIGNAL);
+    }
+
     SpawnServerProcess process(config, cgroup_state, hook);
     process.AddConnection(fd);
     process.Run();

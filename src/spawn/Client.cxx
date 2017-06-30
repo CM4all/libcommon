@@ -369,6 +369,10 @@ SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
     const auto cmd = (SpawnResponseCommand)payload.shift();
 
     switch (cmd) {
+    case SpawnResponseCommand::CGROUPS_AVAILABLE:
+        cgroups = true;
+        break;
+
     case SpawnResponseCommand::EXIT:
         HandleExitMessage(SpawnPayload(payload));
         break;
