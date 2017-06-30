@@ -5,6 +5,8 @@ project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
   ],
 )
 
+compiler = meson.get_compiler('cpp')
+
 add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
   '-DPACKAGE="' + meson.project_name() + '"',
   '-DVERSION="' + meson.project_version() + '"',
@@ -30,12 +32,18 @@ liblua = dependency('luajit')
 libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
 libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.22', required: false)
 
-gtest = declare_dependency(
-  dependencies: [dependency('gtest', main: true)],
-  compile_args: [
-    '-Wno-undef',
+gtest_warning_flags = []
+if compiler.get_id() == 'gcc'
+  gtest_warning_flags += [
     '-Wno-suggest-attribute=format',
     '-Wno-suggest-attribute=noreturn',
+  ]
+endif
+
+gtest = declare_dependency(
+  dependencies: [dependency('gtest', main: true)],
+  compile_args: gtest_warning_flags + [
+    '-Wno-undef',
     '-Wno-missing-declarations',
 
     # needed on Jessie for gtest's IsNullLiteralHelper
