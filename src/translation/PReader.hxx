@@ -7,7 +7,7 @@
 #ifndef BENG_PROXY_TRANSLATE_READER_HXX
 #define BENG_PROXY_TRANSLATE_READER_HXX
 
-#include <beng-proxy/translation.h>
+#include "Protocol.hxx"
 
 #include <assert.h>
 #include <stddef.h>
@@ -24,7 +24,7 @@ class TranslatePacketReader {
 
     State state = State::HEADER;
 
-    struct beng_translation_header header;
+    TranslationHeader header;
 
     char *payload;
     size_t payload_position;
@@ -41,10 +41,10 @@ public:
         return state == State::COMPLETE;
     }
 
-    enum beng_translation_command GetCommand() const {
+    TranslationCommand GetCommand() const {
         assert(IsComplete());
 
-        return (enum beng_translation_command)header.command;
+        return header.command;
     }
 
     const void *GetPayload() const {

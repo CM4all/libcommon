@@ -30,7 +30,6 @@ libdbus = dependency('dbus-1')
 libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
 libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
-libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.22', required: false)
 
 gtest_warning_flags = []
 if compiler.get_id() == 'gcc'
@@ -238,17 +237,14 @@ spawn = static_library('spawn',
   ])
 spawn_dep = declare_dependency(link_with: spawn)
 
-if libbp.found()
-  translation = static_library('translation',
-    'src/translation/PReader.cxx',
-    'src/translation/Parser.cxx',
-    'src/translation/Response.cxx',
-    include_directories: inc,
-    dependencies: [
-      libbp,
-      declare_dependency(link_with: event),
-      declare_dependency(link_with: net),
-    ])
-endif
+translation = static_library('translation',
+  'src/translation/PReader.cxx',
+  'src/translation/Parser.cxx',
+  'src/translation/Response.cxx',
+  include_directories: inc,
+  dependencies: [
+    declare_dependency(link_with: event),
+    declare_dependency(link_with: net),
+  ])
 
 subdir('test')

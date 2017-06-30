@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <stdint.h>
 
+enum class TranslationCommand : uint16_t;
 struct WidgetView;
 class AllocatorPtr;
 class UniqueRegex;
@@ -319,12 +320,12 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
-    ConstBuffer<uint16_t> vary;
-    ConstBuffer<uint16_t> invalidate;
+    ConstBuffer<TranslationCommand> vary;
+    ConstBuffer<TranslationCommand> invalidate;
 #endif
 
 #if TRANSLATION_ENABLE_WANT
-    ConstBuffer<uint16_t> want;
+    ConstBuffer<TranslationCommand> want;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
@@ -364,7 +365,7 @@ struct TranslateResponse {
     void Clear();
 
 #if TRANSLATION_ENABLE_WANT
-    bool Wants(uint16_t cmd) const {
+    bool Wants(TranslationCommand cmd) const {
         assert(protocol_version >= 1);
 
         return want.Contains(cmd);
@@ -373,7 +374,7 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_CACHE
     gcc_pure
-    bool VaryContains(uint16_t cmd) const {
+    bool VaryContains(TranslationCommand cmd) const {
         return vary.Contains(cmd);
     }
 #endif

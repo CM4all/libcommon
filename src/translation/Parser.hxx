@@ -72,7 +72,7 @@ class TranslateParser {
     TranslatePacketReader reader;
     TranslateResponse response;
 
-    enum beng_translation_command previous_command;
+    TranslationCommand previous_command;
 
 #if TRANSLATION_ENABLE_RADDRESS
     /** the current resource address being edited */
@@ -216,21 +216,21 @@ private:
     void HandleRefence(StringView payload);
 
 #if TRANSLATION_ENABLE_WANT
-    void HandleWant(const uint16_t *payload, size_t payload_length);
+    void HandleWant(const TranslationCommand *payload, size_t payload_length);
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
     void HandleContentTypeLookup(ConstBuffer<void> payload);
 #endif
 
-    void HandleRegularPacket(enum beng_translation_command command,
+    void HandleRegularPacket(TranslationCommand command,
                              const void *const _payload, size_t payload_length);
 
     void HandleUidGid(ConstBuffer<void> payload);
 
     void HandleCgroupSet(StringView payload);
 
-    Result HandlePacket(enum beng_translation_command command,
+    Result HandlePacket(TranslationCommand command,
                         const void *const _payload, size_t payload_length);
 };
 
