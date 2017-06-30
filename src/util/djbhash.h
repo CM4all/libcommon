@@ -8,7 +8,7 @@
 #ifndef DJB_HASH_H
 #define DJB_HASH_H
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <stddef.h>
 #include <stdint.h>

@@ -5,7 +5,7 @@
 #ifndef HTTP_LIST_HXX
 #define HTTP_LIST_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 gcc_pure
 bool

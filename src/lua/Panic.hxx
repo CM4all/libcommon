@@ -32,7 +32,7 @@
 
 #include "Error.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 extern "C" {
 #include <lua.h>

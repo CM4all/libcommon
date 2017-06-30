@@ -9,7 +9,7 @@
 #include "event/SocketEvent.hxx"
 #include "net/SocketDescriptor.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <sys/types.h>
 #include <assert.h>

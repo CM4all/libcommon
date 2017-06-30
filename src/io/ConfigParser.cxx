@@ -7,7 +7,7 @@
 #include "system/Error.hxx"
 #include "util/ScopeExit.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <assert.h>
 #include <errno.h>

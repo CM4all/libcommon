@@ -11,7 +11,7 @@
 #include "system/IOPrio.hxx"
 #include "util/PrintException.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <systemd/sd-journal.h>
 

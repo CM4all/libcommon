@@ -30,7 +30,7 @@
 #ifndef CONST_BUFFER_HPP
 #define CONST_BUFFER_HPP
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <cstddef>
 

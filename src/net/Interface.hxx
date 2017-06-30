@@ -5,7 +5,7 @@
 #ifndef NET_INTERFACE_HXX
 #define NET_INTERFACE_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 class SocketAddress;
 

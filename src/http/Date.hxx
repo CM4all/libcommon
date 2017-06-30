@@ -7,7 +7,7 @@
 #ifndef HTTP_DATE_HXX
 #define HTTP_DATE_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <chrono>
 

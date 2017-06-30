@@ -5,7 +5,7 @@
 #ifndef BENG_PROXY_CGROUP_OPTIONS_HXX
 #define BENG_PROXY_CGROUP_OPTIONS_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 class AllocatorPtr;
 struct StringView;

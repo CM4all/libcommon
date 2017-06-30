@@ -8,7 +8,7 @@
 #include "UidGid.hxx"
 #include "util/RuntimeError.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <set>
 

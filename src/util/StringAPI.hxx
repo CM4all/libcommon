@@ -30,7 +30,7 @@
 #ifndef STRING_API_HXX
 #define STRING_API_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <string.h>
 

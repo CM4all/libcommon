@@ -2,7 +2,7 @@
 #include "io/FileLineParser.hxx"
 #include "util/ScopeExit.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <gtest/gtest.h>
 

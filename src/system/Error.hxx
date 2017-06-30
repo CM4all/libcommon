@@ -32,7 +32,7 @@
 
 #include "util/StringUtil.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <system_error>
 #include <utility>

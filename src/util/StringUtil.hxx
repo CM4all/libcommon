@@ -30,7 +30,7 @@
 #ifndef STRING_UTIL_HXX
 #define STRING_UTIL_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <stddef.h>
 

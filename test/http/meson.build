@@ -1,3 +1,4 @@
 test('TestHttpList', executable('TestHttpList',
   'TestHttpList.cxx',
-  dependencies: [gtest, libinline, http_dep]))
+  include_directories: inc,
+  dependencies: [gtest, http_dep]))

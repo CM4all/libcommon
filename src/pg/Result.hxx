@@ -7,7 +7,7 @@
 
 #include "BinaryValue.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <postgresql/libpq-fe.h>
 

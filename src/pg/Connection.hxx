@@ -10,7 +10,7 @@
 #include "Result.hxx"
 #include "Notify.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <postgresql/libpq-fe.h>
 #include <postgresql/pg_config.h>

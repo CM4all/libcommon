@@ -5,7 +5,7 @@
 #ifndef PG_NOTIFY_HXX
 #define PG_NOTIFY_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <postgresql/libpq-fe.h>
 

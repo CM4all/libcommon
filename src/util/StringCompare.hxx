@@ -32,7 +32,7 @@
 
 #include "StringView.hxx"
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 static inline bool
 StringIsEmpty(const char *string) noexcept

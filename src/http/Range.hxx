@@ -5,7 +5,7 @@
 #ifndef HTTP_RANGE_HXX
 #define HTTP_RANGE_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <chrono>
 

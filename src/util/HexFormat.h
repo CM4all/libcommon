@@ -5,7 +5,7 @@
 #ifndef HEX_FORMAT_H
 #define HEX_FORMAT_H
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <stdint.h>
 #include <string.h>

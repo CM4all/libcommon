@@ -7,7 +7,7 @@
 #ifndef BENG_PROXY_JAIL_CONFIG_HXX
 #define BENG_PROXY_JAIL_CONFIG_HXX
 
-#include <inline/compiler.h>
+#include "util/Compiler.h"
 
 #include <string>
 

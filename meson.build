@@ -27,7 +27,6 @@ libsystemd = dependency('libsystemd')
 libdbus = dependency('dbus-1')
 libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
-libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
 libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.22', required: false)
 
@@ -60,7 +59,6 @@ util = static_library('util',
   'src/util/djbhash.c',
   include_directories: inc,
   dependencies: [
-    libinline,
   ])
 util_dep = declare_dependency(link_with: util)
 
@@ -68,7 +66,6 @@ time = static_library('time',
   'src/time/gmtime.c',
   include_directories: inc,
   dependencies: [
-    libinline,
   ])
 time_dep = declare_dependency(link_with: time)
 
@@ -78,7 +75,6 @@ http = static_library('http',
   'src/http/Range.cxx',
   include_directories: inc,
   dependencies: [
-    libinline,
     util_dep,
   ])
 http_dep = declare_dependency(link_with: http)
@@ -87,7 +83,6 @@ adata = static_library('adata',
   'src/adata/ExpandableStringList.cxx',
   include_directories: inc,
   dependencies: [
-    libinline,
   ])
 adata_dep = declare_dependency(link_with: adata)
 
@@ -98,7 +93,6 @@ lua = static_library('lua',
   'src/lua/State.cxx',
   include_directories: inc,
   dependencies: [
-    libinline,
     liblua,
   ]
 )
@@ -114,7 +108,6 @@ event = static_library('event',
   'src/event/PipeLineReader.cxx',
   include_directories: inc,
   dependencies: [
-    libinline,
     libevent,
     util_dep,
   ])
@@ -131,7 +124,6 @@ io = static_library('io',
   'src/io/ConfigParser.cxx',
   include_directories: inc,
   dependencies: [
-    libinline,
   ])
 io_dep = declare_dependency(link_with: io)
 
@@ -140,7 +132,6 @@ system = static_library('system',
   'src/system/ProcessName.cxx',
   include_directories: inc,
   dependencies: [
-    libinline,
     util_dep,
     io_dep,
   ])
@@ -168,7 +159,6 @@ net = static_library('net',
   'src/net/Buffered.cxx',
   include_directories: inc,
   dependencies: [
-    libinline,
   ])
 net_dep = declare_dependency(link_with: net)
 
@@ -180,7 +170,6 @@ curl = static_library('curl',
   include_directories: inc,
   dependencies: [
     libcurl,
-    libinline,
     event_dep,
   ])
 
@@ -194,7 +183,6 @@ pg = static_library('pg',
   include_directories: inc,
   dependencies: [
     libpq,
-    libinline,
   ])
 pg_dep = declare_dependency(link_with: pg)
 
@@ -203,7 +191,6 @@ odbus = static_library('odbus',
   include_directories: inc,
   dependencies: [
     libdbus,
-    libinline,
   ])
 odbus_dep = declare_dependency(link_with: odbus)
 
@@ -236,7 +223,6 @@ spawn = static_library('spawn',
     libdbus,
     libseccomp,
     libsystemd,
-    libinline,
     libdaemon,
     adata_dep,
     io_dep,
@@ -251,7 +237,7 @@ if libbp.found()
     'src/translation/Response.cxx',
     include_directories: inc,
     dependencies: [
-      libinline, libbp,
+      libbp,
       declare_dependency(link_with: event),
       declare_dependency(link_with: net),
     ])
