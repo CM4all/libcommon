@@ -282,10 +282,6 @@ SetPackagePath(lua_State *L, const char *path) {
 	SetField(L, "package", "path", path);
 }
 
-template<typename F>
-void ForEach(lua_State *L) {
-}
-
 }
 
 #endif
