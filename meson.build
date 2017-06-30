@@ -28,7 +28,6 @@ libdbus = dependency('dbus-1')
 libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
-libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
 libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
 libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.22', required: false)
 
@@ -151,6 +150,7 @@ net = static_library('net',
   'src/net/SocketAddress.cxx',
   'src/net/StaticSocketAddress.cxx',
   'src/net/AllocatedSocketAddress.cxx',
+  'src/net/HostParser.cxx',
   'src/net/Resolver.cxx',
   'src/net/Parser.cxx',
   'src/net/Interface.cxx',
@@ -168,7 +168,7 @@ net = static_library('net',
   'src/net/Buffered.cxx',
   include_directories: inc,
   dependencies: [
-    libinline, libsocket,
+    libinline,
   ])
 net_dep = declare_dependency(link_with: net)
 
