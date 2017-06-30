@@ -230,8 +230,11 @@ spawn_fn(void *_ctx)
 
         ctx.wait_pipe_w.Close();
 
+        /* expect one byte to indicate success, and then the pipe will
+           be closed by the parent */
         char buffer;
-        if (ctx.wait_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
+        if (ctx.wait_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
+            ctx.wait_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
             _exit(EXIT_FAILURE);
     }
 
@@ -268,6 +271,12 @@ SpawnChildProcess(PreparedChildProcess &&params,
         /* set up the child's uid/gid mapping and wake it up */
         ctx.wait_pipe_r.Close();
         ctx.params.ns.SetupUidGidMap(ctx.params.uid_gid, pid);
+
+        /* after success (no exception was thrown), we send one byte
+           to the pipe and close it, so the child knows everything's
+           ok; without that byte, it would exit immediately */
+        static constexpr char buffer = 0;
+        ctx.wait_pipe_w.Write(&buffer, sizeof(buffer));
         ctx.wait_pipe_w.Close();
     }
 
