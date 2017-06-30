@@ -30,7 +30,7 @@ liblua = dependency('luajit')
 libinline = dependency('libcm4all-inline', version: '>= 0.3.4')
 libsocket = dependency('libcm4all-socket', version: '>= 0.3.5')
 libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
-libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.22')
+libbp = dependency('libcm4all-beng-proxy', version: '>= 12.0.22', required: false)
 
 gtest = declare_dependency(
   dependencies: [dependency('gtest', main: true)],
@@ -244,15 +244,17 @@ spawn = static_library('spawn',
   ])
 spawn_dep = declare_dependency(link_with: spawn)
 
-translation = static_library('translation',
-  'src/translation/PReader.cxx',
-  'src/translation/Parser.cxx',
-  'src/translation/Response.cxx',
-  include_directories: inc,
-  dependencies: [
-    libinline, libbp,
-    declare_dependency(link_with: event),
-    declare_dependency(link_with: net),
-  ])
+if libbp.found()
+  translation = static_library('translation',
+    'src/translation/PReader.cxx',
+    'src/translation/Parser.cxx',
+    'src/translation/Response.cxx',
+    include_directories: inc,
+    dependencies: [
+      libinline, libbp,
+      declare_dependency(link_with: event),
+      declare_dependency(link_with: net),
+    ])
+endif
 
 subdir('test')
