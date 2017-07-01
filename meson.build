@@ -129,6 +129,7 @@ io = static_library('io',
   'src/io/LineParser.cxx',
   'src/io/FileLineParser.cxx',
   'src/io/ConfigParser.cxx',
+  'src/io/Logger.cxx',
   include_directories: inc,
   dependencies: [
   ])
