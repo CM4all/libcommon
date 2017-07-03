@@ -50,7 +50,7 @@ struct TranslateResponse {
     std::chrono::seconds max_age;
 
     /**
-     * From #TRANSLATE_EXPIRES_RELATIVE
+     * From #TranslationCommand::EXPIRES_RELATIVE
      */
     std::chrono::seconds expires_relative;
 
@@ -107,8 +107,8 @@ struct TranslateResponse {
     const char *document_root;
 
     /**
-     * The value of #TRANSLATE_EXPAND_DOCUMENT_ROOT.  Only used by the
-     * translation cache.
+     * The value of #TranslationCommand::EXPAND_DOCUMENT_ROOT.  Only
+     * used by the translation cache.
      */
     const char *expand_document_root;
 
@@ -132,12 +132,12 @@ struct TranslateResponse {
 #endif
 
     /**
-     * @see #TRANSLATE_TEST_PATH
+     * @see #TranslationCommand::TEST_PATH
      */
     const char *test_path;
 
     /**
-     * @see #TRANSLATE_EXPAND_TEST_PATH
+     * @see #TranslationCommand::EXPAND_TEST_PATH
      */
     const char *expand_test_path;
 
@@ -191,29 +191,29 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_CACHE
     /**
-     * @see #TRANSLATE_REGEX_ON_HOST_URI
+     * @see #TranslationCommand::REGEX_ON_HOST_URI
      */
     bool regex_on_host_uri;
 
     /**
-     * @see #TRANSLATE_REGEX_ON_USER_URI
+     * @see #TranslationCommand::REGEX_ON_USER_URI
      */
     bool regex_on_user_uri;
 #endif
 
     /**
-     * @see #TRANSLATE_AUTO_DEFLATE
+     * @see #TranslationCommand::AUTO_DEFLATE
      */
     bool auto_deflate;
 
     /**
-     * @see #TRANSLATE_AUTO_GZIP
+     * @see #TranslationCommand::AUTO_GZIP
      */
     bool auto_gzip;
 
 #if TRANSLATION_ENABLE_SESSION
     /**
-     * @see #TRANSLATE_REALM_FROM_AUTH_BASE
+     * @see #TranslationCommand::REALM_FROM_AUTH_BASE
      */
     bool realm_from_auth_base;
 
@@ -224,9 +224,9 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_HTTP
     /**
-     * The payload of the #TRANSLATE_INTERNAL_REDIRECT packet.  If
-     * ConstBuffer::IsNull(), then no #TRANSLATE_INTERNAL_REDIRECT
-     * packet was received.
+     * The payload of the #TranslationCommand::INTERNAL_REDIRECT
+     * packet.  If ConstBuffer::IsNull(), then no
+     * #TranslationCommand::INTERNAL_REDIRECT packet was received.
      */
     ConstBuffer<void> internal_redirect;
 #endif
@@ -245,26 +245,27 @@ struct TranslateResponse {
     ConstBuffer<void> auth;
 
     /**
-     * @see #TRANSLATE_AUTH_FILE, #TRANSLATE_EXPAND_AUTH_FILE
+     * @see #TranslationCommand::AUTH_FILE,
+     * #TranslationCommand::EXPAND_AUTH_FILE
      */
     const char *auth_file, *expand_auth_file;
 
     /**
-     * @see #TRANSLATE_APPEND_AUTH
+     * @see #TranslationCommand::APPEND_AUTH
      */
     ConstBuffer<void> append_auth;
 
     /**
-     * @see #TRANSLATE_EXPAND_APPEND_AUTH
+     * @see #TranslationCommand::EXPAND_APPEND_AUTH
      */
     const char *expand_append_auth;
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
     /**
-     * The payload of the #TRANSLATE_WANT_FULL_URI packet.  If
-     * ConstBuffer::IsNull(), then no #TRANSLATE_WANT_FULL_URI packet
-     * was received.
+     * The payload of the #TranslationCommand::WANT_FULL_URI packet.
+     * If ConstBuffer::IsNull(), then no
+     * #TranslationCommand::WANT_FULL_URI packet was received.
      */
     ConstBuffer<void> want_full_uri;
 #endif
@@ -309,12 +310,12 @@ struct TranslateResponse {
     WidgetView *views;
 
     /**
-     * From #TRANSLATE_WIDGET_GROUP.
+     * From #TranslationCommand::WIDGET_GROUP.
      */
     const char *widget_group;
 
     /**
-     * From #TRANSLATE_GROUP_CONTAINER.
+     * From #TranslationCommand::GROUP_CONTAINER.
      */
     StringSet container_groups;
 #endif
@@ -332,8 +333,9 @@ struct TranslateResponse {
     ConstBuffer<void> file_not_found;
 
     /**
-     * From #TRANSLATE_CONTENT_TYPE, but only in reply to
-     * #TRANSLATE_CONTENT_TYPE_LOOKUP / #TRANSLATE_SUFFIX.
+     * From #TranslationCommand::CONTENT_TYPE, but only in reply to
+     * #TranslationCommand::CONTENT_TYPE_LOOKUP /
+     * #TranslationCommand::SUFFIX.
      */
     const char *content_type;
 
@@ -345,7 +347,7 @@ struct TranslateResponse {
     ConstBuffer<void> error_document;
 
     /**
-     * From #TRANSLATE_PROBE_PATH_SUFFIXES.
+     * From #TranslationCommand::PROBE_PATH_SUFFIXES.
      */
     ConstBuffer<void> probe_path_suffixes;
 

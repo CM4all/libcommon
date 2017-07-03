@@ -65,7 +65,7 @@ class TranslateParser {
 #endif
 
     /**
-     * Has #TRANSLATE_BEGIN been seen already?
+     * Has #TranslationCommand::BEGIN been seen already?
      */
     bool begun = false;
 
@@ -117,7 +117,7 @@ class TranslateParser {
     ExpandableStringList::Builder params_builder;
 
     /**
-     * Default port for #TRANSLATE_ADDRESS_STRING.
+     * Default port for #TranslationCommand::ADDRESS_STRING.
      */
     int default_port;
 #endif
