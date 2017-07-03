@@ -131,7 +131,7 @@ ChildOptions::OpenStderrPath() const
     assert(stderr_path != nullptr);
 
     return open(stderr_path, O_CREAT|O_WRONLY|O_APPEND|O_CLOEXEC|O_NOCTTY,
-                0666);
+                0600);
 }
 
 void
