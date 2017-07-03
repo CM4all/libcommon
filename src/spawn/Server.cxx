@@ -415,6 +415,15 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
                 throw MalformedSpawnPayloadError();
             break;
 
+        case SpawnExecCommand::UMASK:
+            {
+                uint16_t value;
+                payload.ReadT(value);
+                p.umask = value;
+            }
+
+            break;
+
         case SpawnExecCommand::STDIN:
             p.SetStdin(fds.Get().Steal());
             break;

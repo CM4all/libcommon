@@ -48,6 +48,12 @@ struct ChildOptions {
     UidGid uid_gid;
 
     /**
+     * The umask for the new child process.  -1 means do not change
+     * it.
+     */
+    int umask = -1;
+
+    /**
      * Redirect STDERR to /dev/null?
      */
     bool stderr_null = false;
@@ -77,6 +83,7 @@ struct ChildOptions {
          jail(src.jail),
 #endif
          uid_gid(src.uid_gid),
+         umask(src.umask),
          stderr_null(src.stderr_null),
          stderr_jailed(src.stderr_jailed),
          forbid_user_ns(src.forbid_user_ns),

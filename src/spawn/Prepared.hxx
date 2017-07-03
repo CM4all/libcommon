@@ -54,6 +54,12 @@ struct PreparedChildProcess {
     int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1, control_fd = -1;
 
     /**
+     * The umask for the new child process.  -1 means do not change
+     * it.
+     */
+    int umask = -1;
+
+    /**
      * The CPU scheduler priority configured with setpriority(),
      * ranging from -20 to 19.
      */

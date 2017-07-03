@@ -41,6 +41,7 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
           : nullptr),
 #endif
      uid_gid(src.uid_gid),
+     umask(src.umask),
      stderr_null(src.stderr_null),
      stderr_jailed(src.stderr_jailed),
      forbid_user_ns(src.forbid_user_ns),
@@ -87,6 +88,9 @@ ChildOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 char *
 ChildOptions::MakeId(char *p) const
 {
+    if (umask >= 0)
+        p += sprintf(p, ";u%o", umask);
+
     if (stderr_path != nullptr)
         p += sprintf(p, ";e%08x", djb_hash_string(stderr_path));
 
@@ -149,6 +153,8 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
     if (use_jail && jail != nullptr)
         jail->InsertWrapper(dest, document_root);
 #endif
+
+    dest.umask = umask;
 
     if (stderr_jailed) {
         assert(stderr_path != nullptr);

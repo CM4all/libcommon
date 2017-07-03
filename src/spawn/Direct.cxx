@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <sys/prctl.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>
 
@@ -88,6 +89,9 @@ Exec(const char *path, PreparedChildProcess &&p,
 try {
     UnignoreSignals();
     UnblockSignals();
+
+    if (p.umask >= 0)
+        umask(p.umask);
 
     int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
     if (stdout_fd < 0 || (stderr_fd < 0 && p.stderr_path == nullptr)) {

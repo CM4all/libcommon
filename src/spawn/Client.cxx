@@ -229,6 +229,12 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
     for (const char *i : p.env)
         s.WriteString(SpawnExecCommand::SETENV, i);
 
+    if (p.umask >= 0) {
+        uint16_t umask = p.umask;
+        s.Write(SpawnExecCommand::UMASK);
+        s.WriteT(umask);
+    }
+
     s.CheckWriteFd(SpawnExecCommand::STDIN, p.stdin_fd);
     s.CheckWriteFd(SpawnExecCommand::STDOUT, p.stdout_fd);
     s.CheckWriteFd(SpawnExecCommand::STDERR, p.stderr_fd);
