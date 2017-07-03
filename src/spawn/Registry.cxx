@@ -5,8 +5,7 @@
 #include "Registry.hxx"
 #include "ExitListener.hxx"
 #include "util/DeleteDisposer.hxx"
-
-#include <daemon/log.h>
+#include "util/StringFormat.hxx"
 
 #include <string.h>
 #include <errno.h>
@@ -19,13 +18,23 @@ static constexpr struct timeval child_kill_timeout = {
     .tv_usec = 0,
 };
 
+static std::string
+MakeChildProcessLogDomain(unsigned pid, const char *name)
+{
+    return StringFormat<64>("spawn:%u:%s", pid, name).c_str();
+}
+
 ChildProcessRegistry::ChildProcess::ChildProcess(EventLoop &_event_loop,
                                                  pid_t _pid, const char *_name,
                                                  ExitListener *_listener)
-    :pid(_pid), name(_name),
+    :logger(MakeChildProcessLogDomain(_pid, _name)),
+     pid(_pid), name(_name),
      start_time(std::chrono::steady_clock::now()),
      listener(_listener),
-     kill_timeout_event(_event_loop, BIND_THIS_METHOD(KillTimeoutCallback)) {}
+     kill_timeout_event(_event_loop, BIND_THIS_METHOD(KillTimeoutCallback))
+{
+    logger(5, "added child process");
+}
 
 static constexpr double
 timeval_to_double(const struct timeval &tv)
@@ -43,28 +52,23 @@ ChildProcessRegistry::ChildProcess::OnExit(int status,
         if (!WCOREDUMP(status) && WTERMSIG(status) == SIGTERM)
             level = 4;
 
-        daemon_log(level,
-                   "child process '%s' (pid %d) died from signal %d%s\n",
-                   name.c_str(), (int)pid,
-                   WTERMSIG(status),
-                   WCOREDUMP(status) ? " (core dumped)" : "");
+        logger(level, "died from signal ",
+               WTERMSIG(status),
+               WCOREDUMP(status) ? " (core dumped)" : "");
     } else if (exit_status == 0)
-        daemon_log(5, "child process '%s' (pid %d) exited with success\n",
-                   name.c_str(), (int)pid);
+        logger(5, "exited with success");
     else
-        daemon_log(2, "child process '%s' (pid %d) exited with status %d\n",
-                   name.c_str(), (int)pid, exit_status);
+        logger(2, "exited with status ", exit_status);
 
     const auto duration = std::chrono::steady_clock::now() - start_time;
     const auto duration_f = std::chrono::duration_cast<std::chrono::duration<double>>(duration);
 
-    daemon_log(6, "stats on '%s' (pid %d): %1.3fs elapsed, %1.3fs user, %1.3fs sys, %ld/%ld faults, %ld/%ld switches\n",
-               name.c_str(), (int)pid,
-               duration_f.count(),
-               timeval_to_double(rusage.ru_utime),
-               timeval_to_double(rusage.ru_stime),
-               rusage.ru_minflt, rusage.ru_majflt,
-               rusage.ru_nvcsw, rusage.ru_nivcsw);
+    logger.Format(6, "stats: %1.3fs elapsed, %1.3fs user, %1.3fs sys, %ld/%ld faults, %ld/%ld switches",
+                  duration_f.count(),
+                  timeval_to_double(rusage.ru_utime),
+                  timeval_to_double(rusage.ru_stime),
+                  rusage.ru_minflt, rusage.ru_majflt,
+                  rusage.ru_nvcsw, rusage.ru_nivcsw);
 
     if (listener != nullptr)
         listener->OnChildProcessExit(status);
@@ -73,16 +77,14 @@ ChildProcessRegistry::ChildProcess::OnExit(int status,
 inline void
 ChildProcessRegistry::ChildProcess::KillTimeoutCallback()
 {
-    daemon_log(3, "sending SIGKILL to child process '%s' (pid %d) due to timeout\n",
-               name.c_str(), (int)pid);
+    logger(3, "sending SIGKILL to due to timeout");
 
     if (kill(pid, SIGKILL) < 0)
-        daemon_log(1, "failed to kill child process '%s' (pid %d): %s\n",
-                   name.c_str(), (int)pid, strerror(errno));
+        logger(1, "failed to kill child process: ", strerror(errno));
 }
 
 ChildProcessRegistry::ChildProcessRegistry(EventLoop &_event_loop)
-    :event_loop(_event_loop),
+    :logger("spawn"), event_loop(_event_loop),
      sigchld_event(event_loop, SIGCHLD, BIND_THIS_METHOD(OnSigChld))
 {
     sigchld_event.Enable();
@@ -103,8 +105,6 @@ ChildProcessRegistry::Add(pid_t pid, const char *name, ExitListener *listener)
 
     if (volatile_event && IsEmpty())
         sigchld_event.Enable();
-
-    daemon_log(5, "added child process '%s' (pid %d)\n", name, (int)pid);
 
     auto child = new ChildProcess(event_loop, pid, name, listener);
 
@@ -132,15 +132,13 @@ ChildProcessRegistry::Kill(pid_t pid, int signo)
     assert(i != children.end());
     auto *child = &*i;
 
-    daemon_log(5, "sending %s to child process '%s' (pid %d)\n",
-               strsignal(signo), child->name.c_str(), (int)pid);
+    logger(5, "sending ", strsignal(signo));
 
     assert(child->listener != nullptr);
     child->listener = nullptr;
 
     if (kill(pid, signo) < 0) {
-        daemon_log(1, "failed to kill child process '%s' (pid %d): %s\n",
-                   child->name.c_str(), (int)pid, strerror(errno));
+        logger(1, "failed to kill child process: ", strerror(errno));
 
         /* if we can't kill the process, we can't do much, so let's
            just ignore the process from now on and don't let it delay

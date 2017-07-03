@@ -22,8 +22,6 @@
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
 
-#include <daemon/log.h>
-
 #include <boost/intrusive/list.hpp>
 
 #include <system_error>
@@ -136,6 +134,8 @@ class SpawnServerConnection
     SpawnServerProcess &process;
     const int fd;
 
+    const Logger logger;
+
     SocketEvent event;
 
     typedef boost::intrusive::set<SpawnServerChild,
@@ -186,6 +186,8 @@ class SpawnServerProcess {
     const CgroupState &cgroup_state;
     SpawnHook *const hook;
 
+    const Logger logger;
+
     EventLoop loop;
 
     ChildProcessRegistry child_process_registry;
@@ -199,6 +201,7 @@ public:
                        const CgroupState &_cgroup_state,
                        SpawnHook *_hook)
         :config(_config), cgroup_state(_cgroup_state), hook(_hook),
+         logger("spawn"),
          child_process_registry(loop) {}
 
     const SpawnConfig &GetConfig() const {
@@ -248,6 +251,7 @@ private:
 SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
                                              int _fd)
     :process(_process), fd(_fd),
+     logger("spawn"),
      event(process.GetEventLoop(), fd, SocketEvent::READ|SocketEvent::PERSIST,
            BIND_THIS_METHOD(ReadEventCallback)) {
     event.Add();
@@ -308,9 +312,9 @@ SpawnServerConnection::SendExit(int id, int status)
 
             throw;
         }
-    } catch (const std::runtime_error &e) {
-        daemon_log(1, "Failed to send EXIT to worker: %s\n",
-                   e.what());
+    } catch (...) {
+        logger(1, "Failed to send EXIT to worker: ",
+               GetFullMessage(std::current_exception()).c_str());
         RemoveConnection();
     }
 }
@@ -334,7 +338,7 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 
     if (p.uid_gid.IsEmpty()) {
         if (config.default_uid_gid.IsEmpty()) {
-            daemon_log(1, "No uid/gid specified\n");
+            logger(1, "No uid/gid specified");
             SendExit(id, W_EXITCODE(0xff, 0));
             return;
         }
@@ -348,8 +352,8 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
         pid = SpawnChildProcess(std::move(p),
                                 process.GetCgroupState());
     } catch (...) {
-        daemon_log(1, "Failed to spawn child process: %s\n",
-                   GetFullMessage(std::current_exception()).c_str());
+        logger(1, "Failed to spawn child process: ",
+               GetFullMessage(std::current_exception()).c_str());
         SendExit(id, W_EXITCODE(0xff, 0));
         return;
     }
@@ -667,7 +671,7 @@ SpawnServerConnection::ReadEventCallback(unsigned)
     ssize_t nbytes = recvmsg(fd, &msg, MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
     if (nbytes <= 0) {
         if (nbytes < 0)
-            daemon_log(2, "recvmsg() failed: %s\n", strerror(errno));
+            logger(2, "recvmsg() failed: ", strerror(errno));
         RemoveConnection();
         return;
     }
@@ -675,7 +679,7 @@ SpawnServerConnection::ReadEventCallback(unsigned)
     try {
         HandleMessage(msg, {payload, size_t(nbytes)});
     } catch (MalformedSpawnPayloadError) {
-        daemon_log(3, "Malformed spawn payload\n");
+        logger(3, "Malformed spawn payload");
     }
 }
 

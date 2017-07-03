@@ -5,6 +5,7 @@
 #ifndef BENG_PROXY_SPAWN_REGISTRY_HXX
 #define BENG_PROXY_SPAWN_REGISTRY_HXX
 
+#include "io/Logger.hxx"
 #include "event/TimerEvent.hxx"
 #include "event/SignalEvent.hxx"
 
@@ -28,6 +29,8 @@ class ChildProcessRegistry {
 
     struct ChildProcess
         : boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
+
+        const Logger logger;
 
         const pid_t pid;
 
@@ -74,6 +77,8 @@ class ChildProcessRegistry {
             }
         };
     };
+
+    const Logger logger;
 
     EventLoop &event_loop;
 
