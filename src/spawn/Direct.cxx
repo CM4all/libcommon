@@ -90,7 +90,7 @@ try {
     UnblockSignals();
 
     int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
-    if (stdout_fd < 0 || stderr_fd < 0) {
+    if (stdout_fd < 0 || (stderr_fd < 0 && p.stderr_path == nullptr)) {
         /* if no log destination was specified, log to the systemd
            journal */
         /* note: this must be done before NamespaceOptions::Setup(),
@@ -99,7 +99,7 @@ try {
         int journal_fd = sd_journal_stream_fd(p.args.front(), LOG_INFO, true);
         if (stdout_fd < 0)
             stdout_fd = journal_fd;
-        if (stderr_fd < 0)
+        if (stderr_fd < 0 && p.stderr_path == nullptr)
             stderr_fd = journal_fd;
     }
 
@@ -149,6 +149,16 @@ try {
 
         if (pid > 0)
             _exit(SpawnInit(pid));
+    }
+
+    if (stderr_fd < 0 && p.stderr_path != nullptr) {
+        stderr_fd = open(p.stderr_path,
+                         O_CREAT|O_WRONLY|O_APPEND|O_CLOEXEC|O_NOCTTY,
+                         0600);
+        if (stderr_fd < 0) {
+            perror("Failed to open STDERR_PATH");
+            _exit(EXIT_FAILURE);
+        }
     }
 
     constexpr int CONTROL_FILENO = 3;

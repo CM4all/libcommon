@@ -42,6 +42,13 @@ struct PreparedChildProcess {
      */
     const char *exec_path = nullptr;
 
+    /**
+     * An absolute path where STDERR output will be appended.  This
+     * file will be opened after jailing and after applying the
+     * #UidGid.
+     */
+    const char *stderr_path = nullptr;
+
     StaticArray<const char *, 32> args;
     StaticArray<const char *, 32> env;
     int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1, control_fd = -1;

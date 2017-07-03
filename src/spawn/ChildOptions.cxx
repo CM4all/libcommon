@@ -89,6 +89,9 @@ ChildOptions::MakeId(char *p) const
     if (stderr_path != nullptr)
         p += sprintf(p, ";e%08x", djb_hash_string(stderr_path));
 
+    if (stderr_jailed)
+        *p++ = 'j';
+
     for (auto i : env) {
         *p++ = '$';
         p = stpcpy(p, i);
@@ -146,7 +149,12 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
         jail->InsertWrapper(dest, document_root);
 #endif
 
-    if (stderr_path != nullptr) {
+    if (stderr_jailed) {
+        assert(stderr_path != nullptr);
+
+        /* open the file in the child process after jailing */
+        dest.stderr_path = stderr_path;
+    } else if (stderr_path != nullptr) {
         int fd = OpenStderrPath();
         if (fd < 0)
             throw FormatErrno("open('%s') failed", stderr_path);

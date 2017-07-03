@@ -52,6 +52,13 @@ struct ChildOptions {
      */
     bool stderr_null = false;
 
+    /**
+     * Shall #stderr_path be applied after jailing?
+     *
+     * @see TranslationCommand::STDERR_PATH_JAILED
+     */
+    bool stderr_jailed = false;
+
     bool forbid_user_ns = false;
 
     bool no_new_privs = false;
