@@ -42,6 +42,7 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 #endif
      uid_gid(src.uid_gid),
      stderr_null(src.stderr_null),
+     stderr_jailed(src.stderr_jailed),
      forbid_user_ns(src.forbid_user_ns),
      no_new_privs(src.no_new_privs)
 {
