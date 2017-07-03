@@ -227,6 +227,7 @@ private:
                              const void *const _payload, size_t payload_length);
 
     void HandleUidGid(ConstBuffer<void> payload);
+    void HandleUmask(ConstBuffer<void> payload);
 
     void HandleCgroupSet(StringView payload);
 

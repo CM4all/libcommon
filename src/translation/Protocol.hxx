@@ -849,6 +849,12 @@ enum class TranslationCommand : uint16_t {
      * Like #STDERR_PATH, but open the file after entering the jail.
      */
     STDERR_PATH_JAILED = 192,
+
+    /**
+     * The umask for the new child process.  Payload is a 16 bit
+     * integer.
+     */
+    UMASK = 193,
 };
 
 struct TranslationHeader {

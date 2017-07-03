@@ -885,6 +885,27 @@ TranslateParser::HandleUidGid(ConstBuffer<void> _payload)
         uid_gid.groups[n_groups] = 0;
 }
 
+inline void
+TranslateParser::HandleUmask(ConstBuffer<void> payload)
+{
+    typedef uint16_t value_type;
+
+    if (child_options == nullptr)
+        throw std::runtime_error("misplaced UMASK packet");
+
+    if (child_options->umask >= 0)
+        throw std::runtime_error("duplicate UMASK packet");
+
+    if (payload.size != sizeof(value_type))
+        throw std::runtime_error("malformed UMASK packet");
+
+    auto umask = *(const uint16_t *)payload.data;
+    if (umask & ~0777)
+        throw std::runtime_error("malformed UMASK packet");
+
+    child_options->umask = umask;
+}
+
 gcc_pure
 static bool
 IsValidCgroupSetName(StringView name)
@@ -3169,6 +3190,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         translate_client_stderr_path(child_options,
                                      { _payload, payload_length },
                                      true);
+        return;
+
+    case TranslationCommand::UMASK:
+        HandleUmask({_payload, payload_length});
         return;
     }
 
