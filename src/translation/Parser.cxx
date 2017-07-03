@@ -790,7 +790,8 @@ translate_client_expires_relative(TranslateResponse &response,
 
 static void
 translate_client_stderr_path(ChildOptions *child_options,
-                             ConstBuffer<void> payload)
+                             ConstBuffer<void> payload,
+                             bool jailed)
 {
     const char *path = (const char *)payload.data;
     if (!is_valid_absolute_path(path, payload.size))
@@ -803,6 +804,7 @@ translate_client_stderr_path(ChildOptions *child_options,
         throw std::runtime_error("duplicate STDERR_PATH packet");
 
     child_options->stderr_path = path;
+    child_options->stderr_jailed = jailed;
 }
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -2540,7 +2542,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::STDERR_PATH:
         translate_client_stderr_path(child_options,
-                                     { _payload, payload_length });
+                                     { _payload, payload_length },
+                                     false);
         return;
 
     case TranslationCommand::AUTH:
@@ -3160,6 +3163,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (has_null_byte(payload, payload_length))
             throw std::runtime_error("malformed TOKEN packet");
         response.token = payload;
+        return;
+
+    case TranslationCommand::STDERR_PATH_JAILED:
+        translate_client_stderr_path(child_options,
+                                     { _payload, payload_length },
+                                     true);
         return;
     }
 

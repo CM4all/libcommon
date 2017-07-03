@@ -844,6 +844,11 @@ enum class TranslationCommand : uint16_t {
      * matched by a configuration file).
      */
     TOKEN = 191,
+
+    /**
+     * Like #STDERR_PATH, but open the file after entering the jail.
+     */
+    STDERR_PATH_JAILED = 192,
 };
 
 struct TranslationHeader {
