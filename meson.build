@@ -29,7 +29,6 @@ libsystemd = dependency('libsystemd')
 libdbus = dependency('dbus-1')
 libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
-libdaemon = dependency('libcm4all-daemon', version: '>= 0.4.1')
 
 gtest_warning_flags = []
 if compiler.get_id() == 'gcc'
@@ -231,7 +230,6 @@ spawn = static_library('spawn',
     libdbus,
     libseccomp,
     libsystemd,
-    libdaemon,
     adata_dep,
     io_dep,
     odbus_dep,

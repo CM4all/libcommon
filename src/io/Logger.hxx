@@ -293,9 +293,8 @@ public:
 
 class LazyDomainLogger : public BasicLogger<LazyLoggerDomain> {
 public:
-    template<typename D>
-    explicit LazyDomainLogger(D &&_domain)
-        :BasicLogger(std::forward<D>(_domain)) {}
+    explicit LazyDomainLogger(LoggerDomainFactory &_factory)
+        :BasicLogger(_factory) {}
 };
 
 #endif
