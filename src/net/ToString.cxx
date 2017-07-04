@@ -17,7 +17,7 @@
 static SocketAddress
 ipv64_normalize_mapped(SocketAddress address)
 {
-    const auto &a6 = *(const struct sockaddr_in6 *)address.GetAddress();
+    const auto &a6 = *(const struct sockaddr_in6 *)(const void *)address.GetAddress();
     if (address.GetFamily() != AF_INET6 || !IN6_IS_ADDR_V4MAPPED(&a6.sin6_addr))
         return address;
 
