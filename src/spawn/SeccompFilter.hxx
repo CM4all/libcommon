@@ -48,6 +48,13 @@ public:
     }
 };
 
+#ifdef __clang__
+/* work around "error: missing field 'datum_b' initializer" in
+   SCMP_CMP() */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
+
 /**
  * Reference to a system call argument.
  */
@@ -106,6 +113,10 @@ private:
         }
     };
 };
+
+#ifdef __clang__
+#pragma GCC diagnostic pop
+#endif
 
 } // namespace Seccomp
 
