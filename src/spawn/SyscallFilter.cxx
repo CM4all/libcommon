@@ -106,7 +106,7 @@ AddInverted(Seccomp::Filter &sf, uint32_t action, int syscall,
 
     for (auto next = std::next(i), end = whitelist.end();
          next != end; i = next++)
-        AddRange(sf, action, syscall, arg, *i + 1, *end);
+        AddRange(sf, action, syscall, arg, *i + 1, *next);
 
     sf.AddRule(action, syscall, arg > *i);
 }
