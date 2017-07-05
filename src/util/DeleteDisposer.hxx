@@ -36,10 +36,10 @@
  */
 class DeleteDisposer {
 public:
-    template<typename T>
-    void operator()(T *t) {
-        delete t;
-    }
+	template<typename T>
+	void operator()(T *t) {
+		delete t;
+	}
 };
 
 #endif
