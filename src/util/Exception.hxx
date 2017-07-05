@@ -60,7 +60,7 @@ ThrowException(std::exception_ptr ep)
  */
 template<typename T>
 inline std::exception_ptr
-NestException(std::exception_ptr ep, T &&t)
+NestException(std::exception_ptr ep, T &&t) noexcept
 {
 	try {
 		std::rethrow_exception(ep);
@@ -104,7 +104,7 @@ FindRetrowNested(std::exception_ptr ep)
 std::string
 GetFullMessage(const std::exception &e,
 	       const char *fallback="Unknown exception",
-	       const char *separator="; ");
+	       const char *separator="; ") noexcept;
 
 /**
  * Obtain the full concatenated message of an exception and its nested
@@ -113,6 +113,6 @@ GetFullMessage(const std::exception &e,
 std::string
 GetFullMessage(const std::exception_ptr &ep,
 	       const char *fallback="Unknown exception",
-	       const char *separator="; ");
+	       const char *separator="; ") noexcept;
 
 #endif

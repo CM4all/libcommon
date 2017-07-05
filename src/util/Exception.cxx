@@ -32,7 +32,7 @@
 template<typename T>
 static void
 AppendNestedMessage(std::string &result, T &&e,
-		    const char *fallback, const char *separator)
+		    const char *fallback, const char *separator) noexcept
 {
 	try {
 		std::rethrow_if_nested(std::forward<T>(e));
@@ -50,7 +50,7 @@ AppendNestedMessage(std::string &result, T &&e,
 
 std::string
 GetFullMessage(const std::exception &e,
-	       const char *fallback, const char *separator)
+	       const char *fallback, const char *separator) noexcept
 {
 	std::string result = e.what();
 	AppendNestedMessage(result, e, fallback, separator);
@@ -59,7 +59,7 @@ GetFullMessage(const std::exception &e,
 
 std::string
 GetFullMessage(const std::exception_ptr &ep,
-	       const char *fallback, const char *separator)
+	       const char *fallback, const char *separator) noexcept
 {
 	try {
 		std::rethrow_exception(ep);
