@@ -855,6 +855,11 @@ enum class TranslationCommand : uint16_t {
      * integer.
      */
     UMASK = 193,
+
+    /**
+     * Start the child process in a new Cgroup namespace?
+     */
+    CGROUP_NAMESPACE = 194,
 };
 
 struct TranslationHeader {

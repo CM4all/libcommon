@@ -3195,6 +3195,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     case TranslationCommand::UMASK:
         HandleUmask({_payload, payload_length});
         return;
+
+    case TranslationCommand::CGROUP_NAMESPACE:
+        if (payload_length != 0)
+            throw std::runtime_error("malformed CGROUP_NAMESPACE packet");
+
+        if (ns_options != nullptr) {
+            if (ns_options->enable_cgroup)
+                throw std::runtime_error("duplicate CGROUP_NAMESPACE packet");
+
+            ns_options->enable_cgroup = true;
+        } else
+            throw std::runtime_error("misplaced CGROUP_NAMESPACE packet");
+
+        return;
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);
