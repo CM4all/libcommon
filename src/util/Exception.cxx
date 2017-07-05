@@ -58,7 +58,7 @@ GetFullMessage(const std::exception &e,
 }
 
 std::string
-GetFullMessage(const std::exception_ptr &ep,
+GetFullMessage(std::exception_ptr ep,
 	       const char *fallback, const char *separator) noexcept
 {
 	try {

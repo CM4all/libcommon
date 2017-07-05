@@ -111,7 +111,7 @@ GetFullMessage(const std::exception &e,
  * chain.
  */
 std::string
-GetFullMessage(const std::exception_ptr &ep,
+GetFullMessage(std::exception_ptr ep,
 	       const char *fallback="Unknown exception",
 	       const char *separator="; ") noexcept;
 
