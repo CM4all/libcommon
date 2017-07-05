@@ -29,6 +29,7 @@ You need:
 - `libsystemd <https://www.freedesktop.org/wiki/Software/systemd/>`__
 - `libdbus <https://www.freedesktop.org/wiki/Software/dbus/>`__
 - `libseccomp <https://github.com/seccomp/libseccomp>`__
+- `OpenSSL <https://www.openssl.org/>`__
 - `LuaJit <http://luajit.org/>`__
 
 To build it, type::
