@@ -43,17 +43,17 @@ StringFormat(char *buffer, size_t size, const char *fmt, Args&&... args)
 
 template<size_t CAPACITY, typename... Args>
 static inline void
-StringFormat(StringBuffer<char, CAPACITY> &buffer,
+StringFormat(StringBuffer<CAPACITY> &buffer,
 	     const char *fmt, Args&&... args)
 {
 	StringFormat(buffer.data(), buffer.capacity(), fmt, args...);
 }
 
 template<size_t CAPACITY, typename... Args>
-static inline StringBuffer<char, CAPACITY>
+static inline StringBuffer<CAPACITY>
 StringFormat(const char *fmt, Args&&... args)
 {
-	StringBuffer<char, CAPACITY> result;
+	StringBuffer<CAPACITY> result;
 	StringFormat(result, fmt, args...);
 	return result;
 }
