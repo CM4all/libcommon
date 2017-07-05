@@ -66,13 +66,6 @@ OffsetCast(const U *p, ptrdiff_t offset)
 	return reinterpret_cast<const T *>(OffsetPointer(p, offset));
 }
 
-/**
- * Cast the given pointer to a struct member to its parent structure.
- */
-#define ContainerCast(p, container, attribute) \
-	OffsetCast<container, decltype(((container*)nullptr)->attribute)> \
-	((p), -ptrdiff_t(offsetof(container, attribute)))
-
 template<class C, class A>
 static constexpr inline ptrdiff_t
 ContainerAttributeOffset(const C *null_c, const A C::*p)
