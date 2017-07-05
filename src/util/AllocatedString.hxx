@@ -103,10 +103,6 @@ public:
 		return *this;
 	}
 
-	constexpr bool IsNull() const {
-		return value == nullptr;
-	}
-
 	constexpr bool operator==(std::nullptr_t) const {
 		return value == nullptr;
 	}
@@ -115,8 +111,16 @@ public:
 		return value != nullptr;
 	}
 
+	constexpr bool IsNull() const {
+		return value == nullptr;
+	}
+
 	constexpr const_pointer_type c_str() const {
 		return value;
+	}
+
+	bool empty() const {
+		return *value == SENTINEL;
 	}
 
 	constexpr pointer_type data() const {
@@ -129,10 +133,6 @@ public:
 
 	const reference_type operator[](size_type i) const {
 		return value[i];
-	}
-
-	bool empty() const {
-		return *value == SENTINEL;
 	}
 
 	pointer_type Steal() {
