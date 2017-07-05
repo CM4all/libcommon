@@ -35,6 +35,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
                                    const NamespaceOptions &src)
     :enable_user(src.enable_user),
      enable_pid(src.enable_pid),
+     enable_cgroup(src.enable_cgroup),
      enable_network(src.enable_network),
      enable_ipc(src.enable_ipc),
      enable_mount(src.enable_mount),
@@ -80,6 +81,8 @@ NamespaceOptions::GetCloneFlags(int flags) const
         flags |= CLONE_NEWUSER;
     if (enable_pid)
         flags |= CLONE_NEWPID;
+    if (enable_cgroup)
+        flags |= CLONE_NEWCGROUP;
     if (enable_network)
         flags |= CLONE_NEWNET;
     if (enable_ipc)
@@ -268,6 +271,9 @@ NamespaceOptions::MakeId(char *p) const
 
     if (enable_pid)
         p = (char *)mempcpy(p, ";pns", 4);
+
+    if (enable_cgroup)
+        p = (char *)mempcpy(p, ";cns", 4);
 
     if (enable_network)
         p = (char *)mempcpy(p, ";nns", 4);

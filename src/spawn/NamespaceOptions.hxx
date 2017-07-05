@@ -27,6 +27,11 @@ struct NamespaceOptions {
     bool enable_pid = false;
 
     /**
+     * Start the child process in a new Cgroup namespace?
+     */
+    bool enable_cgroup = false;
+
+    /**
      * Start the child process in a new network namespace?
      */
     bool enable_network = false;
