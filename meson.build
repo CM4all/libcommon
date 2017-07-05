@@ -29,6 +29,7 @@ libsystemd = dependency('libsystemd')
 libdbus = dependency('dbus-1')
 libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
+libssl = dependency('openssl')
 
 gtest_warning_flags = []
 if compiler.get_id() == 'gcc'
@@ -103,6 +104,25 @@ lua = static_library('lua',
   ]
 )
 lua_dep = declare_dependency(link_with: lua)
+
+ssl = static_library('ssl',
+  'src/ssl/AltName.cxx',
+  'src/ssl/Buffer.cxx',
+  'src/ssl/Certificate.cxx',
+  'src/ssl/Dummy.cxx',
+  'src/ssl/Edit.cxx',
+  'src/ssl/Error.cxx',
+  'src/ssl/Hash.cxx',
+  'src/ssl/Key.cxx',
+  'src/ssl/LoadFile.cxx',
+  'src/ssl/Name.cxx',
+  'src/ssl/Time.cxx',
+  include_directories: inc,
+  dependencies: [
+    libssl,
+    util_dep,
+  ])
+ssl_dep = declare_dependency(link_with: ssl)
 
 event = static_library('event',
   'src/event/Loop.cxx',
