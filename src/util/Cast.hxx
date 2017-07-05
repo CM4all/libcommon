@@ -91,10 +91,7 @@ ContainerAttributeOffset(const A C::*p)
  * Cast the given pointer to a struct member to its parent structure.
  */
 template<class C, class A>
-#if defined(__clang__) || GCC_CHECK_VERSION(4,7)
-constexpr
-#endif
-static inline C &
+static inline constexpr C &
 ContainerCast2(A &a, A C::*member)
 {
 	return *OffsetCast<C, A>(&a, ContainerAttributeOffset<C, A>(member));
@@ -104,10 +101,7 @@ ContainerCast2(A &a, A C::*member)
  * Cast the given pointer to a struct member to its parent structure.
  */
 template<class C, class A>
-#if defined(__clang__) || GCC_CHECK_VERSION(4,7)
-constexpr
-#endif
-static inline const C &
+static inline constexpr const C &
 ContainerCast2(const A &a, A C::*member)
 {
 	return *OffsetCast<const C, const A>(&a, ContainerAttributeOffset<C, A>(member));
