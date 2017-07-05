@@ -30,7 +30,7 @@
 #ifndef STRING_LESS_HXX
 #define STRING_LESS_HXX
 
-#include "util/Compiler.h"
+#include "Compiler.h"
 
 #include <functional>
 

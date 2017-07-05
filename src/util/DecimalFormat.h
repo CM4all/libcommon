@@ -5,7 +5,7 @@
 #ifndef DECIMAL_FORMAT_H
 #define DECIMAL_FORMAT_H
 
-#include "util/Compiler.h"
+#include "Compiler.h"
 
 #include <stdint.h>
 #include <string.h>

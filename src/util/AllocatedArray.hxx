@@ -31,8 +31,7 @@
 #define ALLOCATED_ARRAY_HXX
 
 #include "WritableBuffer.hxx"
-
-#include "util/Compiler.h"
+#include "Compiler.h"
 
 #include <algorithm>
 

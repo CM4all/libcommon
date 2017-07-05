@@ -32,7 +32,7 @@
 
 #include "Manual.hxx"
 
-#include "util/Compiler.h"
+#include "Compiler.h"
 
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/unordered_set.hpp>
