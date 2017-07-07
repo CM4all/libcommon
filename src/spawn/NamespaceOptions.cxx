@@ -77,6 +77,10 @@ NamespaceOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 int
 NamespaceOptions::GetCloneFlags(int flags) const
 {
+#ifndef CLONE_NEWCGROUP
+    constexpr int CLONE_NEWCGROUP = 0x02000000;
+#endif
+
     if (enable_user)
         flags |= CLONE_NEWUSER;
     if (enable_pid)
