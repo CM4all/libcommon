@@ -32,6 +32,7 @@ public:
      */
     void Listen(SocketAddress address,
                 bool reuse_port=false,
+                bool free_bind=false,
                 const char *bind_to_device=nullptr);
 
     void ListenTCP(unsigned port);

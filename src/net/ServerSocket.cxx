@@ -41,6 +41,7 @@ ServerSocket::Listen(UniqueSocketDescriptor &&_fd)
 static UniqueSocketDescriptor
 MakeListener(const SocketAddress address,
              bool reuse_port,
+             bool free_bind,
              const char *bind_to_device)
 {
     const int family = address.GetFamily();
@@ -63,6 +64,9 @@ MakeListener(const SocketAddress address,
 
     if (reuse_port && !fd.SetReusePort())
         throw MakeErrno("Failed to set SO_REUSEPORT");
+
+    if (free_bind && !fd.SetFreeBind())
+        throw MakeErrno("Failed to set SO_FREEBIND");
 
     if (address.IsV6Any())
         fd.SetV6Only(false);
@@ -100,9 +104,10 @@ IsTCP(SocketAddress address)
 void
 ServerSocket::Listen(SocketAddress address,
                      bool reuse_port,
+                     bool free_bind,
                      const char *bind_to_device)
 {
-    Listen(MakeListener(address, reuse_port, bind_to_device));
+    Listen(MakeListener(address, reuse_port, free_bind, bind_to_device));
 }
 
 void
@@ -128,7 +133,7 @@ ServerSocket::ListenTCP4(unsigned port)
     sa4.sin_port = htons(port);
 
     Listen(SocketAddress((const struct sockaddr *)&sa4, sizeof(sa4)),
-           false, nullptr);
+           false, false, nullptr);
 }
 
 void
@@ -144,7 +149,7 @@ ServerSocket::ListenTCP6(unsigned port)
     sa6.sin6_port = htons(port);
 
     Listen(SocketAddress((const struct sockaddr *)&sa6, sizeof(sa6)),
-           false, nullptr);
+           false, false, nullptr);
 }
 
 void
@@ -153,7 +158,7 @@ ServerSocket::ListenPath(const char *path)
     AllocatedSocketAddress address;
     address.SetLocal(path);
 
-    Listen(address, false, nullptr);
+    Listen(address, false, false, nullptr);
 }
 
 StaticSocketAddress
