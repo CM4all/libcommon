@@ -917,7 +917,7 @@ IsValidCgroupSetName(StringView name)
     const StringView controller(name.data, dot);
 
     for (char ch : controller)
-        if (!IsLowerAlphaASCII(ch))
+        if (!IsLowerAlphaASCII(ch) && ch != '_')
             return false;
 
     if (controller.Equals("cgroup"))
