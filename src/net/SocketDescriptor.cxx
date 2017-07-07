@@ -167,6 +167,12 @@ SocketDescriptor::SetReusePort(bool value)
 }
 
 bool
+SocketDescriptor::SetFreeBind(bool value)
+{
+	return SetBoolOption(IPPROTO_IP, IP_FREEBIND, value);
+}
+
+bool
 SocketDescriptor::SetNoDelay(bool value)
 {
 	return SetBoolOption(IPPROTO_TCP, TCP_NODELAY, value);
