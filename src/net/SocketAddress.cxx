@@ -82,6 +82,14 @@ SocketAddress::IsV6Any() const noexcept
 		   &in6addr_any, sizeof(in6addr_any)) == 0;
 }
 
+bool
+SocketAddress::IsV4Mapped() const noexcept
+{
+	const auto &a6 = *(const struct sockaddr_in6 *)(const void *)GetAddress();
+
+	return GetFamily() == AF_INET6 && IN6_IS_ADDR_V4MAPPED(&a6.sin6_addr);
+}
+
 unsigned
 SocketAddress::GetPort() const noexcept
 {

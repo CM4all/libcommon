@@ -157,6 +157,10 @@ public:
 		return ((SocketAddress)*this).IsV6Any();
 	}
 
+	bool IsV4Mapped() const noexcept {
+		return ((SocketAddress)*this).IsV4Mapped();
+	}
+
 	/**
 	 * Extract the port number.  Returns 0 if not applicable.
 	 */
