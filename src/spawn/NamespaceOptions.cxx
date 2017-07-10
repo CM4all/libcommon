@@ -318,6 +318,8 @@ NamespaceOptions::MakeId(char *p) const
             p = (char *)mempcpy(p, ";t:", 3);
             p = stpcpy(p, mount_tmpfs);
         }
+
+        p = MountList::MakeIdAll(p, mounts);
     }
 
     if (hostname != nullptr) {

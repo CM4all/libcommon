@@ -74,6 +74,9 @@ struct MountList {
      * Throws std::system_error on error.
      */
     static void ApplyAll(const MountList *m);
+
+    char *MakeId(char *p) const;
+    static char *MakeIdAll(char *p, const MountList *m);
 };
 
 #endif

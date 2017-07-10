@@ -81,3 +81,32 @@ MountList::ApplyAll(const MountList *m)
     for (; m != nullptr; m = m->next)
         m->Apply();
 }
+
+char *
+MountList::MakeId(char *p) const
+{
+    *p++ = ';';
+    *p++ = 'm';
+
+    if (writable)
+        *p++ = 'w';
+
+    if (exec)
+        *p++ = 'x';
+
+    *p++ = ':';
+    p = stpcpy(p, source);
+    *p++ = '>';
+    p = stpcpy(p, target);
+
+    return p;
+}
+
+char *
+MountList::MakeIdAll(char *p, const MountList *m)
+{
+    for (; m != nullptr; m = m->next)
+        p = m->MakeId(p);
+
+    return p;
+}
