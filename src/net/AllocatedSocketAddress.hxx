@@ -153,6 +153,10 @@ public:
 #endif
 
 #ifdef HAVE_TCP
+	bool IsV6Any() const noexcept {
+		return ((SocketAddress)*this).IsV6Any();
+	}
+
 	/**
 	 * Extract the port number.  Returns 0 if not applicable.
 	 */
