@@ -107,6 +107,14 @@ public:
 		address.sin6_port = ToBE16(port);
 	}
 
+	constexpr const struct in6_addr &GetAddress() const {
+		return address.sin6_addr;
+	}
+
+	constexpr uint32_t GetScopeId() const {
+		return address.sin6_scope_id;
+	}
+
 	/**
 	 * Is this the IPv6 wildcard address (in6addr_any)?
 	 */

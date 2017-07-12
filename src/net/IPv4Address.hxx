@@ -138,6 +138,10 @@ public:
 	void SetPort(uint16_t port) {
 		address.sin_port = ToBE16(port);
 	}
+
+	constexpr const struct in_addr &GetAddress() const {
+		return address.sin_addr;
+	}
 };
 
 #endif
