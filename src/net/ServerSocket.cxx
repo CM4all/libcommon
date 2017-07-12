@@ -4,6 +4,7 @@
 
 #include "ServerSocket.hxx"
 #include "IPv4Address.hxx"
+#include "IPv6Address.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/StaticSocketAddress.hxx"
@@ -14,7 +15,6 @@
 #include <stddef.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <stdio.h>
 #include <errno.h>
@@ -135,14 +135,7 @@ ServerSocket::ListenTCP6(unsigned port)
 {
     assert(port > 0);
 
-    struct sockaddr_in6 sa6;
-
-    memset(&sa6, 0, sizeof(sa6));
-    sa6.sin6_family = AF_INET6;
-    sa6.sin6_addr = in6addr_any;
-    sa6.sin6_port = htons(port);
-
-    Listen(SocketAddress((const struct sockaddr *)&sa6, sizeof(sa6)),
+    Listen(IPv6Address(port),
            false, false, nullptr);
 }
 

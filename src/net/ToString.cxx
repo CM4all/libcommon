@@ -5,12 +5,12 @@
 #include "ToString.hxx"
 #include "SocketAddress.hxx"
 #include "IPv4Address.hxx"
+#include "IPv6Address.hxx"
 
 #include <algorithm>
 
 #include <assert.h>
 #include <sys/un.h>
-#include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdint.h>
