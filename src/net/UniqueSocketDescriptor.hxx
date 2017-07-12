@@ -17,46 +17,46 @@ class StaticSocketAddress;
  */
 class UniqueSocketDescriptor : public SocketDescriptor {
 public:
-    UniqueSocketDescriptor()
-        :SocketDescriptor(SocketDescriptor::Undefined()) {}
+	UniqueSocketDescriptor()
+		:SocketDescriptor(SocketDescriptor::Undefined()) {}
 
-    explicit UniqueSocketDescriptor(SocketDescriptor _fd)
-        :SocketDescriptor(_fd) {}
-    explicit UniqueSocketDescriptor(FileDescriptor _fd)
-        :SocketDescriptor(_fd) {}
-    explicit UniqueSocketDescriptor(int _fd):SocketDescriptor(_fd) {}
+	explicit UniqueSocketDescriptor(SocketDescriptor _fd)
+		:SocketDescriptor(_fd) {}
+	explicit UniqueSocketDescriptor(FileDescriptor _fd)
+		:SocketDescriptor(_fd) {}
+	explicit UniqueSocketDescriptor(int _fd):SocketDescriptor(_fd) {}
 
-    UniqueSocketDescriptor(UniqueSocketDescriptor &&other)
-        :SocketDescriptor(std::exchange(other.fd, -1)) {}
+	UniqueSocketDescriptor(UniqueSocketDescriptor &&other)
+		:SocketDescriptor(std::exchange(other.fd, -1)) {}
 
-    ~UniqueSocketDescriptor() {
-        if (IsDefined())
-            Close();
-    }
+	~UniqueSocketDescriptor() {
+		if (IsDefined())
+			Close();
+	}
 
-    /**
-     * Release ownership and return the descriptor as an unmanaged
-     * #SocketDescriptor instance.
-     */
-    SocketDescriptor Release() {
-        return std::exchange(*(SocketDescriptor *)this, Undefined());
-    }
+	/**
+	 * Release ownership and return the descriptor as an unmanaged
+	 * #SocketDescriptor instance.
+	 */
+	SocketDescriptor Release() {
+		return std::exchange(*(SocketDescriptor *)this, Undefined());
+	}
 
-    UniqueSocketDescriptor &operator=(UniqueSocketDescriptor &&src) {
-        std::swap(fd, src.fd);
-        return *this;
-    }
+	UniqueSocketDescriptor &operator=(UniqueSocketDescriptor &&src) {
+		std::swap(fd, src.fd);
+		return *this;
+	}
 
-    bool operator==(const UniqueSocketDescriptor &other) const {
-        return fd == other.fd;
-    }
+	bool operator==(const UniqueSocketDescriptor &other) const {
+		return fd == other.fd;
+	}
 
-    /**
-     * @return an "undefined" instance on error
-     */
-    UniqueSocketDescriptor AcceptNonBlock(StaticSocketAddress &address) const {
-        return UniqueSocketDescriptor(SocketDescriptor::AcceptNonBlock(address));
-    }
+	/**
+	 * @return an "undefined" instance on error
+	 */
+	UniqueSocketDescriptor AcceptNonBlock(StaticSocketAddress &address) const {
+		return UniqueSocketDescriptor(SocketDescriptor::AcceptNonBlock(address));
+	}
 };
 
 #endif
