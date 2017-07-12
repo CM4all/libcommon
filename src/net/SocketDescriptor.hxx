@@ -122,6 +122,11 @@ public:
 	 */
 	bool CreateNonBlock(int domain, int type, int protocol);
 
+	static bool CreateSocketPair(int domain, int type, int protocol,
+				     SocketDescriptor &a, SocketDescriptor &b);
+	static bool CreateSocketPairNonBlock(int domain, int type, int protocol,
+					     SocketDescriptor &a, SocketDescriptor &b);
+
 	int GetError();
 
 	bool SetOption(int level, int name, const void *value, size_t size);

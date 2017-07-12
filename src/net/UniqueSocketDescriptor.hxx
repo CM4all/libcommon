@@ -57,6 +57,22 @@ public:
 	UniqueSocketDescriptor AcceptNonBlock(StaticSocketAddress &address) const {
 		return UniqueSocketDescriptor(SocketDescriptor::AcceptNonBlock(address));
 	}
+
+	static bool CreateSocketPair(int domain, int type, int protocol,
+				     UniqueSocketDescriptor &a,
+				     UniqueSocketDescriptor &b) {
+		return SocketDescriptor::CreateSocketPair(domain, type,
+							  protocol,
+							  a, b);
+	}
+
+	static bool CreateSocketPairNonBlock(int domain, int type, int protocol,
+					     UniqueSocketDescriptor &a,
+					     UniqueSocketDescriptor &b) {
+		return SocketDescriptor::CreateSocketPairNonBlock(domain, type,
+								  protocol,
+								  a, b);
+	}
 };
 
 #endif
