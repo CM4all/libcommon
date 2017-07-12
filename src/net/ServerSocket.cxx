@@ -3,6 +3,7 @@
  */
 
 #include "ServerSocket.hxx"
+#include "IPv4Address.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/StaticSocketAddress.hxx"
@@ -125,14 +126,7 @@ ServerSocket::ListenTCP4(unsigned port)
 {
     assert(port > 0);
 
-    struct sockaddr_in sa4;
-
-    memset(&sa4, 0, sizeof(sa4));
-    sa4.sin_family = AF_INET;
-    sa4.sin_addr.s_addr = INADDR_ANY;
-    sa4.sin_port = htons(port);
-
-    Listen(SocketAddress((const struct sockaddr *)&sa4, sizeof(sa4)),
+    Listen(IPv4Address(port),
            false, false, nullptr);
 }
 

@@ -4,6 +4,7 @@
 
 #include "ToString.hxx"
 #include "SocketAddress.hxx"
+#include "IPv4Address.hxx"
 
 #include <algorithm>
 
@@ -22,18 +23,14 @@ ipv64_normalize_mapped(SocketAddress address)
     if (!address.IsV4Mapped())
         return address;
 
-    uint16_t port;
-
     struct in_addr inaddr;
     memcpy(&inaddr, ((const char *)&a6.sin6_addr) + 12, sizeof(inaddr));
-    port = a6.sin6_port;
+    const uint16_t port = FromBE16(a6.sin6_port);
 
-    static struct sockaddr_in a4;
-    a4.sin_family = AF_INET;
-    memcpy(&a4.sin_addr, &inaddr, sizeof(inaddr));
-    a4.sin_port = (in_port_t)port;
+    static IPv4Address a4;
+    a4 = {inaddr, port};
 
-    return {(const struct sockaddr *)&a4, sizeof(a4)};
+    return a4;
 }
 
 static bool
