@@ -195,6 +195,9 @@ try {
         if (p.forbid_user_ns)
             ForbidUserNamespace(sf);
 
+        if (p.forbid_multicast)
+            ForbidMulticast(sf);
+
         sf.Load();
     } catch (const std::runtime_error &e) {
         fprintf(stderr, "Failed to setup seccomp filter for '%s': %s\n",
