@@ -6,9 +6,11 @@
 #include "AddressInfo.hxx"
 #include "HostParser.hxx"
 #include "util/RuntimeError.hxx"
+#include "util/CharUtil.hxx"
 
 #include <sys/socket.h>
 #include <netdb.h>
+#include <net/if.h>
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
@@ -17,6 +19,29 @@ static inline bool
 ai_is_passive(const struct addrinfo *ai)
 {
 	return ai == nullptr || (ai->ai_flags & AI_PASSIVE) != 0;
+}
+
+/**
+ * Check if there is an interface name after '%', and if so, replace
+ * it with the interface index, because getaddrinfo() understands only
+ * the index, not the name (tested on Linux/glibc).
+ */
+static void
+FindAndResolveInterfaceName(char *host, size_t size)
+{
+	char *percent = strchr(host, '%');
+	if (percent == nullptr || percent + 64 > host + size)
+		return;
+
+	char *interface = percent + 1;
+	if (!IsAlphaASCII(*interface))
+		return;
+
+	const unsigned i = if_nametoindex(interface);
+	if (i == 0)
+		throw FormatRuntimeError("No such interface: %s", interface);
+
+	sprintf(interface, "%u", i);
 }
 
 static int
@@ -40,6 +65,8 @@ Resolve(const char *host_and_port, int default_port,
 		memcpy(buffer, eh.host.data, eh.host.size);
 		buffer[eh.host.size] = 0;
 		host = buffer;
+
+		FindAndResolveInterfaceName(buffer, sizeof(buffer));
 
 		port = eh.end;
 		if (*port == ':') {
