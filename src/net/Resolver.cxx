@@ -37,16 +37,16 @@ Resolve(const char *host_and_port, int default_port,
 			return EAI_SYSTEM;
 		}
 
+		memcpy(buffer, eh.host.data, eh.host.size);
+		buffer[eh.host.size] = 0;
+		host = buffer;
+
 		port = eh.end;
 		if (*port == ':') {
 			/* port specified */
 			++port;
-			memcpy(buffer, eh.host.data, eh.host.size);
-			buffer[eh.host.size] = 0;
-			host = buffer;
 		} else if (*port == 0) {
 			/* no port specified */
-			host = host_and_port;
 			snprintf(port_string, sizeof(port_string), "%d", default_port);
 			port = port_string;
 		} else
