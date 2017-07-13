@@ -44,12 +44,13 @@ Resolve(const char *host_and_port, int default_port,
 			memcpy(buffer, eh.host.data, eh.host.size);
 			buffer[eh.host.size] = 0;
 			host = buffer;
-		} else {
+		} else if (*port == 0) {
 			/* no port specified */
 			host = host_and_port;
 			snprintf(port_string, sizeof(port_string), "%d", default_port);
 			port = port_string;
-		}
+		} else
+			throw std::runtime_error("Garbage after host name");
 
 		if (ai_is_passive(hints) && strcmp(host, "*") == 0)
 			host = nullptr;
