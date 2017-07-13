@@ -67,6 +67,8 @@ struct ChildOptions {
 
     bool forbid_user_ns = false;
 
+    bool forbid_multicast = false;
+
     bool no_new_privs = false;
 
     ChildOptions() = default;

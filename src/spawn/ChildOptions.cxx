@@ -184,5 +184,6 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
         dest.rlimits = *rlimits;
     dest.uid_gid = uid_gid;
     dest.forbid_user_ns = forbid_user_ns;
+    dest.forbid_multicast = forbid_multicast;
     dest.no_new_privs = no_new_privs;
 }

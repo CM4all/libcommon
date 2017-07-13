@@ -3199,6 +3199,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
         break;
 #endif
+
+    case TranslationCommand::FORBID_MULTICAST:
+        if (child_options == nullptr || child_options->forbid_multicast)
+            throw std::runtime_error("misplaced FORBID_MULTICAST packet");
+
+        if (payload_length != 0)
+            throw std::runtime_error("malformed FORBID_MULTICAST packet");
+
+        child_options->forbid_multicast = true;
+        return;
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

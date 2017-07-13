@@ -866,6 +866,11 @@ enum class TranslationCommand : uint16_t {
      * with #REDIRECT, #BASE, #EASY_BASE and #REDIRECT_QUERY_STRING.
      */
     REDIRECT_FULL_URI = 195,
+
+    /**
+     * Forbid the child process to add multicast group memberships.
+     */
+    FORBID_MULTICAST = 196,
 };
 
 struct TranslationHeader {
