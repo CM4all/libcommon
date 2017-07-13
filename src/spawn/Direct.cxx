@@ -108,6 +108,20 @@ try {
     }
 
     p.cgroup.Apply(cgroup_state);
+
+    if (p.ns.enable_cgroup && p.cgroup.IsDefined()) {
+        /* if the process was just moved to another cgroup, we need to
+           unshare the cgroup namespace again to hide our new cgroup
+           membership */
+
+#ifndef CLONE_NEWCGROUP
+        constexpr int CLONE_NEWCGROUP = 0x02000000;
+#endif
+
+        if (unshare(CLONE_NEWCGROUP) < 0)
+            throw MakeErrno("Failed to unshare cgroup namespace");
+    }
+
     p.refence.Apply();
 
     p.ns.Setup(p.uid_gid);
