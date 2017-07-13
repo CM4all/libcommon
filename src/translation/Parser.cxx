@@ -28,9 +28,9 @@
 #include "spawn/JailParams.hxx"
 #endif
 #if TRANSLATION_ENABLE_HTTP
-#include "net/SocketAddress.hxx"
+#include "net/AllocatedSocketAddress.hxx"
 #include "net/AddressInfo.hxx"
-#include "net/Resolver.hxx"
+#include "net/Parser.hxx"
 #endif
 #include "util/CharUtil.hxx"
 #include "util/RuntimeError.hxx"
@@ -41,8 +41,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include <sys/un.h>
-#include <netdb.h>
 
 void
 TranslateParser::SetChildOptions(ChildOptions &_child_options)
@@ -141,35 +139,7 @@ static void
 parse_address_string(AllocatorPtr alloc, AddressList *list,
                      const char *p, int default_port)
 {
-    if (*p == '/' || *p == '@') {
-        /* unix domain socket */
-
-        struct sockaddr_un sun;
-        size_t path_length = strlen(p);
-
-        if (path_length >= sizeof(sun.sun_path))
-            throw std::runtime_error("Socket path is too long");
-
-        sun.sun_family = AF_UNIX;
-        memcpy(sun.sun_path, p, path_length + 1);
-
-        socklen_t size = SUN_LEN(&sun);
-
-        if (*p == '@')
-            /* abstract socket */
-            sun.sun_path[0] = 0;
-
-        list->Add(alloc, { (const struct sockaddr *)&sun, size });
-        return;
-    }
-
-    struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_flags = AI_NUMERICHOST;
-    hints.ai_socktype = SOCK_STREAM;
-
-    for (const auto &i : Resolve(p, default_port, &hints))
-        list->Add(alloc, i);
+    list->Add(alloc, ParseSocketAddress(p, default_port, false));
 }
 
 #endif
