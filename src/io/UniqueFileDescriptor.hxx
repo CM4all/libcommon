@@ -98,18 +98,6 @@ public:
 		return FileDescriptor::CreatePipeNonBlock(r, w);
 	}
 
-	static bool CreateSocketPair(int domain, int type, int protocol,
-				     UniqueFileDescriptor &a, UniqueFileDescriptor &b) {
-		return FileDescriptor::CreateSocketPair(domain, type, protocol,
-							a, b);
-	}
-
-	static bool CreateSocketPairNonBlock(int domain, int type, int protocol,
-					     UniqueFileDescriptor &a, UniqueFileDescriptor &b) {
-		return FileDescriptor::CreateSocketPairNonBlock(domain, type, protocol,
-								a, b);
-	}
-
 	using FileDescriptor::SetNonBlocking;
 	using FileDescriptor::SetBlocking;
 	using FileDescriptor::EnableCloseOnExec;
