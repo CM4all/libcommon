@@ -124,7 +124,10 @@ public:
 	/**
 	 * Is this an IPv4 address mapped inside struct sockaddr_in6?
 	 */
-	constexpr bool IsV4Mapped() const noexcept {
+#if !GCC_OLDER_THAN(5,0)
+	constexpr
+#endif
+	bool IsV4Mapped() const noexcept {
 		return IN6_IS_ADDR_V4MAPPED(&address.sin6_addr);
 	}
 };
