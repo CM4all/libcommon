@@ -64,3 +64,21 @@ TEST(HostParserTest, IPv6StaticPort)
     ASSERT_EQ(eh.host.size, 11);
     ASSERT_EQ(eh.end, input + 13);
 }
+
+TEST(HostParserTest, IPv6Scope)
+{
+    const auto input = "2001:affe::%eth0";
+    const auto eh = ExtractHost(input);
+    ASSERT_EQ(eh.host.data, input);
+    ASSERT_EQ(eh.host.size, 16);
+    ASSERT_EQ(eh.end, input + 16);
+}
+
+TEST(HostParserTest, IPv6ScopePort)
+{
+    const auto input = "[2001:affe::%eth0]:80";
+    const auto eh = ExtractHost(input);
+    ASSERT_EQ(eh.host.data, input + 1);
+    ASSERT_EQ(eh.host.size, 16);
+    ASSERT_EQ(eh.end, input + 18);
+}

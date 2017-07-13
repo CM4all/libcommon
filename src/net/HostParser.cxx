@@ -16,6 +16,25 @@ IsValidHostnameChar(char ch)
 }
 
 static inline bool
+IsValidScopeChar(char ch)
+{
+	return IsAlphaNumericASCII(ch) ||
+		ch == '-' || ch == '_';
+}
+
+static const char *
+FindScopeEnd(const char *p)
+{
+	if (*p == '%' && IsValidScopeChar(p[1])) {
+		p += 2;
+		while (IsValidScopeChar(*p))
+			++p;
+	}
+
+	return p;
+}
+
+static inline bool
 IsValidIPv6Char(char ch)
 {
 	return IsDigitASCII(ch) ||
@@ -29,6 +48,10 @@ FindIPv6End(const char *p)
 {
 	while (IsValidIPv6Char(*p))
 		++p;
+
+	/* allow "%scope" after numeric IPv6 address */
+	p = FindScopeEnd(p);
+
 	return p;
 }
 
