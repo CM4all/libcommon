@@ -30,7 +30,7 @@ ResolveBindSocket(const char *host_and_port, int default_port, int socktype)
 {
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
-    hints.ai_flags = AI_ADDRCONFIG;
+    hints.ai_flags = AI_ADDRCONFIG|AI_PASSIVE;
     hints.ai_socktype = socktype;
 
     return ResolveBindSocket(host_and_port, default_port, hints);
