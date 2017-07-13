@@ -22,4 +22,11 @@ BuildSyscallFilter(Seccomp::Filter &sf);
 void
 ForbidUserNamespace(Seccomp::Filter &sf);
 
+/**
+ * Add rules which return EPERM upon attempting to join a multicast
+ * group.
+ */
+void
+ForbidMulticast(Seccomp::Filter &sf);
+
 #endif

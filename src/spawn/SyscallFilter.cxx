@@ -8,6 +8,7 @@
 #include <set>
 
 #include <sys/socket.h>
+#include <netinet/in.h>
 
 /**
  * The system calls which are forbidden unconditionally.
@@ -152,4 +153,46 @@ void
 ForbidUserNamespace(Seccomp::Filter &sf)
 {
     ForbidNamespace(sf, CLONE_NEWUSER);
+}
+
+template<typename C>
+static void
+AddSetSockOpts(Seccomp::Filter &sf, uint32_t action,
+               int level, const C &optnames)
+{
+    using Seccomp::Arg;
+
+    for (int optname : optnames)
+        sf.AddRule(action, SCMP_SYS(setsockopt),
+                   Arg(1) == level,
+                   Arg(2) == optname);
+}
+
+void
+ForbidMulticast(Seccomp::Filter &sf)
+{
+    static constexpr int forbidden_ip[] = {
+        IP_ADD_MEMBERSHIP,
+        IP_ADD_SOURCE_MEMBERSHIP,
+        IP_BLOCK_SOURCE,
+        IP_DROP_MEMBERSHIP,
+        IP_DROP_SOURCE_MEMBERSHIP,
+        IP_MULTICAST_ALL,
+        IP_MULTICAST_IF,
+        IP_MULTICAST_LOOP,
+        IP_MULTICAST_TTL,
+        IP_UNBLOCK_SOURCE,
+    };
+
+    AddSetSockOpts(sf, SCMP_ACT_ERRNO(EPERM), IPPROTO_IP, forbidden_ip);
+
+    static constexpr int forbidden_ipv6[] = {
+        IPV6_ADD_MEMBERSHIP,
+        IPV6_DROP_MEMBERSHIP,
+        IPV6_MULTICAST_HOPS,
+        IPV6_MULTICAST_IF,
+        IPV6_MULTICAST_LOOP,
+    };
+
+    AddSetSockOpts(sf, SCMP_ACT_ERRNO(EPERM), IPPROTO_IPV6, forbidden_ipv6);
 }
