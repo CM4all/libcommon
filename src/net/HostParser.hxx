@@ -6,33 +6,32 @@
 #define NET_HOST_PARSER_HXX
 
 #include "util/StringView.hxx"
-
 #include "util/Compiler.h"
 
 /**
  * Result type for ExtractHost().
  */
 struct ExtractHostResult {
-    /**
-     * The host part of the address.
-     *
-     * If nothing was parsed, then this is nullptr.
-     */
-    StringView host;
+	/**
+	 * The host part of the address.
+	 *
+	 * If nothing was parsed, then this is nullptr.
+	 */
+	StringView host;
 
-    /**
-     * Pointer to the first character that was not parsed.  On
-     * success, this is usually a pointer to the zero terminator or to
-     * a colon followed by a port number.
-     *
-     * If nothing was parsed, then this is a pointer to the given
-     * source string.
-     */
-    const char *end;
+	/**
+	 * Pointer to the first character that was not parsed.  On
+	 * success, this is usually a pointer to the zero terminator or to
+	 * a colon followed by a port number.
+	 *
+	 * If nothing was parsed, then this is a pointer to the given
+	 * source string.
+	 */
+	const char *end;
 
-    constexpr bool HasFailed() const {
-        return host.IsNull();
-    }
+	constexpr bool HasFailed() const {
+		return host.IsNull();
+	}
 };
 
 /**
