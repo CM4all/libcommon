@@ -173,6 +173,7 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_HTTP
     bool redirect_query_string;
+    bool redirect_full_uri;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS

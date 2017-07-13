@@ -860,6 +860,12 @@ enum class TranslationCommand : uint16_t {
      * Start the child process in a new Cgroup namespace?
      */
     CGROUP_NAMESPACE = 194,
+
+    /**
+     * Use the full request URI for #REDIRECT?  This should be used
+     * with #REDIRECT, #BASE, #EASY_BASE and #REDIRECT_QUERY_STRING.
+     */
+    REDIRECT_FULL_URI = 195,
 };
 
 struct TranslationHeader {

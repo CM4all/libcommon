@@ -3179,6 +3179,26 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("misplaced CGROUP_NAMESPACE packet");
 
         return;
+
+    case TranslationCommand::REDIRECT_FULL_URI:
+#if TRANSLATION_ENABLE_HTTP
+        if (payload_length != 0)
+            throw std::runtime_error("malformed REDIRECT_FULL_URI packet");
+
+        if (response.base == nullptr)
+            throw std::runtime_error("REDIRECT_FULL_URI without BASE");
+
+        if (!response.easy_base)
+            throw std::runtime_error("REDIRECT_FULL_URI without EASY_BASE");
+
+        if (response.redirect_full_uri)
+            throw std::runtime_error("duplicate REDIRECT_FULL_URI packet");
+
+        response.redirect_full_uri = true;
+        return;
+#else
+        break;
+#endif
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);
