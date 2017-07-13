@@ -200,6 +200,11 @@ try {
 
         sf.Load();
     } catch (const std::runtime_error &e) {
+        if (p.HasSyscallFilter())
+            /* filter options have been explicitly enabled, and thus
+               failure to set up the filter are fatal */
+            throw;
+
         fprintf(stderr, "Failed to setup seccomp filter for '%s': %s\n",
                 path, e.what());
     }

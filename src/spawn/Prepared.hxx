@@ -126,6 +126,14 @@ struct PreparedChildProcess {
     PreparedChildProcess &operator=(const PreparedChildProcess &) = delete;
 
     /**
+     * Is at least one system call filter option enabled?  If yes,
+     * then failures to set up the filter are fatal.
+     */
+    bool HasSyscallFilter() const {
+        return forbid_user_ns || forbid_multicast;
+    }
+
+    /**
      * @return true on success, false if the #args array is full
      */
     bool InsertWrapper(ConstBuffer<const char *> w);
