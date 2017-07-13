@@ -28,6 +28,10 @@ struct CgroupOptions {
     CgroupOptions() = default;
     CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src);
 
+    bool IsDefined() const {
+        return name != nullptr;
+    }
+
     void Set(AllocatorPtr alloc, StringView name, StringView value);
 
     /**
