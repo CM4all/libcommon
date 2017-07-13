@@ -58,7 +58,7 @@ TEST(HostParserTest, IPv6Static)
 
 TEST(HostParserTest, IPv6StaticPort)
 {
-    const auto input = "[2001:affe::]80";
+    const auto input = "[2001:affe::]:80";
     const auto eh = ExtractHost(input);
     ASSERT_EQ(eh.host.data, input + 1);
     ASSERT_EQ(eh.host.size, 11);
