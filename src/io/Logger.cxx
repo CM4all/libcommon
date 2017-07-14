@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 
-unsigned LoggerDetail::min_level = 1;
+unsigned LoggerDetail::max_level = 1;
 
 LoggerDetail::ParamWrapper<std::exception_ptr>::ParamWrapper(std::exception_ptr ep)
     :ParamWrapper<std::string>(GetFullMessage(ep)) {}

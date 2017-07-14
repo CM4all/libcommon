@@ -152,12 +152,12 @@ public:
     }
 };
 
-extern unsigned min_level;
+extern unsigned max_level;
 
 inline bool
 CheckLevel(unsigned level)
 {
-    return level >= min_level;
+    return level < max_level;
 }
 
 void
@@ -184,7 +184,7 @@ Format(unsigned level, StringView domain, const char *fmt, ...) noexcept;
 inline void
 SetLogLevel(unsigned level)
 {
-    LoggerDetail::min_level = level;
+    LoggerDetail::max_level = level;
 }
 
 inline bool
