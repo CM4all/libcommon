@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 UniqueSocketDescriptor
-UdpListenerConfig::Create()
+UdpListenerConfig::Create() const
 {
 	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(bind_address.GetFamily(), SOCK_DGRAM, 0))

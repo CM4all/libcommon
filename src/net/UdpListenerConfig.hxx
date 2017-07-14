@@ -26,7 +26,7 @@ struct UdpListenerConfig {
 	 *
 	 * Throws exception on error.
 	 */
-	UniqueSocketDescriptor Create();
+	UniqueSocketDescriptor Create() const;
 };
 
 #endif
