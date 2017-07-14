@@ -16,6 +16,11 @@ struct UdpListenerConfig {
 
 	bool pass_cred = false;
 
+	UdpListenerConfig() = default;
+
+	explicit UdpListenerConfig(SocketAddress _bind_address)
+		:bind_address(_bind_address) {}
+
 	/**
 	 * Create a listening socket.
 	 *
