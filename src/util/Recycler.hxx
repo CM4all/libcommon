@@ -5,6 +5,8 @@
 #ifndef RECYCLER_HXX
 #define RECYCLER_HXX
 
+#include "Poison.hxx"
+
 #include <boost/intrusive/slist.hpp>
 
 #include <new>
@@ -67,6 +69,9 @@ public:
 
 			item.hook.~Hook();
 
+			PoisonInaccessibleT(item);
+			PoisonUndefinedT(item.value);
+
 			try {
 				new (&item.value) T(std::forward<Args>(args)...);
 				return &item.value;
@@ -86,6 +91,9 @@ public:
 		item->value.~T();
 
 		if (list.size() < N) {
+			PoisonInaccessibleT(*item);
+			PoisonUndefinedT(item->hook);
+
 			new (&item->hook) Hook();
 			list.push_front(*item);
 		} else {

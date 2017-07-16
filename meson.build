@@ -5,6 +5,13 @@ project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
   ],
 )
 
+# TODO: use get_option('b_ndebug'), but that doesn't work with Meson 0.37.1
+if get_option('buildtype') == 'debug'
+  debug = true
+else
+  debug = false
+endif
+
 compiler = meson.get_compiler('cpp')
 
 common_flags = [
@@ -20,6 +27,10 @@ common_flags = [
   '-Wunused',
   '-Wundef',
 ]
+
+if debug
+  common_flags += ['-DPOISON']
+endif
 
 add_global_arguments(common_flags,
   '-Wmissing-prototypes', '-Wstrict-prototypes',
