@@ -7,7 +7,8 @@ project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
 
 compiler = meson.get_compiler('cpp')
 
-add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
+common_flags = [
+  '-D_REENTRANT', '-D_GNU_SOURCE',
   '-DPACKAGE="' + meson.project_name() + '"',
   '-DVERSION="' + meson.project_version() + '"',
   '-Wall',
@@ -17,6 +18,18 @@ add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
   '-Wmissing-declarations', '-Wmissing-noreturn', '-Wmissing-format-attribute',
   '-Wredundant-decls', '-Wno-long-long', '-Wundef',
   '-Wunused',
+  '-Wundef',
+]
+
+add_global_arguments(common_flags,
+  '-Wmissing-prototypes', '-Wstrict-prototypes',
+  '-Wbad-function-cast',
+  '-Waggregate-return',
+  '-Wnested-externs',
+  '-pedantic',
+  language: 'c')
+
+add_global_arguments(common_flags,
   '-Wno-non-virtual-dtor',
   language: 'cpp')
 
