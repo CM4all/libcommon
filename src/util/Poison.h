@@ -9,6 +9,10 @@
 
 #include "Compiler.h"
 
+#if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
+#include <valgrind/memcheck.h>
+#endif
+
 #ifdef POISON
 #include <string.h>
 #endif
@@ -22,8 +26,16 @@
 static inline void
 PoisonInaccessible(gcc_unused void *p, gcc_unused size_t size)
 {
+#if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
+	(void)VALGRIND_MAKE_MEM_UNDEFINED(p, size);
+#endif
+
 #ifdef POISON
 	memset(p, 0x01, size);
+#endif
+
+#if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
+	(void)VALGRIND_MAKE_MEM_NOACCESS(p, size);
 #endif
 }
 
@@ -36,8 +48,16 @@ PoisonInaccessible(gcc_unused void *p, gcc_unused size_t size)
 static inline void
 PoisonUndefined(gcc_unused void *p, gcc_unused size_t size)
 {
+#if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
+	(void)VALGRIND_MAKE_MEM_NOACCESS(p, size);
+#endif
+
 #ifdef POISON
 	memset(p, 0x02, size);
+#endif
+
+#if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
+	(void)VALGRIND_MAKE_MEM_NOACCESS(p, size);
 #endif
 }
 

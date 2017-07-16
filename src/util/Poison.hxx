@@ -11,14 +11,14 @@
 
 template<typename T>
 inline void
-PoisonInaccessibleT(T &&t)
+PoisonInaccessibleT(T &t)
 {
 	PoisonInaccessible(&t, sizeof(t));
 }
 
 template<typename T>
 inline void
-PoisonUndefinedT(T &&t)
+PoisonUndefinedT(T &t)
 {
 	PoisonUndefined(&t, sizeof(t));
 }

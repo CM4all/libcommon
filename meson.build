@@ -54,6 +54,11 @@ libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
 libssl = dependency('openssl')
 
+if compiler.has_header('valgrind/memcheck.h')
+  add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'cpp')
+  add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'c')
+endif
+
 gtest_warning_flags = []
 if compiler.get_id() == 'gcc'
   gtest_warning_flags += [
