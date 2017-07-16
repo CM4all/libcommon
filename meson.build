@@ -18,7 +18,6 @@ add_global_arguments('-D_REENTRANT', '-D_GNU_SOURCE',
   '-Wredundant-decls', '-Wno-long-long', '-Wundef',
   '-Wunused',
   '-Wno-non-virtual-dtor',
-  '-Werror',
   language: 'cpp')
 
 boost = dependency('boost', modules: ['system', 'filesystem'], version: '>= 1.54')
