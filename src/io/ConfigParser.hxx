@@ -37,6 +37,14 @@ public:
 protected:
 	void SetChild(std::unique_ptr<ConfigParser> &&_child);
 	virtual void ParseLine2(FileLineParser &line) = 0;
+
+	/**
+	 * This virtual method gets called after the given child
+	 * parser has finished, before it gets destructed.  This
+	 * method gets the chance to do additional checks or take over
+	 * ownership.
+	 */
+	virtual void FinishChild(std::unique_ptr<ConfigParser> &&) {}
 };
 
 /**

@@ -31,6 +31,7 @@ NestedConfigParser::PreParseLine(FileLineParser &line)
 		if (line.SkipSymbol('}')) {
 			line.ExpectEnd();
 			child->Finish();
+			FinishChild(std::move(child));
 			child.reset();
 			return true;
 		}
