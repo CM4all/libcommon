@@ -49,7 +49,7 @@ static inline void
 PoisonUndefined(gcc_unused void *p, gcc_unused size_t size)
 {
 #if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
-	(void)VALGRIND_MAKE_MEM_NOACCESS(p, size);
+	(void)VALGRIND_MAKE_MEM_UNDEFINED(p, size);
 #endif
 
 #ifdef POISON
@@ -57,7 +57,7 @@ PoisonUndefined(gcc_unused void *p, gcc_unused size_t size)
 #endif
 
 #if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
-	(void)VALGRIND_MAKE_MEM_NOACCESS(p, size);
+	(void)VALGRIND_MAKE_MEM_UNDEFINED(p, size);
 #endif
 }
 
