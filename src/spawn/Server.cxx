@@ -134,7 +134,7 @@ class SpawnServerConnection
     SpawnServerProcess &process;
     const int fd;
 
-    const Logger logger;
+    const LLogger logger;
 
     SocketEvent event;
 
@@ -186,7 +186,7 @@ class SpawnServerProcess {
     const CgroupState &cgroup_state;
     SpawnHook *const hook;
 
-    const Logger logger;
+    const LLogger logger;
 
     EventLoop loop;
 

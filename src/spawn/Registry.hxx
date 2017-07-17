@@ -78,7 +78,7 @@ class ChildProcessRegistry {
         };
     };
 
-    const Logger logger;
+    const LLogger logger;
 
     EventLoop &event_loop;
 

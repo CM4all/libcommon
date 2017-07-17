@@ -270,6 +270,35 @@ public:
         :BasicLogger(std::forward<D>(_domain)) {}
 };
 
+/**
+ * A lighter version of #StringLoggerDomain which uses a literal
+ * string as its domain.
+ */
+class LiteralLoggerDomain {
+    StringView domain;
+
+public:
+    constexpr explicit LiteralLoggerDomain(StringView _domain=nullptr)
+        :domain(_domain) {}
+
+    constexpr StringView GetDomain() const {
+        return domain;
+    }
+};
+
+/**
+ * A lighter version of #Logger which uses a literal string as its
+ * domain.
+ */
+class LLogger : public BasicLogger<LiteralLoggerDomain> {
+public:
+    LLogger() = default;
+
+    template<typename D>
+    explicit LLogger(D &&_domain)
+        :BasicLogger(std::forward<D>(_domain)) {}
+};
+
 class LoggerDomainFactory {
 public:
     virtual std::string MakeLoggerDomain() const noexcept = 0;
