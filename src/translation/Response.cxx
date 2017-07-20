@@ -132,6 +132,7 @@ TranslateResponse::Clear()
 #if TRANSLATION_ENABLE_HTTP
     redirect_query_string = false;
     redirect_full_uri = false;
+    https_only = 0;
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
     auto_base = false;
@@ -312,6 +313,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #if TRANSLATION_ENABLE_HTTP
     redirect_query_string = src.redirect_query_string;
     redirect_full_uri = src.redirect_full_uri;
+    https_only = src.https_only;
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
     auto_base = src.auto_base;

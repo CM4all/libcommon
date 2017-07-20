@@ -3200,6 +3200,28 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         break;
 #endif
 
+    case TranslationCommand::HTTPS_ONLY:
+#if TRANSLATION_ENABLE_HTTP
+        if (response.https_only != 0)
+            throw std::runtime_error("duplicate HTTPS_ONLY packet");
+
+        if (payload_length == sizeof(response.https_only)) {
+            response.https_only = *(const uint16_t *)payload;
+            if (response.https_only == 0)
+                /* zero in the packet means "default port", but we
+                   change it here to 443 because in the variable, zero
+                   means "not set" */
+                response.https_only = 443;
+        } else if (payload_length == 0)
+            response.https_only = 443;
+        else
+            throw std::runtime_error("malformed HTTPS_ONLY packet");
+
+        return;
+#else
+        break;
+#endif
+
     case TranslationCommand::FORBID_MULTICAST:
         if (child_options == nullptr || child_options->forbid_multicast)
             throw std::runtime_error("misplaced FORBID_MULTICAST packet");

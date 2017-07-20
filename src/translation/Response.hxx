@@ -174,6 +174,12 @@ struct TranslateResponse {
 #if TRANSLATION_ENABLE_HTTP
     bool redirect_query_string;
     bool redirect_full_uri;
+
+    /**
+     * Non-zero means the TranslationCommand::HTTPS_ONLY packet was
+     * received, and the value is the port number.
+     */
+    uint16_t https_only;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS

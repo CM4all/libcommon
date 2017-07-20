@@ -871,6 +871,13 @@ enum class TranslationCommand : uint16_t {
      * Forbid the child process to add multicast group memberships.
      */
     FORBID_MULTICAST = 196,
+
+    /**
+     * Allow only HTTPS, and generate a redirect to a https:// if this
+     * is plain http://.  Optional payload is a HTTPS port number (16
+     * bit).
+     */
+    HTTPS_ONLY = 197,
 };
 
 struct TranslationHeader {
