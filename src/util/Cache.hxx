@@ -286,10 +286,6 @@ public:
 		} else {
 			i.first->ReplaceData(std::forward<U>(data));
 		}
-
-		Item &item = Make(std::forward<K>(key), std::forward<U>(data));
-		chronological_list.push_front(item);
-		map.insert(item);
 	}
 
 	/**
