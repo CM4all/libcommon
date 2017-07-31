@@ -284,6 +284,7 @@ spawn = static_library('spawn',
   include_directories: inc,
   dependencies: [
     libdbus,
+    libcap,
     libseccomp,
     libsystemd,
     adata_dep,

@@ -5,10 +5,13 @@
 #include "Init.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
+#include "system/CapabilityState.hxx"
 #include "io/FileDescriptor.hxx"
+#include "util/Macros.hxx"
 
 #include <sys/wait.h>
 #include <sys/signalfd.h>
+#include <sys/capability.h>
 #include <stdlib.h>
 #include <dirent.h>
 
@@ -69,9 +72,27 @@ SpawnInitFork()
     return pid;
 }
 
+static void
+DropCapabilities()
+{
+    static constexpr cap_value_t keep_caps[] = {
+        /* needed to forward received signals to the main child
+           process (running under a different uid) */
+        CAP_KILL,
+    };
+
+    CapabilityState state = CapabilityState::Empty();
+    state.SetFlag(CAP_EFFECTIVE, {keep_caps, ARRAY_SIZE(keep_caps)}, CAP_SET);
+    state.SetFlag(CAP_PERMITTED, {keep_caps, ARRAY_SIZE(keep_caps)}, CAP_SET);
+    state.Install();
+}
+
 int
 SpawnInit(pid_t child_pid)
 {
+    if (geteuid() == 0)
+        DropCapabilities();
+
     int last_status = EXIT_SUCCESS;
 
     while (true) {
