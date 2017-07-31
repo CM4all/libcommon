@@ -28,6 +28,7 @@ You need:
 - `libpq <https://www.postgresql.org/>`__
 - `libsystemd <https://www.freedesktop.org/wiki/Software/systemd/>`__
 - `libdbus <https://www.freedesktop.org/wiki/Software/dbus/>`__
+- `libcap <https://sites.google.com/site/fullycapable/>`__
 - `libseccomp <https://github.com/seccomp/libseccomp>`__
 - `OpenSSL <https://www.openssl.org/>`__
 - `LuaJit <http://luajit.org/>`__

@@ -50,6 +50,7 @@ libcurl = dependency('libcurl', version: '>= 7.38')
 libpq = dependency('libpq', version: '>= 8.4')
 libsystemd = dependency('libsystemd')
 libdbus = dependency('dbus-1')
+libcap = dependency('libcap')
 libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
 libssl = dependency('openssl')
@@ -184,9 +185,11 @@ io_dep = declare_dependency(link_with: io)
 
 system = static_library('system',
   'src/system/BindMount.cxx',
+  'src/system/CapabilityState.cxx',
   'src/system/ProcessName.cxx',
   include_directories: inc,
   dependencies: [
+    libcap,
     util_dep,
     io_dep,
   ])
