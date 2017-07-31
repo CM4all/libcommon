@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Max Kellermann <max@duempel.org>
+ * Copyright (C) 2016-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -87,6 +87,15 @@ public:
 	const AddressInfo &front() const {
 		return *(const AddressInfo *)value;
 	}
+
+	/**
+	 * Pick the best address from the list, e.g. prefer IPv6 over
+	 * IPv4 (if both are available).  We do this because binding
+	 * to an IPv6 wildcard address also allows accepting IPv4
+	 * connections.
+	 */
+	gcc_pure
+	const AddressInfo &GetBest() const;
 
 	class const_iterator {
 		struct addrinfo *cursor;

@@ -57,5 +57,5 @@ ParseSocketAddress(const char *p, int default_port, bool passive)
 
 	const auto ai = Resolve(p, default_port,
 				passive ? &passive_hints : &hints);
-	return AllocatedSocketAddress(ai.front());
+	return AllocatedSocketAddress(ai.GetBest());
 }

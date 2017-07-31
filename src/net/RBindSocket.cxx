@@ -13,7 +13,7 @@ ResolveBindSocket(const char *host_and_port, int default_port,
                   const struct addrinfo &hints)
 {
     const auto ail = Resolve(host_and_port, default_port, &hints);
-    const auto &ai = ail.front();
+    const auto &ai = ail.GetBest();
 
     UniqueSocketDescriptor s;
     if (!s.CreateNonBlock(ai.GetFamily(), ai.GetType(), ai.GetProtocol()))
