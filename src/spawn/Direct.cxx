@@ -153,12 +153,6 @@ try {
     if (p.ioprio_idle)
         ioprio_set_idle();
 
-    if (!p.uid_gid.IsEmpty())
-        p.uid_gid.Apply();
-
-    if (p.no_new_privs)
-        prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
-
     if (p.ns.enable_pid) {
         setsid();
 
@@ -168,6 +162,12 @@ try {
         if (pid > 0)
             _exit(SpawnInit(pid));
     }
+
+    if (!p.uid_gid.IsEmpty())
+        p.uid_gid.Apply();
+
+    if (p.no_new_privs)
+        prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
 
     if (stderr_fd < 0 && p.stderr_path != nullptr) {
         stderr_fd = open(p.stderr_path,
