@@ -114,6 +114,12 @@ struct NamespaceOptions {
     void Setup(const UidGid &uid_gid) const;
 
     char *MakeId(char *p) const;
+
+    const char *GetJailedHome() const {
+        return mount_home != nullptr
+            ? mount_home
+            : home;
+    }
 };
 
 #endif
