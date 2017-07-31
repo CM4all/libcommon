@@ -34,7 +34,7 @@ ParseSocketAddress(const char *p, int default_port, bool passive)
 	}
 
 	static constexpr struct addrinfo hints = {
-		.ai_flags = AI_NUMERICHOST,
+		.ai_flags = AI_NUMERICHOST|AI_ADDRCONFIG,
 		.ai_family = AF_UNSPEC,
 		.ai_socktype = SOCK_STREAM,
 		.ai_protocol = 0,
@@ -45,7 +45,7 @@ ParseSocketAddress(const char *p, int default_port, bool passive)
 	};
 
 	static constexpr struct addrinfo passive_hints = {
-		.ai_flags = AI_NUMERICHOST|AI_PASSIVE,
+		.ai_flags = AI_NUMERICHOST|AI_ADDRCONFIG|AI_PASSIVE,
 		.ai_family = AF_UNSPEC,
 		.ai_socktype = SOCK_STREAM,
 		.ai_protocol = 0,
