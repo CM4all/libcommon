@@ -3,6 +3,7 @@
  */
 
 #include "Init.hxx"
+#include "SeccompFilter.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "system/CapabilityState.hxx"
@@ -87,11 +88,32 @@ DropCapabilities()
     state.Install();
 }
 
+/**
+ * Install a very strict seccomp filter which allows only very few
+ * system calls.
+ */
+static void
+LimitSysCalls(FileDescriptor read_fd, pid_t kill_pid)
+{
+    using Seccomp::Arg;
+
+    Seccomp::Filter sf(SCMP_ACT_KILL);
+    sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(read), Arg(0) == read_fd.Get());
+    sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(wait4));
+    sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(waitid));
+    sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(kill), Arg(0) == kill_pid);
+    sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(exit_group));
+    sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(exit));
+    sf.Load();
+}
+
 int
 SpawnInit(pid_t child_pid)
 {
     if (geteuid() == 0)
         DropCapabilities();
+
+    LimitSysCalls(init_signal_fd, child_pid);
 
     int last_status = EXIT_SUCCESS;
 
