@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2010-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,15 +39,15 @@
 template<class T, unsigned max>
 class StaticArray: public TrivialArray<T, max> {
 public:
-  constexpr
-  StaticArray(): TrivialArray<T, max>(0) {}
+	constexpr
+	StaticArray(): TrivialArray<T, max>(0) {}
 
-  StaticArray(typename TrivialArray<T, max>::size_type _size, const T &value)
-    :TrivialArray<T, max>(_size, value) {}
+	StaticArray(typename TrivialArray<T, max>::size_type _size, const T &value)
+		:TrivialArray<T, max>(_size, value) {}
 
-  template<typename I>
-  StaticArray(I _begin, I _end)
-    :TrivialArray<T, max>(_begin, _end) {}
+	template<typename I>
+	StaticArray(I _begin, I _end)
+		:TrivialArray<T, max>(_begin, _end) {}
 };
 
 #endif
