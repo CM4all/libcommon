@@ -35,7 +35,7 @@
  * version older than the specified one?
  */
 #define GCC_OLDER_THAN(major, minor) \
-	(defined(__GNUC__) && !defined(__clang__) && \
+	(GCC_VERSION > 0 && !defined(__clang__) && \
 	 GCC_VERSION < GCC_MAKE_VERSION(major, minor, 0))
 
 #if CLANG_OR_GCC_VERSION(3,0)
