@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2015 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2010-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -74,6 +74,13 @@ public:
 	TrivialArray(I _begin, I _end):the_size(0) {
 		for (I i = _begin; i != _end; ++i)
 			push_back(*i);
+	}
+
+	TrivialArray(std::initializer_list<T> init)
+		:the_size(init.size()) {
+		assert(init.size() <= max);
+
+		std::copy_n(init.begin(), init.size(), data.begin());
 	}
 
 	constexpr

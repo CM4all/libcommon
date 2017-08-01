@@ -48,6 +48,9 @@ public:
 	template<typename I>
 	StaticArray(I _begin, I _end)
 		:TrivialArray<T, max>(_begin, _end) {}
+
+	StaticArray(std::initializer_list<T> init)
+		:TrivialArray<T, max>(init) {}
 };
 
 #endif
