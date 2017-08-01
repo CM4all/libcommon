@@ -45,6 +45,7 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
      stderr_null(src.stderr_null),
      stderr_jailed(src.stderr_jailed),
      forbid_user_ns(src.forbid_user_ns),
+     forbid_multicast(src.forbid_multicast),
      no_new_privs(src.no_new_privs)
 {
 }
@@ -123,6 +124,12 @@ ChildOptions::MakeId(char *p) const
         *p++ = ';';
         *p++ = 'f';
         *p++ = 'u';
+    }
+
+    if (forbid_multicast) {
+        *p++ = ';';
+        *p++ = 'f';
+        *p++ = 'm';
     }
 
     if (no_new_privs) {
