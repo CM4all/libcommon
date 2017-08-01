@@ -15,12 +15,18 @@
 #define GCC_VERSION 0
 #endif
 
+#ifdef __clang__
+#  define CLANG_VERSION GCC_MAKE_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
+#elif defined(__GNUC__)
+#  define CLANG_VERSION 0
+#endif
+
 /**
  * Are we building with the specified version of gcc (not clang or any
  * other compiler) or newer?
  */
 #define GCC_CHECK_VERSION(major, minor) \
-	(!defined(__clang__) && \
+	(CLANG_VERSION == 0 && \
 	 GCC_VERSION >= GCC_MAKE_VERSION(major, minor, 0))
 
 /**
@@ -28,14 +34,14 @@
  * gcc version?
  */
 #define CLANG_OR_GCC_VERSION(major, minor) \
-	(defined(__clang__) || GCC_CHECK_VERSION(major, minor))
+	(CLANG_VERSION > 0 || GCC_CHECK_VERSION(major, minor))
 
 /**
  * Are we building with gcc (not clang or any other compiler) and a
  * version older than the specified one?
  */
 #define GCC_OLDER_THAN(major, minor) \
-	(GCC_VERSION > 0 && !defined(__clang__) && \
+	(GCC_VERSION > 0 && CLANG_VERSION == 0 && \
 	 GCC_VERSION < GCC_MAKE_VERSION(major, minor, 0))
 
 #if CLANG_OR_GCC_VERSION(3,0)
