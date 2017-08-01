@@ -212,6 +212,9 @@ try {
         if (p.forbid_multicast)
             ForbidMulticast(sf);
 
+        if (p.forbid_bind)
+            ForbidBind(sf);
+
         sf.Load();
     } catch (const std::runtime_error &e) {
         if (p.HasSyscallFilter())

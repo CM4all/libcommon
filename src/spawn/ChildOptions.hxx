@@ -69,6 +69,8 @@ struct ChildOptions {
 
     bool forbid_multicast = false;
 
+    bool forbid_bind = false;
+
     bool no_new_privs = false;
 
     ChildOptions() = default;
@@ -90,6 +92,7 @@ struct ChildOptions {
          stderr_jailed(src.stderr_jailed),
          forbid_user_ns(src.forbid_user_ns),
          forbid_multicast(src.forbid_multicast),
+         forbid_bind(src.forbid_bind),
          no_new_privs(src.no_new_privs) {}
 
     ChildOptions(AllocatorPtr alloc, const ChildOptions &src);

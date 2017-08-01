@@ -40,6 +40,7 @@ enum class SpawnExecCommand : uint8_t {
     UID_GID,
     FORBID_USER_NS,
     FORBID_MULTICAST,
+    FORBID_BIND,
     NO_NEW_PRIVS,
     CGROUP,
     CGROUP_SET,

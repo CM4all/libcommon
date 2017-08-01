@@ -106,6 +106,8 @@ struct PreparedChildProcess {
 
     bool forbid_multicast = false;
 
+    bool forbid_bind = false;
+
     bool no_new_privs = false;
 
     /**
@@ -130,7 +132,7 @@ struct PreparedChildProcess {
      * then failures to set up the filter are fatal.
      */
     bool HasSyscallFilter() const {
-        return forbid_user_ns || forbid_multicast;
+        return forbid_user_ns || forbid_multicast || forbid_bind;
     }
 
     /**

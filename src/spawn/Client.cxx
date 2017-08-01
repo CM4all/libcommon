@@ -268,6 +268,9 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
     if (p.forbid_multicast)
         s.Write(SpawnExecCommand::FORBID_MULTICAST);
 
+    if (p.forbid_bind)
+        s.Write(SpawnExecCommand::FORBID_BIND);
+
     if (p.no_new_privs)
         s.Write(SpawnExecCommand::NO_NEW_PRIVS);
 

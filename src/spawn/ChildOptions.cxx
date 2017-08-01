@@ -46,6 +46,7 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
      stderr_jailed(src.stderr_jailed),
      forbid_user_ns(src.forbid_user_ns),
      forbid_multicast(src.forbid_multicast),
+     forbid_bind(src.forbid_bind),
      no_new_privs(src.no_new_privs)
 {
 }
@@ -132,6 +133,12 @@ ChildOptions::MakeId(char *p) const
         *p++ = 'm';
     }
 
+    if (forbid_bind) {
+        *p++ = ';';
+        *p++ = 'f';
+        *p++ = 'b';
+    }
+
     if (no_new_privs) {
         *p++ = ';';
         *p++ = 'n';
@@ -192,5 +199,6 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
     dest.uid_gid = uid_gid;
     dest.forbid_user_ns = forbid_user_ns;
     dest.forbid_multicast = forbid_multicast;
+    dest.forbid_bind = forbid_bind;
     dest.no_new_privs = no_new_privs;
 }

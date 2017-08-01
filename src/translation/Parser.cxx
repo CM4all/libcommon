@@ -3231,6 +3231,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
         child_options->forbid_multicast = true;
         return;
+
+    case TranslationCommand::FORBID_BIND:
+        if (child_options == nullptr || child_options->forbid_bind)
+            throw std::runtime_error("misplaced FORBID_BIND packet");
+
+        if (payload_length != 0)
+            throw std::runtime_error("malformed FORBID_BIND packet");
+
+        child_options->forbid_bind = true;
+        return;
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

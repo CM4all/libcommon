@@ -539,6 +539,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
             p.forbid_multicast = true;
             break;
 
+        case SpawnExecCommand::FORBID_BIND:
+            p.forbid_bind = true;
+            break;
+
         case SpawnExecCommand::NO_NEW_PRIVS:
             p.no_new_privs = true;
             break;

@@ -878,6 +878,12 @@ enum class TranslationCommand : uint16_t {
      * bit).
      */
     HTTPS_ONLY = 197,
+
+    /**
+     * Forbid the child process to invoke the bind() and listen()
+     * system calls.
+     */
+    FORBID_BIND = 198,
 };
 
 struct TranslationHeader {

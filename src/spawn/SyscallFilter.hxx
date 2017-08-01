@@ -29,4 +29,10 @@ ForbidUserNamespace(Seccomp::Filter &sf);
 void
 ForbidMulticast(Seccomp::Filter &sf);
 
+/**
+ * Add rules which makes bind() and listen() return EACCES.
+ */
+void
+ForbidBind(Seccomp::Filter &sf);
+
 #endif

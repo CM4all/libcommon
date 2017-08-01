@@ -199,3 +199,10 @@ ForbidMulticast(Seccomp::Filter &sf)
 
     AddSetSockOpts(sf, SCMP_ACT_ERRNO(EPERM), IPPROTO_IPV6, forbidden_ipv6);
 }
+
+void
+ForbidBind(Seccomp::Filter &sf)
+{
+    sf.AddRule(SCMP_ACT_ERRNO(EACCES), SCMP_SYS(bind));
+    sf.AddRule(SCMP_ACT_ERRNO(EACCES), SCMP_SYS(listen));
+}
