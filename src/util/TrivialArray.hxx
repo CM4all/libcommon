@@ -265,6 +265,11 @@ public:
 		append(value);
 	}
 
+	template<typename... Args>
+	void emplace_back(Args&&... args) {
+		append() = T(std::forward<Args>(args)...);
+	}
+
 	T &front() {
 		assert(the_size > 0);
 
