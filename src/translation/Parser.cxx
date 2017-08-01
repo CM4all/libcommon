@@ -3206,7 +3206,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("duplicate HTTPS_ONLY packet");
 
         if (payload_length == sizeof(response.https_only)) {
-            response.https_only = *(const uint16_t *)payload;
+            response.https_only = *(const uint16_t *)_payload;
             if (response.https_only == 0)
                 /* zero in the packet means "default port", but we
                    change it here to 443 because in the variable, zero
