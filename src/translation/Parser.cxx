@@ -2424,11 +2424,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (payload_length != 0)
             throw std::runtime_error("malformed NETWORK_NAMESPACE packet");
 
-        if (ns_options != nullptr) {
-            ns_options->enable_network = true;
-        } else
+        if (ns_options == nullptr)
             throw std::runtime_error("misplaced NETWORK_NAMESPACE packet");
 
+        if (ns_options->enable_network)
+            throw std::runtime_error("duplicate NETWORK_NAMESPACE packet");
+
+        if (ns_options->network_namespace != nullptr)
+            throw std::runtime_error("Can't combine NETWORK_NAMESPACE with NETWORK_NAMESPACE_NAME");
+
+        ns_options->enable_network = true;
         return;
 
     case TranslationCommand::PIVOT_ROOT:
@@ -3269,7 +3274,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (ns_options == nullptr)
             throw std::runtime_error("misplaced NETWORK_NAMESPACE_NAME packet");
 
-        ns_options->enable_network = true;
+        if (ns_options->network_namespace != nullptr)
+            throw std::runtime_error("duplicate NETWORK_NAMESPACE_NAME packet");
+
+        if (ns_options->enable_network)
+            throw std::runtime_error("Can't combine NETWORK_NAMESPACE_NAME with NETWORK_NAMESPACE");
+
         ns_options->network_namespace = payload;
         return;
     }

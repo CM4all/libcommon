@@ -198,14 +198,9 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         setup_uid_map(uid_gid.uid);
     }
 
-    if (network_namespace) {
-        if (!enable_network)
-            throw std::runtime_error("network_namespace without enable_network");
-
-        if (setns(OpenNetworkNS(network_namespace).Get(),
-                  CLONE_NEWNET) < 0)
-            throw MakeErrno("Failed to reassociate with network namespace");
-    }
+    if (network_namespace != nullptr &&
+        setns(OpenNetworkNS(network_namespace).Get(), CLONE_NEWNET) < 0)
+        throw MakeErrno("Failed to reassociate with network namespace");
 
     if (enable_mount)
         /* convert all "shared" mounts to "private" mounts */
