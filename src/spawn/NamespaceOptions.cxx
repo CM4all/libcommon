@@ -10,6 +10,7 @@
 #include "system/BindMount.hxx"
 #include "system/Error.hxx"
 #include "io/WriteFile.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -42,6 +43,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
      mount_proc(src.mount_proc),
      mount_pts(src.mount_pts),
      bind_mount_pts(src.bind_mount_pts),
+     network_namespace(alloc.CheckDup(src.network_namespace)),
      pivot_root(alloc.CheckDup(src.pivot_root)),
      home(alloc.CheckDup(src.home)),
 #if TRANSLATION_ENABLE_EXPAND
@@ -164,6 +166,24 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid,
     write_file(path, buffer);
 }
 
+/**
+ * Open a network namespace in /run/netns.
+ */
+static UniqueFileDescriptor
+OpenNetworkNS(const char *name)
+{
+    char path[4096];
+    if (snprintf(path, sizeof(path),
+                 "/run/netns/%s", name) >= (int)sizeof(path))
+        throw std::runtime_error("Network namespace name is too long");
+
+    UniqueFileDescriptor fd;
+    if (!fd.OpenReadOnly(path))
+        throw FormatErrno("Failed to open %s", path);
+
+    return fd;
+}
+
 void
 NamespaceOptions::Setup(const UidGid &uid_gid) const
 {
@@ -176,6 +196,15 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         // TODO: map the current effective gid if no gid was given?
 
         setup_uid_map(uid_gid.uid);
+    }
+
+    if (network_namespace) {
+        if (!enable_network)
+            throw std::runtime_error("network_namespace without enable_network");
+
+        if (setns(OpenNetworkNS(network_namespace).Get(),
+                  CLONE_NEWNET) < 0)
+            throw MakeErrno("Failed to reassociate with network namespace");
     }
 
     if (enable_mount)
@@ -279,8 +308,14 @@ NamespaceOptions::MakeId(char *p) const
     if (enable_cgroup)
         p = (char *)mempcpy(p, ";cns", 4);
 
-    if (enable_network)
+    if (enable_network) {
         p = (char *)mempcpy(p, ";nns", 4);
+
+        if (network_namespace != nullptr) {
+            *p++ = '=';
+            p = stpcpy(p, network_namespace);
+        }
+    }
 
     if (enable_ipc)
         p = (char *)mempcpy(p, ";ins", 4);

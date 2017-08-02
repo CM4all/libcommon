@@ -155,6 +155,7 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
     s.WriteOptional(SpawnExecCommand::USER_NS, ns.enable_user);
     s.WriteOptional(SpawnExecCommand::PID_NS, ns.enable_pid);
     s.WriteOptional(SpawnExecCommand::NETWORK_NS, ns.enable_network);
+    s.WriteOptional(SpawnExecCommand::NETWORK_NS_NAME, ns.network_namespace);
     s.WriteOptional(SpawnExecCommand::IPC_NS, ns.enable_ipc);
     s.WriteOptional(SpawnExecCommand::MOUNT_NS, ns.enable_mount);
     s.WriteOptional(SpawnExecCommand::MOUNT_PROC, ns.mount_proc);

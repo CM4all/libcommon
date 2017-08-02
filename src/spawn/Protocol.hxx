@@ -27,6 +27,7 @@ enum class SpawnExecCommand : uint8_t {
     USER_NS,
     PID_NS,
     NETWORK_NS,
+    NETWORK_NS_NAME,
     IPC_NS,
     MOUNT_NS,
     MOUNT_PROC,

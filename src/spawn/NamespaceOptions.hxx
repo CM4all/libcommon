@@ -61,6 +61,12 @@ struct NamespaceOptions {
      */
     bool bind_mount_pts = false;
 
+    /**
+     * The name of the network namespace (/run/netns/X) to reassociate
+     * with.  Requires #enable_network.
+     */
+    const char *network_namespace = nullptr;
+
     const char *pivot_root = nullptr;
 
     const char *home = nullptr;

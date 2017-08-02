@@ -468,6 +468,11 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
             p.ns.enable_network = true;
             break;
 
+        case SpawnExecCommand::NETWORK_NS_NAME:
+            p.ns.enable_network = true;
+            p.ns.network_namespace = payload.ReadString();
+            break;
+
         case SpawnExecCommand::IPC_NS:
             p.ns.enable_ipc = true;
             break;
