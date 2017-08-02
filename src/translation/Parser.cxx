@@ -88,6 +88,26 @@ is_valid_nonempty_string(const char *p, size_t size)
     return size > 0 && !has_null_byte(p, size);
 }
 
+static constexpr bool
+IsValidNameChar(char ch)
+{
+    return IsAlphaNumericASCII(ch) || ch == '-' || ch == '_';
+}
+
+gcc_pure
+static bool
+IsValidName(StringView s)
+{
+    if (s.IsEmpty())
+        return false;
+
+    for (char i : s)
+        if (!IsValidNameChar(i))
+            return false;
+
+    return true;
+}
+
 gcc_pure
 static bool
 is_valid_absolute_path(const char *p, size_t size)
@@ -3240,6 +3260,17 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("malformed FORBID_BIND packet");
 
         child_options->forbid_bind = true;
+        return;
+
+    case TranslationCommand::NETWORK_NAMESPACE_NAME:
+        if (!IsValidName({payload, payload_length}))
+            throw std::runtime_error("malformed NETWORK_NAMESPACE_NAME packet");
+
+        if (ns_options == nullptr)
+            throw std::runtime_error("misplaced NETWORK_NAMESPACE_NAME packet");
+
+        ns_options->enable_network = true;
+        ns_options->network_namespace = payload;
         return;
     }
 

@@ -884,6 +884,11 @@ enum class TranslationCommand : uint16_t {
      * system calls.
      */
     FORBID_BIND = 198,
+
+    /**
+     * Reassociate with the given named network namespace.
+     */
+    NETWORK_NAMESPACE_NAME = 199,
 };
 
 struct TranslationHeader {
