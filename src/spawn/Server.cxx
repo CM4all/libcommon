@@ -469,7 +469,6 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
             break;
 
         case SpawnExecCommand::NETWORK_NS_NAME:
-            p.ns.enable_network = true;
             p.ns.network_namespace = payload.ReadString();
             break;
 
