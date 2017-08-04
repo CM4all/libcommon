@@ -44,13 +44,11 @@ static constexpr int forbidden_syscalls[] = {
     SCMP_SYS(keyctl),
     SCMP_SYS(lookup_dcookie),
     SCMP_SYS(mbind),
-    SCMP_SYS(mount),
     SCMP_SYS(move_pages),
     SCMP_SYS(name_to_handle_at),
     SCMP_SYS(nfsservctl),
     SCMP_SYS(perf_event_open),
     SCMP_SYS(personality),
-    SCMP_SYS(pivot_root),
     SCMP_SYS(process_vm_readv),
     SCMP_SYS(process_vm_writev),
 
@@ -72,9 +70,6 @@ static constexpr int forbidden_syscalls[] = {
     SCMP_SYS(sysfs),
     SCMP_SYS(syslog),
     SCMP_SYS(_sysctl),
-    SCMP_SYS(umount),
-    SCMP_SYS(umount2),
-    SCMP_SYS(unshare),
     SCMP_SYS(uselib),
 
 #ifdef __NR_userfaultfd
