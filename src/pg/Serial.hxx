@@ -15,26 +15,26 @@ namespace Pg {
  * C++ representation of a PostgreSQL "serial" value.
  */
 class Serial {
-    typedef int32_t value_type;
-    value_type value;
+	typedef int32_t value_type;
+	value_type value;
 
 public:
-    Serial() = default;
-    explicit constexpr Serial(value_type _value):value(_value) {}
+	Serial() = default;
+	explicit constexpr Serial(value_type _value):value(_value) {}
 
-    constexpr value_type get() const {
-        return value;
-    }
+	constexpr value_type get() const {
+		return value;
+	}
 
-    constexpr operator bool() const {
-        return value != 0;
-    }
+	constexpr operator bool() const {
+		return value != 0;
+	}
 
-    /**
-     * Convert a string to a #Serial instance.  Throws
-     * std::invalid_argument on error.
-     */
-    static Serial Parse(const char *s);
+	/**
+	 * Convert a string to a #Serial instance.  Throws
+	 * std::invalid_argument on error.
+	 */
+	static Serial Parse(const char *s);
 };
 
 }

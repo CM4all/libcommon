@@ -7,245 +7,245 @@
 namespace Pg {
 
 AsyncConnection::AsyncConnection(EventLoop &event_loop,
-                                 const char *_conninfo, const char *_schema,
-                                 AsyncConnectionHandler &_handler)
-    :conninfo(_conninfo), schema(_schema),
-     handler(_handler),
-     socket_event(event_loop, -1, 0, BIND_THIS_METHOD(OnSocketEvent)),
-     reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer))
+				 const char *_conninfo, const char *_schema,
+				 AsyncConnectionHandler &_handler)
+	:conninfo(_conninfo), schema(_schema),
+	 handler(_handler),
+	 socket_event(event_loop, -1, 0, BIND_THIS_METHOD(OnSocketEvent)),
+	 reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer))
 {
 }
 
 void
 AsyncConnection::Error()
 {
-    assert(state == State::CONNECTING ||
-           state == State::RECONNECTING ||
-           state == State::READY);
+	assert(state == State::CONNECTING ||
+	       state == State::RECONNECTING ||
+	       state == State::READY);
 
-    socket_event.Delete();
+	socket_event.Delete();
 
-    const bool was_connected = state == State::READY;
-    state = State::DISCONNECTED;
+	const bool was_connected = state == State::READY;
+	state = State::DISCONNECTED;
 
-    if (result_handler != nullptr) {
-        auto rh = result_handler;
-        result_handler = nullptr;
-        rh->OnResultError();
-    }
+	if (result_handler != nullptr) {
+		auto rh = result_handler;
+		result_handler = nullptr;
+		rh->OnResultError();
+	}
 
-    if (was_connected)
-        handler.OnDisconnect();
+	if (was_connected)
+		handler.OnDisconnect();
 
-    ScheduleReconnect();
+	ScheduleReconnect();
 }
 
 void
 AsyncConnection::Poll(PostgresPollingStatusType status)
 {
-    switch (status) {
-    case PGRES_POLLING_FAILED:
-        handler.OnError("Failed to connect to database", GetErrorMessage());
-        Error();
-        break;
+	switch (status) {
+	case PGRES_POLLING_FAILED:
+		handler.OnError("Failed to connect to database", GetErrorMessage());
+		Error();
+		break;
 
-    case PGRES_POLLING_READING:
-        socket_event.Set(GetSocket(), SocketEvent::READ);
-        socket_event.Add();
-        break;
+	case PGRES_POLLING_READING:
+		socket_event.Set(GetSocket(), SocketEvent::READ);
+		socket_event.Add();
+		break;
 
-    case PGRES_POLLING_WRITING:
-        socket_event.Set(GetSocket(), SocketEvent::WRITE);
-        socket_event.Add();
-        break;
+	case PGRES_POLLING_WRITING:
+		socket_event.Set(GetSocket(), SocketEvent::WRITE);
+		socket_event.Add();
+		break;
 
-    case PGRES_POLLING_OK:
-        if (!schema.empty() &&
-            (state == State::CONNECTING || state == State::RECONNECTING) &&
-            !SetSchema(schema.c_str())) {
-            handler.OnError("Failed to set schema", GetErrorMessage());
-            Error();
-            break;
-        }
+	case PGRES_POLLING_OK:
+		if (!schema.empty() &&
+		    (state == State::CONNECTING || state == State::RECONNECTING) &&
+		    !SetSchema(schema.c_str())) {
+			handler.OnError("Failed to set schema", GetErrorMessage());
+			Error();
+			break;
+		}
 
-        state = State::READY;
-        socket_event.Set(GetSocket(), SocketEvent::READ|SocketEvent::PERSIST);
-        socket_event.Add();
+		state = State::READY;
+		socket_event.Set(GetSocket(), SocketEvent::READ|SocketEvent::PERSIST);
+		socket_event.Add();
 
-        handler.OnConnect();
+		handler.OnConnect();
 
-        /* check the connection status, just in case the handler
-           method has done awful things */
-        if (state == State::READY &&
-            GetStatus() == CONNECTION_BAD)
-            Error();
-        break;
+		/* check the connection status, just in case the handler
+		   method has done awful things */
+		if (state == State::READY &&
+		    GetStatus() == CONNECTION_BAD)
+			Error();
+		break;
 
-    case PGRES_POLLING_ACTIVE:
-        /* deprecated enum value */
-        assert(false);
-        break;
-    }
+	case PGRES_POLLING_ACTIVE:
+		/* deprecated enum value */
+		assert(false);
+		break;
+	}
 }
 
 void
 AsyncConnection::PollConnect()
 {
-    assert(IsDefined());
-    assert(state == State::CONNECTING);
+	assert(IsDefined());
+	assert(state == State::CONNECTING);
 
-    Poll(Connection::PollConnect());
+	Poll(Connection::PollConnect());
 }
 
 void
 AsyncConnection::PollReconnect()
 {
-    assert(IsDefined());
-    assert(state == State::RECONNECTING);
+	assert(IsDefined());
+	assert(state == State::RECONNECTING);
 
-    Poll(Connection::PollReconnect());
+	Poll(Connection::PollReconnect());
 }
 
 inline void
 AsyncConnection::PollResult()
 {
-    while (!IsBusy()) {
-        auto result = ReceiveResult();
-        if (result_handler != nullptr) {
-            if (result.IsDefined())
-                result_handler->OnResult(std::move(result));
-            else {
-                auto rh = result_handler;
-                result_handler = nullptr;
-                rh->OnResultEnd();
-            }
-        }
+	while (!IsBusy()) {
+		auto result = ReceiveResult();
+		if (result_handler != nullptr) {
+			if (result.IsDefined())
+				result_handler->OnResult(std::move(result));
+			else {
+				auto rh = result_handler;
+				result_handler = nullptr;
+				rh->OnResultEnd();
+			}
+		}
 
-        if (!result.IsDefined())
-            break;
-    }
+		if (!result.IsDefined())
+			break;
+	}
 }
 
 void
 AsyncConnection::PollNotify()
 {
-    assert(IsDefined());
-    assert(state == State::READY);
+	assert(IsDefined());
+	assert(state == State::READY);
 
-    const bool was_idle = IsIdle();
+	const bool was_idle = IsIdle();
 
-    ConsumeInput();
+	ConsumeInput();
 
-    Notify notify;
-    switch (GetStatus()) {
-    case CONNECTION_OK:
-        PollResult();
+	Notify notify;
+	switch (GetStatus()) {
+	case CONNECTION_OK:
+		PollResult();
 
-        while ((notify = GetNextNotify()))
-            handler.OnNotify(notify->relname);
+		while ((notify = GetNextNotify()))
+			handler.OnNotify(notify->relname);
 
-        if (!was_idle && IsIdle())
-            handler.OnIdle();
-        break;
+		if (!was_idle && IsIdle())
+			handler.OnIdle();
+		break;
 
-    case CONNECTION_BAD:
-        Error();
-        break;
+	case CONNECTION_BAD:
+		Error();
+		break;
 
-    default:
-        break;
-    }
+	default:
+		break;
+	}
 }
 
 void
 AsyncConnection::Connect()
 {
-    assert(state == State::UNINITIALIZED || state == State::WAITING);
+	assert(state == State::UNINITIALIZED || state == State::WAITING);
 
-    state = State::CONNECTING;
+	state = State::CONNECTING;
 
-    try {
-        StartConnect(conninfo.c_str());
-    } catch (const std::runtime_error &e) {
-        Connection::Disconnect();
-        handler.OnError("Failed to connect to database", e.what());
-        Error();
-        return;
-    }
+	try {
+		StartConnect(conninfo.c_str());
+	} catch (const std::runtime_error &e) {
+		Connection::Disconnect();
+		handler.OnError("Failed to connect to database", e.what());
+		Error();
+		return;
+	}
 
-    PollConnect();
+	PollConnect();
 }
 
 void
 AsyncConnection::Reconnect()
 {
-    assert(state != State::UNINITIALIZED);
+	assert(state != State::UNINITIALIZED);
 
-    socket_event.Delete();
-    StartReconnect();
-    state = State::RECONNECTING;
-    PollReconnect();
+	socket_event.Delete();
+	StartReconnect();
+	state = State::RECONNECTING;
+	PollReconnect();
 }
 
 void
 AsyncConnection::Disconnect()
 {
-    if (state == State::UNINITIALIZED)
-        return;
+	if (state == State::UNINITIALIZED)
+		return;
 
-    socket_event.Delete();
-    reconnect_timer.Cancel();
-    Connection::Disconnect();
-    state = State::DISCONNECTED;
+	socket_event.Delete();
+	reconnect_timer.Cancel();
+	Connection::Disconnect();
+	state = State::DISCONNECTED;
 }
 
 void
 AsyncConnection::ScheduleReconnect()
 {
-    /* attempt to reconnect every 10 seconds */
-    static constexpr struct timeval delay{ 10, 0 };
+	/* attempt to reconnect every 10 seconds */
+	static constexpr struct timeval delay{ 10, 0 };
 
-    assert(state == State::DISCONNECTED);
+	assert(state == State::DISCONNECTED);
 
-    state = State::WAITING;
-    reconnect_timer.Add(delay);
+	state = State::WAITING;
+	reconnect_timer.Add(delay);
 }
 
 inline void
 AsyncConnection::OnSocketEvent(unsigned)
 {
-    switch (state) {
-    case State::UNINITIALIZED:
-    case State::DISCONNECTED:
-    case State::WAITING:
-        assert(false);
-        gcc_unreachable();
+	switch (state) {
+	case State::UNINITIALIZED:
+	case State::DISCONNECTED:
+	case State::WAITING:
+		assert(false);
+		gcc_unreachable();
 
-    case State::CONNECTING:
-        PollConnect();
-        break;
+	case State::CONNECTING:
+		PollConnect();
+		break;
 
-    case State::RECONNECTING:
-        PollReconnect();
-        break;
+	case State::RECONNECTING:
+		PollReconnect();
+		break;
 
-    case State::READY:
-        PollNotify();
-        break;
-    }
+	case State::READY:
+		PollNotify();
+		break;
+	}
 }
 
 inline void
 AsyncConnection::OnReconnectTimer()
 {
-    assert(state == State::WAITING);
+	assert(state == State::WAITING);
 
-    if (socket_event.GetFd() < 0)
-        /* there was never a socket, i.e. StartConnect() has failed
-           (maybe due to a DNS failure) - retry that method */
-        Connect();
-    else
-        Reconnect();
+	if (socket_event.GetFd() < 0)
+		/* there was never a socket, i.e. StartConnect() has failed
+		   (maybe due to a DNS failure) - retry that method */
+		Connect();
+	else
+		Reconnect();
 }
 
 } /* namespace Pg */

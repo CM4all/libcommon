@@ -11,78 +11,78 @@ namespace Pg {
 void
 Connection::Connect(const char *conninfo)
 {
-    assert(!IsDefined());
+	assert(!IsDefined());
 
-    conn = ::PQconnectdb(conninfo);
-    if (conn == nullptr)
-        throw std::bad_alloc();
+	conn = ::PQconnectdb(conninfo);
+	if (conn == nullptr)
+		throw std::bad_alloc();
 
-    if (GetStatus() != CONNECTION_OK)
-        throw std::runtime_error(GetErrorMessage());
+	if (GetStatus() != CONNECTION_OK)
+		throw std::runtime_error(GetErrorMessage());
 }
 
 void
 Connection::StartConnect(const char *conninfo)
 {
-    assert(!IsDefined());
+	assert(!IsDefined());
 
-    conn = ::PQconnectStart(conninfo);
-    if (conn == nullptr)
-        throw std::bad_alloc();
+	conn = ::PQconnectStart(conninfo);
+	if (conn == nullptr)
+		throw std::bad_alloc();
 
-    if (GetStatus() == CONNECTION_BAD)
-        throw std::runtime_error(GetErrorMessage());
+	if (GetStatus() == CONNECTION_BAD)
+		throw std::runtime_error(GetErrorMessage());
 }
 
 bool
 Connection::SetSchema(const char *schema)
 {
-    std::string sql = "SET SCHEMA '" + Escape(schema) + "'";
-    return Execute(sql.c_str()).IsCommandSuccessful();
+	std::string sql = "SET SCHEMA '" + Escape(schema) + "'";
+	return Execute(sql.c_str()).IsCommandSuccessful();
 }
 
 void
 Connection::SendQuery(const char *query)
 {
-    assert(IsDefined());
-    assert(query != nullptr);
+	assert(IsDefined());
+	assert(query != nullptr);
 
-    if (::PQsendQuery(conn, query) == 0)
-        throw std::runtime_error(GetErrorMessage());
+	if (::PQsendQuery(conn, query) == 0)
+		throw std::runtime_error(GetErrorMessage());
 }
 
 void
 Connection::_SendQuery(bool result_binary, const char *query,
-                         size_t n_params, const char *const*values,
-                         const int *lengths, const int *formats)
+		       size_t n_params, const char *const*values,
+		       const int *lengths, const int *formats)
 {
-    assert(IsDefined());
-    assert(query != nullptr);
+	assert(IsDefined());
+	assert(query != nullptr);
 
-    if (::PQsendQueryParams(conn, query, n_params, nullptr,
-                            values, lengths, formats, result_binary) == 0)
-        throw std::runtime_error(GetErrorMessage());
+	if (::PQsendQueryParams(conn, query, n_params, nullptr,
+				values, lengths, formats, result_binary) == 0)
+		throw std::runtime_error(GetErrorMessage());
 }
 
 std::string
 Connection::Escape(const char *p, size_t length) const
 {
-    assert(p != nullptr || length == 0);
+	assert(p != nullptr || length == 0);
 
-    char *buffer = new char[length * 2 + 1];
+	char *buffer = new char[length * 2 + 1];
 
-    ::PQescapeStringConn(conn, buffer, p, length, nullptr);
-    std::string result(buffer, length);
-    delete[] buffer;
-    return result;
+	::PQescapeStringConn(conn, buffer, p, length, nullptr);
+	std::string result(buffer, length);
+	delete[] buffer;
+	return result;
 }
 
 std::string
 Connection::Escape(const char *p) const
 {
-    assert(p != nullptr);
+	assert(p != nullptr);
 
-    return Escape(p, strlen(p));
+	return Escape(p, strlen(p));
 }
 
 } /* namespace Pg */

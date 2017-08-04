@@ -17,7 +17,7 @@ class Connection;
  */
 bool
 ColumnExists(Connection &c, const char *schema,
-             const char *table_name, const char *column_name);
+	     const char *table_name, const char *column_name);
 
 /**
  * Does an index with the specified name exist in the table?
@@ -27,7 +27,7 @@ ColumnExists(Connection &c, const char *schema,
  */
 bool
 IndexExists(Connection &c, const char *schema,
-            const char *table_name, const char *index_name);
+	    const char *table_name, const char *index_name);
 
 }
 

@@ -14,18 +14,18 @@
 namespace Pg {
 
 struct BinaryValue : ConstBuffer<void> {
-    BinaryValue() = default;
+	BinaryValue() = default;
 
-    constexpr BinaryValue(ConstBuffer<void> _buffer)
-        :ConstBuffer<void>(_buffer) {}
+	constexpr BinaryValue(ConstBuffer<void> _buffer)
+	:ConstBuffer<void>(_buffer) {}
 
-    constexpr BinaryValue(const void *_value, size_t _size)
-        :ConstBuffer<void>(_value, _size) {}
+	constexpr BinaryValue(const void *_value, size_t _size)
+	:ConstBuffer<void>(_value, _size) {}
 
-    gcc_pure
-    bool ToBool() const {
-        return size == 1 && data != nullptr && *(const bool *)data;
-    }
+	gcc_pure
+	bool ToBool() const {
+		return size == 1 && data != nullptr && *(const bool *)data;
+	}
 };
 
 } /* namespace Pg */

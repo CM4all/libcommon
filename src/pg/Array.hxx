@@ -22,31 +22,31 @@ template<typename L>
 std::string
 EncodeArray(const L &src)
 {
-    if (src.empty())
-        return "{}";
+	if (src.empty())
+		return "{}";
 
-    std::string dest("{");
+	std::string dest("{");
 
-    bool first = true;
-    for (const auto &i : src) {
-        if (first)
-            first = false;
-        else
-            dest.push_back(',');
+	bool first = true;
+	for (const auto &i : src) {
+		if (first)
+			first = false;
+		else
+			dest.push_back(',');
 
-        dest.push_back('"');
+		dest.push_back('"');
 
-        for (const auto ch : i) {
-            if (ch == '\\' || ch == '"')
-                dest.push_back('\\');
-            dest.push_back(ch);
-        }
+		for (const auto ch : i) {
+			if (ch == '\\' || ch == '"')
+				dest.push_back('\\');
+			dest.push_back(ch);
+		}
 
-        dest.push_back('"');
-    }
+		dest.push_back('"');
+	}
 
-    dest.push_back('}');
-    return dest;
+	dest.push_back('}');
+	return dest;
 }
 
 } /* namespace Pg */

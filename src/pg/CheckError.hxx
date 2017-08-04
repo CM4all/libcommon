@@ -18,10 +18,10 @@ namespace Pg {
 static inline Result
 CheckError(Result &&result)
 {
-    if (result.IsError())
-        throw Error(std::move(result));
+	if (result.IsError())
+		throw Error(std::move(result));
 
-    return std::move(result);
+	return std::move(result);
 }
 
 } /* namespace Pg */
