@@ -10,6 +10,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/IOPrio.hxx"
 #include "util/PrintException.hxx"
+#include "util/ScopeExit.hxx"
 
 #include "util/Compiler.h"
 
@@ -288,6 +289,38 @@ SpawnChildProcess(PreparedChildProcess &&params,
     clone_flags = params.ns.GetCloneFlags(clone_flags);
 
     SpawnChildProcessContext ctx(std::move(params), cgroup_state);
+
+    UniqueFileDescriptor old_netns;
+
+    AtScopeExit(&old_netns) {
+        /* restore the old network namespace (see below) */
+        if (old_netns.IsDefined())
+            setns(old_netns.Get(), CLONE_NEWNET);
+    };
+
+    if (ctx.params.ns.enable_user &&
+        ctx.params.ns.network_namespace != nullptr) {
+        /* from inside the new user namespace, we cannot reassociate
+           with a new network namespace, because at this point, we
+           have lost capabilities on the network namespace; therefore,
+           what we can do is either
+           clone()+setns(NETWORK)+unshare(USER) or
+           setns(NETWORK)+clone(USER); for now, I've decided to do the
+           latter */
+
+        /* first open a handle to our existing (old) network namespace
+           to be able to restore it later (see above) */
+        if (!old_netns.OpenReadOnly("/proc/self/ns/net"))
+            throw MakeErrno("Failed to open current network namespace");
+
+        /* then let this process reassociate with the target network
+           namespace */
+        ctx.params.ns.ReassociateNetwork();
+
+        /* clear the option, so the child process doesn't call setns()
+           again */
+        ctx.params.ns.network_namespace = nullptr;
+    }
 
     if (ctx.params.ns.enable_user && geteuid() == 0) {
         /* we'll set up the uid/gid mapping from the privileged
