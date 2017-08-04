@@ -15,7 +15,7 @@ ColumnExists(Pg::Connection &c, const char *schema,
 	assert(schema != nullptr);
 	assert(*schema != 0);
 
-	return CheckError(c.ExecuteParams("SELECT data_type FROM INFORMATION_SCHEMA.COLUMNS "
+	return CheckError(c.ExecuteParams("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS "
 					  "WHERE table_schema=$1 AND table_name=$2 AND column_name=$3",
 					  schema, table_name, column_name)).GetRowCount() > 0;
 
@@ -28,7 +28,7 @@ IndexExists(Pg::Connection &c, const char *schema,
 	assert(schema != nullptr);
 	assert(*schema != 0);
 
-	return CheckError(c.ExecuteParams("SELECT indexdef FROM pg_indexes "
+	return CheckError(c.ExecuteParams("SELECT 1 FROM pg_indexes "
 					  "WHERE schemaname=$1 AND tablename=$2 AND indexname=$3",
 					  schema, table_name, index_name)).GetRowCount() > 0;
 }
