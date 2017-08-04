@@ -289,7 +289,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
     SpawnChildProcessContext ctx(std::move(params), cgroup_state);
 
-    if (params.ns.enable_user && geteuid() == 0) {
+    if (ctx.params.ns.enable_user && geteuid() == 0) {
         /* we'll set up the uid/gid mapping from the privileged
            parent; create a pipe to synchronize this with the child */
 
