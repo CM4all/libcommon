@@ -185,6 +185,15 @@ OpenNetworkNS(const char *name)
 }
 
 void
+NamespaceOptions::ReassociateNetwork() const
+{
+    assert(network_namespace != nullptr);
+
+    if (setns(OpenNetworkNS(network_namespace).Get(), CLONE_NEWNET) < 0)
+        throw MakeErrno("Failed to reassociate with network namespace");
+}
+
+void
 NamespaceOptions::Setup(const UidGid &uid_gid) const
 {
     /* set up UID/GID mapping in the old /proc */
@@ -198,9 +207,8 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         setup_uid_map(uid_gid.uid);
     }
 
-    if (network_namespace != nullptr &&
-        setns(OpenNetworkNS(network_namespace).Get(), CLONE_NEWNET) < 0)
-        throw MakeErrno("Failed to reassociate with network namespace");
+    if (network_namespace != nullptr)
+        ReassociateNetwork();
 
     if (enable_mount)
         /* convert all "shared" mounts to "private" mounts */

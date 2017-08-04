@@ -115,6 +115,11 @@ struct NamespaceOptions {
                         int pid) const;
 
     /**
+     * Apply #network_namespace.
+     */
+    void ReassociateNetwork() const;
+
+    /**
      * Throws std::system_error on error.
      */
     void Setup(const UidGid &uid_gid) const;
