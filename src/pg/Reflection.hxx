@@ -39,6 +39,16 @@ bool
 IndexExists(Connection &c, const char *schema,
 	    const char *table_name, const char *index_name);
 
+/**
+ * Does a rule with the specified name exist in the table?
+ *
+ * @param schema the schema name (must not be nullptr or empty, as
+ * there is no fallback to "public")
+ */
+bool
+RuleExists(Pg::Connection &c, const char *schema,
+	   const char *table_name, const char *rule_name);
+
 }
 
 #endif
