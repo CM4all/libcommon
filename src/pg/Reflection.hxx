@@ -10,6 +10,16 @@ namespace Pg {
 class Connection;
 
 /**
+ * Does the specified table exist?
+ *
+ * @param schema the schema name (must not be nullptr or empty, as
+ * there is no fallback to "public")
+ */
+bool
+TableExists(Connection &c, const char *schema,
+	    const char *table_name);
+
+/**
  * Does a column with the specified name exist in the table?
  *
  * @param schema the schema name (must not be nullptr or empty, as

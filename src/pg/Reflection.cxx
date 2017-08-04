@@ -9,6 +9,19 @@
 namespace Pg {
 
 bool
+TableExists(Pg::Connection &c, const char *schema, const char *table_name)
+{
+	assert(schema != nullptr);
+	assert(*schema != 0);
+	assert(table_name != nullptr);
+
+	return CheckError(c.ExecuteParams("SELECT 1 FROM INFORMATION_SCHEMA.TABLES "
+					  "WHERE table_schema=$1 AND table_name=$2 AND table_type='BASE TABLE'",
+					  schema, table_name)).GetRowCount() > 0;
+
+}
+
+bool
 ColumnExists(Pg::Connection &c, const char *schema,
 	     const char *table_name, const char *column_name)
 {
