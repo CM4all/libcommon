@@ -125,7 +125,7 @@ struct WritableBuffer {
 		assert(other.size % sizeof(T) == 0);
 #endif
 		return WritableBuffer<T>(pointer_type(other.data),
-				      other.size / sizeof(T));
+					 other.size / sizeof(T));
 	}
 
 	constexpr WritableBuffer<void> ToVoid() const {
