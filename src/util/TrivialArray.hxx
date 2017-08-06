@@ -31,6 +31,7 @@
 #define TRIVIAL_ARRAY_HXX
 
 #include <array>
+#include <initializer_list>
 #include <algorithm>
 
 #include <assert.h>
