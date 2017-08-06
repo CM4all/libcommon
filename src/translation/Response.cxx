@@ -222,7 +222,7 @@ TranslateResponse::Clear()
     validate_mtime.path = nullptr;
 }
 
-template<unsigned N>
+template<size_t N>
 static void
 CopyArray(AllocatorPtr alloc, TrivialArray<const char *, N> &dest,
           const TrivialArray<const char *, N> &src)
