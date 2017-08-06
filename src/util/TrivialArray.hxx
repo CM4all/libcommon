@@ -166,13 +166,13 @@ public:
 		return std::next(data.begin(), the_size);
 	}
 
-	T &last() {
+	T &back() {
 		assert(the_size > 0);
 
 		return data[the_size - 1];
 	}
 
-	const T &last() const {
+	const T &back() const {
 		assert(the_size > 0);
 
 		return data[the_size - 1];
@@ -280,14 +280,6 @@ public:
 		assert(the_size > 0);
 
 		return data.front();
-	}
-
-	T &back() {
-		return last();
-	}
-
-	const T &back() const {
-		return last();
 	}
 };
 
