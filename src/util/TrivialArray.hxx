@@ -80,7 +80,7 @@ public:
 		:the_size(init.size()) {
 		assert(init.size() <= max);
 
-		std::copy_n(init.begin(), init.size(), data.begin());
+		std::move(init.begin(), init.end(), data.begin());
 	}
 
 	constexpr
