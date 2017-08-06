@@ -76,7 +76,8 @@ public:
 			push_back(*i);
 	}
 
-	TrivialArray(std::initializer_list<T> init)
+	template<typename U>
+	TrivialArray(std::initializer_list<U> init)
 		:the_size(init.size()) {
 		assert(init.size() <= max);
 
