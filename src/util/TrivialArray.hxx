@@ -151,7 +151,7 @@ public:
 		return data[i];
 	}
 
-	iterator begin() {
+	constexpr iterator begin() {
 		return data.begin();
 	}
 
@@ -159,7 +159,7 @@ public:
 		return data.begin();
 	}
 
-	iterator end() {
+	constexpr iterator end() {
 		return std::next(data.begin(), the_size);
 	}
 
