@@ -55,6 +55,11 @@ public:
 			throw std::runtime_error("curl_easy_init() failed");
 	}
 
+	CurlEasy(const char *url)
+		:CurlEasy() {
+		SetURL(url);
+	}
+
 	/**
 	 * Create an empty instance.
 	 */
@@ -85,6 +90,10 @@ public:
 		CURLcode code = curl_easy_setopt(handle, option, value);
 		if (code != CURLE_OK)
 			throw std::runtime_error(curl_easy_strerror(code));
+	}
+
+	void SetURL(const char *value) {
+		SetOption(CURLOPT_URL, value);
 	}
 
 	template<typename T>

@@ -46,6 +46,7 @@
 CurlRequest::CurlRequest(CurlGlobal &_global, const char *url,
 			 CurlResponseHandler &_handler)
 	:global(_global), handler(_handler),
+	 easy(url),
 	 defer_error_event(global.GetEventLoop(),
 			   BIND_THIS_METHOD(OnDeferredError))
 {
@@ -61,7 +62,6 @@ CurlRequest::CurlRequest(CurlGlobal &_global, const char *url,
 	easy.SetOption(CURLOPT_NOPROGRESS, 1l);
 	easy.SetOption(CURLOPT_NOSIGNAL, 1l);
 	easy.SetOption(CURLOPT_CONNECTTIMEOUT, 10l);
-	easy.SetOption(CURLOPT_URL, url);
 }
 
 CurlRequest::~CurlRequest()
