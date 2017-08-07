@@ -58,16 +58,14 @@ CurlRequest::CurlRequest(CurlGlobal &_global, CurlEasy &&_easy,
 {
 	error_buffer[0] = 0;
 
-	easy.SetOption(CURLOPT_PRIVATE, (void *)this);
-	easy.SetOption(CURLOPT_USERAGENT, PACKAGE " " VERSION);
-	easy.SetOption(CURLOPT_HEADERFUNCTION, _HeaderFunction);
-	easy.SetOption(CURLOPT_WRITEHEADER, this);
-	easy.SetOption(CURLOPT_WRITEFUNCTION, WriteFunction);
-	easy.SetOption(CURLOPT_WRITEDATA, this);
-	easy.SetOption(CURLOPT_ERRORBUFFER, error_buffer);
-	easy.SetOption(CURLOPT_NOPROGRESS, 1l);
-	easy.SetOption(CURLOPT_NOSIGNAL, 1l);
-	easy.SetOption(CURLOPT_CONNECTTIMEOUT, 10l);
+	easy.SetPrivate((void *)this);
+	easy.SetUserAgent(PACKAGE " " VERSION);
+	easy.SetHeaderFunction(_HeaderFunction, this);
+	easy.SetWriteFunction(WriteFunction, this);
+	easy.SetErrorBuffer(error_buffer);
+	easy.SetNoProgress();
+	easy.SetNoSignal();
+	easy.SetConnectTimeout(10);
 }
 
 CurlRequest::~CurlRequest()
@@ -209,13 +207,13 @@ CurlRequest::HeaderFunction(StringView s)
 }
 
 size_t
-CurlRequest::_HeaderFunction(void *ptr, size_t size, size_t nmemb, void *stream)
+CurlRequest::_HeaderFunction(char *ptr, size_t size, size_t nmemb, void *stream)
 {
 	CurlRequest &c = *(CurlRequest *)stream;
 
 	size *= nmemb;
 
-	c.HeaderFunction({(const char *)ptr, size});
+	c.HeaderFunction({ptr, size});
 	return size;
 }
 
@@ -241,7 +239,7 @@ CurlRequest::DataReceived(const void *ptr, size_t received_size)
 }
 
 size_t
-CurlRequest::WriteFunction(void *ptr, size_t size, size_t nmemb, void *stream)
+CurlRequest::WriteFunction(char *ptr, size_t size, size_t nmemb, void *stream)
 {
 	CurlRequest &c = *(CurlRequest *)stream;
 

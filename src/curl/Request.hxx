@@ -134,11 +134,11 @@ private:
 	void HeaderFunction(StringView s);
 
 	/** called by curl when new data is available */
-	static size_t _HeaderFunction(void *ptr, size_t size, size_t nmemb,
+	static size_t _HeaderFunction(char *ptr, size_t size, size_t nmemb,
 				      void *stream);
 
 	/** called by curl when new data is available */
-	static size_t WriteFunction(void *ptr, size_t size, size_t nmemb,
+	static size_t WriteFunction(char *ptr, size_t size, size_t nmemb,
 				    void *stream);
 
 	void OnDeferredError();
