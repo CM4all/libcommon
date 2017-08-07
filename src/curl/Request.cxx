@@ -45,23 +45,8 @@
 
 CurlRequest::CurlRequest(CurlGlobal &_global, const char *url,
 			 CurlResponseHandler &_handler)
-	:global(_global), handler(_handler),
-	 easy(url),
-	 defer_error_event(global.GetEventLoop(),
-			   BIND_THIS_METHOD(OnDeferredError))
+	:CurlRequest(_global, CurlEasy(url), _handler)
 {
-	error_buffer[0] = 0;
-
-	easy.SetOption(CURLOPT_PRIVATE, (void *)this);
-	easy.SetOption(CURLOPT_USERAGENT, PACKAGE " " VERSION);
-	easy.SetOption(CURLOPT_HEADERFUNCTION, _HeaderFunction);
-	easy.SetOption(CURLOPT_WRITEHEADER, this);
-	easy.SetOption(CURLOPT_WRITEFUNCTION, WriteFunction);
-	easy.SetOption(CURLOPT_WRITEDATA, this);
-	easy.SetOption(CURLOPT_ERRORBUFFER, error_buffer);
-	easy.SetOption(CURLOPT_NOPROGRESS, 1l);
-	easy.SetOption(CURLOPT_NOSIGNAL, 1l);
-	easy.SetOption(CURLOPT_CONNECTTIMEOUT, 10l);
 }
 
 CurlRequest::CurlRequest(CurlGlobal &_global, CurlEasy &&_easy,
