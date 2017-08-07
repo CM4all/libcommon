@@ -86,6 +86,11 @@ public:
 		if (code != CURLE_OK)
 			throw std::runtime_error(curl_easy_strerror(code));
 	}
+
+	template<typename T>
+	bool GetInfo(CURLINFO info, T value_r) const {
+		return ::curl_easy_getinfo(handle, info, value_r) == CURLE_OK;
+	}
 };
 
 #endif
