@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Max Kellermann <max@duempel.org>
+ * Copyright (C) 2016-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,6 +29,8 @@
 
 #ifndef CURL_EASY_HXX
 #define CURL_EASY_HXX
+
+#include "util/Compiler.h"
 
 #include <curl/curl.h>
 
@@ -167,6 +169,17 @@ public:
 	template<typename T>
 	bool GetInfo(CURLINFO info, T value_r) const {
 		return ::curl_easy_getinfo(handle, info, value_r) == CURLE_OK;
+	}
+
+	/**
+	 * Returns the response body's size, or -1 if that is unknown.
+	 */
+	gcc_pure
+	int64_t GetContentLength() const {
+		double value;
+		return GetInfo(CURLINFO_CONTENT_LENGTH_DOWNLOAD, &value)
+			? (int64_t)value
+			: -1;
 	}
 
 	bool Unpause() {
