@@ -168,6 +168,10 @@ public:
 	bool GetInfo(CURLINFO info, T value_r) const {
 		return ::curl_easy_getinfo(handle, info, value_r) == CURLE_OK;
 	}
+
+	bool Unpause() {
+		return ::curl_easy_pause(handle, CURLPAUSE_CONT) == CURLE_OK;
+	}
 };
 
 #endif
