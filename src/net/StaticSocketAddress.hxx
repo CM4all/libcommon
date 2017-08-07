@@ -132,7 +132,7 @@ public:
 		return (SocketAddress)*this == other;
 	}
 
-	bool operator!=(const StaticSocketAddress &other) const {
+	bool operator!=(SocketAddress other) const {
 		return !(*this == other);
 	}
 };
