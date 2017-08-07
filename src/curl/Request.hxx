@@ -80,6 +80,8 @@ public:
 	 */
 	CurlRequest(CurlGlobal &_global, const char *url,
 		    CurlResponseHandler &_handler);
+	CurlRequest(CurlGlobal &_global, CurlEasy &&_easy,
+		    CurlResponseHandler &_handler);
 	~CurlRequest();
 
 	CurlRequest(const CurlRequest &) = delete;
