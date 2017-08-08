@@ -1,4 +1,3 @@
-// -*- mode: c++; indent-tabs-mode: t; c-basic-offset: 8; -*-
 /*
  * author: Max Kellermann <mk@cm4all.com>
  */

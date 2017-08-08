@@ -1,4 +1,3 @@
-// -*- mode: c++; indent-tabs-mode: t; c-basic-offset: 8; -*-
 /*
  * author: Max Kellermann <mk@cm4all.com>
  */
@@ -12,54 +11,56 @@
 #include <stdexcept>
 
 namespace ODBus {
-	class PendingCall {
-		DBusPendingCall *pending = nullptr;
 
-		explicit PendingCall(DBusPendingCall *_pending)
-			:pending(_pending) {}
+class PendingCall {
+	DBusPendingCall *pending = nullptr;
 
-	public:
-		PendingCall() = default;
+	explicit PendingCall(DBusPendingCall *_pending)
+		:pending(_pending) {}
 
-		PendingCall(PendingCall &&src)
-			:pending(src.pending) {
-			src.pending = nullptr;
-		}
+public:
+	PendingCall() = default;
 
-		~PendingCall() {
-			if (pending != nullptr)
-				dbus_pending_call_unref(pending);
-		}
+	PendingCall(PendingCall &&src)
+		:pending(src.pending) {
+		src.pending = nullptr;
+	}
 
-		DBusPendingCall *Get() {
-			return pending;
-		}
+	~PendingCall() {
+		if (pending != nullptr)
+			dbus_pending_call_unref(pending);
+	}
 
-		PendingCall &operator=(PendingCall &&src) {
-			std::swap(pending, src.pending);
-			return *this;
-		}
+	DBusPendingCall *Get() {
+		return pending;
+	}
 
-		static PendingCall SendWithReply(DBusConnection *connection,
-						 DBusMessage *message,
-						 int timeout_milliseconds=-1) {
-			DBusPendingCall *pending;
-			if (!dbus_connection_send_with_reply(connection,
-							     message,
-							     &pending,
-							     timeout_milliseconds))
-				throw std::runtime_error("dbus_connection_send_with_reply() failed");
+	PendingCall &operator=(PendingCall &&src) {
+		std::swap(pending, src.pending);
+		return *this;
+	}
 
-			if (pending == nullptr)
-				throw std::runtime_error("dbus_connection_send_with_reply() failed with pending=NULL");
+	static PendingCall SendWithReply(DBusConnection *connection,
+					 DBusMessage *message,
+					 int timeout_milliseconds=-1) {
+		DBusPendingCall *pending;
+		if (!dbus_connection_send_with_reply(connection,
+						     message,
+						     &pending,
+						     timeout_milliseconds))
+			throw std::runtime_error("dbus_connection_send_with_reply() failed");
 
-			return PendingCall(pending);
-		}
+		if (pending == nullptr)
+			throw std::runtime_error("dbus_connection_send_with_reply() failed with pending=NULL");
 
-		void Block() {
-			dbus_pending_call_block(pending);
-		}
-	};
-}
+		return PendingCall(pending);
+	}
+
+	void Block() {
+		dbus_pending_call_block(pending);
+	}
+};
+
+} /* namespace ODBus */
 
 #endif

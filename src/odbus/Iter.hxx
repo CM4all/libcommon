@@ -1,4 +1,3 @@
-// -*- mode: c++; indent-tabs-mode: t; c-basic-offset: 8; -*-
 /*
  * author: Max Kellermann <mk@cm4all.com>
  */
@@ -7,16 +6,18 @@
 #define ODBUS_ITER_HXX
 
 namespace ODBus {
-	class MessageIter {
-	protected:
-		DBusMessageIter iter;
 
-		MessageIter() = default;
+class MessageIter {
+protected:
+	DBusMessageIter iter;
 
-	public:
-		MessageIter(const MessageIter &) = delete;
-		MessageIter &operator=(const MessageIter &) = delete;
-	};
-}
+	MessageIter() = default;
+
+public:
+	MessageIter(const MessageIter &) = delete;
+	MessageIter &operator=(const MessageIter &) = delete;
+};
+
+} /* namespace ODBus */
 
 #endif
