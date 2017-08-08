@@ -8,6 +8,7 @@
 #include "odbus/AppendIter.hxx"
 #include "odbus/ReadIter.hxx"
 #include "odbus/PendingCall.hxx"
+#include "odbus/Error.hxx"
 #include "util/Macros.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
@@ -142,27 +143,18 @@ CreateSystemdScope(const char *name, const char *description,
     if (!sd_booted())
         return CgroupState();
 
-    DBusError err;
-    dbus_error_init(&err);
+    ODBus::Error error;
 
-    auto *connection = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
-    if (dbus_error_is_set(&err)) {
-        fprintf(stderr, "DBus connection error: %s\n", err.message);
-        dbus_error_free(&err);
-        return CgroupState();
-    }
+    auto *connection = dbus_bus_get(DBUS_BUS_SYSTEM, error);
+    error.CheckThrow("DBus connection error");
 
     const char *match = "type='signal',"
         "sender='org.freedesktop.systemd1',"
         "interface='org.freedesktop.systemd1.Manager',"
         "member='JobRemoved',"
         "path='/org/freedesktop/systemd1'";
-    dbus_bus_add_match(connection, match, &err);
-    if (dbus_error_is_set(&err)) {
-        fprintf(stderr, "DBus AddMatch error: %s\n", err.message);
-        dbus_error_free(&err);
-        return CgroupState();
-    }
+    dbus_bus_add_match(connection, match, error);
+    error.CheckThrow("DBus AddMatch error");
 
     AtScopeExit(connection, match){
         dbus_bus_remove_match(connection, match, nullptr);
@@ -207,11 +199,8 @@ CreateSystemdScope(const char *name, const char *description,
     reply.CheckThrowError();
 
     const char *object_path;
-    if (!reply.GetArgs(err, DBUS_TYPE_OBJECT_PATH, &object_path)) {
-        fprintf(stderr, "StartTransientUnit reply failed: %s\n", err.message);
-        dbus_error_free(&err);
-        return CgroupState();
-    }
+    if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
+        error.Throw("StartTransientUnit reply failed");
 
     WaitJobRemoved(connection, object_path);
 

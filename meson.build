@@ -251,6 +251,7 @@ pg = static_library('pg',
 pg_dep = declare_dependency(link_with: pg)
 
 odbus = static_library('odbus',
+  'src/odbus/Error.cxx',
   'src/odbus/Message.cxx',
   include_directories: inc,
   dependencies: [
