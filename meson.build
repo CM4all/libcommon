@@ -254,6 +254,7 @@ odbus = static_library('odbus',
   'src/odbus/Error.cxx',
   'src/odbus/Connection.cxx',
   'src/odbus/Message.cxx',
+  'src/odbus/Watch.cxx',
   include_directories: inc,
   dependencies: [
     libdbus,
