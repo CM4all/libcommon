@@ -4,6 +4,7 @@
 
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
+#include "odbus/Connection.hxx"
 #include "odbus/Message.hxx"
 #include "odbus/AppendIter.hxx"
 #include "odbus/ReadIter.hxx"
@@ -145,8 +146,7 @@ CreateSystemdScope(const char *name, const char *description,
 
     ODBus::Error error;
 
-    auto *connection = dbus_bus_get(DBUS_BUS_SYSTEM, error);
-    error.CheckThrow("DBus connection error");
+    auto connection = ODBus::Connection::GetSystem();
 
     const char *match = "type='signal',"
         "sender='org.freedesktop.systemd1',"
@@ -156,7 +156,7 @@ CreateSystemdScope(const char *name, const char *description,
     dbus_bus_add_match(connection, match, error);
     error.CheckThrow("DBus AddMatch error");
 
-    AtScopeExit(connection, match){
+    AtScopeExit(&connection, match){
         dbus_bus_remove_match(connection, match, nullptr);
     };
 
