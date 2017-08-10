@@ -32,7 +32,6 @@
 
 #include <algorithm>
 
-#include <assert.h>
 #include <string.h>
 
 #ifdef HAVE_TCP
@@ -44,7 +43,7 @@
 #endif
 
 StaticSocketAddress &
-StaticSocketAddress::operator=(SocketAddress other)
+StaticSocketAddress::operator=(SocketAddress other) noexcept
 {
 	size = std::min(other.GetSize(), GetCapacity());
 	memcpy(&address, other.GetAddress(), size);
@@ -54,7 +53,7 @@ StaticSocketAddress::operator=(SocketAddress other)
 #ifdef HAVE_UN
 
 StringView
-StaticSocketAddress::GetLocalRaw() const
+StaticSocketAddress::GetLocalRaw() const noexcept
 {
 	return SocketAddress(*this).GetLocalRaw();
 }
@@ -64,7 +63,7 @@ StaticSocketAddress::GetLocalRaw() const
 #ifdef HAVE_TCP
 
 bool
-StaticSocketAddress::SetPort(unsigned port)
+StaticSocketAddress::SetPort(unsigned port) noexcept
 {
 	switch (GetFamily()) {
 	case AF_INET:
