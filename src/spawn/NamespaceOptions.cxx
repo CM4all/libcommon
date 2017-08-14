@@ -257,20 +257,20 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         /* go to /mnt so we can refer to the old directories with a
            relative path */
         ChdirOrThrow(new_root != nullptr ? "/mnt" : "/");
+
+        if (mount_home != nullptr) {
+            assert(home != nullptr);
+            assert(*home == '/');
+
+            BindMount(home + 1, mount_home, MS_NOSUID|MS_NODEV);
+        }
+
+        MountList::ApplyAll(mounts);
+
+        if (new_root != nullptr)
+            /* back to the new root */
+            ChdirOrThrow("/");
     }
-
-    if (mount_home != nullptr) {
-        assert(home != nullptr);
-        assert(*home == '/');
-
-        BindMount(home + 1, mount_home, MS_NOSUID|MS_NODEV);
-    }
-
-    MountList::ApplyAll(mounts);
-
-    if (new_root != nullptr && HasBindMount())
-        /* back to the new root */
-        ChdirOrThrow("/");
 
     if (new_root != nullptr &&
         /* get rid of the old root */
