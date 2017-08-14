@@ -44,6 +44,12 @@ struct NamespaceOptions {
     bool enable_mount = false;
 
     /**
+     * Mount a tmpfs to "/"?  All required mountpoints will be
+     * created, but the filesystem will contain nothing else.
+     */
+    bool mount_root_tmpfs = false;
+
+    /**
      * Mount a new /proc?
      */
     bool mount_proc = false;

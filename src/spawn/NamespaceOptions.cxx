@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
 #include <sys/mount.h>
 #include <sys/prctl.h>
 
@@ -40,6 +41,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
      enable_network(src.enable_network),
      enable_ipc(src.enable_ipc),
      enable_mount(src.enable_mount),
+     mount_root_tmpfs(src.mount_root_tmpfs),
      mount_proc(src.mount_proc),
      mount_pts(src.mount_pts),
      bind_mount_pts(src.bind_mount_pts),
@@ -200,6 +202,28 @@ ChdirOrThrow(const char *path)
         throw FormatErrno("chdir('%s') failed", path);
 }
 
+static void
+MakeDirs(const char *path)
+{
+    assert(path != nullptr);
+    assert(*path == '/');
+
+    ++path; /* skip the slash to make it relative */
+
+    char *allocated = strdup(path);
+    AtScopeExit(allocated) { free(allocated); };
+
+    char *p = allocated;
+    while (char *slash = strchr(p, '/')) {
+        *slash = 0;
+        mkdir(allocated, 0755);
+        *slash = '/';
+        p = slash + 1;
+    }
+
+    mkdir(allocated, 0700);
+}
+
 void
 NamespaceOptions::Setup(const UidGid &uid_gid) const
 {
@@ -221,10 +245,19 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         /* convert all "shared" mounts to "private" mounts */
         mount(nullptr, "/", nullptr, MS_PRIVATE|MS_REC, nullptr);
 
-    const char *const new_root = pivot_root;
     const char *const put_old = "/mnt";
 
-    if (new_root != nullptr) {
+    const char *new_root = nullptr;
+
+    if (pivot_root != nullptr) {
+        /* first bind-mount the new root onto itself to "unlock" the
+           kernel's mount object (flag MNT_LOCKED) in our namespace;
+           without this, the kernel would not allow an unprivileged
+           process to pivot_root to it */
+
+        new_root = pivot_root;
+        BindMount(new_root, new_root, MS_NOSUID|MS_RDONLY);
+
         /* first bind-mount the new root onto itself to "unlock" the
            kernel's mount object (flag MNT_LOCKED) in our namespace;
            without this, the kernel would not allow an unprivileged
@@ -233,7 +266,51 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
 
         /* release a reference to the old root */
         ChdirOrThrow(new_root);
+    } else if (mount_root_tmpfs) {
+        new_root = "/tmp";
 
+        /* create an empty tmpfs as the new filesystem root */
+        if (mount("none", new_root, "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
+                  "size=256k,nr_inodes=1024,mode=755") < 0)
+            throw FormatErrno("mount(tmpfs, '%s') failed", new_root);
+
+        ChdirOrThrow(new_root);
+
+        /* create all mountpoints which we'll need later on */
+
+        const auto old_umask = umask(0022);
+        AtScopeExit(old_umask) { umask(old_umask); };
+
+        mkdir(put_old + 1, 0700);
+
+        if (mount_proc)
+            mkdir("proc", 0700);
+
+        if (mount_pts || bind_mount_pts) {
+            mkdir("dev", 0755);
+            mkdir("dev/pts", 0700);
+        }
+
+        if (mount_home != nullptr)
+            MakeDirs(mount_home);
+
+        if (mount_tmp_tmpfs != nullptr)
+            mkdir("tmp", 0700);
+
+        for (const auto *i = mounts; i != nullptr; i = i->next)
+            MakeDirs(i->target);
+
+        if (mount_tmpfs != nullptr)
+            MakeDirs(mount_tmpfs);
+
+        /* make the root tmpfs read-only */
+
+        if (mount(nullptr, new_root, nullptr, MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
+                  nullptr) < 0)
+            throw FormatErrno("Failed to remount read-only");
+    }
+
+    if (new_root != nullptr) {
         /* enter the new root */
         int result = my_pivot_root(new_root, put_old + 1);
         if (result < 0)
@@ -331,6 +408,9 @@ NamespaceOptions::MakeId(char *p) const
             p = (char *)mempcpy(p, ";pvr=", 5);
             p = stpcpy(p, pivot_root);
         }
+
+        if (mount_root_tmpfs)
+            p = (char *)mempcpy(p, ";rt", 3);
 
         if (mount_proc)
             p = (char *)mempcpy(p, ";proc", 5);
