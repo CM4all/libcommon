@@ -193,6 +193,13 @@ NamespaceOptions::ReassociateNetwork() const
         throw MakeErrno("Failed to reassociate with network namespace");
 }
 
+static void
+ChdirOrThrow(const char *path)
+{
+    if (chdir(path) < 0)
+        throw FormatErrno("chdir('%s') failed", path);
+}
+
 void
 NamespaceOptions::Setup(const UidGid &uid_gid) const
 {
@@ -225,8 +232,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         BindMount(new_root, new_root, MS_NOSUID|MS_RDONLY);
 
         /* release a reference to the old root */
-        if (chdir(new_root) < 0)
-            throw FormatErrno("chdir('%s') failed", new_root);
+        ChdirOrThrow(new_root);
 
         /* enter the new root */
         int result = my_pivot_root(new_root, put_old);
@@ -250,11 +256,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
     if (HasBindMount()) {
         /* go to /mnt so we can refer to the old directories with a
            relative path */
-
-        const char *path = new_root != nullptr ? "/mnt" : "/";
-
-        if (chdir(path) < 0)
-            throw FormatErrno("chdir('%s') failed", path);
+        ChdirOrThrow(new_root != nullptr ? "/mnt" : "/");
     }
 
     if (mount_home != nullptr) {
@@ -266,10 +268,9 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
 
     MountList::ApplyAll(mounts);
 
-    if (new_root != nullptr && HasBindMount() &&
+    if (new_root != nullptr && HasBindMount())
         /* back to the new root */
-        chdir("/") < 0)
-        throw MakeErrno("chdir('/') failed");
+        ChdirOrThrow("/");
 
     if (new_root != nullptr &&
         /* get rid of the old root */
