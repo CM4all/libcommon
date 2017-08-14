@@ -9,7 +9,6 @@
 
 #include <sys/syscall.h>
 #include <unistd.h>
-#include <linux/sched.h>
 
 static inline int
 my_pivot_root(const char *new_root, const char *put_old)
