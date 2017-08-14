@@ -247,7 +247,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
               nullptr) < 0)
         throw MakeErrno("mount('/dev/pts') failed");
 
-    if (mount_home != nullptr || mounts != nullptr) {
+    if (HasBindMount()) {
         /* go to /mnt so we can refer to the old directories with a
            relative path */
 
@@ -266,7 +266,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
 
     MountList::ApplyAll(mounts);
 
-    if (new_root != nullptr && (mount_home != nullptr || mounts != nullptr) &&
+    if (new_root != nullptr && HasBindMount() &&
         /* back to the new root */
         chdir("/") < 0)
         throw MakeErrno("chdir('/') failed");

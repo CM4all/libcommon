@@ -131,6 +131,11 @@ struct NamespaceOptions {
             ? mount_home
             : home;
     }
+
+private:
+    constexpr bool HasBindMount() const {
+        return mount_home != nullptr || mounts != nullptr;
+    }
 };
 
 #endif
