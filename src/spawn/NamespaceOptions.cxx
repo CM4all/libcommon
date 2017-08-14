@@ -245,9 +245,6 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
               nullptr) < 0)
         throw MakeErrno("mount('/proc') failed");
 
-    if (bind_mount_pts)
-        BindMount("/mnt/dev/pts", "/dev/pts", MS_NOSUID|MS_NOEXEC);
-
     if (mount_pts &&
         mount("devpts", "/dev/pts", "devpts", MS_NOEXEC|MS_NOSUID,
               nullptr) < 0)
@@ -257,6 +254,9 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         /* go to /mnt so we can refer to the old directories with a
            relative path */
         ChdirOrThrow(new_root != nullptr ? "/mnt" : "/");
+
+        if (bind_mount_pts)
+            BindMount("dev/pts", "/dev/pts", MS_NOSUID|MS_NOEXEC);
 
         if (mount_home != nullptr) {
             assert(home != nullptr);
