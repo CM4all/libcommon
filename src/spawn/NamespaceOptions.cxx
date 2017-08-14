@@ -222,7 +222,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         mount(nullptr, "/", nullptr, MS_PRIVATE|MS_REC, nullptr);
 
     const char *const new_root = pivot_root;
-    const char *const put_old = "mnt";
+    const char *const put_old = "/mnt";
 
     if (new_root != nullptr) {
         /* first bind-mount the new root onto itself to "unlock" the
@@ -235,7 +235,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         ChdirOrThrow(new_root);
 
         /* enter the new root */
-        int result = my_pivot_root(new_root, put_old);
+        int result = my_pivot_root(new_root, put_old + 1);
         if (result < 0)
             throw FormatErrno(-result, "pivot_root('%s') failed", new_root);
     }
@@ -253,7 +253,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
     if (HasBindMount()) {
         /* go to /mnt so we can refer to the old directories with a
            relative path */
-        ChdirOrThrow(new_root != nullptr ? "/mnt" : "/");
+        ChdirOrThrow(new_root != nullptr ? put_old : "/");
 
         if (bind_mount_pts)
             BindMount("dev/pts", "/dev/pts", MS_NOSUID|MS_NOEXEC);
