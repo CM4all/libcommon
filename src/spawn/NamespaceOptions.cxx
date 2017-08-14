@@ -237,7 +237,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         /* enter the new root */
         int result = my_pivot_root(new_root, put_old + 1);
         if (result < 0)
-            throw FormatErrno(-result, "pivot_root('%s') failed", new_root);
+            throw FormatErrno("pivot_root('%s') failed", new_root);
     }
 
     if (mount_proc &&
