@@ -889,6 +889,11 @@ enum class TranslationCommand : uint16_t {
      * Reassociate with the given named network namespace.
      */
     NETWORK_NAMESPACE_NAME = 199,
+
+    /**
+     * Mount a tmpfs to "/"?
+     */
+    MOUNT_ROOT_TMPFS = 200,
 };
 
 struct TranslationHeader {

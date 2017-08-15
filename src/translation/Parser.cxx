@@ -445,11 +445,25 @@ translate_client_pivot_root(NamespaceOptions *ns,
     if (!is_valid_absolute_path(payload, payload_length))
         throw std::runtime_error("malformed PIVOT_ROOT packet");
 
-    if (ns == nullptr || ns->pivot_root != nullptr)
+    if (ns == nullptr || ns->pivot_root != nullptr || ns->mount_root_tmpfs)
         throw std::runtime_error("misplaced PIVOT_ROOT packet");
 
     ns->enable_mount = true;
     ns->pivot_root = payload;
+}
+
+static void
+translate_client_mount_root_tmpfs(NamespaceOptions *ns,
+                                  size_t payload_length)
+{
+    if (payload_length > 0)
+        throw std::runtime_error("malformed MOUNT_ROOT_TMPFS packet");
+
+    if (ns == nullptr || ns->pivot_root != nullptr || ns->mount_root_tmpfs)
+        throw std::runtime_error("misplaced MOUNT_ROOT_TMPFS packet");
+
+    ns->enable_mount = true;
+    ns->mount_root_tmpfs = true;
 }
 
 static void
@@ -3281,6 +3295,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("Can't combine NETWORK_NAMESPACE_NAME with NETWORK_NAMESPACE");
 
         ns_options->network_namespace = payload;
+        return;
+
+    case TranslationCommand::MOUNT_ROOT_TMPFS:
+        translate_client_mount_root_tmpfs(ns_options, payload_length);
         return;
     }
 
