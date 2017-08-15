@@ -30,6 +30,8 @@
 #ifndef TRIVIAL_ARRAY_HXX
 #define TRIVIAL_ARRAY_HXX
 
+#include "Compiler.h"
+
 #include <array>
 #include <initializer_list>
 #include <algorithm>
@@ -152,7 +154,10 @@ public:
 		return data[i];
 	}
 
-	constexpr iterator begin() {
+#if !GCC_OLDER_THAN(5,0)
+	constexpr
+#endif
+	iterator begin() {
 		return data.begin();
 	}
 
@@ -160,7 +165,10 @@ public:
 		return data.begin();
 	}
 
-	constexpr iterator end() {
+#if !GCC_OLDER_THAN(5,0)
+	constexpr
+#endif
+	iterator end() {
 		return std::next(data.begin(), the_size);
 	}
 
