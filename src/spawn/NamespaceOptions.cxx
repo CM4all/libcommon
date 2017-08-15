@@ -159,12 +159,25 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid,
         position += sprintf(buffer + position, "%d %d 1\n", i, i);
     }
 
+    if (gids.find(0) == gids.end())
+        /* always map the "root" group or else file operations may
+           fail with EOVERFLOW (and this method will only be called if
+           we're root) */
+        strcpy(buffer + position, "0 0 1\n");
+
     sprintf(path, "/proc/%d/gid_map", pid);
     write_file(path, buffer);
 
     const int uid = uid_gid.uid;
     sprintf(path, "/proc/%d/uid_map", pid);
-    sprintf(buffer, "%d %d 1", uid, uid);
+    position = sprintf(buffer, "%d %d 1\n", uid, uid);
+
+    if (uid != 0)
+        /* always map the "root" user or else file operations may fail
+           with EOVERFLOW (and this method will only be called if
+           we're root) */
+        strcpy(buffer + position, "0 0 1\n");
+
     write_file(path, buffer);
 }
 
