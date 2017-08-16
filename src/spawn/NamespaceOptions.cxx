@@ -315,12 +315,6 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
 
         if (mount_tmpfs != nullptr)
             MakeDirs(mount_tmpfs);
-
-        /* make the root tmpfs read-only */
-
-        if (mount(nullptr, new_root, nullptr, MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
-                  nullptr) < 0)
-            throw FormatErrno("Failed to remount read-only");
     }
 
     if (new_root != nullptr) {
@@ -366,6 +360,17 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         /* get rid of the old root */
         umount2(put_old, MNT_DETACH) < 0)
         throw FormatErrno("umount('%s') failed: %s", put_old);
+
+    if (mount_root_tmpfs) {
+        rmdir(put_old);
+
+        /* make the root tmpfs read-only */
+
+        if (mount(nullptr, "/", nullptr,
+                  MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
+                  nullptr) < 0)
+            throw FormatErrno("Failed to remount read-only");
+    }
 
     if (mount_tmpfs != nullptr &&
         mount("none", mount_tmpfs, "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
