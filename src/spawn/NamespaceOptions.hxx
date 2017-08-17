@@ -55,6 +55,11 @@ struct NamespaceOptions {
     bool mount_proc = false;
 
     /**
+     * Shall /proc we writable?  Only used if #mount_proc is set.
+     */
+    bool writable_proc = false;
+
+    /**
      * Mount /dev/pts?
      */
     bool mount_pts = false;

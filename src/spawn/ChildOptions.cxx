@@ -201,4 +201,10 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
     dest.forbid_multicast = forbid_multicast;
     dest.forbid_bind = forbid_bind;
     dest.no_new_privs = no_new_privs;
+
+    if (!forbid_user_ns)
+        /* if we allow user namespaces, then we should allow writing
+           to /proc/self/{uid,gid}_map, which requires a /proc mount
+           which is not read-only */
+        dest.ns.writable_proc = true;
 }

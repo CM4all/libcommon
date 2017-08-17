@@ -160,6 +160,7 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
     s.WriteOptional(SpawnExecCommand::IPC_NS, ns.enable_ipc);
     s.WriteOptional(SpawnExecCommand::MOUNT_NS, ns.enable_mount);
     s.WriteOptional(SpawnExecCommand::MOUNT_PROC, ns.mount_proc);
+    s.WriteOptional(SpawnExecCommand::WRITABLE_PROC, ns.writable_proc);
     s.WriteOptionalString(SpawnExecCommand::PIVOT_ROOT, ns.pivot_root);
 
     if (ns.mount_home != nullptr) {

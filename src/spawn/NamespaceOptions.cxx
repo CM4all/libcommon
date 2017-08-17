@@ -43,6 +43,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
      enable_mount(src.enable_mount),
      mount_root_tmpfs(src.mount_root_tmpfs),
      mount_proc(src.mount_proc),
+     writable_proc(src.writable_proc),
      mount_pts(src.mount_pts),
      bind_mount_pts(src.bind_mount_pts),
      network_namespace(alloc.CheckDup(src.network_namespace)),
@@ -260,10 +261,13 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
             throw FormatErrno("pivot_root('%s') failed", new_root);
     }
 
-    if (mount_proc)
-        MountOrThrow("proc", "/proc", "proc",
-                     MS_NOEXEC|MS_NOSUID|MS_NODEV|MS_RDONLY,
-                     nullptr);
+    if (mount_proc) {
+        unsigned long flags = MS_NOEXEC|MS_NOSUID|MS_NODEV;
+        if (!writable_proc)
+            flags |= MS_RDONLY;
+
+        MountOrThrow("proc", "/proc", "proc", flags, nullptr);
+    }
 
     if (mount_pts)
         MountOrThrow("devpts", "/dev/pts", "devpts",
@@ -366,8 +370,11 @@ NamespaceOptions::MakeId(char *p) const
         if (mount_root_tmpfs)
             p = (char *)mempcpy(p, ";rt", 3);
 
-        if (mount_proc)
+        if (mount_proc) {
             p = (char *)mempcpy(p, ";proc", 5);
+            if (writable_proc)
+                *p++ = 'w';
+        }
 
         if (mount_pts)
             p = (char *)mempcpy(p, ";pts", 4);

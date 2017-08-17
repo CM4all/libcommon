@@ -484,6 +484,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
             p.ns.mount_proc = true;
             break;
 
+        case SpawnExecCommand::WRITABLE_PROC:
+            p.ns.writable_proc = true;
+            break;
+
         case SpawnExecCommand::PIVOT_ROOT:
             p.ns.pivot_root = payload.ReadString();
             break;
