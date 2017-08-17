@@ -3,6 +3,7 @@
  */
 
 #include "NamespaceOptions.hxx"
+#include "UserNamespace.hxx"
 #include "NetworkNamespace.hxx"
 #include "UidGid.hxx"
 #include "MountList.hxx"
@@ -10,8 +11,6 @@
 #include "system/pivot_root.h"
 #include "system/BindMount.hxx"
 #include "system/Error.hxx"
-#include "io/WriteFile.hxx"
-#include "io/UniqueFileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -104,82 +103,29 @@ NamespaceOptions::GetCloneFlags(int flags) const
     return flags;
 }
 
-static void
-write_file(const char *path, const char *data)
-{
-    if (TryWriteExistingFile(path, data) == WriteFileResult::ERROR)
-        throw FormatErrno("write('%s') failed", path);
-}
-
-static void
-setup_uid_map(int uid)
-{
-    char buffer[64];
-    sprintf(buffer, "%d %d 1", uid, uid);
-    write_file("/proc/self/uid_map", buffer);
-}
-
-static void
-setup_gid_map(int gid)
-{
-    char buffer[64];
-    sprintf(buffer, "%d %d 1", gid, gid);
-    write_file("/proc/self/gid_map", buffer);
-}
-
-/**
- * Write "deny" to /proc/self/setgroups which is necessary for
- * unprivileged processes to set up a gid_map.  See Linux commits
- * 9cc4651 and 66d2f33 for details.
- */
-static void
-deny_setgroups()
-{
-    TryWriteExistingFile("/proc/self/setgroups", "deny");
-}
-
 void
 NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid,
                                  int pid) const
 {
-    char path[64], buffer[1024];
-
     /* collect all gids (including supplementary groups) in a std::set
        to eliminate duplicates, and then map them all into the new
        user namespace */
-    std::set<int> gids;
+    std::set<unsigned> gids;
     gids.emplace(uid_gid.gid);
     for (unsigned i = 0; uid_gid.groups[i] != 0; ++i)
         gids.emplace(uid_gid.groups[i]);
 
-    size_t position = 0;
-    for (int i : gids) {
-        if (position + 64 > sizeof(buffer))
-            break;
+    /* always map the "root" group or else file operations may fail
+       with EOVERFLOW (and this method will only be called if we're
+       root) */
+    gids.emplace(0);
 
-        position += sprintf(buffer + position, "%d %d 1\n", i, i);
-    }
+    SetupGidMap(pid, gids);
 
-    if (gids.find(0) == gids.end())
-        /* always map the "root" group or else file operations may
-           fail with EOVERFLOW (and this method will only be called if
-           we're root) */
-        strcpy(buffer + position, "0 0 1\n");
-
-    sprintf(path, "/proc/%d/gid_map", pid);
-    write_file(path, buffer);
-
-    const int uid = uid_gid.uid;
-    sprintf(path, "/proc/%d/uid_map", pid);
-    position = sprintf(buffer, "%d %d 1\n", uid, uid);
-
-    if (uid != 0)
-        /* always map the "root" user or else file operations may fail
-           with EOVERFLOW (and this method will only be called if
-           we're root) */
-        strcpy(buffer + position, "0 0 1\n");
-
-    write_file(path, buffer);
+    /* always map the "root" user or else file operations may fail
+       with EOVERFLOW (and this method will only be called if we're
+       root) */
+    SetupUidMap(pid, uid_gid.uid, true);
 }
 
 void
@@ -224,13 +170,13 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
 {
     /* set up UID/GID mapping in the old /proc */
     if (enable_user) {
-        deny_setgroups();
+        DenySetGroups();
 
         if (uid_gid.gid != 0)
-            setup_gid_map(uid_gid.gid);
+            SetupGidMap(0, uid_gid.gid, false);
         // TODO: map the current effective gid if no gid was given?
 
-        setup_uid_map(uid_gid.uid);
+        SetupUidMap(0, uid_gid.uid, false);
     }
 
     if (network_namespace != nullptr)
