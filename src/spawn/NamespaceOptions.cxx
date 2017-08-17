@@ -165,6 +165,15 @@ MakeDirs(const char *path)
     mkdir(allocated, 0700);
 }
 
+static void
+MountOrThrow(const char *source, const char *target,
+             const char *filesystemtype, unsigned long mountflags,
+             const void *data)
+{
+    if (mount(source, target, filesystemtype, mountflags, data) < 0)
+        throw FormatErrno("mount('%s') failed", target);
+}
+
 void
 NamespaceOptions::Setup(const UidGid &uid_gid) const
 {
@@ -211,9 +220,8 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         new_root = "/tmp";
 
         /* create an empty tmpfs as the new filesystem root */
-        if (mount("none", new_root, "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
-                  "size=256k,nr_inodes=1024,mode=755") < 0)
-            throw FormatErrno("mount(tmpfs, '%s') failed", new_root);
+        MountOrThrow("none", new_root, "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
+                     "size=256k,nr_inodes=1024,mode=755");
 
         ChdirOrThrow(new_root);
 
@@ -252,15 +260,15 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
             throw FormatErrno("pivot_root('%s') failed", new_root);
     }
 
-    if (mount_proc &&
-        mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV|MS_RDONLY,
-              nullptr) < 0)
-        throw MakeErrno("mount('/proc') failed");
+    if (mount_proc)
+        MountOrThrow("proc", "/proc", "proc",
+                     MS_NOEXEC|MS_NOSUID|MS_NODEV|MS_RDONLY,
+                     nullptr);
 
-    if (mount_pts &&
-        mount("devpts", "/dev/pts", "devpts", MS_NOEXEC|MS_NOSUID,
-              nullptr) < 0)
-        throw MakeErrno("mount('/dev/pts') failed");
+    if (mount_pts)
+        MountOrThrow("devpts", "/dev/pts", "devpts",
+                     MS_NOEXEC|MS_NOSUID,
+                     nullptr);
 
     if (HasBindMount()) {
         /* go to /mnt so we can refer to the old directories with a
@@ -300,10 +308,10 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
             throw FormatErrno("Failed to remount read-only");
     }
 
-    if (mount_tmpfs != nullptr &&
-        mount("none", mount_tmpfs, "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
-              "size=16M,nr_inodes=256,mode=700") < 0)
-        throw FormatErrno("mount(tmpfs, '%s') failed", mount_tmpfs);
+    if (mount_tmpfs != nullptr)
+        MountOrThrow("none", mount_tmpfs, "tmpfs",
+                     MS_NODEV|MS_NOEXEC|MS_NOSUID,
+                     "size=16M,nr_inodes=256,mode=700");
 
     if (mount_tmp_tmpfs != nullptr) {
         const char *options = "size=16M,nr_inodes=256,mode=1777";
@@ -313,9 +321,9 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
             options = buffer;
         }
 
-        if (mount("none", "/tmp", "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
-                  options) < 0)
-            throw MakeErrno("mount('/tmp') failed");
+        MountOrThrow("none", "/tmp", "tmpfs",
+                     MS_NODEV|MS_NOEXEC|MS_NOSUID,
+                     options);
     }
 
     if (hostname != nullptr &&
