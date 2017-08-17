@@ -3,6 +3,7 @@
  */
 
 #include "NamespaceOptions.hxx"
+#include "NetworkNamespace.hxx"
 #include "UidGid.hxx"
 #include "MountList.hxx"
 #include "AllocatorPtr.hxx"
@@ -181,31 +182,12 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid,
     write_file(path, buffer);
 }
 
-/**
- * Open a network namespace in /run/netns.
- */
-static UniqueFileDescriptor
-OpenNetworkNS(const char *name)
-{
-    char path[4096];
-    if (snprintf(path, sizeof(path),
-                 "/run/netns/%s", name) >= (int)sizeof(path))
-        throw std::runtime_error("Network namespace name is too long");
-
-    UniqueFileDescriptor fd;
-    if (!fd.OpenReadOnly(path))
-        throw FormatErrno("Failed to open %s", path);
-
-    return fd;
-}
-
 void
 NamespaceOptions::ReassociateNetwork() const
 {
     assert(network_namespace != nullptr);
 
-    if (setns(OpenNetworkNS(network_namespace).Get(), CLONE_NEWNET) < 0)
-        throw MakeErrno("Failed to reassociate with network namespace");
+    ReassociateNetworkNamespace(network_namespace);
 }
 
 static void
