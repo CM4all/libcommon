@@ -37,11 +37,13 @@ struct CgroupState;
 
 /**
  * Obtain cgroup membership information from the cgroups assigned by
- * systemd to the current process, and return it as a #CgroupState
+ * systemd to the specified process, and return it as a #CgroupState
  * instance.  Returns an empty #CgroupState on error.
+ *
+ * @param pid the process id or 0 for the current process
  */
 CgroupState
-LoadSystemdCgroupState() noexcept;
+LoadSystemdCgroupState(unsigned pid) noexcept;
 
 /**
  * Create a new systemd scope and move the current process into it.

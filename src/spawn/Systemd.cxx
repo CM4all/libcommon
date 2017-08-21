@@ -49,10 +49,22 @@
 #include <unistd.h>
 #include <stdio.h>
 
-CgroupState
-LoadSystemdCgroupState() noexcept
+static FILE *
+OpenProcCgroup(unsigned pid)
 {
-    FILE *file = fopen("/proc/self/cgroup", "r");
+    if (pid > 0) {
+        char buffer[256];
+        sprintf(buffer, "/proc/%u/cgroup", pid);
+        return fopen(buffer, "r");
+    } else
+        return fopen("/proc/self/cgroup", "r");
+
+}
+
+CgroupState
+LoadSystemdCgroupState(unsigned pid) noexcept
+{
+    FILE *file = OpenProcCgroup(pid);
     if (file == nullptr)
         return CgroupState();
 
@@ -230,6 +242,6 @@ CreateSystemdScope(const char *name, const char *description,
     WaitJobRemoved(connection, object_path);
 
     return delegate
-        ? LoadSystemdCgroupState()
+        ? LoadSystemdCgroupState(0)
         : CgroupState();
 }
