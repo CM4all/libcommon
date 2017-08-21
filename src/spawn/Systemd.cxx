@@ -51,7 +51,7 @@
 
 gcc_pure
 static CgroupState
-LoadSystemdCgroupState()
+LoadSystemdCgroupState() noexcept
 {
     FILE *file = fopen("/proc/self/cgroup", "r");
     if (file == nullptr)
