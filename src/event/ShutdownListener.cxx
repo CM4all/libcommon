@@ -38,18 +38,18 @@
 inline void
 ShutdownListener::SignalCallback(int signo)
 {
-    fprintf(stderr, "caught signal %d, shutting down (pid=%d)\n",
-            signo, (int)getpid());
+	fprintf(stderr, "caught signal %d, shutting down (pid=%d)\n",
+		signo, (int)getpid());
 
-    Disable();
-    callback();
+	Disable();
+	callback();
 }
 
 ShutdownListener::ShutdownListener(EventLoop &loop, Callback _callback)
-    :event(loop, BIND_THIS_METHOD(SignalCallback)),
-     callback(_callback)
+	:event(loop, BIND_THIS_METHOD(SignalCallback)),
+	 callback(_callback)
 {
-    event.Add(SIGTERM);
-    event.Add(SIGINT);
-    event.Add(SIGQUIT);
+	event.Add(SIGTERM);
+	event.Add(SIGINT);
+	event.Add(SIGQUIT);
 }

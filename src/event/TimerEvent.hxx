@@ -40,33 +40,33 @@
  * Invoke an event callback after a certain amount of time.
  */
 class TimerEvent {
-    Event event;
+	Event event;
 
-    const BoundMethod<void()> callback;
+	const BoundMethod<void()> callback;
 
 public:
-    TimerEvent(EventLoop &loop, BoundMethod<void()> _callback)
-        :event(loop, -1, 0, Callback, this), callback(_callback) {}
+	TimerEvent(EventLoop &loop, BoundMethod<void()> _callback)
+		:event(loop, -1, 0, Callback, this), callback(_callback) {}
 
-    bool IsPending() const {
-        return event.IsTimerPending();
-    }
+	bool IsPending() const {
+		return event.IsTimerPending();
+	}
 
-    void Add(const struct timeval &tv) {
-        event.Add(tv);
-    }
+	void Add(const struct timeval &tv) {
+		event.Add(tv);
+	}
 
-    void Cancel() {
-        event.Delete();
-    }
+	void Cancel() {
+		event.Delete();
+	}
 
 private:
-    static void Callback(gcc_unused evutil_socket_t fd,
-                         gcc_unused short events,
-                         void *ctx) {
-        auto &event = *(TimerEvent *)ctx;
-        event.callback();
-    }
+	static void Callback(gcc_unused evutil_socket_t fd,
+			     gcc_unused short events,
+			     void *ctx) {
+		auto &event = *(TimerEvent *)ctx;
+		event.callback();
+	}
 };
 
 #endif

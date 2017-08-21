@@ -40,7 +40,7 @@
  */
 template<time_t s, suseconds_t us=0>
 struct EventDuration {
-    static constexpr struct timeval value = { s, us };
+	static constexpr struct timeval value = { s, us };
 };
 
 template<time_t s, suseconds_t us>

@@ -35,19 +35,19 @@
 void
 CleanupTimer::OnTimer()
 {
-    if (callback())
-        Enable();
+	if (callback())
+		Enable();
 }
 
 void
 CleanupTimer::Enable()
 {
-    if (!event.IsPending())
-        event.Add(delay);
+	if (!event.IsPending())
+		event.Add(delay);
 }
 
 void
 CleanupTimer::Disable()
 {
-    event.Cancel();
+	event.Cancel();
 }

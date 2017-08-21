@@ -40,32 +40,32 @@
  * events.
  */
 class CleanupTimer {
-    TimerEvent event;
+	TimerEvent event;
 
-    const struct timeval delay;
+	const struct timeval delay;
 
-    /**
-     * @return true if another cleanup shall be scheduled
-     */
-    typedef BoundMethod<bool()> Callback;
-    const Callback callback;
+	/**
+	 * @return true if another cleanup shall be scheduled
+	 */
+	typedef BoundMethod<bool()> Callback;
+	const Callback callback;
 
 public:
-    CleanupTimer(EventLoop &loop, unsigned delay_s,
-                 Callback _callback)
-        :event(loop, BIND_THIS_METHOD(OnTimer)),
-         delay{time_t(delay_s), 0},
-         callback(_callback) {}
+	CleanupTimer(EventLoop &loop, unsigned delay_s,
+		     Callback _callback)
+		:event(loop, BIND_THIS_METHOD(OnTimer)),
+		 delay{time_t(delay_s), 0},
+		 callback(_callback) {}
 
-    ~CleanupTimer() {
-        event.Cancel();
-    }
+	~CleanupTimer() {
+		event.Cancel();
+	}
 
-    void Enable();
-    void Disable();
+	void Enable();
+	void Disable();
 
 private:
-    void OnTimer();
+	void OnTimer();
 };
 
 #endif

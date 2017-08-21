@@ -39,27 +39,27 @@
  * Listener for shutdown signals (SIGTERM, SIGINT, SIGQUIT).
  */
 class ShutdownListener {
-    SignalEvent event;
+	SignalEvent event;
 
-    typedef BoundMethod<> Callback;
-    const Callback callback;
+	typedef BoundMethod<> Callback;
+	const Callback callback;
 
 public:
-    ShutdownListener(EventLoop &loop, Callback _callback);
+	ShutdownListener(EventLoop &loop, Callback _callback);
 
-    ShutdownListener(const ShutdownListener &) = delete;
-    ShutdownListener &operator=(const ShutdownListener &) = delete;
+	ShutdownListener(const ShutdownListener &) = delete;
+	ShutdownListener &operator=(const ShutdownListener &) = delete;
 
-    void Enable() {
-        event.Enable();
-    }
+	void Enable() {
+		event.Enable();
+	}
 
-    void Disable() {
-        event.Disable();
-    }
+	void Disable() {
+		event.Disable();
+	}
 
 private:
-    void SignalCallback(int signo);
+	void SignalCallback(int signo);
 };
 
 #endif

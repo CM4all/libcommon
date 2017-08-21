@@ -48,40 +48,40 @@
  * called again.
  */
 class SignalEvent {
-    int fd = -1;
+	int fd = -1;
 
-    SocketEvent event;
+	SocketEvent event;
 
-    sigset_t mask;
+	sigset_t mask;
 
-    typedef BoundMethod<void(int)> Callback;
-    const Callback callback;
+	typedef BoundMethod<void(int)> Callback;
+	const Callback callback;
 
 public:
-    SignalEvent(EventLoop &loop, Callback _callback);
+	SignalEvent(EventLoop &loop, Callback _callback);
 
-    SignalEvent(EventLoop &loop, int signo, Callback _callback)
-        :SignalEvent(loop, _callback) {
-        Add(signo);
-    }
+	SignalEvent(EventLoop &loop, int signo, Callback _callback)
+		:SignalEvent(loop, _callback) {
+		Add(signo);
+	}
 
-    ~SignalEvent();
+	~SignalEvent();
 
-    bool IsDefined() const {
-        return fd >= 0;
-    }
+	bool IsDefined() const {
+		return fd >= 0;
+	}
 
-    void Add(int signo) {
-        assert(fd < 0);
+	void Add(int signo) {
+		assert(fd < 0);
 
-        sigaddset(&mask, signo);
-    }
+		sigaddset(&mask, signo);
+	}
 
-    void Enable();
-    void Disable();
+	void Enable();
+	void Disable();
 
 private:
-    void EventCallback(unsigned events);
+	void EventCallback(unsigned events);
 };
 
 #endif

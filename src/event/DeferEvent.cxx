@@ -36,17 +36,17 @@
 void
 DeferEvent::Schedule()
 {
-    if (!IsPending())
-        loop.Defer(*this);
+	if (!IsPending())
+		loop.Defer(*this);
 
-    assert(IsPending());
+	assert(IsPending());
 }
 
 void
 DeferEvent::Cancel()
 {
-    if (IsPending())
-        loop.CancelDefer(*this);
+	if (IsPending())
+		loop.CancelDefer(*this);
 
-    assert(!IsPending());
+	assert(!IsPending());
 }

@@ -45,38 +45,38 @@ class EventLoop;
  * effects for callers up in the call chain.
  */
 class DeferEvent final {
-    friend class EventLoop;
+	friend class EventLoop;
 
-    typedef boost::intrusive::list_member_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>> SiblingsHook;
-    SiblingsHook siblings;
+	typedef boost::intrusive::list_member_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>> SiblingsHook;
+	SiblingsHook siblings;
 
-    EventLoop &loop;
+	EventLoop &loop;
 
-    typedef BoundMethod<void()> Callback;
-    const Callback callback;
+	typedef BoundMethod<void()> Callback;
+	const Callback callback;
 
 public:
-    DeferEvent(EventLoop &_loop, Callback _callback)
-        :loop(_loop), callback(_callback) {}
+	DeferEvent(EventLoop &_loop, Callback _callback)
+		:loop(_loop), callback(_callback) {}
 
-    DeferEvent(const DeferEvent &) = delete;
-    DeferEvent &operator=(const DeferEvent &) = delete;
+	DeferEvent(const DeferEvent &) = delete;
+	DeferEvent &operator=(const DeferEvent &) = delete;
 
-    EventLoop &GetEventLoop() {
-        return loop;
-    }
+	EventLoop &GetEventLoop() {
+		return loop;
+	}
 
-    bool IsPending() const {
-        return siblings.is_linked();
-    }
+	bool IsPending() const {
+		return siblings.is_linked();
+	}
 
-    void Schedule();
-    void Cancel();
+	void Schedule();
+	void Cancel();
 
 protected:
-    void OnDeferred() {
-        callback();
-    }
+	void OnDeferred() {
+		callback();
+	}
 };
 
 #endif

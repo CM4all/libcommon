@@ -35,22 +35,22 @@
 void
 EventLoop::Defer(DeferEvent &e)
 {
-    defer.push_front(e);
+	defer.push_front(e);
 }
 
 void
 EventLoop::CancelDefer(DeferEvent &e)
 {
-    defer.erase(defer.iterator_to(e));
+	defer.erase(defer.iterator_to(e));
 }
 
 bool
 EventLoop::RunDeferred()
 {
-    while (!defer.empty())
-        defer.pop_front_and_dispose([](DeferEvent *e){
-                e->OnDeferred();
-            });
+	while (!defer.empty())
+		defer.pop_front_and_dispose([](DeferEvent *e){
+				e->OnDeferred();
+			});
 
-    return true;
+	return true;
 }

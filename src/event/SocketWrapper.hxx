@@ -48,145 +48,145 @@ template<typename T> class ForeignFifoBuffer;
 
 class SocketHandler {
 public:
-    /**
-     * The socket is ready for reading.
-     *
-     * @return false when the socket has been closed
-     */
-    virtual bool OnSocketRead() = 0;
+	/**
+	 * The socket is ready for reading.
+	 *
+	 * @return false when the socket has been closed
+	 */
+	virtual bool OnSocketRead() = 0;
 
-    /**
-     * The socket is ready for writing.
-     *
-     * @return false when the socket has been closed
-     */
-    virtual bool OnSocketWrite() = 0;
+	/**
+	 * The socket is ready for writing.
+	 *
+	 * @return false when the socket has been closed
+	 */
+	virtual bool OnSocketWrite() = 0;
 
-    /**
-     * @return false when the socket has been closed
-     */
-    virtual bool OnSocketTimeout() = 0;
+	/**
+	 * @return false when the socket has been closed
+	 */
+	virtual bool OnSocketTimeout() = 0;
 };
 
 class SocketWrapper {
-    SocketDescriptor fd;
-    FdType fd_type;
+	SocketDescriptor fd;
+	FdType fd_type;
 
-    SocketEvent read_event, write_event;
+	SocketEvent read_event, write_event;
 
-    SocketHandler &handler;
+	SocketHandler &handler;
 
 public:
-    SocketWrapper(EventLoop &event_loop, SocketHandler &_handler)
-        :read_event(event_loop, BIND_THIS_METHOD(ReadEventCallback)),
-         write_event(event_loop, BIND_THIS_METHOD(WriteEventCallback)),
-         handler(_handler) {}
+	SocketWrapper(EventLoop &event_loop, SocketHandler &_handler)
+		:read_event(event_loop, BIND_THIS_METHOD(ReadEventCallback)),
+		 write_event(event_loop, BIND_THIS_METHOD(WriteEventCallback)),
+		 handler(_handler) {}
 
-    SocketWrapper(const SocketWrapper &) = delete;
+	SocketWrapper(const SocketWrapper &) = delete;
 
-    EventLoop &GetEventLoop() {
-        return read_event.GetEventLoop();
-    }
+	EventLoop &GetEventLoop() {
+		return read_event.GetEventLoop();
+	}
 
-    void Init(SocketDescriptor _fd, FdType _fd_type);
+	void Init(SocketDescriptor _fd, FdType _fd_type);
 
-    /**
-     * Move the socket from another #SocketWrapper instance.  This
-     * disables scheduled events.
-     */
-    void Init(SocketWrapper &&src);
+	/**
+	 * Move the socket from another #SocketWrapper instance.  This
+	 * disables scheduled events.
+	 */
+	void Init(SocketWrapper &&src);
 
-    /**
-     * Shut down the socket gracefully, allowing the TCP stack to
-     * complete all pending transfers.  If you call Close() without
-     * Shutdown(), it may reset the connection and discard pending
-     * data.
-     */
-    void Shutdown();
+	/**
+	 * Shut down the socket gracefully, allowing the TCP stack to
+	 * complete all pending transfers.  If you call Close() without
+	 * Shutdown(), it may reset the connection and discard pending
+	 * data.
+	 */
+	void Shutdown();
 
-    void Close();
+	void Close();
 
-    /**
-     * Just like Close(), but do not actually close the
-     * socket.  The caller is responsible for closing the socket (or
-     * scheduling it for reuse).
-     */
-    void Abandon();
+	/**
+	 * Just like Close(), but do not actually close the
+	 * socket.  The caller is responsible for closing the socket (or
+	 * scheduling it for reuse).
+	 */
+	void Abandon();
 
-    /**
-     * Returns the socket descriptor and calls socket_wrapper_abandon().
-     */
-    int AsFD();
+	/**
+	 * Returns the socket descriptor and calls socket_wrapper_abandon().
+	 */
+	int AsFD();
 
-    bool IsValid() const {
-        return fd.IsDefined();
-    }
+	bool IsValid() const {
+		return fd.IsDefined();
+	}
 
-    int GetFD() const {
-        return fd.Get();
-    }
+	int GetFD() const {
+		return fd.Get();
+	}
 
-    FdType GetType() const {
-        return fd_type;
-    }
+	FdType GetType() const {
+		return fd_type;
+	}
 
-    void ScheduleRead(const struct timeval *timeout) {
-        assert(IsValid());
+	void ScheduleRead(const struct timeval *timeout) {
+		assert(IsValid());
 
-        if (timeout == nullptr && read_event.IsTimerPending())
-            /* work around libevent bug: event_add() should disable the
-               timeout if tv==nullptr, but in fact it does not; workaround:
-               delete the whole event first, then re-add it */
-            read_event.Delete();
+		if (timeout == nullptr && read_event.IsTimerPending())
+			/* work around libevent bug: event_add() should disable the
+			   timeout if tv==nullptr, but in fact it does not; workaround:
+			   delete the whole event first, then re-add it */
+			read_event.Delete();
 
-        read_event.Add(timeout);
-    }
+		read_event.Add(timeout);
+	}
 
-    void UnscheduleRead() {
-        read_event.Delete();
-    }
+	void UnscheduleRead() {
+		read_event.Delete();
+	}
 
-    void ScheduleWrite(const struct timeval *timeout) {
-        assert(IsValid());
+	void ScheduleWrite(const struct timeval *timeout) {
+		assert(IsValid());
 
-        if (timeout == nullptr && write_event.IsTimerPending())
-            /* work around libevent bug: event_add() should disable the
-               timeout if tv==nullptr, but in fact it does not; workaround:
-               delete the whole event first, then re-add it */
-            write_event.Delete();
+		if (timeout == nullptr && write_event.IsTimerPending())
+			/* work around libevent bug: event_add() should disable the
+			   timeout if tv==nullptr, but in fact it does not; workaround:
+			   delete the whole event first, then re-add it */
+			write_event.Delete();
 
-        write_event.Add(timeout);
-    }
+		write_event.Add(timeout);
+	}
 
-    void UnscheduleWrite() {
-        write_event.Delete();
-    }
+	void UnscheduleWrite() {
+		write_event.Delete();
+	}
 
-    gcc_pure
-    bool IsReadPending() const {
-        return read_event.IsPending(SocketEvent::READ);
-    }
+	gcc_pure
+	bool IsReadPending() const {
+		return read_event.IsPending(SocketEvent::READ);
+	}
 
-    gcc_pure
-    bool IsWritePending() const {
-        return write_event.IsPending(SocketEvent::WRITE);
-    }
+	gcc_pure
+	bool IsWritePending() const {
+		return write_event.IsPending(SocketEvent::WRITE);
+	}
 
-    ssize_t ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer);
+	ssize_t ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer);
 
-    gcc_pure
-    bool IsReadyForWriting() const;
+	gcc_pure
+	bool IsReadyForWriting() const;
 
-    ssize_t Write(const void *data, size_t length);
+	ssize_t Write(const void *data, size_t length);
 
-    ssize_t WriteV(const struct iovec *v, size_t n);
+	ssize_t WriteV(const struct iovec *v, size_t n);
 
-    ssize_t WriteFrom(int other_fd, FdType other_fd_type,
-                      size_t length);
+	ssize_t WriteFrom(int other_fd, FdType other_fd_type,
+			  size_t length);
 
 private:
-    void ReadEventCallback(unsigned events);
-    void WriteEventCallback(unsigned events);
+	void ReadEventCallback(unsigned events);
+	void WriteEventCallback(unsigned events);
 };
 
 #endif

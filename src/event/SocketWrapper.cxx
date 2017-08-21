@@ -40,131 +40,131 @@
 void
 SocketWrapper::ReadEventCallback(unsigned events)
 {
-    assert(IsValid());
+	assert(IsValid());
 
-    if (events & SocketEvent::TIMEOUT)
-        handler.OnSocketTimeout();
-    else
-        handler.OnSocketRead();
+	if (events & SocketEvent::TIMEOUT)
+		handler.OnSocketTimeout();
+	else
+		handler.OnSocketRead();
 }
 
 void
 SocketWrapper::WriteEventCallback(unsigned events)
 {
-    assert(IsValid());
+	assert(IsValid());
 
-    if (events & SocketEvent::TIMEOUT)
-        handler.OnSocketTimeout();
-    else
-        handler.OnSocketWrite();
+	if (events & SocketEvent::TIMEOUT)
+		handler.OnSocketTimeout();
+	else
+		handler.OnSocketWrite();
 }
 
 void
 SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type)
 {
-    assert(_fd.IsDefined());
+	assert(_fd.IsDefined());
 
-    fd = _fd;
-    fd_type = _fd_type;
+	fd = _fd;
+	fd_type = _fd_type;
 
-    read_event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
-    write_event.Set(fd.Get(), SocketEvent::WRITE|SocketEvent::PERSIST);
+	read_event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
+	write_event.Set(fd.Get(), SocketEvent::WRITE|SocketEvent::PERSIST);
 }
 
 void
 SocketWrapper::Init(SocketWrapper &&src)
 {
-    Init(src.fd, src.fd_type);
-    src.Abandon();
+	Init(src.fd, src.fd_type);
+	src.Abandon();
 }
 
 void
 SocketWrapper::Shutdown()
 {
-    if (!fd.IsDefined())
-        return;
+	if (!fd.IsDefined())
+		return;
 
-    shutdown(fd.Get(), SHUT_RDWR);
+	shutdown(fd.Get(), SHUT_RDWR);
 }
 
 void
 SocketWrapper::Close()
 {
-    if (!fd.IsDefined())
-        return;
+	if (!fd.IsDefined())
+		return;
 
-    read_event.Delete();
-    write_event.Delete();
+	read_event.Delete();
+	write_event.Delete();
 
-    fd.Close();
+	fd.Close();
 }
 
 void
 SocketWrapper::Abandon()
 {
-    assert(fd.IsDefined());
+	assert(fd.IsDefined());
 
-    read_event.Delete();
-    write_event.Delete();
+	read_event.Delete();
+	write_event.Delete();
 
-    fd = SocketDescriptor::Undefined();
+	fd = SocketDescriptor::Undefined();
 }
 
 int
 SocketWrapper::AsFD()
 {
-    assert(IsValid());
+	assert(IsValid());
 
-    const int result = fd.Get();
-    Abandon();
-    return result;
+	const int result = fd.Get();
+	Abandon();
+	return result;
 }
 
 ssize_t
 SocketWrapper::ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer)
 {
-    assert(IsValid());
+	assert(IsValid());
 
-    return ReceiveToBuffer(fd.Get(), buffer);
+	return ReceiveToBuffer(fd.Get(), buffer);
 }
 
 bool
 SocketWrapper::IsReadyForWriting() const
 {
-    assert(IsValid());
+	assert(IsValid());
 
-    return fd.IsReadyForWriting();
+	return fd.IsReadyForWriting();
 }
 
 ssize_t
 SocketWrapper::Write(const void *data, size_t length)
 {
-    assert(IsValid());
+	assert(IsValid());
 
-    return send(fd.Get(), data, length, MSG_DONTWAIT|MSG_NOSIGNAL);
+	return send(fd.Get(), data, length, MSG_DONTWAIT|MSG_NOSIGNAL);
 }
 
 ssize_t
 SocketWrapper::WriteV(const struct iovec *v, size_t n)
 {
-    assert(IsValid());
+	assert(IsValid());
 
-    struct msghdr m = {
-        .msg_name = nullptr,
-        .msg_namelen = 0,
-        .msg_iov = const_cast<struct iovec *>(v),
-        .msg_iovlen = n,
-        .msg_control = nullptr,
-        .msg_controllen = 0,
-        .msg_flags = 0,
-    };
+	struct msghdr m = {
+		.msg_name = nullptr,
+		.msg_namelen = 0,
+		.msg_iov = const_cast<struct iovec *>(v),
+		.msg_iovlen = n,
+		.msg_control = nullptr,
+		.msg_controllen = 0,
+		.msg_flags = 0,
+	};
 
-    return sendmsg(fd.Get(), &m, MSG_DONTWAIT|MSG_NOSIGNAL);
+	return sendmsg(fd.Get(), &m, MSG_DONTWAIT|MSG_NOSIGNAL);
 }
 
 ssize_t
 SocketWrapper::WriteFrom(int other_fd, FdType other_fd_type,
-                         size_t length)
+			 size_t length)
 {
-    return SpliceToSocket(other_fd_type, other_fd, fd.Get(), length);
+	return SpliceToSocket(other_fd_type, other_fd, fd.Get(), length);
 }
