@@ -36,6 +36,14 @@
 struct CgroupState;
 
 /**
+ * Obtain cgroup membership information from the cgroups assigned by
+ * systemd to the current process, and return it as a #CgroupState
+ * instance.  Returns an empty #CgroupState on error.
+ */
+CgroupState
+LoadSystemdCgroupState() noexcept;
+
+/**
  * Create a new systemd scope and move the current process into it.
  *
  * Throws std::runtime_error on error.

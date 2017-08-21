@@ -49,8 +49,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-gcc_pure
-static CgroupState
+CgroupState
 LoadSystemdCgroupState() noexcept
 {
     FILE *file = fopen("/proc/self/cgroup", "r");
