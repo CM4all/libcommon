@@ -123,8 +123,6 @@ CgroupOptions::Apply(const CgroupState &state) const
         MoveToNewCgroup(mount_base_path, mount_point.c_str(),
                         state.group_path.c_str(), name);
 
-    // TODO: move to "name=systemd"?
-
     for (const auto *set = set_head; set != nullptr; set = set->next) {
         const char *dot = strchr(set->name, '.');
         assert(dot != nullptr);

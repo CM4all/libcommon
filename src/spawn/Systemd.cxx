@@ -120,9 +120,7 @@ LoadSystemdDelegate()
         }
     }
 
-    if (state.mounts.empty())
-        /* no matching controllers found - disable the feature */
-        return CgroupState();
+    state.mounts.emplace_front("systemd");
 
     state.group_path = std::move(systemd_path);
 
