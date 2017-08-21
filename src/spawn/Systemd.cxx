@@ -51,7 +51,7 @@
 
 gcc_pure
 static CgroupState
-LoadSystemdDelegate()
+LoadSystemdCgroupState()
 {
     FILE *file = fopen("/proc/self/cgroup", "r");
     if (file == nullptr)
@@ -231,6 +231,6 @@ CreateSystemdScope(const char *name, const char *description,
     WaitJobRemoved(connection, object_path);
 
     return delegate
-        ? LoadSystemdDelegate()
+        ? LoadSystemdCgroupState()
         : CgroupState();
 }
