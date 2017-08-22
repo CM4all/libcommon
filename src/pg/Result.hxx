@@ -171,6 +171,11 @@ public:
 		return GetColumnType(column) == 17;
 	}
 
+	/**
+	 * Obtains the given value, and return an empty string if the
+	 * value is NULL.  Call IsValueNull() to find out whether the
+	 * real value was NULL or an empty string.
+	 */
 	gcc_pure
 	const char *GetValue(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
@@ -190,6 +195,19 @@ public:
 		assert(IsDefined());
 
 		return ::PQgetisnull(result, row, column);
+	}
+
+	/**
+	 * Obtains the given value, but return nullptr instead of an
+	 * empty string if the value is NULL.
+	 */
+	gcc_pure
+	const char *GetValueOrNull(unsigned row, unsigned column) const noexcept {
+		assert(IsDefined());
+
+		return IsValueNull(row, column)
+			? nullptr
+			: GetValue(row, column);
 	}
 
 	gcc_pure
@@ -258,6 +276,17 @@ public:
 			assert(column < (unsigned)::PQnfields(result));
 
 			return ::PQgetisnull(result, row, column);
+		}
+
+		gcc_pure
+		const char *GetValueOrNull(unsigned column) const noexcept {
+			assert(result != nullptr);
+			assert(row < (unsigned)::PQntuples(result));
+			assert(column < (unsigned)::PQnfields(result));
+
+			return IsValueNull(column)
+				? nullptr
+				: GetValue(column);
 		}
 
 		gcc_pure
