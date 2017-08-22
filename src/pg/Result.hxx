@@ -66,35 +66,35 @@ public:
 			::PQclear(result);
 	}
 
-	bool IsDefined() const {
+	bool IsDefined() const noexcept {
 		return result != nullptr;
 	}
 
 	Result &operator=(const Result &other) = delete;
-	Result &operator=(Result &&other) {
+	Result &operator=(Result &&other) noexcept {
 		std::swap(result, other.result);
 		return *this;
 	}
 
 	gcc_pure
-	ExecStatusType GetStatus() const {
+	ExecStatusType GetStatus() const noexcept {
 		assert(IsDefined());
 
 		return ::PQresultStatus(result);
 	}
 
 	gcc_pure
-	bool IsCommandSuccessful() const {
+	bool IsCommandSuccessful() const noexcept {
 		return GetStatus() == PGRES_COMMAND_OK;
 	}
 
 	gcc_pure
-	bool IsQuerySuccessful() const {
+	bool IsQuerySuccessful() const noexcept {
 		return GetStatus() == PGRES_TUPLES_OK;
 	}
 
 	gcc_pure
-	bool IsError() const {
+	bool IsError() const noexcept {
 		const auto status = GetStatus();
 		return status == PGRES_BAD_RESPONSE ||
 			status == PGRES_NONFATAL_ERROR ||
@@ -102,7 +102,7 @@ public:
 	}
 
 	gcc_pure
-	const char *GetErrorMessage() const {
+	const char *GetErrorMessage() const noexcept {
 		assert(IsDefined());
 
 		return ::PQresultErrorMessage(result);
@@ -113,7 +113,7 @@ public:
 	 * The caller is responsible for checking GetStatus().
 	 */
 	gcc_pure
-	unsigned GetAffectedRows() const {
+	unsigned GetAffectedRows() const noexcept {
 		assert(IsDefined());
 		assert(IsCommandSuccessful());
 
@@ -124,76 +124,76 @@ public:
 	 * Returns true if there are no rows in the result.
 	 */
 	gcc_pure
-	bool IsEmpty() const {
+	bool IsEmpty() const noexcept {
 		assert(IsDefined());
 
 		return ::PQntuples(result) == 0;
 	}
 
 	gcc_pure
-	unsigned GetRowCount() const {
+	unsigned GetRowCount() const noexcept {
 		assert(IsDefined());
 
 		return ::PQntuples(result);
 	}
 
 	gcc_pure
-	unsigned GetColumnCount() const {
+	unsigned GetColumnCount() const noexcept {
 		assert(IsDefined());
 
 		return ::PQnfields(result);
 	}
 
 	gcc_pure
-	const char *GetColumnName(unsigned column) const {
+	const char *GetColumnName(unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQfname(result, column);
 	}
 
 	gcc_pure
-	bool IsColumnBinary(unsigned column) const {
+	bool IsColumnBinary(unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQfformat(result, column);
 	}
 
 	gcc_pure
-	Oid GetColumnType(unsigned column) const {
+	Oid GetColumnType(unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQftype(result, column);
 	}
 
 	gcc_pure
-	bool IsColumnTypeBinary(unsigned column) const {
+	bool IsColumnTypeBinary(unsigned column) const noexcept {
 		/* 17 = bytea */
 		return GetColumnType(column) == 17;
 	}
 
 	gcc_pure
-	const char *GetValue(unsigned row, unsigned column) const {
+	const char *GetValue(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQgetvalue(result, row, column);
 	}
 
 	gcc_pure
-	unsigned GetValueLength(unsigned row, unsigned column) const {
+	unsigned GetValueLength(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQgetlength(result, row, column);
 	}
 
 	gcc_pure
-	bool IsValueNull(unsigned row, unsigned column) const {
+	bool IsValueNull(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQgetisnull(result, row, column);
 	}
 
 	gcc_pure
-	BinaryValue GetBinaryValue(unsigned row, unsigned column) const {
+	BinaryValue GetBinaryValue(unsigned row, unsigned column) const noexcept {
 		assert(IsColumnBinary(column));
 
 		return BinaryValue(GetValue(row, column),
@@ -206,7 +206,7 @@ public:
 	 * is no row or if the value is nullptr.
 	 */
 	gcc_pure
-	std::string GetOnlyStringChecked() const;
+	std::string GetOnlyStringChecked() const noexcept;
 
 	class RowIterator {
 		PGresult *result;
@@ -216,25 +216,25 @@ public:
 		constexpr RowIterator(PGresult *_result, unsigned _row)
 		:result(_result), row(_row) {}
 
-		constexpr bool operator==(const RowIterator &other) const {
+		constexpr bool operator==(const RowIterator &other) const noexcept {
 			return row == other.row;
 		}
 
-		constexpr bool operator!=(const RowIterator &other) const {
+		constexpr bool operator!=(const RowIterator &other) const noexcept {
 			return row != other.row;
 		}
 
-		RowIterator &operator++() {
+		RowIterator &operator++() noexcept {
 			++row;
 			return *this;
 		}
 
-		RowIterator &operator*() {
+		RowIterator &operator*() noexcept {
 			return *this;
 		}
 
 		gcc_pure
-		const char *GetValue(unsigned column) const {
+		const char *GetValue(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
 			assert(column < (unsigned)::PQnfields(result));
@@ -243,7 +243,7 @@ public:
 		}
 
 		gcc_pure
-		unsigned GetValueLength(unsigned column) const {
+		unsigned GetValueLength(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
 			assert(column < (unsigned)::PQnfields(result));
@@ -252,7 +252,7 @@ public:
 		}
 
 		gcc_pure
-		bool IsValueNull(unsigned column) const {
+		bool IsValueNull(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
 			assert(column < (unsigned)::PQnfields(result));
@@ -261,7 +261,7 @@ public:
 		}
 
 		gcc_pure
-		BinaryValue GetBinaryValue(unsigned column) const {
+		BinaryValue GetBinaryValue(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
 			assert(column < (unsigned)::PQnfields(result));
@@ -272,11 +272,11 @@ public:
 
 	typedef RowIterator iterator;
 
-	iterator begin() const {
+	iterator begin() const noexcept {
 		return iterator{result, 0};
 	}
 
-	iterator end() const {
+	iterator end() const noexcept {
 		return iterator{result, GetRowCount()};
 	}
 };

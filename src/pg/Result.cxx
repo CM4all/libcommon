@@ -35,7 +35,7 @@
 namespace Pg {
 
 std::string
-Result::GetOnlyStringChecked() const
+Result::GetOnlyStringChecked() const noexcept
 {
 	if (!IsQuerySuccessful() || GetRowCount() == 0)
 		return std::string();
