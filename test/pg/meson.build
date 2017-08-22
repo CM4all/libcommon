@@ -1,4 +1,5 @@
-test('TestArray', executable('TestArray',
+test('TestPg', executable('TestPg',
   'TestDecodeArray.cxx',
   'TestEncodeArray.cxx',
-  dependencies: [gtest, pg_dep]))
+  'TestInterval.cxx',
+  dependencies: [gtest, pg_dep, util_dep]))
