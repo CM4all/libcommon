@@ -49,9 +49,11 @@ LoadSystemdCgroupState(unsigned pid) noexcept;
  * Create a new systemd scope and move the current process into it.
  *
  * Throws std::runtime_error on error.
+ *
+ * @param slice create the new scope in this slice (optional)
  */
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
-                   int pid, bool delegate=false);
+                   int pid, bool delegate=false, const char *slice=nullptr);
 
 #endif

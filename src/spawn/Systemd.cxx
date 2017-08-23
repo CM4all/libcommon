@@ -176,7 +176,7 @@ WaitJobRemoved(DBusConnection *connection, const char *object_path)
 
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
-                   int pid, bool delegate)
+                   int pid, bool delegate, const char *slice)
 {
     if (!sd_booted())
         return CgroupState();
@@ -219,6 +219,9 @@ CreateSystemdScope(const char *name, const char *description,
                        Variant(FixedArray(pids_value, ARRAY_SIZE(pids_value)))))
         .Append(Struct(String("Delegate"),
                        Variant(Boolean(delegate))))
+        .AppendOptional(slice != nullptr,
+                        Struct(String("Slice"),
+                               Variant(String(slice))))
         .CloseContainer(args);
 
     using AuxTypeTraits = StructTypeTraits<StringTypeTraits,
