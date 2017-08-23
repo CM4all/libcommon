@@ -186,6 +186,17 @@ public:
 			.AppendTuple(value.values)
 			.CloseContainer(*this);
 	}
+
+	/**
+	 * Like Append(), but only do it if the first argument is
+	 * true.
+	 */
+	template<typename T>
+	AppendMessageIter &AppendOptional(bool enabled, T &&value) {
+		return enabled
+			? Append(std::forward<T>(value))
+			: *this;
+	}
 };
 
 } /* namespace ODBus */
