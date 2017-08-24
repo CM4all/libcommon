@@ -152,8 +152,6 @@ public:
 	}
 
 	bool IsReady() const {
-		assert(IsDefined());
-
 		return state == State::READY;
 	}
 
@@ -187,7 +185,7 @@ public:
 	}
 
 	void CheckNotify() {
-		if (IsDefined() && IsReady())
+		if (IsReady())
 			PollNotify();
 	}
 
