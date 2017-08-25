@@ -62,7 +62,7 @@
 #include "util/RuntimeError.hxx"
 
 #if TRANSLATION_ENABLE_HTTP
-#include <http/header.h>
+#include "http/HeaderName.hxx"
 #endif
 
 #include <assert.h>
