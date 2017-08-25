@@ -51,6 +51,12 @@ class MatchInfo;
  */
 struct ChildOptions {
     /**
+     * A "tag" string for the child process.  This can be used to
+     * address groups of child processes.
+     */
+    const char *tag = nullptr;
+
+    /**
      * An absolute path where STDERR output will be appended.
      */
     const char *stderr_path = nullptr;
@@ -104,7 +110,8 @@ struct ChildOptions {
     ChildOptions() = default;
 
     constexpr ChildOptions(ShallowCopy shallow_copy, const ChildOptions &src)
-        :stderr_path(src.stderr_path),
+        :tag(src.tag),
+         stderr_path(src.stderr_path),
          expand_stderr_path(src.expand_stderr_path),
          env(shallow_copy, src.env),
          cgroup(src.cgroup),

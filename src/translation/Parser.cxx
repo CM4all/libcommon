@@ -3326,6 +3326,19 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     case TranslationCommand::MOUNT_ROOT_TMPFS:
         translate_client_mount_root_tmpfs(ns_options, payload_length);
         return;
+
+    case TranslationCommand::CHILD_TAG:
+        if (!IsValidName({payload, payload_length}))
+            throw std::runtime_error("malformed CHILD_TAG packet");
+
+        if (child_options == nullptr)
+            throw std::runtime_error("misplaced CHILD_TAG packet");
+
+        if (child_options->tag != nullptr)
+            throw std::runtime_error("duplicate CHILD_TAG packet");
+
+        child_options->tag = payload;
+        return;
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

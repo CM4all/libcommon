@@ -54,7 +54,8 @@
 
 ChildOptions::ChildOptions(AllocatorPtr alloc,
                            const ChildOptions &src)
-    :stderr_path(alloc.CheckDup(src.stderr_path)),
+    :tag(alloc.CheckDup(src.tag)),
+     stderr_path(alloc.CheckDup(src.stderr_path)),
      expand_stderr_path(alloc.CheckDup(src.expand_stderr_path)),
      env(alloc, src.env),
      cgroup(alloc, src.cgroup),

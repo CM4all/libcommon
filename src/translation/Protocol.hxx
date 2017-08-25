@@ -922,6 +922,12 @@ enum class TranslationCommand : uint16_t {
      * Mount a tmpfs to "/"?
      */
     MOUNT_ROOT_TMPFS = 200,
+
+    /**
+     * A "tag" string for the child process.  This can be used to
+     * address groups of child processes.
+     */
+    CHILD_TAG = 201,
 };
 
 struct TranslationHeader {
