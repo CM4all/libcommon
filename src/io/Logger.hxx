@@ -185,7 +185,7 @@ extern unsigned max_level;
 inline bool
 CheckLevel(unsigned level)
 {
-    return level < max_level;
+    return level <= max_level;
 }
 
 void
