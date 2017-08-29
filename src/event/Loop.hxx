@@ -36,6 +36,8 @@
 #include "DeferEvent.hxx"
 #include "util/BindMethod.hxx"
 
+#include <boost/intrusive/list.hpp>
+
 #include <event.h>
 
 #include <assert.h>

@@ -35,7 +35,7 @@
 
 #include "util/BindMethod.hxx"
 
-#include <boost/intrusive/list.hpp>
+#include <boost/intrusive/list_hook.hpp>
 
 class EventLoop;
 
