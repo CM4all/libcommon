@@ -42,6 +42,7 @@
 #include <exception>
 
 #include <stdio.h>
+#include <inttypes.h>
 
 namespace LoggerDetail {
 
@@ -108,6 +109,30 @@ struct ParamWrapper<unsigned> {
 	size_t size;
 
 	ParamWrapper(int _value):size(sprintf(data, "%u", _value)) {}
+
+	StringView GetValue() const {
+		return {data, size};
+	}
+};
+
+template<>
+struct ParamWrapper<int64_t> {
+	char data[32];
+	size_t size;
+
+	ParamWrapper(int64_t _value):size(sprintf(data, "%" PRId64, _value)) {}
+
+	StringView GetValue() const {
+		return {data, size};
+	}
+};
+
+template<>
+struct ParamWrapper<uint64_t> {
+	char data[32];
+	size_t size;
+
+	ParamWrapper(uint64_t _value):size(sprintf(data, "%" PRIu64, _value)) {}
 
 	StringView GetValue() const {
 		return {data, size};
