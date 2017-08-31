@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FILE_LINE_PARSER_HXX
-#define FILE_LINE_PARSER_HXX
+#pragma once
 
 #include "SocketEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -86,5 +85,3 @@ private:
 		TryRead(false);
 	}
 };
-
-#endif
