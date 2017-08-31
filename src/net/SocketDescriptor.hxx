@@ -44,14 +44,14 @@ class IPv6Address;
  */
 class SocketDescriptor : protected FileDescriptor {
 protected:
-	explicit constexpr SocketDescriptor(int _fd)
-		:FileDescriptor(_fd) {}
-
 	explicit constexpr SocketDescriptor(FileDescriptor _fd)
 		:FileDescriptor(_fd) {}
 
 public:
 	SocketDescriptor() = default;
+
+	explicit constexpr SocketDescriptor(int _fd)
+		:FileDescriptor(_fd) {}
 
 	constexpr bool operator==(SocketDescriptor other) const {
 		return fd == other.fd;
