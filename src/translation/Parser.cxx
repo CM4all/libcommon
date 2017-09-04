@@ -3328,7 +3328,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         return;
 
     case TranslationCommand::CHILD_TAG:
-        if (!IsValidName({payload, payload_length}))
+        if (has_null_byte(payload, payload_length))
             throw std::runtime_error("malformed CHILD_TAG packet");
 
         if (child_options == nullptr)
