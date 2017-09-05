@@ -96,3 +96,12 @@ LoggerDetail::Format(unsigned level, StringView domain,
 
 	WriteV(domain, {&s, 1});
 }
+
+std::string
+ChildLoggerDomain::Make(StringView parent, const char *name)
+{
+	if (parent.IsEmpty())
+		return name;
+
+	return std::string(parent.data, parent.size) + '/' + name;
+}

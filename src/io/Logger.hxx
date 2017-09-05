@@ -339,6 +339,26 @@ public:
 class RootLogger : public BasicLogger<NullLoggerDomain> {
 };
 
+class ChildLoggerDomain : public StringLoggerDomain {
+	std::string name;
+
+public:
+	template<typename P>
+	ChildLoggerDomain(P &&parent, const char *_name)
+		:StringLoggerDomain(Make(parent.GetDomain(), _name)) {}
+
+private:
+	static std::string Make(StringView parent, const char *name);
+};
+
+class ChildLogger : public BasicLogger<ChildLoggerDomain> {
+public:
+	template<typename P>
+	ChildLogger(P &&parent, const char *_name)
+		:BasicLogger(ChildLoggerDomain(std::forward<P>(parent),
+					       _name)) {}
+};
+
 /**
  * A lighter version of #StringLoggerDomain which uses a literal
  * string as its domain.
