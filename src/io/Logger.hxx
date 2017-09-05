@@ -289,11 +289,11 @@ public:
 				     fmt, std::forward<Params>(params)...);
 	}
 
-private:
 	StringView GetDomain() const {
 		return Domain::GetDomain();
 	}
 
+private:
 	void WriteV(ConstBuffer<StringView> buffers) const noexcept {
 		LoggerDetail::WriteV(GetDomain(), buffers);
 	}
