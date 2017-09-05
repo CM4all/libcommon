@@ -324,6 +324,22 @@ public:
 };
 
 /**
+ * An empty logger domain, to be used by #RootLogger.
+ */
+class NullLoggerDomain {
+public:
+	constexpr StringView GetDomain() const {
+		return nullptr;
+	}
+};
+
+/**
+ * An empty logger domain, to be used by #RootLogger.
+ */
+class RootLogger : public BasicLogger<NullLoggerDomain> {
+};
+
+/**
  * A lighter version of #StringLoggerDomain which uses a literal
  * string as its domain.
  */
