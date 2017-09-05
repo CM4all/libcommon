@@ -52,153 +52,153 @@
 
 ServerSocket::~ServerSocket()
 {
-    if (fd.IsDefined())
-        event.Delete();
+	if (fd.IsDefined())
+		event.Delete();
 }
 
 void
 ServerSocket::Listen(UniqueSocketDescriptor &&_fd)
 {
-    assert(!fd.IsDefined());
-    assert(_fd.IsDefined());
+	assert(!fd.IsDefined());
+	assert(_fd.IsDefined());
 
-    fd = std::move(_fd);
-    event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
-    AddEvent();
+	fd = std::move(_fd);
+	event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
+	AddEvent();
 }
 
 static UniqueSocketDescriptor
 MakeListener(const SocketAddress address,
-             bool reuse_port,
-             bool free_bind,
-             const char *bind_to_device)
+	     bool reuse_port,
+	     bool free_bind,
+	     const char *bind_to_device)
 {
-    const int family = address.GetFamily();
-    constexpr int socktype = SOCK_STREAM;
-    constexpr int protocol = 0;
+	const int family = address.GetFamily();
+	constexpr int socktype = SOCK_STREAM;
+	constexpr int protocol = 0;
 
-    if (family == AF_LOCAL) {
-        const struct sockaddr_un *sun = (const struct sockaddr_un *)address.GetAddress();
-        if (sun->sun_path[0] != '\0')
-            /* delete non-abstract socket files before reusing them */
-            unlink(sun->sun_path);
-    }
+	if (family == AF_LOCAL) {
+		const struct sockaddr_un *sun = (const struct sockaddr_un *)address.GetAddress();
+		if (sun->sun_path[0] != '\0')
+			/* delete non-abstract socket files before reusing them */
+			unlink(sun->sun_path);
+	}
 
-    UniqueSocketDescriptor fd;
-    if (!fd.CreateNonBlock(family, socktype, protocol))
-        throw MakeErrno("Failed to create socket");
+	UniqueSocketDescriptor fd;
+	if (!fd.CreateNonBlock(family, socktype, protocol))
+		throw MakeErrno("Failed to create socket");
 
-    if (!fd.SetReuseAddress(true))
-        throw MakeErrno("Failed to set SO_REUSEADDR");
+	if (!fd.SetReuseAddress(true))
+		throw MakeErrno("Failed to set SO_REUSEADDR");
 
-    if (reuse_port && !fd.SetReusePort())
-        throw MakeErrno("Failed to set SO_REUSEPORT");
+	if (reuse_port && !fd.SetReusePort())
+		throw MakeErrno("Failed to set SO_REUSEPORT");
 
-    if (free_bind && !fd.SetFreeBind())
-        throw MakeErrno("Failed to set SO_FREEBIND");
+	if (free_bind && !fd.SetFreeBind())
+		throw MakeErrno("Failed to set SO_FREEBIND");
 
-    if (address.IsV6Any())
-        fd.SetV6Only(false);
+	if (address.IsV6Any())
+		fd.SetV6Only(false);
 
-    if (bind_to_device != nullptr && !fd.SetBindToDevice(bind_to_device))
-        throw MakeErrno("Failed to set SO_BINDTODEVICE");
+	if (bind_to_device != nullptr && !fd.SetBindToDevice(bind_to_device))
+		throw MakeErrno("Failed to set SO_BINDTODEVICE");
 
-    if (!fd.Bind(address))
-        throw MakeErrno("Failed to bind");
+	if (!fd.Bind(address))
+		throw MakeErrno("Failed to bind");
 
-    switch (address.GetFamily()) {
-    case AF_INET:
-    case AF_INET6:
-        if (socktype == SOCK_STREAM)
-            fd.SetTcpFastOpen();
-        break;
+	switch (address.GetFamily()) {
+	case AF_INET:
+	case AF_INET6:
+		if (socktype == SOCK_STREAM)
+			fd.SetTcpFastOpen();
+		break;
 
-    case AF_LOCAL:
-        fd.SetBoolOption(SOL_SOCKET, SO_PASSCRED, true);
-        break;
-    }
+	case AF_LOCAL:
+		fd.SetBoolOption(SOL_SOCKET, SO_PASSCRED, true);
+		break;
+	}
 
-    if (!fd.Listen(64))
-        throw MakeErrno("Failed to listen");
+	if (!fd.Listen(64))
+		throw MakeErrno("Failed to listen");
 
-    return fd;
+	return fd;
 }
 
 static bool
 IsTCP(SocketAddress address)
 {
-    return address.GetFamily() == AF_INET || address.GetFamily() == AF_INET6;
+	return address.GetFamily() == AF_INET || address.GetFamily() == AF_INET6;
 }
 
 void
 ServerSocket::Listen(SocketAddress address,
-                     bool reuse_port,
-                     bool free_bind,
-                     const char *bind_to_device)
+		     bool reuse_port,
+		     bool free_bind,
+		     const char *bind_to_device)
 {
-    Listen(MakeListener(address, reuse_port, free_bind, bind_to_device));
+	Listen(MakeListener(address, reuse_port, free_bind, bind_to_device));
 }
 
 void
 ServerSocket::ListenTCP(unsigned port)
 {
-    try {
-        ListenTCP6(port);
-    } catch (...) {
-        ListenTCP4(port);
-    }
+	try {
+		ListenTCP6(port);
+	} catch (...) {
+		ListenTCP4(port);
+	}
 }
 
 void
 ServerSocket::ListenTCP4(unsigned port)
 {
-    assert(port > 0);
+	assert(port > 0);
 
-    Listen(IPv4Address(port),
-           false, false, nullptr);
+	Listen(IPv4Address(port),
+	       false, false, nullptr);
 }
 
 void
 ServerSocket::ListenTCP6(unsigned port)
 {
-    assert(port > 0);
+	assert(port > 0);
 
-    Listen(IPv6Address(port),
-           false, false, nullptr);
+	Listen(IPv6Address(port),
+	       false, false, nullptr);
 }
 
 void
 ServerSocket::ListenPath(const char *path)
 {
-    AllocatedSocketAddress address;
-    address.SetLocal(path);
+	AllocatedSocketAddress address;
+	address.SetLocal(path);
 
-    Listen(address, false, false, nullptr);
+	Listen(address, false, false, nullptr);
 }
 
 StaticSocketAddress
 ServerSocket::GetLocalAddress() const
 {
-    return fd.GetLocalAddress();
+	return fd.GetLocalAddress();
 }
 
 void
 ServerSocket::EventCallback(unsigned)
 {
-    StaticSocketAddress remote_address;
-    auto remote_fd = fd.AcceptNonBlock(remote_address);
-    if (!remote_fd.IsDefined()) {
-        const int e = errno;
-        if (e != EAGAIN && e != EWOULDBLOCK)
-            OnAcceptError(std::make_exception_ptr(MakeErrno(e, "Failed to accept connection")));
+	StaticSocketAddress remote_address;
+	auto remote_fd = fd.AcceptNonBlock(remote_address);
+	if (!remote_fd.IsDefined()) {
+		const int e = errno;
+		if (e != EAGAIN && e != EWOULDBLOCK)
+			OnAcceptError(std::make_exception_ptr(MakeErrno(e, "Failed to accept connection")));
 
-        return;
-    }
+		return;
+	}
 
-    if (IsTCP(remote_address) && !remote_fd.SetNoDelay()) {
-        OnAcceptError(std::make_exception_ptr(MakeErrno("setsockopt(TCP_NODELAY) failed")));
-        return;
-    }
+	if (IsTCP(remote_address) && !remote_fd.SetNoDelay()) {
+		OnAcceptError(std::make_exception_ptr(MakeErrno("setsockopt(TCP_NODELAY) failed")));
+		return;
+	}
 
-    OnAccept(std::move(remote_fd), remote_address);
+	OnAccept(std::move(remote_fd), remote_address);
 }
