@@ -61,8 +61,8 @@ public:
 	~NetstringServer();
 
 protected:
-	int GetFD() const {
-		return fd.Get();
+	SocketDescriptor GetSocket() const {
+		return fd;
 	}
 
 	bool SendResponse(const void *data, size_t size);
