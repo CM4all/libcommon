@@ -48,38 +48,38 @@
  * responds with another netstring.
  */
 class NetstringServer {
-    UniqueSocketDescriptor fd;
+	UniqueSocketDescriptor fd;
 
-    SocketEvent event;
+	SocketEvent event;
 
-    NetstringInput input;
-    NetstringGenerator generator;
-    MultiWriteBuffer write;
+	NetstringInput input;
+	NetstringGenerator generator;
+	MultiWriteBuffer write;
 
 public:
-    NetstringServer(EventLoop &event_loop, UniqueSocketDescriptor &&_fd);
-    ~NetstringServer();
+	NetstringServer(EventLoop &event_loop, UniqueSocketDescriptor &&_fd);
+	~NetstringServer();
 
 protected:
-    int GetFD() const {
-        return fd.Get();
-    }
+	int GetFD() const {
+		return fd.Get();
+	}
 
-    bool SendResponse(const void *data, size_t size);
-    bool SendResponse(const char *data);
+	bool SendResponse(const void *data, size_t size);
+	bool SendResponse(const char *data);
 
-    /**
-     * A netstring has been received.
-     *
-     * @param payload the netstring value; for the implementation's
-     * convenience, the netstring is writable
-     */
-    virtual void OnRequest(AllocatedArray<uint8_t> &&payload) = 0;
-    virtual void OnError(std::exception_ptr ep) = 0;
-    virtual void OnDisconnect() = 0;
+	/**
+	 * A netstring has been received.
+	 *
+	 * @param payload the netstring value; for the implementation's
+	 * convenience, the netstring is writable
+	 */
+	virtual void OnRequest(AllocatedArray<uint8_t> &&payload) = 0;
+	virtual void OnError(std::exception_ptr ep) = 0;
+	virtual void OnDisconnect() = 0;
 
 private:
-    void OnEvent(unsigned events);
+	void OnEvent(unsigned events);
 };
 
 #endif

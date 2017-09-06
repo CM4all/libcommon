@@ -38,10 +38,10 @@
 struct StringView;
 
 class NetstringHeader {
-    char buffer[32];
+	char buffer[32];
 
 public:
-    StringView operator()(size_t size);
+	StringView operator()(size_t size);
 };
 
 #endif

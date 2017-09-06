@@ -40,17 +40,17 @@ template<typename L>
 static inline size_t
 GetTotalSize(const L &list)
 {
-    size_t result = 0;
-    for (const auto &i : list)
-        result += i.size;
-    return result;
+	size_t result = 0;
+	for (const auto &i : list)
+		result += i.size;
+	return result;
 }
 
 void
 NetstringGenerator::operator()(std::list<ConstBuffer<void>> &list, bool comma)
 {
-    list.emplace_front(header(GetTotalSize(list)).ToVoid());
+	list.emplace_front(header(GetTotalSize(list)).ToVoid());
 
-    if (comma)
-        list.emplace_back(",", 1);
+	if (comma)
+		list.emplace_back(",", 1);
 }

@@ -40,13 +40,13 @@
 template<typename T> struct ConstBuffer;
 
 class NetstringGenerator {
-    NetstringHeader header;
+	NetstringHeader header;
 
 public:
-    /**
-     * @param comma generate the trailing comma?
-     */
-    void operator()(std::list<ConstBuffer<void>> &list, bool comma=true);
+	/**
+	 * @param comma generate the trailing comma?
+	 */
+	void operator()(std::list<ConstBuffer<void>> &list, bool comma=true);
 };
 
 #endif

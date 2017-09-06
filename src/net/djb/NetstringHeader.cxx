@@ -38,5 +38,5 @@
 StringView
 NetstringHeader::operator()(size_t size)
 {
-    return {buffer, (size_t)sprintf(buffer, "%zu:", size)};
+	return {buffer, (size_t)sprintf(buffer, "%zu:", size)};
 }
