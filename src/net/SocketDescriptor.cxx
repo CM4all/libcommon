@@ -180,6 +180,18 @@ SocketDescriptor::GetError()
 		: errno;
 }
 
+size_t
+SocketDescriptor::GetOption(int level, int name,
+			    void *value, size_t size) const
+{
+	assert(IsDefined());
+
+	socklen_t size2 = size;
+	return getsockopt(fd, level, name, value, &size2) == 0
+		? size2
+		: 0;
+}
+
 bool
 SocketDescriptor::SetOption(int level, int name,
 			    const void *value, size_t size)

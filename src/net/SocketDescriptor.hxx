@@ -131,6 +131,11 @@ public:
 
 	int GetError();
 
+	/**
+	 * @return the value size or 0 on error
+	 */
+	size_t GetOption(int level, int name, void *value, size_t size) const;
+
 	bool SetOption(int level, int name, const void *value, size_t size);
 
 	bool SetBoolOption(int level, int name, bool _value) {
