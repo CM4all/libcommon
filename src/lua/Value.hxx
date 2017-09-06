@@ -80,6 +80,10 @@ public:
 		GetTable(L, LUA_REGISTRYINDEX,
 			 LightUserData(const_cast<Value *>(this)));
 	}
+
+	lua_State *GetState() const {
+		return L;
+	}
 };
 
 static inline void
