@@ -136,6 +136,13 @@ public:
 	 */
 	size_t GetOption(int level, int name, void *value, size_t size) const;
 
+	/**
+	 * Receive peer credentials (SO_PEERCRED).  On error, the pid
+	 * is -1.
+	 */
+	gcc_pure
+	struct ucred GetPeerCredentials() const noexcept;
+
 	bool SetOption(int level, int name, const void *value, size_t size);
 
 	bool SetBoolOption(int level, int name, bool _value) {

@@ -192,6 +192,16 @@ SocketDescriptor::GetOption(int level, int name,
 		: 0;
 }
 
+struct ucred
+SocketDescriptor::GetPeerCredentials() const noexcept
+{
+	struct ucred cred;
+	if (GetOption(SOL_SOCKET, SO_PEERCRED,
+		      &cred, sizeof(cred)) < sizeof(cred))
+		cred.pid = -1;
+	return cred;
+}
+
 bool
 SocketDescriptor::SetOption(int level, int name,
 			    const void *value, size_t size)
