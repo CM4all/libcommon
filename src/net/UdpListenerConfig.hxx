@@ -57,6 +57,14 @@ struct UdpListenerConfig {
 		:bind_address(_bind_address) {}
 
 	/**
+	 * Apply fixups after configuration:
+	 *
+	 * - if bind_address is IPv6-wildcard, but multicast_group is
+	 *   IPv4, then change bind_address to IPv4-wildcard
+	 */
+	void Fixup();
+
+	/**
 	 * Create a listening socket.
 	 *
 	 * Throws exception on error.

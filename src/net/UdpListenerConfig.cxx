@@ -32,11 +32,20 @@
 
 #include "UdpListenerConfig.hxx"
 #include "UniqueSocketDescriptor.hxx"
+#include "IPv4Address.hxx"
 #include "ToString.hxx"
 #include "system/Error.hxx"
 
 #include <sys/un.h>
 #include <unistd.h>
+
+void
+UdpListenerConfig::Fixup()
+{
+	if (bind_address.IsV6Any() && multicast_group.IsDefined() &&
+	    multicast_group.GetFamily() == AF_INET)
+		bind_address = IPv4Address(bind_address.GetPort());
+}
 
 UniqueSocketDescriptor
 UdpListenerConfig::Create() const
