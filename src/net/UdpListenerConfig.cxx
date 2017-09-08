@@ -57,6 +57,9 @@ UdpListenerConfig::Create() const
 			fd.SetBoolOption(SOL_SOCKET, SO_PASSCRED, true);
 	}
 
+	if (bind_address.IsV6Any())
+		fd.SetV6Only(false);
+
 	if (!interface.empty() && !fd.SetBindToDevice(interface.c_str()))
 		throw MakeErrno("Failed to set SO_BINDTODEVICE");
 
