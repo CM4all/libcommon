@@ -35,12 +35,19 @@
 
 #include "AllocatedSocketAddress.hxx"
 
+#include <string>
+
 class UniqueSocketDescriptor;
 
 struct UdpListenerConfig {
 	AllocatedSocketAddress bind_address;
 
 	AllocatedSocketAddress multicast_group;
+
+	/**
+	 * If non-empty, sets SO_BINDTODEVICE.
+	 */
+	std::string interface;
 
 	bool pass_cred = false;
 

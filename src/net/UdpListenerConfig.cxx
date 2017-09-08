@@ -57,6 +57,9 @@ UdpListenerConfig::Create() const
 			fd.SetBoolOption(SOL_SOCKET, SO_PASSCRED, true);
 	}
 
+	if (!interface.empty() && !fd.SetBindToDevice(interface.c_str()))
+		throw MakeErrno("Failed to set SO_BINDTODEVICE");
+
 	/* set SO_REUSEADDR if we're using multicast; this option allows
 	   multiple processes to join the same group on the same port */
 	if (!multicast_group.IsNull() && !fd.SetReuseAddress(true))
