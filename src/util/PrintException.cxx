@@ -32,6 +32,8 @@
 
 #include "PrintException.hxx"
 
+#include <stdio.h>
+
 void
 PrintException(const std::exception &e)
 {
