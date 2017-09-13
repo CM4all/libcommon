@@ -31,7 +31,7 @@
 #define STRING_COMPARE_HXX
 
 #include "StringView.hxx"
-
+#include "StringAPI.hxx"
 #include "Compiler.h"
 
 static inline bool
