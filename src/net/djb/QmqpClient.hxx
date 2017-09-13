@@ -45,29 +45,29 @@
 
 class QmqpClientHandler {
 public:
-    virtual void OnQmqpClientSuccess(StringView description) = 0;
-    virtual void OnQmqpClientError(std::exception_ptr error) = 0;
+	virtual void OnQmqpClientSuccess(StringView description) = 0;
+	virtual void OnQmqpClientError(std::exception_ptr error) = 0;
 };
 
 class QmqpClientError : std::runtime_error {
 public:
-    template<typename W>
-    QmqpClientError(W &&what_arg)
-        :std::runtime_error(std::forward<W>(what_arg)) {}
+	template<typename W>
+	QmqpClientError(W &&what_arg)
+		:std::runtime_error(std::forward<W>(what_arg)) {}
 };
 
 class QmqpClientTemporaryFailure final : QmqpClientError {
 public:
-    template<typename W>
-    QmqpClientTemporaryFailure(W &&what_arg)
-        :QmqpClientError(std::forward<W>(what_arg)) {}
+	template<typename W>
+	QmqpClientTemporaryFailure(W &&what_arg)
+		:QmqpClientError(std::forward<W>(what_arg)) {}
 };
 
 class QmqpClientPermanentFailure final : QmqpClientError {
 public:
-    template<typename W>
-    QmqpClientPermanentFailure(W &&what_arg)
-        :QmqpClientError(std::forward<W>(what_arg)) {}
+	template<typename W>
+	QmqpClientPermanentFailure(W &&what_arg)
+		:QmqpClientError(std::forward<W>(what_arg)) {}
 };
 
 /**
@@ -75,45 +75,45 @@ public:
  * response.
  */
 class QmqpClient final : NetstringClientHandler {
-    NetstringClient client;
+	NetstringClient client;
 
-    std::forward_list<NetstringHeader> netstring_headers;
-    std::list<ConstBuffer<void>> request;
+	std::forward_list<NetstringHeader> netstring_headers;
+	std::list<ConstBuffer<void>> request;
 
-    QmqpClientHandler &handler;
+	QmqpClientHandler &handler;
 
 public:
-    QmqpClient(EventLoop &event_loop, QmqpClientHandler &_handler)
-        :client(event_loop, 1024, *this),
-         handler(_handler) {}
+	QmqpClient(EventLoop &event_loop, QmqpClientHandler &_handler)
+		:client(event_loop, 1024, *this),
+		 handler(_handler) {}
 
-    void Begin(StringView message, StringView sender) {
-        assert(netstring_headers.empty());
-        assert(request.empty());
+	void Begin(StringView message, StringView sender) {
+		assert(netstring_headers.empty());
+		assert(request.empty());
 
-        AppendNetstring(message);
-        AppendNetstring(sender);
-    }
+		AppendNetstring(message);
+		AppendNetstring(sender);
+	}
 
-    void AddRecipient(StringView recipient) {
-        assert(!netstring_headers.empty());
-        assert(!request.empty());
+	void AddRecipient(StringView recipient) {
+		assert(!netstring_headers.empty());
+		assert(!request.empty());
 
-        AppendNetstring(recipient);
-    }
+		AppendNetstring(recipient);
+	}
 
-    void Commit(int out_fd, int in_fd);
+	void Commit(int out_fd, int in_fd);
 
 private:
-    void AppendNetstring(StringView value);
+	void AppendNetstring(StringView value);
 
-    /* virtual methods from NetstringClientHandler */
-    void OnNetstringResponse(AllocatedArray<uint8_t> &&payload) override;
+	/* virtual methods from NetstringClientHandler */
+	void OnNetstringResponse(AllocatedArray<uint8_t> &&payload) override;
 
-    void OnNetstringError(std::exception_ptr error) override {
-        /* forward to the QmqpClientHandler */
-        handler.OnQmqpClientError(error);
-    }
+	void OnNetstringError(std::exception_ptr error) override {
+		/* forward to the QmqpClientHandler */
+		handler.OnQmqpClientError(error);
+	}
 };
 
 #endif
