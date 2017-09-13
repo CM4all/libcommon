@@ -56,7 +56,7 @@ QmqpClient::OnNetstringResponse(AllocatedArray<uint8_t> &&_payload)
 try {
 	StringView payload((const char *)&_payload.front(), _payload.size());
 
-	if (!payload.IsEmpty()) {
+	if (!payload.empty()) {
 		switch (payload[0]) {
 		case 'K':
 			// success

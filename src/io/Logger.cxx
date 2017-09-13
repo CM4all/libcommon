@@ -62,7 +62,7 @@ LoggerDetail::WriteV(StringView domain,
 {
 	StaticArray<struct iovec, 64> v;
 
-	if (!domain.IsEmpty()) {
+	if (!domain.empty()) {
 		v.push_back(ToIovec("["));
 		v.push_back(ToIovec(domain));
 		v.push_back(ToIovec("] "));
@@ -100,7 +100,7 @@ LoggerDetail::Format(unsigned level, StringView domain,
 std::string
 ChildLoggerDomain::Make(StringView parent, const char *name)
 {
-	if (parent.IsEmpty())
+	if (parent.empty())
 		return name;
 
 	return std::string(parent.data, parent.size) + '/' + name;

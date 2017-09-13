@@ -40,7 +40,7 @@ PipeLineReader::TryRead(bool flush)
 	assert(!buffer.IsFull());
 
 	auto w = buffer.Write();
-	assert(!w.IsEmpty());
+	assert(!w.empty());
 
 	auto nbytes = fd.Read(w.data, w.size);
 	if (nbytes <= 0) {
@@ -71,7 +71,7 @@ PipeLineReader::TryRead(bool flush)
 		auto r = buffer.Read();
 		buffer.Clear();
 
-		if (!r.IsEmpty())
+		if (!r.empty())
 			callback(r);
 	}
 }

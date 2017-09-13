@@ -49,7 +49,7 @@ public:
     RefenceOptions(AllocatorPtr alloc, const RefenceOptions &src);
 
     bool IsEmpty() const {
-        return data.IsEmpty();
+        return data.empty();
     }
 
     constexpr StringView Get() const {

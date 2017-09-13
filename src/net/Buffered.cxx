@@ -43,7 +43,7 @@ ReceiveToBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer)
 	assert(fd >= 0);
 
 	auto w = buffer.Write();
-	if (w.IsEmpty())
+	if (w.empty())
 		return -2;
 
 	ssize_t nbytes = recv(fd, w.data, w.size, MSG_DONTWAIT);
@@ -57,7 +57,7 @@ ssize_t
 SendFromBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer)
 {
 	auto r = buffer.Read();
-	if (r.IsEmpty())
+	if (r.empty())
 		return -2;
 
 	ssize_t nbytes = send(fd, r.data, r.size, MSG_DONTWAIT|MSG_NOSIGNAL);

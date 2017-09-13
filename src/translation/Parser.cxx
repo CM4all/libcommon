@@ -124,7 +124,7 @@ gcc_pure
 static bool
 IsValidName(StringView s)
 {
-    if (s.IsEmpty())
+    if (s.empty())
         return false;
 
     for (char i : s)
@@ -677,7 +677,7 @@ TranslateParser::HandleWant(const TranslationCommand *payload,
     if (from_request.want)
         throw std::runtime_error("WANT loop");
 
-    if (!response.want.IsEmpty())
+    if (!response.want.empty())
         throw std::runtime_error("duplicate WANT packet");
 
     if (payload_length % sizeof(payload[0]) != 0)
@@ -968,7 +968,7 @@ gcc_pure
 static bool
 IsValidCgroupSetValue(StringView value)
 {
-    return !value.IsEmpty() && value.Find('/') == nullptr;
+    return !value.empty() && value.Find('/') == nullptr;
 }
 
 gcc_pure

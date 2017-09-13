@@ -92,7 +92,7 @@ public:
     }
 
     bool IsEmpty() {
-        return list.IsEmpty();
+        return list.empty();
     }
 
     size_t size() const {
@@ -657,7 +657,7 @@ SpawnServerConnection::HandleMessage(ConstBuffer<uint8_t> payload,
 
     switch (cmd) {
     case SpawnRequestCommand::CONNECT:
-        if (!payload.IsEmpty() || fds.size() != 1)
+        if (!payload.empty() || fds.size() != 1)
             throw MalformedSpawnPayloadError();
 
         process.AddConnection(fds.Get().Steal());

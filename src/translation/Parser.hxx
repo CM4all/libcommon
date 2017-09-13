@@ -85,7 +85,7 @@ class TranslateParser {
 #if TRANSLATION_ENABLE_HTTP
              want_full_uri(!r.want_full_uri.IsNull()),
 #endif
-             want(!r.want.IsEmpty())
+             want(!r.want.empty())
 #if TRANSLATION_ENABLE_RADDRESS
             , content_type_lookup(!r.content_type_lookup.IsNull())
 #endif
