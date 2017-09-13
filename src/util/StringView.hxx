@@ -128,6 +128,24 @@ struct WStringView : BasicStringView<wchar_t> {
 		:BasicStringView(src) {}
 };
 
+struct TStringView : WStringView {
+	using WStringView::WStringView;
+
+	TStringView() = default;
+	constexpr TStringView(WStringView src) noexcept
+		:WStringView(src) {}
+};
+
+#else
+
+struct TStringView : StringView {
+	using StringView::StringView;
+
+	TStringView() = default;
+	constexpr TStringView(StringView src) noexcept
+		:StringView(src) {}
+};
+
 #endif
 
 #endif
