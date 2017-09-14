@@ -448,3 +448,21 @@ SocketDescriptor::Write(const void *buffer, size_t length,
 	return ::sendto(Get(), (const char *)buffer, length, flags,
 			address.GetAddress(), address.GetSize());
 }
+
+void
+SocketDescriptor::Shutdown()
+{
+    shutdown(Get(), SHUT_RDWR);
+}
+
+void
+SocketDescriptor::ShutdownRead()
+{
+    shutdown(Get(), SHUT_RD);
+}
+
+void
+SocketDescriptor::ShutdownWrite()
+{
+    shutdown(Get(), SHUT_WR);
+}
