@@ -42,4 +42,15 @@ TEST(PgTest, ParseTimestamp)
 		  std::chrono::system_clock::time_point(std::chrono::milliseconds(50)));
 	ASSERT_EQ(Pg::ParseTimestamp("2009-02-13 23:31:30Z"),
 		  std::chrono::system_clock::from_time_t(1234567890));
+
+	/* with time zone */
+
+	ASSERT_EQ(Pg::ParseTimestamp("2009-02-13 23:31:30+02"),
+		  std::chrono::system_clock::from_time_t(1234567890)
+		  - std::chrono::hours(2));
+
+	ASSERT_EQ(Pg::ParseTimestamp("2009-02-13 23:31:30-01:30"),
+		  std::chrono::system_clock::from_time_t(1234567890)
+		  + std::chrono::hours(1)
+		  + std::chrono::minutes(30));
 }

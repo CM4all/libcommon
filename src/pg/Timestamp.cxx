@@ -39,6 +39,32 @@
 
 namespace Pg {
 
+static std::chrono::system_clock::duration
+ParsePositiveTimezoneOffset(const char *s)
+{
+	char *endptr;
+	const auto hours = strtoul(s, &endptr, 10);
+	if (endptr != s + 2 || hours >= 24)
+		throw std::runtime_error("Failed to parse time zone offset");
+
+	s = endptr;
+
+	std::chrono::system_clock::duration result = std::chrono::hours(hours);
+
+	if (*s == ':') {
+		++s;
+		const auto minutes = strtoul(s, &endptr, 10);
+		if (endptr != s + 2 || hours >= 60)
+			throw std::runtime_error("Failed to parse time zone offset");
+
+		s = endptr;
+
+		result += std::chrono::minutes(minutes);
+	}
+
+	return result;
+}
+
 std::chrono::system_clock::time_point
 ParseTimestamp(const char *s)
 {
@@ -67,6 +93,16 @@ ParseTimestamp(const char *s)
 
 		const std::chrono::duration<double> f(fractional_s);
 		t += std::chrono::duration_cast<std::chrono::system_clock::duration>(f);
+	}
+
+	switch (*s) {
+	case '+':
+		t -= ParsePositiveTimezoneOffset(s + 1);
+		break;
+
+	case '-':
+		t += ParsePositiveTimezoneOffset(s + 1);
+		break;
 	}
 
 	return t;
