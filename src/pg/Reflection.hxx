@@ -33,6 +33,8 @@
 #ifndef PG_REFLECTION_HXX
 #define PG_REFLECTION_HXX
 
+#include <string>
+
 namespace Pg {
 
 class Connection;
@@ -56,6 +58,10 @@ TableExists(Connection &c, const char *schema,
 bool
 ColumnExists(Connection &c, const char *schema,
 	     const char *table_name, const char *column_name);
+
+std::string
+GetColumnType(Connection &c, const char *schema,
+	      const char *table_name, const char *column_name);
 
 /**
  * Does an index with the specified name exist in the table?

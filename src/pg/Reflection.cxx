@@ -33,6 +33,7 @@
 #include "Reflection.hxx"
 #include "Connection.hxx"
 #include "CheckError.hxx"
+#include "util/RuntimeError.hxx"
 
 namespace Pg {
 
@@ -59,6 +60,24 @@ ColumnExists(Pg::Connection &c, const char *schema,
 	return CheckError(c.ExecuteParams("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS "
 					  "WHERE table_schema=$1 AND table_name=$2 AND column_name=$3",
 					  schema, table_name, column_name)).GetRowCount() > 0;
+
+}
+
+std::string
+GetColumnType(Pg::Connection &c, const char *schema,
+	      const char *table_name, const char *column_name)
+{
+	assert(schema != nullptr);
+	assert(*schema != 0);
+
+	const auto result =
+		CheckError(c.ExecuteParams("SELECT data_type FROM INFORMATION_SCHEMA.COLUMNS "
+					   "WHERE table_schema=$1 AND table_name=$2 AND column_name=$3",
+					   schema, table_name, column_name));
+	if (result.GetRowCount() == 0)
+		throw FormatRuntimeError("No such column: %s", column_name);
+
+	return result.GetValue(0, 0);
 
 }
 
