@@ -100,6 +100,8 @@ util_dep = declare_dependency(link_with: util)
 
 time = static_library('time',
   'src/time/gmtime.c',
+  'src/time/Convert.cxx',
+  'src/time/ISO8601.cxx',
   include_directories: inc,
   dependencies: [
   ])
