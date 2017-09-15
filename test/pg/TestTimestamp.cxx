@@ -38,6 +38,8 @@ TEST(PgTest, ParseTimestamp)
 {
 	ASSERT_EQ(Pg::ParseTimestamp("1970-01-01 00:00:00+00"),
 		  std::chrono::system_clock::from_time_t(0));
+	ASSERT_EQ(Pg::ParseTimestamp("1970-01-01 00:00:00.05+00"),
+		  std::chrono::system_clock::time_point(std::chrono::milliseconds(50)));
 	ASSERT_EQ(Pg::ParseTimestamp("2009-02-13 23:31:30Z"),
 		  std::chrono::system_clock::from_time_t(1234567890));
 }

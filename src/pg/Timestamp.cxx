@@ -49,7 +49,27 @@ ParseTimestamp(const char *s)
 	if (end == nullptr)
 		throw std::runtime_error("Failed to parse PostgreSQL timestamp");
 
-	return TimeGm(tm);
+	s = end;
+
+	auto t = TimeGm(tm);
+
+	if (*s == '.') {
+		/* parse fractional part */
+		char *endptr;
+		double fractional_s = strtod(s, &endptr);
+		if (endptr == s)
+			throw std::runtime_error("Failed to parse PostgreSQL timestamp");
+
+		assert(fractional_s >= 0);
+		assert(fractional_s < 1);
+
+		s = endptr;
+
+		const std::chrono::duration<double> f(fractional_s);
+		t += std::chrono::duration_cast<std::chrono::system_clock::duration>(f);
+	}
+
+	return t;
 }
 
 }
