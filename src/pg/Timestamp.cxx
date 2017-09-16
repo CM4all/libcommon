@@ -32,6 +32,7 @@
 
 #include "Timestamp.hxx"
 #include "time/Convert.hxx"
+#include "util/StringBuffer.hxx"
 
 #include <stdexcept>
 
@@ -106,6 +107,20 @@ ParseTimestamp(const char *s)
 	}
 
 	return t;
+}
+
+static StringBuffer<64>
+FormatTimestamp(const struct tm &tm) noexcept
+{
+	StringBuffer<64> buffer;
+	strftime(buffer.data(), buffer.capacity(), "%F %T", &tm);
+	return buffer;
+}
+
+StringBuffer<64>
+FormatTimestamp(std::chrono::system_clock::time_point tp)
+{
+	return FormatTimestamp(GmTime(tp));
 }
 
 }
