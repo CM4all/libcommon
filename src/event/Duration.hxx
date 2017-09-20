@@ -38,9 +38,18 @@
 /**
  * Generator for shared timeval constants.
  */
+inline constexpr struct timeval
+MakeEventDuration(time_t s, suseconds_t us=0)
+{
+	return { s, us };
+};
+
+/**
+ * Generator for shared timeval constants.
+ */
 template<time_t s, suseconds_t us=0>
 struct EventDuration {
-	static constexpr struct timeval value = { s, us };
+	static constexpr struct timeval value = MakeEventDuration(s, us);
 };
 
 template<time_t s, suseconds_t us>
