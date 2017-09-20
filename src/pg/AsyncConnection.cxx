@@ -188,7 +188,8 @@ AsyncConnection::PollNotify()
 void
 AsyncConnection::Connect()
 {
-	assert(state == State::UNINITIALIZED || state == State::WAITING);
+	assert(!IsDefined());
+	assert(state == State::DISCONNECTED || state == State::WAITING);
 
 	state = State::CONNECTING;
 
@@ -207,7 +208,7 @@ AsyncConnection::Connect()
 void
 AsyncConnection::Reconnect()
 {
-	assert(state != State::UNINITIALIZED);
+	assert(IsDefined());
 
 	socket_event.Delete();
 	StartReconnect();
@@ -218,7 +219,7 @@ AsyncConnection::Reconnect()
 void
 AsyncConnection::Disconnect()
 {
-	if (state == State::UNINITIALIZED)
+	if (!IsDefined())
 		return;
 
 	socket_event.Delete();
@@ -243,7 +244,6 @@ inline void
 AsyncConnection::OnSocketEvent(unsigned)
 {
 	switch (state) {
-	case State::UNINITIALIZED:
 	case State::DISCONNECTED:
 	case State::WAITING:
 		assert(false);

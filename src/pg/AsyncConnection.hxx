@@ -80,12 +80,11 @@ class AsyncConnection : public Connection {
 
 	enum class State {
 		/**
-		 * The Connection has not been initialized yet.  Call Connect().
-		 */
-		UNINITIALIZED,
-
-		/**
 		 * No database connection exists.
+		 *
+		 * In this state, the connect may have failed
+		 * (IsDefined() returns true) or the connect was never
+		 * attempted (IsDefined() returns false).
 		 */
 		DISCONNECTED,
 
@@ -112,7 +111,7 @@ class AsyncConnection : public Connection {
 		WAITING,
 	};
 
-	State state = State::UNINITIALIZED;
+	State state = State::DISCONNECTED;
 
 	/**
 	 * DISCONNECTED: not used.
