@@ -268,7 +268,7 @@ AsyncConnection::OnReconnectTimer()
 {
 	assert(state == State::WAITING);
 
-	if (socket_event.GetFd() < 0)
+	if (!IsDefined())
 		/* there was never a socket, i.e. StartConnect() has failed
 		   (maybe due to a DNS failure) - retry that method */
 		Connect();
