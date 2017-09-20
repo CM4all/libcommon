@@ -35,6 +35,8 @@
 
 #include <sys/time.h>
 
+#include <chrono>
+
 /**
  * Generator for shared timeval constants.
  */
@@ -54,5 +56,19 @@ struct EventDuration {
 
 template<time_t s, suseconds_t us>
 constexpr struct timeval EventDuration<s, us>::value;
+
+inline constexpr struct timeval
+ToEventDuration(std::chrono::microseconds us)
+{
+	return MakeEventDuration(us.count() / 1000000u,
+				 us.count() % 1000000u);
+}
+
+inline constexpr std::chrono::microseconds
+ToChrono(struct timeval tv)
+{
+	return std::chrono::microseconds(tv.tv_usec) +
+		std::chrono::seconds(tv.tv_sec);
+}
 
 #endif
