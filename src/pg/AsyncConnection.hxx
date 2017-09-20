@@ -85,6 +85,9 @@ class AsyncConnection : public Connection {
 		 * In this state, the connect may have failed
 		 * (IsDefined() returns true) or the connect was never
 		 * attempted (IsDefined() returns false).
+		 *
+		 * The #reconnect_timer may be configured to retry
+		 * connecting somewhat later.
 		 */
 		DISCONNECTED,
 
@@ -104,11 +107,6 @@ class AsyncConnection : public Connection {
 		 * forwarded to AsyncConnectionHandler::OnNotify().
 		 */
 		READY,
-
-		/**
-		 * Waiting to reconnect.  A timer was scheduled to do this.
-		 */
-		WAITING,
 	};
 
 	State state = State::DISCONNECTED;

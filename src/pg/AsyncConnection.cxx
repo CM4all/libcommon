@@ -189,7 +189,7 @@ void
 AsyncConnection::Connect()
 {
 	assert(!IsDefined());
-	assert(state == State::DISCONNECTED || state == State::WAITING);
+	assert(state == State::DISCONNECTED);
 
 	state = State::CONNECTING;
 
@@ -236,7 +236,6 @@ AsyncConnection::ScheduleReconnect()
 
 	assert(state == State::DISCONNECTED);
 
-	state = State::WAITING;
 	reconnect_timer.Add(delay);
 }
 
@@ -245,7 +244,6 @@ AsyncConnection::OnSocketEvent(unsigned)
 {
 	switch (state) {
 	case State::DISCONNECTED:
-	case State::WAITING:
 		assert(false);
 		gcc_unreachable();
 
@@ -266,7 +264,7 @@ AsyncConnection::OnSocketEvent(unsigned)
 inline void
 AsyncConnection::OnReconnectTimer()
 {
-	assert(state == State::WAITING);
+	assert(state == State::DISCONNECTED);
 
 	if (!IsDefined())
 		/* there was never a socket, i.e. StartConnect() has failed
