@@ -108,6 +108,20 @@ public:
 		return ::PQresultErrorMessage(result);
 	}
 
+	gcc_pure
+	const char *GetErrorField(int fieldcode) const noexcept {
+		assert(IsDefined());
+
+		return PQresultErrorField(result, fieldcode);
+	}
+
+	gcc_pure
+	const char *GetErrorType() const noexcept {
+		assert(IsDefined());
+
+		return GetErrorField(PG_DIAG_SQLSTATE);
+	}
+
 	/**
 	 * Returns the number of rows that were affected by the command.
 	 * The caller is responsible for checking GetStatus().

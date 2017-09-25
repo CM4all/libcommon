@@ -67,6 +67,11 @@ public:
 	}
 
 	gcc_pure
+	const char *GetType() const noexcept {
+		return result.GetErrorType();
+	}
+
+	gcc_pure
 	const char *what() const noexcept override {
 		return result.GetErrorMessage();
 	}
