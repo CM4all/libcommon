@@ -263,6 +263,7 @@ odbus = static_library('odbus',
   'src/odbus/Connection.cxx',
   'src/odbus/Message.cxx',
   'src/odbus/Watch.cxx',
+  'src/odbus/ScopeMatch.cxx',
   include_directories: inc,
   dependencies: [
     libdbus,

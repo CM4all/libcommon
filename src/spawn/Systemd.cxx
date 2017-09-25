@@ -38,6 +38,7 @@
 #include "odbus/ReadIter.hxx"
 #include "odbus/PendingCall.hxx"
 #include "odbus/Error.hxx"
+#include "odbus/ScopeMatch.hxx"
 #include "util/Macros.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
@@ -190,12 +191,7 @@ CreateSystemdScope(const char *name, const char *description,
         "interface='org.freedesktop.systemd1.Manager',"
         "member='JobRemoved',"
         "path='/org/freedesktop/systemd1'";
-    dbus_bus_add_match(connection, match, error);
-    error.CheckThrow("DBus AddMatch error");
-
-    AtScopeExit(&connection, match){
-        dbus_bus_remove_match(connection, match, nullptr);
-    };
+    const ODBus::ScopeMatch scope_match(connection, match);
 
     using namespace ODBus;
 
