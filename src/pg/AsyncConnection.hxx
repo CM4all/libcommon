@@ -138,7 +138,7 @@ public:
 	 */
 	AsyncConnection(EventLoop &event_loop,
 			const char *conninfo, const char *schema,
-			AsyncConnectionHandler &handler);
+			AsyncConnectionHandler &handler) noexcept;
 
 	~AsyncConnection() {
 		Disconnect();
@@ -201,7 +201,7 @@ protected:
 	void PollResult();
 	void PollNotify();
 
-	void ScheduleReconnect();
+	void ScheduleReconnect() noexcept;
 
 private:
 	void OnSocketEvent(unsigned events);

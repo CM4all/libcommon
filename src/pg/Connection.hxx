@@ -72,67 +72,67 @@ public:
 
 	Connection(const Connection &other) = delete;
 
-	Connection(Connection &&other)
+	Connection(Connection &&other) noexcept
 		:conn(std::exchange(other.conn, nullptr)) {}
 
 	Connection &operator=(const Connection &other) = delete;
 
-	Connection &operator=(Connection &&other) {
+	Connection &operator=(Connection &&other) noexcept {
 		std::swap(conn, other.conn);
 		return *this;
 	}
 
-	~Connection() {
+	~Connection() noexcept {
 		Disconnect();
 	}
 
-	bool IsDefined() const {
+	bool IsDefined() const noexcept {
 		return conn != nullptr;
 	}
 
 	gcc_pure
-	ConnStatusType GetStatus() const {
+	ConnStatusType GetStatus() const noexcept {
 		assert(IsDefined());
 
 		return ::PQstatus(conn);
 	}
 
 	gcc_pure
-	const char *GetErrorMessage() const {
+	const char *GetErrorMessage() const noexcept {
 		assert(IsDefined());
 
 		return ::PQerrorMessage(conn);
 	}
 
 	gcc_pure
-	int GetProtocolVersion() const {
+	int GetProtocolVersion() const noexcept {
 		assert(IsDefined());
 
 		return ::PQprotocolVersion (conn);
 	}
 
 	gcc_pure
-	int GetServerVersion() const {
+	int GetServerVersion() const noexcept {
 		assert(IsDefined());
 
 		return ::PQserverVersion (conn);
 	}
 
 	gcc_pure
-	int GetBackendPID() const {
+	int GetBackendPID() const noexcept {
 		assert(IsDefined());
 
 		return ::PQbackendPID (conn);
 	}
 
 	gcc_pure
-	int GetSocket() const {
+	int GetSocket() const noexcept {
 		assert(IsDefined());
 
 		return ::PQsocket(conn);
 	}
 
-	void Disconnect() {
+	void Disconnect() noexcept {
 		if (conn != nullptr) {
 			::PQfinish(conn);
 			conn = nullptr;
@@ -148,31 +148,31 @@ public:
 		return ::PQconnectPoll(conn);
 	}
 
-	void Reconnect() {
+	void Reconnect() noexcept {
 		assert(IsDefined());
 
 		::PQreset(conn);
 	}
 
-	void StartReconnect() {
+	void StartReconnect() noexcept {
 		assert(IsDefined());
 
 		::PQresetStart(conn);
 	}
 
-	PostgresPollingStatusType PollReconnect() {
+	PostgresPollingStatusType PollReconnect() noexcept {
 		assert(IsDefined());
 
 		return ::PQresetPoll(conn);
 	}
 
-	void ConsumeInput() {
+	void ConsumeInput() noexcept {
 		assert(IsDefined());
 
 		::PQconsumeInput(conn);
 	}
 
-	Notify GetNextNotify() {
+	Notify GetNextNotify() noexcept {
 		assert(IsDefined());
 
 		return Notify(::PQnotifies(conn));
@@ -186,12 +186,12 @@ protected:
 		return Result(result);
 	}
 
-	static size_t CountDynamic() {
+	static size_t CountDynamic() noexcept {
 		return 0;
 	}
 
 	template<typename T, typename... Params>
-	static size_t CountDynamic(const T &t, Params... params) {
+	static size_t CountDynamic(const T &t, Params... params) noexcept {
 		return DynamicParamWrapper<T>::Count(t) +
 			CountDynamic(params...);
 	}
@@ -302,7 +302,7 @@ public:
 	}
 
 	gcc_pure
-	bool IsBusy() const {
+	bool IsBusy() const noexcept {
 		assert(IsDefined());
 
 		return ::PQisBusy(conn) != 0;
@@ -334,25 +334,25 @@ public:
 	}
 
 #if PG_VERSION_NUM >= 90200
-	void SetSingleRowMode() {
+	void SetSingleRowMode() noexcept {
 		PQsetSingleRowMode(conn);
 	}
 #endif
 
-	Result ReceiveResult() {
+	Result ReceiveResult() noexcept {
 		assert(IsDefined());
 
 		return Result(PQgetResult(conn));
 	}
 
 	gcc_pure
-	std::string Escape(const char *p, size_t length) const;
+	std::string Escape(const char *p, size_t length) const noexcept;
 
 	gcc_pure
-	std::string Escape(const char *p) const;
+	std::string Escape(const char *p) const noexcept;
 
 	gcc_pure
-	std::string Escape(const std::string &p) const {
+	std::string Escape(const std::string &p) const noexcept {
 		return Escape(p.data(), p.length());
 	}
 };

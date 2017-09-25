@@ -36,7 +36,7 @@ namespace Pg {
 
 AsyncConnection::AsyncConnection(EventLoop &event_loop,
 				 const char *_conninfo, const char *_schema,
-				 AsyncConnectionHandler &_handler)
+				 AsyncConnectionHandler &_handler) noexcept
 	:conninfo(_conninfo), schema(_schema),
 	 handler(_handler),
 	 socket_event(event_loop, -1, 0, BIND_THIS_METHOD(OnSocketEvent)),
@@ -229,7 +229,7 @@ AsyncConnection::Disconnect()
 }
 
 void
-AsyncConnection::ScheduleReconnect()
+AsyncConnection::ScheduleReconnect() noexcept
 {
 	/* attempt to reconnect every 10 seconds */
 	static constexpr struct timeval delay{ 10, 0 };

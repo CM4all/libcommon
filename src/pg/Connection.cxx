@@ -93,7 +93,7 @@ Connection::_SendQuery(bool result_binary, const char *query,
 }
 
 std::string
-Connection::Escape(const char *p, size_t length) const
+Connection::Escape(const char *p, size_t length) const noexcept
 {
 	assert(p != nullptr || length == 0);
 
@@ -106,7 +106,7 @@ Connection::Escape(const char *p, size_t length) const
 }
 
 std::string
-Connection::Escape(const char *p) const
+Connection::Escape(const char *p) const noexcept
 {
 	assert(p != nullptr);
 
