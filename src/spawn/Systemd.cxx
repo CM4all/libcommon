@@ -175,6 +175,42 @@ WaitJobRemoved(DBusConnection *connection, const char *object_path)
     }
 }
 
+/**
+ * Wait for the UnitRemoved signal for the specified unit name.
+ */
+static bool
+WaitUnitRemoved(ODBus::Connection &connection, const char *name,
+                int timeout_ms)
+{
+    using namespace ODBus;
+
+    while (true) {
+        auto msg = Message::Pop(*connection);
+        if (!msg.IsDefined()) {
+            if (dbus_connection_read_write(connection, timeout_ms))
+                continue;
+            else
+                return false;
+        }
+
+        if (msg.IsSignal("org.freedesktop.systemd1.Manager", "UnitRemoved")) {
+            DBusError err;
+            dbus_error_init(&err);
+
+            const char *unit_name, *object_path;
+            if (!msg.GetArgs(err,
+                             DBUS_TYPE_STRING, &unit_name,
+                             DBUS_TYPE_OBJECT_PATH, &object_path)) {
+                dbus_error_free(&err);
+                return false;
+            }
+
+            if (strcmp(unit_name, name) == 0)
+                return true;
+        }
+    }
+}
+
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
                    int pid, bool delegate, const char *slice)
@@ -192,6 +228,15 @@ CreateSystemdScope(const char *name, const char *description,
         "member='JobRemoved',"
         "path='/org/freedesktop/systemd1'";
     const ODBus::ScopeMatch scope_match(connection, match);
+
+    /* the match for WaitUnitRemoved() */
+    const char *unit_removed_match = "type='signal',"
+        "sender='org.freedesktop.systemd1',"
+        "interface='org.freedesktop.systemd1.Manager',"
+        "member='UnitRemoved',"
+        "path='/org/freedesktop/systemd1'";
+    const ODBus::ScopeMatch unit_removed_scope_match(connection,
+                                                     unit_removed_match);
 
     using namespace ODBus;
 
@@ -232,6 +277,23 @@ CreateSystemdScope(const char *name, const char *description,
     pending.Block();
 
     Message reply = Message::StealReply(*pending.Get());
+
+    /* if the scope already exists, it may be because the previous
+       instance crashed and its spawner process was not yet cleaned up
+       by systemd; try to recover by waiting for the UnitRemoved
+       signal, and then try again to create the scope */
+    if (reply.GetType() == DBUS_MESSAGE_TYPE_ERROR &&
+        strcmp(reply.GetErrorName(),
+               "org.freedesktop.systemd1.UnitExists") == 0 &&
+        WaitUnitRemoved(connection, name, 2000)) {
+        /* send the StartTransientUnit message again and hope it
+           succeeds this time */
+        pending = PendingCall::SendWithReply(connection, msg.Get());
+        dbus_connection_flush(connection);
+        pending.Block();
+        reply = Message::StealReply(*pending.Get());
+    }
+
     reply.CheckThrowError();
 
     const char *object_path;
