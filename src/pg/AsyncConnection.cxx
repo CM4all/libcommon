@@ -31,6 +31,7 @@
  */
 
 #include "AsyncConnection.hxx"
+#include "util/Exception.hxx"
 
 namespace Pg {
 
@@ -89,11 +90,15 @@ AsyncConnection::Poll(PostgresPollingStatusType status)
 
 	case PGRES_POLLING_OK:
 		if (!schema.empty() &&
-		    (state == State::CONNECTING || state == State::RECONNECTING) &&
-		    !SetSchema(schema.c_str())) {
-			handler.OnError("Failed to set schema", GetErrorMessage());
-			Error();
-			break;
+		    (state == State::CONNECTING || state == State::RECONNECTING)) {
+			try {
+				SetSchema(schema.c_str());
+			} catch (...) {
+				handler.OnError("Failed to set schema",
+						GetFullMessage(std::current_exception()).c_str());
+				Error();
+				break;
+			}
 		}
 
 		state = State::READY;

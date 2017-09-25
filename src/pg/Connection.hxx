@@ -291,21 +291,38 @@ public:
 	 */
 	void ExecuteOrThrow(const char *query);
 
-	bool SetSchema(const char *schema);
+	/**
+	 * Set the search path to the specified schema.
+	 *
+	 * Throws #Error on error.
+	 */
+	void SetSchema(const char *schema);
 
-	bool BeginSerializable() {
-		const auto result = Execute("BEGIN ISOLATION LEVEL SERIALIZABLE");
-		return result.IsCommandSuccessful();
+	/**
+	 * Begin a transaction with isolation level "SERIALIZABLE".
+	 *
+	 * Throws #Error on error.
+	 */
+	void BeginSerializable() {
+		ExecuteOrThrow("BEGIN ISOLATION LEVEL SERIALIZABLE");
 	}
 
-	bool Commit() {
-		const auto result = Execute("COMMIT");
-		return result.IsCommandSuccessful();
+	/**
+	 * Commit the current transaction.
+	 *
+	 * Throws #Error on error.
+	 */
+	void Commit() {
+		ExecuteOrThrow("COMMIT");
 	}
 
-	bool Rollback() {
-		const auto result = Execute("ROLLBACK");
-		return result.IsCommandSuccessful();
+	/**
+	 * Roll back the current transaction.
+	 *
+	 * Throws #Error on error.
+	 */
+	void Rollback() {
+		ExecuteOrThrow("ROLLBACK");
 	}
 
 	gcc_pure

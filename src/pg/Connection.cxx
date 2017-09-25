@@ -71,11 +71,11 @@ Connection::ExecuteOrThrow(const char *query)
 		throw Error(std::move(result));
 }
 
-bool
+void
 Connection::SetSchema(const char *schema)
 {
 	std::string sql = "SET SCHEMA '" + Escape(schema) + "'";
-	return Execute(sql.c_str()).IsCommandSuccessful();
+	ExecuteOrThrow(sql.c_str());
 }
 
 void
