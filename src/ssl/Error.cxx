@@ -38,10 +38,10 @@
 static AllocatedString<>
 ErrToString()
 {
-    return BioWriterToString([](BIO &bio){
-            ERR_print_errors(&bio);
-        });
+	return BioWriterToString([](BIO &bio){
+			ERR_print_errors(&bio);
+		});
 }
 
 SslError::SslError(const std::string &msg)
-    :std::runtime_error(msg + ": " + ErrToString().c_str()) {}
+	:std::runtime_error(msg + ": " + ErrToString().c_str()) {}

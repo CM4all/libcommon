@@ -39,53 +39,53 @@
 #include <memory>
 
 struct OpenSslDelete {
-    void operator()(SSL *ssl) {
-        SSL_free(ssl);
-    }
+	void operator()(SSL *ssl) {
+		SSL_free(ssl);
+	}
 
-    void operator()(X509 *x509) {
-        X509_free(x509);
-    }
+	void operator()(X509 *x509) {
+		X509_free(x509);
+	}
 
-    void operator()(X509_REQ *r) {
-        X509_REQ_free(r);
-    }
+	void operator()(X509_REQ *r) {
+		X509_REQ_free(r);
+	}
 
-    void operator()(X509_NAME *name) {
-        X509_NAME_free(name);
-    }
+	void operator()(X509_NAME *name) {
+		X509_NAME_free(name);
+	}
 
-    void operator()(X509_EXTENSION *ext) {
-        X509_EXTENSION_free(ext);
-    }
+	void operator()(X509_EXTENSION *ext) {
+		X509_EXTENSION_free(ext);
+	}
 
-    void operator()(X509_EXTENSIONS *sk) {
-        sk_X509_EXTENSION_pop_free(sk, X509_EXTENSION_free);
-    }
+	void operator()(X509_EXTENSIONS *sk) {
+		sk_X509_EXTENSION_pop_free(sk, X509_EXTENSION_free);
+	}
 
-    void operator()(RSA *rsa) {
-        RSA_free(rsa);
-    }
+	void operator()(RSA *rsa) {
+		RSA_free(rsa);
+	}
 
-    void operator()(EC_KEY *key) {
-        EC_KEY_free(key);
-    }
+	void operator()(EC_KEY *key) {
+		EC_KEY_free(key);
+	}
 
-    void operator()(EVP_PKEY *key) {
-        EVP_PKEY_free(key);
-    }
+	void operator()(EVP_PKEY *key) {
+		EVP_PKEY_free(key);
+	}
 
-    void operator()(EVP_PKEY_CTX *key) {
-        EVP_PKEY_CTX_free(key);
-    }
+	void operator()(EVP_PKEY_CTX *key) {
+		EVP_PKEY_CTX_free(key);
+	}
 
-    void operator()(BIO *bio) {
-        BIO_free(bio);
-    }
+	void operator()(BIO *bio) {
+		BIO_free(bio);
+	}
 
-    void operator()(BIGNUM *bn) {
-        BN_free(bn);
-    }
+	void operator()(BIGNUM *bn) {
+		BN_free(bn);
+	}
 };
 
 using UniqueSSL = std::unique_ptr<SSL, OpenSslDelete>;

@@ -45,15 +45,15 @@ template<typename W>
 static inline AllocatedString<>
 BioWriterToString(W &&writer)
 {
-    UniqueBIO bio(BIO_new(BIO_s_mem()));
-    if (bio == nullptr)
-        throw SslError("BIO_new() failed");
+	UniqueBIO bio(BIO_new(BIO_s_mem()));
+	if (bio == nullptr)
+		throw SslError("BIO_new() failed");
 
-    writer(*bio);
+	writer(*bio);
 
-    char *data;
-    long length = BIO_get_mem_data(bio.get(), &data);
-    return AllocatedString<>::Duplicate(data, length);
+	char *data;
+	long length = BIO_get_mem_data(bio.get(), &data);
+	return AllocatedString<>::Duplicate(data, length);
 }
 
 #endif
