@@ -44,25 +44,25 @@ class Error final : public std::exception {
 
 public:
 	Error(const Error &other) = delete;
-	Error(Error &&other)
+	Error(Error &&other) noexcept
 		:result(std::move(other.result)) {}
-	explicit Error(Result &&_result)
+	explicit Error(Result &&_result) noexcept
 		:result(std::move(_result)) {}
 
 	Error &operator=(const Error &other) = delete;
 
-	Error &operator=(Error &&other) {
+	Error &operator=(Error &&other) noexcept {
 		result = std::move(other.result);
 		return *this;
 	}
 
-	Error &operator=(Result &&other) {
+	Error &operator=(Result &&other) noexcept {
 		result = std::move(other);
 		return *this;
 	}
 
 	gcc_pure
-	ExecStatusType GetStatus() const {
+	ExecStatusType GetStatus() const noexcept {
 		return result.GetStatus();
 	}
 
