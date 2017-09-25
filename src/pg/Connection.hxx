@@ -284,6 +284,13 @@ public:
 						  params...);
 	}
 
+	/**
+	 * Execute a command (with no result set).
+	 *
+	 * Throws #Error on error.
+	 */
+	void ExecuteOrThrow(const char *query);
+
 	bool SetSchema(const char *schema);
 
 	bool BeginSerializable() {

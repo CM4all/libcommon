@@ -31,6 +31,7 @@
  */
 
 #include "Connection.hxx"
+#include "Error.hxx"
 
 #include <string.h>
 
@@ -60,6 +61,14 @@ Connection::StartConnect(const char *conninfo)
 
 	if (GetStatus() == CONNECTION_BAD)
 		throw std::runtime_error(GetErrorMessage());
+}
+
+void
+Connection::ExecuteOrThrow(const char *query)
+{
+	auto result = Execute(query);
+	if (!result.IsCommandSuccessful())
+		throw Error(std::move(result));
 }
 
 bool
