@@ -170,7 +170,7 @@ static void
 Serialize(SpawnSerializer &s, const RefenceOptions &_r)
 {
     const auto r = _r.Get();
-    if (!r.IsNull()) {
+    if (r != nullptr) {
         s.Write(SpawnExecCommand::REFENCE);
         s.Write(r.ToVoid());
         s.WriteByte(0);

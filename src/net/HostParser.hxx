@@ -58,7 +58,7 @@ struct ExtractHostResult {
 	const char *end;
 
 	constexpr bool HasFailed() const {
-		return host.IsNull();
+		return host == nullptr;
 	}
 };
 
