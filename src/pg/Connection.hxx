@@ -72,9 +72,8 @@ public:
 
 	Connection(const Connection &other) = delete;
 
-	Connection(Connection &&other):conn(other.conn) {
-		other.conn = nullptr;
-	}
+	Connection(Connection &&other)
+		:conn(std::exchange(other.conn, nullptr)) {}
 
 	Connection &operator=(const Connection &other) = delete;
 
