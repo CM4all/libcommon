@@ -45,7 +45,7 @@
 template<typename T> struct ConstBuffer;
 
 struct SHA1Digest {
-    unsigned char data[SHA_DIGEST_LENGTH];
+	unsigned char data[SHA_DIGEST_LENGTH];
 };
 
 gcc_pure

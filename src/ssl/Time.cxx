@@ -36,16 +36,16 @@
 AllocatedString<>
 FormatTime(ASN1_TIME &t)
 {
-    return BioWriterToString([&t](BIO &bio){
-            ASN1_TIME_print(&bio, &t);
-        });
+	return BioWriterToString([&t](BIO &bio){
+			ASN1_TIME_print(&bio, &t);
+		});
 }
 
 AllocatedString<>
 FormatTime(ASN1_TIME *t)
 {
-    if (t == nullptr)
-        return nullptr;
+	if (t == nullptr)
+		return nullptr;
 
-    return FormatTime(*t);
+	return FormatTime(*t);
 }
