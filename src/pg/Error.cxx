@@ -30,66 +30,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PG_ERROR_HXX
-#define PG_ERROR_HXX
+#include "Error.hxx"
 
-#include "Result.hxx"
+#include <string.h>
 
-#include <exception>
-
-namespace Pg {
-
-class Error final : public std::exception {
-	Result result;
-
-public:
-	Error(const Error &other) = delete;
-	Error(Error &&other) noexcept
-		:result(std::move(other.result)) {}
-	explicit Error(Result &&_result) noexcept
-		:result(std::move(_result)) {}
-
-	Error &operator=(const Error &other) = delete;
-
-	Error &operator=(Error &&other) noexcept {
-		result = std::move(other.result);
-		return *this;
-	}
-
-	Error &operator=(Result &&other) noexcept {
-		result = std::move(other);
-		return *this;
-	}
-
-	gcc_pure
-	ExecStatusType GetStatus() const noexcept {
-		return result.GetStatus();
-	}
-
-	gcc_pure
-	const char *GetType() const noexcept {
-		return result.GetErrorType();
-	}
-
-	gcc_pure
-	bool IsType(const char *type) const noexcept;
-
-	/**
-	 * Is this a serialization failure, i.e. a problem with "BEGIN
-	 * SERIALIZABLE" or Pg::Connection::BeginSerializable().
-	 */
-	gcc_pure
-	bool IsSerializationFailure() const noexcept {
-		// https://www.postgresql.org/docs/current/static/errcodes-appendix.html
-		return IsType("40001");
-	}
-
-	gcc_pure
-	const char *what() const noexcept override {
-		return result.GetErrorMessage();
-	}
-};
-
-} /* namespace Pg */
-
-#endif
+bool
+Pg::Error::IsType(const char *expected_type) const noexcept
+{
+	const char *actual_type = GetType();
+	return actual_type != nullptr &&
+		strcmp(actual_type, expected_type) == 0;
+}
