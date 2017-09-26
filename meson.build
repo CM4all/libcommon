@@ -142,6 +142,7 @@ lua_dep = declare_dependency(link_with: lua)
 ssl = static_library('ssl',
   'src/ssl/AltName.cxx',
   'src/ssl/Buffer.cxx',
+  'src/ssl/Request.cxx',
   'src/ssl/Certificate.cxx',
   'src/ssl/Dummy.cxx',
   'src/ssl/Edit.cxx',
