@@ -325,6 +325,26 @@ public:
 		ExecuteOrThrow("ROLLBACK");
 	}
 
+	/**
+	 * Invoke the given function from within a "SERIALIZABLE"
+	 * transaction.  Performs automatic rollback if the function
+	 * throws an exception.
+	 */
+	template<typename F>
+	void DoSerializable(F &&f) {
+		BeginSerializable();
+
+		try {
+			f();
+		} catch (...) {
+			if (IsDefined())
+				Execute("ROLLBACK");
+			throw;
+		}
+
+		Commit();
+	}
+
 	gcc_pure
 	bool IsBusy() const noexcept {
 		assert(IsDefined());
