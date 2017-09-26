@@ -37,6 +37,7 @@
 
 #include <stdexcept>
 
+#include <assert.h>
 #include <stdlib.h>
 
 static constexpr std::chrono::hours pg_day(24);
