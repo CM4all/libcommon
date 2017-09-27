@@ -42,6 +42,7 @@
 class Expiry {
 	typedef std::chrono::steady_clock clock_type;
 	typedef clock_type::time_point value_type;
+	typedef clock_type::duration duration_type;
 	value_type value;
 
 	constexpr Expiry(value_type _value):value(_value) {}
@@ -61,20 +62,19 @@ public:
 		return value_type::max();
 	}
 
-	static constexpr Expiry Touched(Expiry now,
-					std::chrono::seconds duration) {
+	static constexpr Expiry Touched(Expiry now, duration_type duration) {
 		return now.value + duration;
 	}
 
-	static Expiry Touched(std::chrono::seconds duration) {
+	static Expiry Touched(duration_type duration) {
 		return Touched(Now(), duration);
 	}
 
-	void Touch(Expiry now, std::chrono::seconds duration) {
+	void Touch(Expiry now, duration_type duration) {
 		value = now.value + duration;
 	}
 
-	void Touch(std::chrono::seconds duration) {
+	void Touch(duration_type duration) {
 		Touch(Now(), duration);
 	}
 
