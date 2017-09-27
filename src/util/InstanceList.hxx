@@ -41,29 +41,29 @@ class WithInstanceList {};
 
 template<typename T>
 class WithInstanceList {
-    typedef boost::intrusive::list_member_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>> SiblingsHook;
-    SiblingsHook instance_siblings;
+	typedef boost::intrusive::list_member_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>> SiblingsHook;
+	SiblingsHook instance_siblings;
 
-    typedef boost::intrusive::list<WithInstanceList,
-                                   boost::intrusive::member_hook<WithInstanceList,
-                                                                 WithInstanceList::SiblingsHook,
-                                                                 &WithInstanceList::instance_siblings>,
-                                   boost::intrusive::constant_time_size<false>> InstanceList;
+	typedef boost::intrusive::list<WithInstanceList,
+				       boost::intrusive::member_hook<WithInstanceList,
+								     WithInstanceList::SiblingsHook,
+								     &WithInstanceList::instance_siblings>,
+				       boost::intrusive::constant_time_size<false>> InstanceList;
 
-    static InstanceList instances;
+	static InstanceList instances;
 
 protected:
-    WithInstanceList() {
-        instances.push_back(*this);
-    }
+	WithInstanceList() {
+		instances.push_back(*this);
+	}
 
-    WithInstanceList(WithInstanceList &&) = delete;
-    WithInstanceList &operator=(WithInstanceList &&) = delete;
+	WithInstanceList(WithInstanceList &&) = delete;
+	WithInstanceList &operator=(WithInstanceList &&) = delete;
 
 public:
-    ~WithInstanceList() {
-        instances.erase(instances.iterator_to(*this));
-    }
+	~WithInstanceList() {
+		instances.erase(instances.iterator_to(*this));
+	}
 };
 
 template<typename T>

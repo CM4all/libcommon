@@ -46,17 +46,17 @@ class DestructAnchor;
  * and thus inaccessible, the #destructed flag gets set.
  */
 class DestructObserver
-    : public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>> {
-    friend class DestructAnchor;
+	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>> {
+	friend class DestructAnchor;
 
-    bool destructed = false;
+	bool destructed = false;
 
 public:
-    explicit DestructObserver(DestructAnchor &anchor);
+	explicit DestructObserver(DestructAnchor &anchor);
 
-    operator bool() const {
-        return destructed;
-    }
+	operator bool() const {
+		return destructed;
+	}
 };
 
 /**
@@ -65,23 +65,23 @@ public:
  * overhead.
  */
 class DestructAnchor {
-    friend class DestructObserver;
+	friend class DestructObserver;
 
-    boost::intrusive::list<DestructObserver,
-                           boost::intrusive::constant_time_size<false>> observers;
+	boost::intrusive::list<DestructObserver,
+			       boost::intrusive::constant_time_size<false>> observers;
 
 public:
-    ~DestructAnchor() {
-        /* tell all observers about it */
-        for (auto &i : observers)
-            i.destructed = true;
-    }
+	~DestructAnchor() {
+		/* tell all observers about it */
+		for (auto &i : observers)
+			i.destructed = true;
+	}
 };
 
 inline
 DestructObserver::DestructObserver(DestructAnchor &anchor)
 {
-    anchor.observers.push_front(*this);
+	anchor.observers.push_front(*this);
 }
 
 #endif
