@@ -54,11 +54,11 @@ public:
 		return clock_type::now();
 	}
 
-	static Expiry AlreadyExpired() {
+	static constexpr Expiry AlreadyExpired() {
 		return value_type::min();
 	}
 
-	static Expiry Never() {
+	static constexpr Expiry Never() {
 		return value_type::max();
 	}
 
