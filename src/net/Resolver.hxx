@@ -38,6 +38,6 @@ class AddressInfoList;
 
 AddressInfoList
 Resolve(const char *host_and_port, int default_port,
-        const struct addrinfo *hints);
+	const struct addrinfo *hints);
 
 #endif

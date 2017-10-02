@@ -45,7 +45,7 @@ class UniqueSocketDescriptor;
  */
 UniqueSocketDescriptor
 ResolveBindSocket(const char *host_and_port, int default_port,
-                  const struct addrinfo &hints);
+		  const struct addrinfo &hints);
 
 UniqueSocketDescriptor
 ResolveBindStreamSocket(const char *host_and_port, int default_port);

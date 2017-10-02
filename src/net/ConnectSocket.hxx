@@ -45,58 +45,58 @@ class AddressInfo;
 
 class ConnectSocketHandler {
 public:
-    virtual void OnSocketConnectSuccess(UniqueSocketDescriptor &&fd) = 0;
-    virtual void OnSocketConnectTimeout();
-    virtual void OnSocketConnectError(std::exception_ptr ep) = 0;
+	virtual void OnSocketConnectSuccess(UniqueSocketDescriptor &&fd) = 0;
+	virtual void OnSocketConnectTimeout();
+	virtual void OnSocketConnectError(std::exception_ptr ep) = 0;
 };
 
 /**
  * A class that connects to a SocketAddress.
  */
 class ConnectSocket final : public Cancellable {
-    ConnectSocketHandler &handler;
+	ConnectSocketHandler &handler;
 
-    UniqueSocketDescriptor fd;
+	UniqueSocketDescriptor fd;
 
-    SocketEvent event;
+	SocketEvent event;
 
 public:
-    explicit ConnectSocket(EventLoop &_event_loop,
-                           ConnectSocketHandler &_handler);
-    ~ConnectSocket();
+	explicit ConnectSocket(EventLoop &_event_loop,
+			       ConnectSocketHandler &_handler);
+	~ConnectSocket();
 
-    bool IsPending() const {
-        return fd.IsDefined();
-    }
+	bool IsPending() const {
+		return fd.IsDefined();
+	}
 
-    bool Connect(SocketAddress address);
+	bool Connect(SocketAddress address);
 
-    bool Connect(const AddressInfo &address,
-                 const struct timeval *timeout);
+	bool Connect(const AddressInfo &address,
+		     const struct timeval *timeout);
 
-    bool Connect(const AddressInfo &address,
-                 const struct timeval &timeout) {
-        return Connect(address, &timeout);
-    }
+	bool Connect(const AddressInfo &address,
+		     const struct timeval &timeout) {
+		return Connect(address, &timeout);
+	}
 
-    /**
-     * Wait until the given socket is connected (this method returns
-     * immediately and invokes the #ConnectSocketHandler on completion
-     * or error).
-     */
-    void WaitConnected(UniqueSocketDescriptor &&_fd,
-                       const struct timeval *timeout);
+	/**
+	 * Wait until the given socket is connected (this method returns
+	 * immediately and invokes the #ConnectSocketHandler on completion
+	 * or error).
+	 */
+	void WaitConnected(UniqueSocketDescriptor &&_fd,
+			   const struct timeval *timeout);
 
-    void WaitConnected(UniqueSocketDescriptor &&_fd,
-                       const struct timeval &timeout) {
-        WaitConnected(std::move(_fd), &timeout);
-    }
+	void WaitConnected(UniqueSocketDescriptor &&_fd,
+			   const struct timeval &timeout) {
+		WaitConnected(std::move(_fd), &timeout);
+	}
 
-    /* virtual methods from Cancellable */
-    void Cancel() override;
+	/* virtual methods from Cancellable */
+	void Cancel() override;
 
 private:
-    void OnEvent(unsigned events);
+	void OnEvent(unsigned events);
 };
 
 #endif
