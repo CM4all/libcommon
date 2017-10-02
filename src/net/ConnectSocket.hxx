@@ -69,6 +69,9 @@ public:
 		return fd.IsDefined();
 	}
 
+	bool Connect(SocketAddress address,
+		     const struct timeval &timeout);
+
 	bool Connect(SocketAddress address);
 
 	bool Connect(const AddressInfo &address,

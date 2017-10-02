@@ -88,17 +88,24 @@ Connect(const SocketAddress address)
 }
 
 bool
-ConnectSocket::Connect(const SocketAddress address)
+ConnectSocket::Connect(const SocketAddress address,
+		       const struct timeval &timeout)
 {
 	assert(!fd.IsDefined());
 
 	try {
-		WaitConnected(::Connect(address), connect_timeout);
+		WaitConnected(::Connect(address), timeout);
 		return true;
 	} catch (...) {
 		handler.OnSocketConnectError(std::current_exception());
 		return false;
 	}
+}
+
+bool
+ConnectSocket::Connect(const SocketAddress address)
+{
+	return Connect(address, connect_timeout);
 }
 
 static UniqueSocketDescriptor
