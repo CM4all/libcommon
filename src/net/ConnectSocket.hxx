@@ -61,8 +61,7 @@ class ConnectSocket final : public Cancellable {
 	SocketEvent event;
 
 public:
-	explicit ConnectSocket(EventLoop &_event_loop,
-			       ConnectSocketHandler &_handler);
+	ConnectSocket(EventLoop &_event_loop, ConnectSocketHandler &_handler);
 	~ConnectSocket();
 
 	bool IsPending() const {
