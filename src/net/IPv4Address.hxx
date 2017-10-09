@@ -201,6 +201,15 @@ public:
 	constexpr uint32_t GetNumericAddress() const {
 		return FromBE32(GetNumericAddressBE());
 	}
+
+	/**
+	 * Bit-wise AND of two addresses.  This is useful for netmask
+	 * calculations.
+	 */
+	constexpr IPv4Address operator&(const IPv4Address &other) const {
+		return IPv4Address(ConstructInAddrBE(GetNumericAddressBE() & other.GetNumericAddressBE()),
+				   GetPort() & other.GetPort());
+	}
 };
 
 #endif
