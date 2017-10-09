@@ -157,6 +157,14 @@ public:
 	 */
 	explicit IPv4Address(SocketAddress src);
 
+	/**
+	 * Generate a (net-)mask with the specified prefix length.
+	 */
+	static constexpr IPv4Address MaskFromPrefix(unsigned prefix_length) {
+		return Construct((~uint32_t(0)) << (32 - prefix_length),
+				 ~uint16_t(0));
+	}
+
 	operator SocketAddress() const {
 		return SocketAddress(reinterpret_cast<const struct sockaddr *>(&address),
 				     sizeof(address));
