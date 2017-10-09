@@ -58,6 +58,9 @@ class IPv4Address {
 		return {{{ a, b, c, d }}};
 	}
 
+	/**
+	 * @param x the 32 bit IP address in host byte order
+	 */
 	static constexpr struct in_addr ConstructInAddr(uint32_t x) {
 		return ConstructInAddr(x >> 24, x >> 16, x >> 8, x);
 	}
@@ -72,6 +75,9 @@ class IPv4Address {
 		return ToBE32((a << 24) | (b << 16) | (c << 8) | d);
 	}
 
+	/**
+	 * @param x the 32 bit IP address in host byte order
+	 */
 	static constexpr struct in_addr ConstructInAddr(uint32_t x) {
 		return { ToBE32(x) };
 	}
@@ -82,6 +88,9 @@ class IPv4Address {
 	}
 #endif
 
+	/**
+	 * @param port the port number in host byte order
+	 */
 	static constexpr struct sockaddr_in Construct(struct in_addr address,
 						      uint16_t port) {
 		return {
@@ -95,6 +104,10 @@ class IPv4Address {
 		};
 	}
 
+	/**
+	 * @param x the 32 bit IP address in host byte order
+	 * @param port the port number in host byte order
+	 */
 	static constexpr struct sockaddr_in Construct(uint32_t address,
 						      uint16_t port) {
 		return Construct(ConstructInAddr(address), port);
@@ -103,13 +116,22 @@ class IPv4Address {
 public:
 	IPv4Address() = default;
 
+	/**
+	 * @param port the port number in host byte order
+	 */
 	constexpr IPv4Address(struct in_addr _address, uint16_t port)
 		:address(Construct(_address, port)) {}
 
+	/**
+	 * @param port the port number in host byte order
+	 */
 	constexpr IPv4Address(uint8_t a, uint8_t b, uint8_t c,
 			      uint8_t d, uint16_t port)
 		:IPv4Address(ConstructInAddr(a, b, c, d), port) {}
 
+	/**
+	 * @param port the port number in host byte order
+	 */
 	constexpr explicit IPv4Address(uint16_t port)
 		:IPv4Address(ConstructInAddr(INADDR_ANY), port) {}
 
@@ -131,10 +153,16 @@ public:
 		return address.sin_family != AF_UNSPEC;
 	}
 
+	/**
+	 * @return the port number in host byte order
+	 */
 	constexpr uint16_t GetPort() const {
 		return FromBE16(address.sin_port);
 	}
 
+	/**
+	 * @param port the port number in host byte order
+	 */
 	void SetPort(uint16_t port) {
 		address.sin_port = ToBE16(port);
 	}
