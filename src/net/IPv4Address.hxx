@@ -187,6 +187,20 @@ public:
 	constexpr const struct in_addr &GetAddress() const {
 		return address.sin_addr;
 	}
+
+	/**
+	 * @return the 32 bit IP address in network byte order
+	 */
+	constexpr uint32_t GetNumericAddressBE() const {
+		return GetAddress().s_addr;
+	}
+
+	/**
+	 * @return the 32 bit IP address in host byte order
+	 */
+	constexpr uint32_t GetNumericAddress() const {
+		return FromBE32(GetNumericAddressBE());
+	}
 };
 
 #endif
