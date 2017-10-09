@@ -39,7 +39,6 @@
 #include <sys/types.h>
 
 #ifdef __linux__
-#define HAVE_POSIX
 #define HAVE_EVENTFD
 #define HAVE_SIGNALFD
 #define HAVE_INOTIFY
@@ -105,7 +104,7 @@ public:
 	bool Open(const char *pathname, int flags, mode_t mode=0666);
 	bool OpenReadOnly(const char *pathname);
 
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 	bool OpenNonBlocking(const char *pathname);
 
 #ifdef __linux__
@@ -209,7 +208,7 @@ public:
 		return ::write(fd, buffer, length);
 	}
 
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 	int Poll(short events, int timeout) const;
 
 	int WaitReadable(int timeout) const;

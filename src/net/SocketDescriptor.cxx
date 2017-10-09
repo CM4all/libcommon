@@ -33,11 +33,11 @@
 #include "IPv4Address.hxx"
 #include "IPv6Address.hxx"
 
-#ifdef HAVE_POSIX
-#include <sys/socket.h>
-#else
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#else
+#include <sys/socket.h>
 #endif
 
 #include <errno.h>
@@ -45,7 +45,7 @@
 #include <netinet/tcp.h>
 #include <string.h>
 
-#ifndef HAVE_POSIX
+#ifdef _WIN32
 
 void
 SocketDescriptor::Close()
@@ -355,7 +355,7 @@ ssize_t
 SocketDescriptor::Read(void *buffer, size_t length)
 {
 	int flags = 0;
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 	flags |= MSG_DONTWAIT;
 #endif
 
@@ -373,7 +373,7 @@ SocketDescriptor::Write(const void *buffer, size_t length)
 	return ::send(Get(), (const char *)buffer, length, flags);
 }
 
-#ifndef HAVE_POSIX
+#ifdef _WIN32
 
 int
 SocketDescriptor::WaitReadable(int timeout_ms) const
@@ -420,7 +420,7 @@ SocketDescriptor::Read(void *buffer, size_t length,
 		       StaticSocketAddress &address)
 {
 	int flags = 0;
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 	flags |= MSG_DONTWAIT;
 #endif
 
@@ -438,7 +438,7 @@ SocketDescriptor::Write(const void *buffer, size_t length,
 			SocketAddress address)
 {
 	int flags = 0;
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 	flags |= MSG_DONTWAIT;
 #endif
 #ifdef __linux__

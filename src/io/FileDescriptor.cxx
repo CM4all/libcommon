@@ -36,7 +36,7 @@
 #include <sys/syscall.h>
 #endif
 
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 #include <poll.h>
 #endif
 
@@ -79,7 +79,7 @@ FileDescriptor::OpenReadOnly(const char *pathname)
 	return Open(pathname, O_RDONLY);
 }
 
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 
 bool
 FileDescriptor::OpenNonBlocking(const char *pathname)
@@ -266,7 +266,7 @@ FileDescriptor::GetSize() const
 		: -1;
 }
 
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 
 int
 FileDescriptor::Poll(short events, int timeout) const

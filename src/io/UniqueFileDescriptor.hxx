@@ -86,7 +86,7 @@ public:
 	using FileDescriptor::Open;
 	using FileDescriptor::OpenReadOnly;
 
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 	using FileDescriptor::OpenNonBlocking;
 
 	static bool CreatePipe(UniqueFileDescriptor &r, UniqueFileDescriptor &w) {
@@ -132,7 +132,7 @@ public:
 	using FileDescriptor::Read;
 	using FileDescriptor::Write;
 
-#ifdef HAVE_POSIX
+#ifndef _WIN32
 	using FileDescriptor::Poll;
 	using FileDescriptor::WaitReadable;
 	using FileDescriptor::WaitWritable;
