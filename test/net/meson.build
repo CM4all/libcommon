@@ -1,5 +1,6 @@
 test('TestNet', executable('TestNet',
   'TestIPv4Address.cxx',
+  'TestIPv6Address.cxx',
   'TestHostParser.cxx',
   'TestAddressString.cxx',
   include_directories: inc,
