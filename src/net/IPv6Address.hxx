@@ -32,6 +32,7 @@
 
 #include "SocketAddress.hxx"
 #include "util/ByteOrder.hxx"
+#include "util/Compiler.h"
 
 #include <stdint.h>
 
@@ -166,6 +167,13 @@ public:
 	bool IsV4Mapped() const noexcept {
 		return IN6_IS_ADDR_V4MAPPED(&address.sin6_addr);
 	}
+
+	/**
+	 * Bit-wise AND of two addresses.  This is useful for netmask
+	 * calculations.
+	 */
+	gcc_pure
+	IPv6Address operator&(const IPv6Address &other) const;
 
 private:
 	/**

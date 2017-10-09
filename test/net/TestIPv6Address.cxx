@@ -72,3 +72,20 @@ TEST(IPv6AddressTest, Mask)
 		  IPv6Address(0xffff, 0xffff, 0xffff, 0xff00,
 			      0, 0, 0, 0, 0).GetAddress());
 }
+
+TEST(IPv6AddressTest, And)
+{
+	EXPECT_EQ((IPv6Address::MaskFromPrefix(128) &
+		   IPv6Address::MaskFromPrefix(56)).GetAddress(),
+		  IPv6Address::MaskFromPrefix(56).GetAddress());
+	EXPECT_EQ((IPv6Address::MaskFromPrefix(48) &
+		   IPv6Address(0x2a00, 0x1450, 0x4001, 0x816,
+			       0, 0, 0, 0x200e, 0)).GetAddress(),
+		  IPv6Address(0x2a00, 0x1450, 0x4001, 0,
+			      0, 0, 0, 0, 0).GetAddress());
+	EXPECT_EQ((IPv6Address::MaskFromPrefix(24) &
+		   IPv6Address(0x2a00, 0x1450, 0x4001, 0x816,
+			       0, 0, 0, 0x200e, 0)).GetAddress(),
+		  IPv6Address(0x2a00, 0x1400, 0, 0,
+			      0, 0, 0, 0, 0).GetAddress());
+}
