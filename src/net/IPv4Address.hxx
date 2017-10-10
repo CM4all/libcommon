@@ -164,6 +164,16 @@ public:
 				 ~uint16_t(0));
 	}
 
+	/**
+	 * Return a downcasted reference to the address.  This call is
+	 * only legal after verifying SocketAddress::GetFamily().
+	 */
+	static constexpr const IPv4Address &Cast(const SocketAddress src) noexcept {
+		/* this reinterpret_cast works because this class is
+		   just a wrapper for struct sockaddr_in6 */
+		return *reinterpret_cast<const IPv4Address *>(src.GetAddress());
+	}
+
 	constexpr operator SocketAddress() const noexcept {
 		return SocketAddress(reinterpret_cast<const struct sockaddr *>(&address),
 				     sizeof(address));
