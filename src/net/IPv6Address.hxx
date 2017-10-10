@@ -99,7 +99,8 @@ public:
 			     port, scope_id) {}
 
 	/**
-	 * Convert a #SocketAddress to a #IPv6Address.  Its address family must be AF_INET.
+	 * Construct with data copied from a #SocketAddress.  Its
+	 * address family must be AF_INET6.
 	 */
 	explicit IPv6Address(SocketAddress src) noexcept;
 

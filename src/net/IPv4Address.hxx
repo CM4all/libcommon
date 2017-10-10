@@ -149,7 +149,8 @@ public:
 		:IPv4Address(ConstructInAddr(INADDR_ANY), port) {}
 
 	/**
-	 * Convert a #SocketAddress to a #IPv4Address.  Its address family must be AF_INET.
+	 * Construct with data copied from a #SocketAddress.  Its
+	 * address family must be AF_INET.
 	 */
 	explicit IPv4Address(SocketAddress src) noexcept;
 
