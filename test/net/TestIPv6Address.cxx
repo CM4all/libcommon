@@ -48,3 +48,27 @@ TEST(IPv6AddressTest, Port)
 	a.SetPort(42);
 	EXPECT_EQ(a.GetPort(), 42);
 }
+
+static bool
+operator==(const struct in6_addr &a, const struct in6_addr &b)
+{
+	return memcmp(&a, &b, sizeof(a)) == 0;
+}
+
+TEST(IPv6AddressTest, Mask)
+{
+	EXPECT_EQ(IPv6Address::MaskFromPrefix(0).GetAddress(),
+		  IPv6Address(0, 0, 0, 0, 0, 0, 0, 0, 0).GetAddress());
+	EXPECT_EQ(IPv6Address::MaskFromPrefix(128).GetAddress(),
+		  IPv6Address(0xffff, 0xffff, 0xffff, 0xffff,
+			      0xffff, 0xffff, 0xffff, 0xffff, 0).GetAddress());
+	EXPECT_EQ(IPv6Address::MaskFromPrefix(127).GetAddress(),
+		  IPv6Address(0xffff, 0xffff, 0xffff, 0xffff,
+			      0xffff, 0xffff, 0xffff, 0xfffe, 0).GetAddress());
+	EXPECT_EQ(IPv6Address::MaskFromPrefix(64).GetAddress(),
+		  IPv6Address(0xffff, 0xffff, 0xffff, 0xffff,
+			      0, 0, 0, 0, 0).GetAddress());
+	EXPECT_EQ(IPv6Address::MaskFromPrefix(56).GetAddress(),
+		  IPv6Address(0xffff, 0xffff, 0xffff, 0xff00,
+			      0, 0, 0, 0, 0).GetAddress());
+}

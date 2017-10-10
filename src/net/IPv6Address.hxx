@@ -102,6 +102,22 @@ public:
 	 */
 	explicit IPv6Address(SocketAddress src) noexcept;
 
+	/**
+	 * Generate a (net-)mask with the specified prefix length.
+	 */
+	static constexpr IPv6Address MaskFromPrefix(unsigned prefix_length) noexcept {
+		return IPv6Address(MaskWord(prefix_length, 0),
+				   MaskWord(prefix_length, 16),
+				   MaskWord(prefix_length, 32),
+				   MaskWord(prefix_length, 48),
+				   MaskWord(prefix_length, 64),
+				   MaskWord(prefix_length, 80),
+				   MaskWord(prefix_length, 96),
+				   MaskWord(prefix_length, 112),
+				   ~uint16_t(0),
+				   ~uint32_t(0));
+	}
+
 	constexpr operator SocketAddress() const noexcept {
 		return SocketAddress(reinterpret_cast<const struct sockaddr *>(&address),
 				     sizeof(address));
@@ -149,6 +165,19 @@ public:
 #endif
 	bool IsV4Mapped() const noexcept {
 		return IN6_IS_ADDR_V4MAPPED(&address.sin6_addr);
+	}
+
+private:
+	/**
+	 * Helper function for MaskFromPrefix().
+	 */
+	static constexpr uint16_t MaskWord(unsigned prefix_length,
+					   unsigned offset) noexcept {
+		return prefix_length <= offset
+			? 0
+			: (prefix_length >= offset + 16
+			   ? 0xffff
+			   : (0xffff << (offset + 16 - prefix_length)));
 	}
 };
 
