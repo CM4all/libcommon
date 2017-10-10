@@ -48,6 +48,22 @@
 class IPv6Address {
 	struct sockaddr_in6 address;
 
+	static constexpr struct in6_addr Construct(uint16_t a, uint16_t b,
+						   uint16_t c, uint16_t d,
+						   uint16_t e, uint16_t f,
+						   uint16_t g, uint16_t h) noexcept {
+		return {{{
+			uint8_t(a >> 8), uint8_t(a),
+			uint8_t(b >> 8), uint8_t(b),
+			uint8_t(c >> 8), uint8_t(c),
+			uint8_t(d >> 8), uint8_t(d),
+			uint8_t(e >> 8), uint8_t(e),
+			uint8_t(f >> 8), uint8_t(f),
+			uint8_t(g >> 8), uint8_t(g),
+			uint8_t(h >> 8), uint8_t(h),
+		}}};
+	}
+
 	static constexpr struct sockaddr_in6 Construct(struct in6_addr address,
 						       uint16_t port,
 						       uint32_t scope_id) noexcept {
@@ -73,6 +89,13 @@ public:
 	constexpr explicit IPv6Address(uint16_t port,
 				       uint32_t scope_id=0) noexcept
 		:IPv6Address(IN6ADDR_ANY_INIT, port, scope_id) {}
+
+
+	constexpr IPv6Address(uint16_t a, uint16_t b, uint16_t c, uint16_t d,
+			      uint16_t e, uint16_t f, uint16_t g, uint16_t h,
+			      uint16_t port, uint32_t scope_id=0) noexcept
+		:IPv6Address(Construct(a, b, c, d, e, f, g, h),
+			     port, scope_id) {}
 
 	/**
 	 * Convert a #SocketAddress to a #IPv6Address.  Its address family must be AF_INET.
