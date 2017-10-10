@@ -78,7 +78,7 @@ public:
 		return address == nullptr;
 	}
 
-	const struct sockaddr *GetAddress() const noexcept {
+	constexpr const struct sockaddr *GetAddress() const noexcept {
 		return address;
 	}
 
