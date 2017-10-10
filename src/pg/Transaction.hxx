@@ -60,6 +60,28 @@ void DoSerializableRepeat(Pg::Connection &connection, unsigned retries,
 	}
 }
 
+/**
+ * Like Connection::DoRepeatableRead(), but retry on
+ * "serialization_failure" (Error::IsSerializationFailure()).
+ */
+template<typename F>
+void DoRepeatableReadRepeat(Pg::Connection &connection, unsigned retries,
+			  F &&f) {
+	while (true) {
+		try {
+			connection.DoRepeatableRead(f);
+			break;
+		} catch (const Pg::Error &e) {
+			if (e.IsSerializationFailure() &&
+			    retries-- > 0)
+				/* try again */
+				continue;
+
+			throw;
+		}
+	}
+}
+
 } /* namespace Pg */
 
 #endif

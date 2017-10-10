@@ -308,6 +308,15 @@ public:
 	}
 
 	/**
+	 * Begin a transaction with isolation level "REPEATABLE READ".
+	 *
+	 * Throws #Error on error.
+	 */
+	void BeginRepeatableRead() {
+		ExecuteOrThrow("BEGIN ISOLATION LEVEL REPEATABLE READ");
+	}
+
+	/**
 	 * Commit the current transaction.
 	 *
 	 * Throws #Error on error.
@@ -333,6 +342,26 @@ public:
 	template<typename F>
 	void DoSerializable(F &&f) {
 		BeginSerializable();
+
+		try {
+			f();
+		} catch (...) {
+			if (IsDefined())
+				Execute("ROLLBACK");
+			throw;
+		}
+
+		Commit();
+	}
+
+	/**
+	 * Invoke the given function from within a "REPEATABLE READ"
+	 * transaction.  Performs automatic rollback if the function
+	 * throws an exception.
+	 */
+	template<typename F>
+	void DoRepeatableRead(F &&f) {
+		BeginRepeatableRead();
 
 		try {
 			f();
