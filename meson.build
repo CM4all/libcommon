@@ -229,6 +229,7 @@ net = static_library('net',
   'src/net/djb/NetstringGenerator.cxx',
   'src/net/djb/QmqpClient.cxx',
   'src/net/Buffered.cxx',
+  'src/net/log/Parser.cxx',
   include_directories: inc,
   dependencies: [
   ])
