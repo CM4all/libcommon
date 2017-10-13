@@ -54,11 +54,13 @@ SocketConfig::Create(int type) const
 	assert(!bind_address.IsNull());
 	assert(bind_address.IsDefined());
 
+	const int family = bind_address.GetFamily();
+
 	UniqueSocketDescriptor fd;
-	if (!fd.CreateNonBlock(bind_address.GetFamily(), type, 0))
+	if (!fd.CreateNonBlock(family, type, 0))
 		throw MakeErrno("Failed to create socket");
 
-	if (bind_address.GetFamily() == AF_LOCAL) {
+	if (family == AF_LOCAL) {
 		const struct sockaddr_un *sun = (const struct sockaddr_un *)
 			bind_address.GetAddress();
 		if (sun->sun_path[0] != '\0')
