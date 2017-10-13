@@ -48,6 +48,10 @@ struct SocketConfig {
 	 */
 	std::string interface;
 
+	bool reuse_port = false;
+
+	bool free_bind = false;
+
 	bool pass_cred = false;
 
 	SocketConfig() = default;

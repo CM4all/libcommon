@@ -88,6 +88,12 @@ SocketConfig::Create(int type) const
 	    !fd.SetReuseAddress(true))
 		throw MakeErrno("Failed to set SO_REUSEADDR");
 
+	if (reuse_port && !fd.SetReusePort())
+		throw MakeErrno("Failed to set SO_REUSEPORT");
+
+	if (free_bind && !fd.SetFreeBind())
+		throw MakeErrno("Failed to set SO_FREEBIND");
+
 	if (!fd.Bind(bind_address)) {
 		const int e = errno;
 
