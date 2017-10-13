@@ -48,6 +48,12 @@ struct SocketConfig {
 	 */
 	std::string interface;
 
+	/**
+	 * If non-zero, sets TCP_DEFER_ACCEPT.  Value is a number of
+	 * seconds.
+	 */
+	unsigned tcp_defer_accept = 0;
+
 	bool reuse_port = false;
 
 	bool free_bind = false;

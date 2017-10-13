@@ -120,8 +120,12 @@ SocketConfig::Create(int type) const
 				  address_string);
 	}
 
-	if (is_tcp)
+	if (is_tcp) {
 		fd.SetTcpFastOpen();
+
+		if (tcp_defer_accept > 0)
+			fd.SetTcpDeferAccept(tcp_defer_accept);
+	}
 
 	return fd;
 }
