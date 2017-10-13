@@ -55,6 +55,9 @@ struct SocketConfig {
 	explicit SocketConfig(SocketAddress _bind_address)
 		:bind_address(_bind_address) {}
 
+	explicit SocketConfig(AllocatedSocketAddress &&_bind_address)
+		:bind_address(std::move(_bind_address)) {}
+
 	/**
 	 * Apply fixups after configuration:
 	 *
