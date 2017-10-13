@@ -127,5 +127,8 @@ SocketConfig::Create(int type) const
 			fd.SetTcpDeferAccept(tcp_defer_accept);
 	}
 
+	if (listen > 0 && !fd.Listen(listen))
+		throw MakeErrno("Failed to listen");
+
 	return fd;
 }

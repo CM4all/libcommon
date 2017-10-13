@@ -49,6 +49,11 @@ struct SocketConfig {
 	std::string interface;
 
 	/**
+	 * If non-zero, calls listen().  Value is the backlog.
+	 */
+	unsigned listen = 0;
+
+	/**
 	 * If non-zero, sets TCP_DEFER_ACCEPT.  Value is a number of
 	 * seconds.
 	 */
