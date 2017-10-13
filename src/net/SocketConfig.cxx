@@ -36,6 +36,7 @@
 #include "ToString.hxx"
 #include "system/Error.hxx"
 
+#include <assert.h>
 #include <sys/un.h>
 #include <unistd.h>
 
@@ -50,6 +51,9 @@ SocketConfig::Fixup()
 UniqueSocketDescriptor
 SocketConfig::Create(int type) const
 {
+	assert(!bind_address.IsNull());
+	assert(bind_address.IsDefined());
+
 	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(bind_address.GetFamily(), type, 0))
 		throw MakeErrno("Failed to create socket");
