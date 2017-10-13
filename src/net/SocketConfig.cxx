@@ -55,6 +55,8 @@ SocketConfig::Create(int type) const
 	assert(bind_address.IsDefined());
 
 	const int family = bind_address.GetFamily();
+	const bool is_inet = family == AF_INET || family == AF_INET6;
+	const bool is_tcp = is_inet && type == SOCK_STREAM;
 
 	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(family, type, 0))
@@ -78,9 +80,12 @@ SocketConfig::Create(int type) const
 	if (!interface.empty() && !fd.SetBindToDevice(interface.c_str()))
 		throw MakeErrno("Failed to set SO_BINDTODEVICE");
 
+	/* always set SO_REUSEADDR for TCP sockets to allow quick
+	   restarts */
 	/* set SO_REUSEADDR if we're using multicast; this option allows
 	   multiple processes to join the same group on the same port */
-	if (!multicast_group.IsNull() && !fd.SetReuseAddress(true))
+	if ((is_tcp || !multicast_group.IsNull()) &&
+	    !fd.SetReuseAddress(true))
 		throw MakeErrno("Failed to set SO_REUSEADDR");
 
 	if (!fd.Bind(bind_address)) {
