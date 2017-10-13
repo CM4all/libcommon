@@ -114,5 +114,8 @@ SocketConfig::Create(int type) const
 				  address_string);
 	}
 
+	if (is_tcp)
+		fd.SetTcpFastOpen();
+
 	return fd;
 }
