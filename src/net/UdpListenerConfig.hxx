@@ -33,36 +33,10 @@
 #ifndef UDP_LISTENER_CONFIG_HXX
 #define UDP_LISTENER_CONFIG_HXX
 
-#include "AllocatedSocketAddress.hxx"
+#include "SocketConfig.hxx"
 
-#include <string>
-
-class UniqueSocketDescriptor;
-
-struct UdpListenerConfig {
-	AllocatedSocketAddress bind_address;
-
-	AllocatedSocketAddress multicast_group;
-
-	/**
-	 * If non-empty, sets SO_BINDTODEVICE.
-	 */
-	std::string interface;
-
-	bool pass_cred = false;
-
-	UdpListenerConfig() = default;
-
-	explicit UdpListenerConfig(SocketAddress _bind_address)
-		:bind_address(_bind_address) {}
-
-	/**
-	 * Apply fixups after configuration:
-	 *
-	 * - if bind_address is IPv6-wildcard, but multicast_group is
-	 *   IPv4, then change bind_address to IPv4-wildcard
-	 */
-	void Fixup();
+struct UdpListenerConfig : SocketConfig {
+	using SocketConfig::SocketConfig;
 
 	/**
 	 * Create a listening socket.

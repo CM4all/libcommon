@@ -30,13 +30,43 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UdpListenerConfig.hxx"
-#include "UniqueSocketDescriptor.hxx"
+#pragma once
 
-#include <sys/socket.h>
+#include "AllocatedSocketAddress.hxx"
 
-UniqueSocketDescriptor
-UdpListenerConfig::Create() const
-{
-	return SocketConfig::Create(SOCK_DGRAM);
-}
+#include <string>
+
+class UniqueSocketDescriptor;
+
+struct SocketConfig {
+	AllocatedSocketAddress bind_address;
+
+	AllocatedSocketAddress multicast_group;
+
+	/**
+	 * If non-empty, sets SO_BINDTODEVICE.
+	 */
+	std::string interface;
+
+	bool pass_cred = false;
+
+	SocketConfig() = default;
+
+	explicit SocketConfig(SocketAddress _bind_address)
+		:bind_address(_bind_address) {}
+
+	/**
+	 * Apply fixups after configuration:
+	 *
+	 * - if bind_address is IPv6-wildcard, but multicast_group is
+	 *   IPv4, then change bind_address to IPv4-wildcard
+	 */
+	void Fixup();
+
+	/**
+	 * Create a listening socket.
+	 *
+	 * Throws exception on error.
+	 */
+	UniqueSocketDescriptor Create(int type) const;
+};
