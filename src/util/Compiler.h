@@ -165,19 +165,4 @@
 #define gcc_unreachable()
 #endif
 
-/* pre-0.3 compatibility macros */
-
-#define __attr_always_inline gcc_always_inline
-#define __attr_malloc gcc_malloc
-#define __attr_pure gcc_pure
-#define __attr_const gcc_const
-#define __attr_unused gcc_unused
-#define __attr_deprecated gcc_deprecated
-#define __attr_packed gcc_packed
-#define __attr_noreturn gcc_noreturn
-#define __attr_sentinel(n) gcc_sentinel(n)
-#define __attr_printf(string_index, first_to_check) gcc_printf(string_index, first_to_check)
-#define likely(x) gcc_likely(x)
-#define unlikely(x) gcc_unlikely(x)
-
 #endif

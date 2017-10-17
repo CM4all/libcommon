@@ -67,14 +67,14 @@ static constexpr char months[13][5] = {
 static gcc_always_inline const char *
 wday_name(int wday)
 {
-	return wdays[likely(wday >= 0 && wday < 7)
+	return wdays[gcc_likely(wday >= 0 && wday < 7)
 		     ? wday : 7];
 }
 
 static gcc_always_inline const char *
 month_name(int month)
 {
-	return months[likely(month >= 0 && month < 12)
+	return months[gcc_likely(month >= 0 && month < 12)
 		      ? month : 12];
 }
 
