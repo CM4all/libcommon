@@ -38,20 +38,20 @@
 #include <chrono>
 
 struct HttpRangeRequest {
-    enum class Type {
-        NONE,
-        VALID,
-        INVALID,
-    } type = Type::NONE;
+	enum class Type {
+		NONE,
+		VALID,
+		INVALID,
+	} type = Type::NONE;
 
-    uint64_t skip = 0, size;
+	uint64_t skip = 0, size;
 
-    explicit HttpRangeRequest(uint64_t _size):size(_size) {}
+	explicit HttpRangeRequest(uint64_t _size):size(_size) {}
 
-    /**
-     * Parse a "Range" request header.
-     */
-    void ParseRangeHeader(const char *p);
+	/**
+	 * Parse a "Range" request header.
+	 */
+	void ParseRangeHeader(const char *p);
 };
 
 #endif
