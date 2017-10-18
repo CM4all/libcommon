@@ -31,8 +31,8 @@
  */
 
 #include "ServerSocket.hxx"
-#include "IPv4Address.hxx"
-#include "IPv6Address.hxx"
+#include "net/IPv4Address.hxx"
+#include "net/IPv6Address.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/StaticSocketAddress.hxx"

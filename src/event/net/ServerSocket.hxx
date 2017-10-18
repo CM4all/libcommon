@@ -30,75 +30,73 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONNECT_SOCKET_HXX
-#define CONNECT_SOCKET_HXX
+#pragma once
 
 #include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
-#include "util/Cancellable.hxx"
 
 #include <exception>
 
-class Error;
 class SocketAddress;
-class AddressInfo;
-
-class ConnectSocketHandler {
-public:
-	virtual void OnSocketConnectSuccess(UniqueSocketDescriptor &&fd) = 0;
-	virtual void OnSocketConnectTimeout();
-	virtual void OnSocketConnectError(std::exception_ptr ep) = 0;
-};
 
 /**
- * A class that connects to a SocketAddress.
+ * A socket that accepts incoming connections.
  */
-class ConnectSocket final : public Cancellable {
-	ConnectSocketHandler &handler;
-
+class ServerSocket {
 	UniqueSocketDescriptor fd;
-
 	SocketEvent event;
 
 public:
-	ConnectSocket(EventLoop &_event_loop, ConnectSocketHandler &_handler);
-	~ConnectSocket();
+	explicit ServerSocket(EventLoop &event_loop)
+		:event(event_loop, BIND_THIS_METHOD(EventCallback)) {}
 
-	bool IsPending() const {
-		return fd.IsDefined();
+	ServerSocket(EventLoop &event_loop, UniqueSocketDescriptor &&_fd)
+		:ServerSocket(event_loop) {
+		Listen(std::move(_fd));
 	}
 
-	bool Connect(SocketAddress address,
-		     const struct timeval &timeout);
+	~ServerSocket();
 
-	bool Connect(SocketAddress address);
-
-	bool Connect(const AddressInfo &address,
-		     const struct timeval *timeout);
-
-	bool Connect(const AddressInfo &address,
-		     const struct timeval &timeout) {
-		return Connect(address, &timeout);
-	}
+	void Listen(UniqueSocketDescriptor &&_fd);
 
 	/**
-	 * Wait until the given socket is connected (this method returns
-	 * immediately and invokes the #ConnectSocketHandler on completion
-	 * or error).
+	 * Throws std::runtime_error on error.
 	 */
-	void WaitConnected(UniqueSocketDescriptor &&_fd,
-			   const struct timeval *timeout);
+	void Listen(SocketAddress address,
+		    bool reuse_port=false,
+		    bool free_bind=false,
+		    const char *bind_to_device=nullptr);
 
-	void WaitConnected(UniqueSocketDescriptor &&_fd,
-			   const struct timeval &timeout) {
-		WaitConnected(std::move(_fd), &timeout);
+	void ListenTCP(unsigned port);
+	void ListenTCP4(unsigned port);
+	void ListenTCP6(unsigned port);
+
+	void ListenPath(const char *path);
+
+	StaticSocketAddress GetLocalAddress() const;
+
+	bool SetTcpDeferAccept(const int &seconds) {
+		return fd.SetTcpDeferAccept(seconds);
 	}
 
-	/* virtual methods from Cancellable */
-	void Cancel() override;
+	void AddEvent() {
+		event.Add();
+	}
+
+	void RemoveEvent() {
+		event.Delete();
+	}
+
+protected:
+	/**
+	 * A new incoming connection has been established.
+	 *
+	 * @param fd the socket owned by the callee
+	 */
+	virtual void OnAccept(UniqueSocketDescriptor &&fd,
+			      SocketAddress address) = 0;
+	virtual void OnAcceptError(std::exception_ptr ep) = 0;
 
 private:
-	void OnEvent(unsigned events);
+	void EventCallback(unsigned events);
 };
-
-#endif

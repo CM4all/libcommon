@@ -30,56 +30,62 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NETSTRING_SERVER_HXX
-#define NETSTRING_SERVER_HXX
+#pragma once
 
-#include "NetstringInput.hxx"
-#include "NetstringGenerator.hxx"
-#include "io/MultiWriteBuffer.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 
-#include <exception>
-#include <cstddef>
+#include <stddef.h>
+
+class SocketAddress;
+class UdpHandler;
 
 /**
- * A server that receives netstrings
- * (http://cr.yp.to/proto/netstrings.txt) from its clients and
- * responds with another netstring.
+ * Listener on a UDP port.
  */
-class NetstringServer {
+class UdpListener {
 	UniqueSocketDescriptor fd;
-
 	SocketEvent event;
 
-	NetstringInput input;
-	NetstringGenerator generator;
-	MultiWriteBuffer write;
+	UdpHandler &handler;
 
 public:
-	NetstringServer(EventLoop &event_loop, UniqueSocketDescriptor &&_fd);
-	~NetstringServer();
-
-protected:
-	SocketDescriptor GetSocket() const {
-		return fd;
-	}
-
-	bool SendResponse(const void *data, size_t size);
-	bool SendResponse(const char *data);
+	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
+		    UdpHandler &_handler);
+	~UdpListener();
 
 	/**
-	 * A netstring has been received.
-	 *
-	 * @param payload the netstring value; for the implementation's
-	 * convenience, the netstring is writable
+	 * Enable the object after it has been disabled by Disable().  A
+	 * new object is enabled by default.
 	 */
-	virtual void OnRequest(AllocatedArray<uint8_t> &&payload) = 0;
-	virtual void OnError(std::exception_ptr ep) = 0;
-	virtual void OnDisconnect() = 0;
+	void Enable() {
+		event.Add();
+	}
+
+	/**
+	 * Disable the object temporarily.  To undo this, call Enable().
+	 */
+	void Disable() {
+		event.Delete();
+	}
+
+	/**
+	 * Replaces the socket.  The old one is closed, and the new one is now
+	 * owned by this object.
+	 *
+	 * This may only be called on an object that is "enabled", see
+	 * Enable().
+	 */
+	void SetFd(UniqueSocketDescriptor &&_fd);
+
+	/**
+	 * Send a reply datagram to a client.
+	 *
+	 * Throws std::runtime_error on error.
+	 */
+	void Reply(SocketAddress address,
+		   const void *data, size_t data_length);
 
 private:
-	void OnEvent(unsigned events);
+	void EventCallback(unsigned events);
 };
-
-#endif

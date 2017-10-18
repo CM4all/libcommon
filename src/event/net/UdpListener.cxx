@@ -32,7 +32,7 @@
 
 #include "UdpListener.hxx"
 #include "UdpHandler.hxx"
-#include "AllocatedSocketAddress.hxx"
+#include "net/SocketAddress.hxx"
 #include "system/Error.hxx"
 
 #include <assert.h>

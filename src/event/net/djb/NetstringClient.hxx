@@ -30,12 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NETSTRING_CLIENT_HXX
-#define NETSTRING_CLIENT_HXX
+#pragma once
 
-#include "NetstringGenerator.hxx"
-#include "NetstringInput.hxx"
 #include "io/MultiWriteBuffer.hxx"
+#include "net/djb/NetstringGenerator.hxx"
+#include "net/djb/NetstringInput.hxx"
 #include "event/SocketEvent.hxx"
 #include "util/ConstBuffer.hxx"
 
@@ -98,5 +97,3 @@ public:
 private:
 	void OnEvent(unsigned events);
 };
-
-#endif

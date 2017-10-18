@@ -219,21 +219,31 @@ net = static_library('net',
   'src/net/SocketConfig.cxx',
   'src/net/RBindSocket.cxx',
   'src/net/RConnectSocket.cxx',
-  'src/net/ConnectSocket.cxx',
-  'src/net/ServerSocket.cxx',
-  'src/net/UdpListener.cxx',
-  'src/net/djb/NetstringServer.cxx',
-  'src/net/djb/NetstringClient.cxx',
   'src/net/djb/NetstringInput.cxx',
   'src/net/djb/NetstringHeader.cxx',
   'src/net/djb/NetstringGenerator.cxx',
-  'src/net/djb/QmqpClient.cxx',
   'src/net/Buffered.cxx',
   'src/net/log/Parser.cxx',
   include_directories: inc,
   dependencies: [
   ])
 net_dep = declare_dependency(link_with: net)
+
+event_net = static_library('event_net',
+  'src/event/net/ConnectSocket.cxx',
+  'src/event/net/ServerSocket.cxx',
+  'src/event/net/UdpListener.cxx',
+  'src/event/net/djb/NetstringServer.cxx',
+  'src/event/net/djb/NetstringClient.cxx',
+  'src/event/net/djb/QmqpClient.cxx',
+  include_directories: inc,
+  dependencies: [
+    libevent,
+    event_dep,
+    net_dep,
+    util_dep,
+  ])
+event_net_dep = declare_dependency(link_with: event_net)
 
 curl = static_library('curl',
   'src/curl/Version.cxx',

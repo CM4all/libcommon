@@ -33,7 +33,7 @@
 #include "ConnectSocket.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/SocketAddress.hxx"
-#include "AddressInfo.hxx"
+#include "net/AddressInfo.hxx"
 #include "system/Error.hxx"
 
 #include <stdexcept>

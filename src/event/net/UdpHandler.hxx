@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UDP_HANDLER_HXX
-#define UDP_HANDLER_HXX
+#pragma once
 
 #include <exception>
 
@@ -49,5 +48,3 @@ public:
 
 	virtual void OnUdpError(std::exception_ptr ep) = 0;
 };
-
-#endif

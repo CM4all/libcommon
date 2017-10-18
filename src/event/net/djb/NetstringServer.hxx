@@ -30,65 +30,53 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UDP_LISTENER_HXX
-#define UDP_LISTENER_HXX
+#pragma once
 
-#include "UniqueSocketDescriptor.hxx"
+#include "io/MultiWriteBuffer.hxx"
+#include "net/djb/NetstringInput.hxx"
+#include "net/djb/NetstringGenerator.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
 
-#include <stddef.h>
-
-class SocketAddress;
-class UdpHandler;
+#include <exception>
+#include <cstddef>
 
 /**
- * Listener on a UDP port.
+ * A server that receives netstrings
+ * (http://cr.yp.to/proto/netstrings.txt) from its clients and
+ * responds with another netstring.
  */
-class UdpListener {
+class NetstringServer {
 	UniqueSocketDescriptor fd;
+
 	SocketEvent event;
 
-	UdpHandler &handler;
+	NetstringInput input;
+	NetstringGenerator generator;
+	MultiWriteBuffer write;
 
 public:
-	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
-		    UdpHandler &_handler);
-	~UdpListener();
+	NetstringServer(EventLoop &event_loop, UniqueSocketDescriptor &&_fd);
+	~NetstringServer();
 
-	/**
-	 * Enable the object after it has been disabled by Disable().  A
-	 * new object is enabled by default.
-	 */
-	void Enable() {
-		event.Add();
+protected:
+	SocketDescriptor GetSocket() const {
+		return fd;
 	}
 
-	/**
-	 * Disable the object temporarily.  To undo this, call Enable().
-	 */
-	void Disable() {
-		event.Delete();
-	}
+	bool SendResponse(const void *data, size_t size);
+	bool SendResponse(const char *data);
 
 	/**
-	 * Replaces the socket.  The old one is closed, and the new one is now
-	 * owned by this object.
+	 * A netstring has been received.
 	 *
-	 * This may only be called on an object that is "enabled", see
-	 * Enable().
+	 * @param payload the netstring value; for the implementation's
+	 * convenience, the netstring is writable
 	 */
-	void SetFd(UniqueSocketDescriptor &&_fd);
-
-	/**
-	 * Send a reply datagram to a client.
-	 *
-	 * Throws std::runtime_error on error.
-	 */
-	void Reply(SocketAddress address,
-		   const void *data, size_t data_length);
+	virtual void OnRequest(AllocatedArray<uint8_t> &&payload) = 0;
+	virtual void OnError(std::exception_ptr ep) = 0;
+	virtual void OnDisconnect() = 0;
 
 private:
-	void EventCallback(unsigned events);
+	void OnEvent(unsigned events);
 };
-
-#endif

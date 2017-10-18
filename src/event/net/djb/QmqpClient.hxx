@@ -30,11 +30,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QMQP_CLIENT_HXX
-#define QMQP_CLIENT_HXX
+#pragma once
 
 #include "NetstringClient.hxx"
-#include "NetstringHeader.hxx"
+#include "net/djb/NetstringHeader.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/StringView.hxx"
 
@@ -115,5 +114,3 @@ private:
 		handler.OnQmqpClientError(error);
 	}
 };
-
-#endif
