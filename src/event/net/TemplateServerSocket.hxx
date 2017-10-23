@@ -34,7 +34,7 @@
 #define TEMPLATE_SERVER_SOCKET_HXX
 
 #include "ServerSocket.hxx"
-#include "SocketAddress.hxx"
+#include "net/SocketAddress.hxx"
 #include "util/PrintException.hxx"
 
 #include <boost/intrusive/list.hpp>
