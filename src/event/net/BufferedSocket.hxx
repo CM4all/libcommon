@@ -169,19 +169,23 @@ enum write_result {
 	WRITE_BROKEN = -4,
 };
 
-struct BufferedSocketHandler {
+class BufferedSocketHandler {
+public:
 	/**
 	 * Data has been read from the socket into the input buffer.  Call
 	 * BufferedSocket::Consumed() each time you consume data from the
 	 * given buffer.
 	 */
-	BufferedResult (*data)(const void *buffer, size_t size, void *ctx);
+	virtual BufferedResult OnBufferedData(const void *buffer, size_t size) = 0;
 
 	/**
 	 * The socket is ready for reading.  It is suggested to attempt a
 	 * "direct" tansfer.
 	 */
-	DirectResult (*direct)(int fd, FdType fd_type, void *ctx);
+	virtual DirectResult OnBufferedDirect(gcc_unused int fd,
+					      gcc_unused FdType fd_type) {
+		gcc_unreachable();
+	}
 
 	/**
 	 * The peer has finished sending and has closed the socket.  The
@@ -196,7 +200,7 @@ struct BufferedSocketHandler {
 	 * handler; the methods #remaining and #end will also not be
 	 * invoked
 	 */
-	bool (*closed)(void *ctx);
+	virtual bool OnBufferedClosed() = 0;
 
 	/**
 	 * This method gets called after #closed, as soon as the remaining
@@ -208,7 +212,9 @@ struct BufferedSocketHandler {
 	 * @return false if no more data shall be delivered to the
 	 * handler; the #end method will also not be invoked
 	 */
-	bool (*remaining)(size_t remaining, void *ctx);
+	virtual bool OnBufferedRemaining(gcc_unused size_t remaining) {
+		return true;
+	}
 
 	/**
 	 * The buffer has become empty after the socket has been closed by
@@ -217,15 +223,20 @@ struct BufferedSocketHandler {
 	 *
 	 * If this method is not implemented, a "closed prematurely" error
 	 * is thrown.
+	 *
+	 * @return true if the stream has ended properly, false if the
+	 * stream end was unexpected (closed prematurely)
 	 */
-	void (*end)(void *ctx);
+	virtual bool OnBufferedEnd() {
+		return false;
+	}
 
 	/**
 	 * The socket is ready for writing.
 	 *
 	 * @return false when the socket has been closed
 	 */
-	bool (*write)(void *ctx);
+	virtual bool OnBufferedWrite() = 0;
 
 	/**
 	 * The output buffer was drained, and all data that has been
@@ -236,12 +247,14 @@ struct BufferedSocketHandler {
 	 *
 	 * @return false if the method has destroyed the socket
 	 */
-	bool (*drained)(void *ctx);
+	virtual bool OnBufferedDrained() {
+		return true;
+	}
 
 	/**
 	 * @return false when the socket has been closed
 	 */
-	bool (*timeout)(void *ctx);
+	virtual bool OnBufferedTimeout();
 
 	/**
 	 * A write failed because the peer has closed (at least one side
@@ -253,7 +266,9 @@ struct BufferedSocketHandler {
 	 * close the socket with the error, #WRITE_DESTROYED if the
 	 * function has destroyed the #BufferedSocket
 	 */
-	enum write_result (*broken)(void *ctx);
+	virtual enum write_result OnBufferedBroken() {
+		return WRITE_ERRNO;
+	}
 
 	/**
 	 * An I/O error on the socket has occurred.  After returning, it
@@ -261,7 +276,7 @@ struct BufferedSocketHandler {
 	 *
 	 * @param e the exception that was caught
 	 */
-	void (*error)(std::exception_ptr e, void *ctx);
+	virtual void OnBufferedError(std::exception_ptr e) = 0;
 };
 
 /**
@@ -292,8 +307,7 @@ class BufferedSocket final : DestructAnchor, LeakDetector, SocketHandler {
 	 */
 	DeferEvent defer_read;
 
-	const BufferedSocketHandler *handler;
-	void *handler_ctx;
+	BufferedSocketHandler *handler;
 
 	DefaultFifoBuffer input;
 
@@ -333,11 +347,11 @@ public:
 	void Init(SocketDescriptor _fd, FdType _fd_type,
 		  const struct timeval *_read_timeout,
 		  const struct timeval *_write_timeout,
-		  const BufferedSocketHandler &_handler, void *_ctx);
+		  BufferedSocketHandler &_handler);
 
 	void Reinit(const struct timeval *_read_timeout,
 		    const struct timeval *_write_timeout,
-		    const BufferedSocketHandler &_handler, void *_ctx);
+		    BufferedSocketHandler &_handler);
 
 	/**
 	 * Move the socket from another #BufferedSocket instance.  This
@@ -347,7 +361,7 @@ public:
 	void Init(BufferedSocket &&src,
 		  const struct timeval *_read_timeout,
 		  const struct timeval *_write_timeout,
-		  const BufferedSocketHandler &_handler, void *_ctx);
+		  BufferedSocketHandler &_handler);
 
 	void Shutdown() {
 		base.Shutdown();

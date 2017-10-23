@@ -40,11 +40,17 @@
 
 #include <errno.h>
 
+bool
+BufferedSocketHandler::OnBufferedTimeout()
+{
+	OnBufferedError(std::make_exception_ptr(SocketTimeoutError()));
+	return false;
+}
+
 void
 BufferedSocket::ClosedPrematurely()
 {
-	handler->error(std::make_exception_ptr(SocketClosedPrematurelyError()),
-		       handler_ctx);
+	handler->OnBufferedError(std::make_exception_ptr(SocketClosedPrematurelyError()));
 }
 
 void
@@ -57,10 +63,8 @@ BufferedSocket::Ended()
 	ended = true;
 #endif
 
-	if (handler->end == nullptr)
+	if (!handler->OnBufferedEnd())
 		ClosedPrematurely();
-	else
-		handler->end(handler_ctx);
 }
 
 bool
@@ -71,13 +75,10 @@ BufferedSocket::ClosedByPeer()
 		return false;
 	}
 
-	assert(handler->closed != nullptr);
-
 	const size_t remaining = input.GetAvailable();
 
-	if (!handler->closed(handler_ctx) ||
-	    (handler->remaining != nullptr &&
-	     !handler->remaining(remaining, handler_ctx)))
+	if (!handler->OnBufferedClosed() ||
+	    !handler->OnBufferedRemaining(remaining))
 		return false;
 
 	assert(!IsConnected());
@@ -140,7 +141,7 @@ BufferedSocket::InvokeData()
 		DestructObserver destructed(*this);
 #endif
 
-		BufferedResult result = handler->data(r.data, r.size, handler_ctx);
+		BufferedResult result = handler->OnBufferedData(r.data, r.size);
 
 #ifndef NDEBUG
 		if (destructed) {
@@ -208,8 +209,7 @@ BufferedSocket::SubmitFromBuffer()
 		}
 
 		if (IsFull()) {
-			handler->error(std::make_exception_ptr(SocketBufferFullError()),
-				       handler_ctx);
+			handler->OnBufferedError(std::make_exception_ptr(SocketBufferFullError()));
 			return false;
 		}
 
@@ -262,7 +262,7 @@ BufferedSocket::SubmitDirect()
 	expect_more = false;
 
 	const DirectResult result =
-		handler->direct(base.GetFD(), base.GetType(), handler_ctx);
+		handler->OnBufferedDirect(base.GetFD(), base.GetType());
 	switch (result) {
 	case DirectResult::OK:
 		/* some data was transferred: refresh the read timeout */
@@ -289,7 +289,7 @@ BufferedSocket::SubmitDirect()
 		return false;
 
 	case DirectResult::ERRNO:
-		handler->error(std::make_exception_ptr(MakeErrno()), handler_ctx);
+		handler->OnBufferedError(std::make_exception_ptr(MakeErrno()));
 		return false;
 	}
 
@@ -334,8 +334,7 @@ BufferedSocket::FillBuffer()
 				base.ScheduleRead(read_timeout);
 			return true;
 		} else {
-			handler->error(std::make_exception_ptr(MakeErrno("recv() failed")),
-				       handler_ctx);
+			handler->OnBufferedError(std::make_exception_ptr(MakeErrno("recv() failed")));
 			return false;
 		}
 	}
@@ -427,7 +426,7 @@ BufferedSocket::OnSocketWrite()
 	assert(!destroyed);
 	assert(!ended);
 
-	return handler->write(handler_ctx);
+	return handler->OnBufferedWrite();
 }
 
 bool
@@ -445,12 +444,7 @@ BufferedSocket::OnSocketTimeout()
 	assert(!destroyed);
 	assert(!ended);
 
-	if (handler->timeout != nullptr)
-		return handler->timeout(handler_ctx);
-
-	handler->error(std::make_exception_ptr(SocketTimeoutError()),
-		       handler_ctx);
-	return false;
+	return handler->OnBufferedTimeout();
 }
 
 /*
@@ -462,20 +456,14 @@ void
 BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 		     const struct timeval *_read_timeout,
 		     const struct timeval *_write_timeout,
-		     const BufferedSocketHandler &_handler, void *_ctx)
+		     BufferedSocketHandler &_handler)
 {
-	assert(_handler.data != nullptr);
-	/* handler method closed() is optional */
-	assert(_handler.write != nullptr);
-	assert(_handler.error != nullptr);
-
 	base.Init(_fd, _fd_type);
 
 	read_timeout = _read_timeout;
 	write_timeout = _write_timeout;
 
 	handler = &_handler;
-	handler_ctx = _ctx;
 	input.SetNull();
 	direct = false;
 	expect_more = false;
@@ -491,21 +479,16 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 void
 BufferedSocket::Reinit(const struct timeval *_read_timeout,
 		       const struct timeval *_write_timeout,
-		       const BufferedSocketHandler &_handler, void *_ctx)
+		       BufferedSocketHandler &_handler)
 {
 	assert(IsValid());
 	assert(IsConnected());
 	assert(!expect_more);
-	assert(_handler.data != nullptr);
-	/* handler method closed() is optional */
-	assert(_handler.write != nullptr);
-	assert(_handler.error != nullptr);
 
 	read_timeout = _read_timeout;
 	write_timeout = _write_timeout;
 
 	handler = &_handler;
-	handler_ctx = _ctx;
 
 	direct = false;
 }
@@ -514,20 +497,14 @@ void
 BufferedSocket::Init(BufferedSocket &&src,
 		     const struct timeval *_read_timeout,
 		     const struct timeval *_write_timeout,
-		     const BufferedSocketHandler &_handler, void *_ctx)
+		     BufferedSocketHandler &_handler)
 {
-	assert(_handler.data != nullptr);
-	/* handler method closed() is optional */
-	assert(_handler.write != nullptr);
-	assert(_handler.error != nullptr);
-
 	base.Init(std::move(src.base));
 
 	read_timeout = _read_timeout;
 	write_timeout = _write_timeout;
 
 	handler = &_handler;
-	handler_ctx = _ctx;
 
 	/* steal the input buffer (after we already stole the socket) */
 	input = std::move(src.input);
@@ -600,9 +577,7 @@ BufferedSocket::Write(const void *data, size_t length)
 			ScheduleWrite();
 			return WRITE_BLOCKING;
 		} else if (e == EPIPE || e == ECONNRESET) {
-			enum write_result r = handler->broken != nullptr
-				? handler->broken(handler_ctx)
-				: WRITE_ERRNO;
+			enum write_result r = handler->OnBufferedBroken();
 
 			if (r == WRITE_BROKEN)
 				UnscheduleWrite();
@@ -625,10 +600,7 @@ BufferedSocket::WriteV(const struct iovec *v, size_t n)
 			ScheduleWrite();
 			return WRITE_BLOCKING;
 		} else if (e == EPIPE || e == ECONNRESET) {
-			enum write_result r = handler->broken != nullptr
-				? handler->broken(handler_ctx)
-				: WRITE_ERRNO;
-
+			enum write_result r = handler->OnBufferedBroken();
 			if (r == WRITE_BROKEN)
 				UnscheduleWrite();
 
