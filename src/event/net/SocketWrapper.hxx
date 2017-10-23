@@ -30,13 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SOCKET_WRAPPER_HXX
-#define SOCKET_WRAPPER_HXX
+#pragma once
 
 #include "io/FdType.hxx"
 #include "event/SocketEvent.hxx"
 #include "net/SocketDescriptor.hxx"
-
 #include "util/Compiler.h"
 
 #include <sys/types.h>
@@ -188,5 +186,3 @@ private:
 	void ReadEventCallback(unsigned events);
 	void WriteEventCallback(unsigned events);
 };
-
-#endif
