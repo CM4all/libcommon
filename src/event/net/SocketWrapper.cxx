@@ -34,6 +34,7 @@
 #include "io/Splice.hxx"
 #include "net/Buffered.hxx"
 #include "net/MsgHdr.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 
 void
 SocketWrapper::SocketEventCallback(unsigned events) noexcept
@@ -92,6 +93,12 @@ SocketWrapper::Init(SocketDescriptor fd, FdType _fd_type) noexcept
 	fd_type = _fd_type;
 
 	socket_event.Open(fd);
+}
+
+void
+SocketWrapper::Init(UniqueSocketDescriptor _fd, FdType _fd_type) noexcept
+{
+	Init(_fd.Release(), _fd_type);
 }
 
 void

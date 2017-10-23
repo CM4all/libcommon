@@ -44,6 +44,7 @@
 #include <stdint.h>
 
 template<typename T> class ForeignFifoBuffer;
+class UniqueSocketDescriptor;
 
 class SocketHandler {
 public:
@@ -108,6 +109,7 @@ public:
 	}
 
 	void Init(SocketDescriptor _fd, FdType _fd_type) noexcept;
+	void Init(UniqueSocketDescriptor _fd, FdType _fd_type) noexcept;
 
 	/**
 	 * Shut down the socket gracefully, allowing the TCP stack to
