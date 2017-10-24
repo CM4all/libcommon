@@ -206,7 +206,7 @@ public:
 	 * handler; the methods #remaining and #end will also not be
 	 * invoked
 	 */
-	virtual bool OnBufferedClosed() = 0;
+	virtual bool OnBufferedClosed() noexcept = 0;
 
 	/**
 	 * This method gets called after #closed, as soon as the remaining
@@ -218,7 +218,7 @@ public:
 	 * @return false if no more data shall be delivered to the
 	 * handler; the #end method will also not be invoked
 	 */
-	virtual bool OnBufferedRemaining(gcc_unused size_t remaining) {
+	virtual bool OnBufferedRemaining(gcc_unused size_t remaining) noexcept {
 		return true;
 	}
 
@@ -233,7 +233,7 @@ public:
 	 * @return true if the stream has ended properly, false if the
 	 * stream end was unexpected (closed prematurely)
 	 */
-	virtual bool OnBufferedEnd() {
+	virtual bool OnBufferedEnd() noexcept {
 		return false;
 	}
 
@@ -256,14 +256,14 @@ public:
 	 *
 	 * @return false if the method has destroyed the socket
 	 */
-	virtual bool OnBufferedDrained() {
+	virtual bool OnBufferedDrained() noexcept {
 		return true;
 	}
 
 	/**
 	 * @return false when the socket has been closed
 	 */
-	virtual bool OnBufferedTimeout();
+	virtual bool OnBufferedTimeout() noexcept;
 
 	/**
 	 * A write failed because the peer has closed (at least one side
@@ -275,7 +275,7 @@ public:
 	 * close the socket with the error, #WRITE_DESTROYED if the
 	 * function has destroyed the #BufferedSocket
 	 */
-	virtual enum write_result OnBufferedBroken() {
+	virtual enum write_result OnBufferedBroken() noexcept {
 		return WRITE_ERRNO;
 	}
 
@@ -285,7 +285,7 @@ public:
 	 *
 	 * @param e the exception that was caught
 	 */
-	virtual void OnBufferedError(std::exception_ptr e) = 0;
+	virtual void OnBufferedError(std::exception_ptr e) noexcept = 0;
 };
 
 /**
@@ -345,22 +345,22 @@ class BufferedSocket final : DestructAnchor, LeakDetector, SocketHandler {
 #endif
 
 public:
-	explicit BufferedSocket(EventLoop &_event_loop)
+	explicit BufferedSocket(EventLoop &_event_loop) noexcept
 		:base(_event_loop, *this),
 		 defer_read(_event_loop, BIND_THIS_METHOD(DeferReadCallback)) {}
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() noexcept {
 		return defer_read.GetEventLoop();
 	}
 
 	void Init(SocketDescriptor _fd, FdType _fd_type,
 		  const struct timeval *_read_timeout,
 		  const struct timeval *_write_timeout,
-		  BufferedSocketHandler &_handler);
+		  BufferedSocketHandler &_handler) noexcept;
 
 	void Reinit(const struct timeval *_read_timeout,
 		    const struct timeval *_write_timeout,
-		    BufferedSocketHandler &_handler);
+		    BufferedSocketHandler &_handler) noexcept;
 
 	/**
 	 * Move the socket from another #BufferedSocket instance.  This
@@ -370,9 +370,9 @@ public:
 	void Init(BufferedSocket &&src,
 		  const struct timeval *_read_timeout,
 		  const struct timeval *_write_timeout,
-		  BufferedSocketHandler &_handler);
+		  BufferedSocketHandler &_handler) noexcept;
 
-	void Shutdown() {
+	void Shutdown() noexcept {
 		base.Shutdown();
 	}
 
@@ -380,7 +380,7 @@ public:
 	 * Close the physical socket, but do not destroy the input buffer.  To
 	 * do the latter, call Destroy().
 	 */
-	void Close() {
+	void Close() noexcept {
 		assert(!ended);
 		assert(!destroyed);
 
@@ -393,7 +393,7 @@ public:
 	 * socket.  The caller is responsible for closing the socket (or
 	 * scheduling it for reuse).
 	 */
-	void Abandon() {
+	void Abandon() noexcept {
 		assert(!ended);
 		assert(!destroyed);
 
@@ -405,19 +405,19 @@ public:
 	 * Destroy the object.  Prior to that, the socket must be removed by
 	 * calling either Close() or Abandon().
 	 */
-	void Destroy();
+	void Destroy() noexcept;
 
 	/**
 	 * Is the object (already and) still usable?  That is, Init() was
 	 * called, but Destroy() was NOT called yet?  The socket may be closed
 	 * already, though.
 	 */
-	bool IsValid() const {
+	bool IsValid() const noexcept {
 		return !destroyed;
 	}
 
 #ifndef NDEBUG
-	bool HasEnded() const {
+	bool HasEnded() const noexcept {
 		return ended;
 	}
 #endif
@@ -427,7 +427,7 @@ public:
 	 * whether the socket is connected, just whether it is known to be
 	 * closed.
 	 */
-	bool IsConnected() const {
+	bool IsConnected() const noexcept {
 		assert(!destroyed);
 
 		return base.IsValid();
@@ -438,13 +438,13 @@ public:
 	 * and no more data is available on the socket.  At this point,
 	 * our socket descriptor has not yet been closed.
 	 */
-	bool ClosedByPeer();
+	bool ClosedByPeer() noexcept;
 
-	FdType GetType() const {
+	FdType GetType() const noexcept {
 		return base.GetType();
 	}
 
-	void SetDirect(bool _direct) {
+	void SetDirect(bool _direct) noexcept {
 		direct = _direct;
 	}
 
@@ -452,28 +452,28 @@ public:
 	 * Returns the socket descriptor and calls Abandon().
 	 * Returns -1 if the input buffer is not empty.
 	 */
-	int AsFD();
+	int AsFD() noexcept;
 
 	/**
 	 * Is the input buffer empty?
 	 */
 	gcc_pure
-	bool IsEmpty() const;
+	bool IsEmpty() const noexcept;
 
 	/**
 	 * Is the input buffer full?
 	 */
 	gcc_pure
-	bool IsFull() const;
+	bool IsFull() const noexcept;
 
 	/**
 	 * Returns the number of bytes in the input buffer.
 	 */
 	gcc_pure
-	size_t GetAvailable() const;
+	size_t GetAvailable() const noexcept;
 
 	gcc_pure
-	WritableBuffer<void> ReadBuffer() const {
+	WritableBuffer<void> ReadBuffer() const noexcept {
 		assert(!ended);
 
 		return input.Read().ToVoid();
@@ -485,7 +485,7 @@ public:
 	 * method does not invalidate the buffer passed to
 	 * BufferedSocketHandler::data().  It may be called repeatedly.
 	 */
-	void Consumed(size_t nbytes);
+	void Consumed(size_t nbytes) noexcept;
 
 	/**
 	 * The caller wants to read more data from the socket.  There are four
@@ -498,7 +498,7 @@ public:
 	 * be read (socket already shut down, buffer empty); if false, the
 	 * existing expect_more state is unmodified
 	 */
-	bool Read(bool expect_more);
+	bool Read(bool expect_more) noexcept;
 
 	/**
 	 * Variant of Write() which does not touch events and does not
@@ -507,7 +507,7 @@ public:
 	 * in special cases when you want to push data to the socket right
 	 * before closing it.
 	 */
-	ssize_t DirectWrite(const void *data, size_t length) {
+	ssize_t DirectWrite(const void *data, size_t length) noexcept {
 		return base.Write(data, length);
 	}
 
@@ -517,9 +517,9 @@ public:
 	 * @return the positive number of bytes written or a #write_result
 	 * code
 	 */
-	ssize_t Write(const void *data, size_t length);
+	ssize_t Write(const void *data, size_t length) noexcept;
 
-	ssize_t WriteV(const struct iovec *v, size_t n);
+	ssize_t WriteV(const struct iovec *v, size_t n) noexcept;
 
 	/**
 	 * Transfer data from the given file descriptor to the socket.
@@ -528,10 +528,10 @@ public:
 	 * code
 	 */
 	ssize_t WriteFrom(int other_fd, FdType other_fd_type,
-			  size_t length);
+			  size_t length) noexcept;
 
 	gcc_pure
-	bool IsReadyForWriting() const {
+	bool IsReadyForWriting() const noexcept {
 		assert(!destroyed);
 
 		return base.IsReadyForWriting();
@@ -540,10 +540,10 @@ public:
 	/**
 	 * Defer a call to Read().
 	 */
-	void DeferRead(bool _expect_more);
+	void DeferRead(bool _expect_more) noexcept;
 
 	void ScheduleReadTimeout(bool _expect_more,
-				 const struct timeval *timeout);
+				 const struct timeval *timeout) noexcept;
 
 	/**
 	 * Schedules reading on the socket with timeout disabled, to indicate
@@ -552,23 +552,23 @@ public:
 	 * sending the request.  When you are finished sending the request,
 	 * you should call BufferedSocket::Read() to enable the read timeout.
 	 */
-	void ScheduleReadNoTimeout(bool _expect_more) {
+	void ScheduleReadNoTimeout(bool _expect_more) noexcept {
 		ScheduleReadTimeout(_expect_more, nullptr);
 	}
 
-	void UnscheduleRead() {
+	void UnscheduleRead() noexcept {
 		base.UnscheduleRead();
 		defer_read.Cancel();
 	}
 
-	void ScheduleWrite() {
+	void ScheduleWrite() noexcept {
 		assert(!ended);
 		assert(!destroyed);
 
 		base.ScheduleWrite(write_timeout);
 	}
 
-	void UnscheduleWrite() {
+	void UnscheduleWrite() noexcept {
 		assert(!ended);
 		assert(!destroyed);
 
@@ -576,22 +576,21 @@ public:
 	}
 
 private:
-	void ClosedPrematurely();
-	void Ended();
+	void ClosedPrematurely() noexcept;
+	void Ended() noexcept;
 
-	BufferedResult InvokeData();
-	bool SubmitFromBuffer();
-	bool SubmitDirect();
-	bool FillBuffer();
-	bool TryRead2();
-	bool TryRead();
+	BufferedResult InvokeData() noexcept;
+	bool SubmitFromBuffer() noexcept;
+	bool SubmitDirect() noexcept;
+	bool FillBuffer() noexcept;
+	bool TryRead2() noexcept;
+	bool TryRead() noexcept;
 
-	static bool OnWrite(void *ctx);
-	static bool OnRead(void *ctx);
-	static bool OnTimeout(void *ctx);
-	static const struct socket_handler buffered_socket_handler;
+	static bool OnWrite(void *ctx) noexcept;
+	static bool OnRead(void *ctx) noexcept;
+	static bool OnTimeout(void *ctx) noexcept;
 
-	void DeferReadCallback() {
+	void DeferReadCallback() noexcept {
 		Read(false);
 	}
 

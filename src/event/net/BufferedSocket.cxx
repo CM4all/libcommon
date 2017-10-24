@@ -41,20 +41,20 @@
 #include <errno.h>
 
 bool
-BufferedSocketHandler::OnBufferedTimeout()
+BufferedSocketHandler::OnBufferedTimeout() noexcept
 {
 	OnBufferedError(std::make_exception_ptr(SocketTimeoutError()));
 	return false;
 }
 
 void
-BufferedSocket::ClosedPrematurely()
+BufferedSocket::ClosedPrematurely() noexcept
 {
 	handler->OnBufferedError(std::make_exception_ptr(SocketClosedPrematurelyError()));
 }
 
 void
-BufferedSocket::Ended()
+BufferedSocket::Ended() noexcept
 {
 	assert(!IsConnected());
 	assert(!ended);
@@ -68,7 +68,7 @@ BufferedSocket::Ended()
 }
 
 bool
-BufferedSocket::ClosedByPeer()
+BufferedSocket::ClosedByPeer() noexcept
 {
 	if (expect_more) {
 		ClosedPrematurely();
@@ -93,7 +93,7 @@ BufferedSocket::ClosedByPeer()
 }
 
 int
-BufferedSocket::AsFD()
+BufferedSocket::AsFD() noexcept
 {
 	if (!IsEmpty())
 		/* can switch to the raw socket descriptor only if the input
@@ -104,7 +104,7 @@ BufferedSocket::AsFD()
 }
 
 size_t
-BufferedSocket::GetAvailable() const
+BufferedSocket::GetAvailable() const noexcept
 {
 	assert(!ended);
 
@@ -112,7 +112,7 @@ BufferedSocket::GetAvailable() const
 }
 
 void
-BufferedSocket::Consumed(size_t nbytes)
+BufferedSocket::Consumed(size_t nbytes) noexcept
 {
 	assert(!ended);
 
@@ -124,7 +124,7 @@ BufferedSocket::Consumed(size_t nbytes)
  * #BufferedResult::AGAIN_OPTIONAL and #BufferedResult::AGAIN_EXPECT.
  */
 inline BufferedResult
-BufferedSocket::InvokeData()
+BufferedSocket::InvokeData() noexcept
 {
 	assert(!IsEmpty());
 
@@ -171,7 +171,7 @@ BufferedSocket::InvokeData()
 }
 
 bool
-BufferedSocket::SubmitFromBuffer()
+BufferedSocket::SubmitFromBuffer() noexcept
 {
 	if (IsEmpty())
 		return true;
@@ -262,7 +262,7 @@ BufferedSocket::SubmitFromBuffer()
  * @return true if more data should be read from the socket
  */
 inline bool
-BufferedSocket::SubmitDirect()
+BufferedSocket::SubmitDirect() noexcept
 {
 	assert(IsConnected());
 	assert(IsEmpty());
@@ -314,7 +314,7 @@ BufferedSocket::SubmitDirect()
 }
 
 inline bool
-BufferedSocket::FillBuffer()
+BufferedSocket::FillBuffer() noexcept
 {
 	assert(IsConnected());
 
@@ -359,7 +359,7 @@ BufferedSocket::FillBuffer()
 }
 
 inline bool
-BufferedSocket::TryRead2()
+BufferedSocket::TryRead2() noexcept
 {
 	assert(IsValid());
 	assert(!destroyed);
@@ -407,7 +407,7 @@ BufferedSocket::TryRead2()
 }
 
 bool
-BufferedSocket::TryRead()
+BufferedSocket::TryRead() noexcept
 {
 	assert(IsValid());
 	assert(!destroyed);
@@ -477,7 +477,7 @@ void
 BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 		     const struct timeval *_read_timeout,
 		     const struct timeval *_write_timeout,
-		     BufferedSocketHandler &_handler)
+		     BufferedSocketHandler &_handler) noexcept
 {
 	base.Init(_fd, _fd_type);
 
@@ -500,7 +500,7 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 void
 BufferedSocket::Reinit(const struct timeval *_read_timeout,
 		       const struct timeval *_write_timeout,
-		       BufferedSocketHandler &_handler)
+		       BufferedSocketHandler &_handler) noexcept
 {
 	assert(IsValid());
 	assert(IsConnected());
@@ -518,7 +518,7 @@ void
 BufferedSocket::Init(BufferedSocket &&src,
 		     const struct timeval *_read_timeout,
 		     const struct timeval *_write_timeout,
-		     BufferedSocketHandler &_handler)
+		     BufferedSocketHandler &_handler) noexcept
 {
 	base.Init(std::move(src.base));
 
@@ -542,7 +542,7 @@ BufferedSocket::Init(BufferedSocket &&src,
 }
 
 void
-BufferedSocket::Destroy()
+BufferedSocket::Destroy() noexcept
 {
 	assert(!base.IsValid());
 	assert(!destroyed);
@@ -553,7 +553,7 @@ BufferedSocket::Destroy()
 }
 
 bool
-BufferedSocket::IsEmpty() const
+BufferedSocket::IsEmpty() const noexcept
 {
 	assert(!ended);
 
@@ -561,7 +561,7 @@ BufferedSocket::IsEmpty() const
 }
 
 bool
-BufferedSocket::IsFull() const
+BufferedSocket::IsFull() const noexcept
 {
 	assert(!ended);
 
@@ -569,7 +569,7 @@ BufferedSocket::IsFull() const
 }
 
 bool
-BufferedSocket::Read(bool _expect_more)
+BufferedSocket::Read(bool _expect_more) noexcept
 {
 	assert(!reading);
 	assert(!destroyed);
@@ -588,7 +588,7 @@ BufferedSocket::Read(bool _expect_more)
 }
 
 ssize_t
-BufferedSocket::Write(const void *data, size_t length)
+BufferedSocket::Write(const void *data, size_t length) noexcept
 {
 	ssize_t nbytes = base.Write(data, length);
 
@@ -611,7 +611,7 @@ BufferedSocket::Write(const void *data, size_t length)
 }
 
 ssize_t
-BufferedSocket::WriteV(const struct iovec *v, size_t n)
+BufferedSocket::WriteV(const struct iovec *v, size_t n) noexcept
 {
 	ssize_t nbytes = base.WriteV(v, n);
 
@@ -634,7 +634,7 @@ BufferedSocket::WriteV(const struct iovec *v, size_t n)
 
 ssize_t
 BufferedSocket::WriteFrom(int other_fd, FdType other_fd_type,
-			  size_t length)
+			  size_t length) noexcept
 {
 	ssize_t nbytes = base.WriteFrom(other_fd, other_fd_type, length);
 	if (gcc_unlikely(nbytes < 0)) {
@@ -656,7 +656,7 @@ BufferedSocket::WriteFrom(int other_fd, FdType other_fd_type,
 }
 
 void
-BufferedSocket::DeferRead(bool _expect_more)
+BufferedSocket::DeferRead(bool _expect_more) noexcept
 {
 	assert(!ended);
 	assert(!destroyed);
@@ -669,7 +669,7 @@ BufferedSocket::DeferRead(bool _expect_more)
 
 void
 BufferedSocket::ScheduleReadTimeout(bool _expect_more,
-				    const struct timeval *timeout)
+				    const struct timeval *timeout) noexcept
 {
 	assert(!ended);
 	assert(!destroyed);
