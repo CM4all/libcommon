@@ -175,12 +175,18 @@ public:
 	 * Data has been read from the socket into the input buffer.  Call
 	 * BufferedSocket::Consumed() each time you consume data from the
 	 * given buffer.
+	 *
+	 * Exceptions thrown by this method are passed to
+	 * OnBufferedError().
 	 */
 	virtual BufferedResult OnBufferedData(const void *buffer, size_t size) = 0;
 
 	/**
 	 * The socket is ready for reading.  It is suggested to attempt a
 	 * "direct" tansfer.
+	 *
+	 * Exceptions thrown by this method are passed to
+	 * OnBufferedError().
 	 */
 	virtual DirectResult OnBufferedDirect(gcc_unused int fd,
 					      gcc_unused FdType fd_type) {
@@ -233,6 +239,9 @@ public:
 
 	/**
 	 * The socket is ready for writing.
+	 *
+	 * Exceptions thrown by this method are passed to
+	 * OnBufferedError().
 	 *
 	 * @return false when the socket has been closed
 	 */

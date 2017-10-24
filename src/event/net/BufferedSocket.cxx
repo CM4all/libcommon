@@ -141,7 +141,16 @@ BufferedSocket::InvokeData()
 		DestructObserver destructed(*this);
 #endif
 
-		BufferedResult result = handler->OnBufferedData(r.data, r.size);
+		BufferedResult result;
+
+		try {
+			result = handler->OnBufferedData(r.data, r.size);
+		} catch (...) {
+			assert(!destructed);
+
+			handler->OnBufferedError(std::current_exception());
+			return BufferedResult::CLOSED;
+		}
 
 #ifndef NDEBUG
 		if (destructed) {
@@ -261,8 +270,15 @@ BufferedSocket::SubmitDirect()
 	const bool old_expect_more = expect_more;
 	expect_more = false;
 
-	const DirectResult result =
-		handler->OnBufferedDirect(base.GetFD(), base.GetType());
+	DirectResult result;
+
+	try {
+		result = handler->OnBufferedDirect(base.GetFD(), base.GetType());
+	} catch (...) {
+		handler->OnBufferedError(std::current_exception());
+		return false;
+	}
+
 	switch (result) {
 	case DirectResult::OK:
 		/* some data was transferred: refresh the read timeout */
@@ -426,7 +442,12 @@ BufferedSocket::OnSocketWrite() noexcept
 	assert(!destroyed);
 	assert(!ended);
 
-	return handler->OnBufferedWrite();
+	try {
+		return handler->OnBufferedWrite();
+	} catch (...) {
+		handler->OnBufferedError(std::current_exception());
+		return false;
+	}
 }
 
 bool
