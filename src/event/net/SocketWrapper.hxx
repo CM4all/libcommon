@@ -51,19 +51,19 @@ public:
 	 *
 	 * @return false when the socket has been closed
 	 */
-	virtual bool OnSocketRead() = 0;
+	virtual bool OnSocketRead() noexcept = 0;
 
 	/**
 	 * The socket is ready for writing.
 	 *
 	 * @return false when the socket has been closed
 	 */
-	virtual bool OnSocketWrite() = 0;
+	virtual bool OnSocketWrite() noexcept = 0;
 
 	/**
 	 * @return false when the socket has been closed
 	 */
-	virtual bool OnSocketTimeout() = 0;
+	virtual bool OnSocketTimeout() noexcept = 0;
 };
 
 class SocketWrapper {
@@ -75,24 +75,24 @@ class SocketWrapper {
 	SocketHandler &handler;
 
 public:
-	SocketWrapper(EventLoop &event_loop, SocketHandler &_handler)
+	SocketWrapper(EventLoop &event_loop, SocketHandler &_handler) noexcept
 		:read_event(event_loop, BIND_THIS_METHOD(ReadEventCallback)),
 		 write_event(event_loop, BIND_THIS_METHOD(WriteEventCallback)),
 		 handler(_handler) {}
 
 	SocketWrapper(const SocketWrapper &) = delete;
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() noexcept {
 		return read_event.GetEventLoop();
 	}
 
-	void Init(SocketDescriptor _fd, FdType _fd_type);
+	void Init(SocketDescriptor _fd, FdType _fd_type) noexcept;
 
 	/**
 	 * Move the socket from another #SocketWrapper instance.  This
 	 * disables scheduled events.
 	 */
-	void Init(SocketWrapper &&src);
+	void Init(SocketWrapper &&src) noexcept;
 
 	/**
 	 * Shut down the socket gracefully, allowing the TCP stack to
@@ -100,35 +100,35 @@ public:
 	 * Shutdown(), it may reset the connection and discard pending
 	 * data.
 	 */
-	void Shutdown();
+	void Shutdown() noexcept;
 
-	void Close();
+	void Close() noexcept;
 
 	/**
 	 * Just like Close(), but do not actually close the
 	 * socket.  The caller is responsible for closing the socket (or
 	 * scheduling it for reuse).
 	 */
-	void Abandon();
+	void Abandon() noexcept;
 
 	/**
 	 * Returns the socket descriptor and calls socket_wrapper_abandon().
 	 */
-	int AsFD();
+	int AsFD() noexcept;
 
-	bool IsValid() const {
+	bool IsValid() const noexcept {
 		return fd.IsDefined();
 	}
 
-	int GetFD() const {
+	int GetFD() const noexcept {
 		return fd.Get();
 	}
 
-	FdType GetType() const {
+	FdType GetType() const noexcept {
 		return fd_type;
 	}
 
-	void ScheduleRead(const struct timeval *timeout) {
+	void ScheduleRead(const struct timeval *timeout) noexcept {
 		assert(IsValid());
 
 		if (timeout == nullptr && read_event.IsTimerPending())
@@ -140,11 +140,11 @@ public:
 		read_event.Add(timeout);
 	}
 
-	void UnscheduleRead() {
+	void UnscheduleRead() noexcept {
 		read_event.Delete();
 	}
 
-	void ScheduleWrite(const struct timeval *timeout) {
+	void ScheduleWrite(const struct timeval *timeout) noexcept {
 		assert(IsValid());
 
 		if (timeout == nullptr && write_event.IsTimerPending())
@@ -156,33 +156,33 @@ public:
 		write_event.Add(timeout);
 	}
 
-	void UnscheduleWrite() {
+	void UnscheduleWrite() noexcept {
 		write_event.Delete();
 	}
 
 	gcc_pure
-	bool IsReadPending() const {
+	bool IsReadPending() const noexcept {
 		return read_event.IsPending(SocketEvent::READ);
 	}
 
 	gcc_pure
-	bool IsWritePending() const {
+	bool IsWritePending() const noexcept {
 		return write_event.IsPending(SocketEvent::WRITE);
 	}
 
-	ssize_t ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer);
+	ssize_t ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer) noexcept;
 
 	gcc_pure
-	bool IsReadyForWriting() const;
+	bool IsReadyForWriting() const noexcept;
 
-	ssize_t Write(const void *data, size_t length);
+	ssize_t Write(const void *data, size_t length) noexcept;
 
-	ssize_t WriteV(const struct iovec *v, size_t n);
+	ssize_t WriteV(const struct iovec *v, size_t n) noexcept;
 
 	ssize_t WriteFrom(int other_fd, FdType other_fd_type,
-			  size_t length);
+			  size_t length) noexcept;
 
 private:
-	void ReadEventCallback(unsigned events);
-	void WriteEventCallback(unsigned events);
+	void ReadEventCallback(unsigned events) noexcept;
+	void WriteEventCallback(unsigned events) noexcept;
 };

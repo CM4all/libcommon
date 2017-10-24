@@ -38,7 +38,7 @@
 #include <sys/socket.h>
 
 void
-SocketWrapper::ReadEventCallback(unsigned events)
+SocketWrapper::ReadEventCallback(unsigned events) noexcept
 {
 	assert(IsValid());
 
@@ -49,7 +49,7 @@ SocketWrapper::ReadEventCallback(unsigned events)
 }
 
 void
-SocketWrapper::WriteEventCallback(unsigned events)
+SocketWrapper::WriteEventCallback(unsigned events) noexcept
 {
 	assert(IsValid());
 
@@ -60,7 +60,7 @@ SocketWrapper::WriteEventCallback(unsigned events)
 }
 
 void
-SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type)
+SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 {
 	assert(_fd.IsDefined());
 
@@ -72,14 +72,14 @@ SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type)
 }
 
 void
-SocketWrapper::Init(SocketWrapper &&src)
+SocketWrapper::Init(SocketWrapper &&src) noexcept
 {
 	Init(src.fd, src.fd_type);
 	src.Abandon();
 }
 
 void
-SocketWrapper::Shutdown()
+SocketWrapper::Shutdown() noexcept
 {
 	if (!fd.IsDefined())
 		return;
@@ -88,7 +88,7 @@ SocketWrapper::Shutdown()
 }
 
 void
-SocketWrapper::Close()
+SocketWrapper::Close() noexcept
 {
 	if (!fd.IsDefined())
 		return;
@@ -100,7 +100,7 @@ SocketWrapper::Close()
 }
 
 void
-SocketWrapper::Abandon()
+SocketWrapper::Abandon() noexcept
 {
 	assert(fd.IsDefined());
 
@@ -111,7 +111,7 @@ SocketWrapper::Abandon()
 }
 
 int
-SocketWrapper::AsFD()
+SocketWrapper::AsFD() noexcept
 {
 	assert(IsValid());
 
@@ -121,7 +121,7 @@ SocketWrapper::AsFD()
 }
 
 ssize_t
-SocketWrapper::ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer)
+SocketWrapper::ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer) noexcept
 {
 	assert(IsValid());
 
@@ -129,7 +129,7 @@ SocketWrapper::ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer)
 }
 
 bool
-SocketWrapper::IsReadyForWriting() const
+SocketWrapper::IsReadyForWriting() const noexcept
 {
 	assert(IsValid());
 
@@ -137,7 +137,7 @@ SocketWrapper::IsReadyForWriting() const
 }
 
 ssize_t
-SocketWrapper::Write(const void *data, size_t length)
+SocketWrapper::Write(const void *data, size_t length) noexcept
 {
 	assert(IsValid());
 
@@ -145,7 +145,7 @@ SocketWrapper::Write(const void *data, size_t length)
 }
 
 ssize_t
-SocketWrapper::WriteV(const struct iovec *v, size_t n)
+SocketWrapper::WriteV(const struct iovec *v, size_t n) noexcept
 {
 	assert(IsValid());
 
@@ -164,7 +164,7 @@ SocketWrapper::WriteV(const struct iovec *v, size_t n)
 
 ssize_t
 SocketWrapper::WriteFrom(int other_fd, FdType other_fd_type,
-			 size_t length)
+			 size_t length) noexcept
 {
 	return SpliceToSocket(other_fd_type, other_fd, fd.Get(), length);
 }

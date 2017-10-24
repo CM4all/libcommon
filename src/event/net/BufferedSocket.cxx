@@ -421,7 +421,7 @@ BufferedSocket::TryRead()
  */
 
 bool
-BufferedSocket::OnSocketWrite()
+BufferedSocket::OnSocketWrite() noexcept
 {
 	assert(!destroyed);
 	assert(!ended);
@@ -430,7 +430,7 @@ BufferedSocket::OnSocketWrite()
 }
 
 bool
-BufferedSocket::OnSocketRead()
+BufferedSocket::OnSocketRead() noexcept
 {
 	assert(!destroyed);
 	assert(!ended);
@@ -439,7 +439,7 @@ BufferedSocket::OnSocketRead()
 }
 
 bool
-BufferedSocket::OnSocketTimeout()
+BufferedSocket::OnSocketTimeout() noexcept
 {
 	assert(!destroyed);
 	assert(!ended);

@@ -587,7 +587,7 @@ private:
 	}
 
 	/* virtual methods from class SocketHandler */
-	bool OnSocketRead() override;
-	bool OnSocketWrite() override;
-	bool OnSocketTimeout() override;
+	bool OnSocketRead() noexcept override;
+	bool OnSocketWrite() noexcept override;
+	bool OnSocketTimeout() noexcept override;
 };
