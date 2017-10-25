@@ -42,9 +42,6 @@
 
 #include <assert.h>
 
-/**
- * Wrapper for a socket file descriptor with input buffer management.
- */
 enum class BufferedResult {
 	/**
 	 * The handler has consumed all data successfully, and is willing
@@ -171,6 +168,9 @@ enum write_result {
 	WRITE_BROKEN = -4,
 };
 
+/**
+ * Wrapper for a socket file descriptor with input buffer management.
+ */
 class BufferedSocketHandler {
 public:
 	/**
