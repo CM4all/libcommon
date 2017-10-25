@@ -33,7 +33,7 @@
 #pragma once
 
 #include "DefaultFifoBuffer.hxx"
-#include "event/net/SocketWrapper.hxx"
+#include "SocketWrapper.hxx"
 #include "event/DeferEvent.hxx"
 #include "util/DestructObserver.hxx"
 #include "util/LeakDetector.hxx"

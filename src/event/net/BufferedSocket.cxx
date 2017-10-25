@@ -36,7 +36,6 @@
 #include "util/ConstBuffer.hxx"
 
 #include <utility>
-#include <stdexcept>
 
 #include <errno.h>
 
