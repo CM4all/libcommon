@@ -223,6 +223,7 @@ net = static_library('net',
   'src/net/djb/NetstringGenerator.cxx',
   'src/net/Buffered.cxx',
   'src/net/log/Parser.cxx',
+  'src/net/log/OneLine.cxx',
   include_directories: inc,
   dependencies: [
   ])
