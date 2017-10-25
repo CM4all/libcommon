@@ -40,6 +40,8 @@
 
 #include <exception>
 
+#include <assert.h>
+
 /**
  * Wrapper for a socket file descriptor with input buffer management.
  */
