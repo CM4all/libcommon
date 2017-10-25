@@ -40,7 +40,7 @@ struct Datagram;
 class ProtocolError {};
 
 /**
- * Throws #AccessLogProtocolError on error.
+ * Throws #ProtocolError on error.
  */
 Datagram
 ParseDatagram(const void *p, const void *end);
