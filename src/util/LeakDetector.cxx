@@ -33,6 +33,8 @@
 
 #include <mutex>
 
+#include <assert.h>
+
 class LeakDetectorContainer {
 	std::mutex mutex;
 
