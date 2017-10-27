@@ -61,20 +61,20 @@
 #endif
 
 bool
-FileDescriptor::IsValid() const
+FileDescriptor::IsValid() const noexcept
 {
 	return IsDefined() && fcntl(fd, F_GETFL) >= 0;
 }
 
 bool
-FileDescriptor::Open(const char *pathname, int flags, mode_t mode)
+FileDescriptor::Open(const char *pathname, int flags, mode_t mode) noexcept
 {
 	fd = ::open(pathname, flags | O_NOCTTY | O_CLOEXEC, mode);
 	return IsDefined();
 }
 
 bool
-FileDescriptor::OpenReadOnly(const char *pathname)
+FileDescriptor::OpenReadOnly(const char *pathname) noexcept
 {
 	return Open(pathname, O_RDONLY);
 }
@@ -82,14 +82,14 @@ FileDescriptor::OpenReadOnly(const char *pathname)
 #ifndef _WIN32
 
 bool
-FileDescriptor::OpenNonBlocking(const char *pathname)
+FileDescriptor::OpenNonBlocking(const char *pathname) noexcept
 {
 	return Open(pathname, O_RDWR | O_NONBLOCK);
 }
 
 #ifdef __linux__
 bool
-FileDescriptor::CreatePipe(FileDescriptor &r, FileDescriptor &w, int flags)
+FileDescriptor::CreatePipe(FileDescriptor &r, FileDescriptor &w, int flags) noexcept
 {
 	int fds[2];
 #ifdef __BIONIC__
@@ -109,7 +109,7 @@ FileDescriptor::CreatePipe(FileDescriptor &r, FileDescriptor &w, int flags)
 #endif
 
 bool
-FileDescriptor::CreatePipe(FileDescriptor &r, FileDescriptor &w)
+FileDescriptor::CreatePipe(FileDescriptor &r, FileDescriptor &w) noexcept
 {
 #ifdef __linux__
 	return CreatePipe(r, w, O_CLOEXEC);
@@ -126,7 +126,7 @@ FileDescriptor::CreatePipe(FileDescriptor &r, FileDescriptor &w)
 }
 
 bool
-FileDescriptor::CreatePipeNonBlock(FileDescriptor &r, FileDescriptor &w)
+FileDescriptor::CreatePipeNonBlock(FileDescriptor &r, FileDescriptor &w) noexcept
 {
 #ifdef __linux__
 	return CreatePipe(r, w, O_CLOEXEC|O_NONBLOCK);
@@ -141,7 +141,7 @@ FileDescriptor::CreatePipeNonBlock(FileDescriptor &r, FileDescriptor &w)
 }
 
 void
-FileDescriptor::SetNonBlocking()
+FileDescriptor::SetNonBlocking() noexcept
 {
 	assert(IsDefined());
 
@@ -150,7 +150,7 @@ FileDescriptor::SetNonBlocking()
 }
 
 void
-FileDescriptor::SetBlocking()
+FileDescriptor::SetBlocking() noexcept
 {
 	assert(IsDefined());
 
@@ -159,7 +159,7 @@ FileDescriptor::SetBlocking()
 }
 
 void
-FileDescriptor::EnableCloseOnExec()
+FileDescriptor::EnableCloseOnExec() noexcept
 {
 	assert(IsDefined());
 
@@ -168,7 +168,7 @@ FileDescriptor::EnableCloseOnExec()
 }
 
 void
-FileDescriptor::DisableCloseOnExec()
+FileDescriptor::DisableCloseOnExec() noexcept
 {
 	assert(IsDefined());
 
@@ -177,7 +177,7 @@ FileDescriptor::DisableCloseOnExec()
 }
 
 bool
-FileDescriptor::CheckDuplicate(FileDescriptor new_fd)
+FileDescriptor::CheckDuplicate(FileDescriptor new_fd) noexcept
 {
 	if (*this == new_fd) {
 		DisableCloseOnExec();
@@ -191,7 +191,7 @@ FileDescriptor::CheckDuplicate(FileDescriptor new_fd)
 #ifdef HAVE_EVENTFD
 
 bool
-FileDescriptor::CreateEventFD(unsigned initval)
+FileDescriptor::CreateEventFD(unsigned initval) noexcept
 {
 #ifdef __BIONIC__
 	/* Bionic provides the eventfd() function only since Android 2.3,
@@ -208,7 +208,7 @@ FileDescriptor::CreateEventFD(unsigned initval)
 #ifdef HAVE_SIGNALFD
 
 bool
-FileDescriptor::CreateSignalFD(const sigset_t *mask)
+FileDescriptor::CreateSignalFD(const sigset_t *mask) noexcept
 {
 #ifdef __BIONIC__
 	int new_fd = syscall(__NR_signalfd4, fd, mask, sizeof(*mask),
@@ -228,7 +228,7 @@ FileDescriptor::CreateSignalFD(const sigset_t *mask)
 #ifdef HAVE_INOTIFY
 
 bool
-FileDescriptor::CreateInotify()
+FileDescriptor::CreateInotify() noexcept
 {
 #ifdef __BIONIC__
 	/* Bionic doesn't have inotify_init1() */
@@ -250,7 +250,7 @@ FileDescriptor::CreateInotify()
 #endif
 
 bool
-FileDescriptor::Rewind()
+FileDescriptor::Rewind() noexcept
 {
 	assert(IsDefined());
 
@@ -258,7 +258,7 @@ FileDescriptor::Rewind()
 }
 
 off_t
-FileDescriptor::GetSize() const
+FileDescriptor::GetSize() const noexcept
 {
 	struct stat st;
 	return ::fstat(fd, &st) >= 0
@@ -269,7 +269,7 @@ FileDescriptor::GetSize() const
 #ifndef _WIN32
 
 int
-FileDescriptor::Poll(short events, int timeout) const
+FileDescriptor::Poll(short events, int timeout) const noexcept
 {
 	assert(IsDefined());
 
@@ -283,19 +283,19 @@ FileDescriptor::Poll(short events, int timeout) const
 }
 
 int
-FileDescriptor::WaitReadable(int timeout) const
+FileDescriptor::WaitReadable(int timeout) const noexcept
 {
 	return Poll(POLLIN, timeout);
 }
 
 int
-FileDescriptor::WaitWritable(int timeout) const
+FileDescriptor::WaitWritable(int timeout) const noexcept
 {
 	return Poll(POLLOUT, timeout);
 }
 
 bool
-FileDescriptor::IsReadyForWriting() const
+FileDescriptor::IsReadyForWriting() const noexcept
 {
 	return WaitWritable(0) > 0;
 }

@@ -57,17 +57,17 @@ protected:
 
 public:
 	FileDescriptor() = default;
-	explicit constexpr FileDescriptor(int _fd):fd(_fd) {}
+	explicit constexpr FileDescriptor(int _fd) noexcept:fd(_fd) {}
 
-	constexpr bool operator==(FileDescriptor other) const {
+	constexpr bool operator==(FileDescriptor other) const noexcept {
 		return fd == other.fd;
 	}
 
-	constexpr bool operator!=(FileDescriptor other) const {
+	constexpr bool operator!=(FileDescriptor other) const noexcept {
 		return fd != other.fd;
 	}
 
-	constexpr bool IsDefined() const {
+	constexpr bool IsDefined() const noexcept {
 		return fd >= 0;
 	}
 
@@ -75,72 +75,72 @@ public:
 	 * Ask the kernel whether this is a valid file descriptor.
 	 */
 	gcc_pure
-	bool IsValid() const;
+	bool IsValid() const noexcept;
 
 	/**
 	 * Returns the file descriptor.  This may only be called if
 	 * IsDefined() returns true.
 	 */
-	constexpr int Get() const {
+	constexpr int Get() const noexcept {
 		return fd;
 	}
 
-	void Set(int _fd) {
+	void Set(int _fd) noexcept {
 		fd = _fd;
 	}
 
-	int Steal() {
+	int Steal() noexcept {
 		return std::exchange(fd, -1);
 	}
 
-	void SetUndefined() {
+	void SetUndefined() noexcept {
 		fd = -1;
 	}
 
-	static constexpr FileDescriptor Undefined() {
+	static constexpr FileDescriptor Undefined() noexcept {
 		return FileDescriptor(-1);
 	}
 
-	bool Open(const char *pathname, int flags, mode_t mode=0666);
-	bool OpenReadOnly(const char *pathname);
+	bool Open(const char *pathname, int flags, mode_t mode=0666) noexcept;
+	bool OpenReadOnly(const char *pathname) noexcept;
 
 #ifndef _WIN32
-	bool OpenNonBlocking(const char *pathname);
+	bool OpenNonBlocking(const char *pathname) noexcept;
 
 #ifdef __linux__
 	static bool CreatePipe(FileDescriptor &r, FileDescriptor &w,
-			       int flags);
+			       int flags) noexcept;
 #endif
 
-	static bool CreatePipe(FileDescriptor &r, FileDescriptor &w);
-	static bool CreatePipeNonBlock(FileDescriptor &r, FileDescriptor &w);
+	static bool CreatePipe(FileDescriptor &r, FileDescriptor &w) noexcept;
+	static bool CreatePipeNonBlock(FileDescriptor &r, FileDescriptor &w) noexcept;
 
 	/**
 	 * Enable non-blocking mode on this file descriptor.
 	 */
-	void SetNonBlocking();
+	void SetNonBlocking() noexcept;
 
 	/**
 	 * Enable blocking mode on this file descriptor.
 	 */
-	void SetBlocking();
+	void SetBlocking() noexcept;
 
 	/**
 	 * Auto-close this file descriptor when a new program is
 	 * executed.
 	 */
-	void EnableCloseOnExec();
+	void EnableCloseOnExec() noexcept;
 
 	/**
 	 * Do not auto-close this file descriptor when a new program
 	 * is executed.
 	 */
-	void DisableCloseOnExec();
+	void DisableCloseOnExec() noexcept;
 
 	/**
 	 * Duplicate the file descriptor onto the given file descriptor.
 	 */
-	bool Duplicate(FileDescriptor new_fd) const {
+	bool Duplicate(FileDescriptor new_fd) const noexcept {
 		return ::dup2(Get(), new_fd.Get()) == 0;
 	}
 
@@ -150,19 +150,19 @@ public:
 	 * this method to inject file descriptors into a new child
 	 * process, to be used by a newly executed program.
 	 */
-	bool CheckDuplicate(FileDescriptor new_fd);
+	bool CheckDuplicate(FileDescriptor new_fd) noexcept;
 #endif
 
 #ifdef HAVE_EVENTFD
-	bool CreateEventFD(unsigned initval=0);
+	bool CreateEventFD(unsigned initval=0) noexcept;
 #endif
 
 #ifdef HAVE_SIGNALFD
-	bool CreateSignalFD(const sigset_t *mask);
+	bool CreateSignalFD(const sigset_t *mask) noexcept;
 #endif
 
 #ifdef HAVE_INOTIFY
-	bool CreateInotify();
+	bool CreateInotify() noexcept;
 #endif
 
 	/**
@@ -179,7 +179,7 @@ public:
 	/**
 	 * Rewind the pointer to the beginning of the file.
 	 */
-	bool Rewind();
+	bool Rewind() noexcept;
 
 	off_t Seek(off_t offset) {
 		return lseek(Get(), offset, SEEK_SET);
@@ -190,7 +190,7 @@ public:
 	}
 
 	gcc_pure
-	off_t Tell() const {
+	off_t Tell() const noexcept {
 		return lseek(Get(), 0, SEEK_CUR);
 	}
 
@@ -198,24 +198,24 @@ public:
 	 * Returns the size of the file in bytes, or -1 on error.
 	 */
 	gcc_pure
-	off_t GetSize() const;
+	off_t GetSize() const noexcept;
 
-	ssize_t Read(void *buffer, size_t length) {
+	ssize_t Read(void *buffer, size_t length) noexcept {
 		return ::read(fd, buffer, length);
 	}
 
-	ssize_t Write(const void *buffer, size_t length) {
+	ssize_t Write(const void *buffer, size_t length) noexcept {
 		return ::write(fd, buffer, length);
 	}
 
 #ifndef _WIN32
-	int Poll(short events, int timeout) const;
+	int Poll(short events, int timeout) const noexcept;
 
-	int WaitReadable(int timeout) const;
-	int WaitWritable(int timeout) const;
+	int WaitReadable(int timeout) const noexcept;
+	int WaitWritable(int timeout) const noexcept;
 
 	gcc_pure
-	bool IsReadyForWriting() const;
+	bool IsReadyForWriting() const noexcept;
 #endif
 };
 
