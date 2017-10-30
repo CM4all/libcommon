@@ -189,6 +189,7 @@ io = static_library('io',
 io_dep = declare_dependency(link_with: io)
 
 system = static_library('system',
+  'src/system/LargeAllocation.cxx',
   'src/system/BindMount.cxx',
   'src/system/CapabilityState.cxx',
   'src/system/ProcessName.cxx',
