@@ -33,6 +33,7 @@
 #include "UdpListener.hxx"
 #include "UdpHandler.hxx"
 #include "net/SocketAddress.hxx"
+#include "net/ReceiveMessage.hxx"
 #include "system/Error.hxx"
 
 #include <assert.h>
@@ -74,63 +75,20 @@ UdpListener::SetFd(UniqueSocketDescriptor &&_fd)
 
 void
 UdpListener::EventCallback(unsigned)
-{
-	char buffer[4096];
-	struct iovec iov;
-	iov.iov_base = buffer;
-	iov.iov_len = sizeof(buffer);
-
-	struct sockaddr_storage sa;
-	char cbuffer[CMSG_SPACE(1024)];
-	struct msghdr msg = {
-		.msg_name = &sa,
-		.msg_namelen = sizeof(sa),
-		.msg_iov = &iov,
-		.msg_iovlen = 1,
-		.msg_control = cbuffer,
-		.msg_controllen = sizeof(cbuffer),
-		.msg_flags = 0,
-	};
-
-	ssize_t nbytes = recvmsg(fd.Get(), &msg, MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
-	if (nbytes < 0) {
-		handler.OnUdpError(std::make_exception_ptr(MakeErrno("recv() failed")));
-		return;
-	}
-
-	int uid = -1;
-
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-align"
-#endif
-
-	struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
-	while (cmsg != nullptr) {
-		if (cmsg->cmsg_level == SOL_SOCKET &&
-		    cmsg->cmsg_type == SCM_CREDENTIALS) {
-			const struct ucred *cred = (const struct ucred *)CMSG_DATA(cmsg);
-			uid = cred->uid;
-		} else if (cmsg->cmsg_level == SOL_SOCKET &&
-			   cmsg->cmsg_type == SCM_RIGHTS) {
-			const int *fds = (const int *)CMSG_DATA(cmsg);
-			const unsigned n = (cmsg->cmsg_len - CMSG_LEN(0)) / sizeof(fds[0]);
-
-			for (unsigned i = 0; i < n; ++i)
-				close(fds[i]);
-		}
-
-		cmsg = CMSG_NXTHDR(&msg, cmsg);
-	}
-
-#ifdef __clang__
-#pragma GCC diagnostic pop
-#endif
-
-	handler.OnUdpDatagram(buffer, nbytes,
-			      SocketAddress((struct sockaddr *)&sa,
-					    msg.msg_namelen),
+try {
+	ReceiveMessageBuffer<4096, 1024> buffer;
+	auto result = ReceiveMessage(fd, buffer,
+				     MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
+	result.fds.clear();
+	int uid = result.cred != nullptr
+		? result.cred->uid
+		: -1;
+	handler.OnUdpDatagram(result.payload.data,
+			      result.payload.size,
+			      result.address,
 			      uid);
+} catch (...) {
+	handler.OnUdpError(std::current_exception());
 }
 
 void
