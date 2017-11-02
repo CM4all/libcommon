@@ -67,6 +67,13 @@ FileDescriptor::IsValid() const noexcept
 }
 
 bool
+FileDescriptor::IsPipe() const noexcept
+{
+	struct stat st;
+	return IsDefined() && fstat(fd, &st) == 0 && S_ISFIFO(st.st_mode);
+}
+
+bool
 FileDescriptor::IsSocket() const noexcept
 {
 	struct stat st;

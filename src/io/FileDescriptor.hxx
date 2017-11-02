@@ -78,6 +78,12 @@ public:
 	bool IsValid() const noexcept;
 
 	/**
+	 * Ask the kernel whether this is a pipe.
+	 */
+	gcc_pure
+	bool IsPipe() const noexcept;
+
+	/**
 	 * Ask the kernel whether this is a socket descriptor.
 	 */
 	gcc_pure
