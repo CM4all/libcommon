@@ -78,6 +78,12 @@ public:
 	bool IsValid() const noexcept;
 
 	/**
+	 * Ask the kernel whether this is a socket descriptor.
+	 */
+	gcc_pure
+	bool IsSocket() const noexcept;
+
+	/**
 	 * Returns the file descriptor.  This may only be called if
 	 * IsDefined() returns true.
 	 */

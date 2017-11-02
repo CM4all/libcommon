@@ -81,6 +81,7 @@ public:
 
 	using FileDescriptor::IsDefined;
 	using FileDescriptor::IsValid;
+	using FileDescriptor::IsSocket;
 	using FileDescriptor::Get;
 	using FileDescriptor::Set;
 	using FileDescriptor::Steal;

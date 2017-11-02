@@ -67,6 +67,13 @@ FileDescriptor::IsValid() const noexcept
 }
 
 bool
+FileDescriptor::IsSocket() const noexcept
+{
+	struct stat st;
+	return IsDefined() && fstat(fd, &st) == 0 && S_ISSOCK(st.st_mode);
+}
+
+bool
 FileDescriptor::Open(const char *pathname, int flags, mode_t mode) noexcept
 {
 	fd = ::open(pathname, flags | O_NOCTTY | O_CLOEXEC, mode);
