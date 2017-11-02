@@ -33,6 +33,7 @@
 #ifndef BENG_PROXY_SPAWN_BUILDER_HXX
 #define BENG_PROXY_SPAWN_BUILDER_HXX
 
+#include "net/ScmRightsBuilder.hxx"
 #include "Protocol.hxx"
 #include "system/Error.hxx"
 #include "util/ConstBuffer.hxx"
@@ -133,41 +134,6 @@ public:
 
     ConstBuffer<int> GetFds() const {
         return {fds.begin(), fds.size()};
-    }
-};
-
-template<size_t MAX_FDS>
-class ScmRightsBuilder {
-    static constexpr size_t size = CMSG_SPACE(MAX_FDS * sizeof(int));
-    static constexpr size_t n_longs = (size + sizeof(long) - 1) / sizeof(long);
-
-    size_t n = 0;
-    long buffer[n_longs];
-
-    int *data;
-
-public:
-    explicit ScmRightsBuilder(struct msghdr &msg) {
-        msg.msg_control = buffer;
-        msg.msg_controllen = sizeof(buffer);
-
-        struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
-        data = (int *)(void *)CMSG_DATA(cmsg);
-    }
-
-    void push_back(int fd) {
-        assert(n < MAX_FDS);
-
-        data[n++] = fd;
-    }
-
-    void Finish(struct msghdr &msg) {
-        msg.msg_controllen = CMSG_SPACE(n * sizeof(int));
-
-        struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
-        cmsg->cmsg_level = SOL_SOCKET;
-        cmsg->cmsg_type = SCM_RIGHTS;
-        cmsg->cmsg_len = CMSG_LEN(n * sizeof(int));
     }
 };
 
