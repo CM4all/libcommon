@@ -35,6 +35,7 @@
 #include "event/SocketEvent.hxx"
 
 #include <cstddef>
+#include <span>
 
 class UniqueSocketDescriptor;
 class SocketAddress;
@@ -96,8 +97,7 @@ public:
 	 *
 	 * Throws std::runtime_error on error.
 	 */
-	void Reply(SocketAddress address,
-		   const void *data, std::size_t data_length);
+	void Reply(SocketAddress address, std::span<const std::byte> payload);
 
 	/**
 	 * Receive all pending datagram from the stocket and pass them
