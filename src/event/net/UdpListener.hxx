@@ -70,6 +70,14 @@ public:
 	}
 
 	/**
+	 * Obtains the underlying socket, which can be used to send
+	 * replies.
+	 */
+	SocketDescriptor GetSocket() {
+		return fd;
+	}
+
+	/**
 	 * Replaces the socket.  The old one is closed, and the new one is now
 	 * owned by this object.
 	 *
