@@ -33,9 +33,7 @@
 #ifndef HTTP_RANGE_HXX
 #define HTTP_RANGE_HXX
 
-#include "util/Compiler.h"
-
-#include <chrono>
+#include <stdint.h>
 
 struct HttpRangeRequest {
 	enum class Type {
