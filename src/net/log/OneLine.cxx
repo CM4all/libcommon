@@ -33,9 +33,30 @@
 #include "OneLine.hxx"
 #include "Datagram.hxx"
 #include "io/FileDescriptor.hxx"
+#include "util/StringBuffer.hxx"
 
 #include <stdio.h>
 #include <time.h>
+
+template<size_t capacity>
+static const char *
+FormatTimestamp(StringBuffer<capacity> &buffer, uint64_t value)
+{
+	time_t t = value / 1000000;
+	strftime(buffer.data(), buffer.capacity(),
+		 "%d/%b/%Y:%H:%M:%S %z", gmtime(&t));
+	return buffer.c_str();
+}
+
+template<size_t capacity>
+static const char *
+FormatOptionalTimestamp(StringBuffer<capacity> &buffer, bool valid,
+			uint64_t value)
+{
+	return valid
+		? FormatTimestamp(buffer, value)
+		: "-";
+}
 
 static const char *
 OptionalString(const char *p)
@@ -95,14 +116,10 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d)
 		? http_method_to_string(d.http_method)
 		: "?";
 
-	char stamp_buffer[32];
-	const char *stamp = "-";
-	if (d.valid_timestamp) {
-		time_t t = d.timestamp / 1000000;
-		strftime(stamp_buffer, sizeof(stamp_buffer),
-			 "%d/%b/%Y:%H:%M:%S %z", gmtime(&t));
-		stamp = stamp_buffer;
-	}
+	StringBuffer<32> stamp_buffer;
+	const char *stamp =
+		FormatOptionalTimestamp(stamp_buffer, d.valid_timestamp,
+					d.timestamp);
 
 	char length_buffer[32];
 	const char *length = "-";
@@ -139,14 +156,11 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d)
 static void
 LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d)
 {
-	char stamp_buffer[32];
-	const char *stamp = "-";
-	if (d.valid_timestamp) {
-		time_t t = d.timestamp / 1000000;
-		strftime(stamp_buffer, sizeof(stamp_buffer),
-			 "%d/%b/%Y:%H:%M:%S %z", gmtime(&t));
-		stamp = stamp_buffer;
-	}
+
+	StringBuffer<32> stamp_buffer;
+	const char *stamp =
+		FormatOptionalTimestamp(stamp_buffer, d.valid_timestamp,
+					d.timestamp);
 
 	char escaped_message[4096];
 
