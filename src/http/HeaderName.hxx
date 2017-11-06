@@ -40,7 +40,7 @@
  */
 gcc_pure
 bool
-http_header_name_valid(const char *name);
+http_header_name_valid(const char *name) noexcept;
 
 /**
  * Determines if the specified name is a hop-by-hop header.  In
@@ -49,4 +49,4 @@ http_header_name_valid(const char *name);
  */
 gcc_pure
 bool
-http_header_is_hop_by_hop(const char *name);
+http_header_is_hop_by_hop(const char *name) noexcept;

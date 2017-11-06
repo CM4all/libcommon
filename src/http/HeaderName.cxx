@@ -35,14 +35,14 @@
 #include <assert.h>
 #include <string.h>
 
-static inline bool
-http_header_name_char_valid(char ch)
+static constexpr inline bool
+http_header_name_char_valid(char ch) noexcept
 {
 	return (signed char)ch > 0x20 && ch != ':';
 }
 
 bool
-http_header_name_valid(const char *name)
+http_header_name_valid(const char *name) noexcept
 {
 	do {
 		if (!http_header_name_char_valid(*name))
@@ -53,7 +53,7 @@ http_header_name_valid(const char *name)
 }
 
 bool
-http_header_is_hop_by_hop(const char *name)
+http_header_is_hop_by_hop(const char *name) noexcept
 {
 	assert(name != nullptr);
 
