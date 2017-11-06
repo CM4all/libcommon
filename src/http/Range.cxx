@@ -37,7 +37,7 @@
 #include <stdlib.h>
 
 void
-HttpRangeRequest::ParseRangeHeader(const char *p)
+HttpRangeRequest::ParseRangeHeader(const char *p) noexcept
 {
 	assert(p != nullptr);
 	assert(type == Type::NONE);

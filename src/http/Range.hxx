@@ -44,12 +44,13 @@ struct HttpRangeRequest {
 
 	uint64_t skip = 0, size;
 
-	explicit HttpRangeRequest(uint64_t _size):size(_size) {}
+	explicit constexpr HttpRangeRequest(uint64_t _size) noexcept
+		:size(_size) {}
 
 	/**
 	 * Parse a "Range" request header.
 	 */
-	void ParseRangeHeader(const char *p);
+	void ParseRangeHeader(const char *p) noexcept;
 };
 
 #endif
