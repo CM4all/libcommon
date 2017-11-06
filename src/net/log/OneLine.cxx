@@ -43,8 +43,9 @@ static const char *
 FormatTimestamp(StringBuffer<capacity> &buffer, uint64_t value)
 {
 	time_t t = value / 1000000;
+	struct tm tm;
 	strftime(buffer.data(), buffer.capacity(),
-		 "%d/%b/%Y:%H:%M:%S %z", gmtime(&t));
+		 "%d/%b/%Y:%H:%M:%S %z", localtime_r(&t, &tm));
 	return buffer.c_str();
 }
 
