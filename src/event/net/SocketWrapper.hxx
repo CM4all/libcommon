@@ -120,8 +120,8 @@ public:
 		return fd.IsDefined();
 	}
 
-	int GetFD() const noexcept {
-		return fd.Get();
+	SocketDescriptor GetSocket() const noexcept {
+		return fd;
 	}
 
 	FdType GetType() const noexcept {
