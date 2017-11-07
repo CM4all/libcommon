@@ -436,6 +436,15 @@ public:
 	}
 
 	/**
+	 * Returns the underlying socket.  It may be used to send
+	 * data.  But don't use it to receive data, as it may confuse
+	 * the input buffer.
+	 */
+	SocketDescriptor GetSocket() const noexcept {
+		return base.GetSocket();
+	}
+
+	/**
 	 * Called after we learn that the peer has closed the connection,
 	 * and no more data is available on the socket.  At this point,
 	 * our socket descriptor has not yet been closed.
