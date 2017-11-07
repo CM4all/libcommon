@@ -272,7 +272,7 @@ BufferedSocket::SubmitDirect() noexcept
 	DirectResult result;
 
 	try {
-		result = handler->OnBufferedDirect(base.GetSocket().Get(), base.GetType());
+		result = handler->OnBufferedDirect(base.GetSocket(), base.GetType());
 	} catch (...) {
 		handler->OnBufferedError(std::current_exception());
 		return false;

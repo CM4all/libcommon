@@ -190,7 +190,7 @@ public:
 	 * Exceptions thrown by this method are passed to
 	 * OnBufferedError().
 	 */
-	virtual DirectResult OnBufferedDirect(gcc_unused int fd,
+	virtual DirectResult OnBufferedDirect(gcc_unused SocketDescriptor fd,
 					      gcc_unused FdType fd_type) {
 		gcc_unreachable();
 	}
