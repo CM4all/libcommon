@@ -202,15 +202,15 @@ struct PreparedChildProcess {
     void SetStderr(int fd);
     void SetControl(int fd);
 
-    void SetStdin(UniqueFileDescriptor &&fd);
-    void SetStdout(UniqueFileDescriptor &&fd);
-    void SetStderr(UniqueFileDescriptor &&fd);
-    void SetControl(UniqueFileDescriptor &&fd);
+    void SetStdin(UniqueFileDescriptor fd);
+    void SetStdout(UniqueFileDescriptor fd);
+    void SetStderr(UniqueFileDescriptor fd);
+    void SetControl(UniqueFileDescriptor fd);
 
-    void SetStdin(UniqueSocketDescriptor &&fd);
-    void SetStdout(UniqueSocketDescriptor &&fd);
-    void SetStderr(UniqueSocketDescriptor &&fd);
-    void SetControl(UniqueSocketDescriptor &&fd);
+    void SetStdin(UniqueSocketDescriptor fd);
+    void SetStdout(UniqueSocketDescriptor fd);
+    void SetStderr(UniqueSocketDescriptor fd);
+    void SetControl(UniqueSocketDescriptor fd);
 
     /**
      * Finish this object and return the executable path.

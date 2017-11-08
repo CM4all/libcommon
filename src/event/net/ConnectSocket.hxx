@@ -85,10 +85,10 @@ public:
 	 * immediately and invokes the #ConnectSocketHandler on completion
 	 * or error).
 	 */
-	void WaitConnected(UniqueSocketDescriptor &&_fd,
+	void WaitConnected(UniqueSocketDescriptor _fd,
 			   const struct timeval *timeout);
 
-	void WaitConnected(UniqueSocketDescriptor &&_fd,
+	void WaitConnected(UniqueSocketDescriptor _fd,
 			   const struct timeval &timeout) {
 		WaitConnected(std::move(_fd), &timeout);
 	}

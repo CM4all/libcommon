@@ -119,49 +119,49 @@ PreparedChildProcess::SetControl(int fd)
 }
 
 void
-PreparedChildProcess::SetStdin(UniqueFileDescriptor &&fd)
+PreparedChildProcess::SetStdin(UniqueFileDescriptor fd)
 {
     SetStdin(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStdout(UniqueFileDescriptor &&fd)
+PreparedChildProcess::SetStdout(UniqueFileDescriptor fd)
 {
     SetStdout(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStderr(UniqueFileDescriptor &&fd)
+PreparedChildProcess::SetStderr(UniqueFileDescriptor fd)
 {
     SetStderr(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetControl(UniqueFileDescriptor &&fd)
+PreparedChildProcess::SetControl(UniqueFileDescriptor fd)
 {
     SetControl(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStdin(UniqueSocketDescriptor &&fd)
+PreparedChildProcess::SetStdin(UniqueSocketDescriptor fd)
 {
     SetStdin(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStdout(UniqueSocketDescriptor &&fd)
+PreparedChildProcess::SetStdout(UniqueSocketDescriptor fd)
 {
     SetStdout(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStderr(UniqueSocketDescriptor &&fd)
+PreparedChildProcess::SetStderr(UniqueSocketDescriptor fd)
 {
     SetStderr(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetControl(UniqueSocketDescriptor &&fd)
+PreparedChildProcess::SetControl(UniqueSocketDescriptor fd)
 {
     SetControl(fd.Steal());
 }

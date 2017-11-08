@@ -50,14 +50,14 @@ public:
 	explicit ServerSocket(EventLoop &event_loop)
 		:event(event_loop, BIND_THIS_METHOD(EventCallback)) {}
 
-	ServerSocket(EventLoop &event_loop, UniqueSocketDescriptor &&_fd)
+	ServerSocket(EventLoop &event_loop, UniqueSocketDescriptor _fd)
 		:ServerSocket(event_loop) {
 		Listen(std::move(_fd));
 	}
 
 	~ServerSocket();
 
-	void Listen(UniqueSocketDescriptor &&_fd);
+	void Listen(UniqueSocketDescriptor _fd);
 
 	/**
 	 * Throws std::runtime_error on error.

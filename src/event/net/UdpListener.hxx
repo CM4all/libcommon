@@ -50,7 +50,7 @@ class UdpListener {
 	UdpHandler &handler;
 
 public:
-	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
+	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
 		    UdpHandler &_handler);
 	~UdpListener();
 
@@ -84,7 +84,7 @@ public:
 	 * This may only be called on an object that is "enabled", see
 	 * Enable().
 	 */
-	void SetFd(UniqueSocketDescriptor &&_fd);
+	void SetFd(UniqueSocketDescriptor _fd);
 
 	/**
 	 * Send a reply datagram to a client.

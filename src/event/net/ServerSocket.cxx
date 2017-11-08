@@ -57,7 +57,7 @@ ServerSocket::~ServerSocket()
 }
 
 void
-ServerSocket::Listen(UniqueSocketDescriptor &&_fd)
+ServerSocket::Listen(UniqueSocketDescriptor _fd)
 {
 	assert(!fd.IsDefined());
 	assert(_fd.IsDefined());

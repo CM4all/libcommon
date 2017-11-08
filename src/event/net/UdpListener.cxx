@@ -42,7 +42,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
+UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
 			 UdpHandler &_handler)
 	:fd(std::move(_fd)),
 	 event(event_loop, fd.Get(), SocketEvent::READ|SocketEvent::PERSIST,
@@ -60,7 +60,7 @@ UdpListener::~UdpListener()
 }
 
 void
-UdpListener::SetFd(UniqueSocketDescriptor &&_fd)
+UdpListener::SetFd(UniqueSocketDescriptor _fd)
 {
 	assert(fd.IsDefined());
 	assert(_fd.IsDefined());

@@ -56,7 +56,7 @@ class NetstringServer {
 	MultiWriteBuffer write;
 
 public:
-	NetstringServer(EventLoop &event_loop, UniqueSocketDescriptor &&_fd);
+	NetstringServer(EventLoop &event_loop, UniqueSocketDescriptor _fd);
 	~NetstringServer();
 
 protected:

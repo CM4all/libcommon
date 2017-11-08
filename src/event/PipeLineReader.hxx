@@ -54,7 +54,7 @@ class PipeLineReader {
 
 public:
 	PipeLineReader(EventLoop &event_loop,
-		       UniqueFileDescriptor &&_fd,
+		       UniqueFileDescriptor _fd,
 		       Callback _callback)
 		:fd(std::move(_fd)),
 		 event(event_loop, fd.Get(), SocketEvent::READ|SocketEvent::PERSIST,

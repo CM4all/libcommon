@@ -138,7 +138,7 @@ ConnectSocket::Connect(const AddressInfo &address,
 }
 
 void
-ConnectSocket::WaitConnected(UniqueSocketDescriptor &&_fd,
+ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 			     const struct timeval *timeout)
 {
 	assert(!fd.IsDefined());
