@@ -45,8 +45,9 @@ class UdpHandler {
 public:
 	/**
 	 * @param uid the peer process uid, or -1 if unknown
+	 * @return false if the #UdpHandler was destroyed inside this method
 	 */
-	virtual void OnUdpDatagram(const void *data, size_t length,
+	virtual bool OnUdpDatagram(const void *data, size_t length,
 				   SocketAddress address, int uid) = 0;
 
 	/**
