@@ -86,5 +86,13 @@ public:
 		   const void *data, size_t data_length);
 
 private:
+	/**
+	 * Receive one datagram and pass it to the handler.  Throws
+	 * exception on error.
+	 *
+	 * @return UdpHandler::OnUdpDatagram()
+	 */
+	bool ReceiveOne();
+
 	void EventCallback(unsigned events) noexcept;
 };

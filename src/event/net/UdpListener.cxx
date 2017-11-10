@@ -59,9 +59,9 @@ UdpListener::~UdpListener() noexcept
 	event.Delete();
 }
 
-void
-UdpListener::EventCallback(unsigned) noexcept
-try {
+bool
+UdpListener::ReceiveOne()
+{
 	ReceiveMessageBuffer<4096, 1024> buffer;
 	auto result = ReceiveMessage(fd, buffer,
 				     MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
@@ -69,10 +69,16 @@ try {
 	int uid = result.cred != nullptr
 		? result.cred->uid
 		: -1;
-	handler.OnUdpDatagram(result.payload.data,
-			      result.payload.size,
-			      result.address,
-			      uid);
+	return handler.OnUdpDatagram(result.payload.data,
+				     result.payload.size,
+				     result.address,
+				     uid);
+}
+
+void
+UdpListener::EventCallback(unsigned) noexcept
+try {
+	ReceiveOne();
 } catch (...) {
 	/* unregister the SocketEvent, just in case the handler does
 	   not destroy us */
