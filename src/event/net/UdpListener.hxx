@@ -78,15 +78,6 @@ public:
 	}
 
 	/**
-	 * Replaces the socket.  The old one is closed, and the new one is now
-	 * owned by this object.
-	 *
-	 * This may only be called on an object that is "enabled", see
-	 * Enable().
-	 */
-	void SetFd(UniqueSocketDescriptor _fd) noexcept;
-
-	/**
 	 * Send a reply datagram to a client.
 	 *
 	 * Throws std::runtime_error on error.

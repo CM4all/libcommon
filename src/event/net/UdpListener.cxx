@@ -60,20 +60,6 @@ UdpListener::~UdpListener() noexcept
 }
 
 void
-UdpListener::SetFd(UniqueSocketDescriptor _fd) noexcept
-{
-	assert(fd.IsDefined());
-	assert(_fd.IsDefined());
-
-	event.Delete();
-
-	fd = std::move(_fd);
-
-	event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
-	event.Add();
-}
-
-void
 UdpListener::EventCallback(unsigned) noexcept
 try {
 	ReceiveMessageBuffer<4096, 1024> buffer;
