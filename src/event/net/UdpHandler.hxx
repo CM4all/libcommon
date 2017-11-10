@@ -38,6 +38,9 @@
 
 class SocketAddress;
 
+/**
+ * Handler for a #UdpListener.
+ */
 class UdpHandler {
 public:
 	/**
@@ -46,5 +49,10 @@ public:
 	virtual void OnUdpDatagram(const void *data, size_t length,
 				   SocketAddress address, int uid) = 0;
 
+	/**
+	 * An I/O error has occurred, and the socket is defunct.
+	 * After returning, it is assumed that the #UdpListener has
+	 * been destroyed.
+	 */
 	virtual void OnUdpError(std::exception_ptr ep) = 0;
 };
