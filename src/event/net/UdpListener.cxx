@@ -43,7 +43,7 @@
 #include <unistd.h>
 
 UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
-			 UdpHandler &_handler)
+			 UdpHandler &_handler) noexcept
 	:fd(std::move(_fd)),
 	 event(event_loop, fd.Get(), SocketEvent::READ|SocketEvent::PERSIST,
 	       BIND_THIS_METHOD(EventCallback)),
@@ -52,7 +52,7 @@ UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
 	event.Add();
 }
 
-UdpListener::~UdpListener()
+UdpListener::~UdpListener() noexcept
 {
 	assert(fd.IsDefined());
 
@@ -60,7 +60,7 @@ UdpListener::~UdpListener()
 }
 
 void
-UdpListener::SetFd(UniqueSocketDescriptor _fd)
+UdpListener::SetFd(UniqueSocketDescriptor _fd) noexcept
 {
 	assert(fd.IsDefined());
 	assert(_fd.IsDefined());
@@ -74,7 +74,7 @@ UdpListener::SetFd(UniqueSocketDescriptor _fd)
 }
 
 void
-UdpListener::EventCallback(unsigned)
+UdpListener::EventCallback(unsigned) noexcept
 try {
 	ReceiveMessageBuffer<4096, 1024> buffer;
 	auto result = ReceiveMessage(fd, buffer,

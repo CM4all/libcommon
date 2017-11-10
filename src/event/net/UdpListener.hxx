@@ -51,21 +51,21 @@ class UdpListener {
 
 public:
 	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
-		    UdpHandler &_handler);
-	~UdpListener();
+		    UdpHandler &_handler) noexcept;
+	~UdpListener() noexcept;
 
 	/**
 	 * Enable the object after it has been disabled by Disable().  A
 	 * new object is enabled by default.
 	 */
-	void Enable() {
+	void Enable() noexcept {
 		event.Add();
 	}
 
 	/**
 	 * Disable the object temporarily.  To undo this, call Enable().
 	 */
-	void Disable() {
+	void Disable() noexcept {
 		event.Delete();
 	}
 
@@ -73,7 +73,7 @@ public:
 	 * Obtains the underlying socket, which can be used to send
 	 * replies.
 	 */
-	SocketDescriptor GetSocket() {
+	SocketDescriptor GetSocket() noexcept {
 		return fd;
 	}
 
@@ -84,7 +84,7 @@ public:
 	 * This may only be called on an object that is "enabled", see
 	 * Enable().
 	 */
-	void SetFd(UniqueSocketDescriptor _fd);
+	void SetFd(UniqueSocketDescriptor _fd) noexcept;
 
 	/**
 	 * Send a reply datagram to a client.
@@ -95,5 +95,5 @@ public:
 		   const void *data, size_t data_length);
 
 private:
-	void EventCallback(unsigned events);
+	void EventCallback(unsigned events) noexcept;
 };
