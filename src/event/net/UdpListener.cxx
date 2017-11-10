@@ -88,6 +88,10 @@ try {
 			      result.address,
 			      uid);
 } catch (...) {
+	/* unregister the SocketEvent, just in case the handler does
+	   not destroy us */
+	event.Delete();
+
 	handler.OnUdpError(std::current_exception());
 }
 
