@@ -77,7 +77,7 @@ LoggerDetail::WriteV(StringView domain,
 
 	v.push_back(ToIovec("\n"));
 
-	writev(STDERR_FILENO, v.raw(), v.size());
+	(void)writev(STDERR_FILENO, v.raw(), v.size());
 }
 
 void
