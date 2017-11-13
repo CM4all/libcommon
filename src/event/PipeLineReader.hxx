@@ -53,6 +53,12 @@ class PipeLineReader {
 	const Callback callback;
 
 public:
+	/**
+	 * @param callback this function will be invoked for every
+	 * received line, and again with a nullptr parameter at the
+	 * end of the pipe; it returns false if the #PipeLineReader
+	 * has been destroyed inside the callback
+	 */
 	PipeLineReader(EventLoop &event_loop,
 		       UniqueFileDescriptor _fd,
 		       Callback _callback)
