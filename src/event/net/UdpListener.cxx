@@ -60,6 +60,27 @@ UdpListener::~UdpListener() noexcept
 }
 
 bool
+UdpListener::ReceiveAll()
+try {
+	while (true) {
+		try {
+			if (!ReceiveOne())
+				return false;
+		} catch (const std::system_error &e) {
+			if (e.code().category() == ErrnoCategory() &&
+			    e.code().value() == EAGAIN)
+				/* no more pending datagrams */
+				return true;
+
+			throw;
+		}
+	}
+} catch (...) {
+	event.Delete();
+	throw;
+}
+
+bool
 UdpListener::ReceiveOne()
 {
 	ReceiveMessageBuffer<4096, 1024> buffer;

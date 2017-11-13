@@ -85,6 +85,16 @@ public:
 	void Reply(SocketAddress address,
 		   const void *data, size_t data_length);
 
+	/**
+	 * Receive all pending datagram from the stocket and pass them
+	 * to the handler (until the handler returns false).  Throws
+	 * exception on error.
+	 *
+	 * @return false if one UdpHandler::OnUdpDatagram() invocation
+	 * has returned false
+	 */
+	bool ReceiveAll();
+
 private:
 	/**
 	 * Receive one datagram and pass it to the handler.  Throws
