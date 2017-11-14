@@ -61,7 +61,7 @@ public:
 	 */
 	PipeLineReader(EventLoop &event_loop,
 		       UniqueFileDescriptor _fd,
-		       Callback _callback)
+		       Callback _callback) noexcept
 		:fd(std::move(_fd)),
 		 event(event_loop, fd.Get(), SocketEvent::READ|SocketEvent::PERSIST,
 		       BIND_THIS_METHOD(OnPipeReadable)),
@@ -69,7 +69,7 @@ public:
 		event.Add();
 	}
 
-	~PipeLineReader() {
+	~PipeLineReader() noexcept {
 		event.Delete();
 	}
 
@@ -80,14 +80,14 @@ public:
 	 * buffer is empty.  Call this when the child process exits, to
 	 * ensure that everything in the pipe is handled.
 	 */
-	void Flush() {
+	void Flush() noexcept {
 		TryRead(true);
 	}
 
 private:
-	void TryRead(bool flush);
+	void TryRead(bool flush) noexcept;
 
-	void OnPipeReadable(unsigned) {
+	void OnPipeReadable(unsigned) noexcept {
 		TryRead(false);
 	}
 };

@@ -35,7 +35,7 @@
 #include <string.h>
 
 void
-PipeLineReader::TryRead(bool flush)
+PipeLineReader::TryRead(bool flush) noexcept
 {
 	assert(!buffer.IsFull());
 
