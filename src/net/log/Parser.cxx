@@ -33,6 +33,7 @@
 #include "Parser.hxx"
 #include "Datagram.hxx"
 #include "Protocol.hxx"
+#include "Crc.hxx"
 #include "util/ByteOrder.hxx"
 
 #include <string.h>
@@ -216,6 +217,24 @@ Net::Log::ParseDatagram(ConstBuffer<void> _d)
 		throw ProtocolError();
 
 	d.MoveFront((const uint8_t *)(magic + 1));
+
+	if (*magic == ToBE32(MAGIC_V2)) {
+		if (d.size < sizeof(Crc::value_type))
+			throw ProtocolError();
+
+		auto &expected_crc =
+			*(const Crc::value_type *)(const void *)
+			(d.data + d.size - sizeof(Crc::value_type));
+		d.SetEnd((const uint8_t *)&expected_crc);
+
+		Crc crc;
+		crc.reset();
+		crc.process_bytes(d.data, d.size);
+		if (crc.checksum() != FromBE32(expected_crc))
+			throw ProtocolError();
+
+		return log_server_apply_attributes(d.data, d.data + d.size);
+	}
 
 	/* allow both little-endian and big-endian magic in the V1
 	   protocol due to a client bug which always used host byte

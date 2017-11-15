@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -56,12 +56,22 @@ namespace Log {
   older parsers to extract all attributes they know, and ignore newer
   ones at the end.
 
+  The last two bytes of the datagram are a CRC32-CCITT of the payload,
+  excluding the magic (and of course excluding the CRC itself).
+
  */
 
 /**
  * Protocol version 1 magic number.
  */
 static constexpr uint32_t MAGIC_V1 = 0x63046102;
+
+/**
+ * Protocol version 2 magic number.  Changes:
+ *
+ * - a CRC32-CCITT is at the end of the datagram
+ */
+static constexpr uint32_t MAGIC_V2 = 0x63046103;
 
 enum class Attribute : uint8_t {
 	NOP = 0,
