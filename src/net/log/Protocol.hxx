@@ -41,6 +41,23 @@
 namespace Net {
 namespace Log {
 
+/*
+
+  Each log record is transmitted in a datagram (e.g. UDP).  All
+  integers are in network byte order (big-endian).
+
+  The datagram payload starts with a "magic" 32 bit number which
+  identifies this datagram.
+
+  After the magic, there are a variable number of attributes.  The
+  first byte identifies the attribute according to enum Attribute,
+  followed by a payload, which is specific to the attribute.  The
+  attributes should be sorted by their identification bytes to allow
+  older parsers to extract all attributes they know, and ignore newer
+  ones at the end.
+
+ */
+
 /**
  * This magic number precedes every UDP packet.
  */
