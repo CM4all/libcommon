@@ -59,9 +59,9 @@ namespace Log {
  */
 
 /**
- * This magic number precedes every UDP packet.
+ * Protocol version 1 magic number.
  */
-static constexpr uint32_t MAGIC = 0x63046102;
+static constexpr uint32_t MAGIC_V1 = 0x63046102;
 
 enum class Attribute : uint8_t {
 	NOP = 0,

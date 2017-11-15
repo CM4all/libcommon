@@ -210,7 +210,7 @@ Datagram
 Net::Log::ParseDatagram(const void *p, const void *end)
 {
 	auto magic = (const uint32_t *)p;
-	if (*magic != MAGIC)
+	if (*magic != MAGIC_V1)
 		throw ProtocolError();
 
 	return log_server_apply_attributes(magic + 1, (const uint8_t *)end);
