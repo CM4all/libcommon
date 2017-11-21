@@ -248,9 +248,9 @@ private:
 		void *const first_slot = FirstSlot();
 
 		while (true) {
-			const auto &front = list->front();
+			const auto &front_ = list->front();
 
-			if (BytesDelta(first_slot, &front) >= required_space)
+			if (BytesDelta(first_slot, &front_) >= required_space)
 				return first_slot;
 
 			/* not enough room before the first item -
