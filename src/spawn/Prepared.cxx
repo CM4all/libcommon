@@ -55,17 +55,13 @@ PreparedChildProcess::~PreparedChildProcess()
         close(control_fd);
 }
 
-bool
+void
 PreparedChildProcess::InsertWrapper(ConstBuffer<const char *> w)
 {
-    if (args.size() + w.size >= args.capacity())
-        return false;
-
-    args.insert(0, w.begin(), w.end());
-    return true;
+    args.insert(args.begin(), w.begin(), w.end());
 }
 
-bool
+void
 PreparedChildProcess::SetEnv(const char *name, const char *value)
 {
     assert(name != nullptr);
@@ -75,7 +71,7 @@ PreparedChildProcess::SetEnv(const char *name, const char *value)
     auto &s = strings.front();
     s.push_back('=');
     s.append(value);
-    return PutEnv(s.c_str());
+    PutEnv(s.c_str());
 }
 
 void
@@ -170,8 +166,6 @@ const char *
 PreparedChildProcess::Finish()
 {
     assert(!args.empty());
-    assert(!args.full());
-    assert(!env.full());
 
     const char *path = exec_path;
 

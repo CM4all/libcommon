@@ -33,7 +33,6 @@
 #ifndef PREPARED_CHILD_PROCESS_HXX
 #define PREPARED_CHILD_PROCESS_HXX
 
-#include "util/StaticArray.hxx"
 #include "CgroupOptions.hxx"
 #include "ResourceLimits.hxx"
 #include "RefenceOptions.hxx"
@@ -41,6 +40,7 @@
 #include "UidGid.hxx"
 
 #include <string>
+#include <vector>
 #include <forward_list>
 
 #include <assert.h>
@@ -77,8 +77,8 @@ struct PreparedChildProcess {
      */
     const char *stderr_path = nullptr;
 
-    StaticArray<const char *, 32> args;
-    StaticArray<const char *, 32> env;
+    std::vector<const char *> args;
+    std::vector<const char *> env;
     int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1, control_fd = -1;
 
     /**
@@ -163,39 +163,17 @@ struct PreparedChildProcess {
         return forbid_user_ns || forbid_multicast || forbid_bind;
     }
 
-    /**
-     * @return true on success, false if the #args array is full
-     */
-    bool InsertWrapper(ConstBuffer<const char *> w);
+    void InsertWrapper(ConstBuffer<const char *> w);
 
-    /**
-     * @return true on success, false if the #args array is full
-     */
-    bool Append(const char *arg) {
-        assert(arg != nullptr);
-
-        if (args.size() + 1 >= args.capacity())
-            return false;
-
+    void Append(const char *arg) {
         args.push_back(arg);
-        return true;
     }
 
-    /**
-     * @return true on success, false if the #env array is full
-     */
-    bool PutEnv(const char *p) {
-        if (env.size() + 1 >= env.capacity())
-            return false;
-
+    void PutEnv(const char *p) {
         env.push_back(p);
-        return true;
     }
 
-    /**
-     * @return true on success, false if the #env array is full
-     */
-    bool SetEnv(const char *name, const char *value);
+    void SetEnv(const char *name, const char *value);
 
     void SetStdin(int fd);
     void SetStdout(int fd);

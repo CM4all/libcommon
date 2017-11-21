@@ -258,8 +258,8 @@ try {
     if (p.exec_function != nullptr) {
         _exit(p.exec_function(std::move(p)));
     } else {
-        execve(path, const_cast<char *const*>(p.args.raw()),
-               const_cast<char *const*>(p.env.raw()));
+        execve(path, const_cast<char *const*>(&p.args.front()),
+               const_cast<char *const*>(&p.env.front()));
 
         fprintf(stderr, "failed to execute %s: %s\n", path, strerror(errno));
         _exit(EXIT_FAILURE);

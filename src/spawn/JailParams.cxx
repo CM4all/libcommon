@@ -35,6 +35,7 @@
 #include "AllocatorPtr.hxx"
 #include "util/CharUtil.hxx"
 #include "util/ConstBuffer.hxx"
+#include "util/StaticArray.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
@@ -78,12 +79,12 @@ JailParams::MakeId(char *p) const
     return p;
 }
 
-bool
+void
 JailParams::InsertWrapper(PreparedChildProcess &p,
                           const char *document_root) const
 {
     if (!enabled)
-        return true;
+        return;
 
     StaticArray<const char *, 16> w;
 
@@ -119,7 +120,7 @@ JailParams::InsertWrapper(PreparedChildProcess &p,
 
     w.push_back("--");
 
-    return p.InsertWrapper({w.raw(), w.size()});
+    p.InsertWrapper({w.raw(), w.size()});
 }
 
 #if TRANSLATION_ENABLE_EXPAND

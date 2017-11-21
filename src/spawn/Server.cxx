@@ -438,13 +438,17 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
         const SpawnExecCommand cmd = (SpawnExecCommand)payload.ReadByte();
         switch (cmd) {
         case SpawnExecCommand::ARG:
-            if (!p.Append(payload.ReadString()))
+            if (p.args.size() >= 16384)
                 throw MalformedSpawnPayloadError();
+
+            p.Append(payload.ReadString());
             break;
 
         case SpawnExecCommand::SETENV:
-            if (!p.PutEnv(payload.ReadString()))
+            if (p.env.size() >= 16384)
                 throw MalformedSpawnPayloadError();
+
+            p.PutEnv(payload.ReadString());
             break;
 
         case SpawnExecCommand::UMASK:

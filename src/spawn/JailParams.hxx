@@ -62,7 +62,7 @@ struct JailParams {
 
     char *MakeId(char *p) const;
 
-    bool InsertWrapper(PreparedChildProcess &p,
+    void InsertWrapper(PreparedChildProcess &p,
                        const char *document_root) const;
 
 #if TRANSLATION_ENABLE_EXPAND
