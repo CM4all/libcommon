@@ -70,7 +70,7 @@ template<class C, class A>
 static constexpr inline ptrdiff_t
 ContainerAttributeOffset(const C *null_c, const A C::*p)
 {
-	return ptrdiff_t((const char *)null_c - (const char *)&(null_c->*p));
+	return ptrdiff_t((const char *)&(null_c->*p) - (const char *)null_c);
 }
 
 template<class C, class A>
@@ -87,7 +87,7 @@ template<class C, class A>
 static inline constexpr C &
 ContainerCast(A &a, const A C::*member)
 {
-	return *OffsetCast<C, A>(&a, ContainerAttributeOffset<C, A>(member));
+	return *OffsetCast<C, A>(&a, -ContainerAttributeOffset<C, A>(member));
 }
 
 /**
@@ -97,7 +97,7 @@ template<class C, class A>
 static inline constexpr const C &
 ContainerCast(const A &a, const A C::*member)
 {
-	return *OffsetCast<const C, const A>(&a, ContainerAttributeOffset<C, A>(member));
+	return *OffsetCast<const C, const A>(&a, -ContainerAttributeOffset<C, A>(member));
 }
 
 #endif
