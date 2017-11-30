@@ -32,7 +32,9 @@
 
 #include "RConnectSocket.hxx"
 #include "Resolver.hxx"
+#include "AllocatedSocketAddress.hxx"
 #include "AddressInfo.hxx"
+#include "Parser.hxx"
 #include "UniqueSocketDescriptor.hxx"
 #include "system/Error.hxx"
 
@@ -74,10 +76,29 @@ ResolveConnectSocket(const char *host_and_port, int default_port,
 }
 
 static UniqueSocketDescriptor
+ParseConnectSocket(const char *host_and_port, int default_port,
+		   int socktype,
+		   std::chrono::duration<int, std::milli> timeout)
+{
+	const auto address = ParseSocketAddress(host_and_port,
+						default_port, false);
+	UniqueSocketDescriptor s;
+	if (!s.CreateNonBlock(address.GetFamily(), socktype, 0))
+		throw MakeErrno("Failed to create socket");
+
+	ConnectWait(s, address, timeout);
+	return s;
+}
+
+static UniqueSocketDescriptor
 ResolveConnectSocket(const char *host_and_port, int default_port,
 		     int socktype,
 		     std::chrono::duration<int, std::milli> timeout)
 {
+	if (*host_and_port == '/' || *host_and_port == '@')
+		return ParseConnectSocket(host_and_port, default_port,
+					  socktype, timeout);
+
 	struct addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_flags = AI_ADDRCONFIG;
