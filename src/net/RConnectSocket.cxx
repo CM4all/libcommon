@@ -31,9 +31,9 @@
  */
 
 #include "RConnectSocket.hxx"
-#include "net/Resolver.hxx"
-#include "net/AddressInfo.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
+#include "Resolver.hxx"
+#include "AddressInfo.hxx"
+#include "UniqueSocketDescriptor.hxx"
 #include "system/Error.hxx"
 
 UniqueSocketDescriptor
