@@ -36,6 +36,27 @@
 #include "UniqueSocketDescriptor.hxx"
 #include "system/Error.hxx"
 
+static void
+ConnectWait(SocketDescriptor s, const SocketAddress address,
+	    std::chrono::duration<int, std::milli> timeout)
+{
+	if (s.Connect(address))
+		return;
+
+	if (errno != EINPROGRESS)
+		throw MakeErrno("Failed to connect");
+
+	int w = s.WaitWritable(timeout.count());
+	if (w < 0)
+		throw MakeErrno("Connect wait error");
+	else if (w == 0)
+		throw std::runtime_error("Connect timeout");
+
+	int err = s.GetError();
+	if (err != 0)
+		throw MakeErrno(err, "Failed to connect");
+}
+
 UniqueSocketDescriptor
 ResolveConnectSocket(const char *host_and_port, int default_port,
 		     const struct addrinfo &hints,
@@ -48,21 +69,7 @@ ResolveConnectSocket(const char *host_and_port, int default_port,
 	if (!s.CreateNonBlock(ai.GetFamily(), ai.GetType(), ai.GetProtocol()))
 		throw MakeErrno("Failed to create socket");
 
-	if (!s.Connect(ai)) {
-		if (errno != EINPROGRESS)
-			throw MakeErrno("Failed to connect");
-
-		int w = s.WaitWritable(timeout.count());
-		if (w < 0)
-			throw MakeErrno("Connect wait error");
-		else if (w == 0)
-			throw std::runtime_error("Connect timeout");
-
-		int err = s.GetError();
-		if (err != 0)
-			throw MakeErrno(err, "Failed to connect");
-	}
-
+	ConnectWait(s, ai, timeout);
 	return s;
 }
 
