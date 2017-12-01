@@ -44,6 +44,8 @@ class SocketAddress;
 class UdpHandler {
 public:
 	/**
+	 * Exceptions thrown by this method will be passed to OnUdpError().
+	 *
 	 * @param uid the peer process uid, or -1 if unknown
 	 * @return false if the #UdpHandler was destroyed inside this method
 	 */
