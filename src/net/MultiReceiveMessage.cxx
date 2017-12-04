@@ -63,11 +63,11 @@ MultiReceiveMessage::MultiReceiveMessage(size_t _allocated_datagrams,
 
 		m[i].msg_hdr = {
 			.msg_name = (struct sockaddr *)&a[i],
-			.msg_namelen = 0,
+			.msg_namelen = sizeof(struct sockaddr_storage),
 			.msg_iov = &v[i],
 			.msg_iovlen = 1,
 			.msg_control = max_cmsg_size > 0 ? GetCmsg(i) : nullptr,
-			.msg_controllen = 0,
+			.msg_controllen = max_cmsg_size,
 			.msg_flags = 0,
 		};
 	}
@@ -79,12 +79,6 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 	Clear();
 
 	auto *m = GetMmsg();
-
-	/* reinitialize attributes which are modified by recvmmsg */
-	for (size_t i = 0; i < allocated_datagrams; ++i) {
-		m[i].msg_hdr.msg_namelen = sizeof(struct sockaddr_storage);
-		m[i].msg_hdr.msg_controllen = max_cmsg_size;
-	}
 
 	int result = recvmmsg(s.Get(), m, allocated_datagrams,
 			      MSG_WAITFORONE, nullptr);
@@ -147,6 +141,13 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 void
 MultiReceiveMessage::Clear()
 {
+	/* reinitialize attributes which are modified by recvmmsg */
+	auto *m = GetMmsg();
+	for (size_t i = 0; i < n_datagrams; ++i) {
+		m[i].msg_hdr.msg_namelen = sizeof(struct sockaddr_storage);
+		m[i].msg_hdr.msg_controllen = max_cmsg_size;
+	}
+
 	n_datagrams = 0;
 
 	while (n_fds > 0)
