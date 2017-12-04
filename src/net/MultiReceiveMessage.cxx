@@ -52,6 +52,25 @@ MultiReceiveMessage::MultiReceiveMessage(size_t _allocated_datagrams,
 	     : nullptr),
 	 datagrams(new Datagram[allocated_datagrams])
 {
+	auto *m = GetMmsg();
+	auto *v = (struct iovec *)(m + allocated_datagrams);
+	auto *a = (struct sockaddr_storage *)(v + allocated_datagrams);
+
+	/* initialize attributes which will not be modified by
+	   recvmmsg() */
+	for (size_t i = 0; i < allocated_datagrams; ++i) {
+		v[i] = {GetPayload(i), max_payload_size};
+
+		m[i].msg_hdr = {
+			.msg_name = (struct sockaddr *)&a[i],
+			.msg_namelen = 0,
+			.msg_iov = &v[i],
+			.msg_iovlen = 1,
+			.msg_control = max_cmsg_size > 0 ? GetCmsg(i) : nullptr,
+			.msg_controllen = 0,
+			.msg_flags = 0,
+		};
+	}
 }
 
 bool
@@ -60,21 +79,11 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 	Clear();
 
 	auto *m = GetMmsg();
-	auto *v = (struct iovec *)(m + allocated_datagrams);
-	auto *a = (struct sockaddr_storage *)(v + allocated_datagrams);
 
+	/* reinitialize attributes which are modified by recvmmsg */
 	for (size_t i = 0; i < allocated_datagrams; ++i) {
-		v[i] = {GetPayload(i), max_payload_size};
-
-		m[i].msg_hdr = {
-			.msg_name = (struct sockaddr *)&a[i],
-			.msg_namelen = sizeof(a[i]),
-			.msg_iov = &v[i],
-			.msg_iovlen = 1,
-			.msg_control = max_cmsg_size > 0 ? GetCmsg(i) : nullptr,
-			.msg_controllen = max_cmsg_size,
-			.msg_flags = 0,
-		};
+		m[i].msg_hdr.msg_namelen = sizeof(struct sockaddr_storage);
+		m[i].msg_hdr.msg_controllen = max_cmsg_size;
 	}
 
 	int result = recvmmsg(s.Get(), m, allocated_datagrams,
