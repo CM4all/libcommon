@@ -34,6 +34,7 @@
 #include "system/Error.hxx"
 #include "util/djbhash.h"
 #include "util/CharUtil.hxx"
+#include "util/Compiler.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -248,9 +249,20 @@ ResourceLimits::Parse(const char *s)
             s = endptr;
 
             switch (*s) {
-            case 'G' : value <<= 10; /* fall through */
-            case 'M' : value <<= 10;
-            case 'K' : value <<= 10;
+            case 'G':
+                value <<= 10;
+#if !GCC_OLDER_THAN(7,0)
+                [[fallthrough]];
+#endif
+
+            case 'M':
+                value <<= 10;
+#if !GCC_OLDER_THAN(7,0)
+                [[fallthrough]];
+#endif
+
+            case 'K':
+                value <<= 10;
                 ++s;
             }
         }
