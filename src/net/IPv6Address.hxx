@@ -127,11 +127,11 @@ public:
 	static constexpr const IPv6Address &Cast(const SocketAddress src) noexcept {
 		/* this reinterpret_cast works because this class is
 		   just a wrapper for struct sockaddr_in6 */
-		return *reinterpret_cast<const IPv6Address *>(src.GetAddress());
+		return *(const IPv6Address *)(const void *)src.GetAddress();
 	}
 
 	constexpr operator SocketAddress() const noexcept {
-		return SocketAddress(reinterpret_cast<const struct sockaddr *>(&address),
+		return SocketAddress((const struct sockaddr *)&address,
 				     sizeof(address));
 	}
 
