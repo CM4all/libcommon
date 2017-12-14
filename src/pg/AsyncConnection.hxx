@@ -55,14 +55,14 @@ public:
 
 	virtual void OnDisconnect() = 0;
 	virtual void OnNotify(const char *name) = 0;
-	virtual void OnError(std::exception_ptr e) = 0;
+	virtual void OnError(std::exception_ptr e) noexcept = 0;
 };
 
 class AsyncResultHandler {
 public:
 	virtual void OnResult(Result &&result) = 0;
 	virtual void OnResultEnd() = 0;
-	virtual void OnResultError() {
+	virtual void OnResultError() noexcept {
 		OnResultEnd();
 	}
 };
