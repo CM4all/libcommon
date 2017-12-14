@@ -140,26 +140,26 @@ public:
 			const char *conninfo, const char *schema,
 			AsyncConnectionHandler &handler) noexcept;
 
-	~AsyncConnection() {
+	~AsyncConnection() noexcept {
 		Disconnect();
 	}
 
-	const std::string &GetSchemaName() const {
+	const std::string &GetSchemaName() const noexcept {
 		return schema;
 	}
 
-	bool IsReady() const {
+	bool IsReady() const noexcept {
 		return state == State::READY;
 	}
 
 	/**
 	 * Initiate the initial connect.  This may be called only once.
 	 */
-	void Connect();
+	void Connect() noexcept;
 
-	void Reconnect();
+	void Reconnect() noexcept;
 
-	void Disconnect();
+	void Disconnect() noexcept;
 
 	/**
 	 * Returns true when no asynchronous query is in progress.  In
@@ -181,7 +181,7 @@ public:
 		Connection::SendQuery(params...);
 	}
 
-	void CheckNotify() {
+	void CheckNotify() noexcept {
 		if (IsReady())
 			PollNotify();
 	}
@@ -194,18 +194,18 @@ protected:
 	 */
 	void Error() noexcept;
 
-	void Poll(PostgresPollingStatusType status);
+	void Poll(PostgresPollingStatusType status) noexcept;
 
-	void PollConnect();
-	void PollReconnect();
-	void PollResult();
-	void PollNotify();
+	void PollConnect() noexcept;
+	void PollReconnect() noexcept;
+	void PollResult() noexcept;
+	void PollNotify() noexcept;
 
 	void ScheduleReconnect() noexcept;
 
 private:
-	void OnSocketEvent(unsigned events);
-	void OnReconnectTimer();
+	void OnSocketEvent(unsigned events) noexcept;
+	void OnReconnectTimer() noexcept;
 };
 
 } /* namespace Pg */

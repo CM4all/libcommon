@@ -70,7 +70,7 @@ AsyncConnection::Error() noexcept
 }
 
 void
-AsyncConnection::Poll(PostgresPollingStatusType status)
+AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 {
 	switch (status) {
 	case PGRES_POLLING_FAILED:
@@ -122,7 +122,7 @@ AsyncConnection::Poll(PostgresPollingStatusType status)
 }
 
 void
-AsyncConnection::PollConnect()
+AsyncConnection::PollConnect() noexcept
 {
 	assert(IsDefined());
 	assert(state == State::CONNECTING);
@@ -131,7 +131,7 @@ AsyncConnection::PollConnect()
 }
 
 void
-AsyncConnection::PollReconnect()
+AsyncConnection::PollReconnect() noexcept
 {
 	assert(IsDefined());
 	assert(state == State::RECONNECTING);
@@ -140,7 +140,7 @@ AsyncConnection::PollReconnect()
 }
 
 inline void
-AsyncConnection::PollResult()
+AsyncConnection::PollResult() noexcept
 {
 	while (!IsBusy()) {
 		auto result = ReceiveResult();
@@ -160,7 +160,7 @@ AsyncConnection::PollResult()
 }
 
 void
-AsyncConnection::PollNotify()
+AsyncConnection::PollNotify() noexcept
 {
 	assert(IsDefined());
 	assert(state == State::READY);
@@ -191,7 +191,7 @@ AsyncConnection::PollNotify()
 }
 
 void
-AsyncConnection::Connect()
+AsyncConnection::Connect() noexcept
 {
 	assert(!IsDefined());
 	assert(state == State::DISCONNECTED);
@@ -211,7 +211,7 @@ AsyncConnection::Connect()
 }
 
 void
-AsyncConnection::Reconnect()
+AsyncConnection::Reconnect() noexcept
 {
 	assert(IsDefined());
 
@@ -222,7 +222,7 @@ AsyncConnection::Reconnect()
 }
 
 void
-AsyncConnection::Disconnect()
+AsyncConnection::Disconnect() noexcept
 {
 	if (!IsDefined())
 		return;
@@ -245,7 +245,7 @@ AsyncConnection::ScheduleReconnect() noexcept
 }
 
 inline void
-AsyncConnection::OnSocketEvent(unsigned)
+AsyncConnection::OnSocketEvent(unsigned) noexcept
 {
 	switch (state) {
 	case State::DISCONNECTED:
@@ -267,7 +267,7 @@ AsyncConnection::OnSocketEvent(unsigned)
 }
 
 inline void
-AsyncConnection::OnReconnectTimer()
+AsyncConnection::OnReconnectTimer() noexcept
 {
 	assert(state == State::DISCONNECTED);
 
