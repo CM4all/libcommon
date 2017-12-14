@@ -43,6 +43,10 @@ namespace Pg {
 
 class AsyncConnectionHandler {
 public:
+	/**
+	 * Exceptions thrown by this method will be reported to
+	 * OnError(), and the connection will be closed.
+	 */
 	virtual void OnConnect() = 0;
 
 	/**
@@ -50,18 +54,39 @@ public:
 	 * after the previous query result was finished.  It is not called
 	 * when the connection becomes idle for the first time after the
 	 * connection has been established.
+	 *
+	 * Exceptions thrown by this method will be reported to
+	 * OnError(), and the connection will be closed.
 	 */
 	virtual void OnIdle() {}
 
 	virtual void OnDisconnect() noexcept = 0;
+
+	/**
+	 * Exceptions thrown by this method will be reported to
+	 * OnError(), and the connection will be closed.
+	 */
 	virtual void OnNotify(const char *name) = 0;
+
 	virtual void OnError(std::exception_ptr e) noexcept = 0;
 };
 
 class AsyncResultHandler {
 public:
+	/**
+	 * Exceptions thrown by this method will be reported to
+	 * AsyncConnectionHandler::OnError(), and the connection will
+	 * be closed.
+	 */
 	virtual void OnResult(Result &&result) = 0;
+
+	/**
+	 * Exceptions thrown by this method will be reported to
+	 * AsyncConnectionHandler::OnError(), and the connection will
+	 * be closed.
+	 */
 	virtual void OnResultEnd() = 0;
+
 	virtual void OnResultError() noexcept {
 		OnResultEnd();
 	}
@@ -198,7 +223,7 @@ protected:
 
 	void PollConnect() noexcept;
 	void PollReconnect() noexcept;
-	void PollResult() noexcept;
+	void PollResult();
 	void PollNotify() noexcept;
 
 	void ScheduleReconnect() noexcept;

@@ -105,7 +105,13 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 		socket_event.Set(GetSocket(), SocketEvent::READ|SocketEvent::PERSIST);
 		socket_event.Add();
 
-		handler.OnConnect();
+		try {
+			handler.OnConnect();
+		} catch (...) {
+			handler.OnError(std::current_exception());
+			Error();
+			break;
+		}
 
 		/* check the connection status, just in case the handler
 		   method has done awful things */
@@ -140,7 +146,7 @@ AsyncConnection::PollReconnect() noexcept
 }
 
 inline void
-AsyncConnection::PollResult() noexcept
+AsyncConnection::PollResult()
 {
 	while (!IsBusy()) {
 		auto result = ReceiveResult();
@@ -172,13 +178,19 @@ AsyncConnection::PollNotify() noexcept
 	Notify notify;
 	switch (GetStatus()) {
 	case CONNECTION_OK:
-		PollResult();
+		try {
+			PollResult();
 
-		while ((notify = GetNextNotify()))
-			handler.OnNotify(notify->relname);
+			while ((notify = GetNextNotify()))
+				handler.OnNotify(notify->relname);
 
-		if (!was_idle && IsIdle())
-			handler.OnIdle();
+			if (!was_idle && IsIdle())
+				handler.OnIdle();
+		} catch (...) {
+			handler.OnError(std::current_exception());
+			Error();
+		}
+
 		break;
 
 	case CONNECTION_BAD:
