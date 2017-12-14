@@ -46,7 +46,7 @@ AsyncConnection::AsyncConnection(EventLoop &event_loop,
 }
 
 void
-AsyncConnection::Error()
+AsyncConnection::Error() noexcept
 {
 	assert(state == State::CONNECTING ||
 	       state == State::RECONNECTING ||

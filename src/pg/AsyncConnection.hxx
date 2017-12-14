@@ -53,7 +53,7 @@ public:
 	 */
 	virtual void OnIdle() {}
 
-	virtual void OnDisconnect() = 0;
+	virtual void OnDisconnect() noexcept = 0;
 	virtual void OnNotify(const char *name) = 0;
 	virtual void OnError(std::exception_ptr e) noexcept = 0;
 };
@@ -192,7 +192,7 @@ protected:
 	 * occurred.  It will set the state to DISCONNECTED, notify the
 	 * handler, and schedule a reconnect.
 	 */
-	void Error();
+	void Error() noexcept;
 
 	void Poll(PostgresPollingStatusType status);
 
