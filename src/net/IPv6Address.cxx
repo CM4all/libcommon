@@ -63,7 +63,7 @@ BitwiseAndT(T *dest, const T *a, const T *b, size_t n)
 }
 
 static void
-BitwiseAnd32(char *dest, const char *a, const char *b, size_t n)
+BitwiseAnd32(void *dest, const void *a, const void *b, size_t n)
 {
 	using value_type = uint32_t;
 	using pointer = value_type *;
@@ -77,7 +77,7 @@ IPv6Address
 IPv6Address::operator&(const IPv6Address &other) const
 {
 	IPv6Address result;
-	BitwiseAnd32((char *)&result, (const char *)this, (const char *)&other,
+	BitwiseAnd32(&result, this, &other,
 		     sizeof(result));
 	return result;
 }
