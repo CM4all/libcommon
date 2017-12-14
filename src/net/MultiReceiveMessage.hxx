@@ -50,7 +50,7 @@ class SocketDescriptor;
 class MultiReceiveMessage {
 	const size_t allocated_datagrams;
 	const size_t max_payload_size, max_cmsg_size, max_fds;
-	size_t n_datagrams = 0, current_datagram = 0;
+	size_t n_datagrams = 0;
 
 	LargeAllocation buffer;
 
