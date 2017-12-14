@@ -55,7 +55,7 @@ public:
 
 	virtual void OnDisconnect() = 0;
 	virtual void OnNotify(const char *name) = 0;
-	virtual void OnError(const char *prefix, const char *error) = 0;
+	virtual void OnError(std::exception_ptr e) = 0;
 };
 
 class AsyncResultHandler {

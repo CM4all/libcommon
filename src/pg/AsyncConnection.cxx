@@ -74,7 +74,7 @@ AsyncConnection::Poll(PostgresPollingStatusType status)
 {
 	switch (status) {
 	case PGRES_POLLING_FAILED:
-		handler.OnError("Failed to connect to database", GetErrorMessage());
+		handler.OnError(std::make_exception_ptr(std::runtime_error(GetErrorMessage())));
 		Error();
 		break;
 
@@ -94,8 +94,8 @@ AsyncConnection::Poll(PostgresPollingStatusType status)
 			try {
 				SetSchema(schema.c_str());
 			} catch (...) {
-				handler.OnError("Failed to set schema",
-						GetFullMessage(std::current_exception()).c_str());
+				handler.OnError(NestCurrentException(std::runtime_error("Failed to set schema")));
+
 				Error();
 				break;
 			}
@@ -200,9 +200,9 @@ AsyncConnection::Connect()
 
 	try {
 		StartConnect(conninfo.c_str());
-	} catch (const std::runtime_error &e) {
+	} catch (...) {
 		Connection::Disconnect();
-		handler.OnError("Failed to connect to database", e.what());
+		handler.OnError(std::current_exception());
 		Error();
 		return;
 	}
