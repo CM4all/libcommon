@@ -33,21 +33,21 @@
 #include "CleanupTimer.hxx"
 
 void
-CleanupTimer::OnTimer()
+CleanupTimer::OnTimer() noexcept
 {
 	if (callback())
 		Enable();
 }
 
 void
-CleanupTimer::Enable()
+CleanupTimer::Enable() noexcept
 {
 	if (!event.IsPending())
 		event.Add(delay);
 }
 
 void
-CleanupTimer::Disable()
+CleanupTimer::Disable() noexcept
 {
 	event.Cancel();
 }

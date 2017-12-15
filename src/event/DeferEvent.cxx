@@ -34,7 +34,7 @@
 #include "Loop.hxx"
 
 void
-DeferEvent::Schedule()
+DeferEvent::Schedule() noexcept
 {
 	if (!IsPending())
 		loop.Defer(*this);
@@ -43,7 +43,7 @@ DeferEvent::Schedule()
 }
 
 void
-DeferEvent::Cancel()
+DeferEvent::Cancel() noexcept
 {
 	if (IsPending())
 		loop.CancelDefer(*this);

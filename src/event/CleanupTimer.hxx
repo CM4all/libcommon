@@ -52,20 +52,20 @@ class CleanupTimer {
 
 public:
 	CleanupTimer(EventLoop &loop, unsigned delay_s,
-		     Callback _callback)
+		     Callback _callback) noexcept
 		:event(loop, BIND_THIS_METHOD(OnTimer)),
 		 delay{time_t(delay_s), 0},
 		 callback(_callback) {}
 
-	~CleanupTimer() {
+	~CleanupTimer() noexcept {
 		event.Cancel();
 	}
 
-	void Enable();
-	void Disable();
+	void Enable() noexcept;
+	void Disable() noexcept;
 
 private:
-	void OnTimer();
+	void OnTimer() noexcept;
 };
 
 #endif

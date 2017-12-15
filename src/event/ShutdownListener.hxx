@@ -45,7 +45,7 @@ class ShutdownListener {
 	const Callback callback;
 
 public:
-	ShutdownListener(EventLoop &loop, Callback _callback);
+	ShutdownListener(EventLoop &loop, Callback _callback) noexcept;
 
 	ShutdownListener(const ShutdownListener &) = delete;
 	ShutdownListener &operator=(const ShutdownListener &) = delete;
@@ -54,12 +54,12 @@ public:
 		event.Enable();
 	}
 
-	void Disable() {
+	void Disable() noexcept {
 		event.Disable();
 	}
 
 private:
-	void SignalCallback(int signo);
+	void SignalCallback(int signo) noexcept;
 };
 
 #endif

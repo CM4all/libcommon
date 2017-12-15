@@ -58,30 +58,30 @@ class SignalEvent {
 	const Callback callback;
 
 public:
-	SignalEvent(EventLoop &loop, Callback _callback);
+	SignalEvent(EventLoop &loop, Callback _callback) noexcept;
 
-	SignalEvent(EventLoop &loop, int signo, Callback _callback)
+	SignalEvent(EventLoop &loop, int signo, Callback _callback) noexcept
 		:SignalEvent(loop, _callback) {
 		Add(signo);
 	}
 
-	~SignalEvent();
+	~SignalEvent() noexcept;
 
-	bool IsDefined() const {
+	bool IsDefined() const noexcept {
 		return fd >= 0;
 	}
 
-	void Add(int signo) {
+	void Add(int signo) noexcept {
 		assert(fd < 0);
 
 		sigaddset(&mask, signo);
 	}
 
 	void Enable();
-	void Disable();
+	void Disable() noexcept;
 
 private:
-	void EventCallback(unsigned events);
+	void EventCallback(unsigned events) noexcept;
 };
 
 #endif

@@ -36,7 +36,7 @@
 #include <stdio.h>
 
 inline void
-ShutdownListener::SignalCallback(int signo)
+ShutdownListener::SignalCallback(int signo) noexcept
 {
 	fprintf(stderr, "caught signal %d, shutting down (pid=%d)\n",
 		signo, (int)getpid());
@@ -45,7 +45,8 @@ ShutdownListener::SignalCallback(int signo)
 	callback();
 }
 
-ShutdownListener::ShutdownListener(EventLoop &loop, Callback _callback)
+ShutdownListener::ShutdownListener(EventLoop &loop,
+				   Callback _callback) noexcept
 	:event(loop, BIND_THIS_METHOD(SignalCallback)),
 	 callback(_callback)
 {

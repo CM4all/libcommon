@@ -50,58 +50,58 @@ public:
 	static constexpr unsigned PERSIST = EV_PERSIST;
 	static constexpr unsigned TIMEOUT = EV_TIMEOUT;
 
-	SocketEvent(EventLoop &_event_loop, Callback _callback)
+	SocketEvent(EventLoop &_event_loop, Callback _callback) noexcept
 		:event_loop(_event_loop), callback(_callback) {}
 
 	SocketEvent(EventLoop &_event_loop, evutil_socket_t fd, unsigned events,
-		    Callback _callback)
+		    Callback _callback) noexcept
 		:SocketEvent(_event_loop, _callback) {
 		Set(fd, events);
 	}
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() noexcept {
 		return event_loop;
 	}
 
 	gcc_pure
-	evutil_socket_t GetFd() const {
+	evutil_socket_t GetFd() const noexcept {
 		return event.GetFd();
 	}
 
 	gcc_pure
-	unsigned GetEvents() const {
+	unsigned GetEvents() const noexcept {
 		return event.GetEvents();
 	}
 
-	void Set(evutil_socket_t fd, unsigned events) {
+	void Set(evutil_socket_t fd, unsigned events) noexcept {
 		event.Set(event_loop, fd, events, EventCallback, this);
 	}
 
-	bool Add(const struct timeval *timeout=nullptr) {
+	bool Add(const struct timeval *timeout=nullptr) noexcept {
 		return event.Add(timeout);
 	}
 
-	bool Add(const struct timeval &timeout) {
+	bool Add(const struct timeval &timeout) noexcept {
 		return event.Add(timeout);
 	}
 
-	void Delete() {
+	void Delete() noexcept {
 		event.Delete();
 	}
 
 	gcc_pure
-	bool IsPending(unsigned events) const {
+	bool IsPending(unsigned events) const noexcept {
 		return event.IsPending(events);
 	}
 
 	gcc_pure
-	bool IsTimerPending() const {
+	bool IsTimerPending() const noexcept {
 		return event.IsTimerPending();
 	}
 
 private:
 	static void EventCallback(gcc_unused evutil_socket_t fd, short events,
-				  void *ctx) {
+				  void *ctx) noexcept {
 		auto &event = *(SocketEvent *)ctx;
 		event.callback(events);
 	}

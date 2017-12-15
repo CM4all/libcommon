@@ -56,25 +56,25 @@ class DeferEvent final {
 	const Callback callback;
 
 public:
-	DeferEvent(EventLoop &_loop, Callback _callback)
+	DeferEvent(EventLoop &_loop, Callback _callback) noexcept
 		:loop(_loop), callback(_callback) {}
 
 	DeferEvent(const DeferEvent &) = delete;
 	DeferEvent &operator=(const DeferEvent &) = delete;
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() noexcept {
 		return loop;
 	}
 
-	bool IsPending() const {
+	bool IsPending() const noexcept {
 		return siblings.is_linked();
 	}
 
-	void Schedule();
-	void Cancel();
+	void Schedule() noexcept;
+	void Cancel() noexcept;
 
 protected:
-	void OnDeferred() {
+	void OnDeferred() noexcept {
 		callback();
 	}
 };

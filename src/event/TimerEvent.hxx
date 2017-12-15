@@ -45,25 +45,25 @@ class TimerEvent {
 	const BoundMethod<void()> callback;
 
 public:
-	TimerEvent(EventLoop &loop, BoundMethod<void()> _callback)
+	TimerEvent(EventLoop &loop, BoundMethod<void()> _callback) noexcept
 		:event(loop, -1, 0, Callback, this), callback(_callback) {}
 
-	bool IsPending() const {
+	bool IsPending() const noexcept {
 		return event.IsTimerPending();
 	}
 
-	void Add(const struct timeval &tv) {
+	void Add(const struct timeval &tv) noexcept {
 		event.Add(tv);
 	}
 
-	void Cancel() {
+	void Cancel() noexcept {
 		event.Delete();
 	}
 
 private:
 	static void Callback(gcc_unused evutil_socket_t fd,
 			     gcc_unused short events,
-			     void *ctx) {
+			     void *ctx) noexcept {
 		auto &event = *(TimerEvent *)ctx;
 		event.callback();
 	}

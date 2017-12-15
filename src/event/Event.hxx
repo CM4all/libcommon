@@ -49,12 +49,12 @@ public:
 	Event() = default;
 
 	Event(EventLoop &loop, evutil_socket_t fd, short mask,
-	      event_callback_fn callback, void *ctx) {
+	      event_callback_fn callback, void *ctx) noexcept {
 		Set(loop, fd, mask, callback, ctx);
 	}
 
 #ifndef NDEBUG
-	~Event() {
+	~Event() noexcept {
 		event_debug_unassign(&event);
 	}
 #endif
@@ -68,62 +68,63 @@ public:
 	 * zeroed (e.g. an uninitialized global/static variable).
 	 */
 	gcc_pure
-	bool IsInitialized() const {
+	bool IsInitialized() const noexcept {
 		return event_initialized(&event);
 	}
 
 	gcc_pure
-	evutil_socket_t GetFd() const {
+	evutil_socket_t GetFd() const noexcept {
 		return event_get_fd(&event);
 	}
 
 	gcc_pure
-	short GetEvents() const {
+	short GetEvents() const noexcept {
 		return event_get_events(&event);
 	}
 
 	gcc_pure
-	event_callback_fn GetCallback() const {
+	event_callback_fn GetCallback() const noexcept {
 		return event_get_callback(&event);
 	}
 
 	gcc_pure
-	void *GetCallbackArg() const {
+	void *GetCallbackArg() const noexcept {
 		return event_get_callback_arg(&event);
 	}
 
 	void Set(EventLoop &loop, evutil_socket_t fd, short mask,
-		 event_callback_fn callback, void *ctx) {
+		 event_callback_fn callback, void *ctx) noexcept {
 		::event_assign(&event, loop.Get(), fd, mask, callback, ctx);
 	}
 
-	bool Add(const struct timeval *timeout=nullptr) {
+	bool Add(const struct timeval *timeout=nullptr) noexcept {
 		return ::event_add(&event, timeout) == 0;
 	}
 
-	bool Add(const struct timeval &timeout) {
+	bool Add(const struct timeval &timeout) noexcept {
 		return Add(&timeout);
 	}
 
-	void SetTimer(event_callback_fn callback, void *ctx) {
+	void SetTimer(event_callback_fn callback, void *ctx) noexcept {
 		::evtimer_set(&event, callback, ctx);
 	}
 
-	void SetSignal(int sig, event_callback_fn callback, void *ctx) {
+	void SetSignal(int sig,
+		       event_callback_fn callback, void *ctx) noexcept {
 		::evsignal_set(&event, sig, callback, ctx);
 	}
 
-	void Delete() {
+	void Delete() noexcept {
 		::event_del(&event);
 	}
 
 	gcc_pure
-	bool IsPending(short events) const {
+	bool IsPending(short events) const noexcept {
 		return ::event_pending(&event, events, nullptr);
 	}
 
 	gcc_pure
-	bool IsTimerPending() const {
+	bool IsTimerPending() const noexcept {
 		return IsPending(EV_TIMEOUT);
 	}
 };

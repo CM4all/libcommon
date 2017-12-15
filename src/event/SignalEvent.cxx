@@ -36,13 +36,13 @@
 #include <sys/signalfd.h>
 #include <unistd.h>
 
-SignalEvent::SignalEvent(EventLoop &loop, Callback _callback)
+SignalEvent::SignalEvent(EventLoop &loop, Callback _callback) noexcept
 	:event(loop, BIND_THIS_METHOD(EventCallback)), callback(_callback)
 {
 	sigemptyset(&mask);
 }
 
-SignalEvent::~SignalEvent()
+SignalEvent::~SignalEvent() noexcept
 {
 	if (fd >= 0) {
 		Disable();
@@ -64,7 +64,7 @@ SignalEvent::Enable()
 }
 
 void
-SignalEvent::Disable()
+SignalEvent::Disable() noexcept
 {
 	sigprocmask(SIG_UNBLOCK, &mask, nullptr);
 
@@ -72,7 +72,7 @@ SignalEvent::Disable()
 }
 
 void
-SignalEvent::EventCallback(unsigned)
+SignalEvent::EventCallback(unsigned) noexcept
 {
 	struct signalfd_siginfo info;
 	ssize_t nbytes = read(fd, &info, sizeof(info));
