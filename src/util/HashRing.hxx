@@ -67,7 +67,7 @@ public:
 	 * a node and a replica number
 	 */
 	template<typename C, typename H>
-	void Build(C &&nodes, H &&hasher) {
+	void Build(C &&nodes, H &&hasher) noexcept {
 		/* clear all buckets */
 		std::fill(buckets.begin(), buckets.end(), nullptr);
 
@@ -101,7 +101,7 @@ public:
 	 * Before calling this, Build() must have been called.
 	 */
 	gcc_pure
-	Node &Pick(hash_t h) const {
+	Node &Pick(hash_t h) const noexcept {
 		return *buckets[h % N_BUCKETS];
 	}
 
@@ -114,7 +114,7 @@ public:
 	 * one node)
 	 */
 	gcc_pure
-	std::pair<hash_t, Node &> FindNext(hash_t h) const {
+	std::pair<hash_t, Node &> FindNext(hash_t h) const noexcept {
 		auto &node = Pick(h++);
 
 		for (size_t i = buckets.size() - 1;; --i, ++h) {
