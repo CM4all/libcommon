@@ -69,12 +69,12 @@ struct FNV1aAlgorithm {
 	typedef typename Traits::fast_type fast_type;
 
 	gcc_hot
-	static constexpr fast_type Update(fast_type hash, uint8_t b) {
+	static constexpr fast_type Update(fast_type hash, uint8_t b) noexcept {
 		return (hash ^ b) * Traits::PRIME;
 	}
 
 	gcc_pure gcc_hot
-	static value_type StringHash(const char *s) {
+	static value_type StringHash(const char *s) noexcept {
 		using Algorithm = FNV1aAlgorithm<Traits>;
 
 		fast_type hash = Traits::OFFSET_BASIS;
@@ -87,7 +87,7 @@ struct FNV1aAlgorithm {
 
 gcc_pure gcc_hot
 inline uint32_t
-FNV1aHash32(const char *s)
+FNV1aHash32(const char *s) noexcept
 {
 	using Traits = FNVTraits<uint32_t>;
 	using Algorithm = FNV1aAlgorithm<Traits>;
@@ -96,7 +96,7 @@ FNV1aHash32(const char *s)
 
 gcc_pure gcc_hot
 inline uint64_t
-FNV1aHash64(const char *s)
+FNV1aHash64(const char *s) noexcept
 {
 	using Traits = FNVTraits<uint64_t>;
 	using Algorithm = FNV1aAlgorithm<Traits>;
@@ -105,7 +105,7 @@ FNV1aHash64(const char *s)
 
 gcc_pure gcc_hot
 inline uint32_t
-FNV1aHashFold32(const char *s)
+FNV1aHashFold32(const char *s) noexcept
 {
 	const uint64_t h64 = FNV1aHash64(s);
 
