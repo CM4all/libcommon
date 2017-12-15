@@ -13,6 +13,7 @@ else
 endif
 
 compiler = meson.get_compiler('cpp')
+c_compiler = meson.get_compiler('c')
 
 common_flags = [
   '-D_REENTRANT', '-D_GNU_SOURCE',
@@ -32,17 +33,32 @@ if debug
   common_flags += ['-DPOISON']
 endif
 
-add_global_arguments(common_flags,
+test_cxxflags = [
+  '-Wno-non-virtual-dtor',
+]
+
+test_cflags = [
   '-Wmissing-prototypes', '-Wstrict-prototypes',
   '-Wbad-function-cast',
   '-Waggregate-return',
   '-Wnested-externs',
   '-pedantic',
-  language: 'c')
+]
 
-add_global_arguments(common_flags,
-  '-Wno-non-virtual-dtor',
-  language: 'cpp')
+add_global_arguments(common_flags, language: 'c')
+add_global_arguments(common_flags, language: 'cpp')
+
+foreach f: test_cxxflags
+  if compiler.has_argument(f)
+    add_global_arguments(f, language: 'cpp')
+  endif
+endforeach
+
+foreach f: test_cflags
+  if c_compiler.has_argument(f)
+    add_global_arguments(f, language: 'c')
+  endif
+endforeach
 
 boost = dependency('boost', modules: ['system', 'filesystem'], version: '>= 1.54')
 libevent = dependency('libevent', version: '>= 2.0.19')
