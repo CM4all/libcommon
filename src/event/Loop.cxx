@@ -33,19 +33,19 @@
 #include "Loop.hxx"
 
 void
-EventLoop::Defer(DeferEvent &e)
+EventLoop::Defer(DeferEvent &e) noexcept
 {
 	defer.push_front(e);
 }
 
 void
-EventLoop::CancelDefer(DeferEvent &e)
+EventLoop::CancelDefer(DeferEvent &e) noexcept
 {
 	defer.erase(defer.iterator_to(e));
 }
 
 bool
-EventLoop::RunDeferred()
+EventLoop::RunDeferred() noexcept
 {
 	while (!defer.empty())
 		defer.pop_front_and_dispose([](DeferEvent *e){

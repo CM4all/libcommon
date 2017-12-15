@@ -56,7 +56,7 @@ class EventLoop {
 		/* call event_enable_debug_mode() only once, before the first
 		   event_init() call */
 		static struct DebugMode {
-			DebugMode() {
+			DebugMode() noexcept {
 				event_enable_debug_mode();
 			}
 		} once_enable_debug_mode;
@@ -73,16 +73,16 @@ class EventLoop {
 			       boost::intrusive::constant_time_size<false>> defer;
 
 #ifndef NDEBUG
-	typedef BoundMethod<void()> PostCallback;
+	typedef BoundMethod<void() noexcept> PostCallback;
 	PostCallback post_callback = nullptr;
 #endif
 
 	bool quit;
 
 public:
-	EventLoop():event_base(Create()) {}
+	EventLoop() noexcept:event_base(Create()) {}
 
-	~EventLoop() {
+	~EventLoop() noexcept {
 		assert(defer.empty());
 
 		::event_base_free(event_base);
@@ -91,11 +91,11 @@ public:
 	EventLoop(const EventLoop &other) = delete;
 	EventLoop &operator=(const EventLoop &other) = delete;
 
-	struct event_base *Get() {
+	struct event_base *Get() noexcept {
 		return event_base;
 	}
 
-	void Reinit() {
+	void Reinit() noexcept {
 		event_reinit(event_base);
 	}
 
@@ -105,12 +105,12 @@ public:
 	 * has been handled.  This is debug-only and may be used to inject
 	 * regular debug checks.
 	 */
-	void SetPostCallback(PostCallback new_value) {
+	void SetPostCallback(PostCallback new_value) noexcept {
 		post_callback = new_value;
 	}
 #endif
 
-	void Dispatch() {
+	void Dispatch() noexcept {
 		quit = false;
 
 		RunDeferred();
@@ -120,44 +120,44 @@ public:
 		}
 	}
 
-	bool LoopNonBlock() {
+	bool LoopNonBlock() noexcept {
 		return RunDeferred() && Loop(EVLOOP_NONBLOCK) &&
 			RunDeferred() &&
 			RunPost();
 	}
 
-	bool LoopOnce() {
+	bool LoopOnce() noexcept {
 		return RunDeferred() && Loop(EVLOOP_ONCE) &&
 			RunDeferred() &&
 			RunPost();
 	}
 
-	bool LoopOnceNonBlock() {
+	bool LoopOnceNonBlock() noexcept {
 		return RunDeferred() && Loop(EVLOOP_ONCE|EVLOOP_NONBLOCK) &&
 			RunDeferred() &&
 			RunPost();
 	}
 
-	void Break() {
+	void Break() noexcept {
 		quit = true;
 		::event_base_loopbreak(event_base);
 	}
 
-	void DumpEvents(FILE *file) {
+	void DumpEvents(FILE *file) noexcept {
 		event_base_dump_events(event_base, file);
 	}
 
-	void Defer(DeferEvent &e);
-	void CancelDefer(DeferEvent &e);
+	void Defer(DeferEvent &e) noexcept;
+	void CancelDefer(DeferEvent &e) noexcept;
 
 private:
-	bool Loop(int flags) {
+	bool Loop(int flags) noexcept {
 		return ::event_base_loop(event_base, flags) == 0;
 	}
 
-	bool RunDeferred();
+	bool RunDeferred() noexcept;
 
-	bool RunPost() {
+	bool RunPost() noexcept {
 #ifndef NDEBUG
 		if (post_callback)
 			post_callback();
