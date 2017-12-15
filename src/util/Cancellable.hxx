@@ -38,7 +38,7 @@
  */
 class Cancellable {
 public:
-	virtual void Cancel() = 0;
+	virtual void Cancel() noexcept = 0;
 };
 
 class CancellablePointer {
@@ -47,36 +47,36 @@ class CancellablePointer {
 public:
 	constexpr CancellablePointer() = default;
 
-	CancellablePointer(CancellablePointer &&src)
+	CancellablePointer(CancellablePointer &&src) noexcept
 		:cancellable(src.cancellable) {
 		src.cancellable = nullptr;
 	}
 
-	CancellablePointer &operator=(CancellablePointer &&src) {
+	CancellablePointer &operator=(CancellablePointer &&src) noexcept {
 		using std::swap;
 		swap(cancellable, src.cancellable);
 		return *this;
 	}
 
-	CancellablePointer &operator=(std::nullptr_t n) {
+	CancellablePointer &operator=(std::nullptr_t n) noexcept {
 		cancellable = n;
 		return *this;
 	}
 
-	CancellablePointer &operator=(Cancellable &_cancellable) {
+	CancellablePointer &operator=(Cancellable &_cancellable) noexcept {
 		cancellable = &_cancellable;
 		return *this;
 	}
 
-	constexpr operator bool() const {
+	constexpr operator bool() const noexcept {
 		return cancellable != nullptr;
 	}
 
-	void Cancel() {
+	void Cancel() noexcept {
 		cancellable->Cancel();
 	}
 
-	void CancelAndClear() {
+	void CancelAndClear() noexcept {
 		auto *c = cancellable;
 		cancellable = nullptr;
 		c->Cancel();

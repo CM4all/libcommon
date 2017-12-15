@@ -94,7 +94,7 @@ public:
 	}
 
 	/* virtual methods from Cancellable */
-	void Cancel() override;
+	void Cancel() noexcept override;
 
 private:
 	void OnEvent(unsigned events);

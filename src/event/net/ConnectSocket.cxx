@@ -66,7 +66,7 @@ ConnectSocket::~ConnectSocket()
 }
 
 void
-ConnectSocket::Cancel()
+ConnectSocket::Cancel() noexcept
 {
 	assert(IsPending());
 
