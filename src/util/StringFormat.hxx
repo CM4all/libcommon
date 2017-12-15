@@ -36,7 +36,8 @@
 
 template<typename... Args>
 static inline void
-StringFormat(char *buffer, size_t size, const char *fmt, Args&&... args)
+StringFormat(char *buffer, size_t size,
+	     const char *fmt, Args&&... args) noexcept
 {
 	snprintf(buffer, size, fmt, args...);
 }
@@ -44,14 +45,14 @@ StringFormat(char *buffer, size_t size, const char *fmt, Args&&... args)
 template<size_t CAPACITY, typename... Args>
 static inline void
 StringFormat(StringBuffer<CAPACITY> &buffer,
-	     const char *fmt, Args&&... args)
+	     const char *fmt, Args&&... args) noexcept
 {
 	StringFormat(buffer.data(), buffer.capacity(), fmt, args...);
 }
 
 template<size_t CAPACITY, typename... Args>
 static inline StringBuffer<CAPACITY>
-StringFormat(const char *fmt, Args&&... args)
+StringFormat(const char *fmt, Args&&... args) noexcept
 {
 	StringBuffer<CAPACITY> result;
 	StringFormat(result, fmt, args...);
@@ -60,7 +61,7 @@ StringFormat(const char *fmt, Args&&... args)
 
 template<typename... Args>
 static inline void
-StringFormatUnsafe(char *buffer, const char *fmt, Args&&... args)
+StringFormatUnsafe(char *buffer, const char *fmt, Args&&... args) noexcept
 {
 	sprintf(buffer, fmt, args...);
 }
