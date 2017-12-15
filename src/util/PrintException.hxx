@@ -39,9 +39,9 @@
  * Print this exception (and its nested exceptions, if any) to stderr.
  */
 void
-PrintException(const std::exception &e);
+PrintException(const std::exception &e) noexcept;
 
 void
-PrintException(const std::exception_ptr &ep);
+PrintException(const std::exception_ptr &ep) noexcept;
 
 #endif

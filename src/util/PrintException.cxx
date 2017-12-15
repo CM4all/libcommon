@@ -35,7 +35,7 @@
 #include <stdio.h>
 
 void
-PrintException(const std::exception &e)
+PrintException(const std::exception &e) noexcept
 {
 	fprintf(stderr, "%s\n", e.what());
 	try {
@@ -48,7 +48,7 @@ PrintException(const std::exception &e)
 }
 
 void
-PrintException(const std::exception_ptr &ep)
+PrintException(const std::exception_ptr &ep) noexcept
 {
 	try {
 		std::rethrow_exception(ep);
