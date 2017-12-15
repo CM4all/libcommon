@@ -50,47 +50,48 @@ class Expiry {
 public:
 	Expiry() = default;
 
-	static Expiry Now() {
+	static Expiry Now() noexcept {
 		return clock_type::now();
 	}
 
-	static constexpr Expiry AlreadyExpired() {
+	static constexpr Expiry AlreadyExpired() noexcept {
 		return value_type::min();
 	}
 
-	static constexpr Expiry Never() {
+	static constexpr Expiry Never() noexcept {
 		return value_type::max();
 	}
 
-	static constexpr Expiry Touched(Expiry now, duration_type duration) {
+	static constexpr Expiry Touched(Expiry now,
+					duration_type duration) noexcept {
 		return now.value + duration;
 	}
 
-	static Expiry Touched(duration_type duration) {
+	static Expiry Touched(duration_type duration) noexcept {
 		return Touched(Now(), duration);
 	}
 
-	void Touch(Expiry now, duration_type duration) {
+	void Touch(Expiry now, duration_type duration) noexcept {
 		value = now.value + duration;
 	}
 
-	void Touch(duration_type duration) {
+	void Touch(duration_type duration) noexcept {
 		Touch(Now(), duration);
 	}
 
-	constexpr bool IsExpired(Expiry now) const {
+	constexpr bool IsExpired(Expiry now) const noexcept {
 		return now >= *this;
 	}
 
-	bool IsExpired() const {
+	bool IsExpired() const noexcept {
 		return IsExpired(Now());
 	}
 
-	constexpr bool operator==(Expiry other) const {
+	constexpr bool operator==(Expiry other) const noexcept {
 		return value == other.value;
 	}
 
-	constexpr bool operator>=(Expiry other) const {
+	constexpr bool operator>=(Expiry other) const noexcept {
 		return value >= other.value;
 	}
 };
