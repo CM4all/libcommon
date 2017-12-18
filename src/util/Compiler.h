@@ -86,6 +86,8 @@
 #  define gcc_noinline __attribute__((noinline))
 #  define gcc_nonnull(...) __attribute__((nonnull(__VA_ARGS__)))
 #  define gcc_nonnull_all __attribute__((nonnull))
+#  define gcc_returns_nonnull __attribute__((returns_nonnull))
+#  define gcc_returns_twice __attribute__((returns_twice))
 #  define gcc_malloc __attribute__((malloc))
 #  define gcc_pure __attribute__((pure))
 #  define gcc_const __attribute__((const))
@@ -106,6 +108,8 @@
 #  define gcc_noinline
 #  define gcc_nonnull(...)
 #  define gcc_nonnull_all
+#  define gcc_returns_nonnull
+#  define gcc_returns_twice
 #  define gcc_malloc
 #  define gcc_pure
 #  define gcc_const
