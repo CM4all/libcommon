@@ -68,6 +68,7 @@ endforeach
 boost = dependency('boost', modules: ['system', 'filesystem'], version: '>= 1.54')
 libevent = dependency('libevent', version: '>= 2.0.19')
 libcurl = dependency('libcurl', version: '>= 7.38')
+libcares = dependency('libcares')
 libpq = dependency('libpq', version: '>= 8.4')
 libsystemd = dependency('libsystemd')
 libdbus = dependency('dbus-1')
@@ -270,6 +271,24 @@ event_net = static_library('event_net',
     util_dep,
   ])
 event_net_dep = declare_dependency(link_with: event_net)
+
+event_net_cares = static_library('event_net_cares',
+  'src/event/net/cares/Error.cxx',
+  'src/event/net/cares/Init.cxx',
+  'src/event/net/cares/Channel.cxx',
+  include_directories: inc,
+  dependencies: [
+    libcares,
+    libevent,
+  ])
+event_net_cares_dep = declare_dependency(
+  link_with: event_net_cares,
+  dependencies: [
+    event_dep,
+    net_dep,
+    util_dep,
+  ],
+)
 
 curl = static_library('curl',
   'src/curl/Version.cxx',
