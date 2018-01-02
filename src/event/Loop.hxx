@@ -114,7 +114,7 @@ public:
 		quit = false;
 
 		RunDeferred();
-		while (Loop(EVLOOP_ONCE) && !quit) {
+		while (!quit && Loop(EVLOOP_ONCE) && !quit) {
 			RunDeferred();
 			RunPost();
 		}
