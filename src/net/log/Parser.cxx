@@ -214,7 +214,10 @@ Net::Log::ParseDatagram(ConstBuffer<void> _d)
 	auto magic = (const uint32_t *)(const void *)d.data;
 	d.MoveFront((const uint8_t *)(magic + 1));
 
-	if (*magic != MAGIC_V1)
+	/* allow both little-endian and big-endian magic in the V1
+	   protocol due to a client bug which always used host byte
+	   order for the magic */
+	if (*magic != ToLE32(MAGIC_V1) && *magic != ToBE32(MAGIC_V1))
 		throw ProtocolError();
 
 	return log_server_apply_attributes(d.data, d.data + d.size);
