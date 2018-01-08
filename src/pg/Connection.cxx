@@ -72,6 +72,13 @@ Connection::ExecuteOrThrow(const char *query)
 }
 
 void
+Connection::SetRole(const char *role_name)
+{
+	std::string sql = "SET ROLE '" + Escape(role_name) + "'";
+	ExecuteOrThrow(sql.c_str());
+}
+
+void
 Connection::SetSchema(const char *schema)
 {
 	std::string sql = "SET SCHEMA '" + Escape(schema) + "'";

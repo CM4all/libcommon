@@ -292,6 +292,13 @@ public:
 	void ExecuteOrThrow(const char *query);
 
 	/**
+	 * Wrapper for "SET ROLE ...".
+	 *
+	 * Throws #Error on error.
+	 */
+	void SetRole(const char *role_name);
+
+	/**
 	 * Set the search path to the specified schema.
 	 *
 	 * Throws #Error on error.
