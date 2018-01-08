@@ -207,11 +207,22 @@ log_server_apply_attributes(const void *p, const uint8_t *end)
 }
 
 Datagram
-Net::Log::ParseDatagram(const void *p, const void *end)
+Net::Log::ParseDatagram(ConstBuffer<void> _d)
 {
-	auto magic = (const uint32_t *)p;
+	auto d = ConstBuffer<uint8_t>::FromVoid(_d);
+
+	auto magic = (const uint32_t *)(const void *)d.data;
+	d.MoveFront((const uint8_t *)(magic + 1));
+
 	if (*magic != MAGIC_V1)
 		throw ProtocolError();
 
-	return log_server_apply_attributes(magic + 1, (const uint8_t *)end);
+	return log_server_apply_attributes(d.data, d.data + d.size);
+}
+
+Datagram
+Net::Log::ParseDatagram(const void *p, const void *end)
+{
+	return ParseDatagram(ConstBuffer<uint8_t>((const uint8_t *)p,
+						  (const uint8_t *)end).ToVoid());
 }
