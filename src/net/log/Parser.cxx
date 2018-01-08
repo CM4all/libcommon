@@ -212,6 +212,9 @@ Net::Log::ParseDatagram(ConstBuffer<void> _d)
 	auto d = ConstBuffer<uint8_t>::FromVoid(_d);
 
 	auto magic = (const uint32_t *)(const void *)d.data;
+	if (d.size < sizeof(*magic))
+		throw ProtocolError();
+
 	d.MoveFront((const uint8_t *)(magic + 1));
 
 	/* allow both little-endian and big-endian magic in the V1
