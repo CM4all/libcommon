@@ -40,6 +40,8 @@
 #include "MemBio.hxx"
 #include "Unique.hxx"
 #include "Error.hxx"
+#include "util/AllocatedString.hxx"
+#include "util/ConstBuffer.hxx"
 
 #include <string>
 
