@@ -33,8 +33,8 @@
 #include "Parser.hxx"
 #if TRANSLATION_ENABLE_TRANSFORMATION
 #include "translation/Transformation.hxx"
-#include "processor.hxx"
-#include "css_processor.hxx"
+#include "bp/XmlProcessor.hxx"
+#include "bp/CssProcessor.hxx"
 #endif
 #if TRANSLATION_ENABLE_WIDGET
 #include "widget/Class.hxx"
