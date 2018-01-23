@@ -36,6 +36,7 @@
 #include "SyscallFilter.hxx"
 #include "Init.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "io/WriteFile.hxx"
 #include "system/IOPrio.hxx"
 #include "util/PrintException.hxx"
 #include "util/ScopeExit.hxx"
@@ -121,6 +122,8 @@ try {
 
     if (p.umask >= 0)
         umask(p.umask);
+
+    TryWriteExistingFile("/proc/self/oom_adj", "8");
 
     int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
     if (stdout_fd < 0 || (stderr_fd < 0 && p.stderr_path == nullptr)) {
