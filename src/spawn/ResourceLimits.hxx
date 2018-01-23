@@ -52,19 +52,19 @@ struct ResourceLimit : rlimit {
     /**
      * Throws std::system_error on error.
      */
-    void Get(int resource);
+    void Get(int pid, int resource);
 
     /**
      * Throws std::system_error on error.
      */
-    void Set(int resource) const;
+    void Set(int pid, int resource) const;
 
     void OverrideFrom(const ResourceLimit &src);
 
     /**
      * Throws std::system_error on error.
      */
-    void CompleteFrom(int resource, const ResourceLimit &src);
+    void CompleteFrom(int pid, int resource, const ResourceLimit &src);
 };
 
 /**
@@ -82,7 +82,7 @@ struct ResourceLimits {
     /**
      * Throws std::system_error on error.
      */
-    void Apply() const;
+    void Apply(int pid) const;
 
     bool Parse(const char *s);
 };

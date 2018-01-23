@@ -154,7 +154,7 @@ try {
     p.refence.Apply();
 
     p.ns.Setup(p.uid_gid);
-    p.rlimits.Apply();
+    p.rlimits.Apply(0);
 
     if (p.chroot != nullptr && chroot(p.chroot) < 0) {
         fprintf(stderr, "chroot('%s') failed: %s\n",

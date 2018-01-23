@@ -39,17 +39,27 @@
 #include <assert.h>
 #include <stdio.h>
 
+/**
+ * glibc has a "__rlimit_resource_t" typedef which maps to "int" in
+ * C++ (probably to work around "invalid conversion from 'int' to
+ * '__rlimit_resource'"); however prlimit() does not uses that
+ * typedef, but uses "enum __rlimit_resource" directory.  Thus we need
+ * to cast to that (internal) type.  Fortunately C++'s decltype()
+ * helps us to make that internal type access portable.
+ */
+using my_rlimit_resource_t = decltype(RLIMIT_NLIMITS);
+
 inline void
-ResourceLimit::Get(int resource)
+ResourceLimit::Get(int pid, int resource)
 {
-    if (getrlimit(resource, this) < 0)
+    if (prlimit(pid, my_rlimit_resource_t(resource), nullptr, this) < 0)
         throw FormatErrno("getrlimit(%d) failed", resource);
 }
 
 inline void
-ResourceLimit::Set(int resource) const
+ResourceLimit::Set(int pid, int resource) const
 {
-    if (setrlimit(resource, this) < 0)
+    if (prlimit(pid, my_rlimit_resource_t(resource), this, nullptr) < 0)
         throw FormatErrno("setrlimit(%d, %lu, %lu) failed",
                           resource, (unsigned long)rlim_cur,
                           (unsigned long)rlim_max);
@@ -66,9 +76,9 @@ ResourceLimit::OverrideFrom(const ResourceLimit &src)
 }
 
 inline void
-ResourceLimit::CompleteFrom(int resource, const ResourceLimit &src)
+ResourceLimit::CompleteFrom(int pid, int resource, const ResourceLimit &src)
 {
-    Get(resource);
+    Get(pid, resource);
     OverrideFrom(src);
 }
 
@@ -106,32 +116,33 @@ ResourceLimits::MakeId(char *p) const
  * Replace ResourceLimit::UNDEFINED with current values.
  */
 static const ResourceLimit &
-complete_rlimit(int resource, const ResourceLimit &r, ResourceLimit &buffer)
+complete_rlimit(int pid, int resource,
+                const ResourceLimit &r, ResourceLimit &buffer)
 {
     if (r.IsFull())
         /* already complete */
         return r;
 
-    buffer.CompleteFrom(resource, r);
+    buffer.CompleteFrom(pid, resource, r);
     return buffer;
 }
 
 static void
-rlimit_apply(int resource, const ResourceLimit &r)
+rlimit_apply(int pid, int resource, const ResourceLimit &r)
 {
     if (r.IsEmpty())
         return;
 
     ResourceLimit buffer;
-    const auto &r2 = complete_rlimit(resource, r, buffer);
-    r2.Set(resource);
+    const auto &r2 = complete_rlimit(pid, resource, r, buffer);
+    r2.Set(pid, resource);
 }
 
 void
-ResourceLimits::Apply() const
+ResourceLimits::Apply(int pid) const
 {
     for (unsigned i = 0; i < RLIM_NLIMITS; ++i)
-        rlimit_apply(i, values[i]);
+        rlimit_apply(pid, i, values[i]);
 }
 
 bool
