@@ -304,6 +304,10 @@ spawn_fn(void *_ctx)
         if (ctx.wait_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
             ctx.wait_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
             _exit(EXIT_FAILURE);
+
+        /* clear the resource limits because they have been applied
+           already by the parent */
+        ctx.params.rlimits = ResourceLimits();
     }
 
     Exec(ctx.path, std::move(ctx.params), ctx.cgroup_state);
@@ -371,6 +375,11 @@ SpawnChildProcess(PreparedChildProcess &&params,
         /* set up the child's uid/gid mapping and wake it up */
         ctx.wait_pipe_r.Close();
         ctx.params.ns.SetupUidGidMap(ctx.params.uid_gid, pid);
+
+        /* apply the resource limits in the parent process, because
+           the child has lost all root namespace capabilities by
+           entering a new user namespace */
+        ctx.params.rlimits.Apply(pid);
 
         /* after success (no exception was thrown), we send one byte
            to the pipe and close it, so the child knows everything's
