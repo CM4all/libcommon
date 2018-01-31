@@ -123,7 +123,7 @@ try {
     if (p.umask >= 0)
         umask(p.umask);
 
-    TryWriteExistingFile("/proc/self/oom_adj", "8");
+    TryWriteExistingFile("/proc/self/oom_score_adj", "800");
 
     int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
     if (stdout_fd < 0 || (stderr_fd < 0 && p.stderr_path == nullptr)) {
