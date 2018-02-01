@@ -48,6 +48,18 @@ GetDirectory(const char *path)
 	return std::string(path, slash);
 }
 
+static std::pair<std::string, UniqueFileDescriptor>
+MakeTempFileInDirectory(const std::string &directory)
+{
+	auto path = directory + "/" + "tmp.XXXXXX";
+	int _fd = mkostemp(&path.front(), O_CLOEXEC);
+	if (_fd < 0)
+		throw FormatErrno("Failed to create %s", path.c_str());
+
+	return std::make_pair(std::move(path),
+			      UniqueFileDescriptor(FileDescriptor(_fd)));
+}
+
 FileWriter::FileWriter(const char *_path)
 	:path(_path)
 {
@@ -56,12 +68,9 @@ FileWriter::FileWriter(const char *_path)
 	if (fd.Open(directory.c_str(), O_TMPFILE|O_WRONLY, 0666))
 		return;
 
-	tmp_path = directory + "/" + "tmp.XXXXXX";
-	int _fd = mkostemp(&tmp_path.front(), O_CLOEXEC);
-	if (_fd < 0)
-		throw FormatErrno("Failed to create %s", _path);
-
-	fd = UniqueFileDescriptor(FileDescriptor(_fd));
+	auto tmp = MakeTempFileInDirectory(directory);
+	tmp_path = std::move(tmp.first);
+	fd = std::move(tmp.second);
 }
 
 void
