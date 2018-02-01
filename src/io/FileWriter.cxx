@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2011-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -102,13 +102,9 @@ FileWriter::Commit()
 	if (!fd.Close())
 		throw FormatErrno("Failed to commit %s", path.c_str());
 
-	if (!tmp_path.empty()) {
-		unlink(path.c_str());
-
-		if (rename(tmp_path.c_str(), path.c_str()) < 0)
-			throw FormatErrno("Failed to rename %s to %s",
-					  tmp_path.c_str(), path.c_str());
-	}
+	if (!tmp_path.empty() && rename(tmp_path.c_str(), path.c_str()) < 0)
+		throw FormatErrno("Failed to rename %s to %s",
+				  tmp_path.c_str(), path.c_str());
 }
 
 void
