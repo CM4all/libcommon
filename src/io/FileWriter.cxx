@@ -51,13 +51,20 @@ GetDirectory(const char *path)
 static std::pair<std::string, UniqueFileDescriptor>
 MakeTempFileInDirectory(const std::string &directory)
 {
-	auto path = directory + "/" + "tmp.XXXXXX";
-	int _fd = mkostemp(&path.front(), O_CLOEXEC);
-	if (_fd < 0)
-		throw FormatErrno("Failed to create %s", path.c_str());
+	unsigned r = rand();
 
-	return std::make_pair(std::move(path),
-			      UniqueFileDescriptor(FileDescriptor(_fd)));
+	while (true) {
+		auto path = directory + "/tmp." + std::to_string(r);
+		UniqueFileDescriptor fd;
+		if (fd.Open(path.c_str(), O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,
+			    0666))
+			return std::make_pair(std::move(path), std::move(fd));
+
+		if (errno != EEXIST)
+			throw FormatErrno("Failed to create %s", path.c_str());
+
+		++r;
+	}
 }
 
 FileWriter::FileWriter(const char *_path)
