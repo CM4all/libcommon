@@ -50,9 +50,7 @@ public:
 	PendingCall() = default;
 
 	PendingCall(PendingCall &&src)
-		:pending(src.pending) {
-		src.pending = nullptr;
-	}
+		:pending(std::exchange(src.pending, nullptr)) {}
 
 	~PendingCall() {
 		if (pending != nullptr)

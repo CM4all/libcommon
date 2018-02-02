@@ -50,9 +50,7 @@ public:
 	Message() = default;
 
 	Message(Message &&src)
-		:msg(src.msg) {
-		src.msg = nullptr;
-	}
+		:msg(std::exchange(src.msg, nullptr)) {}
 
 	~Message() {
 		if (msg != nullptr)
