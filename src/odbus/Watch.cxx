@@ -71,8 +71,14 @@ LibeventToDbus(unsigned flags) noexcept
 void
 WatchManager::Watch::OnSocketReady(unsigned events) noexcept
 {
+	/* copy the "parent" reference to the stack, because the
+	   dbus_watch_handle() may invoke WatchManager::Remove() which
+	   may destroy this object */
+	auto &_parent = parent;
+
 	dbus_watch_handle(&watch, LibeventToDbus(events));
-	parent.ScheduleDispatch();
+
+	_parent.ScheduleDispatch();
 }
 
 void
