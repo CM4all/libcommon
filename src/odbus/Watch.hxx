@@ -106,11 +106,11 @@ public:
 		return connection;
 	}
 
+private:
 	void ScheduleDispatch() noexcept {
 		defer_dispatch.Schedule();
 	}
 
-private:
 	void Dispatch() noexcept;
 
 	bool Add(DBusWatch *watch) noexcept;
