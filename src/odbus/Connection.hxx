@@ -46,35 +46,35 @@ namespace ODBus {
 class Connection {
 	DBusConnection *c = nullptr;
 
-	explicit Connection(DBusConnection *_c)
+	explicit Connection(DBusConnection *_c) noexcept
 		:c(_c) {}
 
 public:
-	Connection() = default;
+	Connection() noexcept = default;
 
-	Connection(const Connection &src)
+	Connection(const Connection &src) noexcept
 		:c(dbus_connection_ref(src.c)) {}
 
-	Connection(Connection &&src)
+	Connection(Connection &&src) noexcept
 		:c(std::exchange(src.c, nullptr)) {}
 
-	~Connection() {
+	~Connection() noexcept {
 		if (c != nullptr)
 			dbus_connection_unref(c);
 	}
 
-	Connection &operator=(Connection &&src) {
+	Connection &operator=(Connection &&src) noexcept {
 		std::swap(c, src.c);
 		return *this;
 	}
 
 	static Connection GetSystem();
 
-	operator DBusConnection *() {
+	operator DBusConnection *() noexcept {
 		return c;
 	}
 
-	operator bool() const {
+	operator bool() const noexcept {
 		return c != nullptr;
 	}
 };

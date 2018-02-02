@@ -35,7 +35,7 @@
 namespace ODBus {
 
 WatchManager::Watch::Watch(EventLoop &event_loop,
-			   WatchManager &_parent, DBusWatch &_watch)
+			   WatchManager &_parent, DBusWatch &_watch) noexcept
 	:parent(_parent), watch(_watch),
 	 event(event_loop, -1, 0, BIND_THIS_METHOD(OnSocketReady))
 {
@@ -43,14 +43,14 @@ WatchManager::Watch::Watch(EventLoop &event_loop,
 }
 
 static constexpr unsigned
-DbusToLibevent(unsigned flags)
+DbusToLibevent(unsigned flags) noexcept
 {
 	return ((flags & DBUS_WATCH_READABLE) != 0) * SocketEvent::READ |
 		((flags & DBUS_WATCH_WRITABLE) != 0) * SocketEvent::WRITE;
 }
 
 void
-WatchManager::Watch::Toggled()
+WatchManager::Watch::Toggled() noexcept
 {
 	event.Delete();
 
@@ -62,21 +62,21 @@ WatchManager::Watch::Toggled()
 }
 
 static constexpr unsigned
-LibeventToDbus(unsigned flags)
+LibeventToDbus(unsigned flags) noexcept
 {
 	return ((flags & SocketEvent::READ) != 0) * DBUS_WATCH_READABLE |
 		((flags & SocketEvent::WRITE) != 0) * DBUS_WATCH_WRITABLE;
 }
 
 void
-WatchManager::Watch::OnSocketReady(unsigned events)
+WatchManager::Watch::OnSocketReady(unsigned events) noexcept
 {
 	dbus_watch_handle(&watch, LibeventToDbus(events));
 	parent.ScheduleDispatch();
 }
 
 void
-WatchManager::Shutdown()
+WatchManager::Shutdown() noexcept
 {
 	dbus_connection_set_watch_functions(connection,
 					    nullptr, nullptr,
@@ -87,13 +87,13 @@ WatchManager::Shutdown()
 }
 
 void
-WatchManager::Dispatch()
+WatchManager::Dispatch() noexcept
 {
 	while (dbus_connection_dispatch(connection) == DBUS_DISPATCH_DATA_REMAINS) {}
 }
 
 bool
-WatchManager::Add(DBusWatch *watch)
+WatchManager::Add(DBusWatch *watch) noexcept
 {
 	watches.emplace(std::piecewise_construct,
 			std::forward_as_tuple(watch),
@@ -102,13 +102,13 @@ WatchManager::Add(DBusWatch *watch)
 }
 
 void
-WatchManager::Remove(DBusWatch *watch)
+WatchManager::Remove(DBusWatch *watch) noexcept
 {
 	watches.erase(watch);
 }
 
 void
-WatchManager::Toggled(DBusWatch *watch)
+WatchManager::Toggled(DBusWatch *watch) noexcept
 {
 	auto i = watches.find(watch);
 	assert(i != watches.end());

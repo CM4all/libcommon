@@ -59,16 +59,16 @@ class WatchManager {
 
 	public:
 		Watch(EventLoop &event_loop, WatchManager &_parent,
-		      DBusWatch &_watch);
+		      DBusWatch &_watch) noexcept;
 
-		~Watch() {
+		~Watch() noexcept {
 			event.Delete();
 		}
 
-		void Toggled();
+		void Toggled() noexcept;
 
 	private:
-		void OnSocketReady(unsigned events);
+		void OnSocketReady(unsigned events) noexcept;
 	};
 
 	std::map<DBusWatch *, Watch> watches;
@@ -77,7 +77,7 @@ class WatchManager {
 
 public:
 	template<typename C>
-	WatchManager(EventLoop &event_loop, C &&_connection)
+	WatchManager(EventLoop &event_loop, C &&_connection) noexcept
 		:connection(std::forward<C>(_connection)),
 		 defer_dispatch(event_loop, BIND_THIS_METHOD(Dispatch))
 	{
@@ -89,41 +89,41 @@ public:
 						    nullptr);
 	}
 
-	~WatchManager() {
+	~WatchManager() noexcept {
 		Shutdown();
 	}
 
 	WatchManager(const WatchManager &) = delete;
 	WatchManager &operator=(const WatchManager &) = delete;
 
-	void Shutdown();
+	void Shutdown() noexcept;
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() noexcept {
 		return defer_dispatch.GetEventLoop();
 	}
 
-	void ScheduleDispatch() {
+	void ScheduleDispatch() noexcept {
 		defer_dispatch.Schedule();
 	}
 
 private:
-	void Dispatch();
+	void Dispatch() noexcept;
 
-	bool Add(DBusWatch *watch);
-	void Remove(DBusWatch *watch);
-	void Toggled(DBusWatch *watch);
+	bool Add(DBusWatch *watch) noexcept;
+	void Remove(DBusWatch *watch) noexcept;
+	void Toggled(DBusWatch *watch) noexcept;
 
-	static dbus_bool_t AddFunction(DBusWatch *watch, void *data) {
+	static dbus_bool_t AddFunction(DBusWatch *watch, void *data) noexcept {
 		auto &wm = *(WatchManager *)data;
 		return wm.Add(watch);
 	}
 
-	static void RemoveFunction(DBusWatch *watch, void *data) {
+	static void RemoveFunction(DBusWatch *watch, void *data) noexcept {
 		auto &wm = *(WatchManager *)data;
 		wm.Remove(watch);
 	}
 
-	static void ToggledFunction(DBusWatch *watch, void *data) {
+	static void ToggledFunction(DBusWatch *watch, void *data) noexcept {
 		auto &wm = *(WatchManager *)data;
 		wm.Toggled(watch);
 	}

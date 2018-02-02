@@ -48,7 +48,7 @@ class ScopeMatch {
 public:
 	ScopeMatch(DBusConnection *_connection, const char *_rule);
 
-	~ScopeMatch() {
+	~ScopeMatch() noexcept {
 		dbus_bus_remove_match(connection, rule, nullptr);
 	}
 

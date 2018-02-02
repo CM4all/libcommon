@@ -43,25 +43,25 @@ namespace ODBus {
 class PendingCall {
 	DBusPendingCall *pending = nullptr;
 
-	explicit PendingCall(DBusPendingCall *_pending)
+	explicit PendingCall(DBusPendingCall *_pending) noexcept
 		:pending(_pending) {}
 
 public:
-	PendingCall() = default;
+	PendingCall() noexcept = default;
 
-	PendingCall(PendingCall &&src)
+	PendingCall(PendingCall &&src) noexcept
 		:pending(std::exchange(src.pending, nullptr)) {}
 
-	~PendingCall() {
+	~PendingCall() noexcept {
 		if (pending != nullptr)
 			dbus_pending_call_unref(pending);
 	}
 
-	DBusPendingCall *Get() {
+	DBusPendingCall *Get() noexcept {
 		return pending;
 	}
 
-	PendingCall &operator=(PendingCall &&src) {
+	PendingCall &operator=(PendingCall &&src) noexcept {
 		std::swap(pending, src.pending);
 		return *this;
 	}
@@ -82,7 +82,7 @@ public:
 		return PendingCall(pending);
 	}
 
-	void Block() {
+	void Block() noexcept {
 		dbus_pending_call_block(pending);
 	}
 };

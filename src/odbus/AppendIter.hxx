@@ -40,7 +40,7 @@ namespace ODBus {
 
 class AppendMessageIter : public MessageIter {
 public:
-	explicit AppendMessageIter(DBusMessage &msg) {
+	explicit AppendMessageIter(DBusMessage &msg) noexcept {
 		dbus_message_iter_init_append(&msg, &iter);
 	}
 

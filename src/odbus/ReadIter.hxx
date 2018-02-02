@@ -39,31 +39,31 @@ namespace ODBus {
 
 class ReadMessageIter : public MessageIter {
 public:
-	explicit ReadMessageIter(DBusMessage &msg) {
+	explicit ReadMessageIter(DBusMessage &msg) noexcept {
 		dbus_message_iter_init(&msg, &iter);
 	}
 
-	bool HasNext() {
+	bool HasNext() noexcept {
 		return dbus_message_iter_has_next(&iter);
 	}
 
-	bool Next() {
+	bool Next() noexcept {
 		return dbus_message_iter_next(&iter);
 	}
 
-	int GetArgType() {
+	int GetArgType() noexcept {
 		return dbus_message_iter_get_arg_type(&iter);
 	}
 
-	const char *GetSignature() {
+	const char *GetSignature() noexcept {
 		return dbus_message_iter_get_signature(&iter);
 	}
 
-	void GetBasic(void *value) {
+	void GetBasic(void *value) noexcept {
 		dbus_message_iter_get_basic(&iter, value);
 	}
 
-	const char *GetString() {
+	const char *GetString() noexcept {
 		const char *value;
 		GetBasic(&value);
 		return value;
