@@ -102,6 +102,10 @@ public:
 		return defer_dispatch.GetEventLoop();
 	}
 
+	Connection &GetConnection() noexcept {
+		return connection;
+	}
+
 	void ScheduleDispatch() noexcept {
 		defer_dispatch.Schedule();
 	}
