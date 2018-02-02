@@ -46,10 +46,17 @@ class EventLoop;
 
 namespace ODBus {
 
+class WatchManagerObserver {
+public:
+	virtual void OnDBusClosed() noexcept = 0;
+};
+
 /**
  * Integrate a DBusConnection into the #EventLoop.
  */
 class WatchManager {
+	WatchManagerObserver &observer;
+
 	Connection connection;
 
 	class Watch {
@@ -76,14 +83,17 @@ class WatchManager {
 	DeferEvent defer_dispatch;
 
 public:
-	explicit WatchManager(EventLoop &event_loop) noexcept
-		:defer_dispatch(event_loop, BIND_THIS_METHOD(Dispatch))
+	WatchManager(EventLoop &event_loop,
+		     WatchManagerObserver &_observer) noexcept
+		:observer(_observer),
+		 defer_dispatch(event_loop, BIND_THIS_METHOD(Dispatch))
 	{
 	}
 
 	template<typename C>
-	WatchManager(EventLoop &event_loop, C &&_connection) noexcept
-		:WatchManager(event_loop)
+	WatchManager(EventLoop &event_loop, WatchManagerObserver &_observer,
+		     C &&_connection) noexcept
+		:WatchManager(event_loop, _observer)
 	{
 		SetConnection(std::forward<C>(_connection));
 	}

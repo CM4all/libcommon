@@ -99,6 +99,11 @@ void
 WatchManager::Dispatch() noexcept
 {
 	while (dbus_connection_dispatch(connection) == DBUS_DISPATCH_DATA_REMAINS) {}
+
+	if (!dbus_connection_get_is_connected(connection)) {
+		Shutdown();
+		observer.OnDBusClosed();
+	}
 }
 
 bool
