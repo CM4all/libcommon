@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -84,6 +84,9 @@ WatchManager::Watch::OnSocketReady(unsigned events) noexcept
 void
 WatchManager::Shutdown() noexcept
 {
+	if (!connection)
+		return;
+
 	dbus_connection_set_watch_functions(connection,
 					    nullptr, nullptr,
 					    nullptr, nullptr,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -76,17 +76,16 @@ class WatchManager {
 	DeferEvent defer_dispatch;
 
 public:
+	explicit WatchManager(EventLoop &event_loop) noexcept
+		:defer_dispatch(event_loop, BIND_THIS_METHOD(Dispatch))
+	{
+	}
+
 	template<typename C>
 	WatchManager(EventLoop &event_loop, C &&_connection) noexcept
-		:connection(std::forward<C>(_connection)),
-		 defer_dispatch(event_loop, BIND_THIS_METHOD(Dispatch))
+		:WatchManager(event_loop)
 	{
-		dbus_connection_set_watch_functions(connection,
-						    AddFunction,
-						    RemoveFunction,
-						    ToggledFunction,
-						    (void *)this,
-						    nullptr);
+		SetConnection(std::forward<C>(_connection));
 	}
 
 	~WatchManager() noexcept {
@@ -104,6 +103,21 @@ public:
 
 	Connection &GetConnection() noexcept {
 		return connection;
+	}
+
+	template<typename C>
+	void SetConnection(C &&_connection) noexcept {
+		Shutdown();
+
+		connection = std::forward<C>(_connection);
+
+		if (connection)
+			dbus_connection_set_watch_functions(connection,
+							    AddFunction,
+							    RemoveFunction,
+							    ToggledFunction,
+							    (void *)this,
+							    nullptr);
 	}
 
 private:
