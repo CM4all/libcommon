@@ -41,3 +41,12 @@ ODBus::Connection::GetSystem()
 	error.CheckThrow("DBus connection error");
 	return Connection(c);
 }
+
+ODBus::Connection
+ODBus::Connection::Open(const char *address)
+{
+	ODBus::Error error;
+	auto *c = dbus_connection_open(address, error);
+	error.CheckThrow("DBus connection error");
+	return Connection(c);
+}
