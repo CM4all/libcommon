@@ -192,7 +192,7 @@ enum class Type : uint8_t {
 	 * A mail submission log line.  The record usually also
 	 * contains #Attribute::MESSAGE.
 	 */
-	SUBMISSON = 3,
+	SUBMISSION = 3,
 };
 
 }}
