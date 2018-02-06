@@ -51,10 +51,12 @@ namespace Log {
 
   After the magic, there are a variable number of attributes.  The
   first byte identifies the attribute according to enum Attribute,
-  followed by a payload, which is specific to the attribute.  The
-  attributes should be sorted by their identification bytes to allow
-  older parsers to extract all attributes they know, and ignore newer
-  ones at the end.
+  followed by a payload, which is specific to the attribute.  Strings
+  are null-terminated.
+
+  The attributes should be sorted by their identification bytes to
+  allow older parsers to extract all attributes they know, and ignore
+  newer ones at the end.
 
   The last four bytes of the datagram are a CRC32-CCITT of the
   payload, excluding the magic (and of course excluding the CRC
