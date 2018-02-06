@@ -154,6 +154,45 @@ enum class Attribute : uint8_t {
 	 * forwarded to.
 	 */
 	FORWARDED_TO = 14,
+
+	/**
+	 * The record type.  Payload is a #Type.
+	 *
+	 * Note that older clients do not emit this attribute, and
+	 * parser have to guess it by checking which other attributes
+	 * are present.
+	 */
+	TYPE = 15,
+};
+
+/**
+ * The record type.  Payload of #Attrbute::TYPE.
+ */
+enum class Type : uint8_t {
+	/**
+	 * Unspecified.  The presence of HTTP-specific attributes can
+	 * allow the parser to guess it's #HTTP_ACCESS or #HTTP_ERROR.
+	 */
+	UNSPECIFIED = 0,
+
+	/**
+	 * An HTTP access log record.  The record usually also
+	 * contains #Attribute::HTTP_METHOD, #Attribute::HTTP_URI etc.
+	 */
+	HTTP_ACCESS = 1,
+
+	/**
+	 * An HTTP error log line.  The record usually also contains
+	 * #Attribute::MESSAGE, and maybe attributes describing the
+	 * HTTP request which caused the log event.
+	 */
+	HTTP_ERROR = 2,
+
+	/**
+	 * A mail submission log line.  The record usually also
+	 * contains #Attribute::MESSAGE.
+	 */
+	SUBMISSON = 3,
 };
 
 }}

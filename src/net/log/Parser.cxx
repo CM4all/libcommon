@@ -200,6 +200,10 @@ log_server_apply_attributes(const void *p, const uint8_t *end)
 			p = read_uint64(&datagram.duration, p, end);
 			datagram.valid_duration = true;
 			break;
+
+		case Attribute::TYPE:
+			p = read_uint8(&(uint8_t &)datagram.type, p, end);
+			break;
 		}
 
 		if (p == nullptr)

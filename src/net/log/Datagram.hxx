@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "Protocol.hxx"
 #include "http/Method.h"
 #include "http/Status.h"
 #include "util/StringView.hxx"
@@ -64,6 +65,8 @@ struct Datagram {
 	uint64_t traffic_received, traffic_sent;
 
 	uint64_t duration;
+
+	Type type = Type::UNSPECIFIED;
 
 	bool valid_timestamp = false;
 	bool valid_http_method = false, valid_http_status = false;
