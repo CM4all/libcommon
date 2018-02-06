@@ -80,78 +80,78 @@ enum class Attribute : uint8_t {
 	/**
 	 * A 64 bit time stamp of the event, microseconds since epoch.
 	 */
-	TIMESTAMP,
+	TIMESTAMP = 1,
 
 	/**
 	 * The address of the remote host as a string.
 	 */
-	REMOTE_HOST,
+	REMOTE_HOST = 2,
 
 	/**
 	 * The name of the site which was accessed.
 	 */
-	SITE,
+	SITE = 3,
 
 	/**
 	 * The request method (http_method_t) as a 8 bit integer.
 	 */
-	HTTP_METHOD,
+	HTTP_METHOD = 4,
 
 	/**
 	 * The request URI.
 	 */
-	HTTP_URI,
+	HTTP_URI = 5,
 
 	/**
 	 * The "Referer"[sic] request header.
 	 */
-	HTTP_REFERER,
+	HTTP_REFERER = 6,
 
 	/**
 	 * The "User-Agent" request header.
 	 */
-	USER_AGENT,
+	USER_AGENT = 7,
 
 	/**
 	 * The response status (http_status_t) as a 16 bit integer.
 	 */
-	HTTP_STATUS,
+	HTTP_STATUS = 8,
 
 	/**
 	 * The netto length of the entity in bytes, as a 64 bit integer.
 	 */
-	LENGTH,
+	LENGTH = 9,
 
 	/**
 	 * The total number of raw bytes received and sent for this event,
 	 * as two 64 bit integers.  This includes all extra data such as
 	 * headers.
 	 */
-	TRAFFIC,
+	TRAFFIC = 10,
 
 	/**
 	 * The wallclock duration of the operation as a 64 bit unsigned
 	 * integer specifying the number of microseconds.
 	 */
-	DURATION,
+	DURATION = 11,
 
 	/**
 	 * The "Host" request header.
 	 */
-	HOST,
+	HOST = 12,
 
 	/**
 	 * An opaque one-line message (without a trailing newline
 	 * character).  This is used for error logging, not for HTTP
 	 * access logging.
 	 */
-	MESSAGE,
+	MESSAGE = 13,
 
 	/**
 	 * The (string) address of the host which this request has been
 	 * forwarded to.
 	 */
-	FORWARDED_TO,
+	FORWARDED_TO = 14,
 };
 
 }}
