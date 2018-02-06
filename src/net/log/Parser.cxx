@@ -99,6 +99,17 @@ ReadStringView(StringView &value_r, const void *p, const uint8_t *end)
 	return p;
 }
 
+static void
+FixUp(Datagram &d)
+{
+	if (d.type == Type::UNSPECIFIED && d.http_uri != nullptr)
+		/* old clients don't send a type; attempt to guess the
+		   type */
+		d.type = d.message.IsNull()
+			? Type::HTTP_ACCESS
+			: Type::HTTP_ERROR;
+}
+
 static Datagram
 log_server_apply_attributes(const void *p, const uint8_t *end)
 {
@@ -110,8 +121,10 @@ log_server_apply_attributes(const void *p, const uint8_t *end)
 
 	while (true) {
 		auto attr_p = (const uint8_t *)p;
-		if (attr_p >= end)
+		if (attr_p >= end) {
+			FixUp(datagram);
 			return datagram;
+		}
 
 		auto attr = (Attribute)*attr_p++;
 		p = attr_p;
