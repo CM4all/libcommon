@@ -30,12 +30,6 @@
 #ifndef DESTRUCT_OBSERVER_HXX
 #define DESTRUCT_OBSERVER_HXX
 
-#ifdef NDEBUG
-
-class DestructAnchor {};
-
-#else
-
 #include <boost/intrusive/list.hpp>
 
 class DestructAnchor;
@@ -84,6 +78,10 @@ DestructObserver::DestructObserver(DestructAnchor &anchor)
 	anchor.observers.push_front(*this);
 }
 
+#ifdef NDEBUG
+class DebugDestructAnchor {};
+#else
+using DebugDestructAnchor = DestructAnchor;
 #endif
 
 #endif

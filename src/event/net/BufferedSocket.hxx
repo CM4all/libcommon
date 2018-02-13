@@ -308,7 +308,7 @@ public:
  *
  * - destroyed (after Destroy())
  */
-class BufferedSocket final : DestructAnchor, LeakDetector, SocketHandler {
+class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	SocketWrapper base;
 
 	const struct timeval *read_timeout, *write_timeout;
