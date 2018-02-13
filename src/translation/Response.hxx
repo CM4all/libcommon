@@ -38,14 +38,13 @@
 #include "util/TrivialArray.hxx"
 #if TRANSLATION_ENABLE_HTTP
 #include "util/kvlist.hxx"
-#include "header_forward.hxx"
+#include "bp/ForwardHeaders.hxx"
 #endif
 #if TRANSLATION_ENABLE_WIDGET
 #include "util/StringSet.hxx"
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
-#include "header_forward.hxx"
 #endif
 #if TRANSLATION_ENABLE_EXECUTE
 #include "adata/ExpandableStringList.hxx"
