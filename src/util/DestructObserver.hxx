@@ -43,13 +43,11 @@ class DestructObserver
 	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>> {
 	friend class DestructAnchor;
 
-	bool destructed = false;
-
 public:
 	explicit DestructObserver(DestructAnchor &anchor);
 
 	operator bool() const {
-		return destructed;
+		return !is_linked();
 	}
 };
 
@@ -66,9 +64,7 @@ class DestructAnchor {
 
 public:
 	~DestructAnchor() {
-		/* tell all observers about it */
-		for (auto &i : observers)
-			i.destructed = true;
+		observers.clear();
 	}
 };
 
