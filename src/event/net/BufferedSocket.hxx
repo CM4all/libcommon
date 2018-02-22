@@ -205,8 +205,8 @@ public:
 	 * #remaining is called (even if it's 0 bytes).
 	 *
 	 * @return false if no more data shall be delivered to the
-	 * handler; the methods #remaining and #end will also not be
-	 * invoked
+	 * handler; the methods OnBufferedRemaining() and
+	 * OnBufferedError() will also not be invoked
 	 */
 	virtual bool OnBufferedClosed() noexcept = 0;
 
@@ -225,9 +225,9 @@ public:
 	}
 
 	/**
-	 * The buffer has become empty after the socket has been closed by
-	 * the peer.  This may be called right after #closed if the input
-	 * buffer was empty.
+	 * The buffer has become empty after the socket has been
+	 * closed by the peer.  This may be called right after
+	 * OnBufferedClosed() if the input buffer was empty.
 	 *
 	 * If this method is not implemented, a "closed prematurely" error
 	 * is thrown.
@@ -492,18 +492,21 @@ public:
 
 	/**
 	 * Mark the specified number of bytes of the input buffer as
-	 * "consumed".  Call this in the data() method.  Note that this
-	 * method does not invalidate the buffer passed to
-	 * BufferedSocketHandler::data().  It may be called repeatedly.
+	 * "consumed".  Call this in the data() method.  Note that
+	 * this method does not invalidate the buffer passed to
+	 * BufferedSocketHandler::OnBufferedData().  It may be called
+	 * repeatedly.
 	 */
 	void Consumed(size_t nbytes) noexcept;
 
 	/**
-	 * The caller wants to read more data from the socket.  There are four
-	 * possible outcomes: a call to BufferedSocketHandler::read(), a call
-	 * to BufferedSocketHandler::direct(), a call to
-	 * BufferedSocketHandler::error() or (if there is no data available
-	 * yet) an event gets scheduled and the function returns immediately.
+	 * The caller wants to read more data from the socket.  There
+	 * are four possible outcomes: a call to
+	 * BufferedSocketHandler::OnBufferedData(), a call to
+	 * BufferedSocketHandler::OnBufferedDirect(), a call to
+	 * BufferedSocketHandler::OnBufferedError() or (if there is no
+	 * data available yet) an event gets scheduled and the
+	 * function returns immediately.
 	 *
 	 * @param expect_more if true, generates an error if no more data can
 	 * be read (socket already shut down, buffer empty); if false, the
