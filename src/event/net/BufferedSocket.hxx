@@ -168,14 +168,14 @@ enum write_result {
 class BufferedSocketHandler {
 public:
 	/**
-	 * Data has been read from the socket into the input buffer.  Call
-	 * BufferedSocket::Consumed() each time you consume data from the
-	 * given buffer.
+	 * Data has been read from the socket into the input buffer.
+	 * Call BufferedSocket::ReadBuffer() and
+	 * BufferedSocket::Consumed() to process the buffered data.
 	 *
 	 * Exceptions thrown by this method are passed to
 	 * OnBufferedError().
 	 */
-	virtual BufferedResult OnBufferedData(const void *buffer, size_t size) = 0;
+	virtual BufferedResult OnBufferedData() = 0;
 
 	/**
 	 * The socket is ready for reading.  It is suggested to attempt a

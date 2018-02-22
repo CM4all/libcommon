@@ -130,8 +130,7 @@ BufferedSocket::InvokeData() noexcept
 	bool local_expect_more = false;
 
 	while (true) {
-		auto r = input.Read();
-		if (r.empty())
+		if (input.IsEmpty())
 			return expect_more || local_expect_more
 				? BufferedResult::MORE
 				: BufferedResult::OK;
@@ -143,7 +142,7 @@ BufferedSocket::InvokeData() noexcept
 		BufferedResult result;
 
 		try {
-			result = handler->OnBufferedData(r.data, r.size);
+			result = handler->OnBufferedData();
 		} catch (...) {
 			assert(!destructed);
 
