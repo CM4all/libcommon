@@ -183,28 +183,25 @@ BufferedSocket::SubmitFromBuffer() noexcept
 
 	switch (result) {
 	case BufferedResult::OK:
-		assert(input.IsEmpty());
 		assert(!expect_more);
 
-		input.Free();
+		if (input.IsEmpty()) {
+			input.Free();
 
-		if (!IsConnected()) {
-			Ended();
-			return false;
+			if (!IsConnected()) {
+				Ended();
+				return false;
+			}
+
+			if (!base.IsReadPending())
+				/* try to refill the buffer, now that
+				   it's become empty (but don't
+				   refresh the pending timeout) */
+				base.ScheduleRead(read_timeout);
+		} else {
+			if (!IsConnected())
+				return false;
 		}
-
-		if (!base.IsReadPending())
-			/* try to refill the buffer, now that it's become empty
-			   (but don't refresh the pending timeout) */
-			base.ScheduleRead(read_timeout);
-
-		return true;
-
-	case BufferedResult::PARTIAL:
-		assert(!input.IsEmpty());
-
-		if (!IsConnected())
-			return false;
 
 		return true;
 

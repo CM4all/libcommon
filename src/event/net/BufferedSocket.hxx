@@ -44,16 +44,10 @@
 
 enum class BufferedResult {
 	/**
-	 * The handler has consumed all data successfully, and is willing
+	 * The handler has consumed at least one byte, and is willing
 	 * to receive more data.
 	 */
 	OK,
-
-	/**
-	 * The handler has consumed some data successfully, and is willing
-	 * to receive more data.
-	 */
-	PARTIAL,
 
 	/**
 	 * The handler needs more data to finish the operation.  If no
