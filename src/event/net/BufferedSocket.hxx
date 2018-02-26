@@ -358,16 +358,6 @@ public:
 		    const struct timeval *_write_timeout,
 		    BufferedSocketHandler &_handler) noexcept;
 
-	/**
-	 * Move the socket from another #BufferedSocket instance.  This
-	 * disables scheduled events, moves the input buffer to this
-	 * instance and installs a new handler.
-	 */
-	void Init(BufferedSocket &&src,
-		  const struct timeval *_read_timeout,
-		  const struct timeval *_write_timeout,
-		  BufferedSocketHandler &_handler) noexcept;
-
 	void Shutdown() noexcept {
 		base.Shutdown();
 	}

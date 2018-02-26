@@ -72,13 +72,6 @@ SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 }
 
 void
-SocketWrapper::Init(SocketWrapper &&src) noexcept
-{
-	Init(src.fd, src.fd_type);
-	src.Abandon();
-}
-
-void
 SocketWrapper::Shutdown() noexcept
 {
 	if (!fd.IsDefined())

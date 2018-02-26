@@ -510,33 +510,6 @@ BufferedSocket::Reinit(const struct timeval *_read_timeout,
 }
 
 void
-BufferedSocket::Init(BufferedSocket &&src,
-		     const struct timeval *_read_timeout,
-		     const struct timeval *_write_timeout,
-		     BufferedSocketHandler &_handler) noexcept
-{
-	base.Init(std::move(src.base));
-
-	read_timeout = _read_timeout;
-	write_timeout = _write_timeout;
-
-	handler = &_handler;
-
-	/* steal the input buffer (after we already stole the socket) */
-	input = std::move(src.input);
-
-	direct = false;
-	expect_more = false;
-	destroyed = false;
-
-#ifndef NDEBUG
-	reading = false;
-	ended = false;
-	last_buffered_result = BufferedResult(-1);
-#endif
-}
-
-void
 BufferedSocket::Destroy() noexcept
 {
 	assert(!base.IsValid());

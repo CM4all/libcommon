@@ -89,12 +89,6 @@ public:
 	void Init(SocketDescriptor _fd, FdType _fd_type) noexcept;
 
 	/**
-	 * Move the socket from another #SocketWrapper instance.  This
-	 * disables scheduled events.
-	 */
-	void Init(SocketWrapper &&src) noexcept;
-
-	/**
 	 * Shut down the socket gracefully, allowing the TCP stack to
 	 * complete all pending transfers.  If you call Close() without
 	 * Shutdown(), it may reset the connection and discard pending
