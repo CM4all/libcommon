@@ -393,6 +393,12 @@ public:
 	 */
 	void Destroy() noexcept;
 
+	void SetTimeouts(const struct timeval *_read_timeout,
+			 const struct timeval *_write_timeout) noexcept {
+		read_timeout = _read_timeout;
+		write_timeout = _write_timeout;
+	}
+
 	/**
 	 * Is the object (already and) still usable?  That is, Init() was
 	 * called, but Destroy() was NOT called yet?  The socket may be closed
