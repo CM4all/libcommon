@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,6 +31,7 @@
  */
 
 #include "LoadFile.hxx"
+#include "Key.hxx"
 #include "Error.hxx"
 
 #include <openssl/ts.h>
@@ -103,4 +104,15 @@ LoadKeyFile(const char *path)
 		throw SslError("Failed to load key");
 
 	return UniqueEVP_PKEY(key);
+}
+
+std::pair<UniqueX509, UniqueEVP_PKEY>
+LoadCertKeyFile(const char *cert_path, const char *key_path)
+{
+	auto pair = std::make_pair(LoadCertFile(cert_path),
+				   LoadKeyFile(key_path));
+	if (!MatchModulus(*pair.first, *pair.second))
+		throw std::runtime_error("Key does not match certificate");
+
+	return pair;
 }

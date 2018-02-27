@@ -40,6 +40,7 @@
 #include "Unique.hxx"
 
 #include <forward_list>
+#include <utility>
 
 UniqueX509
 LoadCertFile(const char *path);
@@ -49,5 +50,8 @@ LoadCertChainFile(const char *path);
 
 UniqueEVP_PKEY
 LoadKeyFile(const char *path);
+
+std::pair<UniqueX509, UniqueEVP_PKEY>
+LoadCertKeyFile(const char *cert_path, const char *key_path);
 
 #endif
