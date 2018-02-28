@@ -928,6 +928,11 @@ enum class TranslationCommand : uint16_t {
      * address groups of child processes.
      */
     CHILD_TAG = 201,
+
+    /**
+     * The name of the SSL/TLS client certificate to be used.
+     */
+    CERTIFICATE = 202,
 };
 
 struct TranslationHeader {

@@ -3339,6 +3339,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
         child_options->tag = payload;
         return;
+
+    case TranslationCommand::CERTIFICATE:
+#if TRANSLATION_ENABLE_RADDRESS
+        if (http_address == nullptr || !http_address->ssl)
+            throw std::runtime_error("misplaced CERTIFICATE packet");
+
+        if (http_address->certificate != nullptr)
+            throw std::runtime_error("duplicate CERTIFICATE packet");
+
+        if (!IsValidName({payload, payload_length}))
+            throw std::runtime_error("malformed CERTIFICATE packet");
+
+        http_address->certificate = payload;
+        return;
+#else
+        break;
+#endif
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);
