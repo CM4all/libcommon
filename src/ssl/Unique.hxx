@@ -101,4 +101,26 @@ using UniqueEVP_PKEY_CTX = std::unique_ptr<EVP_PKEY_CTX, OpenSslDelete>;
 using UniqueBIO = std::unique_ptr<BIO, OpenSslDelete>;
 using UniqueBIGNUM = std::unique_ptr<BIGNUM, OpenSslDelete>;
 
+static inline auto
+UpRef(X509 &cert) noexcept
+{
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	CRYPTO_add(&cert.references, 1, CRYPTO_LOCK_X509);
+#else
+	X509_up_ref(&cert);
+#endif
+	return UniqueX509(&cert);
+}
+
+static inline auto
+UpRef(EVP_PKEY &key) noexcept
+{
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	CRYPTO_add(&key.references, 1, CRYPTO_LOCK_EVP_PKEY);
+#else
+	EVP_PKEY_up_ref(&key);
+#endif
+	return UniqueEVP_PKEY(&key);
+}
+
 #endif
