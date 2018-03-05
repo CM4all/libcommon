@@ -193,6 +193,13 @@ enum class Type : uint8_t {
 	 * contains #Attribute::MESSAGE.
 	 */
 	SUBMISSION = 3,
+
+	/**
+	 * A log message from a secure shell (SSH) server.  The record
+	 * usually also contains #Attribute::MESSAGE, and may contain
+	 * #Attribute::REMOTE_HOST and #Attribute::SITE.
+	 */
+	SSH = 4,
 };
 
 }}
