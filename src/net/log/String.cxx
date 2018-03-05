@@ -54,6 +54,9 @@ ToString(Type type) noexcept
 
 	case Type::SUBMISSION:
 		return "submission";
+
+	case Type::SSH:
+		return "ssh";
 	}
 
 	return nullptr;
@@ -70,6 +73,8 @@ ParseType(const char *s)
 		return Type::HTTP_ERROR;
 	if (StringIsEqual(s, "submission"))
 		return Type::SUBMISSION;
+	if (StringIsEqual(s, "ssh"))
+		return Type::SSH;
 	throw std::invalid_argument("Invalid log record type");
 }
 
