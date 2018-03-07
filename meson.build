@@ -249,6 +249,7 @@ net = static_library('net',
   'src/net/log/String.cxx',
   'src/net/log/Parser.cxx',
   'src/net/log/OneLine.cxx',
+  'src/net/log/Send.cxx',
   include_directories: inc,
   dependencies: [
   ])
