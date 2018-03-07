@@ -1203,16 +1203,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("malformed SITE packet");
 
         if (resource_address == &response.address)
+#endif
             response.site = payload;
+#if TRANSLATION_ENABLE_RADDRESS
         else if (jail != nullptr && jail->enabled)
             jail->site_id = payload;
         else
             throw std::runtime_error("misplaced SITE packet");
+#endif
 
         return;
-#else
-        break;
-#endif
 
     case TranslationCommand::CONTENT_TYPE:
 #if TRANSLATION_ENABLE_RADDRESS
