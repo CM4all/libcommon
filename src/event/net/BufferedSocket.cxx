@@ -155,7 +155,7 @@ BufferedSocket::InvokeData() noexcept
 			assert(result == BufferedResult::CLOSED);
 		} else {
 			last_buffered_result = result;
-			assert((result == BufferedResult::CLOSED) == !IsValid());
+			assert((result == BufferedResult::CLOSED) || IsValid());
 		}
 #endif
 
