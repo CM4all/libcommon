@@ -75,7 +75,7 @@ libdbus = dependency('dbus-1')
 libcap = dependency('libcap')
 libseccomp = dependency('libseccomp')
 liblua = dependency('luajit')
-libssl = dependency('openssl')
+libssl = dependency('openssl', version: '>= 1.0')
 
 if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'cpp')
