@@ -135,6 +135,9 @@ TranslateResponse::Clear()
 #endif
 
     test_path = expand_test_path = nullptr;
+
+    uncached = false;
+
 #if TRANSLATION_ENABLE_RADDRESS
     unsafe_base = false;
     easy_base = false;
@@ -314,6 +317,9 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     untrusted_raw_site_suffix =
         alloc.CheckDup(src.untrusted_raw_site_suffix);
 #endif
+
+    uncached = src.uncached;
+
 #if TRANSLATION_ENABLE_RADDRESS
     unsafe_base = src.unsafe_base;
     easy_base = src.easy_base;

@@ -166,6 +166,8 @@ struct TranslateResponse {
      */
     const char *expand_test_path;
 
+    bool uncached;
+
 #if TRANSLATION_ENABLE_RADDRESS
     bool unsafe_base;
 

@@ -3356,6 +3356,18 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
         break;
 #endif
+
+    case TranslationCommand::UNCACHED:
+#if TRANSLATION_ENABLE_RADDRESS
+        if (resource_address == nullptr)
+            throw std::runtime_error("misplaced UNCACHED packet");
+#endif
+
+        if (response.uncached)
+            throw std::runtime_error("duplicate UNCACHED packet");
+
+        response.uncached = true;
+        return;
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

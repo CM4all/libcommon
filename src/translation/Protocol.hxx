@@ -933,6 +933,11 @@ enum class TranslationCommand : uint16_t {
      * The name of the SSL/TLS client certificate to be used.
      */
     CERTIFICATE = 202,
+
+    /**
+     * Disable the HTTP cache for the given address.
+     */
+    UNCACHED = 203,
 };
 
 struct TranslationHeader {
