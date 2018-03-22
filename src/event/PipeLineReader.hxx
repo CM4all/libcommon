@@ -73,6 +73,10 @@ public:
 		event.Delete();
 	}
 
+	EventLoop &GetEventLoop() noexcept {
+		return event.GetEventLoop();
+	}
+
 	/**
 	 * Attempt to read again, and pass all data to the callback.  If
 	 * the last line isn't finalized with a newline character, it is
