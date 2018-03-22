@@ -265,6 +265,7 @@ event_net = static_library('event_net',
   'src/event/net/djb/NetstringServer.cxx',
   'src/event/net/djb/NetstringClient.cxx',
   'src/event/net/djb/QmqpClient.cxx',
+  'src/event/net/log/PipeAdapter.cxx',
   include_directories: inc,
   dependencies: [
     libevent,
