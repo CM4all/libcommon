@@ -38,7 +38,12 @@
  * Derive from this class to verify that its destructor gets called
  * before the process exits.
  */
-class LeakDetector : public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
+class LeakDetector {
+	friend class LeakDetectorContainer;
+
+	typedef boost::intrusive::list_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> LeakDetectorSiblingsHook;
+	LeakDetectorSiblingsHook leak_detector_siblings;
+
 	enum class State {
 		INITIAL,
 		REGISTERED,

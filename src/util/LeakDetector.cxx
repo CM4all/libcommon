@@ -39,6 +39,9 @@ class LeakDetectorContainer {
 	std::mutex mutex;
 
 	boost::intrusive::list<LeakDetector,
+			       boost::intrusive::member_hook<LeakDetector,
+							     LeakDetector::LeakDetectorSiblingsHook,
+							     &LeakDetector::leak_detector_siblings>,
 			       boost::intrusive::constant_time_size<true>> list;
 
 public:
