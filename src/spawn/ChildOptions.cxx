@@ -35,6 +35,7 @@
 #include "Prepared.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/djbhash.h"
 
 #if TRANSLATION_ENABLE_JAILCGI
@@ -176,13 +177,14 @@ ChildOptions::MakeId(char *p) const
     return p;
 }
 
-int
+UniqueFileDescriptor
 ChildOptions::OpenStderrPath() const
 {
     assert(stderr_path != nullptr);
 
-    return open(stderr_path, O_CREAT|O_WRONLY|O_APPEND|O_CLOEXEC|O_NOCTTY,
-                0600);
+    UniqueFileDescriptor fd;
+    fd.Open(stderr_path, O_CREAT|O_WRONLY|O_APPEND, 0600);
+    return fd;
 }
 
 void
@@ -205,11 +207,11 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
         /* open the file in the child process after jailing */
         dest.stderr_path = stderr_path;
     } else if (stderr_path != nullptr) {
-        int fd = OpenStderrPath();
-        if (fd < 0)
+        auto fd = OpenStderrPath();
+        if (!fd.IsDefined())
             throw FormatErrno("open('%s') failed", stderr_path);
 
-        dest.SetStderr(fd);
+        dest.SetStderr(std::move(fd));
     } else if (stderr_null) {
         const char *path = "/dev/null";
         int fd = open(path, O_WRONLY|O_CLOEXEC|O_NOCTTY);

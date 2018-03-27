@@ -45,6 +45,7 @@ struct ResourceLimits;
 struct JailParams;
 struct PreparedChildProcess;
 class MatchInfo;
+class UniqueFileDescriptor;
 
 /**
  * Options for launching a child process.
@@ -147,7 +148,7 @@ struct ChildOptions {
 
     char *MakeId(char *p) const;
 
-    int OpenStderrPath() const;
+    UniqueFileDescriptor OpenStderrPath() const;
 
     /**
      * Throws std::runtime_error on error.
