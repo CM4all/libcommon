@@ -183,7 +183,9 @@ ChildOptions::OpenStderrPath() const
     assert(stderr_path != nullptr);
 
     UniqueFileDescriptor fd;
-    fd.Open(stderr_path, O_CREAT|O_WRONLY|O_APPEND, 0600);
+    if (!fd.Open(stderr_path, O_CREAT|O_WRONLY|O_APPEND, 0600))
+        throw FormatErrno("open('%s') failed", stderr_path);
+
     return fd;
 }
 
@@ -207,11 +209,7 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
         /* open the file in the child process after jailing */
         dest.stderr_path = stderr_path;
     } else if (stderr_path != nullptr) {
-        auto fd = OpenStderrPath();
-        if (!fd.IsDefined())
-            throw FormatErrno("open('%s') failed", stderr_path);
-
-        dest.SetStderr(std::move(fd));
+        dest.SetStderr(OpenStderrPath());
     } else if (stderr_null) {
         const char *path = "/dev/null";
         int fd = open(path, O_WRONLY|O_CLOEXEC|O_NOCTTY);

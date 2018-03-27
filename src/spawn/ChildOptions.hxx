@@ -148,6 +148,9 @@ struct ChildOptions {
 
     char *MakeId(char *p) const;
 
+    /**
+     * Throws on error.
+     */
     UniqueFileDescriptor OpenStderrPath() const;
 
     /**
