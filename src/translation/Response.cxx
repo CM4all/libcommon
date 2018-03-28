@@ -457,7 +457,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 
 #if TRANSLATION_ENABLE_CACHE
 
-bool
+void
 TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
                               const char *request_uri)
 {
@@ -472,14 +472,10 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 
     const bool expandable = src.IsExpandable();
 
-    const bool has_base = address.CacheStore(alloc, src.address,
-                                             request_uri, base,
-                                             easy_base,
-                                             expandable);
-
-    if (!has_base)
-        /* the BASE value didn't match - clear it */
-        base = nullptr;
+    address.CacheStore(alloc, src.address,
+                       request_uri, base,
+                       easy_base,
+                       expandable);
 
     if (base != nullptr && !expandable && !easy_base) {
         const char *tail = base_tail(request_uri, base);
@@ -514,8 +510,6 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
             }
         }
     }
-
-    return has_base;
 }
 
 void
