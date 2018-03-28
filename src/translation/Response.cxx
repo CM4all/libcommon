@@ -463,12 +463,11 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 {
     CopyFrom(alloc, src);
 
-    const char *new_base = nullptr;
     if (auto_base) {
         assert(base == nullptr);
         assert(request_uri != nullptr);
 
-        base = new_base = src.address.AutoBase(alloc, request_uri);
+        base = src.address.AutoBase(alloc, request_uri);
     }
 
     const bool expandable = src.IsExpandable();
@@ -481,8 +480,6 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
     if (!has_base)
         /* the BASE value didn't match - clear it */
         base = nullptr;
-    else if (new_base != nullptr)
-        base = new_base;
 
     if (base != nullptr && !expandable && !easy_base) {
         const char *tail = base_tail(request_uri, base);
