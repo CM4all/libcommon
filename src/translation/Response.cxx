@@ -36,7 +36,7 @@
 #endif
 #if TRANSLATION_ENABLE_CACHE
 #include "uri/uri_base.hxx"
-#include "puri_base.hxx"
+#include "uri/Compare.hxx"
 #include "puri_escape.hxx"
 #include "HttpMessageResponse.hxx"
 #endif
@@ -503,9 +503,9 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
             }
 
             if (test_path != nullptr) {
-                size_t length = base_string_unescape(alloc, test_path, tail);
-                test_path = length != (size_t)-1
-                    ? alloc.DupZ({test_path, length})
+                const char *end = UriFindUnescapedSuffix(test_path, tail);
+                test_path = end != nullptr
+                    ? alloc.DupZ({test_path, end})
                     : nullptr;
             }
         }
