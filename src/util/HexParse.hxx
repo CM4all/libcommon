@@ -34,8 +34,8 @@
 
 #include "CharUtil.hxx"
 
-inline int
-ParseHexDigit(char ch)
+inline constexpr int
+ParseHexDigit(char ch) noexcept
 {
 	if (IsDigitASCII(ch))
 		return ch - '0';
