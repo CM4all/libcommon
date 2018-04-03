@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,34 +30,30 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "PipeLineReader.hxx"
-#include "util/ExtractLine.hxx"
+#pragma once
 
 #include <string.h>
 
-void
-PipeLineReader::TryRead(bool flush) noexcept
+template<typename B>
+auto
+ExtractLine(B &buffer, bool flush=false)
 {
-	assert(!buffer.IsFull());
+	auto r = buffer.Read();
+	char *newline = (char *)memchr(r.data, '\n', r.size);
+	if (newline == nullptr) {
+		if (!r.empty() && (flush || buffer.IsFull())) {
+			buffer.Clear();
+			return r;
+		}
 
-	auto w = buffer.Write();
-	assert(!w.empty());
-
-	auto nbytes = fd.Read(w.data, w.size);
-	if (nbytes <= 0) {
-		event.Delete();
-		callback(nullptr);
-		return;
+		return decltype(r)(nullptr);
 	}
 
-	buffer.Append(nbytes);
+	buffer.Consume(newline + 1 - r.data);
 
-	while (true) {
-		auto r = ExtractLine(buffer, flush);
-		if (r.IsNull())
-			break;
+	while (newline > r.data && newline[-1] == '\r')
+		--newline;
 
-		if (!callback(r))
-			return;
-	}
+	r.size = newline - r.data;
+	return r;
 }
