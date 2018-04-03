@@ -237,12 +237,6 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
         new_root = pivot_root;
         BindMount(new_root, new_root, MS_NOSUID|MS_RDONLY);
 
-        /* first bind-mount the new root onto itself to "unlock" the
-           kernel's mount object (flag MNT_LOCKED) in our namespace;
-           without this, the kernel would not allow an unprivileged
-           process to pivot_root to it */
-        BindMount(new_root, new_root, MS_NOSUID|MS_RDONLY);
-
         /* release a reference to the old root */
         ChdirOrThrow(new_root);
     } else if (mount_root_tmpfs) {
