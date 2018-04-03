@@ -292,9 +292,12 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
     }
 
     if (mount_pts)
+        /* the "newinstance" option is only needed with pre-4.7
+           kernels; from v4.7 on, this is implicit for all new devpts
+           mounts (kernel commit eedf265aa003) */
         MountOrThrow("devpts", "/dev/pts", "devpts",
                      MS_NOEXEC|MS_NOSUID,
-                     nullptr);
+                     "newinstance");
 
     if (HasBindMount()) {
         /* go to /mnt so we can refer to the old directories with a
