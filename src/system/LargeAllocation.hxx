@@ -55,7 +55,7 @@ public:
 	LargeAllocation(LargeAllocation &&src) noexcept
 		:data(std::exchange(src.data, nullptr)), the_size(src.the_size) {}
 
-	~LargeAllocation() {
+	~LargeAllocation() noexcept {
 		if (data != nullptr)
 			Free(data, the_size);
 	}
@@ -87,7 +87,7 @@ public:
 	}
 
 private:
-	static void Free(void *p, size_t size);
+	static void Free(void *p, size_t size) noexcept;
 };
 
 #endif

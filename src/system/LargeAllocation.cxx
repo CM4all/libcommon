@@ -63,7 +63,7 @@ LargeAllocation::LargeAllocation(size_t _size)
 }
 
 void
-LargeAllocation::Free(void *p, size_t size)
+LargeAllocation::Free(void *p, size_t size) noexcept
 {
 	munmap(p, size);
 }
