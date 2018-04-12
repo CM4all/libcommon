@@ -74,11 +74,7 @@ public:
 		}
 	}
 
-	void *get() noexcept {
-		return data;
-	}
-
-	const void *get() const noexcept {
+	void *get() const noexcept {
 		return data;
 	}
 
