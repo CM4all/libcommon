@@ -474,13 +474,14 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 		     const struct timeval *_write_timeout,
 		     BufferedSocketHandler &_handler) noexcept
 {
+	assert(!input.IsDefined());
+
 	base.Init(_fd, _fd_type);
 
 	read_timeout = _read_timeout;
 	write_timeout = _write_timeout;
 
 	handler = &_handler;
-	input.SetNull();
 	direct = false;
 	expect_more = false;
 	destroyed = false;
