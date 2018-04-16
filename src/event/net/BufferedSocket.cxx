@@ -469,6 +469,26 @@ BufferedSocket::OnSocketTimeout() noexcept
  */
 
 void
+BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
+{
+	base.Init(_fd, _fd_type);
+
+	read_timeout = nullptr;
+	write_timeout = nullptr;
+
+	handler = nullptr;
+	direct = false;
+	expect_more = false;
+	destroyed = false;
+
+#ifndef NDEBUG
+	reading = false;
+	ended = false;
+	last_buffered_result = BufferedResult(-1);
+#endif
+}
+
+void
 BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 		     const struct timeval *_read_timeout,
 		     const struct timeval *_write_timeout,

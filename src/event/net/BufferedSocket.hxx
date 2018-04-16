@@ -349,6 +349,13 @@ public:
 		return defer_read.GetEventLoop();
 	}
 
+	/**
+	 * Initialize a "dummy" instance which cannot be used to
+	 * schedule events (because there is no handler); the next
+	 * Reinit() call finishes initialization.
+	 */
+	void Init(SocketDescriptor _fd, FdType _fd_type) noexcept;
+
 	void Init(SocketDescriptor _fd, FdType _fd_type,
 		  const struct timeval *_read_timeout,
 		  const struct timeval *_write_timeout,
