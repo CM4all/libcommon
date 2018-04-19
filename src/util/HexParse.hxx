@@ -34,7 +34,10 @@
 
 #include "CharUtil.hxx"
 
-inline constexpr int
+#if __cpp_constexpr >= 201304
+constexpr /* requires C++14 */
+#endif
+inline int
 ParseHexDigit(char ch) noexcept
 {
 	if (IsDigitASCII(ch))
