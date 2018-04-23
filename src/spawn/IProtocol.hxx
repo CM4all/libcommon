@@ -34,6 +34,14 @@
 
 #include <stdint.h>
 
+/*
+ * This header contains definitions for the internal protocol between
+ * #SpawnServerClient and #SpawnServerConnection.  It is not a stable
+ * protocol, because both client and server are contained in the same
+ * executable (even though the server runs in a forked child process
+ * as root).
+ */
+
 enum class SpawnRequestCommand : uint8_t {
     CONNECT,
     EXEC,
