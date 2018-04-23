@@ -34,7 +34,7 @@
 #define BENG_PROXY_SPAWN_BUILDER_HXX
 
 #include "net/ScmRightsBuilder.hxx"
-#include "Protocol.hxx"
+#include "IProtocol.hxx"
 #include "system/Error.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"

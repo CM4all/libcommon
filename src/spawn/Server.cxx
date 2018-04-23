@@ -32,7 +32,7 @@
 
 #include "Server.hxx"
 #include "Config.hxx"
-#include "Protocol.hxx"
+#include "IProtocol.hxx"
 #include "Parser.hxx"
 #include "Builder.hxx"
 #include "Prepared.hxx"

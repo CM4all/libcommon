@@ -31,7 +31,7 @@
  */
 
 #include "Client.hxx"
-#include "Protocol.hxx"
+#include "IProtocol.hxx"
 #include "Builder.hxx"
 #include "Parser.hxx"
 #include "Prepared.hxx"
