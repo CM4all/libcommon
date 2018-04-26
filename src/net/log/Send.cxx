@@ -161,7 +161,7 @@ FillIovec(V &v, const Datagram &d)
 	} traffic;
 
 	if (d.valid_traffic) {
-		v.push_back(MakeIovecAttribute<Attribute::LENGTH>());
+		v.push_back(MakeIovecAttribute<Attribute::TRAFFIC>());
 		traffic.received = ToBE64(d.traffic_received);
 		traffic.sent = ToBE64(d.traffic_sent);
 		v.push_back(MakeIovecT(traffic));
