@@ -86,7 +86,11 @@ public:
 	TemplateServerSocket(EventLoop &event_loop, P&&... _params)
 		:ServerSocket(event_loop), params(std::forward<P>(_params)...) {}
 
-	~TemplateServerSocket() {
+	~TemplateServerSocket() noexcept {
+		CloseAllConnections();
+	}
+
+	void CloseAllConnections() noexcept {
 		while (!connections.empty())
 			delete &connections.front();
 	}
