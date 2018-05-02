@@ -41,6 +41,7 @@
 #include <sys/wait.h>
 #include <sys/signalfd.h>
 #include <sys/capability.h>
+#include <sched.h>
 #include <stdlib.h>
 #include <dirent.h>
 
@@ -191,4 +192,39 @@ SpawnInit(pid_t child_pid, bool remain)
     }
 
     return last_status;
+}
+
+pid_t
+UnshareForkSpawnInit()
+{
+    assert(!init_signal_fd.IsDefined());
+
+    if (unshare(CLONE_NEWPID) < 0)
+        throw MakeErrno("unshare(CLONE_NEWPID) failed");
+
+    pid_t pid = fork();
+    if (pid < 0)
+        throw MakeErrno("fork() failed");
+
+    if (pid > 0)
+        return pid;
+
+    sigemptyset(&init_signal_mask);
+    sigaddset(&init_signal_mask, SIGINT);
+    sigaddset(&init_signal_mask, SIGQUIT);
+    sigaddset(&init_signal_mask, SIGTERM);
+    sigaddset(&init_signal_mask, SIGCHLD);
+
+    sigprocmask(SIG_BLOCK, &init_signal_mask, nullptr);
+
+    SetProcessName("init");
+
+    CloseAllFiles();
+
+    if (!init_signal_fd.CreateSignalFD(&init_signal_mask, false)) {
+        perror("signalfd() failed");
+        _exit(EXIT_FAILURE);
+    }
+
+    _exit(SpawnInit(0, true));
 }

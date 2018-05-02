@@ -61,4 +61,18 @@ SpawnInitFork();
 int
 SpawnInit(pid_t child_pid, bool remain);
 
+/**
+ * Fork an init process in a new PID namespace.
+ *
+ * Note: a side effect of this function is that the caller's
+ * "pid_for_children" namespace is changed to the new PID namespace.
+ *
+ * Throws on error.
+ *
+ * @return pid the pid of the new init process (as seen by the
+ * caller's PID namespace)
+ */
+pid_t
+UnshareForkSpawnInit();
+
 #endif
