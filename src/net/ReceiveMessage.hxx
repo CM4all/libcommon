@@ -69,6 +69,11 @@ ReceiveMessage(SocketDescriptor s,
 	       ReceiveMessageBuffer<PAYLOAD_SIZE, CMSG_SIZE> &buffer,
 	       int flags)
 {
+#ifdef MSG_CMSG_CLOEXEC
+	/* implemented since Linux 2.6.23 */
+	flags |= MSG_CMSG_CLOEXEC;
+#endif
+
 	struct iovec iov;
 	iov.iov_base = buffer.payload;
 	iov.iov_len = sizeof(buffer.payload);

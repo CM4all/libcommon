@@ -80,8 +80,14 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 
 	auto *m = GetMmsg();
 
+	int flags = MSG_WAITFORONE;
+#ifdef MSG_CMSG_CLOEXEC
+	/* implemented since Linux 2.6.23 */
+	flags |= MSG_CMSG_CLOEXEC;
+#endif
+
 	int result = recvmmsg(s.Get(), m, allocated_datagrams,
-			      MSG_WAITFORONE, nullptr);
+			      flags, nullptr);
 	if (result == 0)
 		return false;
 
