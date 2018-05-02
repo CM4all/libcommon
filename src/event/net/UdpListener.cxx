@@ -84,8 +84,7 @@ bool
 UdpListener::ReceiveOne()
 {
 	ReceiveMessageBuffer<4096, 1024> buffer;
-	auto result = ReceiveMessage(fd, buffer,
-				     MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
+	auto result = ReceiveMessage(fd, buffer, MSG_DONTWAIT);
 	result.fds.clear();
 	int uid = result.cred != nullptr
 		? result.cred->uid
