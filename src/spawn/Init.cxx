@@ -92,10 +92,8 @@ SpawnInitFork()
 
         CloseAllFiles();
 
-        if (!init_signal_fd.CreateSignalFD(&init_signal_mask))
+        if (!init_signal_fd.CreateSignalFD(&init_signal_mask, false))
             throw MakeErrno("signalfd() failed");
-
-        init_signal_fd.SetBlocking();
     }
 
     return pid;

@@ -222,13 +222,19 @@ FileDescriptor::CreateEventFD(unsigned initval) noexcept
 #ifdef HAVE_SIGNALFD
 
 bool
-FileDescriptor::CreateSignalFD(const sigset_t *mask) noexcept
+FileDescriptor::CreateSignalFD(const sigset_t *mask, bool nonblock) noexcept
 {
 #ifdef __BIONIC__
+	int flags = O_CLOEXEC;
+	if (nonblock)
+		flags |= O_NONBLOCK;
 	int new_fd = syscall(__NR_signalfd4, fd, mask, sizeof(*mask),
-			     O_NONBLOCK|O_CLOEXEC);
+			     flags);
 #else
-	int new_fd = ::signalfd(fd, mask, SFD_NONBLOCK|SFD_CLOEXEC);
+	int flags = SFD_CLOEXEC;
+	if (nonblock)
+		flags |= SFD_NONBLOCK;
+	int new_fd = ::signalfd(fd, mask, flags);
 #endif
 	if (new_fd < 0)
 		return false;

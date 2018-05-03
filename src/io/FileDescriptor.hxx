@@ -170,7 +170,7 @@ public:
 #endif
 
 #ifdef HAVE_SIGNALFD
-	bool CreateSignalFD(const sigset_t *mask) noexcept;
+	bool CreateSignalFD(const sigset_t *mask, bool nonblock=true) noexcept;
 #endif
 
 #ifdef HAVE_INOTIFY
