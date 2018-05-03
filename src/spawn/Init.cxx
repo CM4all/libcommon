@@ -134,7 +134,7 @@ LimitSysCalls(FileDescriptor read_fd, pid_t kill_pid)
 }
 
 int
-SpawnInit(pid_t child_pid)
+SpawnInit(pid_t child_pid, bool remain)
 {
     if (geteuid() == 0)
         DropCapabilities();
@@ -149,8 +149,13 @@ SpawnInit(pid_t child_pid)
         while (true) {
             int status;
             pid_t pid = waitpid(-1, &status, WNOHANG);
-            if (pid < 0)
+            if (pid < 0) {
+                if (remain && errno == ECHILD)
+                    /* no more child processes: keep running */
+                    break;
+
                 return last_status;
+            }
 
             if (pid == 0)
                 break;

@@ -192,7 +192,7 @@ try {
         assert(pid >= 0);
 
         if (pid > 0)
-            _exit(SpawnInit(pid));
+            _exit(SpawnInit(pid, false));
     }
 
     if (!p.uid_gid.IsEmpty())

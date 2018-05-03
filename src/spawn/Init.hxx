@@ -51,10 +51,14 @@ SpawnInitFork();
  * An "init" implementation for PID namespaces.
  *
  * @param child_pid the main child's process id obtained from
- * SpawnInitFork()
+ * SpawnInitFork(); its exit status is returned by this function; a
+ * non-positive value disables this feature
+ * @param remain keep running after the last child process has exited?
+ * In this mode, the function will return only after receiving
+ * SIGTERM, SIGINT or SIGQUIT
  * @return the exit status
  */
 int
-SpawnInit(pid_t child_pid);
+SpawnInit(pid_t child_pid, bool remain);
 
 #endif
