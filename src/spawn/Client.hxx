@@ -36,6 +36,7 @@
 #include "Interface.hxx"
 #include "Config.hxx"
 #include "event/SocketEvent.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 
 #include <map>
 
@@ -54,7 +55,7 @@ class SpawnServerClient final : public SpawnService {
 
     const SpawnConfig config;
 
-    int fd;
+    UniqueSocketDescriptor socket;
 
     unsigned last_pid = 0;
 
@@ -74,7 +75,8 @@ class SpawnServerClient final : public SpawnService {
 
 public:
     explicit SpawnServerClient(EventLoop &event_loop,
-                               const SpawnConfig &_config, int _fd,
+                               const SpawnConfig &_config,
+                               UniqueSocketDescriptor _socket,
                                bool _verify=true);
     ~SpawnServerClient();
 
@@ -90,11 +92,11 @@ public:
         return cgroups;
     }
 
-    void ReplaceSocket(int new_fd);
+    void ReplaceSocket(UniqueSocketDescriptor new_socket);
 
     void Shutdown();
 
-    int Connect();
+    UniqueSocketDescriptor Connect();
 
 private:
     int MakePid() {

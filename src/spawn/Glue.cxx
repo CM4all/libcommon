@@ -34,6 +34,7 @@
 #include "Client.hxx"
 #include "Launch.hxx"
 #include "Registry.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "system/Error.hxx"
 
 #include <unistd.h>
@@ -45,31 +46,21 @@ StartSpawnServer(const SpawnConfig &config,
                  SpawnHook *hook,
                  std::function<void()> post_clone)
 {
-    int sv[2];
-    if (socketpair(AF_LOCAL, SOCK_SEQPACKET|SOCK_CLOEXEC|SOCK_NONBLOCK,
-                   0, sv) < 0)
+    UniqueSocketDescriptor s1, s2;
+    if (!UniqueSocketDescriptor::CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET, 0,
+                                                          s1, s2))
         throw MakeErrno("socketpair() failed");
 
-    const int close_fd = sv[1];
-
-    pid_t pid;
-    try {
-        pid = LaunchSpawnServer(config, hook, sv[0],
-                                [close_fd, post_clone](){
-                                    close(close_fd);
-                                    post_clone();
-                                });
-    } catch (...) {
-        close(sv[0]);
-        close(sv[1]);
-        throw;
-    }
+    auto pid = LaunchSpawnServer(config, hook, std::move(s1),
+                                 [&s2, post_clone](){
+                                     s2.Close();
+                                     post_clone();
+                                 });
 
     child_process_registry.Add(pid, "spawn", nullptr);
 
-    close(sv[0]);
     return new SpawnServerClient(child_process_registry.GetEventLoop(),
-                                 config, sv[1],
+                                 config, std::move(s2),
                                  /* don't verify if there is a hook,
                                     because the hook may have its own
                                     overriding rules */

@@ -37,6 +37,7 @@
 #include "Server.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
 
@@ -53,7 +54,7 @@ struct LaunchSpawnServerContext {
 
     SpawnHook *hook;
 
-    int fd;
+    UniqueSocketDescriptor socket;
 
     std::function<void()> post_clone;
 
@@ -121,19 +122,21 @@ RunSpawnServer2(void *p)
         }
     }
 
-    RunSpawnServer(ctx.config, cgroup_state, ctx.hook, ctx.fd);
+    RunSpawnServer(ctx.config, cgroup_state, ctx.hook, std::move(ctx.socket));
     return 0;
 }
 
 pid_t
-LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook, int fd,
+LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
+                  UniqueSocketDescriptor socket,
                   std::function<void()> post_clone)
 {
     UniqueFileDescriptor read_pipe, write_pipe;
     if (!UniqueFileDescriptor::CreatePipe(read_pipe, write_pipe))
         throw MakeErrno("pipe() failed");
 
-    LaunchSpawnServerContext ctx{config, hook, fd, std::move(post_clone),
+    LaunchSpawnServerContext ctx{config, hook, std::move(socket),
+            std::move(post_clone),
             read_pipe.ToFileDescriptor(), write_pipe.ToFileDescriptor(), true};
 
     char stack[32768];

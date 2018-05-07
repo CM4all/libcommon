@@ -36,10 +36,11 @@
 struct SpawnConfig;
 struct CgroupState;
 class SpawnHook;
+class UniqueSocketDescriptor;
 
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
                SpawnHook *hook,
-               int fd);
+               UniqueSocketDescriptor fd);
 
 #endif

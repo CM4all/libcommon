@@ -43,6 +43,7 @@
 #include "Registry.hxx"
 #include "ExitListener.hxx"
 #include "event/SocketEvent.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/ConstBuffer.hxx"
@@ -105,6 +106,13 @@ public:
 
         return UniqueFileDescriptor(FileDescriptor(list.shift()));
     }
+
+    UniqueSocketDescriptor GetSocket() {
+        if (IsEmpty())
+            throw MalformedSpawnPayloadError();
+
+        return UniqueSocketDescriptor(list.shift());
+    }
 };
 
 class SpawnServerConnection;
@@ -160,7 +168,7 @@ public:
 class SpawnServerConnection
     : public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
     SpawnServerProcess &process;
-    const int fd;
+    UniqueSocketDescriptor socket;
 
     const LLogger logger;
 
@@ -174,7 +182,8 @@ class SpawnServerConnection
     ChildIdMap children;
 
 public:
-    SpawnServerConnection(SpawnServerProcess &_process, int _fd);
+    SpawnServerConnection(SpawnServerProcess &_process,
+                          UniqueSocketDescriptor &&_socket);
     ~SpawnServerConnection();
 
     void OnChildProcessExit(int id, int status, SpawnServerChild *child);
@@ -252,8 +261,8 @@ public:
         return hook != nullptr && hook->Verify(p);
     }
 
-    void AddConnection(int fd) {
-        auto connection = new SpawnServerConnection(*this, fd);
+    void AddConnection(UniqueSocketDescriptor &&_socket) {
+        auto connection = new SpawnServerConnection(*this, std::move(_socket));
         connections.push_back(*connection);
     }
 
@@ -277,10 +286,11 @@ private:
 };
 
 SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
-                                             int _fd)
-    :process(_process), fd(_fd),
+                                             UniqueSocketDescriptor &&_socket)
+    :process(_process), socket(std::move(_socket)),
      logger("spawn"),
-     event(process.GetEventLoop(), fd, SocketEvent::READ|SocketEvent::PERSIST,
+     event(process.GetEventLoop(), socket.Get(),
+           SocketEvent::READ|SocketEvent::PERSIST,
            BIND_THIS_METHOD(ReadEventCallback)) {
     event.Add();
 }
@@ -288,7 +298,6 @@ SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
 SpawnServerConnection::~SpawnServerConnection()
 {
     event.Delete();
-    close(fd);
 
     auto &registry = process.GetChildProcessRegistry();
     children.clear_and_dispose([&registry](SpawnServerChild *child){
@@ -312,7 +321,7 @@ SpawnServerConnection::SendExit(int id, int status)
 
     try {
         try {
-            ::Send<1>(fd, s);
+            ::Send<1>(socket.Get(), s);
         } catch (const std::system_error &e) {
             if (e.code().category() == std::system_category() &&
                 e.code().value() == EAGAIN) {
@@ -320,7 +329,7 @@ SpawnServerConnection::SendExit(int id, int status)
                    has filled (see /proc/sys/net/unix/max_dgram_qlen);
                    wait some more before giving up */
                 struct pollfd pfd;
-                pfd.fd = fd;
+                pfd.fd = socket.Get();
                 pfd.events = POLLOUT;
 
                 static const struct timespec timeout = {10, 0};
@@ -332,7 +341,7 @@ SpawnServerConnection::SendExit(int id, int status)
 
                 if (ppoll(&pfd, 1, &timeout, &signals) > 0) {
                     /* try again (may throw another exception) */
-                    ::Send<1>(fd, s);
+                    ::Send<1>(socket.Get(), s);
                     /* yay, it worked! */
                     return;
                 }
@@ -664,7 +673,7 @@ SpawnServerConnection::HandleMessage(ConstBuffer<uint8_t> payload,
         if (!payload.empty() || fds.size() != 1)
             throw MalformedSpawnPayloadError();
 
-        process.AddConnection(fds.Get().Steal());
+        process.AddConnection(fds.GetSocket());
         break;
 
     case SpawnRequestCommand::EXEC:
@@ -716,7 +725,7 @@ SpawnServerConnection::ReadEventCallback(unsigned)
         .msg_flags = 0,
     };
 
-    ssize_t nbytes = recvmsg(fd, &msg, MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
+    ssize_t nbytes = recvmsg(socket.Get(), &msg, MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
     if (nbytes <= 0) {
         if (nbytes < 0)
             logger(2, "recvmsg() failed: ", strerror(errno));
@@ -740,17 +749,17 @@ SpawnServerProcess::Run()
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
                SpawnHook *hook,
-               int fd)
+               UniqueSocketDescriptor socket)
 {
     if (cgroup_state.IsEnabled()) {
         /* tell the client that the cgroups feature is available;
            there is no other way for the client to know if we don't
            tell him; see SpawnServerClient::SupportsCgroups() */
         static constexpr auto cmd = SpawnResponseCommand::CGROUPS_AVAILABLE;
-        send(fd, &cmd, sizeof(cmd), MSG_NOSIGNAL);
+        send(socket.Get(), &cmd, sizeof(cmd), MSG_NOSIGNAL);
     }
 
     SpawnServerProcess process(config, cgroup_state, hook);
-    process.AddConnection(fd);
+    process.AddConnection(std::move(socket));
     process.Run();
 }

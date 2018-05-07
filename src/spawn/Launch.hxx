@@ -39,9 +39,11 @@
 
 struct SpawnConfig;
 class SpawnHook;
+class UniqueSocketDescriptor;
 
 pid_t
-LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook, int fd,
+LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
+                  UniqueSocketDescriptor socket,
                   std::function<void()> post_clone);
 
 #endif

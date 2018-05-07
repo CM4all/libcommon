@@ -53,10 +53,12 @@
 static constexpr size_t MAX_FDS = 8;
 
 SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
-                                     const SpawnConfig &_config, int _fd,
+                                     const SpawnConfig &_config,
+                                     UniqueSocketDescriptor _socket,
                                      bool _verify)
-    :config(_config), fd(_fd),
-     read_event(event_loop, fd, SocketEvent::READ|SocketEvent::PERSIST,
+    :config(_config), socket(std::move(_socket)),
+     read_event(event_loop, socket.Get(),
+                SocketEvent::READ|SocketEvent::PERSIST,
                 BIND_THIS_METHOD(OnSocketEvent)),
      verify(_verify)
 {
@@ -65,36 +67,34 @@ SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 
 SpawnServerClient::~SpawnServerClient()
 {
-    if (fd >= 0)
+    if (socket.IsDefined())
         Close();
 }
 
 void
-SpawnServerClient::ReplaceSocket(int new_fd)
+SpawnServerClient::ReplaceSocket(UniqueSocketDescriptor new_socket)
 {
-    assert(fd >= 0);
-    assert(new_fd >= 0);
-    assert(fd != new_fd);
+    assert(socket.IsDefined());
+    assert(new_socket.IsDefined());
     assert(!shutting_down);
 
     processes.clear();
 
     Close();
 
-    fd = new_fd;
+    socket = std::move(new_socket);
 
-    read_event.Set(fd, SocketEvent::READ|SocketEvent::PERSIST);
+    read_event.Set(socket.Get(), SocketEvent::READ|SocketEvent::PERSIST);
     read_event.Add();
 }
 
 void
 SpawnServerClient::Close()
 {
-    assert(fd >= 0);
+    assert(socket.IsDefined());
 
     read_event.Delete();
-    close(fd);
-    fd = -1;
+    socket.Close();
 }
 
 void
@@ -102,14 +102,14 @@ SpawnServerClient::Shutdown()
 {
     shutting_down = true;
 
-    if (processes.empty() && fd >= 0)
+    if (processes.empty() && socket.IsDefined())
         Close();
 }
 
 void
 SpawnServerClient::CheckOrAbort()
 {
-    if (fd < 0) {
+    if (!socket.IsDefined()) {
         fprintf(stderr, "SpawnChildProcess: the spawner is gone, emergency!\n");
         exit(EXIT_FAILURE);
     }
@@ -118,40 +118,37 @@ SpawnServerClient::CheckOrAbort()
 inline void
 SpawnServerClient::Send(ConstBuffer<void> payload, ConstBuffer<int> fds)
 {
-    ::Send<MAX_FDS>(fd, payload, fds);
+    ::Send<MAX_FDS>(socket.Get(), payload, fds);
 }
 
 inline void
 SpawnServerClient::Send(const SpawnSerializer &s)
 {
-    ::Send<MAX_FDS>(fd, s);
+    ::Send<MAX_FDS>(socket.Get(), s);
 }
 
-int
+UniqueSocketDescriptor
 SpawnServerClient::Connect()
 {
     CheckOrAbort();
 
-    int sv[2];
-    if (socketpair(AF_LOCAL, SOCK_SEQPACKET|SOCK_CLOEXEC|SOCK_NONBLOCK,
-                   0, sv) < 0)
+    UniqueSocketDescriptor local_socket, remote_socket;
+    if (!UniqueSocketDescriptor::CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET, 0,
+                                                          local_socket,
+                                                          remote_socket))
         throw MakeErrno("socketpair() failed");
 
-    const int local_fd = sv[0];
-    const int remote_fd = sv[1];
-
-    AtScopeExit(remote_fd){ close(remote_fd); };
-
     static constexpr SpawnRequestCommand cmd = SpawnRequestCommand::CONNECT;
+
+    const int remote_fd = remote_socket.Get();
 
     try {
         Send(ConstBuffer<void>(&cmd, sizeof(cmd)), {&remote_fd, 1});
     } catch (...) {
-        close(local_fd);
         std::throw_with_nested(std::runtime_error("Spawn server failed"));
     }
 
-    return local_fd;
+    return local_socket;
 }
 
 static void
@@ -446,7 +443,7 @@ SpawnServerClient::OnSocketEvent(unsigned)
         msg.msg_controllen = 0;
     }
 
-    int n = recvmmsg(fd, &msgs.front(), msgs.size(),
+    int n = recvmmsg(socket.Get(), &msgs.front(), msgs.size(),
                      MSG_DONTWAIT|MSG_CMSG_CLOEXEC, nullptr);
     if (n <= 0) {
         if (n < 0)
