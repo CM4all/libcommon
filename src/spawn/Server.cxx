@@ -44,6 +44,7 @@
 #include "ExitListener.hxx"
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
+#include "net/ReceiveMessage.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/ConstBuffer.hxx"
@@ -69,49 +70,35 @@
 class SpawnServerProcess;
 
 class SpawnFdList {
-    ConstBuffer<int> list;
+    std::forward_list<UniqueFileDescriptor> list;
 
 public:
-    SpawnFdList(std::nullptr_t n):list(n) {}
+    SpawnFdList(std::forward_list<UniqueFileDescriptor> &&_list) noexcept
+        :list(std::move(_list)) {}
 
-    explicit SpawnFdList(ConstBuffer<int> _list)
-        :list(_list) {}
+    SpawnFdList(SpawnFdList &&src) = default;
 
-    SpawnFdList(SpawnFdList &&src)
-        :list(src.list) {
-        src.list = nullptr;
-    }
-
-    ~SpawnFdList() {
-        for (auto fd : list)
-            close(fd);
-    }
-
-    SpawnFdList &operator=(SpawnFdList &&src) {
-        std::swap(list, src.list);
-        return *this;
-    }
+    SpawnFdList &operator=(SpawnFdList &&src) = default;
 
     bool IsEmpty() {
         return list.empty();
     }
 
     size_t size() const {
-        return list.size;
+        return std::distance(list.begin(), list.end());
     }
 
     UniqueFileDescriptor Get() {
         if (IsEmpty())
             throw MalformedSpawnPayloadError();
 
-        return UniqueFileDescriptor(FileDescriptor(list.shift()));
+        auto result = std::move(list.front());
+        list.pop_front();
+        return result;
     }
 
     UniqueSocketDescriptor GetSocket() {
-        if (IsEmpty())
-            throw MalformedSpawnPayloadError();
-
-        return UniqueSocketDescriptor(list.shift());
+        return UniqueSocketDescriptor(Get().Steal());
     }
 };
 
@@ -197,7 +184,7 @@ private:
     void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
     void HandleKillMessage(SpawnPayload payload, SpawnFdList &&fds);
     void HandleMessage(ConstBuffer<uint8_t> payload, SpawnFdList &&fds);
-    void HandleMessage(const struct msghdr &msg, ConstBuffer<uint8_t> payload);
+    void HandleMessage(ReceiveMessageResult &&result);
 
     void ReadEventCallback(unsigned events);
 };
@@ -687,57 +674,31 @@ SpawnServerConnection::HandleMessage(ConstBuffer<uint8_t> payload,
 }
 
 inline void
-SpawnServerConnection::HandleMessage(const struct msghdr &msg,
-                                     ConstBuffer<uint8_t> payload)
+SpawnServerConnection::HandleMessage(ReceiveMessageResult &&result)
 {
-    SpawnFdList fds = nullptr;
-
-    const struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
-    if (cmsg != nullptr && cmsg->cmsg_level == SOL_SOCKET &&
-        cmsg->cmsg_type == SCM_RIGHTS) {
-        /* with gcc 4.9, we need const_cast to work around warning */
-        auto data = ConstBuffer<void>(CMSG_DATA(const_cast<struct cmsghdr *>(cmsg)),
-                                      cmsg->cmsg_len - CMSG_LEN(0));
-        fds = SpawnFdList(ConstBuffer<int>::FromVoid(data));
-    }
-
-    HandleMessage(payload, std::move(fds));
+    HandleMessage(ConstBuffer<uint8_t>::FromVoid(result.payload),
+                  std::move(result.fds));
 }
 
 inline void
 SpawnServerConnection::ReadEventCallback(unsigned)
-{
-    uint8_t payload[8192];
+try {
+    ReceiveMessageBuffer<8192, CMSG_SPACE(sizeof(int) * 32)> rmb;
 
-    struct iovec iov;
-    iov.iov_base = payload;
-    iov.iov_len = sizeof(payload);
-
-    int fds[32];
-    char ccmsg[CMSG_SPACE(sizeof(fds))];
-    struct msghdr msg = {
-        .msg_name = nullptr,
-        .msg_namelen = 0,
-        .msg_iov = &iov,
-        .msg_iovlen = 1,
-        .msg_control = ccmsg,
-        .msg_controllen = sizeof(ccmsg),
-        .msg_flags = 0,
-    };
-
-    ssize_t nbytes = recvmsg(socket.Get(), &msg, MSG_DONTWAIT|MSG_CMSG_CLOEXEC);
-    if (nbytes <= 0) {
-        if (nbytes < 0)
-            logger(2, "recvmsg() failed: ", strerror(errno));
+    auto result = ReceiveMessage(socket, rmb, MSG_DONTWAIT);
+    if (result.payload.empty()) {
         RemoveConnection();
         return;
     }
 
     try {
-        HandleMessage(msg, {payload, size_t(nbytes)});
+        HandleMessage(std::move(result));
     } catch (MalformedSpawnPayloadError) {
         logger(3, "Malformed spawn payload");
     }
+} catch (...) {
+    logger(2, std::current_exception());
+    RemoveConnection();
 }
 
 inline void
