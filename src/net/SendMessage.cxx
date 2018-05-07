@@ -42,7 +42,7 @@
 size_t
 SendMessage(SocketDescriptor s, const MessageHeader &mh, int flags)
 {
-	auto nbytes = sendmsg(s.Get(), mh, flags);
+	auto nbytes = sendmsg(s.Get(), &mh, flags);
 	if (nbytes < 0)
 		throw MakeErrno("sendmsg() failed");
 

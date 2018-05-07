@@ -45,23 +45,17 @@ class SocketDescriptor;
 /**
  * A convenience wrapper for struct msghdr.
  */
-class MessageHeader {
-	struct msghdr mh;
-
+class MessageHeader : public msghdr {
 public:
 	constexpr MessageHeader(ConstBuffer<struct iovec> payload) noexcept
-		:mh{nullptr, 0,
+		:msghdr{nullptr, 0,
 			const_cast<struct iovec *>(payload.data),
 			payload.size,
 			nullptr, 0, 0} {}
 
-	constexpr operator const struct msghdr *() const noexcept {
-		return &mh;
-	}
-
 	MessageHeader &SetAddress(SocketAddress address) noexcept {
-		mh.msg_name = const_cast<struct sockaddr *>(address.GetAddress());
-		mh.msg_namelen = address.GetSize();
+		msg_name = const_cast<struct sockaddr *>(address.GetAddress());
+		msg_namelen = address.GetSize();
 		return *this;
 	}
 };
