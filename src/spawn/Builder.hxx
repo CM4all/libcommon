@@ -35,6 +35,7 @@
 
 #include "net/SocketDescriptor.hxx"
 #include "net/ScmRightsBuilder.hxx"
+#include "net/SendMessage.hxx"
 #include "IProtocol.hxx"
 #include "system/Error.hxx"
 #include "util/ConstBuffer.hxx"
@@ -43,7 +44,6 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
-#include <sys/socket.h>
 
 class SpawnPayloadTooLargeError {};
 
@@ -149,23 +149,14 @@ Send(SocketDescriptor s, ConstBuffer<void> payload, ConstBuffer<int> fds)
         .iov_len = payload.size,
     };
 
-    struct msghdr msg = {
-        .msg_name = nullptr,
-        .msg_namelen = 0,
-        .msg_iov = &vec,
-        .msg_iovlen = 1,
-        .msg_control = nullptr,
-        .msg_controllen = 0,
-        .msg_flags = 0,
-    };
+    MessageHeader msg(ConstBuffer<struct iovec>(&vec, 1));
 
     ScmRightsBuilder<MAX_FDS> b(msg);
     for (int i : fds)
         b.push_back(i);
     b.Finish(msg);
 
-    if (sendmsg(s.Get(), &msg, MSG_NOSIGNAL) < 0)
-        throw MakeErrno("send() failed");
+    SendMessage(s, msg, MSG_NOSIGNAL);
 }
 
 template<size_t MAX_FDS>
