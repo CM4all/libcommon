@@ -308,7 +308,7 @@ SpawnServerConnection::SendExit(int id, int status)
 
     try {
         try {
-            ::Send<1>(socket.Get(), s);
+            ::Send<1>(socket, s);
         } catch (const std::system_error &e) {
             if (e.code().category() == std::system_category() &&
                 e.code().value() == EAGAIN) {
@@ -328,7 +328,7 @@ SpawnServerConnection::SendExit(int id, int status)
 
                 if (ppoll(&pfd, 1, &timeout, &signals) > 0) {
                     /* try again (may throw another exception) */
-                    ::Send<1>(socket.Get(), s);
+                    ::Send<1>(socket, s);
                     /* yay, it worked! */
                     return;
                 }

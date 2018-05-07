@@ -118,13 +118,13 @@ SpawnServerClient::CheckOrAbort()
 inline void
 SpawnServerClient::Send(ConstBuffer<void> payload, ConstBuffer<int> fds)
 {
-    ::Send<MAX_FDS>(socket.Get(), payload, fds);
+    ::Send<MAX_FDS>(socket, payload, fds);
 }
 
 inline void
 SpawnServerClient::Send(const SpawnSerializer &s)
 {
-    ::Send<MAX_FDS>(socket.Get(), s);
+    ::Send<MAX_FDS>(socket, s);
 }
 
 UniqueSocketDescriptor

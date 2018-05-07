@@ -33,6 +33,7 @@
 #ifndef BENG_PROXY_SPAWN_BUILDER_HXX
 #define BENG_PROXY_SPAWN_BUILDER_HXX
 
+#include "net/SocketDescriptor.hxx"
 #include "net/ScmRightsBuilder.hxx"
 #include "IProtocol.hxx"
 #include "system/Error.hxx"
@@ -139,9 +140,9 @@ public:
 
 template<size_t MAX_FDS>
 static void
-Send(int fd, ConstBuffer<void> payload, ConstBuffer<int> fds)
+Send(SocketDescriptor s, ConstBuffer<void> payload, ConstBuffer<int> fds)
 {
-    assert(fd >= 0);
+    assert(s.IsDefined());
 
     struct iovec vec = {
         .iov_base = const_cast<void *>(payload.data),
@@ -163,15 +164,15 @@ Send(int fd, ConstBuffer<void> payload, ConstBuffer<int> fds)
         b.push_back(i);
     b.Finish(msg);
 
-    if (sendmsg(fd, &msg, MSG_NOSIGNAL) < 0)
+    if (sendmsg(s.Get(), &msg, MSG_NOSIGNAL) < 0)
         throw MakeErrno("send() failed");
 }
 
 template<size_t MAX_FDS>
 static void
-Send(int fd, const SpawnSerializer &s)
+Send(SocketDescriptor socket, const SpawnSerializer &s)
 {
-    return Send<MAX_FDS>(fd, s.GetPayload(), s.GetFds());
+    return Send<MAX_FDS>(socket, s.GetPayload(), s.GetFds());
 }
 
 #endif
