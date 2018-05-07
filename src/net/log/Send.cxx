@@ -35,6 +35,7 @@
 #include "Protocol.hxx"
 #include "Crc.hxx"
 #include "net/SocketDescriptor.hxx"
+#include "net/SendMessage.hxx"
 #include "system/Error.hxx"
 #include "util/ByteOrder.hxx"
 #include "util/StaticArray.hxx"
@@ -196,19 +197,8 @@ Send(SocketDescriptor s, const Datagram &d)
 	StaticArray<struct iovec, 64> v;
 	FillIovec(v, d);
 
-	struct msghdr h = {
-		.msg_name = nullptr,
-		.msg_namelen = 0,
-		.msg_iov = &v.front(),
-		.msg_iovlen = v.size(),
-		.msg_control = nullptr,
-		.msg_controllen = 0,
-		.msg_flags = 0,
-	};
-
-	auto nbytes = sendmsg(s.Get(), &h, MSG_DONTWAIT);
-	if (nbytes < 0)
-		throw MakeErrno("Failed to send");
+	SendMessage(s, ConstBuffer<struct iovec>(&v.front(), v.size()),
+		    MSG_DONTWAIT);
 }
 
 }}
