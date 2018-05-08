@@ -101,6 +101,13 @@ struct NamespaceOptions {
 	bool bind_mount_pts = false;
 
 	/**
+	 * The name of the PID namespace to reassociate with.  The
+	 * namespace is requested from the "Spawn" daemon (Package
+	 * cm4all-spawn).
+	 */
+	const char *pid_namespace = nullptr;
+
+	/**
 	 * The name of the network namespace (/run/netns/X) to reassociate
 	 * with.  Requires #enable_network.
 	 */
@@ -152,6 +159,12 @@ struct NamespaceOptions {
 
 	void SetupUidGidMap(const UidGid &uid_gid,
 			    int pid) const;
+
+	/**
+	 * Apply #pid_namespace.  This will affect new child
+	 * processes, but not this process.
+	 */
+	void ReassociatePid() const;
 
 	/**
 	 * Apply #network_namespace.

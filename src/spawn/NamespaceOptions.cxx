@@ -32,6 +32,7 @@
 
 #include "NamespaceOptions.hxx"
 #include "UserNamespace.hxx"
+#include "PidNamespace.hxx"
 #include "NetworkNamespace.hxx"
 #include "UidGid.hxx"
 #include "MountList.hxx"
@@ -74,6 +75,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 	 writable_proc(src.writable_proc),
 	 mount_pts(src.mount_pts),
 	 bind_mount_pts(src.bind_mount_pts),
+	 pid_namespace(alloc.CheckDup(src.pid_namespace)),
 	 network_namespace(alloc.CheckDup(src.network_namespace)),
 	 pivot_root(alloc.CheckDup(src.pivot_root)),
 	 home(alloc.CheckDup(src.home)),
@@ -116,7 +118,7 @@ NamespaceOptions::GetCloneFlags(int flags) const
 
 	if (enable_user)
 		flags |= CLONE_NEWUSER;
-	if (enable_pid)
+	if (enable_pid && pid_namespace == nullptr)
 		flags |= CLONE_NEWPID;
 	if (enable_cgroup)
 		flags |= CLONE_NEWCGROUP;
@@ -154,6 +156,14 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
 	   with EOVERFLOW (and this method will only be called if we're
 	   root) */
 	SetupUidMap(pid, uid_gid.uid, true);
+}
+
+void
+NamespaceOptions::ReassociatePid() const
+{
+    assert(pid_namespace != nullptr);
+
+    ReassociatePidNamespace(pid_namespace);
 }
 
 void

@@ -35,6 +35,8 @@
 #include "SeccompFilter.hxx"
 #include "SyscallFilter.hxx"
 #include "Init.hxx"
+#include "daemon/Client.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "system/IOPrio.hxx"
@@ -185,7 +187,7 @@ try {
 	if (p.ioprio_idle)
 		ioprio_set_idle();
 
-	if (p.ns.enable_pid) {
+	if (p.ns.enable_pid && p.ns.pid_namespace == nullptr) {
 		setsid();
 
 		const auto pid = SpawnInitFork();
@@ -325,13 +327,27 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	SpawnChildProcessContext ctx(std::move(params), cgroup_state);
 
-	UniqueFileDescriptor old_netns;
+	UniqueFileDescriptor old_pidns, old_netns;
 
-	AtScopeExit(&old_netns) {
-		/* restore the old network namespace (see below) */
+	AtScopeExit(&old_pidns, &old_netns) {
+		/* restore the old namespaces */
+		if (old_pidns.IsDefined())
+			setns(old_pidns.Get(), CLONE_NEWPID);
 		if (old_netns.IsDefined())
 			setns(old_netns.Get(), CLONE_NEWNET);
 	};
+
+	if (ctx.params.ns.pid_namespace != nullptr) {
+		/* first open a handle to our existing (old) network namespace
+		   to be able to restore it later (see above) */
+		if (!old_pidns.OpenReadOnly("/proc/self/ns/pid"))
+			throw MakeErrno("Failed to open current PID namespace");
+
+		auto fd = SpawnDaemon::MakePidNamespace(SpawnDaemon::Connect(),
+							ctx.params.ns.pid_namespace);
+		if (setns(fd.Get(), CLONE_NEWPID) < 0)
+			throw MakeErrno("setns(CLONE_NEWPID) failed");
+	}
 
 	if (ctx.params.ns.enable_user &&
 	    ctx.params.ns.network_namespace != nullptr) {
