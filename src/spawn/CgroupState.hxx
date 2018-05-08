@@ -38,27 +38,27 @@
 #include <map>
 
 struct CgroupState {
-    /**
-     * Our own control group path.  It starts with a slash.
-     */
-    std::string group_path;
+	/**
+	 * Our own control group path.  It starts with a slash.
+	 */
+	std::string group_path;
 
-    /**
-     * The controller mount points below /sys/fs/cgroup which are
-     * managed by us (delegated from systemd).  Each mount point may
-     * contain several controllers.
-     */
-    std::forward_list<std::string> mounts;
+	/**
+	 * The controller mount points below /sys/fs/cgroup which are
+	 * managed by us (delegated from systemd).  Each mount point may
+	 * contain several controllers.
+	 */
+	std::forward_list<std::string> mounts;
 
-    /**
-     * A mapping from controller name to mount point name.  More than
-     * one controller may be mounted at one mount point.
-     */
-    std::map<std::string, std::string> controllers;
+	/**
+	 * A mapping from controller name to mount point name.  More than
+	 * one controller may be mounted at one mount point.
+	 */
+	std::map<std::string, std::string> controllers;
 
-    bool IsEnabled() const {
-        return !group_path.empty();
-    }
+	bool IsEnabled() const {
+		return !group_path.empty();
+	}
 };
 
 #endif

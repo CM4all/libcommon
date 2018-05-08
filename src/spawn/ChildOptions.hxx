@@ -51,120 +51,120 @@ class UniqueFileDescriptor;
  * Options for launching a child process.
  */
 struct ChildOptions {
-    /**
-     * A "tag" string for the child process.  This can be used to
-     * address groups of child processes.
-     */
-    const char *tag = nullptr;
+	/**
+	 * A "tag" string for the child process.  This can be used to
+	 * address groups of child processes.
+	 */
+	const char *tag = nullptr;
 
-    /**
-     * An absolute path where STDERR output will be appended.
-     */
-    const char *stderr_path = nullptr;
-    const char *expand_stderr_path = nullptr;
+	/**
+	 * An absolute path where STDERR output will be appended.
+	 */
+	const char *stderr_path = nullptr;
+	const char *expand_stderr_path = nullptr;
 
-    /**
-     * Environment variables.
-     */
-    ExpandableStringList env;
+	/**
+	 * Environment variables.
+	 */
+	ExpandableStringList env;
 
-    CgroupOptions cgroup;
+	CgroupOptions cgroup;
 
-    ResourceLimits *rlimits = nullptr;
+	ResourceLimits *rlimits = nullptr;
 
-    RefenceOptions refence;
+	RefenceOptions refence;
 
-    NamespaceOptions ns;
+	NamespaceOptions ns;
 
 #if TRANSLATION_ENABLE_JAILCGI
-    JailParams *jail = nullptr;
+	JailParams *jail = nullptr;
 #endif
 
-    UidGid uid_gid;
+	UidGid uid_gid;
 
-    /**
-     * The umask for the new child process.  -1 means do not change
-     * it.
-     */
-    int umask = -1;
+	/**
+	 * The umask for the new child process.  -1 means do not change
+	 * it.
+	 */
+	int umask = -1;
 
-    /**
-     * Redirect STDERR to /dev/null?
-     */
-    bool stderr_null = false;
+	/**
+	 * Redirect STDERR to /dev/null?
+	 */
+	bool stderr_null = false;
 
-    /**
-     * Shall #stderr_path be applied after jailing?
-     *
-     * @see TranslationCommand::STDERR_PATH_JAILED
-     */
-    bool stderr_jailed = false;
+	/**
+	 * Shall #stderr_path be applied after jailing?
+	 *
+	 * @see TranslationCommand::STDERR_PATH_JAILED
+	 */
+	bool stderr_jailed = false;
 
-    bool forbid_user_ns = false;
+	bool forbid_user_ns = false;
 
-    bool forbid_multicast = false;
+	bool forbid_multicast = false;
 
-    bool forbid_bind = false;
+	bool forbid_bind = false;
 
-    bool no_new_privs = false;
+	bool no_new_privs = false;
 
-    ChildOptions() = default;
+	ChildOptions() = default;
 
-    constexpr ChildOptions(ShallowCopy shallow_copy, const ChildOptions &src)
-        :tag(src.tag),
-         stderr_path(src.stderr_path),
-         expand_stderr_path(src.expand_stderr_path),
-         env(shallow_copy, src.env),
-         cgroup(src.cgroup),
-         rlimits(src.rlimits),
-         refence(src.refence),
-         ns(src.ns),
+	constexpr ChildOptions(ShallowCopy shallow_copy, const ChildOptions &src)
+	:tag(src.tag),
+		stderr_path(src.stderr_path),
+		expand_stderr_path(src.expand_stderr_path),
+		env(shallow_copy, src.env),
+		cgroup(src.cgroup),
+		rlimits(src.rlimits),
+		refence(src.refence),
+		ns(src.ns),
 #if TRANSLATION_ENABLE_JAILCGI
-         jail(src.jail),
+		jail(src.jail),
 #endif
-         uid_gid(src.uid_gid),
-         umask(src.umask),
-         stderr_null(src.stderr_null),
-         stderr_jailed(src.stderr_jailed),
-         forbid_user_ns(src.forbid_user_ns),
-         forbid_multicast(src.forbid_multicast),
-         forbid_bind(src.forbid_bind),
-         no_new_privs(src.no_new_privs) {}
+		uid_gid(src.uid_gid),
+		umask(src.umask),
+		stderr_null(src.stderr_null),
+		stderr_jailed(src.stderr_jailed),
+		forbid_user_ns(src.forbid_user_ns),
+		forbid_multicast(src.forbid_multicast),
+		forbid_bind(src.forbid_bind),
+		no_new_privs(src.no_new_privs) {}
 
-    ChildOptions(AllocatorPtr alloc, const ChildOptions &src);
+	ChildOptions(AllocatorPtr alloc, const ChildOptions &src);
 
-    ChildOptions(ChildOptions &&) = default;
-    ChildOptions &operator=(ChildOptions &&) = default;
+	ChildOptions(ChildOptions &&) = default;
+	ChildOptions &operator=(ChildOptions &&) = default;
 
-    /**
-     * Throws std::runtime_error on error.
-     */
-    void Check() const;
+	/**
+	 * Throws std::runtime_error on error.
+	 */
+	void Check() const;
 
-    gcc_pure
-    bool IsExpandable() const;
+	gcc_pure
+	bool IsExpandable() const;
 
-    void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
+	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
 
-    char *MakeId(char *p) const;
+	char *MakeId(char *p) const;
 
-    /**
-     * Throws on error.
-     */
-    UniqueFileDescriptor OpenStderrPath() const;
+	/**
+	 * Throws on error.
+	 */
+	UniqueFileDescriptor OpenStderrPath() const;
 
-    /**
-     * Throws std::runtime_error on error.
-     *
-     * @param use_jail shall #jail be used?  Pass false for protocols
-     * which have a non-standard way of calling the JailCGI wrapper,
-     * e.g. basic CGI
-     */
-    void CopyTo(PreparedChildProcess &dest
+	/**
+	 * Throws std::runtime_error on error.
+	 *
+	 * @param use_jail shall #jail be used?  Pass false for protocols
+	 * which have a non-standard way of calling the JailCGI wrapper,
+	 * e.g. basic CGI
+	 */
+	void CopyTo(PreparedChildProcess &dest
 #if TRANSLATION_ENABLE_JAILCGI
-                , bool use_jail, const char *document_root
+		    , bool use_jail, const char *document_root
 #endif
-                ) const;
+		    ) const;
 };
 
 #endif

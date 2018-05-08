@@ -48,122 +48,122 @@
 class SpawnPayloadTooLargeError {};
 
 class SpawnSerializer {
-    static constexpr size_t capacity = 65536;
+	static constexpr size_t capacity = 65536;
 
-    size_t size = 0;
+	size_t size = 0;
 
-    uint8_t buffer[capacity];
+	uint8_t buffer[capacity];
 
-    StaticArray<int, 8> fds;
+	StaticArray<int, 8> fds;
 
 public:
-    explicit SpawnSerializer(SpawnRequestCommand cmd) {
-        buffer[size++] = (uint8_t)cmd;
-    }
+	explicit SpawnSerializer(SpawnRequestCommand cmd) {
+		buffer[size++] = (uint8_t)cmd;
+	}
 
-    explicit SpawnSerializer(SpawnResponseCommand cmd) {
-        buffer[size++] = (uint8_t)cmd;
-    }
+	explicit SpawnSerializer(SpawnResponseCommand cmd) {
+		buffer[size++] = (uint8_t)cmd;
+	}
 
-    void WriteByte(uint8_t value) {
-        if (size >= capacity)
-            throw SpawnPayloadTooLargeError();
+	void WriteByte(uint8_t value) {
+		if (size >= capacity)
+			throw SpawnPayloadTooLargeError();
 
-        buffer[size++] = value;
-    }
+		buffer[size++] = value;
+	}
 
-    void Write(SpawnExecCommand cmd) {
-        WriteByte((uint8_t)cmd);
-    }
+	void Write(SpawnExecCommand cmd) {
+		WriteByte((uint8_t)cmd);
+	}
 
-    void WriteOptional(SpawnExecCommand cmd, bool value) {
-        if (value)
-            Write(cmd);
-    }
+	void WriteOptional(SpawnExecCommand cmd, bool value) {
+		if (value)
+			Write(cmd);
+	}
 
-    void Write(ConstBuffer<void> value) {
-        if (size + value.size > capacity)
-            throw SpawnPayloadTooLargeError();
+	void Write(ConstBuffer<void> value) {
+		if (size + value.size > capacity)
+			throw SpawnPayloadTooLargeError();
 
-        memcpy(buffer + size, value.data, value.size);
-        size += value.size;
-    }
+		memcpy(buffer + size, value.data, value.size);
+		size += value.size;
+	}
 
-    template<typename T>
-    void WriteT(const T &value) {
-        Write(ConstBuffer<void>(&value, sizeof(value)));
-    }
+	template<typename T>
+	void WriteT(const T &value) {
+		Write(ConstBuffer<void>(&value, sizeof(value)));
+	}
 
-    void WriteInt(int value) {
-        WriteT(value);
-    }
+	void WriteInt(int value) {
+		WriteT(value);
+	}
 
-    void WriteString(const char *value) {
-        assert(value != nullptr);
+	void WriteString(const char *value) {
+		assert(value != nullptr);
 
-        Write(ConstBuffer<void>(value, strlen(value) + 1));
-    }
+		Write(ConstBuffer<void>(value, strlen(value) + 1));
+	}
 
-    void WriteString(SpawnExecCommand cmd, const char *value) {
-        Write(cmd);
-        WriteString(value);
-    }
+	void WriteString(SpawnExecCommand cmd, const char *value) {
+		Write(cmd);
+		WriteString(value);
+	}
 
-    void WriteOptionalString(SpawnExecCommand cmd, const char *value) {
-        if (value != nullptr)
-            WriteString(cmd, value);
-    }
+	void WriteOptionalString(SpawnExecCommand cmd, const char *value) {
+		if (value != nullptr)
+			WriteString(cmd, value);
+	}
 
-    void WriteFd(SpawnExecCommand cmd, int fd) {
-        assert(fd >= 0);
+	void WriteFd(SpawnExecCommand cmd, int fd) {
+		assert(fd >= 0);
 
-        if (fds.full())
-            throw SpawnPayloadTooLargeError();
+		if (fds.full())
+			throw SpawnPayloadTooLargeError();
 
-        Write(cmd);
-        fds.push_back(fd);
-    }
+		Write(cmd);
+		fds.push_back(fd);
+	}
 
-    void CheckWriteFd(SpawnExecCommand cmd, int fd) {
-        if (fd >= 0)
-            WriteFd(cmd, fd);
-    }
+	void CheckWriteFd(SpawnExecCommand cmd, int fd) {
+		if (fd >= 0)
+			WriteFd(cmd, fd);
+	}
 
-    ConstBuffer<void> GetPayload() const {
-        return {buffer, size};
-    }
+	ConstBuffer<void> GetPayload() const {
+		return {buffer, size};
+	}
 
-    ConstBuffer<int> GetFds() const {
-        return {fds.begin(), fds.size()};
-    }
+	ConstBuffer<int> GetFds() const {
+		return {fds.begin(), fds.size()};
+	}
 };
 
 template<size_t MAX_FDS>
 static void
 Send(SocketDescriptor s, ConstBuffer<void> payload, ConstBuffer<int> fds)
 {
-    assert(s.IsDefined());
+	assert(s.IsDefined());
 
-    struct iovec vec = {
-        .iov_base = const_cast<void *>(payload.data),
-        .iov_len = payload.size,
-    };
+	struct iovec vec = {
+		.iov_base = const_cast<void *>(payload.data),
+		.iov_len = payload.size,
+	};
 
-    MessageHeader msg(ConstBuffer<struct iovec>(&vec, 1));
+	MessageHeader msg(ConstBuffer<struct iovec>(&vec, 1));
 
-    ScmRightsBuilder<MAX_FDS> b(msg);
-    for (int i : fds)
-        b.push_back(i);
-    b.Finish(msg);
+	ScmRightsBuilder<MAX_FDS> b(msg);
+	for (int i : fds)
+		b.push_back(i);
+	b.Finish(msg);
 
-    SendMessage(s, msg, MSG_NOSIGNAL);
+	SendMessage(s, msg, MSG_NOSIGNAL);
 }
 
 template<size_t MAX_FDS>
 static void
 Send(SocketDescriptor socket, const SpawnSerializer &s)
 {
-    return Send<MAX_FDS>(socket, s.GetPayload(), s.GetFds());
+	return Send<MAX_FDS>(socket, s.GetPayload(), s.GetFds());
 }
 
 #endif

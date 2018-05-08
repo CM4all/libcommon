@@ -54,30 +54,30 @@
 #include <unistd.h>
 
 ChildOptions::ChildOptions(AllocatorPtr alloc,
-                           const ChildOptions &src)
-    :tag(alloc.CheckDup(src.tag)),
-     stderr_path(alloc.CheckDup(src.stderr_path)),
-     expand_stderr_path(alloc.CheckDup(src.expand_stderr_path)),
-     env(alloc, src.env),
-     cgroup(alloc, src.cgroup),
-     rlimits(src.rlimits != nullptr
-             ? alloc.New<ResourceLimits>(*src.rlimits)
-             : nullptr),
-     refence(alloc, src.refence),
-     ns(alloc, src.ns),
+			   const ChildOptions &src)
+	:tag(alloc.CheckDup(src.tag)),
+	 stderr_path(alloc.CheckDup(src.stderr_path)),
+	 expand_stderr_path(alloc.CheckDup(src.expand_stderr_path)),
+	 env(alloc, src.env),
+	 cgroup(alloc, src.cgroup),
+	 rlimits(src.rlimits != nullptr
+		 ? alloc.New<ResourceLimits>(*src.rlimits)
+		 : nullptr),
+	 refence(alloc, src.refence),
+	 ns(alloc, src.ns),
 #if TRANSLATION_ENABLE_JAILCGI
-     jail(src.jail != nullptr
-          ? alloc.New<JailParams>(*src.jail)
-          : nullptr),
+	 jail(src.jail != nullptr
+	      ? alloc.New<JailParams>(*src.jail)
+	      : nullptr),
 #endif
-     uid_gid(src.uid_gid),
-     umask(src.umask),
-     stderr_null(src.stderr_null),
-     stderr_jailed(src.stderr_jailed),
-     forbid_user_ns(src.forbid_user_ns),
-     forbid_multicast(src.forbid_multicast),
-     forbid_bind(src.forbid_bind),
-     no_new_privs(src.no_new_privs)
+	 uid_gid(src.uid_gid),
+	 umask(src.umask),
+	 stderr_null(src.stderr_null),
+	 stderr_jailed(src.stderr_jailed),
+	 forbid_user_ns(src.forbid_user_ns),
+	 forbid_multicast(src.forbid_multicast),
+	 forbid_bind(src.forbid_bind),
+	 no_new_privs(src.no_new_privs)
 {
 }
 
@@ -85,8 +85,8 @@ void
 ChildOptions::Check() const
 {
 #if TRANSLATION_ENABLE_JAILCGI
-    if (jail != nullptr)
-        jail->Check();
+	if (jail != nullptr)
+		jail->Check();
 #endif
 }
 
@@ -95,24 +95,24 @@ ChildOptions::Check() const
 bool
 ChildOptions::IsExpandable() const
 {
-    return expand_stderr_path != nullptr ||
-        env.IsExpandable() ||
-        ns.IsExpandable() ||
-        (jail != nullptr && jail->IsExpandable());
+	return expand_stderr_path != nullptr ||
+		env.IsExpandable() ||
+		ns.IsExpandable() ||
+		(jail != nullptr && jail->IsExpandable());
 }
 
 void
 ChildOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 {
-    if (expand_stderr_path != nullptr)
-        stderr_path = expand_string_unescaped(alloc, expand_stderr_path,
-                                              match_info);
+	if (expand_stderr_path != nullptr)
+		stderr_path = expand_string_unescaped(alloc, expand_stderr_path,
+						      match_info);
 
-    env.Expand(alloc, match_info);
-    ns.Expand(alloc, match_info);
+	env.Expand(alloc, match_info);
+	ns.Expand(alloc, match_info);
 
-    if (jail != nullptr)
-        jail->Expand(alloc, match_info);
+	if (jail != nullptr)
+		jail->Expand(alloc, match_info);
 }
 
 #endif
@@ -120,120 +120,120 @@ ChildOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 char *
 ChildOptions::MakeId(char *p) const
 {
-    if (umask >= 0)
-        p += sprintf(p, ";u%o", umask);
+	if (umask >= 0)
+		p += sprintf(p, ";u%o", umask);
 
-    if (stderr_path != nullptr)
-        p += sprintf(p, ";e%08x", djb_hash_string(stderr_path));
+	if (stderr_path != nullptr)
+		p += sprintf(p, ";e%08x", djb_hash_string(stderr_path));
 
-    if (stderr_jailed)
-        *p++ = 'j';
+	if (stderr_jailed)
+		*p++ = 'j';
 
-    for (auto i : env) {
-        *p++ = '$';
-        p = stpcpy(p, i);
-    }
+	for (auto i : env) {
+		*p++ = '$';
+		p = stpcpy(p, i);
+	}
 
-    p = cgroup.MakeId(p);
-    if (rlimits != nullptr)
-        p = rlimits->MakeId(p);
-    p = refence.MakeId(p);
-    p = ns.MakeId(p);
+	p = cgroup.MakeId(p);
+	if (rlimits != nullptr)
+		p = rlimits->MakeId(p);
+	p = refence.MakeId(p);
+	p = ns.MakeId(p);
 #if TRANSLATION_ENABLE_JAILCGI
-    if (jail != nullptr)
-        p = jail->MakeId(p);
+	if (jail != nullptr)
+		p = jail->MakeId(p);
 #endif
-    p = uid_gid.MakeId(p);
+	p = uid_gid.MakeId(p);
 
-    if (stderr_null) {
-        *p++ = ';';
-        *p++ = 'e';
-        *p++ = 'n';
-    }
+	if (stderr_null) {
+		*p++ = ';';
+		*p++ = 'e';
+		*p++ = 'n';
+	}
 
-    if (forbid_user_ns) {
-        *p++ = ';';
-        *p++ = 'f';
-        *p++ = 'u';
-    }
+	if (forbid_user_ns) {
+		*p++ = ';';
+		*p++ = 'f';
+		*p++ = 'u';
+	}
 
-    if (forbid_multicast) {
-        *p++ = ';';
-        *p++ = 'f';
-        *p++ = 'm';
-    }
+	if (forbid_multicast) {
+		*p++ = ';';
+		*p++ = 'f';
+		*p++ = 'm';
+	}
 
-    if (forbid_bind) {
-        *p++ = ';';
-        *p++ = 'f';
-        *p++ = 'b';
-    }
+	if (forbid_bind) {
+		*p++ = ';';
+		*p++ = 'f';
+		*p++ = 'b';
+	}
 
-    if (no_new_privs) {
-        *p++ = ';';
-        *p++ = 'n';
-    }
+	if (no_new_privs) {
+		*p++ = ';';
+		*p++ = 'n';
+	}
 
-    return p;
+	return p;
 }
 
 UniqueFileDescriptor
 ChildOptions::OpenStderrPath() const
 {
-    assert(stderr_path != nullptr);
+	assert(stderr_path != nullptr);
 
-    UniqueFileDescriptor fd;
-    if (!fd.Open(stderr_path, O_CREAT|O_WRONLY|O_APPEND, 0600))
-        throw FormatErrno("open('%s') failed", stderr_path);
+	UniqueFileDescriptor fd;
+	if (!fd.Open(stderr_path, O_CREAT|O_WRONLY|O_APPEND, 0600))
+		throw FormatErrno("open('%s') failed", stderr_path);
 
-    return fd;
+	return fd;
 }
 
 void
 ChildOptions::CopyTo(PreparedChildProcess &dest
 #if TRANSLATION_ENABLE_JAILCGI
-                     , bool use_jail, const char *document_root
+		     , bool use_jail, const char *document_root
 #endif
-                     ) const
+		     ) const
 {
 #if TRANSLATION_ENABLE_JAILCGI
-    if (use_jail && jail != nullptr)
-        jail->InsertWrapper(dest, document_root);
+	if (use_jail && jail != nullptr)
+		jail->InsertWrapper(dest, document_root);
 #endif
 
-    dest.umask = umask;
+	dest.umask = umask;
 
-    if (stderr_jailed) {
-        assert(stderr_path != nullptr);
+	if (stderr_jailed) {
+		assert(stderr_path != nullptr);
 
-        /* open the file in the child process after jailing */
-        dest.stderr_path = stderr_path;
-    } else if (stderr_path != nullptr) {
-        dest.SetStderr(OpenStderrPath());
-    } else if (stderr_null) {
-        const char *path = "/dev/null";
-        int fd = open(path, O_WRONLY|O_CLOEXEC|O_NOCTTY);
-        if (fd >= 0)
-            dest.SetStderr(fd);
-    }
+		/* open the file in the child process after jailing */
+		dest.stderr_path = stderr_path;
+	} else if (stderr_path != nullptr) {
+		dest.SetStderr(OpenStderrPath());
+	} else if (stderr_null) {
+		const char *path = "/dev/null";
+		int fd = open(path, O_WRONLY|O_CLOEXEC|O_NOCTTY);
+		if (fd >= 0)
+			dest.SetStderr(fd);
+	}
 
-    for (const char *e : env)
-        dest.PutEnv(e);
+	for (const char *e : env)
+		dest.PutEnv(e);
 
-    dest.cgroup = cgroup;
-    dest.refence = refence;
-    dest.ns = ns;
-    if (rlimits != nullptr)
-        dest.rlimits = *rlimits;
-    dest.uid_gid = uid_gid;
-    dest.forbid_user_ns = forbid_user_ns;
-    dest.forbid_multicast = forbid_multicast;
-    dest.forbid_bind = forbid_bind;
-    dest.no_new_privs = no_new_privs;
+	dest.cgroup = cgroup;
+	dest.refence = refence;
+	dest.ns = ns;
+	if (rlimits != nullptr)
+		dest.rlimits = *rlimits;
+	dest.uid_gid = uid_gid;
+	dest.forbid_user_ns = forbid_user_ns;
+	dest.forbid_multicast = forbid_multicast;
+	dest.forbid_bind = forbid_bind;
+	dest.no_new_privs = no_new_privs;
 
-    if (!forbid_user_ns)
-        /* if we allow user namespaces, then we should allow writing
-           to /proc/self/{uid,gid}_map, which requires a /proc mount
-           which is not read-only */
-        dest.ns.writable_proc = true;
+	if (!forbid_user_ns)
+		/* if we allow user namespaces, then we should allow writing
+		   to /proc/self/{uid,gid}_map, which requires a /proc mount
+		   which is not read-only */
+		dest.ns.writable_proc = true;
 }

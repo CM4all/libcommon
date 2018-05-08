@@ -52,64 +52,64 @@ using my_rlimit_resource_t = decltype(RLIMIT_NLIMITS);
 inline void
 ResourceLimit::Get(int pid, int resource)
 {
-    if (prlimit(pid, my_rlimit_resource_t(resource), nullptr, this) < 0)
-        throw FormatErrno("getrlimit(%d) failed", resource);
+	if (prlimit(pid, my_rlimit_resource_t(resource), nullptr, this) < 0)
+		throw FormatErrno("getrlimit(%d) failed", resource);
 }
 
 inline void
 ResourceLimit::Set(int pid, int resource) const
 {
-    if (prlimit(pid, my_rlimit_resource_t(resource), this, nullptr) < 0)
-        throw FormatErrno("setrlimit(%d, %lu, %lu) failed",
-                          resource, (unsigned long)rlim_cur,
-                          (unsigned long)rlim_max);
+	if (prlimit(pid, my_rlimit_resource_t(resource), this, nullptr) < 0)
+		throw FormatErrno("setrlimit(%d, %lu, %lu) failed",
+				  resource, (unsigned long)rlim_cur,
+				  (unsigned long)rlim_max);
 }
 
 inline void
 ResourceLimit::OverrideFrom(const ResourceLimit &src)
 {
-    if (src.rlim_cur != UNDEFINED)
-        rlim_cur = src.rlim_cur;
+	if (src.rlim_cur != UNDEFINED)
+		rlim_cur = src.rlim_cur;
 
-    if (src.rlim_max != UNDEFINED)
-        rlim_max = src.rlim_max;
+	if (src.rlim_max != UNDEFINED)
+		rlim_max = src.rlim_max;
 }
 
 inline void
 ResourceLimit::CompleteFrom(int pid, int resource, const ResourceLimit &src)
 {
-    Get(pid, resource);
-    OverrideFrom(src);
+	Get(pid, resource);
+	OverrideFrom(src);
 }
 
 gcc_pure
 inline bool
 ResourceLimits::IsEmpty() const
 {
-    for (const auto &i : values)
-        if (!i.IsEmpty())
-            return false;
+	for (const auto &i : values)
+		if (!i.IsEmpty())
+			return false;
 
-    return true;
+	return true;
 }
 
 gcc_pure
 inline unsigned
 ResourceLimits::GetHash() const
 {
-    return djb_hash(this, sizeof(*this));
+	return djb_hash(this, sizeof(*this));
 }
 
 char *
 ResourceLimits::MakeId(char *p) const
 {
-    if (IsEmpty())
-        return p;
+	if (IsEmpty())
+		return p;
 
-    *p++ = ';';
-    *p++ = 'r';
-    p += sprintf(p, "%08x", GetHash());
-    return p;
+	*p++ = ';';
+	*p++ = 'r';
+	p += sprintf(p, "%08x", GetHash());
+	return p;
 }
 
 /**
@@ -117,181 +117,181 @@ ResourceLimits::MakeId(char *p) const
  */
 static const ResourceLimit &
 complete_rlimit(int pid, int resource,
-                const ResourceLimit &r, ResourceLimit &buffer)
+		const ResourceLimit &r, ResourceLimit &buffer)
 {
-    if (r.IsFull())
-        /* already complete */
-        return r;
+	if (r.IsFull())
+		/* already complete */
+		return r;
 
-    buffer.CompleteFrom(pid, resource, r);
-    return buffer;
+	buffer.CompleteFrom(pid, resource, r);
+	return buffer;
 }
 
 static void
 rlimit_apply(int pid, int resource, const ResourceLimit &r)
 {
-    if (r.IsEmpty())
-        return;
+	if (r.IsEmpty())
+		return;
 
-    ResourceLimit buffer;
-    const auto &r2 = complete_rlimit(pid, resource, r, buffer);
-    r2.Set(pid, resource);
+	ResourceLimit buffer;
+	const auto &r2 = complete_rlimit(pid, resource, r, buffer);
+	r2.Set(pid, resource);
 }
 
 void
 ResourceLimits::Apply(int pid) const
 {
-    for (unsigned i = 0; i < RLIM_NLIMITS; ++i)
-        rlimit_apply(pid, i, values[i]);
+	for (unsigned i = 0; i < RLIM_NLIMITS; ++i)
+		rlimit_apply(pid, i, values[i]);
 }
 
 bool
 ResourceLimits::Parse(const char *s)
 {
-    enum {
-        BOTH,
-        SOFT,
-        HARD,
-    } which = BOTH;
+	enum {
+		BOTH,
+		SOFT,
+		HARD,
+	} which = BOTH;
 
-    char ch;
-    while ((ch = *s++) != 0) {
-        unsigned resource;
+	char ch;
+	while ((ch = *s++) != 0) {
+		unsigned resource;
 
-        switch (ch) {
-        case 'S':
-            which = SOFT;
-            continue;
+		switch (ch) {
+		case 'S':
+			which = SOFT;
+			continue;
 
-        case 'H':
-            which = HARD;
-            continue;
+		case 'H':
+			which = HARD;
+			continue;
 
-        case 't':
-            resource = RLIMIT_CPU;
-            break;
+		case 't':
+			resource = RLIMIT_CPU;
+			break;
 
-        case 'f':
-            resource = RLIMIT_FSIZE;
-            break;
+		case 'f':
+			resource = RLIMIT_FSIZE;
+			break;
 
-        case 'd':
-            resource = RLIMIT_DATA;
-            break;
+		case 'd':
+			resource = RLIMIT_DATA;
+			break;
 
-        case 's':
-            resource = RLIMIT_STACK;
-            break;
+		case 's':
+			resource = RLIMIT_STACK;
+			break;
 
-        case 'c':
-            resource = RLIMIT_CORE;
-            break;
+		case 'c':
+			resource = RLIMIT_CORE;
+			break;
 
-        case 'm':
-            resource = RLIMIT_RSS;
-            break;
+		case 'm':
+			resource = RLIMIT_RSS;
+			break;
 
-        case 'u':
-            resource = RLIMIT_NPROC;
-            break;
+		case 'u':
+			resource = RLIMIT_NPROC;
+			break;
 
-        case 'n':
-            resource = RLIMIT_NOFILE;
-            break;
+		case 'n':
+			resource = RLIMIT_NOFILE;
+			break;
 
-        case 'l':
-            resource = RLIMIT_MEMLOCK;
-            break;
+		case 'l':
+			resource = RLIMIT_MEMLOCK;
+			break;
 
-        case 'v':
-            resource = RLIMIT_AS;
-            break;
+		case 'v':
+			resource = RLIMIT_AS;
+			break;
 
-            /* obsolete:
-        case 'x':
-            resource = RLIMIT_LOCKS;
-            break;
-            */
+			/* obsolete:
+			   case 'x':
+			   resource = RLIMIT_LOCKS;
+			   break;
+			*/
 
-        case 'i':
-            resource = RLIMIT_SIGPENDING;
-            break;
+		case 'i':
+			resource = RLIMIT_SIGPENDING;
+			break;
 
-        case 'q':
-            resource = RLIMIT_MSGQUEUE;
-            break;
+		case 'q':
+			resource = RLIMIT_MSGQUEUE;
+			break;
 
-        case 'e':
-            resource = RLIMIT_NICE;
-            break;
+		case 'e':
+			resource = RLIMIT_NICE;
+			break;
 
-        case 'r':
-            resource = RLIMIT_RTPRIO;
-            break;
+		case 'r':
+			resource = RLIMIT_RTPRIO;
+			break;
 
-            /* not supported by bash's "ulimit" command
-        case ?:
-            resource = RLIMIT_RTTIME;
-            break;
-            */
+			/* not supported by bash's "ulimit" command
+			   case ?:
+			   resource = RLIMIT_RTTIME;
+			   break;
+			*/
 
-        default:
-            if (IsWhitespaceFast(ch))
-                /* ignore whitespace */
-                continue;
+		default:
+			if (IsWhitespaceFast(ch))
+				/* ignore whitespace */
+				continue;
 
-            return false;
-        }
+			return false;
+		}
 
-        assert(resource < RLIM_NLIMITS);
-        struct rlimit *const t = &values[resource];
+		assert(resource < RLIM_NLIMITS);
+		struct rlimit *const t = &values[resource];
 
-        unsigned long value;
+		unsigned long value;
 
-        if (*s == '!') {
-            value = (unsigned long)RLIM_INFINITY;
-            ++s;
-        } else {
-            char *endptr;
-            value = strtoul(s, &endptr, 10);
-            if (endptr == s)
-                return false;
+		if (*s == '!') {
+			value = (unsigned long)RLIM_INFINITY;
+			++s;
+		} else {
+			char *endptr;
+			value = strtoul(s, &endptr, 10);
+			if (endptr == s)
+				return false;
 
-            s = endptr;
+			s = endptr;
 
-            switch (*s) {
-            case 'G':
-                value <<= 10;
+			switch (*s) {
+			case 'G':
+				value <<= 10;
 #if !GCC_OLDER_THAN(7,0)
-                [[fallthrough]];
+				[[fallthrough]];
 #endif
 
-            case 'M':
-                value <<= 10;
+			case 'M':
+				value <<= 10;
 #if !GCC_OLDER_THAN(7,0)
-                [[fallthrough]];
+				[[fallthrough]];
 #endif
 
-            case 'K':
-                value <<= 10;
-                ++s;
-            }
-        }
+			case 'K':
+				value <<= 10;
+				++s;
+			}
+		}
 
-        switch (which) {
-        case BOTH:
-            t->rlim_cur = t->rlim_max = value;
-            break;
+		switch (which) {
+		case BOTH:
+			t->rlim_cur = t->rlim_max = value;
+			break;
 
-        case SOFT:
-            t->rlim_cur = value;
-            break;
+		case SOFT:
+			t->rlim_cur = value;
+			break;
 
-        case HARD:
-            t->rlim_max = value;
-            break;
-        }
-    }
+		case HARD:
+			t->rlim_max = value;
+			break;
+		}
+	}
 
-    return true;
+	return true;
 }
