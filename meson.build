@@ -359,6 +359,7 @@ spawn = static_library('spawn',
   'src/spawn/Client.cxx',
   'src/spawn/Glue.cxx',
   'src/spawn/ConfigParser.cxx',
+  'src/spawn/daemon/Client.cxx',
   include_directories: inc,
   dependencies: [
     libdbus,
