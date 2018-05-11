@@ -378,6 +378,11 @@ NamespaceOptions::MakeId(char *p) const
 	if (enable_pid)
 		p = (char *)mempcpy(p, ";pns", 4);
 
+	if (pid_namespace != nullptr) {
+		p = (char *)mempcpy(p, ";pns=", 5);
+		p = (char *)stpcpy(p, pid_namespace);
+	}
+
 	if (enable_cgroup)
 		p = (char *)mempcpy(p, ";cns", 4);
 
