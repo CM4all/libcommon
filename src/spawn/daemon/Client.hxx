@@ -32,6 +32,8 @@
 
 #pragma once
 
+class UniqueFileDescriptor;
+class SocketDescriptor;
 class UniqueSocketDescriptor;
 
 namespace SpawnDaemon {
@@ -41,5 +43,15 @@ namespace SpawnDaemon {
  */
 UniqueSocketDescriptor
 Connect();
+
+/**
+ * Ask the Spawn daemon to create a new PID namespace.
+ *
+ * Throws on error.
+ *
+ * @return the namespace descriptor
+ */
+UniqueFileDescriptor
+MakePidNamespace(SocketDescriptor s, const char *name);
 
 }
