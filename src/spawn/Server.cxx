@@ -423,7 +423,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 	PreparedChildProcess p;
 
-	MountList **mount_tail = &p.ns.mounts;
+	MountList **mount_tail = &p.ns.mount.mounts;
 	assert(*mount_tail == nullptr);
 
 	std::forward_list<MountList> mounts;
@@ -505,32 +505,32 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::MOUNT_NS:
-			p.ns.enable_mount = true;
+			p.ns.mount.enable_mount = true;
 			break;
 
 		case SpawnExecCommand::MOUNT_PROC:
-			p.ns.mount_proc = true;
+			p.ns.mount.mount_proc = true;
 			break;
 
 		case SpawnExecCommand::WRITABLE_PROC:
-			p.ns.writable_proc = true;
+			p.ns.mount.writable_proc = true;
 			break;
 
 		case SpawnExecCommand::PIVOT_ROOT:
-			p.ns.pivot_root = payload.ReadString();
+			p.ns.mount.pivot_root = payload.ReadString();
 			break;
 
 		case SpawnExecCommand::MOUNT_HOME:
-			p.ns.mount_home = payload.ReadString();
-			p.ns.home = payload.ReadString();
+			p.ns.mount.mount_home = payload.ReadString();
+			p.ns.mount.home = payload.ReadString();
 			break;
 
 		case SpawnExecCommand::MOUNT_TMP_TMPFS:
-			p.ns.mount_tmp_tmpfs = payload.ReadString();
+			p.ns.mount.mount_tmp_tmpfs = payload.ReadString();
 			break;
 
 		case SpawnExecCommand::MOUNT_TMPFS:
-			p.ns.mount_tmpfs = payload.ReadString();
+			p.ns.mount.mount_tmpfs = payload.ReadString();
 			break;
 
 		case SpawnExecCommand::BIND_MOUNT:

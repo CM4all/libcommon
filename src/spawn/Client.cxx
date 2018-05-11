@@ -183,21 +183,25 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 	s.WriteOptionalString(SpawnExecCommand::NETWORK_NS_NAME,
 			      ns.network_namespace);
 	s.WriteOptional(SpawnExecCommand::IPC_NS, ns.enable_ipc);
-	s.WriteOptional(SpawnExecCommand::MOUNT_NS, ns.enable_mount);
-	s.WriteOptional(SpawnExecCommand::MOUNT_PROC, ns.mount_proc);
-	s.WriteOptional(SpawnExecCommand::WRITABLE_PROC, ns.writable_proc);
-	s.WriteOptionalString(SpawnExecCommand::PIVOT_ROOT, ns.pivot_root);
+	s.WriteOptional(SpawnExecCommand::MOUNT_NS, ns.mount.enable_mount);
+	s.WriteOptional(SpawnExecCommand::MOUNT_PROC, ns.mount.mount_proc);
+	s.WriteOptional(SpawnExecCommand::WRITABLE_PROC,
+			ns.mount.writable_proc);
+	s.WriteOptionalString(SpawnExecCommand::PIVOT_ROOT,
+			      ns.mount.pivot_root);
 
-	if (ns.mount_home != nullptr) {
+	if (ns.mount.mount_home != nullptr) {
 		s.Write(SpawnExecCommand::MOUNT_HOME);
-		s.WriteString(ns.mount_home);
-		s.WriteString(ns.home);
+		s.WriteString(ns.mount.mount_home);
+		s.WriteString(ns.mount.home);
 	}
 
-	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMP_TMPFS, ns.mount_tmp_tmpfs);
-	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMPFS, ns.mount_tmpfs);
+	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMP_TMPFS,
+			      ns.mount.mount_tmp_tmpfs);
+	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMPFS,
+			      ns.mount.mount_tmpfs);
 
-	for (auto i = ns.mounts; i != nullptr; i = i->next) {
+	for (auto i = ns.mount.mounts; i != nullptr; i = i->next) {
 		s.Write(SpawnExecCommand::BIND_MOUNT);
 		s.WriteString(i->source);
 		s.WriteString(i->target);

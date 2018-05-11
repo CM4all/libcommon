@@ -73,7 +73,7 @@ TranslateParser::SetChildOptions(ChildOptions &_child_options)
 {
     child_options = &_child_options;
     ns_options = &child_options->ns;
-    mount_list = &ns_options->mounts;
+    mount_list = &ns_options->mount.mounts;
     jail = nullptr;
     env_builder = child_options->env;
 }
@@ -471,11 +471,12 @@ translate_client_pivot_root(NamespaceOptions *ns,
     if (!is_valid_absolute_path(payload, payload_length))
         throw std::runtime_error("malformed PIVOT_ROOT packet");
 
-    if (ns == nullptr || ns->pivot_root != nullptr || ns->mount_root_tmpfs)
+    if (ns == nullptr || ns->mount.pivot_root != nullptr ||
+        ns->mount.mount_root_tmpfs)
         throw std::runtime_error("misplaced PIVOT_ROOT packet");
 
-    ns->enable_mount = true;
-    ns->pivot_root = payload;
+    ns->mount.enable_mount = true;
+    ns->mount.pivot_root = payload;
 }
 
 static void
@@ -485,11 +486,12 @@ translate_client_mount_root_tmpfs(NamespaceOptions *ns,
     if (payload_length > 0)
         throw std::runtime_error("malformed MOUNT_ROOT_TMPFS packet");
 
-    if (ns == nullptr || ns->pivot_root != nullptr || ns->mount_root_tmpfs)
+    if (ns == nullptr || ns->mount.pivot_root != nullptr ||
+        ns->mount.mount_root_tmpfs)
         throw std::runtime_error("misplaced MOUNT_ROOT_TMPFS packet");
 
-    ns->enable_mount = true;
-    ns->mount_root_tmpfs = true;
+    ns->mount.enable_mount = true;
+    ns->mount.mount_root_tmpfs = true;
 }
 
 static void
@@ -504,8 +506,8 @@ translate_client_home(NamespaceOptions *ns,
 
     bool ok = false;
 
-    if (ns != nullptr && ns->home == nullptr) {
-        ns->home = payload;
+    if (ns != nullptr && ns->mount.home == nullptr) {
+        ns->mount.home = payload;
         ok = true;
     }
 
@@ -534,8 +536,8 @@ translate_client_expand_home(NamespaceOptions *ns,
 
     bool ok = false;
 
-    if (ns != nullptr && ns->expand_home == nullptr) {
-        ns->expand_home = payload;
+    if (ns != nullptr && ns->mount.expand_home == nullptr) {
+        ns->mount.expand_home = payload;
         ok = true;
     }
 
@@ -561,11 +563,11 @@ translate_client_mount_proc(NamespaceOptions *ns,
     if (payload_length > 0)
         throw std::runtime_error("malformed MOUNT_PROC packet");
 
-    if (ns == nullptr || ns->mount_proc)
+    if (ns == nullptr || ns->mount.mount_proc)
         throw std::runtime_error("misplaced MOUNT_PROC packet");
 
-    ns->enable_mount = true;
-    ns->mount_proc = true;
+    ns->mount.enable_mount = true;
+    ns->mount.mount_proc = true;
 }
 
 static void
@@ -575,11 +577,11 @@ translate_client_mount_tmp_tmpfs(NamespaceOptions *ns,
     if (has_null_byte(payload.data, payload.size))
         throw std::runtime_error("malformed MOUNT_TMP_TMPFS packet");
 
-    if (ns == nullptr || ns->mount_tmp_tmpfs != nullptr)
+    if (ns == nullptr || ns->mount.mount_tmp_tmpfs != nullptr)
         throw std::runtime_error("misplaced MOUNT_TMP_TMPFS packet");
 
-    ns->enable_mount = true;
-    ns->mount_tmp_tmpfs = payload.data != nullptr
+    ns->mount.enable_mount = true;
+    ns->mount.mount_tmp_tmpfs = payload.data != nullptr
         ? payload.data
         : "";
 }
@@ -591,12 +593,12 @@ translate_client_mount_home(NamespaceOptions *ns,
     if (!is_valid_absolute_path(payload, payload_length))
         throw std::runtime_error("malformed MOUNT_HOME packet");
 
-    if (ns == nullptr || ns->home == nullptr ||
-        ns->mount_home != nullptr)
+    if (ns == nullptr || ns->mount.home == nullptr ||
+        ns->mount.mount_home != nullptr)
         throw std::runtime_error("misplaced MOUNT_HOME packet");
 
-    ns->enable_mount = true;
-    ns->mount_home = payload;
+    ns->mount.enable_mount = true;
+    ns->mount.mount_home = payload;
 }
 
 static void
@@ -609,11 +611,11 @@ translate_client_mount_tmpfs(NamespaceOptions *ns,
         strcmp(payload, "/tmp") == 0)
         throw std::runtime_error("malformed MOUNT_TMPFS packet");
 
-    if (ns == nullptr || ns->mount_tmpfs != nullptr)
+    if (ns == nullptr || ns->mount.mount_tmpfs != nullptr)
         throw std::runtime_error("misplaced MOUNT_TMPFS packet");
 
-    ns->enable_mount = true;
-    ns->mount_tmpfs = payload;
+    ns->mount.enable_mount = true;
+    ns->mount.mount_tmpfs = payload;
 }
 
 inline void

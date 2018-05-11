@@ -32,69 +32,81 @@
 
 #pragma once
 
-#include "MountNamespaceOptions.hxx"
 #include "translation/Features.hxx"
 
 #include "util/Compiler.h"
 
 class AllocatorPtr;
 struct MountList;
-struct SpawnConfig;
-struct UidGid;
 class MatchInfo;
 
-struct NamespaceOptions {
-	/**
-	 * Start the child process in a new user namespace?
-	 */
-	bool enable_user = false;
+struct MountNamespaceOptions {
+	bool enable_mount = false;
 
 	/**
-	 * Start the child process in a new PID namespace?
+	 * Mount a tmpfs to "/"?  All required mountpoints will be
+	 * created, but the filesystem will contain nothing else.
 	 */
-	bool enable_pid = false;
+	bool mount_root_tmpfs = false;
 
 	/**
-	 * Start the child process in a new Cgroup namespace?
+	 * Mount a new /proc?
 	 */
-	bool enable_cgroup = false;
+	bool mount_proc = false;
 
 	/**
-	 * Start the child process in a new network namespace?
+	 * Shall /proc we writable?  Only used if #mount_proc is set.
 	 */
-	bool enable_network = false;
+	bool writable_proc = false;
 
 	/**
-	 * Start the child process in a new IPC namespace?
+	 * Mount /dev/pts?
 	 */
-	bool enable_ipc = false;
+	bool mount_pts = false;
 
 	/**
-	 * The name of the PID namespace to reassociate with.  The
-	 * namespace is requested from the "Spawn" daemon (Package
-	 * cm4all-spawn).
+	 * Bind-mount the old /dev/pts?
+	 *
+	 * Note that #MountList cannot be used here because it enforces
+	 * MS_NODEV.
 	 */
-	const char *pid_namespace = nullptr;
+	bool bind_mount_pts = false;
+
+	const char *pivot_root = nullptr;
+
+	const char *home = nullptr;
+
+#if TRANSLATION_ENABLE_EXPAND
+	const char *expand_home = nullptr;
+#endif
 
 	/**
-	 * The name of the network namespace (/run/netns/X) to reassociate
-	 * with.  Requires #enable_network.
+	 * Mount the given home directory?  Value is the mount point.
 	 */
-	const char *network_namespace = nullptr;
+	const char *mount_home = nullptr;
+
+	/**
+	 * Mount a new tmpfs on /tmp?  A non-empty string specifies
+	 * additional mount options, such as "size=64M".
+	 */
+	const char *mount_tmp_tmpfs = nullptr;
+
+	const char *mount_tmpfs = nullptr;
+
+	MountList *mounts = nullptr;
 
 	/**
 	 * The hostname of the new UTS namespace.
 	 */
 	const char *hostname = nullptr;
 
-	MountNamespaceOptions mount;
-
-	NamespaceOptions() = default;
-	NamespaceOptions(AllocatorPtr alloc, const NamespaceOptions &src);
+	MountNamespaceOptions() = default;
+	MountNamespaceOptions(AllocatorPtr alloc,
+			      const MountNamespaceOptions &src) noexcept;
 
 #if TRANSLATION_ENABLE_EXPAND
 	gcc_pure
-	bool IsExpandable() const;
+	bool IsExpandable() const noexcept;
 
 	/**
 	 * Throws std::runtime_error on error.
@@ -102,31 +114,21 @@ struct NamespaceOptions {
 	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
 #endif
 
-	gcc_pure
-	int GetCloneFlags(int flags) const;
-
-	void SetupUidGidMap(const UidGid &uid_gid,
-			    int pid) const;
-
-	/**
-	 * Apply #pid_namespace.  This will affect new child
-	 * processes, but not this process.
-	 */
-	void ReassociatePid() const;
-
-	/**
-	 * Apply #network_namespace.
-	 */
-	void ReassociateNetwork() const;
-
 	/**
 	 * Throws std::system_error on error.
 	 */
-	void Setup(const UidGid &uid_gid) const;
+	void Setup() const;
 
-	char *MakeId(char *p) const;
+	char *MakeId(char *p) const noexcept;
 
-	const char *GetJailedHome() const {
-		return mount.GetJailedHome();
+	const char *GetJailedHome() const noexcept {
+		return mount_home != nullptr
+			? mount_home
+			: home;
+	}
+
+private:
+	constexpr bool HasBindMount() const noexcept {
+		return bind_mount_pts || mount_home != nullptr || mounts != nullptr;
 	}
 };

@@ -235,5 +235,5 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
 		/* if we allow user namespaces, then we should allow writing
 		   to /proc/self/{uid,gid}_map, which requires a /proc mount
 		   which is not read-only */
-		dest.ns.writable_proc = true;
+		dest.ns.mount.writable_proc = true;
 }
