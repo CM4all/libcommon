@@ -81,10 +81,11 @@ MakeIovecAttribute()
 	return MakeIovecStatic<Attribute, value>();
 }
 
-template<typename V>
-static void
-FillIovec(V &v, const Datagram &d)
+void
+Send(SocketDescriptor s, const Datagram &d)
 {
+	StaticArray<struct iovec, 64> v;
+
 	v.push_back(MakeIovecStatic<uint32_t, ToBE32(MAGIC_V2)>());
 
 	uint64_t timestamp;
@@ -189,13 +190,6 @@ FillIovec(V &v, const Datagram &d)
 
 	const uint32_t crc_value = ToBE32(crc.checksum());
 	v.push_back(MakeIovecT(crc_value));
-}
-
-void
-Send(SocketDescriptor s, const Datagram &d)
-{
-	StaticArray<struct iovec, 64> v;
-	FillIovec(v, d);
 
 	SendMessage(s, ConstBuffer<struct iovec>(&v.front(), v.size()),
 		    MSG_DONTWAIT);
