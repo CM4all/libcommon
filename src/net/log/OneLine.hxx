@@ -38,6 +38,9 @@ class FileDescriptor;
 /**
  * Print the #Net::Log::Datagram in one line, similar to Apache's
  * "combined" log format.
+ *
+ * @param site log the site name?
  */
 void
-LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d);
+LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d,
+	   bool site=true);

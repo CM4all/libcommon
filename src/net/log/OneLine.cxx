@@ -110,7 +110,8 @@ EscapeString(StringView value, char *const buffer, size_t buffer_size)
 }
 
 static void
-LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d)
+LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
+	       bool site)
 {
 	const char *method = d.valid_http_method &&
 		http_method_is_valid(d.http_method)
@@ -140,22 +141,36 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d)
 
 	char escaped_uri[4096], escaped_referer[2048], escaped_ua[1024];
 
-	dprintf(fd.Get(),
-		"%s %s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
-		OptionalString(d.site),
-		OptionalString(d.remote_host),
-		stamp, method,
-		EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
-		d.http_status, length,
-		EscapeString(OptionalString(d.http_referer),
-			     escaped_referer, sizeof(escaped_referer)),
-		EscapeString(OptionalString(d.user_agent),
-			     escaped_ua, sizeof(escaped_ua)),
-		duration);
+	if (site)
+		dprintf(fd.Get(),
+			"%s %s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
+			OptionalString(d.site),
+			OptionalString(d.remote_host),
+			stamp, method,
+			EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
+			d.http_status, length,
+			EscapeString(OptionalString(d.http_referer),
+				     escaped_referer, sizeof(escaped_referer)),
+			EscapeString(OptionalString(d.user_agent),
+				     escaped_ua, sizeof(escaped_ua)),
+			duration);
+	else
+		dprintf(fd.Get(),
+			"%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
+			OptionalString(d.remote_host),
+			stamp, method,
+			EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
+			d.http_status, length,
+			EscapeString(OptionalString(d.http_referer),
+				     escaped_referer, sizeof(escaped_referer)),
+			EscapeString(OptionalString(d.user_agent),
+				     escaped_ua, sizeof(escaped_ua)),
+			duration);
 }
 
 static void
-LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d)
+LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
+		  bool site)
 {
 
 	StringBuffer<32> stamp_buffer;
@@ -165,19 +180,26 @@ LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d)
 
 	char escaped_message[4096];
 
-	dprintf(fd.Get(),
-		"%s [%s] %s\n",
-		OptionalString(d.site),
-		stamp,
-		EscapeString(d.message, escaped_message,
-			     sizeof(escaped_message)));
-}
+	if (site)
+		dprintf(fd.Get(),
+			"%s [%s] %s\n",
+			OptionalString(d.site),
+			stamp,
+			EscapeString(d.message, escaped_message,
+				     sizeof(escaped_message)));
+	else
+		dprintf(fd.Get(),
+			"[%s] %s\n",
+			stamp,
+			EscapeString(d.message, escaped_message,
+				     sizeof(escaped_message)));}
+
 
 void
-LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d)
+LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d, bool site)
 {
 	if (d.http_uri != nullptr && d.valid_http_status)
-		LogOneLineHttp(fd, d);
+		LogOneLineHttp(fd, d, site);
 	else if (d.message != nullptr)
-		LogOneLineMessage(fd, d);
+		LogOneLineMessage(fd, d, site);
 }
