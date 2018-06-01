@@ -86,6 +86,18 @@ public:
 		return PendingCall(pending);
 	}
 
+	bool SetNotify(DBusPendingCallNotifyFunction function,
+		       void *user_data,
+		       DBusFreeFunction free_user_data=nullptr) noexcept {
+		return dbus_pending_call_set_notify(pending,
+						    function, user_data,
+						    free_user_data);
+	}
+
+	void Cancel() noexcept {
+		dbus_pending_call_cancel(pending);
+	}
+
 	void Block() noexcept {
 		dbus_pending_call_block(pending);
 	}
