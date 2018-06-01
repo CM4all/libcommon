@@ -47,7 +47,12 @@ PipeAdapter::OnLine(WritableBuffer<char> line) noexcept
 	datagram.SetTimestamp(std::chrono::system_clock::now());
 
 	datagram.message = {line.data, line.size};
-	Send(socket, datagram);
+
+	try {
+		Send(socket, datagram);
+	} catch (...) {
+		// TODO: log this error?
+	}
 
 	return true;
 }
