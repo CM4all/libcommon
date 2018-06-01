@@ -38,6 +38,11 @@
 namespace ODBus {
 
 class ReadMessageIter : public MessageIter {
+	struct RecurseTag {};
+	ReadMessageIter(RecurseTag, ReadMessageIter &parent) noexcept {
+		dbus_message_iter_recurse(&parent.iter, &iter);
+	}
+
 public:
 	explicit ReadMessageIter(DBusMessage &msg) noexcept {
 		dbus_message_iter_init(&msg, &iter);
@@ -67,6 +72,10 @@ public:
 		const char *value;
 		GetBasic(&value);
 		return value;
+	}
+
+	ReadMessageIter Recurse() noexcept {
+		return {RecurseTag(), *this};
 	}
 };
 
