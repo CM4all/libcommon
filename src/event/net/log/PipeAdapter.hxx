@@ -34,7 +34,6 @@
 
 #include "net/SocketDescriptor.hxx"
 #include "net/log/Datagram.hxx"
-#include "event/SocketEvent.hxx"
 #include "event/PipeLineReader.hxx"
 
 namespace Net {
