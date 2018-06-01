@@ -36,8 +36,10 @@
 class AllocatedSocketAddress;
 
 /**
- * Parse a numeric socket address.  Throws std::runtime_error on
- * error.
+ * Parse a numeric socket address or a local socket address (absolute
+ * path starting with '/' or an abstract name starting with '@').
+ *
+ * Throws std::runtime_error on error.
  */
 AllocatedSocketAddress
 ParseSocketAddress(const char *p, int default_port, bool passive);
