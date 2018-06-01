@@ -57,6 +57,10 @@ public:
 			dbus_pending_call_unref(pending);
 	}
 
+	operator bool() const noexcept {
+		return pending;
+	}
+
 	DBusPendingCall *Get() noexcept {
 		return pending;
 	}
