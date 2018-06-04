@@ -81,6 +81,49 @@ public:
 	ReadMessageIter Recurse() noexcept {
 		return {RecurseTag(), *this};
 	}
+
+	/**
+	 * Invoke a function for each element (including the current
+	 * one), as long as the argument type is the specified one.
+	 */
+	template<typename F>
+	void ForEach(int arg_type, F &&f) {
+		for (; GetArgType() == arg_type; Next())
+			f(*this);
+	}
+
+	/**
+	 * Wrapper for ForEach() which passes a recursed iterator for
+	 * each element.
+	 */
+	template<typename F>
+	void ForEachRecurse(int arg_type, F &&f) {
+		ForEach(arg_type, [&f](auto &&i){
+				f(i.Recurse());
+			});
+	}
+
+	/**
+	 * Invoke a function for each name/value pair (string/variant)
+	 * in a dictionary (array containing #DBUS_TYPE_DICT_ENTRY).
+	 * The function gets two parameters: the property name (as C
+	 * string) and the variant value (as #ReadMessageIter).
+	 */
+	template<typename F>
+	void ForEachProperty(F &&f) {
+		ForEachRecurse(DBUS_TYPE_DICT_ENTRY, [&f](auto &&i){
+				if (i.GetArgType() != DBUS_TYPE_STRING)
+					return;
+
+				const char *name = i.GetString();
+				i.Next();
+
+				if (i.GetArgType() != DBUS_TYPE_VARIANT)
+					return;
+
+				f(name, i.Recurse());
+			});
+	}
 };
 
 } /* namespace ODBus */
