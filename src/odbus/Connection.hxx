@@ -69,6 +69,7 @@ public:
 	}
 
 	static Connection GetSystem();
+	static Connection GetSystemPrivate();
 	static Connection Open(const char *address);
 
 	operator DBusConnection *() noexcept {
