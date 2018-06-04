@@ -74,6 +74,10 @@ public:
 		return value;
 	}
 
+	/**
+	 * Create a new iterator which recurses into a container
+	 * value.
+	 */
 	ReadMessageIter Recurse() noexcept {
 		return {RecurseTag(), *this};
 	}
