@@ -117,6 +117,8 @@ UnblockSignals()
 gcc_noreturn
 static void
 Exec(const char *path, PreparedChildProcess &&p,
+     UniqueFileDescriptor &&userns_create_pipe_w,
+     UniqueFileDescriptor &&userns_setup_pipe_r,
      const CgroupState &cgroup_state)
 try {
 	UnignoreSignals();
@@ -165,6 +167,36 @@ try {
 		fprintf(stderr, "chroot('%s') failed: %s\n",
 			p.chroot, strerror(errno));
 		_exit(EXIT_FAILURE);
+	}
+
+	if (userns_create_pipe_w.IsDefined()) {
+		/* user namespace allocation was postponed to allow
+		   mounting /proc with a reassociated PID namespace
+		   (which would not be allowed from inside a new user
+		   namespace, because the user namespace drops
+		   capabilities on the PID namespace) */
+
+		assert(userns_setup_pipe_r.IsDefined());
+
+		if (unshare(CLONE_NEWUSER) < 0)
+			throw MakeErrno("clone(CLONE_NEWUSER) failed");
+
+		/* after success (no exception was thrown), we send
+		   one byte to the pipe and close it, so the parent
+		   knows everything's ok; without that byte, it would
+		   fail */
+		static constexpr char zero = 0;
+		userns_create_pipe_w.Write(&zero, sizeof(zero));
+		userns_create_pipe_w.Close();
+
+		/* wait for the parent to set us up */
+
+		/* expect one byte to indicate success, and then the pipe will
+		   be closed by the parent */
+		char buffer;
+		if (userns_setup_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
+		    userns_setup_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
+			_exit(EXIT_FAILURE);
 	}
 
 	if (p.chdir != nullptr && chdir(p.chdir) < 0) {
@@ -282,6 +314,12 @@ struct SpawnChildProcessContext {
 	const char *path;
 
 	/**
+	 * A pipe used by the parent process to wait for the child to
+	 * create the user namespace.
+	 */
+	UniqueFileDescriptor userns_create_pipe_r, userns_create_pipe_w;
+
+	/**
 	 * A pipe used by the child process to wait for the parent to set
 	 * it up (e.g. uid/gid mappings).
 	 */
@@ -299,24 +337,13 @@ spawn_fn(void *_ctx)
 {
 	auto &ctx = *(SpawnChildProcessContext *)_ctx;
 
-	if (ctx.wait_pipe_r.IsDefined()) {
-		/* wait for the parent to set us up */
+	ctx.userns_create_pipe_r.Close();
+	ctx.wait_pipe_w.Close();
 
-		ctx.wait_pipe_w.Close();
-
-		/* expect one byte to indicate success, and then the pipe will
-		   be closed by the parent */
-		char buffer;
-		if (ctx.wait_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
-		    ctx.wait_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
-			_exit(EXIT_FAILURE);
-
-		/* clear the resource limits because they have been applied
-		   already by the parent */
-		ctx.params.rlimits = ResourceLimits();
-	}
-
-	Exec(ctx.path, std::move(ctx.params), ctx.cgroup_state);
+	Exec(ctx.path, std::move(ctx.params),
+	     std::move(ctx.userns_create_pipe_w),
+	     std::move(ctx.wait_pipe_r),
+	     ctx.cgroup_state);
 }
 
 pid_t
@@ -328,14 +355,12 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	SpawnChildProcessContext ctx(std::move(params), cgroup_state);
 
-	UniqueFileDescriptor old_pidns, old_netns;
+	UniqueFileDescriptor old_pidns;
 
-	AtScopeExit(&old_pidns, &old_netns) {
+	AtScopeExit(&old_pidns) {
 		/* restore the old namespaces */
 		if (old_pidns.IsDefined())
 			setns(old_pidns.Get(), CLONE_NEWPID);
-		if (old_netns.IsDefined())
-			setns(old_netns.Get(), CLONE_NEWNET);
 	};
 
 	if (ctx.params.ns.pid_namespace != nullptr) {
@@ -350,39 +375,29 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			throw MakeErrno("setns(CLONE_NEWPID) failed");
 	}
 
-	if (ctx.params.ns.enable_user &&
-	    ctx.params.ns.network_namespace != nullptr) {
-		/* from inside the new user namespace, we cannot reassociate
-		   with a new network namespace, because at this point, we
-		   have lost capabilities on the network namespace; therefore,
-		   what we can do is either
-		   clone()+setns(NETWORK)+unshare(USER) or
-		   setns(NETWORK)+clone(USER); for now, I've decided to do the
-		   latter */
-
-		/* first open a handle to our existing (old) network namespace
-		   to be able to restore it later (see above) */
-		if (!old_netns.OpenReadOnly("/proc/self/ns/net"))
-			throw MakeErrno("Failed to open current network namespace");
-
-		/* then let this process reassociate with the target network
-		   namespace */
-		ctx.params.ns.ReassociateNetwork();
-
-		/* clear the option, so the child process doesn't call setns()
-		   again */
-		ctx.params.ns.network_namespace = nullptr;
-	}
-
 	if (ctx.params.ns.enable_user && geteuid() == 0) {
-		/* we'll set up the uid/gid mapping from the privileged
-		   parent; create a pipe to synchronize this with the child */
+		/* from inside the new user namespace, we cannot
+		   reassociate with a new network namespace or mount
+		   /proc of a reassociated PID namespace, because at
+		   this point, we have lost capabilities on those
+		   namespaces; therefore, postpone CLONE_NEWUSER until
+		   everything is set up; to synchronize this, create
+		   two pairs of pipes */
+
+		if (!UniqueFileDescriptor::CreatePipe(ctx.userns_create_pipe_r,
+						      ctx.userns_create_pipe_w))
+			throw MakeErrno("pipe() failed");
 
 		if (!UniqueFileDescriptor::CreatePipe(ctx.wait_pipe_r, ctx.wait_pipe_w))
 			throw MakeErrno("pipe() failed");
 
-		/* don't do it again inside the child process by disabling the
-		   feature on the child's copy */
+		/* disable CLONE_NEWUSER for the clone() call, because
+		   the child process will call
+		   unshare(CLONE_NEWUSER) */
+		clone_flags &= ~CLONE_NEWUSER;
+
+		/* this process will set up the uid/gid maps, so
+		   disable that part in the child process */
 		ctx.params.ns.enable_user = false;
 	}
 
@@ -390,6 +405,19 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags, &ctx);
 	if (pid < 0)
 		throw MakeErrno("clone() failed");
+
+	if (ctx.userns_create_pipe_r.IsDefined()) {
+		/* wait for the child to create the user namespace */
+
+		ctx.userns_create_pipe_w.Close();
+
+		/* expect one byte to indicate success, and then the
+		   pipe will be closed by the child */
+		char buffer;
+		if (ctx.userns_create_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
+		    ctx.userns_create_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
+			throw std::runtime_error("User namespace setup failed");
+	}
 
 	if (ctx.wait_pipe_w.IsDefined()) {
 		/* set up the child's uid/gid mapping and wake it up */
