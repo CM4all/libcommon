@@ -199,6 +199,14 @@ MountNamespaceOptions::Setup() const
 	}
 
 	if (mount_proc) {
+		if (new_root == nullptr)
+			/* if we're still in the old filesystem root
+			   (no pivot_root()), /proc is already
+			   mounted, so we need to unmount it first to
+			   allow mounting a new /proc instance, or
+			   else that will fail with EBUSY */
+			umount2("/proc", MNT_DETACH);
+
 		unsigned long flags = MS_NOEXEC|MS_NOSUID|MS_NODEV;
 		if (!writable_proc)
 			flags |= MS_RDONLY;
