@@ -74,6 +74,9 @@ try {
 			p.ns.enable_network = true;
 		} else if (const char *netns = StringAfterPrefix(arg, "--netns=")) {
 			p.ns.network_namespace = netns;
+		} else if (const char *pivot_root = StringAfterPrefix(arg, "--root=")) {
+			p.ns.mount.enable_mount = true;
+			p.ns.mount.pivot_root = pivot_root;
 		} else if (StringIsEqual(arg, "--mount-proc")) {
 			p.ns.mount.enable_mount = true;
 			p.ns.mount.mount_proc = true;
@@ -103,7 +106,7 @@ try {
 	fprintf(stderr, "%s\n", msg);
 	return EXIT_FAILURE;
 } catch (Usage) {
-	fprintf(stderr, "Usage: RunSpawn [--uid=#] [--gid=#] [--userns] [--pidns[=NAME]] [--netns[=NAME]] [--mount-proc]\n");
+	fprintf(stderr, "Usage: RunSpawn [--uid=#] [--gid=#] [--userns] [--pidns[=NAME]] [--netns[=NAME]] [--root=PATH] [--mount-proc]\n");
 	return EXIT_FAILURE;
 } catch (...) {
 	PrintException(std::current_exception());
