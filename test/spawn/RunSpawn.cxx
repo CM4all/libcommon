@@ -87,7 +87,7 @@ try {
 	const auto pid = SpawnChildProcess(std::move(p), cgroup_state);
 
 	int status;
-	if (waitpid(pid, &status, 0))
+	if (waitpid(pid, &status, 0) < 0)
 		throw MakeErrno("waitpid() failed");
 
 	if (WIFSIGNALED(status)) {
