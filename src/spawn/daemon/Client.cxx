@@ -52,7 +52,7 @@ CreateConnectLocalSocket(const char *path)
 		AllocatedSocketAddress address;
 		address.SetLocal(path);
 		if (!s.Connect(address))
-			throw MakeErrno("Failed to bind");
+			throw FormatErrno("Failed to connect to %s", path);
 	}
 
 	return s;
