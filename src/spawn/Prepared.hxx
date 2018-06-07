@@ -145,6 +145,11 @@ struct PreparedChildProcess {
 	bool tty = false;
 
 	/**
+	 * Run the process in a new session using setsid()?
+	 */
+	bool session = true;
+
+	/**
 	 * String allocations for SetEnv().
 	 */
 	std::forward_list<std::string> strings;

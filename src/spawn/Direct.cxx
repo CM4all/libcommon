@@ -222,7 +222,8 @@ try {
 	if (p.tty)
 		DisconnectTty();
 
-	setsid();
+	if (p.session)
+		setsid();
 
 	if (p.tty) {
 		assert(p.stdin_fd >= 0);
