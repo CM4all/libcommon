@@ -103,7 +103,7 @@ try {
 	fprintf(stderr, "%s\n", msg);
 	return EXIT_FAILURE;
 } catch (Usage) {
-	fprintf(stderr, "Usage: RunSpawn [--userns] [--pidns[=NAME]]\n");
+	fprintf(stderr, "Usage: RunSpawn [--uid=#] [--gid=#] [--userns] [--pidns[=NAME]] [--netns[=NAME]] [--mount-proc]\n");
 	return EXIT_FAILURE;
 } catch (...) {
 	PrintException(std::current_exception());
