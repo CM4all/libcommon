@@ -69,6 +69,10 @@ public:
 		AppendRaw({&rh, sizeof(rh)});
 	}
 
+	void Append(const SpawnDaemon::ResponseHeader &rh) noexcept {
+		AppendRaw({&rh, sizeof(rh)});
+	}
+
 	MessageHeader Finish() noexcept {
 		boost::crc_32_type crc;
 		crc.reset();
