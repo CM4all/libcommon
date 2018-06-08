@@ -2460,6 +2460,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         } else
             throw std::runtime_error("misplaced PID_NAMESPACE packet");
 
+        if (ns_options->pid_namespace != nullptr)
+            throw std::runtime_error("Can't combine PID_NAMESPACE with PID_NAMESPACE_NAME");
+
         return;
 
     case TranslationCommand::NETWORK_NAMESPACE:
@@ -3369,6 +3372,22 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("duplicate UNCACHED packet");
 
         response.uncached = true;
+        return;
+
+    case TranslationCommand::PID_NAMESPACE_NAME:
+        if (!IsValidName({payload, payload_length}))
+            throw std::runtime_error("malformed PID_NAMESPACE_NAME packet");
+
+        if (ns_options == nullptr)
+            throw std::runtime_error("misplaced PID_NAMESPACE_NAME packet");
+
+        if (ns_options->pid_namespace != nullptr)
+            throw std::runtime_error("duplicate PID_NAMESPACE_NAME packet");
+
+        if (ns_options->enable_pid)
+            throw std::runtime_error("Can't combine PID_NAMESPACE_NAME with PID_NAMESPACE");
+
+        ns_options->pid_namespace = payload;
         return;
     }
 

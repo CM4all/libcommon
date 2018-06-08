@@ -938,6 +938,12 @@ enum class TranslationCommand : uint16_t {
      * Disable the HTTP cache for the given address.
      */
     UNCACHED = 203,
+
+    /**
+     * Reassociate with the given named PID namespace (queried from
+     * the Spawn daemon).
+     */
+    PID_NAMESPACE_NAME = 204,
 };
 
 struct TranslationHeader {
