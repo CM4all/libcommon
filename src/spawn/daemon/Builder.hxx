@@ -39,45 +39,45 @@
 #include <boost/crc.hpp>
 
 class DatagramBuilder {
-    SpawnDaemon::DatagramHeader header;
+	SpawnDaemon::DatagramHeader header;
 
-    StaticArray<struct iovec, 16> v;
+	StaticArray<struct iovec, 16> v;
 
 public:
-    DatagramBuilder() noexcept {
-        header.magic = SpawnDaemon::MAGIC;
+	DatagramBuilder() noexcept {
+		header.magic = SpawnDaemon::MAGIC;
 
-        AppendRaw({&header, sizeof(header)});
-    }
+		AppendRaw({&header, sizeof(header)});
+	}
 
-    DatagramBuilder(const DatagramBuilder &) = delete;
-    DatagramBuilder &operator=(const DatagramBuilder &) = delete;
+	DatagramBuilder(const DatagramBuilder &) = delete;
+	DatagramBuilder &operator=(const DatagramBuilder &) = delete;
 
-    void AppendRaw(ConstBuffer<void> b) noexcept {
-        v.append() = { const_cast<void *>(b.data), b.size };
-    }
+	void AppendRaw(ConstBuffer<void> b) noexcept {
+		v.append() = { const_cast<void *>(b.data), b.size };
+	}
 
-    void AppendPadded(ConstBuffer<void> b) noexcept {
-        AppendRaw(b);
+	void AppendPadded(ConstBuffer<void> b) noexcept {
+		AppendRaw(b);
 
-        const size_t padding_size = (-b.size) & 3;
-        static constexpr uint8_t padding[] = {0, 0, 0};
-        AppendRaw({padding, padding_size});
-    }
+		const size_t padding_size = (-b.size) & 3;
+		static constexpr uint8_t padding[] = {0, 0, 0};
+		AppendRaw({padding, padding_size});
+	}
 
-    void Append(const SpawnDaemon::RequestHeader &rh) noexcept {
-        AppendRaw({&rh, sizeof(rh)});
-    }
+	void Append(const SpawnDaemon::RequestHeader &rh) noexcept {
+		AppendRaw({&rh, sizeof(rh)});
+	}
 
-    MessageHeader Finish() noexcept {
-        boost::crc_32_type crc;
-        crc.reset();
+	MessageHeader Finish() noexcept {
+		boost::crc_32_type crc;
+		crc.reset();
 
-        for (size_t i = 1; i < v.size(); ++i)
-            crc.process_bytes(v[i].iov_base, v[i].iov_len);
+		for (size_t i = 1; i < v.size(); ++i)
+			crc.process_bytes(v[i].iov_base, v[i].iov_len);
 
-        header.crc = crc.checksum();
+		header.crc = crc.checksum();
 
-        return ConstBuffer<struct iovec>(&v.front(), v.size());
-    }
+		return ConstBuffer<struct iovec>(&v.front(), v.size());
+	}
 };
