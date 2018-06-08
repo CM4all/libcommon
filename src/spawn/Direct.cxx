@@ -364,8 +364,8 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	};
 
 	if (ctx.params.ns.pid_namespace != nullptr) {
-		/* first open a handle to our existing (old) network namespace
-		   to be able to restore it later (see above) */
+		/* first open a handle to our existing (old) namespaces
+		   to be able to restore them later (see above) */
 		if (!old_pidns.OpenReadOnly("/proc/self/ns/pid"))
 			throw MakeErrno("Failed to open current PID namespace");
 
