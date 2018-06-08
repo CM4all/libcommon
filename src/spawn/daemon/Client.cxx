@@ -37,6 +37,7 @@
 #include "net/ReceiveMessage.hxx"
 #include "net/SendMessage.hxx"
 #include "system/Error.hxx"
+#include "util/RuntimeError.hxx"
 #include "util/StringView.hxx"
 
 #include <boost/crc.hpp>
@@ -134,8 +135,9 @@ MakePidNamespace(SocketDescriptor s, const char *name)
 
 	switch (rh.command) {
 	case ResponseCommand::ERROR:
-		throw std::runtime_error(std::string((const char *)payload.data,
-						     rh.size));
+		throw FormatRuntimeError("Spawn server error: %.*s",
+					 int(rh.size),
+					 (const char *)payload.data);
 
 	case ResponseCommand::NAMESPACE_HANDLES:
 		if (rh.size != sizeof(uint32_t) ||
