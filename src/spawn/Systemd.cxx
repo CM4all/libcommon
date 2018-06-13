@@ -85,9 +85,15 @@ LoadSystemdCgroupState(unsigned pid) noexcept
 	std::forward_list<ControllerAssignment> assignments;
 
 	std::string systemd_path;
+	bool have_unified = false;
 
 	char line[256];
 	while (fgets(line, sizeof(line), file) != nullptr) {
+		if (strncmp(line, "0::/", 4) == 0) {
+			have_unified = true;
+			continue;
+		}
+
 		char *p = line, *endptr;
 
 		strtoul(p, &endptr, 10);
@@ -133,6 +139,11 @@ LoadSystemdCgroupState(unsigned pid) noexcept
 	}
 
 	state.mounts.emplace_front("systemd");
+
+	if (have_unified)
+		state.mounts.emplace_front("unified");
+
+	// TODO: support pure unified hierarchy (no hybrid)
 
 	state.group_path = std::move(systemd_path);
 
