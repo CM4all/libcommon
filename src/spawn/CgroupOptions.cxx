@@ -55,105 +55,105 @@
 #endif
 
 CgroupOptions::CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src)
-    :name(alloc.CheckDup(src.name))
+	:name(alloc.CheckDup(src.name))
 {
-    auto **set_tail = &set_head;
+	auto **set_tail = &set_head;
 
-    for (const auto *i = src.set_head; i != nullptr; i = i->next) {
-        auto *new_set = alloc.New<SetItem>(alloc.Dup(i->name),
-                                           alloc.Dup(i->value));
-        *set_tail = new_set;
-        set_tail = &new_set->next;
-    }
+	for (const auto *i = src.set_head; i != nullptr; i = i->next) {
+		auto *new_set = alloc.New<SetItem>(alloc.Dup(i->name),
+						   alloc.Dup(i->value));
+		*set_tail = new_set;
+		set_tail = &new_set->next;
+	}
 }
 
 void
 CgroupOptions::Set(AllocatorPtr alloc, StringView _name, StringView _value)
 {
-    auto *new_set = alloc.New<SetItem>(alloc.DupZ(_name), alloc.DupZ(_value));
-    new_set->next = set_head;
-    set_head = new_set;
+	auto *new_set = alloc.New<SetItem>(alloc.DupZ(_name), alloc.DupZ(_value));
+	new_set->next = set_head;
+	set_head = new_set;
 }
 
 static void
 WriteFile(const char *path, const char *data)
 {
-    if (TryWriteExistingFile(path, data) == WriteFileResult::ERROR)
-        throw FormatErrno("write('%s') failed", path);
+	if (TryWriteExistingFile(path, data) == WriteFileResult::ERROR)
+		throw FormatErrno("write('%s') failed", path);
 }
 
 static void
 MoveToNewCgroup(const char *mount_base_path, const char *controller,
-                const char *delegated_group, const char *sub_group)
+		const char *delegated_group, const char *sub_group)
 {
-    char path[PATH_MAX];
+	char path[PATH_MAX];
 
-    constexpr int max_path = sizeof(path) - 16;
-    if (snprintf(path, max_path, "%s/%s%s/%s",
-                 mount_base_path, controller,
-                 delegated_group, sub_group) >= max_path)
-        throw std::runtime_error("Path is too long");
+	constexpr int max_path = sizeof(path) - 16;
+	if (snprintf(path, max_path, "%s/%s%s/%s",
+		     mount_base_path, controller,
+		     delegated_group, sub_group) >= max_path)
+		throw std::runtime_error("Path is too long");
 
-    if (mkdir(path, 0777) < 0) {
-        switch (errno) {
-        case EEXIST:
-            break;
+	if (mkdir(path, 0777) < 0) {
+		switch (errno) {
+		case EEXIST:
+			break;
 
-        default:
-            throw FormatErrno("mkdir('%s') failed", path);
-        }
-    }
+		default:
+			throw FormatErrno("mkdir('%s') failed", path);
+		}
+	}
 
-    strcat(path, "/cgroup.procs");
-    WriteFile(path, "0");
+	strcat(path, "/cgroup.procs");
+	WriteFile(path, "0");
 }
 
 void
 CgroupOptions::Apply(const CgroupState &state) const
 {
-    if (name == nullptr)
-        return;
+	if (name == nullptr)
+		return;
 
-    if (!state.IsEnabled())
-        throw std::runtime_error("Control groups are disabled");
+	if (!state.IsEnabled())
+		throw std::runtime_error("Control groups are disabled");
 
-    const auto mount_base_path = "/sys/fs/cgroup";
+	const auto mount_base_path = "/sys/fs/cgroup";
 
-    for (const auto &mount_point : state.mounts)
-        MoveToNewCgroup(mount_base_path, mount_point.c_str(),
-                        state.group_path.c_str(), name);
+	for (const auto &mount_point : state.mounts)
+		MoveToNewCgroup(mount_base_path, mount_point.c_str(),
+				state.group_path.c_str(), name);
 
-    for (const auto *set = set_head; set != nullptr; set = set->next) {
-        const char *dot = strchr(set->name, '.');
-        assert(dot != nullptr);
+	for (const auto *set = set_head; set != nullptr; set = set->next) {
+		const char *dot = strchr(set->name, '.');
+		assert(dot != nullptr);
 
-        const std::string controller(set->name, dot);
-        auto i = state.controllers.find(controller);
-        if (i == state.controllers.end())
-            throw FormatRuntimeError("cgroup controller '%s' is unavailable",
-                                     controller.c_str());
+		const std::string controller(set->name, dot);
+		auto i = state.controllers.find(controller);
+		if (i == state.controllers.end())
+			throw FormatRuntimeError("cgroup controller '%s' is unavailable",
+						 controller.c_str());
 
-        const std::string &mount_point = i->second;
+		const std::string &mount_point = i->second;
 
-        char path[PATH_MAX];
+		char path[PATH_MAX];
 
-        if (snprintf(path, sizeof(path), "%s/%s%s/%s/%s",
-                     mount_base_path, mount_point.c_str(),
-                     state.group_path.c_str(), name,
-                     set->name) >= (int)sizeof(path))
-            throw std::runtime_error("Path is too long");
+		if (snprintf(path, sizeof(path), "%s/%s%s/%s/%s",
+			     mount_base_path, mount_point.c_str(),
+			     state.group_path.c_str(), name,
+			     set->name) >= (int)sizeof(path))
+			throw std::runtime_error("Path is too long");
 
-        WriteFile(path, set->value);
-    }
+		WriteFile(path, set->value);
+	}
 }
 
 char *
 CgroupOptions::MakeId(char *p) const
 {
-    if (name != nullptr) {
-        p = (char *)mempcpy(p, ";cg", 3);
-        p = stpcpy(p, name);
-    }
+	if (name != nullptr) {
+		p = (char *)mempcpy(p, ";cg", 3);
+		p = stpcpy(p, name);
+	}
 
-    return p;
+	return p;
 }
