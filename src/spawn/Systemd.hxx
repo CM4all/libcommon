@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_SYSTEMD_HXX
-#define BENG_PROXY_SYSTEMD_HXX
+#pragma once
 
 struct CgroupState;
 
@@ -54,6 +53,4 @@ LoadSystemdCgroupState(unsigned pid) noexcept;
  */
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
-                   int pid, bool delegate=false, const char *slice=nullptr);
-
-#endif
+		   int pid, bool delegate=false, const char *slice=nullptr);

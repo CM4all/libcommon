@@ -53,126 +53,137 @@
 static FILE *
 OpenProcCgroup(unsigned pid)
 {
-    if (pid > 0) {
-        char buffer[256];
-        sprintf(buffer, "/proc/%u/cgroup", pid);
-        return fopen(buffer, "r");
-    } else
-        return fopen("/proc/self/cgroup", "r");
+	if (pid > 0) {
+		char buffer[256];
+		sprintf(buffer, "/proc/%u/cgroup", pid);
+		return fopen(buffer, "r");
+	} else
+		return fopen("/proc/self/cgroup", "r");
 
 }
 
 CgroupState
 LoadSystemdCgroupState(unsigned pid) noexcept
 {
-    FILE *file = OpenProcCgroup(pid);
-    if (file == nullptr)
-        return CgroupState();
+	FILE *file = OpenProcCgroup(pid);
+	if (file == nullptr)
+		return CgroupState();
 
-    AtScopeExit(file) { fclose(file); };
+	AtScopeExit(file) { fclose(file); };
 
-    struct ControllerAssignment {
-        std::string name;
-        std::string path;
+	struct ControllerAssignment {
+		std::string name;
+		std::string path;
 
-        std::forward_list<std::string> controllers;
+		std::forward_list<std::string> controllers;
 
-        ControllerAssignment(StringView _name, StringView _path)
-            :name(_name.data, _name.size),
-             path(_path.data, _path.size) {}
-    };
+		ControllerAssignment(StringView _name, StringView _path)
+			:name(_name.data, _name.size),
+			 path(_path.data, _path.size) {}
+	};
 
-    std::forward_list<ControllerAssignment> assignments;
+	std::forward_list<ControllerAssignment> assignments;
 
-    std::string systemd_path;
+	std::string systemd_path;
+	bool have_unified = false;
 
-    char line[256];
-    while (fgets(line, sizeof(line), file) != nullptr) {
-        char *p = line, *endptr;
+	char line[256];
+	while (fgets(line, sizeof(line), file) != nullptr) {
+		if (strncmp(line, "0::/", 4) == 0) {
+			have_unified = true;
+			continue;
+		}
 
-        strtoul(p, &endptr, 10);
-        if (endptr == p || *endptr != ':')
-            continue;
+		char *p = line, *endptr;
 
-        char *const _name = endptr + 1;
-        char *const colon = strchr(_name, ':');
-        if (colon == nullptr || colon == _name ||
-            colon[1] != '/' || colon[2] == '/')
-            continue;
+		strtoul(p, &endptr, 10);
+		if (endptr == p || *endptr != ':')
+			continue;
 
-        StringView name(_name, colon);
+		char *const _name = endptr + 1;
+		char *const colon = strchr(_name, ':');
+		if (colon == nullptr || colon == _name ||
+		    colon[1] != '/' || colon[2] == '/')
+			continue;
 
-        StringView path(colon + 1);
-        if (path.back() == '\n')
-            --path.size;
+		StringView name(_name, colon);
 
-        if (name.Equals("name=systemd"))
-            systemd_path = std::string(path.data, path.size);
-        else {
-            assignments.emplace_front(name, path);
+		StringView path(colon + 1);
+		if (path.back() == '\n')
+			--path.size;
 
-            auto &controllers = assignments.front().controllers;
-            for (StringView i : IterableSplitString(name, ','))
-                controllers.emplace_front(i.data, i.size);
-        }
-    }
+		if (name.Equals("name=systemd"))
+			systemd_path = std::string(path.data, path.size);
+		else {
+			assignments.emplace_front(name, path);
 
-    if (systemd_path.empty())
-        /* no "systemd" controller found - disable the feature */
-        return CgroupState();
+			auto &controllers = assignments.front().controllers;
+			for (StringView i : IterableSplitString(name, ','))
+				controllers.emplace_front(i.data, i.size);
+		}
+	}
 
-    CgroupState state;
+	if (systemd_path.empty())
+		/* no "systemd" controller found - disable the feature */
+		return CgroupState();
 
-    for (auto &i : assignments) {
-        if (i.path == systemd_path) {
-            for (auto &controller : i.controllers)
-                state.controllers.emplace(std::move(controller), i.name);
+	CgroupState state;
 
-            state.mounts.emplace_front(std::move(i.name));
-        }
-    }
+	for (auto &i : assignments) {
+		if (i.path == systemd_path) {
+			for (auto &controller : i.controllers)
+				state.controllers.emplace(std::move(controller), i.name);
 
-    state.mounts.emplace_front("systemd");
+			state.mounts.emplace_front(std::move(i.name));
+		}
+	}
 
-    state.group_path = std::move(systemd_path);
+	state.mounts.emplace_front("systemd");
 
-    return state;
+	if (have_unified)
+		state.mounts.emplace_front("unified");
+
+	// TODO: support pure unified hierarchy (no hybrid)
+
+	state.group_path = std::move(systemd_path);
+
+	return state;
 }
 
 static void
 WaitJobRemoved(DBusConnection *connection, const char *object_path)
 {
-    using namespace ODBus;
+	using namespace ODBus;
 
-    while (true) {
-        auto msg = Message::Pop(*connection);
-        if (!msg.IsDefined()) {
-            if (dbus_connection_read_write(connection, -1))
-                continue;
-            else
-                break;
-        }
+	while (true) {
+		auto msg = Message::Pop(*connection);
+		if (!msg.IsDefined()) {
+			if (dbus_connection_read_write(connection, -1))
+				continue;
+			else
+				break;
+		}
 
-        if (msg.IsSignal("org.freedesktop.systemd1.Manager", "JobRemoved")) {
-            DBusError err;
-            dbus_error_init(&err);
+		if (msg.IsSignal("org.freedesktop.systemd1.Manager", "JobRemoved")) {
+			DBusError err;
+			dbus_error_init(&err);
 
-            dbus_uint32_t job_id;
-            const char *removed_object_path, *unit_name, *result_string;
-            if (!msg.GetArgs(err,
-                             DBUS_TYPE_UINT32, &job_id,
-                             DBUS_TYPE_OBJECT_PATH, &removed_object_path,
-                             DBUS_TYPE_STRING, &unit_name,
-                             DBUS_TYPE_STRING, &result_string)) {
-                fprintf(stderr, "JobRemoved failed: %s\n", err.message);
-                dbus_error_free(&err);
-                break;
-            }
+			dbus_uint32_t job_id;
+			const char *removed_object_path, *unit_name, *result_string;
+			if (!msg.GetArgs(err,
+					 DBUS_TYPE_UINT32, &job_id,
+					 DBUS_TYPE_OBJECT_PATH, &removed_object_path,
+					 DBUS_TYPE_STRING, &unit_name,
+					 DBUS_TYPE_STRING, &result_string)) {
+				fprintf(stderr, "JobRemoved failed: %s\n", err.message);
+				dbus_error_free(&err);
+				break;
+			}
 
-            if (strcmp(removed_object_path, object_path) == 0)
-                break;
-        }
-    }
+			if (strcmp(removed_object_path, object_path) == 0)
+				break;
+		}
+	}
 }
 
 /**
@@ -180,129 +191,129 @@ WaitJobRemoved(DBusConnection *connection, const char *object_path)
  */
 static bool
 WaitUnitRemoved(ODBus::Connection &connection, const char *name,
-                int timeout_ms)
+		int timeout_ms)
 {
-    using namespace ODBus;
+	using namespace ODBus;
 
-    while (true) {
-        auto msg = Message::Pop(*connection);
-        if (!msg.IsDefined()) {
-            if (dbus_connection_read_write(connection, timeout_ms))
-                continue;
-            else
-                return false;
-        }
+	while (true) {
+		auto msg = Message::Pop(*connection);
+		if (!msg.IsDefined()) {
+			if (dbus_connection_read_write(connection, timeout_ms))
+				continue;
+			else
+				return false;
+		}
 
-        if (msg.IsSignal("org.freedesktop.systemd1.Manager", "UnitRemoved")) {
-            DBusError err;
-            dbus_error_init(&err);
+		if (msg.IsSignal("org.freedesktop.systemd1.Manager", "UnitRemoved")) {
+			DBusError err;
+			dbus_error_init(&err);
 
-            const char *unit_name, *object_path;
-            if (!msg.GetArgs(err,
-                             DBUS_TYPE_STRING, &unit_name,
-                             DBUS_TYPE_OBJECT_PATH, &object_path)) {
-                dbus_error_free(&err);
-                return false;
-            }
+			const char *unit_name, *object_path;
+			if (!msg.GetArgs(err,
+					 DBUS_TYPE_STRING, &unit_name,
+					 DBUS_TYPE_OBJECT_PATH, &object_path)) {
+				dbus_error_free(&err);
+				return false;
+			}
 
-            if (strcmp(unit_name, name) == 0)
-                return true;
-        }
-    }
+			if (strcmp(unit_name, name) == 0)
+				return true;
+		}
+	}
 }
 
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
-                   int pid, bool delegate, const char *slice)
+		   int pid, bool delegate, const char *slice)
 {
-    if (!sd_booted())
-        return CgroupState();
+	if (!sd_booted())
+		return CgroupState();
 
-    ODBus::Error error;
+	ODBus::Error error;
 
-    auto connection = ODBus::Connection::GetSystem();
+	auto connection = ODBus::Connection::GetSystem();
 
-    const char *match = "type='signal',"
-        "sender='org.freedesktop.systemd1',"
-        "interface='org.freedesktop.systemd1.Manager',"
-        "member='JobRemoved',"
-        "path='/org/freedesktop/systemd1'";
-    const ODBus::ScopeMatch scope_match(connection, match);
+	const char *match = "type='signal',"
+		"sender='org.freedesktop.systemd1',"
+		"interface='org.freedesktop.systemd1.Manager',"
+		"member='JobRemoved',"
+		"path='/org/freedesktop/systemd1'";
+	const ODBus::ScopeMatch scope_match(connection, match);
 
-    /* the match for WaitUnitRemoved() */
-    const char *unit_removed_match = "type='signal',"
-        "sender='org.freedesktop.systemd1',"
-        "interface='org.freedesktop.systemd1.Manager',"
-        "member='UnitRemoved',"
-        "path='/org/freedesktop/systemd1'";
-    const ODBus::ScopeMatch unit_removed_scope_match(connection,
-                                                     unit_removed_match);
+	/* the match for WaitUnitRemoved() */
+	const char *unit_removed_match = "type='signal',"
+		"sender='org.freedesktop.systemd1',"
+		"interface='org.freedesktop.systemd1.Manager',"
+		"member='UnitRemoved',"
+		"path='/org/freedesktop/systemd1'";
+	const ODBus::ScopeMatch unit_removed_scope_match(connection,
+							 unit_removed_match);
 
-    using namespace ODBus;
+	using namespace ODBus;
 
-    auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-                                      "/org/freedesktop/systemd1",
-                                      "org.freedesktop.systemd1.Manager",
-                                      "StartTransientUnit");
+	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
+					  "/org/freedesktop/systemd1",
+					  "org.freedesktop.systemd1.Manager",
+					  "StartTransientUnit");
 
-    AppendMessageIter args(*msg.Get());
-    args.Append(name).Append("replace");
+	AppendMessageIter args(*msg.Get());
+	args.Append(name).Append("replace");
 
-    using PropTypeTraits = StructTypeTraits<StringTypeTraits,
-                                            VariantTypeTraits>;
+	using PropTypeTraits = StructTypeTraits<StringTypeTraits,
+						VariantTypeTraits>;
 
-    const uint32_t pids_value[] = { uint32_t(pid) };
+	const uint32_t pids_value[] = { uint32_t(pid) };
 
-    AppendMessageIter(args, DBUS_TYPE_ARRAY, PropTypeTraits::TypeAsString::value)
-        .Append(Struct(String("Description"),
-                       Variant(String(description))))
-        .Append(Struct(String("PIDs"),
-                       Variant(FixedArray(pids_value, ARRAY_SIZE(pids_value)))))
-        .Append(Struct(String("Delegate"),
-                       Variant(Boolean(delegate))))
-        .AppendOptional(slice != nullptr,
-                        Struct(String("Slice"),
-                               Variant(String(slice))))
-        .CloseContainer(args);
+	AppendMessageIter(args, DBUS_TYPE_ARRAY, PropTypeTraits::TypeAsString::value)
+		.Append(Struct(String("Description"),
+			       Variant(String(description))))
+		.Append(Struct(String("PIDs"),
+			       Variant(FixedArray(pids_value, ARRAY_SIZE(pids_value)))))
+		.Append(Struct(String("Delegate"),
+			       Variant(Boolean(delegate))))
+		.AppendOptional(slice != nullptr,
+				Struct(String("Slice"),
+				       Variant(String(slice))))
+		.CloseContainer(args);
 
-    using AuxTypeTraits = StructTypeTraits<StringTypeTraits,
-                                           ArrayTypeTraits<StructTypeTraits<StringTypeTraits,
-                                                                            VariantTypeTraits>>>;
-    args.AppendEmptyArray<AuxTypeTraits>();
+	using AuxTypeTraits = StructTypeTraits<StringTypeTraits,
+					       ArrayTypeTraits<StructTypeTraits<StringTypeTraits,
+										VariantTypeTraits>>>;
+	args.AppendEmptyArray<AuxTypeTraits>();
 
-    auto pending = PendingCall::SendWithReply(connection, msg.Get());
+	auto pending = PendingCall::SendWithReply(connection, msg.Get());
 
-    dbus_connection_flush(connection);
+	dbus_connection_flush(connection);
 
-    pending.Block();
+	pending.Block();
 
-    Message reply = Message::StealReply(*pending.Get());
+	Message reply = Message::StealReply(*pending.Get());
 
-    /* if the scope already exists, it may be because the previous
-       instance crashed and its spawner process was not yet cleaned up
-       by systemd; try to recover by waiting for the UnitRemoved
-       signal, and then try again to create the scope */
-    if (reply.GetType() == DBUS_MESSAGE_TYPE_ERROR &&
-        strcmp(reply.GetErrorName(),
-               "org.freedesktop.systemd1.UnitExists") == 0 &&
-        WaitUnitRemoved(connection, name, 2000)) {
-        /* send the StartTransientUnit message again and hope it
-           succeeds this time */
-        pending = PendingCall::SendWithReply(connection, msg.Get());
-        dbus_connection_flush(connection);
-        pending.Block();
-        reply = Message::StealReply(*pending.Get());
-    }
+	/* if the scope already exists, it may be because the previous
+	   instance crashed and its spawner process was not yet cleaned up
+	   by systemd; try to recover by waiting for the UnitRemoved
+	   signal, and then try again to create the scope */
+	if (reply.GetType() == DBUS_MESSAGE_TYPE_ERROR &&
+	    strcmp(reply.GetErrorName(),
+		   "org.freedesktop.systemd1.UnitExists") == 0 &&
+	    WaitUnitRemoved(connection, name, 2000)) {
+		/* send the StartTransientUnit message again and hope it
+		   succeeds this time */
+		pending = PendingCall::SendWithReply(connection, msg.Get());
+		dbus_connection_flush(connection);
+		pending.Block();
+		reply = Message::StealReply(*pending.Get());
+	}
 
-    reply.CheckThrowError();
+	reply.CheckThrowError();
 
-    const char *object_path;
-    if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
-        error.Throw("StartTransientUnit reply failed");
+	const char *object_path;
+	if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
+		error.Throw("StartTransientUnit reply failed");
 
-    WaitJobRemoved(connection, object_path);
+	WaitJobRemoved(connection, object_path);
 
-    return delegate
-        ? LoadSystemdCgroupState(0)
-        : CgroupState();
+	return delegate
+		? LoadSystemdCgroupState(0)
+		: CgroupState();
 }
