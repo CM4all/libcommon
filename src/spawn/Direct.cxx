@@ -179,7 +179,7 @@ try {
 		assert(userns_setup_pipe_r.IsDefined());
 
 		if (unshare(CLONE_NEWUSER) < 0)
-			throw MakeErrno("clone(CLONE_NEWUSER) failed");
+			throw MakeErrno("unshare(CLONE_NEWUSER) failed");
 
 		/* after success (no exception was thrown), we send
 		   one byte to the pipe and close it, so the parent
