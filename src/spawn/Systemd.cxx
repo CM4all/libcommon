@@ -229,6 +229,36 @@ WaitUnitRemoved(ODBus::Connection &connection, const char *name,
 	}
 }
 
+static void
+SystemdStopService(ODBus::Connection &connection,
+		   const char *name, const char *mode)
+{
+	using namespace ODBus;
+
+	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
+					  "/org/freedesktop/systemd1",
+					  "org.freedesktop.systemd1.Manager",
+					  "StopUnit");
+
+	AppendMessageIter(*msg.Get()).Append(name).Append(mode);
+
+	auto pending = PendingCall::SendWithReply(connection, msg.Get());
+
+	dbus_connection_flush(connection);
+
+	pending.Block();
+
+	Message reply = Message::StealReply(*pending.Get());
+	reply.CheckThrowError();
+
+	Error error;
+	const char *object_path;
+	if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
+		error.Throw("StopUnit reply failed");
+
+	WaitJobRemoved(connection, object_path);
+}
+
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
 		   int pid, bool delegate, const char *slice)
@@ -302,8 +332,24 @@ CreateSystemdScope(const char *name, const char *description,
 	   signal, and then try again to create the scope */
 	if (reply.GetType() == DBUS_MESSAGE_TYPE_ERROR &&
 	    strcmp(reply.GetErrorName(),
-		   "org.freedesktop.systemd1.UnitExists") == 0 &&
-	    WaitUnitRemoved(connection, name, 2000)) {
+		   "org.freedesktop.systemd1.UnitExists") == 0) {
+
+		if (!WaitUnitRemoved(connection, name, 2000)) {
+			/* if the old scope is still alive, stop it
+			   forcefully; this works around a known
+			   problem with LXC and systemd's cgroups1
+			   release agent: the agent doesn't get called
+			   inside LXC containers, so systemd never
+			   cleans up empty units; this is a larger
+			   problem affecting everything, but this
+			   kludge only solves the infamous spawner
+			   failures caused by this */
+			fprintf(stderr, "Old unit %s didn't disappear; attempting to stop it\n",
+				name);
+			SystemdStopService(connection, name, "replace");
+			WaitUnitRemoved(connection, name, -1);
+		}
+
 		/* send the StartTransientUnit message again and hope it
 		   succeeds this time */
 		pending = PendingCall::SendWithReply(connection, msg.Get());
