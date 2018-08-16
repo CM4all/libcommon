@@ -195,9 +195,16 @@ WaitUnitRemoved(ODBus::Connection &connection, const char *name,
 {
 	using namespace ODBus;
 
+	bool was_empty = false;
+
 	while (true) {
 		auto msg = Message::Pop(*connection);
 		if (!msg.IsDefined()) {
+			if (was_empty)
+				return false;
+
+			was_empty = true;
+
 			if (dbus_connection_read_write(connection, timeout_ms))
 				continue;
 			else
