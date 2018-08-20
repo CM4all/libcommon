@@ -48,7 +48,6 @@
 #include <dirent.h>
 
 static sigset_t init_signal_mask;
-static FileDescriptor init_signal_fd = FileDescriptor::Undefined();
 
 static void
 CloseAllFiles()
@@ -74,8 +73,6 @@ CloseAllFiles()
 pid_t
 SpawnInitFork()
 {
-	assert(!init_signal_fd.IsDefined());
-
 	sigemptyset(&init_signal_mask);
 	sigaddset(&init_signal_mask, SIGINT);
 	sigaddset(&init_signal_mask, SIGQUIT);
@@ -94,9 +91,6 @@ SpawnInitFork()
 		SetProcessName("init");
 
 		CloseAllFiles();
-
-		if (!init_signal_fd.CreateSignalFD(&init_signal_mask, false))
-			throw MakeErrno("signalfd() failed");
 	}
 
 	return pid;
@@ -141,6 +135,10 @@ SpawnInit(pid_t child_pid, bool remain)
 {
 	if (geteuid() == 0)
 		DropCapabilities();
+
+	FileDescriptor init_signal_fd;
+	if (!init_signal_fd.CreateSignalFD(&init_signal_mask, false))
+		throw MakeErrno("signalfd() failed");
 
 	LimitSysCalls(init_signal_fd, child_pid);
 
@@ -199,8 +197,6 @@ SpawnInit(pid_t child_pid, bool remain)
 pid_t
 UnshareForkSpawnInit()
 {
-	assert(!init_signal_fd.IsDefined());
-
 	if (unshare(CLONE_NEWPID) < 0)
 		throw MakeErrno("unshare(CLONE_NEWPID) failed");
 
@@ -222,11 +218,6 @@ UnshareForkSpawnInit()
 	SetProcessName("init");
 
 	CloseAllFiles();
-
-	if (!init_signal_fd.CreateSignalFD(&init_signal_mask, false)) {
-		perror("signalfd() failed");
-		_exit(EXIT_FAILURE);
-	}
 
 	try {
 		_exit(SpawnInit(0, true));
