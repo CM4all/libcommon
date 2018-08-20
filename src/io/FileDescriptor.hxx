@@ -68,7 +68,7 @@ public:
 	}
 
 	constexpr bool operator!=(FileDescriptor other) const noexcept {
-		return fd != other.fd;
+		return !(*this == other);
 	}
 
 	constexpr bool IsDefined() const noexcept {
