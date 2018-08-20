@@ -70,7 +70,7 @@ public:
 	}
 
 	void FreeIfEmpty() {
-		if (IsEmpty())
+		if (empty())
 			Free();
 	}
 

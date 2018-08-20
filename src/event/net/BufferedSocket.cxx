@@ -83,7 +83,7 @@ BufferedSocket::ClosedByPeer() noexcept
 	assert(!IsConnected());
 	assert(remaining == input.GetAvailable());
 
-	if (input.IsEmpty()) {
+	if (input.empty()) {
 		Ended();
 		return false;
 	}
@@ -130,7 +130,7 @@ BufferedSocket::InvokeData() noexcept
 	bool local_expect_more = false;
 
 	while (true) {
-		if (input.IsEmpty())
+		if (input.empty())
 			return expect_more || local_expect_more
 				? BufferedResult::MORE
 				: BufferedResult::OK;
@@ -184,7 +184,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 	case BufferedResult::OK:
 		assert(!expect_more);
 
-		if (input.IsEmpty()) {
+		if (input.empty()) {
 			input.Free();
 
 			if (!IsConnected()) {
@@ -546,7 +546,7 @@ BufferedSocket::IsEmpty() const noexcept
 {
 	assert(!ended);
 
-	return input.IsEmpty();
+	return input.empty();
 }
 
 bool
@@ -668,7 +668,7 @@ BufferedSocket::ScheduleReadTimeout(bool _expect_more,
 
 	read_timeout = timeout;
 
-	if (!input.IsEmpty())
+	if (!input.empty())
 		/* deferred call to Read() to deliver data from the buffer */
 		defer_read.Schedule();
 	else
