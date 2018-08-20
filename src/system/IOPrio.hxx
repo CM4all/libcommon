@@ -31,6 +31,7 @@
 #define IOPRIO_HXX
 
 #include <sys/syscall.h>
+#include <unistd.h>
 
 static int
 ioprio_set(int which, int who, int ioprio)
