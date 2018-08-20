@@ -36,7 +36,7 @@
 
 #include <cstddef>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <sys/socket.h>
@@ -50,7 +50,7 @@ struct StringView;
  */
 class SocketAddress {
 public:
-#ifdef WIN32
+#ifdef _WIN32
 	typedef int size_type;
 #else
 	typedef socklen_t size_type;
