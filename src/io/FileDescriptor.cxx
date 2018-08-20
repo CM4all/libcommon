@@ -37,12 +37,6 @@
 #include <poll.h>
 #endif
 
-#ifdef __linux__
-#include <sys/eventfd.h>
-#include <sys/signalfd.h>
-#include <sys/inotify.h>
-#endif
-
 #ifndef O_NOCTTY
 #define O_NOCTTY 0
 #endif
@@ -212,42 +206,6 @@ FileDescriptor::CheckDuplicate(FileDescriptor new_fd) noexcept
 		return true;
 	} else
 		return Duplicate(new_fd);
-}
-
-#endif
-
-#ifdef __linux__
-
-bool
-FileDescriptor::CreateEventFD(unsigned initval) noexcept
-{
-	fd = ::eventfd(initval, EFD_NONBLOCK|EFD_CLOEXEC);
-	return fd >= 0;
-}
-
-bool
-FileDescriptor::CreateSignalFD(const sigset_t *mask, bool nonblock) noexcept
-{
-	int flags = SFD_CLOEXEC;
-	if (nonblock)
-		flags |= SFD_NONBLOCK;
-	int new_fd = ::signalfd(fd, mask, flags);
-	if (new_fd < 0)
-		return false;
-
-	fd = new_fd;
-	return true;
-}
-
-bool
-FileDescriptor::CreateInotify() noexcept
-{
-	int new_fd = inotify_init1(IN_CLOEXEC|IN_NONBLOCK);
-	if (new_fd < 0)
-		return false;
-
-	fd = new_fd;
-	return true;
 }
 
 #endif

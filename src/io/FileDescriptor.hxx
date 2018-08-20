@@ -37,10 +37,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#ifdef __linux__
-#include <signal.h>
-#endif
-
 #ifdef _WIN32
 #include <wchar.h>
 #endif
@@ -177,12 +173,6 @@ public:
 	 * process, to be used by a newly executed program.
 	 */
 	bool CheckDuplicate(FileDescriptor new_fd) noexcept;
-#endif
-
-#ifdef __linux__
-	bool CreateEventFD(unsigned initval=0) noexcept;
-	bool CreateSignalFD(const sigset_t *mask, bool nonblock=true) noexcept;
-	bool CreateInotify() noexcept;
 #endif
 
 	/**

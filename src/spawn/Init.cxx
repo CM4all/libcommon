@@ -35,7 +35,8 @@
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "system/CapabilityState.hxx"
-#include "io/FileDescriptor.hxx"
+#include "system/LinuxFD.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/Macros.hxx"
 #include "util/PrintException.hxx"
 
@@ -136,9 +137,7 @@ SpawnInit(pid_t child_pid, bool remain)
 	if (geteuid() == 0)
 		DropCapabilities();
 
-	FileDescriptor init_signal_fd;
-	if (!init_signal_fd.CreateSignalFD(&init_signal_mask, false))
-		throw MakeErrno("signalfd() failed");
+	auto init_signal_fd = CreateSignalFD(init_signal_mask, false);
 
 	LimitSysCalls(init_signal_fd, child_pid);
 

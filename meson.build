@@ -219,6 +219,7 @@ system = static_library('system',
   'src/system/BindMount.cxx',
   'src/system/CapabilityState.cxx',
   'src/system/ProcessName.cxx',
+  'src/system/LinuxFD.cxx',
   include_directories: inc,
   dependencies: [
     libcap,
