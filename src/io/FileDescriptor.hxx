@@ -39,9 +39,6 @@
 #include <sys/types.h>
 
 #ifdef __linux__
-#define HAVE_EVENTFD
-#define HAVE_SIGNALFD
-#define HAVE_INOTIFY
 #include <signal.h>
 #endif
 
@@ -176,15 +173,9 @@ public:
 	bool CheckDuplicate(FileDescriptor new_fd) noexcept;
 #endif
 
-#ifdef HAVE_EVENTFD
+#ifdef __linux__
 	bool CreateEventFD(unsigned initval=0) noexcept;
-#endif
-
-#ifdef HAVE_SIGNALFD
 	bool CreateSignalFD(const sigset_t *mask, bool nonblock=true) noexcept;
-#endif
-
-#ifdef HAVE_INOTIFY
 	bool CreateInotify() noexcept;
 #endif
 
