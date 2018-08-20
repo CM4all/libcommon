@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2016 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2012-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -184,7 +184,7 @@ public:
 	 * "undefined" object.  After this call, IsDefined() is guaranteed
 	 * to return false, and this object may be reused.
 	 */
-	bool Close() {
+	bool Close() noexcept {
 		assert(IsDefined());
 
 		return ::close(Steal()) == 0;
@@ -195,11 +195,11 @@ public:
 	 */
 	bool Rewind() noexcept;
 
-	off_t Seek(off_t offset) {
+	off_t Seek(off_t offset) noexcept {
 		return lseek(Get(), offset, SEEK_SET);
 	}
 
-	off_t Skip(off_t offset) {
+	off_t Skip(off_t offset) noexcept {
 		return lseek(Get(), offset, SEEK_CUR);
 	}
 
