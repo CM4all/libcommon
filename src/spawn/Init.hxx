@@ -50,6 +50,8 @@ SpawnInitFork();
 /**
  * An "init" implementation for PID namespaces.
  *
+ * Throws if an error occurs during initialization.
+ *
  * @param child_pid the main child's process id obtained from
  * SpawnInitFork(); its exit status is returned by this function; a
  * non-positive value disables this feature
