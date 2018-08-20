@@ -38,6 +38,7 @@
 #include "io/FileDescriptor.hxx"
 #include "util/Macros.hxx"
 
+#include <assert.h>
 #include <sys/wait.h>
 #include <sys/signalfd.h>
 #include <sys/capability.h>
