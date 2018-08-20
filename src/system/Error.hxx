@@ -30,12 +30,12 @@
 #ifndef SYSTEM_ERROR_HXX
 #define SYSTEM_ERROR_HXX
 
-#include "util/StringUtil.hxx"
-
 #include "util/Compiler.h"
 
 #include <system_error>
 #include <utility>
+
+#include <stdio.h>
 
 template<typename... Args>
 static inline std::system_error
