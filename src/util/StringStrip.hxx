@@ -86,7 +86,7 @@ size_t
 StripRight(const char *p, size_t length) noexcept;
 
 /**
- * Strips trailing whitespace.
+ * Strip trailing whitespace by null-terminating the string.
  */
 gcc_nonnull_all
 void
