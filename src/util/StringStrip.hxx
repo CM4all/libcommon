@@ -40,11 +40,11 @@
  * non-whitespace characters, then a pointer to the NULL terminator is
  * returned.
  */
-gcc_pure gcc_nonnull_all
+gcc_pure gcc_returns_nonnull gcc_nonnull_all
 const char *
 StripLeft(const char *p) noexcept;
 
-gcc_pure gcc_nonnull_all
+gcc_pure gcc_returns_nonnull gcc_nonnull_all
 static inline char *
 StripLeft(char *p) noexcept
 {
@@ -55,21 +55,21 @@ StripLeft(char *p) noexcept
  * Skips whitespace at the beginning of the string, and returns the
  * first non-whitespace character or the end pointer.
  */
-gcc_pure
+gcc_pure gcc_returns_nonnull gcc_nonnull_all
 const char *
 StripLeft(const char *p, const char *end) noexcept;
 
 /**
  * Determine the string's end as if it was stripped on the right side.
  */
-gcc_pure
+gcc_pure gcc_returns_nonnull gcc_nonnull_all
 const char *
 StripRight(const char *p, const char *end) noexcept;
 
 /**
  * Determine the string's end as if it was stripped on the right side.
  */
-gcc_pure
+gcc_pure gcc_returns_nonnull gcc_nonnull_all
 static inline char *
 StripRight(char *p, char *end) noexcept
 {
@@ -81,7 +81,7 @@ StripRight(char *p, char *end) noexcept
  * Determine the string's length as if it was stripped on the right
  * side.
  */
-gcc_pure
+gcc_pure gcc_nonnull_all
 size_t
 StripRight(const char *p, size_t length) noexcept;
 
@@ -92,7 +92,7 @@ gcc_nonnull_all
 void
 StripRight(char *p) noexcept;
 
-gcc_nonnull_all
+gcc_returns_nonnull gcc_nonnull_all
 char *
 Strip(char *p) noexcept;
 
