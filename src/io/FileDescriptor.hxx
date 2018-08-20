@@ -126,6 +126,7 @@ public:
 
 #ifndef _WIN32
 	bool OpenNonBlocking(const char *pathname) noexcept;
+#endif
 
 #ifdef __linux__
 	static bool CreatePipe(FileDescriptor &r, FileDescriptor &w,
@@ -133,6 +134,8 @@ public:
 #endif
 
 	static bool CreatePipe(FileDescriptor &r, FileDescriptor &w) noexcept;
+
+#ifndef _WIN32
 	static bool CreatePipeNonBlock(FileDescriptor &r, FileDescriptor &w) noexcept;
 
 	/**
