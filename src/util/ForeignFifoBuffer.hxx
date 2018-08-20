@@ -220,7 +220,7 @@ public:
 	 *
 	 * @return the number of items moved
 	 */
-	size_type MoveFrom(ForeignFifoBuffer<T> &src) {
+	size_type MoveFrom(ForeignFifoBuffer<T> &src) noexcept {
 		auto r = src.Read();
 		auto w = Write();
 
