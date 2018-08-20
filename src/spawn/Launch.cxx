@@ -137,7 +137,7 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 
     LaunchSpawnServerContext ctx{config, hook, std::move(socket),
             std::move(post_clone),
-            read_pipe.ToFileDescriptor(), write_pipe.ToFileDescriptor(), true};
+            read_pipe, write_pipe, true};
 
     char stack[32768];
 

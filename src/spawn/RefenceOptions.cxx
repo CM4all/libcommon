@@ -98,5 +98,5 @@ RefenceOptions::Apply() const
     if (!fd.Open(path, O_WRONLY))
         throw MakeErrno("Failed to open Refence");
 
-    Apply(fd.ToFileDescriptor());
+    Apply(fd);
 }

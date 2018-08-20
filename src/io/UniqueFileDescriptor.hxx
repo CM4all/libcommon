@@ -34,10 +34,12 @@
 
 #include <utility>
 
+#include <assert.h>
+
 /**
  * An OO wrapper for a UNIX file descriptor.
  */
-class UniqueFileDescriptor : protected FileDescriptor {
+class UniqueFileDescriptor : public FileDescriptor {
 public:
 	UniqueFileDescriptor() noexcept
 		:FileDescriptor(FileDescriptor::Undefined()) {}
@@ -51,6 +53,8 @@ public:
 	explicit UniqueFileDescriptor(FileDescriptor _fd) noexcept
 		:FileDescriptor(_fd) {}
 
+	UniqueFileDescriptor(const UniqueFileDescriptor &) = delete;
+
 	UniqueFileDescriptor(UniqueFileDescriptor &&other) noexcept
 		:FileDescriptor(other.Steal()) {}
 
@@ -63,20 +67,6 @@ public:
 		return *this;
 	}
 
-	/**
-	 * Convert this object to its #FileDescriptor base type.
-	 */
-	const FileDescriptor &ToFileDescriptor() const noexcept {
-		return *this;
-	}
-
-	using FileDescriptor::IsDefined;
-	using FileDescriptor::IsValid;
-	using FileDescriptor::IsPipe;
-	using FileDescriptor::IsSocket;
-	using FileDescriptor::Get;
-	using FileDescriptor::Steal;
-
 protected:
 	void Set(int _fd) noexcept {
 		assert(!IsDefined());
@@ -86,12 +76,7 @@ protected:
 	}
 
 public:
-	using FileDescriptor::Open;
-	using FileDescriptor::OpenReadOnly;
-
 #ifndef _WIN32
-	using FileDescriptor::OpenNonBlocking;
-
 	static bool CreatePipe(UniqueFileDescriptor &r, UniqueFileDescriptor &w) noexcept {
 		return FileDescriptor::CreatePipe(r, w);
 	}
@@ -101,46 +86,12 @@ public:
 		return FileDescriptor::CreatePipeNonBlock(r, w);
 	}
 
-	using FileDescriptor::SetNonBlocking;
-	using FileDescriptor::SetBlocking;
-	using FileDescriptor::EnableCloseOnExec;
-	using FileDescriptor::DisableCloseOnExec;
-	using FileDescriptor::Duplicate;
-	using FileDescriptor::CheckDuplicate;
-
 	static bool CreatePipe(FileDescriptor &r, FileDescriptor &w) noexcept;
-#endif
-
-#ifdef HAVE_EVENTFD
-	using FileDescriptor::CreateEventFD;
-#endif
-
-#ifdef HAVE_SIGNALFD
-	using FileDescriptor::CreateSignalFD;
-#endif
-
-#ifdef HAVE_INOTIFY
-	using FileDescriptor::CreateInotify;
 #endif
 
 	bool Close() noexcept {
 		return IsDefined() && FileDescriptor::Close();
 	}
-
-	using FileDescriptor::Rewind;
-	using FileDescriptor::Seek;
-	using FileDescriptor::Skip;
-	using FileDescriptor::Tell;
-	using FileDescriptor::GetSize;
-	using FileDescriptor::Read;
-	using FileDescriptor::Write;
-
-#ifndef _WIN32
-	using FileDescriptor::Poll;
-	using FileDescriptor::WaitReadable;
-	using FileDescriptor::WaitWritable;
-	using FileDescriptor::IsReadyForWriting;
-#endif
 };
 
 #endif

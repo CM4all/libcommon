@@ -58,7 +58,7 @@ public:
 	}
 
 	FileDescriptor GetFileDescriptor() {
-		return fd.ToFileDescriptor();
+		return fd;
 	}
 
 	/**
