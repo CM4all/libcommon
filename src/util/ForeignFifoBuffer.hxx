@@ -146,7 +146,7 @@ public:
 	 * Prepares writing.  Returns a buffer range which may be written.
 	 * When you are finished, call Append().
 	 */
-	Range Write() {
+	Range Write() noexcept {
 		if (empty())
 			Clear();
 		else if (tail == capacity)
@@ -155,7 +155,7 @@ public:
 		return Range(data + tail, capacity - tail);
 	}
 
-	bool WantWrite(size_type n) {
+	bool WantWrite(size_type n) noexcept {
 		if (tail + n <= capacity)
 			/* enough space after the tail */
 			return true;
@@ -206,7 +206,7 @@ public:
 		head += n;
 	}
 
-	size_type Read(pointer_type p, size_type n) {
+	size_type Read(pointer_type p, size_type n) noexcept {
 		auto range = Read();
 		if (n > range.size)
 			n = range.size;
@@ -241,7 +241,7 @@ public:
 	}
 
 protected:
-	void Shift() {
+	void Shift() noexcept {
 		if (head == 0)
 			return;
 
