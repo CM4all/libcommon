@@ -154,6 +154,10 @@ public:
 	 */
 	explicit IPv4Address(SocketAddress src) noexcept;
 
+	static constexpr struct in_addr Loopback() noexcept {
+		return ConstructInAddr(INADDR_LOOPBACK);
+	}
+
 	/**
 	 * Generate a (net-)mask with the specified prefix length.
 	 */
