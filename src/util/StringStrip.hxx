@@ -92,6 +92,10 @@ gcc_nonnull_all
 void
 StripRight(char *p) noexcept;
 
+/**
+ * Skip whitespace at the beginning and terminate the string after the
+ * last non-whitespace character.
+ */
 gcc_returns_nonnull gcc_nonnull_all
 char *
 Strip(char *p) noexcept;
