@@ -34,7 +34,6 @@
 
 #include <utility>
 
-#include <assert.h>
 #include <unistd.h>
 #include <sys/types.h>
 
@@ -192,8 +191,6 @@ public:
 	 * to return false, and this object may be reused.
 	 */
 	bool Close() noexcept {
-		assert(IsDefined());
-
 		return ::close(Steal()) == 0;
 	}
 
