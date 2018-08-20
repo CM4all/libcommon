@@ -37,6 +37,7 @@
 #include "system/CapabilityState.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/Macros.hxx"
+#include "util/PrintException.hxx"
 
 #include <assert.h>
 #include <sys/wait.h>
@@ -227,5 +228,10 @@ UnshareForkSpawnInit()
 		_exit(EXIT_FAILURE);
 	}
 
-	_exit(SpawnInit(0, true));
+	try {
+		_exit(SpawnInit(0, true));
+	} catch (...) {
+		PrintException(std::current_exception());
+		_exit(EXIT_FAILURE);
+	}
 }
