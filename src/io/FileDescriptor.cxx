@@ -60,6 +60,8 @@
 #define O_CLOEXEC 0
 #endif
 
+#ifndef _WIN32
+
 bool
 FileDescriptor::IsValid() const noexcept
 {
@@ -79,6 +81,8 @@ FileDescriptor::IsSocket() const noexcept
 	struct stat st;
 	return IsDefined() && fstat(fd, &st) == 0 && S_ISSOCK(st.st_mode);
 }
+
+#endif
 
 bool
 FileDescriptor::Open(const char *pathname, int flags, mode_t mode) noexcept
