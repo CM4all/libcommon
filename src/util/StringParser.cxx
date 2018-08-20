@@ -28,7 +28,7 @@
  */
 
 #include "StringParser.hxx"
-#include "StringUtil.hxx"
+#include "StringStrip.hxx"
 
 #include <stdexcept>
 

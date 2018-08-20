@@ -33,7 +33,7 @@
 #include "JailConfig.hxx"
 #include "AllocatorPtr.hxx"
 #include "util/CharUtil.hxx"
-#include "util/StringUtil.hxx"
+#include "util/StringStrip.hxx"
 
 #include <assert.h>
 #include <stdio.h>

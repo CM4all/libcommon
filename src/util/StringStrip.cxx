@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2014 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2009-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "StringUtil.hxx"
+#include "StringStrip.hxx"
 #include "CharUtil.hxx"
 
 #include <string.h>

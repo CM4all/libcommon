@@ -33,7 +33,7 @@
 #ifndef LINE_PARSER_HXX
 #define LINE_PARSER_HXX
 
-#include "util/StringUtil.hxx"
+#include "util/StringStrip.hxx"
 #include "util/CharUtil.hxx"
 
 #include <stdexcept>

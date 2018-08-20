@@ -32,7 +32,7 @@
 
 #include "Interval.hxx"
 #include "util/StringCompare.hxx"
-#include "util/StringUtil.hxx"
+#include "util/StringStrip.hxx"
 #include "util/CharUtil.hxx"
 
 #include <stdexcept>
