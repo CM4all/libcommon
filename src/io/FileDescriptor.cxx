@@ -121,13 +121,7 @@ bool
 FileDescriptor::CreatePipe(FileDescriptor &r, FileDescriptor &w, int flags) noexcept
 {
 	int fds[2];
-#ifdef __BIONIC__
-	/* Bionic provides the pipe2() function only since Android 2.3,
-	   therefore we must roll our own system call here */
-	const int result = syscall(__NR_pipe2, fds, flags);
-#else
 	const int result = pipe2(fds, flags);
-#endif
 	if (result < 0)
 		return false;
 
@@ -222,13 +216,7 @@ FileDescriptor::CheckDuplicate(FileDescriptor new_fd) noexcept
 bool
 FileDescriptor::CreateEventFD(unsigned initval) noexcept
 {
-#ifdef __BIONIC__
-	/* Bionic provides the eventfd() function only since Android 2.3,
-	   therefore we must roll our own system call here */
-	fd = syscall(__NR_eventfd2, initval, O_NONBLOCK|O_CLOEXEC);
-#else
 	fd = ::eventfd(initval, EFD_NONBLOCK|EFD_CLOEXEC);
-#endif
 	return fd >= 0;
 }
 
