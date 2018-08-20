@@ -151,6 +151,8 @@ SocketDescriptor::CreateNonBlock(int domain, int type, int protocol)
 	return true;
 }
 
+#ifndef _WIN32
+
 bool
 SocketDescriptor::CreateSocketPair(int domain, int type, int protocol,
 				 SocketDescriptor &a, SocketDescriptor &b)
@@ -185,6 +187,8 @@ SocketDescriptor::CreateSocketPairNonBlock(int domain, int type, int protocol,
 
 	return true;
 }
+
+#endif
 
 int
 SocketDescriptor::GetError()

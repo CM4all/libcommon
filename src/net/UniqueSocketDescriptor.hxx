@@ -86,6 +86,7 @@ public:
 		return UniqueSocketDescriptor(SocketDescriptor::AcceptNonBlock(address));
 	}
 
+#ifndef _WIN32
 	static bool CreateSocketPair(int domain, int type, int protocol,
 				     UniqueSocketDescriptor &a,
 				     UniqueSocketDescriptor &b) {
@@ -101,6 +102,7 @@ public:
 								  protocol,
 								  a, b);
 	}
+#endif
 };
 
 #endif
