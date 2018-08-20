@@ -32,19 +32,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef __BIONIC__
-#include <sys/syscall.h>
-#endif
-
 #ifndef _WIN32
 #include <poll.h>
 #endif
 
-#if defined(HAVE_EVENTFD) && !defined(__BIONIC__)
+#ifdef HAVE_EVENTFD
 #include <sys/eventfd.h>
 #endif
 
-#if defined(HAVE_SIGNALFD) && !defined(__BIONIC__)
+#ifdef HAVE_SIGNALFD
 #include <sys/signalfd.h>
 #endif
 
@@ -227,18 +223,10 @@ FileDescriptor::CreateEventFD(unsigned initval) noexcept
 bool
 FileDescriptor::CreateSignalFD(const sigset_t *mask, bool nonblock) noexcept
 {
-#ifdef __BIONIC__
-	int flags = O_CLOEXEC;
-	if (nonblock)
-		flags |= O_NONBLOCK;
-	int new_fd = syscall(__NR_signalfd4, fd, mask, sizeof(*mask),
-			     flags);
-#else
 	int flags = SFD_CLOEXEC;
 	if (nonblock)
 		flags |= SFD_NONBLOCK;
 	int new_fd = ::signalfd(fd, mask, flags);
-#endif
 	if (new_fd < 0)
 		return false;
 
@@ -253,18 +241,9 @@ FileDescriptor::CreateSignalFD(const sigset_t *mask, bool nonblock) noexcept
 bool
 FileDescriptor::CreateInotify() noexcept
 {
-#ifdef __BIONIC__
-	/* Bionic doesn't have inotify_init1() */
-	int new_fd = inotify_init();
-#else
 	int new_fd = inotify_init1(IN_CLOEXEC|IN_NONBLOCK);
-#endif
 	if (new_fd < 0)
 		return false;
-
-#ifdef __BIONIC__
-	SetNonBlocking();
-#endif
 
 	fd = new_fd;
 	return true;
