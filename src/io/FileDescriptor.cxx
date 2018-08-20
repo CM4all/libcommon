@@ -134,7 +134,13 @@ FileDescriptor::CreatePipe(FileDescriptor &r, FileDescriptor &w) noexcept
 	return CreatePipe(r, w, O_CLOEXEC);
 #else
 	int fds[2];
+
+#ifdef _WIN32
+	const int result = _pipe(fds, 512, _O_BINARY);
+#else
 	const int result = pipe(fds);
+#endif
+
 	if (result < 0)
 		return false;
 
