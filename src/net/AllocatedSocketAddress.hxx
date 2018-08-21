@@ -32,7 +32,6 @@
 
 #include "SocketAddress.hxx"
 #include "Features.hxx"
-
 #include "util/Compiler.h"
 
 #include <algorithm>
@@ -90,7 +89,7 @@ public:
 		return (SocketAddress)*this == other;
 	}
 
-	bool operator!=(SocketAddress &other) const noexcept {
+	bool operator!=(SocketAddress other) const noexcept {
 		return !(*this == other);
 	}
 
