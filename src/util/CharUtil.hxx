@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2014 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2011-2017 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,6 +29,10 @@
 
 #ifndef CHAR_UTIL_HXX
 #define CHAR_UTIL_HXX
+
+#ifdef _UNICODE
+#include "WCharUtil.hxx"
+#endif
 
 constexpr
 static inline bool

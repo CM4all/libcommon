@@ -34,6 +34,10 @@
 #include "StringAPI.hxx"
 #include "Compiler.h"
 
+#ifdef _UNICODE
+#include "WStringCompare.hxx"
+#endif
+
 static inline bool
 StringIsEmpty(const char *string) noexcept
 {
