@@ -97,6 +97,8 @@ SocketDescriptor::AcceptNonBlock(StaticSocketAddress &address) const noexcept
 				      SOCK_CLOEXEC|SOCK_NONBLOCK);
 #else
 	int connection_fd = ::accept(Get(), address, &address.size);
+	if (connection_fd >= 0)
+		SocketDescriptor(connection_fd).SetNonBlocking();
 #endif
 	return SocketDescriptor(connection_fd);
 }
