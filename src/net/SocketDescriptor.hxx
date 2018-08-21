@@ -116,6 +116,8 @@ public:
 	using FileDescriptor::CheckDuplicate;
 	using FileDescriptor::Close;
 #else
+	bool SetNonBlocking() noexcept;
+
 	/**
 	 * This method replaces FileDescriptor::Close(), using closesocket()
 	 * on Windows.  FileDescriptor::Close() is not virtual, so be
