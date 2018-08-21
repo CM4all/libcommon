@@ -173,8 +173,9 @@ public:
 		return SetOption(level, name, &value, sizeof(value));
 	}
 
-#ifdef __linux__
 	bool SetReuseAddress(bool value=true) noexcept;
+
+#ifdef __linux__
 	bool SetReusePort(bool value=true) noexcept;
 	bool SetFreeBind(bool value=true) noexcept;
 	bool SetNoDelay(bool value=true) noexcept;
