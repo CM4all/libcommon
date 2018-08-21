@@ -79,7 +79,7 @@ SocketAddress::GetLocalRaw() const noexcept
 bool
 SocketAddress::IsV6Any() const noexcept
 {
-    return GetFamily() == AF_INET6 && IPv6Address(*this).IsAny();
+	return GetFamily() == AF_INET6 && IPv6Address(*this).IsAny();
 }
 
 bool
