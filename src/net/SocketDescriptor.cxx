@@ -504,6 +504,8 @@ SocketDescriptor::Write(const void *buffer, size_t length,
 			address.GetAddress(), address.GetSize());
 }
 
+#ifndef _WIN32
+
 void
 SocketDescriptor::Shutdown() noexcept
 {
@@ -521,3 +523,5 @@ SocketDescriptor::ShutdownWrite() noexcept
 {
     shutdown(Get(), SHUT_WR);
 }
+
+#endif
