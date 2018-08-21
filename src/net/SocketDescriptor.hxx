@@ -173,6 +173,7 @@ public:
 		return SetOption(level, name, &value, sizeof(value));
 	}
 
+	bool SetKeepAlive(bool value=true) noexcept;
 	bool SetReuseAddress(bool value=true) noexcept;
 
 #ifdef __linux__

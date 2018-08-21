@@ -267,6 +267,12 @@ SocketDescriptor::SetOption(int level, int name,
 }
 
 bool
+SocketDescriptor::SetKeepAlive(bool value) noexcept
+{
+	return SetBoolOption(SOL_SOCKET, SO_KEEPALIVE, value);
+}
+
+bool
 SocketDescriptor::SetReuseAddress(bool value) noexcept
 {
 	return SetBoolOption(SOL_SOCKET, SO_REUSEADDR, value);
