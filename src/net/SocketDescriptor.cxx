@@ -78,7 +78,7 @@ SocketDescriptor::Close()
 SocketDescriptor
 SocketDescriptor::Accept()
 {
-#if defined(__linux__) && !defined(__BIONIC__) && !defined(KOBO)
+#ifdef __linux__
 	int connection_fd = ::accept4(Get(), nullptr, nullptr, SOCK_CLOEXEC);
 #else
 	int connection_fd = ::accept(Get(), nullptr, nullptr);
@@ -92,7 +92,7 @@ SocketDescriptor
 SocketDescriptor::AcceptNonBlock(StaticSocketAddress &address) const
 {
 	address.SetMaxSize();
-#if defined(__linux__) && !defined(__BIONIC__) && !defined(KOBO)
+#ifdef __linux__
 	int connection_fd = ::accept4(Get(), address, &address.size,
 				      SOCK_CLOEXEC|SOCK_NONBLOCK);
 #else
