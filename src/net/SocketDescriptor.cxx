@@ -153,14 +153,14 @@ SocketDescriptor::Create(int domain, int type, int protocol) noexcept
 bool
 SocketDescriptor::CreateNonBlock(int domain, int type, int protocol) noexcept
 {
-#ifdef __linux__
+#ifdef SOCK_NONBLOCK
 	type |= SOCK_NONBLOCK;
 #endif
 
 	if (!Create(domain, type, protocol))
 		return false;
 
-#ifndef __linux__
+#ifndef SOCK_NONBLOCK
 	SetNonBlocking();
 #endif
 
@@ -171,10 +171,11 @@ SocketDescriptor::CreateNonBlock(int domain, int type, int protocol) noexcept
 
 bool
 SocketDescriptor::CreateSocketPair(int domain, int type, int protocol,
-				 SocketDescriptor &a,
+				   SocketDescriptor &a,
 				   SocketDescriptor &b) noexcept
 {
-#ifdef __linux__
+#ifdef SOCK_CLOEXEC
+	/* implemented since Linux 2.6.27 */
 	type |= SOCK_CLOEXEC;
 #endif
 
@@ -192,13 +193,14 @@ SocketDescriptor::CreateSocketPairNonBlock(int domain, int type, int protocol,
 					   SocketDescriptor &a,
 					   SocketDescriptor &b) noexcept
 {
-#ifdef __linux__
+#ifdef SOCK_NONBLOCK
 	type |= SOCK_NONBLOCK;
 #endif
+
 	if (!CreateSocketPair(domain, type, protocol, a, b))
 		return false;
 
-#ifndef __linux__
+#ifndef SOCK_NONBLOCK
 	a.SetNonBlocking();
 	b.SetNonBlocking();
 #endif
