@@ -106,7 +106,7 @@ public:
 	 * nullptr if not applicable.
 	 */
 	gcc_pure
-	StringView GetLocalRaw() const;
+	StringView GetLocalRaw() const noexcept;
 #endif
 
 #ifdef HAVE_TCP

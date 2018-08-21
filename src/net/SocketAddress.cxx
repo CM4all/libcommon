@@ -55,7 +55,7 @@ SocketAddress::operator==(SocketAddress other) const noexcept
 #ifdef HAVE_UN
 
 StringView
-SocketAddress::GetLocalRaw() const
+SocketAddress::GetLocalRaw() const noexcept
 {
 	if (IsNull() || GetFamily() != AF_LOCAL)
 		/* not applicable */
