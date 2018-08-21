@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,7 +35,11 @@
 #include <algorithm>
 #include <utility>
 
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#else
 #include <netdb.h>
+#endif
 
 class AddressInfo : addrinfo {
 	/* this class cannot be instantiated, it can only be cast from
@@ -57,7 +61,7 @@ public:
 	}
 
 	constexpr operator SocketAddress() const {
-		return {ai_addr, ai_addrlen};
+		return {ai_addr, (SocketAddress::size_type)ai_addrlen};
 	}
 };
 

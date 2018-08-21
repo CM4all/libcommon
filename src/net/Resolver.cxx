@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,9 +36,14 @@
 #include "util/RuntimeError.hxx"
 #include "util/CharUtil.hxx"
 
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#else
 #include <sys/socket.h>
 #include <netdb.h>
 #include <net/if.h>
+#endif
+
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
@@ -48,6 +53,8 @@ ai_is_passive(const struct addrinfo *ai)
 {
 	return ai == nullptr || (ai->ai_flags & AI_PASSIVE) != 0;
 }
+
+#ifndef _WIN32
 
 /**
  * Check if there is an interface name after '%', and if so, replace
@@ -72,6 +79,8 @@ FindAndResolveInterfaceName(char *host, size_t size)
 	sprintf(interface, "%u", i);
 }
 
+#endif
+
 static int
 Resolve(const char *host_and_port, int default_port,
 	const struct addrinfo *hints,
@@ -86,15 +95,21 @@ Resolve(const char *host_and_port, int default_port,
 			return EAI_NONAME;
 
 		if (eh.host.size >= sizeof(buffer)) {
+#ifdef _WIN32
+			return EAI_MEMORY;
+#else
 			errno = ENAMETOOLONG;
 			return EAI_SYSTEM;
+#endif
 		}
 
 		memcpy(buffer, eh.host.data, eh.host.size);
 		buffer[eh.host.size] = 0;
 		host = buffer;
 
+#ifndef _WIN32
 		FindAndResolveInterfaceName(buffer, sizeof(buffer));
+#endif
 
 		port = eh.end;
 		if (*port == ':') {
@@ -129,4 +144,16 @@ Resolve(const char *host_and_port, int default_port,
 					 host_and_port, gai_strerror(result));
 
 	return AddressInfoList(ai);
+}
+
+AddressInfoList
+Resolve(const char *host_port, unsigned default_port, int flags, int socktype)
+{
+	addrinfo hints;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_flags = flags;
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = socktype;
+
+	return Resolve(host_port, default_port, &hints);
 }

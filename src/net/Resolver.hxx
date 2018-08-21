@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -48,5 +48,8 @@ class AddressInfoList;
 AddressInfoList
 Resolve(const char *host_and_port, int default_port,
 	const struct addrinfo *hints);
+
+AddressInfoList
+Resolve(const char *host_port, unsigned default_port, int flags, int socktype);
 
 #endif
