@@ -230,7 +230,7 @@ SocketDescriptor::GetOption(int level, int name,
 	assert(IsDefined());
 
 	socklen_t size2 = size;
-	return getsockopt(fd, level, name, value, &size2) == 0
+	return getsockopt(fd, level, name, (char *)value, &size2) == 0
 		? size2
 		: 0;
 }
@@ -262,7 +262,8 @@ SocketDescriptor::SetOption(int level, int name,
 {
 	assert(IsDefined());
 
-	return setsockopt(fd, level, name, value, size) == 0;
+	/* on Windows, setsockopt() wants "const char *" */
+	return setsockopt(fd, level, name, (const char *)value, size) == 0;
 }
 
 #ifdef __linux__
