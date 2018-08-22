@@ -46,7 +46,8 @@ public:
 	/**
 	 * @param comma generate the trailing comma?
 	 */
-	void operator()(std::list<ConstBuffer<void>> &list, bool comma=true);
+	void operator()(std::list<ConstBuffer<void>> &list,
+			bool comma=true) noexcept;
 };
 
 #endif

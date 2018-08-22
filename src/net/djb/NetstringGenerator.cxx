@@ -38,7 +38,7 @@
 
 template<typename L>
 static inline size_t
-GetTotalSize(const L &list)
+GetTotalSize(const L &list) noexcept
 {
 	size_t result = 0;
 	for (const auto &i : list)
@@ -47,7 +47,8 @@ GetTotalSize(const L &list)
 }
 
 void
-NetstringGenerator::operator()(std::list<ConstBuffer<void>> &list, bool comma)
+NetstringGenerator::operator()(std::list<ConstBuffer<void>> &list,
+			       bool comma) noexcept
 {
 	list.emplace_front(header(GetTotalSize(list)).ToVoid());
 

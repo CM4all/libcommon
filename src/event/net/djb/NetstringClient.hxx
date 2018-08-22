@@ -45,8 +45,8 @@ template<typename T> struct ConstBuffer;
 
 class NetstringClientHandler {
 public:
-	virtual void OnNetstringResponse(AllocatedArray<uint8_t> &&payload) = 0;
-	virtual void OnNetstringError(std::exception_ptr error) = 0;
+	virtual void OnNetstringResponse(AllocatedArray<uint8_t> &&payload) noexcept = 0;
+	virtual void OnNetstringError(std::exception_ptr error) noexcept = 0;
 };
 
 /**
@@ -74,8 +74,8 @@ class NetstringClient final {
 
 public:
 	NetstringClient(EventLoop &event_loop, size_t max_size,
-			NetstringClientHandler &_handler);
-	~NetstringClient();
+			NetstringClientHandler &_handler) noexcept;
+	~NetstringClient() noexcept;
 
 	/**
 	 * Start sending the request.  This method may be called only
@@ -92,8 +92,8 @@ public:
 	 * has been invoked)
 	 */
 	void Request(int _out_fd, int _in_fd,
-		     std::list<ConstBuffer<void>> &&data);
+		     std::list<ConstBuffer<void>> &&data) noexcept;
 
 private:
-	void OnEvent(unsigned events);
+	void OnEvent(unsigned events) noexcept;
 };

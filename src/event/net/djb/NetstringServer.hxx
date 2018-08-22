@@ -56,16 +56,17 @@ class NetstringServer {
 	MultiWriteBuffer write;
 
 public:
-	NetstringServer(EventLoop &event_loop, UniqueSocketDescriptor _fd);
-	~NetstringServer();
+	NetstringServer(EventLoop &event_loop,
+			UniqueSocketDescriptor _fd) noexcept;
+	~NetstringServer() noexcept;
 
 protected:
-	SocketDescriptor GetSocket() const {
+	SocketDescriptor GetSocket() const noexcept {
 		return fd;
 	}
 
-	bool SendResponse(const void *data, size_t size);
-	bool SendResponse(const char *data);
+	bool SendResponse(const void *data, size_t size) noexcept;
+	bool SendResponse(const char *data) noexcept;
 
 	/**
 	 * A netstring has been received.
@@ -74,9 +75,9 @@ protected:
 	 * convenience, the netstring is writable
 	 */
 	virtual void OnRequest(AllocatedArray<uint8_t> &&payload) = 0;
-	virtual void OnError(std::exception_ptr ep) = 0;
-	virtual void OnDisconnect() = 0;
+	virtual void OnError(std::exception_ptr ep) noexcept = 0;
+	virtual void OnDisconnect() noexcept = 0;
 
 private:
-	void OnEvent(unsigned events);
+	void OnEvent(unsigned events) noexcept;
 };

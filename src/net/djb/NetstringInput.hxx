@@ -60,7 +60,7 @@ class NetstringInput {
 	const size_t max_size;
 
 public:
-	explicit NetstringInput(size_t _max_size)
+	explicit NetstringInput(size_t _max_size) noexcept
 		:max_size(_max_size) {}
 
 	enum class Result {
@@ -74,7 +74,7 @@ public:
 	 */
 	Result Receive(int fd);
 
-	AllocatedArray<uint8_t> &GetValue() {
+	AllocatedArray<uint8_t> &GetValue() noexcept {
 		assert(state == State::FINISHED);
 
 		return value;

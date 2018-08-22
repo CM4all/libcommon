@@ -38,11 +38,11 @@ static constexpr timeval recv_timeout{60, 0};
 static constexpr timeval busy_timeout{5, 0};
 
 NetstringClient::NetstringClient(EventLoop &event_loop, size_t max_size,
-				 NetstringClientHandler &_handler)
+				 NetstringClientHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(OnEvent)),
 	 input(max_size), handler(_handler) {}
 
-NetstringClient::~NetstringClient()
+NetstringClient::~NetstringClient() noexcept
 {
 	if (out_fd >= 0 || in_fd >= 0)
 		event.Delete();
@@ -56,7 +56,7 @@ NetstringClient::~NetstringClient()
 
 void
 NetstringClient::Request(int _out_fd, int _in_fd,
-			 std::list<ConstBuffer<void>> &&data)
+			 std::list<ConstBuffer<void>> &&data) noexcept
 {
 	assert(in_fd < 0);
 	assert(out_fd < 0);
@@ -75,37 +75,37 @@ NetstringClient::Request(int _out_fd, int _in_fd,
 }
 
 void
-NetstringClient::OnEvent(unsigned events)
-	try {
-		if (events & SocketEvent::TIMEOUT) {
-			throw std::runtime_error("Connect timeout");
-		} else if (events & SocketEvent::WRITE) {
-			switch (write.Write(out_fd)) {
-			case MultiWriteBuffer::Result::MORE:
-				event.Add(&send_timeout);
-				break;
+NetstringClient::OnEvent(unsigned events) noexcept
+try {
+	if (events & SocketEvent::TIMEOUT) {
+		throw std::runtime_error("Connect timeout");
+	} else if (events & SocketEvent::WRITE) {
+		switch (write.Write(out_fd)) {
+		case MultiWriteBuffer::Result::MORE:
+			event.Add(&send_timeout);
+			break;
 
-			case MultiWriteBuffer::Result::FINISHED:
-				event.Delete();
-				event.Set(in_fd, SocketEvent::READ|SocketEvent::PERSIST);
-				event.Add(recv_timeout);
-				break;
-			}
-		} else if (events & SocketEvent::READ) {
-			switch (input.Receive(in_fd)) {
-			case NetstringInput::Result::MORE:
-				event.Add(&busy_timeout);
-				break;
-
-			case NetstringInput::Result::CLOSED:
-				throw std::runtime_error("Connection closed prematurely");
-
-			case NetstringInput::Result::FINISHED:
-				event.Delete();
-				handler.OnNetstringResponse(std::move(input.GetValue()));
-				break;
-			}
+		case MultiWriteBuffer::Result::FINISHED:
+			event.Delete();
+			event.Set(in_fd, SocketEvent::READ|SocketEvent::PERSIST);
+			event.Add(recv_timeout);
+			break;
 		}
-	} catch (...) {
-		handler.OnNetstringError(std::current_exception());
+	} else if (events & SocketEvent::READ) {
+		switch (input.Receive(in_fd)) {
+		case NetstringInput::Result::MORE:
+			event.Add(&busy_timeout);
+			break;
+
+		case NetstringInput::Result::CLOSED:
+			throw std::runtime_error("Connection closed prematurely");
+
+		case NetstringInput::Result::FINISHED:
+			event.Delete();
+			handler.OnNetstringResponse(std::move(input.GetValue()));
+			break;
+		}
 	}
+} catch (...) {
+	handler.OnNetstringError(std::current_exception());
+}

@@ -44,28 +44,28 @@
 
 class QmqpClientHandler {
 public:
-	virtual void OnQmqpClientSuccess(StringView description) = 0;
-	virtual void OnQmqpClientError(std::exception_ptr error) = 0;
+	virtual void OnQmqpClientSuccess(StringView description) noexcept = 0;
+	virtual void OnQmqpClientError(std::exception_ptr error) noexcept = 0;
 };
 
 class QmqpClientError : std::runtime_error {
 public:
 	template<typename W>
-	QmqpClientError(W &&what_arg)
+	QmqpClientError(W &&what_arg) noexcept
 		:std::runtime_error(std::forward<W>(what_arg)) {}
 };
 
 class QmqpClientTemporaryFailure final : QmqpClientError {
 public:
 	template<typename W>
-	QmqpClientTemporaryFailure(W &&what_arg)
+	QmqpClientTemporaryFailure(W &&what_arg) noexcept
 		:QmqpClientError(std::forward<W>(what_arg)) {}
 };
 
 class QmqpClientPermanentFailure final : QmqpClientError {
 public:
 	template<typename W>
-	QmqpClientPermanentFailure(W &&what_arg)
+	QmqpClientPermanentFailure(W &&what_arg) noexcept
 		:QmqpClientError(std::forward<W>(what_arg)) {}
 };
 
@@ -82,11 +82,11 @@ class QmqpClient final : NetstringClientHandler {
 	QmqpClientHandler &handler;
 
 public:
-	QmqpClient(EventLoop &event_loop, QmqpClientHandler &_handler)
+	QmqpClient(EventLoop &event_loop, QmqpClientHandler &_handler) noexcept
 		:client(event_loop, 1024, *this),
 		 handler(_handler) {}
 
-	void Begin(StringView message, StringView sender) {
+	void Begin(StringView message, StringView sender) noexcept {
 		assert(netstring_headers.empty());
 		assert(request.empty());
 
@@ -94,22 +94,22 @@ public:
 		AppendNetstring(sender);
 	}
 
-	void AddRecipient(StringView recipient) {
+	void AddRecipient(StringView recipient) noexcept {
 		assert(!netstring_headers.empty());
 		assert(!request.empty());
 
 		AppendNetstring(recipient);
 	}
 
-	void Commit(int out_fd, int in_fd);
+	void Commit(int out_fd, int in_fd) noexcept;
 
 private:
-	void AppendNetstring(StringView value);
+	void AppendNetstring(StringView value) noexcept;
 
 	/* virtual methods from NetstringClientHandler */
-	void OnNetstringResponse(AllocatedArray<uint8_t> &&payload) override;
+	void OnNetstringResponse(AllocatedArray<uint8_t> &&payload) noexcept override;
 
-	void OnNetstringError(std::exception_ptr error) override {
+	void OnNetstringError(std::exception_ptr error) noexcept override {
 		/* forward to the QmqpClientHandler */
 		handler.OnQmqpClientError(error);
 	}

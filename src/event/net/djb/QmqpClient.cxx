@@ -33,7 +33,7 @@
 #include "QmqpClient.hxx"
 
 void
-QmqpClient::AppendNetstring(StringView value)
+QmqpClient::AppendNetstring(StringView value) noexcept
 {
 	netstring_headers.emplace_front();
 	auto &g = netstring_headers.front();
@@ -43,7 +43,7 @@ QmqpClient::AppendNetstring(StringView value)
 }
 
 void
-QmqpClient::Commit(int out_fd, int in_fd)
+QmqpClient::Commit(int out_fd, int in_fd) noexcept
 {
 	assert(!netstring_headers.empty());
 	assert(!request.empty());
@@ -52,7 +52,7 @@ QmqpClient::Commit(int out_fd, int in_fd)
 }
 
 void
-QmqpClient::OnNetstringResponse(AllocatedArray<uint8_t> &&_payload)
+QmqpClient::OnNetstringResponse(AllocatedArray<uint8_t> &&_payload) noexcept
 try {
 	StringView payload((const char *)&_payload.front(), _payload.size());
 

@@ -39,8 +39,9 @@
 #include <string.h>
 #include <errno.h>
 
+gcc_pure
 static bool
-OnlyDigits(const char *p, size_t size)
+OnlyDigits(const char *p, size_t size) noexcept
 {
 	for (size_t i = 0; i != size; ++i)
 		if (!IsDigitASCII(p[i]))
