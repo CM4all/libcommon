@@ -55,7 +55,8 @@ ConnectSocketHandler::OnSocketConnectTimeout() noexcept
 ConnectSocket::ConnectSocket(EventLoop &_event_loop,
 			     ConnectSocketHandler &_handler) noexcept
 	:handler(_handler),
-	 event(_event_loop, BIND_THIS_METHOD(OnEvent))
+	 event(_event_loop, BIND_THIS_METHOD(OnEvent)),
+	 timeout_event(_event_loop, BIND_THIS_METHOD(OnTimeout))
 {
 }
 
@@ -70,6 +71,7 @@ ConnectSocket::Cancel() noexcept
 {
 	assert(IsPending());
 
+	timeout_event.Cancel();
 	event.Delete();
 	fd.Close();
 }
@@ -145,16 +147,16 @@ ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 
 	fd = std::move(_fd);
 	event.Set(fd.Get(), SocketEvent::WRITE);
-	event.Add(timeout);
+	event.Add();
+
+	if (timeout != nullptr)
+		timeout_event.Add(*timeout);
 }
 
 void
-ConnectSocket::OnEvent(unsigned events) noexcept
+ConnectSocket::OnEvent(unsigned) noexcept
 {
-	if (events & SocketEvent::TIMEOUT) {
-		handler.OnSocketConnectTimeout();
-		return;
-	}
+	timeout_event.Cancel();
 
 	int s_err = fd.GetError();
 	if (s_err != 0) {
@@ -164,4 +166,13 @@ ConnectSocket::OnEvent(unsigned events) noexcept
 
 	handler.OnSocketConnectSuccess(std::exchange(fd,
 						     UniqueSocketDescriptor()));
+}
+
+void
+ConnectSocket::OnTimeout() noexcept
+{
+	event.Delete();
+	fd.Close();
+
+	handler.OnSocketConnectTimeout();
 }
