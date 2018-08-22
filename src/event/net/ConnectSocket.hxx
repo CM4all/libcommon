@@ -44,9 +44,9 @@ class AddressInfo;
 
 class ConnectSocketHandler {
 public:
-	virtual void OnSocketConnectSuccess(UniqueSocketDescriptor &&fd) = 0;
-	virtual void OnSocketConnectTimeout();
-	virtual void OnSocketConnectError(std::exception_ptr ep) = 0;
+	virtual void OnSocketConnectSuccess(UniqueSocketDescriptor &&fd) noexcept = 0;
+	virtual void OnSocketConnectTimeout() noexcept;
+	virtual void OnSocketConnectError(std::exception_ptr ep) noexcept = 0;
 };
 
 /**
@@ -60,23 +60,24 @@ class ConnectSocket final : public Cancellable {
 	SocketEvent event;
 
 public:
-	ConnectSocket(EventLoop &_event_loop, ConnectSocketHandler &_handler);
-	~ConnectSocket();
+	ConnectSocket(EventLoop &_event_loop,
+		      ConnectSocketHandler &_handler) noexcept;
+	~ConnectSocket() noexcept;
 
-	bool IsPending() const {
+	bool IsPending() const noexcept {
 		return fd.IsDefined();
 	}
 
 	bool Connect(SocketAddress address,
-		     const struct timeval &timeout);
+		     const struct timeval &timeout) noexcept;
 
-	bool Connect(SocketAddress address);
-
-	bool Connect(const AddressInfo &address,
-		     const struct timeval *timeout);
+	bool Connect(SocketAddress address) noexcept;
 
 	bool Connect(const AddressInfo &address,
-		     const struct timeval &timeout) {
+		     const struct timeval *timeout) noexcept;
+
+	bool Connect(const AddressInfo &address,
+		     const struct timeval &timeout) noexcept {
 		return Connect(address, &timeout);
 	}
 
@@ -86,10 +87,10 @@ public:
 	 * or error).
 	 */
 	void WaitConnected(UniqueSocketDescriptor _fd,
-			   const struct timeval *timeout);
+			   const struct timeval *timeout) noexcept;
 
 	void WaitConnected(UniqueSocketDescriptor _fd,
-			   const struct timeval &timeout) {
+			   const struct timeval &timeout) noexcept {
 		WaitConnected(std::move(_fd), &timeout);
 	}
 
@@ -97,5 +98,5 @@ public:
 	void Cancel() noexcept override;
 
 private:
-	void OnEvent(unsigned events);
+	void OnEvent(unsigned events) noexcept;
 };

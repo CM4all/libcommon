@@ -46,20 +46,20 @@
 static constexpr timeval connect_timeout{10, 0};
 
 void
-ConnectSocketHandler::OnSocketConnectTimeout()
+ConnectSocketHandler::OnSocketConnectTimeout() noexcept
 {
 	/* default implementation falls back to OnSocketConnectError() */
 	OnSocketConnectError(std::make_exception_ptr(std::runtime_error("Connect timeout")));
 }
 
 ConnectSocket::ConnectSocket(EventLoop &_event_loop,
-			     ConnectSocketHandler &_handler)
+			     ConnectSocketHandler &_handler) noexcept
 	:handler(_handler),
 	 event(_event_loop, BIND_THIS_METHOD(OnEvent))
 {
 }
 
-ConnectSocket::~ConnectSocket()
+ConnectSocket::~ConnectSocket() noexcept
 {
 	if (IsPending())
 		Cancel();
@@ -89,7 +89,7 @@ Connect(const SocketAddress address)
 
 bool
 ConnectSocket::Connect(const SocketAddress address,
-		       const struct timeval &timeout)
+		       const struct timeval &timeout) noexcept
 {
 	assert(!fd.IsDefined());
 
@@ -103,7 +103,7 @@ ConnectSocket::Connect(const SocketAddress address,
 }
 
 bool
-ConnectSocket::Connect(const SocketAddress address)
+ConnectSocket::Connect(const SocketAddress address) noexcept
 {
 	return Connect(address, connect_timeout);
 }
@@ -124,7 +124,7 @@ Connect(const AddressInfo &address)
 
 bool
 ConnectSocket::Connect(const AddressInfo &address,
-		       const struct timeval *timeout)
+		       const struct timeval *timeout) noexcept
 {
 	assert(!fd.IsDefined());
 
@@ -139,7 +139,7 @@ ConnectSocket::Connect(const AddressInfo &address,
 
 void
 ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
-			     const struct timeval *timeout)
+			     const struct timeval *timeout) noexcept
 {
 	assert(!fd.IsDefined());
 
@@ -149,7 +149,7 @@ ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 }
 
 void
-ConnectSocket::OnEvent(unsigned events)
+ConnectSocket::OnEvent(unsigned events) noexcept
 {
 	if (events & SocketEvent::TIMEOUT) {
 		handler.OnSocketConnectTimeout();
