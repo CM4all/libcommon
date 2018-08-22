@@ -30,8 +30,43 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
 #include "SocketEvent.hxx"
+#include "Loop.hxx"
 
-using NewSocketEvent = SocketEvent;
+#include <assert.h>
+
+void
+SocketEvent::Open(SocketDescriptor _fd) noexcept
+{
+	assert(_fd.IsDefined());
+	assert(GetScheduledFlags() == 0);
+
+	fd = _fd;
+}
+
+void
+SocketEvent::Schedule(unsigned flags) noexcept
+{
+	if (flags == GetScheduledFlags())
+		return;
+
+	assert(IsDefined());
+
+	if (scheduled_flags == 0)
+		loop.AddFD(fd.Get(), flags, *this);
+	else if (flags == 0)
+		loop.RemoveFD(fd.Get(), *this);
+	else
+		loop.ModifyFD(fd.Get(), flags, *this);
+
+	scheduled_flags = flags;
+}
+
+void
+SocketEvent::Dispatch(unsigned flags) noexcept
+{
+	flags &= GetScheduledFlags();
+
+	if (flags != 0)
+		callback(flags);
+}

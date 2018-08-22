@@ -30,32 +30,27 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "NewSocketEvent.hxx"
-
-#include <assert.h>
+#include "TimerEvent.hxx"
+#include "Loop.hxx"
 
 void
-NewSocketEvent::Open(SocketDescriptor fd) noexcept
+TimerEvent::Cancel() noexcept
 {
-	assert(fd.IsDefined());
-	assert(GetScheduledFlags() == 0);
-
-	read_event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
-	write_event.Set(fd.Get(), SocketEvent::WRITE|SocketEvent::PERSIST);
+	if (IsPending())
+		loop.CancelTimer(*this);
 }
 
 void
-NewSocketEvent::Schedule(unsigned flags) noexcept
+TimerEvent::Schedule(std::chrono::steady_clock::duration d) noexcept
 {
-	if (flags & READ) {
-		assert(read_event.GetFd() >= 0);
-		read_event.Add();
-	} else
-		read_event.Delete();
+	Cancel();
 
-	if (flags & WRITE) {
-		assert(write_event.GetFd() >= 0);
-		write_event.Add();
-	} else
-		write_event.Delete();
+	loop.AddTimer(*this, d);
+}
+
+void
+TimerEvent::Add(const struct timeval &tv) noexcept
+{
+	Schedule(std::chrono::steady_clock::duration(std::chrono::seconds(tv.tv_sec)) +
+		 std::chrono::steady_clock::duration(std::chrono::microseconds(tv.tv_usec)));
 }

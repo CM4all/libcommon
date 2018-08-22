@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,47 +30,59 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_TIMER_EVENT_HXX
-#define BENG_PROXY_TIMER_EVENT_HXX
+#pragma once
 
-#include "Event.hxx"
 #include "util/BindMethod.hxx"
+#include "util/Compiler.h"
+
+#include <boost/intrusive/set_hook.hpp>
+
+#include <chrono>
+
+struct timeval;
+class EventLoop;
 
 /**
  * Invoke an event callback after a certain amount of time.
  */
 class TimerEvent {
-	Event event;
+	friend class EventLoop;
+
+	typedef boost::intrusive::set_member_hook<> TimerSetHook;
+	TimerSetHook timer_set_hook;
+
+	EventLoop &loop;
 
 	const BoundMethod<void()> callback;
 
+	/**
+	 * When is this timer due?  This is only valid if IsActive()
+	 * returns true.
+	 */
+	std::chrono::steady_clock::time_point due;
+
 public:
-	TimerEvent(EventLoop &loop, BoundMethod<void()> _callback) noexcept
-		:event(loop, -1, 0, Callback, this), callback(_callback) {}
+	TimerEvent(EventLoop &_loop, BoundMethod<void()> _callback) noexcept
+		:loop(_loop), callback(_callback) {}
 
 	~TimerEvent() noexcept {
 		Cancel();
 	}
 
 	bool IsPending() const noexcept {
-		return event.IsTimerPending();
+		return timer_set_hook.is_linked();
 	}
 
-	void Add(const struct timeval &tv) noexcept {
-		event.Add(tv);
-	}
+	void Schedule(std::chrono::steady_clock::duration d) noexcept;
+	void Cancel() noexcept;
 
-	void Cancel() noexcept {
-		event.Delete();
-	}
+	/**
+	 * Deprecated compatibility wrapper.  Use Schedule() instead.
+	 */
+	void Add(const struct timeval &tv) noexcept;
 
 private:
-	static void Callback(gcc_unused evutil_socket_t fd,
-			     gcc_unused short events,
-			     void *ctx) noexcept {
-		auto &event = *(TimerEvent *)ctx;
-		event.callback();
+	void Run() noexcept {
+		callback();
 	}
 };
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,81 +30,102 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SOCKET_EVENT_HXX
-#define SOCKET_EVENT_HXX
+#pragma once
 
-#include "Event.hxx"
+#include "net/SocketDescriptor.hxx"
 #include "util/BindMethod.hxx"
 
-class SocketEvent {
-	EventLoop &event_loop;
+#include <boost/intrusive/list_hook.hpp>
 
-	Event event;
+#include <sys/epoll.h>
 
-	typedef BoundMethod<void(unsigned events)> Callback;
+class EventLoop;
+
+class SocketEvent
+	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>
+{
+	EventLoop &loop;
+
+	using Callback = BoundMethod<void(unsigned events)>;
 	const Callback callback;
 
+	SocketDescriptor fd;
+
+	/**
+	 * A bit mask of events that is currently registered in the
+	 * #EventLoop.
+	 */
+	unsigned scheduled_flags = 0;
+
 public:
-	static constexpr unsigned READ = EV_READ;
-	static constexpr unsigned WRITE = EV_WRITE;
-	static constexpr unsigned PERSIST = EV_PERSIST;
-	static constexpr unsigned TIMEOUT = EV_TIMEOUT;
+	static constexpr unsigned READ = EPOLLIN;
+	static constexpr unsigned WRITE = EPOLLOUT;
+	static constexpr unsigned ERROR = EPOLLERR;
+	static constexpr unsigned HANGUP = EPOLLHUP;
 
-	SocketEvent(EventLoop &_event_loop, Callback _callback) noexcept
-		:event_loop(_event_loop), callback(_callback) {}
+	SocketEvent(EventLoop &_loop, Callback _callback,
+		       SocketDescriptor _fd=SocketDescriptor::Undefined()) noexcept
+		:loop(_loop),
+		 callback(_callback),
+		 fd(_fd) {}
 
-	SocketEvent(EventLoop &_event_loop, evutil_socket_t fd, unsigned events,
-		    Callback _callback) noexcept
-		:SocketEvent(_event_loop, _callback) {
-		Set(fd, events);
+	~SocketEvent() noexcept {
+		Cancel();
 	}
+
+	SocketEvent(const SocketEvent &) = delete;
+	SocketEvent &operator=(const SocketEvent &) = delete;
 
 	EventLoop &GetEventLoop() noexcept {
-		return event_loop;
+		return loop;
 	}
 
 	gcc_pure
-	evutil_socket_t GetFd() const noexcept {
-		return event.GetFd();
+	bool IsDefined() const noexcept {
+		return fd.IsDefined();
 	}
 
 	gcc_pure
-	unsigned GetEvents() const noexcept {
-		return event.GetEvents();
+	SocketDescriptor GetSocket() const noexcept {
+		return fd;
 	}
 
-	void Set(evutil_socket_t fd, unsigned events) noexcept {
-		event.Set(event_loop, fd, events, EventCallback, this);
+	void Open(SocketDescriptor fd) noexcept;
+
+	unsigned GetScheduledFlags() const noexcept {
+		return scheduled_flags;
 	}
 
-	bool Add(const struct timeval *timeout=nullptr) noexcept {
-		return event.Add(timeout);
+	void Schedule(unsigned flags) noexcept;
+
+	void Cancel() noexcept {
+		Schedule(0);
 	}
 
-	bool Add(const struct timeval &timeout) noexcept {
-		return event.Add(timeout);
+	void ScheduleRead() noexcept {
+		Schedule(GetScheduledFlags() | READ | HANGUP | ERROR);
+
 	}
 
-	void Delete() noexcept {
-		event.Delete();
+	void ScheduleWrite() noexcept {
+		Schedule(GetScheduledFlags() | WRITE);
 	}
 
-	gcc_pure
-	bool IsPending(unsigned events) const noexcept {
-		return event.IsPending(events);
+	void CancelRead() noexcept {
+		Schedule(GetScheduledFlags() & ~(READ|HANGUP|ERROR));
 	}
 
-	gcc_pure
-	bool IsTimerPending() const noexcept {
-		return event.IsTimerPending();
+	void CancelWrite() noexcept {
+		Schedule(GetScheduledFlags() & ~WRITE);
 	}
 
-private:
-	static void EventCallback(gcc_unused evutil_socket_t fd, short events,
-				  void *ctx) noexcept {
-		auto &event = *(SocketEvent *)ctx;
-		event.callback(events);
+	bool IsReadPending() const noexcept {
+		return GetScheduledFlags() & READ;
 	}
+
+	bool IsWritePending() const noexcept {
+		return GetScheduledFlags() & WRITE;
+	}
+
+	void Dispatch(unsigned flags) noexcept;
 };
-
-#endif

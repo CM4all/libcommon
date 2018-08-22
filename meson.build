@@ -70,7 +70,6 @@ foreach f: test_cflags
 endforeach
 
 boost = dependency('boost', modules: ['system', 'filesystem'], version: '>= 1.54')
-libevent = dependency('libevent', version: '>= 2.0.19')
 libcurl = dependency('libcurl', version: '>= 7.38')
 libcares = dependency('libcares')
 libpq = dependency('libpq', version: '>= 8.4')
@@ -252,14 +251,15 @@ net_dep = declare_dependency(link_with: net)
 event = static_library('event',
   'src/event/Loop.cxx',
   'src/event/ShutdownListener.cxx',
+  'src/event/TimerEvent.cxx',
   'src/event/CleanupTimer.cxx',
   'src/event/DeferEvent.cxx',
-  'src/event/NewSocketEvent.cxx',
+  'src/event/SocketEvent.cxx',
   'src/event/SignalEvent.cxx',
   'src/event/PipeLineReader.cxx',
   include_directories: inc,
   dependencies: [
-    libevent,
+    system_dep,
     util_dep,
   ])
 event_dep = declare_dependency(link_with: event)
@@ -277,7 +277,6 @@ event_net = static_library('event_net',
   'src/event/net/log/PipeAdapter.cxx',
   include_directories: inc,
   dependencies: [
-    libevent,
     event_dep,
     net_dep,
     util_dep,
@@ -291,7 +290,6 @@ event_net_cares = static_library('event_net_cares',
   include_directories: inc,
   dependencies: [
     libcares,
-    libevent,
   ])
 event_net_cares_dep = declare_dependency(
   link_with: event_net_cares,
