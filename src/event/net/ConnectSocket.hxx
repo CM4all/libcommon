@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,7 +33,7 @@
 #pragma once
 
 #include "net/UniqueSocketDescriptor.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "util/Cancellable.hxx"
 
@@ -58,7 +58,7 @@ class ConnectSocket final : public Cancellable {
 
 	UniqueSocketDescriptor fd;
 
-	SocketEvent event;
+	NewSocketEvent event;
 	TimerEvent timeout_event;
 
 public:

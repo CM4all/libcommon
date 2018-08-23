@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -72,7 +72,7 @@ ConnectSocket::Cancel() noexcept
 	assert(IsPending());
 
 	timeout_event.Cancel();
-	event.Delete();
+	event.Cancel();
 	fd.Close();
 }
 
@@ -146,8 +146,8 @@ ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 	assert(!fd.IsDefined());
 
 	fd = std::move(_fd);
-	event.Set(fd.Get(), SocketEvent::WRITE);
-	event.Add();
+	event.Open(fd);
+	event.ScheduleWrite();
 
 	if (timeout != nullptr)
 		timeout_event.Add(*timeout);
@@ -156,6 +156,7 @@ ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 void
 ConnectSocket::OnEvent(unsigned) noexcept
 {
+	event.Cancel();
 	timeout_event.Cancel();
 
 	int s_err = fd.GetError();
@@ -171,7 +172,7 @@ ConnectSocket::OnEvent(unsigned) noexcept
 void
 ConnectSocket::OnTimeout() noexcept
 {
-	event.Delete();
+	event.Cancel();
 	fd.Close();
 
 	handler.OnSocketConnectTimeout();
