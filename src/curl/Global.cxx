@@ -29,7 +29,7 @@
 
 #include "Global.hxx"
 #include "Request.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "util/RuntimeError.hxx"
 
 #include <curl/curl.h>
@@ -47,17 +47,16 @@ class CurlSocket final {
 
 	const curl_socket_t fd;
 
-	SocketEvent socket_event;
+	NewSocketEvent socket_event;
 
 public:
 	CurlSocket(CurlGlobal &_global, EventLoop &_loop,
 		   curl_socket_t _fd) noexcept
 		:global(_global), fd(_fd),
-		 socket_event(_loop, fd, 0, BIND_THIS_METHOD(OnSocketReady)) {}
+		 socket_event(_loop, BIND_THIS_METHOD(OnSocketReady),
+			      SocketDescriptor(fd)) {}
 
 	~CurlSocket() noexcept {
-		socket_event.Delete();
-
 		/* TODO: sometimes, CURL uses CURL_POLL_REMOVE after
 		   closing the socket, and sometimes, it uses
 		   CURL_POLL_REMOVE just to move the (still open)
@@ -65,12 +64,6 @@ public:
 		   Abandon() would be most appropriate, but it breaks
 		   the second case - is that a CURL bug?  is there a
 		   better solution? */
-	}
-
-	void Schedule(unsigned events) noexcept {
-		socket_event.Delete();
-		socket_event.Set(fd, events|SocketEvent::PERSIST);
-		socket_event.Add();
 	}
 
 	/**
@@ -84,8 +77,8 @@ private:
 	void OnSocketReady(unsigned events) noexcept;
 
 	static constexpr int LibEventToCurlCSelect(unsigned flags) noexcept {
-		return (flags & SocketEvent::READ ? CURL_CSELECT_IN : 0) |
-			(flags & SocketEvent::WRITE ? CURL_CSELECT_OUT : 0);
+		return (flags & NewSocketEvent::READ ? CURL_CSELECT_IN : 0) |
+			(flags & NewSocketEvent::WRITE ? CURL_CSELECT_OUT : 0);
 	}
 
 	gcc_const
@@ -95,13 +88,13 @@ private:
 			return 0;
 
 		case CURL_POLL_IN:
-			return SocketEvent::READ;
+			return NewSocketEvent::READ;
 
 		case CURL_POLL_OUT:
-			return SocketEvent::WRITE;
+			return NewSocketEvent::WRITE;
 
 		case CURL_POLL_INOUT:
-			return SocketEvent::READ|SocketEvent::WRITE;
+			return NewSocketEvent::READ|NewSocketEvent::WRITE;
 		}
 
 		assert(false);
@@ -141,7 +134,7 @@ CurlSocket::SocketFunction(gcc_unused CURL *easy,
 
 	unsigned flags = CurlPollToLibEvent(action);
 	if (flags != 0)
-		cs->Schedule(flags);
+		cs->socket_event.Schedule(flags);
 	return 0;
 }
 
