@@ -40,6 +40,7 @@ static constexpr timeval busy_timeout{5, 0};
 NetstringClient::NetstringClient(EventLoop &event_loop, size_t max_size,
 				 NetstringClientHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(OnEvent)),
+	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout)),
 	 input(max_size), handler(_handler) {}
 
 NetstringClient::~NetstringClient() noexcept
@@ -71,30 +72,30 @@ NetstringClient::Request(int _out_fd, int _in_fd,
 		write.Push(i.data, i.size);
 
 	event.Set(out_fd, SocketEvent::WRITE|SocketEvent::PERSIST);
-	event.Add(send_timeout);
+	event.Add();
+	timeout_event.Add(send_timeout);
 }
 
 void
 NetstringClient::OnEvent(unsigned events) noexcept
 try {
-	if (events & SocketEvent::TIMEOUT) {
-		throw std::runtime_error("Connect timeout");
-	} else if (events & SocketEvent::WRITE) {
+	if (events & SocketEvent::WRITE) {
 		switch (write.Write(out_fd)) {
 		case MultiWriteBuffer::Result::MORE:
-			event.Add(&send_timeout);
+			timeout_event.Add(send_timeout);
 			break;
 
 		case MultiWriteBuffer::Result::FINISHED:
 			event.Delete();
 			event.Set(in_fd, SocketEvent::READ|SocketEvent::PERSIST);
 			event.Add(recv_timeout);
+			timeout_event.Add(recv_timeout);
 			break;
 		}
 	} else if (events & SocketEvent::READ) {
 		switch (input.Receive(in_fd)) {
 		case NetstringInput::Result::MORE:
-			event.Add(&busy_timeout);
+			timeout_event.Add(busy_timeout);
 			break;
 
 		case NetstringInput::Result::CLOSED:
@@ -102,10 +103,17 @@ try {
 
 		case NetstringInput::Result::FINISHED:
 			event.Delete();
+			timeout_event.Cancel();
 			handler.OnNetstringResponse(std::move(input.GetValue()));
 			break;
 		}
 	}
 } catch (...) {
 	handler.OnNetstringError(std::current_exception());
+}
+
+void
+NetstringClient::OnTimeout() noexcept
+{
+	handler.OnNetstringError(std::make_exception_ptr(std::runtime_error("Connect timeout")));
 }

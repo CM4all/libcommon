@@ -44,8 +44,11 @@ NetstringServer::NetstringServer(EventLoop &event_loop,
 	:fd(std::move(_fd)),
 	 event(event_loop, fd.Get(), SocketEvent::READ|SocketEvent::PERSIST,
 	       BIND_THIS_METHOD(OnEvent)),
-	 input(16 * 1024 * 1024) {
-	event.Add(busy_timeout);
+	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout)),
+	 input(16 * 1024 * 1024)
+{
+	event.Add();
+	timeout_event.Add(busy_timeout);
 }
 
 NetstringServer::~NetstringServer() noexcept
@@ -83,16 +86,11 @@ NetstringServer::SendResponse(const char *data) noexcept
 }
 
 void
-NetstringServer::OnEvent(unsigned events) noexcept
+NetstringServer::OnEvent(unsigned) noexcept
 try {
-	if (events & SocketEvent::TIMEOUT) {
-		OnDisconnect();
-		return;
-	}
-
 	switch (input.Receive(fd.Get())) {
 	case NetstringInput::Result::MORE:
-		event.Add(&busy_timeout);
+		timeout_event.Add(busy_timeout);
 		break;
 
 	case NetstringInput::Result::CLOSED:
@@ -101,9 +99,16 @@ try {
 
 	case NetstringInput::Result::FINISHED:
 		event.Delete();
+		timeout_event.Cancel();
 		OnRequest(std::move(input.GetValue()));
 		break;
 	}
 } catch (...) {
 	OnError(std::current_exception());
+}
+
+void
+NetstringServer::OnTimeout() noexcept
+{
+	OnDisconnect();
 }

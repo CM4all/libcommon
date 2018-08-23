@@ -36,6 +36,7 @@
 #include "net/djb/NetstringGenerator.hxx"
 #include "net/djb/NetstringInput.hxx"
 #include "event/SocketEvent.hxx"
+#include "event/TimerEvent.hxx"
 #include "util/ConstBuffer.hxx"
 
 #include <list>
@@ -64,6 +65,7 @@ class NetstringClient final {
 	int out_fd = -1, in_fd = -1;
 
 	SocketEvent event;
+	TimerEvent timeout_event;
 
 	NetstringGenerator generator;
 	MultiWriteBuffer write;
@@ -96,4 +98,5 @@ public:
 
 private:
 	void OnEvent(unsigned events) noexcept;
+	void OnTimeout() noexcept;
 };
