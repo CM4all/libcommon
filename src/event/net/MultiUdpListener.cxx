@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -42,21 +42,14 @@ MultiUdpListener::MultiUdpListener(EventLoop &event_loop,
 				   MultiReceiveMessage &&_multi,
 				   UdpHandler &_handler) noexcept
 	:socket(std::move(_socket)),
-	 event(event_loop, socket.Get(),
-	       SocketEvent::READ|SocketEvent::PERSIST,
-	       BIND_THIS_METHOD(EventCallback)),
+	 event(event_loop, BIND_THIS_METHOD(EventCallback), socket),
 	 multi(std::move(_multi)),
 	 handler(_handler)
 {
-	event.Add();
+	event.ScheduleRead();
 }
 
-MultiUdpListener::~MultiUdpListener() noexcept
-{
-	assert(socket.IsDefined());
-
-	event.Delete();
-}
+MultiUdpListener::~MultiUdpListener() noexcept = default;
 
 void
 MultiUdpListener::EventCallback(unsigned) noexcept
@@ -78,7 +71,7 @@ try {
 } catch (...) {
 	/* unregister the SocketEvent, just in case the handler does
 	   not destroy us */
-	event.Delete();
+	event.Cancel();
 
 	handler.OnUdpError(std::current_exception());
 }

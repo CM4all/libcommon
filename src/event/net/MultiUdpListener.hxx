@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
 
@@ -47,7 +47,7 @@ class UdpHandler;
  */
 class MultiUdpListener {
 	UniqueSocketDescriptor socket;
-	SocketEvent event;
+	NewSocketEvent event;
 
 	MultiReceiveMessage multi;
 
@@ -64,14 +64,14 @@ public:
 	 * new object is enabled by default.
 	 */
 	void Enable() noexcept {
-		event.Add();
+		event.ScheduleRead();
 	}
 
 	/**
 	 * Disable the object temporarily.  To undo this, call Enable().
 	 */
 	void Disable() noexcept {
-		event.Delete();
+		event.Cancel();
 	}
 
 	/**
