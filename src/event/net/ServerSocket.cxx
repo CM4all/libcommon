@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -50,14 +50,14 @@
 #include <string.h>
 #include <fcntl.h>
 
-ServerSocket::~ServerSocket()
+ServerSocket::~ServerSocket() noexcept
 {
 	if (fd.IsDefined())
 		event.Delete();
 }
 
 void
-ServerSocket::Listen(UniqueSocketDescriptor _fd)
+ServerSocket::Listen(UniqueSocketDescriptor _fd) noexcept
 {
 	assert(!fd.IsDefined());
 	assert(_fd.IsDefined());
@@ -125,7 +125,7 @@ MakeListener(const SocketAddress address,
 }
 
 static bool
-IsTCP(SocketAddress address)
+IsTCP(SocketAddress address) noexcept
 {
 	return address.GetFamily() == AF_INET || address.GetFamily() == AF_INET6;
 }
@@ -177,13 +177,13 @@ ServerSocket::ListenPath(const char *path)
 }
 
 StaticSocketAddress
-ServerSocket::GetLocalAddress() const
+ServerSocket::GetLocalAddress() const noexcept
 {
 	return fd.GetLocalAddress();
 }
 
 void
-ServerSocket::EventCallback(unsigned)
+ServerSocket::EventCallback(unsigned) noexcept
 {
 	StaticSocketAddress remote_address;
 	auto remote_fd = fd.AcceptNonBlock(remote_address);

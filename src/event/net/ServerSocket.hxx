@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -47,17 +47,18 @@ class ServerSocket {
 	SocketEvent event;
 
 public:
-	explicit ServerSocket(EventLoop &event_loop)
+	explicit ServerSocket(EventLoop &event_loop) noexcept
 		:event(event_loop, BIND_THIS_METHOD(EventCallback)) {}
 
-	ServerSocket(EventLoop &event_loop, UniqueSocketDescriptor _fd)
+	ServerSocket(EventLoop &event_loop,
+		     UniqueSocketDescriptor _fd) noexcept
 		:ServerSocket(event_loop) {
 		Listen(std::move(_fd));
 	}
 
-	~ServerSocket();
+	~ServerSocket() noexcept;
 
-	void Listen(UniqueSocketDescriptor _fd);
+	void Listen(UniqueSocketDescriptor _fd) noexcept;
 
 	/**
 	 * Throws std::runtime_error on error.
@@ -73,17 +74,17 @@ public:
 
 	void ListenPath(const char *path);
 
-	StaticSocketAddress GetLocalAddress() const;
+	StaticSocketAddress GetLocalAddress() const noexcept;
 
-	bool SetTcpDeferAccept(const int &seconds) {
+	bool SetTcpDeferAccept(const int &seconds) noexcept {
 		return fd.SetTcpDeferAccept(seconds);
 	}
 
-	void AddEvent() {
+	void AddEvent() noexcept {
 		event.Add();
 	}
 
-	void RemoveEvent() {
+	void RemoveEvent() noexcept {
 		event.Delete();
 	}
 
@@ -94,9 +95,9 @@ protected:
 	 * @param fd the socket owned by the callee
 	 */
 	virtual void OnAccept(UniqueSocketDescriptor &&fd,
-			      SocketAddress address) = 0;
-	virtual void OnAcceptError(std::exception_ptr ep) = 0;
+			      SocketAddress address) noexcept = 0;
+	virtual void OnAcceptError(std::exception_ptr ep) noexcept = 0;
 
 private:
-	void EventCallback(unsigned events);
+	void EventCallback(unsigned events) noexcept;
 };
