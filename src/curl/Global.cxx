@@ -77,8 +77,8 @@ private:
 	void OnSocketReady(unsigned events) noexcept;
 
 	static constexpr int LibEventToCurlCSelect(unsigned flags) noexcept {
-		return (flags & NewSocketEvent::READ ? CURL_CSELECT_IN : 0) |
-			(flags & NewSocketEvent::WRITE ? CURL_CSELECT_OUT : 0);
+		return (flags & SocketEvent::READ ? CURL_CSELECT_IN : 0) |
+			(flags & SocketEvent::WRITE ? CURL_CSELECT_OUT : 0);
 	}
 
 	gcc_const
@@ -88,13 +88,13 @@ private:
 			return 0;
 
 		case CURL_POLL_IN:
-			return NewSocketEvent::READ;
+			return SocketEvent::READ;
 
 		case CURL_POLL_OUT:
-			return NewSocketEvent::WRITE;
+			return SocketEvent::WRITE;
 
 		case CURL_POLL_INOUT:
-			return NewSocketEvent::READ|NewSocketEvent::WRITE;
+			return SocketEvent::READ|SocketEvent::WRITE;
 		}
 
 		assert(false);

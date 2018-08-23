@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Content Management AG
+ * Copyright 2017-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,7 +33,7 @@
 #include "Channel.hxx"
 #include "Handler.hxx"
 #include "Error.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 #include "util/Cancellable.hxx"
 
@@ -45,24 +45,21 @@ namespace Cares {
 
 class Channel::Socket {
 	Channel &channel;
-	SocketEvent event;
+	NewSocketEvent event;
 
 public:
 	Socket(Channel &_channel,
 	       evutil_socket_t fd, unsigned events) noexcept
 		:channel(_channel),
-		 event(channel.GetEventLoop(), fd, events,
-		       BIND_THIS_METHOD(OnSocket)) {
-		event.Add(nullptr);
-	}
-
-	~Socket() noexcept {
-		event.Delete();
+		 event(channel.GetEventLoop(), BIND_THIS_METHOD(OnSocket),
+		       SocketDescriptor(fd)) {
+		event.Schedule(events);
 	}
 
 private:
 	void OnSocket(unsigned events) noexcept {
-		channel.OnSocket(event.GetFd(), events);
+		event.Cancel();
+		channel.OnSocket(event.GetSocket().Get(), events);
 	}
 };
 
