@@ -38,25 +38,31 @@
 #include <sys/socket.h>
 
 void
-SocketWrapper::ReadEventCallback(unsigned events) noexcept
+SocketWrapper::ReadEventCallback(unsigned) noexcept
 {
 	assert(IsValid());
 
-	if (events & SocketEvent::TIMEOUT)
-		handler.OnSocketTimeout();
-	else
-		handler.OnSocketRead();
+	read_timeout_event.Cancel();
+
+	handler.OnSocketRead();
 }
 
 void
-SocketWrapper::WriteEventCallback(unsigned events) noexcept
+SocketWrapper::WriteEventCallback(unsigned) noexcept
 {
 	assert(IsValid());
 
-	if (events & SocketEvent::TIMEOUT)
-		handler.OnSocketTimeout();
-	else
-		handler.OnSocketWrite();
+	write_timeout_event.Cancel();
+
+	handler.OnSocketWrite();
+}
+
+void
+SocketWrapper::TimeoutCallback() noexcept
+{
+	assert(IsValid());
+
+	handler.OnSocketTimeout();
 }
 
 void
@@ -88,6 +94,8 @@ SocketWrapper::Close() noexcept
 
 	read_event.Delete();
 	write_event.Delete();
+	read_timeout_event.Cancel();
+	write_timeout_event.Cancel();
 
 	fd.Close();
 }
@@ -99,6 +107,8 @@ SocketWrapper::Abandon() noexcept
 
 	read_event.Delete();
 	write_event.Delete();
+	read_timeout_event.Cancel();
+	write_timeout_event.Cancel();
 
 	fd = SocketDescriptor::Undefined();
 }

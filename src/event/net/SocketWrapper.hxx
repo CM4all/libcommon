@@ -34,6 +34,7 @@
 
 #include "io/FdType.hxx"
 #include "event/SocketEvent.hxx"
+#include "event/TimerEvent.hxx"
 #include "net/SocketDescriptor.hxx"
 #include "util/Compiler.h"
 
@@ -71,6 +72,7 @@ class SocketWrapper {
 	FdType fd_type;
 
 	SocketEvent read_event, write_event;
+	TimerEvent read_timeout_event, write_timeout_event;
 
 	SocketHandler &handler;
 
@@ -78,6 +80,8 @@ public:
 	SocketWrapper(EventLoop &event_loop, SocketHandler &_handler) noexcept
 		:read_event(event_loop, BIND_THIS_METHOD(ReadEventCallback)),
 		 write_event(event_loop, BIND_THIS_METHOD(WriteEventCallback)),
+		 read_timeout_event(event_loop, BIND_THIS_METHOD(TimeoutCallback)),
+		 write_timeout_event(event_loop, BIND_THIS_METHOD(TimeoutCallback)),
 		 handler(_handler) {}
 
 	SocketWrapper(const SocketWrapper &) = delete;
@@ -125,33 +129,33 @@ public:
 	void ScheduleRead(const struct timeval *timeout) noexcept {
 		assert(IsValid());
 
-		if (timeout == nullptr && read_event.IsTimerPending())
-			/* work around libevent bug: event_add() should disable the
-			   timeout if tv==nullptr, but in fact it does not; workaround:
-			   delete the whole event first, then re-add it */
-			read_event.Delete();
+		read_event.Add();
 
-		read_event.Add(timeout);
+		if (timeout == nullptr)
+			read_timeout_event.Cancel();
+		else
+			read_timeout_event.Add(*timeout);
 	}
 
 	void UnscheduleRead() noexcept {
 		read_event.Delete();
+		read_timeout_event.Cancel();
 	}
 
 	void ScheduleWrite(const struct timeval *timeout) noexcept {
 		assert(IsValid());
 
-		if (timeout == nullptr && write_event.IsTimerPending())
-			/* work around libevent bug: event_add() should disable the
-			   timeout if tv==nullptr, but in fact it does not; workaround:
-			   delete the whole event first, then re-add it */
-			write_event.Delete();
+		write_event.Add();
 
-		write_event.Add(timeout);
+		if (timeout == nullptr)
+			write_timeout_event.Cancel();
+		else
+			write_timeout_event.Add(*timeout);
 	}
 
 	void UnscheduleWrite() noexcept {
 		write_event.Delete();
+		write_timeout_event.Cancel();
 	}
 
 	gcc_pure
@@ -179,4 +183,5 @@ public:
 private:
 	void ReadEventCallback(unsigned events) noexcept;
 	void WriteEventCallback(unsigned events) noexcept;
+	void TimeoutCallback() noexcept;
 };
