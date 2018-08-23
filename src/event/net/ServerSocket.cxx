@@ -50,11 +50,7 @@
 #include <string.h>
 #include <fcntl.h>
 
-ServerSocket::~ServerSocket() noexcept
-{
-	if (fd.IsDefined())
-		event.Delete();
-}
+ServerSocket::~ServerSocket() noexcept = default;
 
 void
 ServerSocket::Listen(UniqueSocketDescriptor _fd) noexcept
@@ -63,7 +59,7 @@ ServerSocket::Listen(UniqueSocketDescriptor _fd) noexcept
 	assert(_fd.IsDefined());
 
 	fd = std::move(_fd);
-	event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
+	event.Open(fd);
 	AddEvent();
 }
 
