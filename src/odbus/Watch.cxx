@@ -37,7 +37,7 @@ namespace ODBus {
 WatchManager::Watch::Watch(EventLoop &event_loop,
 			   WatchManager &_parent, DBusWatch &_watch) noexcept
 	:parent(_parent), watch(_watch),
-	 event(event_loop, -1, 0, BIND_THIS_METHOD(OnSocketReady))
+	 event(event_loop, BIND_THIS_METHOD(OnSocketReady))
 {
 	Toggled();
 }
@@ -52,12 +52,11 @@ DbusToLibevent(unsigned flags) noexcept
 void
 WatchManager::Watch::Toggled() noexcept
 {
-	event.Delete();
+	event.Cancel();
 
 	if (dbus_watch_get_enabled(&watch)) {
-		event.Set(dbus_watch_get_unix_fd(&watch),
-			  SocketEvent::PERSIST | DbusToLibevent(dbus_watch_get_flags(&watch)));
-		event.Add();
+		event.Open(SocketDescriptor(dbus_watch_get_unix_fd(&watch)));
+		event.Schedule(DbusToLibevent(dbus_watch_get_flags(&watch)));
 	}
 }
 
