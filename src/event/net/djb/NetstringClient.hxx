@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -35,7 +35,7 @@
 #include "io/MultiWriteBuffer.hxx"
 #include "net/djb/NetstringGenerator.hxx"
 #include "net/djb/NetstringInput.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "util/ConstBuffer.hxx"
 
@@ -64,7 +64,7 @@ public:
 class NetstringClient final {
 	int out_fd = -1, in_fd = -1;
 
-	SocketEvent event;
+	NewSocketEvent event;
 	TimerEvent timeout_event;
 
 	NetstringGenerator generator;

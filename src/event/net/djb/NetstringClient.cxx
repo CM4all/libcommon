@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -46,7 +46,7 @@ NetstringClient::NetstringClient(EventLoop &event_loop, size_t max_size,
 NetstringClient::~NetstringClient() noexcept
 {
 	if (out_fd >= 0 || in_fd >= 0)
-		event.Delete();
+		event.Cancel();
 
 	if (out_fd >= 0)
 		close(out_fd);
@@ -71,8 +71,8 @@ NetstringClient::Request(int _out_fd, int _in_fd,
 	for (const auto &i : data)
 		write.Push(i.data, i.size);
 
-	event.Set(out_fd, SocketEvent::WRITE|SocketEvent::PERSIST);
-	event.Add();
+	event.Open(SocketDescriptor(out_fd));
+	event.ScheduleWrite();
 	timeout_event.Add(send_timeout);
 }
 
@@ -86,9 +86,9 @@ try {
 			break;
 
 		case MultiWriteBuffer::Result::FINISHED:
-			event.Delete();
-			event.Set(in_fd, SocketEvent::READ|SocketEvent::PERSIST);
-			event.Add(recv_timeout);
+			event.Cancel();
+			event.Open(SocketDescriptor(in_fd));
+			event.ScheduleRead();
 			timeout_event.Add(recv_timeout);
 			break;
 		}
@@ -102,7 +102,7 @@ try {
 			throw std::runtime_error("Connection closed prematurely");
 
 		case NetstringInput::Result::FINISHED:
-			event.Delete();
+			event.Cancel();
 			timeout_event.Cancel();
 			handler.OnNetstringResponse(std::move(input.GetValue()));
 			break;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -42,19 +42,15 @@ static constexpr timeval busy_timeout{5, 0};
 NetstringServer::NetstringServer(EventLoop &event_loop,
 				 UniqueSocketDescriptor _fd) noexcept
 	:fd(std::move(_fd)),
-	 event(event_loop, fd.Get(), SocketEvent::READ|SocketEvent::PERSIST,
-	       BIND_THIS_METHOD(OnEvent)),
+	 event(event_loop, BIND_THIS_METHOD(OnEvent), fd),
 	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout)),
 	 input(16 * 1024 * 1024)
 {
-	event.Add();
+	event.ScheduleRead();
 	timeout_event.Add(busy_timeout);
 }
 
-NetstringServer::~NetstringServer() noexcept
-{
-	event.Delete();
-}
+NetstringServer::~NetstringServer() noexcept = default;
 
 bool
 NetstringServer::SendResponse(const void *data, size_t size) noexcept
@@ -98,7 +94,7 @@ try {
 		break;
 
 	case NetstringInput::Result::FINISHED:
-		event.Delete();
+		event.Cancel();
 		timeout_event.Cancel();
 		OnRequest(std::move(input.GetValue()));
 		break;

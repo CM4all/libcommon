@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,7 +36,7 @@
 #include "net/djb/NetstringInput.hxx"
 #include "net/djb/NetstringGenerator.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 
 #include <exception>
@@ -50,7 +50,7 @@
 class NetstringServer {
 	UniqueSocketDescriptor fd;
 
-	SocketEvent event;
+	NewSocketEvent event;
 	TimerEvent timeout_event;
 
 	NetstringInput input;
