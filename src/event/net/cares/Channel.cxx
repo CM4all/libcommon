@@ -44,27 +44,27 @@
 namespace Cares {
 
 class Channel::Socket {
-		Channel &channel;
-		SocketEvent event;
+	Channel &channel;
+	SocketEvent event;
 
-	public:
-		Socket(Channel &_channel,
-		       evutil_socket_t fd, unsigned events) noexcept
-			:channel(_channel),
-			 event(channel.GetEventLoop(), fd, events,
-			       BIND_THIS_METHOD(OnSocket)) {
-			event.Add(nullptr);
-		}
+public:
+	Socket(Channel &_channel,
+	       evutil_socket_t fd, unsigned events) noexcept
+		:channel(_channel),
+		 event(channel.GetEventLoop(), fd, events,
+		       BIND_THIS_METHOD(OnSocket)) {
+		event.Add(nullptr);
+	}
 
-		~Socket() noexcept {
-			event.Delete();
-		}
+	~Socket() noexcept {
+		event.Delete();
+	}
 
-	private:
-		void OnSocket(unsigned events) noexcept {
-			channel.OnSocket(event.GetFd(), events);
-		}
-	};
+private:
+	void OnSocket(unsigned events) noexcept {
+		channel.OnSocket(event.GetFd(), events);
+	}
+};
 
 Channel::Channel(EventLoop &event_loop)
 	:defer_process(event_loop, BIND_THIS_METHOD(DeferredProcess)),
