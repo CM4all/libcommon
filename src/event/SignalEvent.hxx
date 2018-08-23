@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,7 +33,7 @@
 #ifndef SIGNAL_EVENT_HXX
 #define SIGNAL_EVENT_HXX
 
-#include "SocketEvent.hxx"
+#include "NewSocketEvent.hxx"
 #include "util/BindMethod.hxx"
 
 #include <assert.h>
@@ -50,7 +50,7 @@
 class SignalEvent {
 	int fd = -1;
 
-	SocketEvent event;
+	NewSocketEvent event;
 
 	sigset_t mask;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -57,8 +57,8 @@ SignalEvent::Enable()
 	if (fd < 0)
 		throw MakeErrno("signalfd() failed");
 
-	event.Set(fd, SocketEvent::READ|SocketEvent::PERSIST);
-	event.Add();
+	event.Open(SocketDescriptor(fd));
+	event.ScheduleRead();
 
 	sigprocmask(SIG_BLOCK, &mask, nullptr);
 }
@@ -68,7 +68,7 @@ SignalEvent::Disable() noexcept
 {
 	sigprocmask(SIG_UNBLOCK, &mask, nullptr);
 
-	event.Delete();
+	event.Cancel();
 }
 
 void
