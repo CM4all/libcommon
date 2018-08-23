@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -40,7 +40,7 @@ AsyncConnection::AsyncConnection(EventLoop &event_loop,
 				 AsyncConnectionHandler &_handler) noexcept
 	:conninfo(_conninfo), schema(_schema),
 	 handler(_handler),
-	 socket_event(event_loop, -1, 0, BIND_THIS_METHOD(OnSocketEvent)),
+	 socket_event(event_loop, BIND_THIS_METHOD(OnSocketEvent)),
 	 reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer))
 {
 }
@@ -52,7 +52,7 @@ AsyncConnection::Error() noexcept
 	       state == State::RECONNECTING ||
 	       state == State::READY);
 
-	socket_event.Delete();
+	socket_event.Cancel();
 
 	const bool was_connected = state == State::READY;
 	state = State::DISCONNECTED;
@@ -79,13 +79,13 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 		break;
 
 	case PGRES_POLLING_READING:
-		socket_event.Set(GetSocket(), SocketEvent::READ);
-		socket_event.Add();
+		socket_event.Open(SocketDescriptor(GetSocket()));
+		socket_event.ScheduleRead();
 		break;
 
 	case PGRES_POLLING_WRITING:
-		socket_event.Set(GetSocket(), SocketEvent::WRITE);
-		socket_event.Add();
+		socket_event.Open(SocketDescriptor(GetSocket()));
+		socket_event.ScheduleWrite();
 		break;
 
 	case PGRES_POLLING_OK:
@@ -102,8 +102,8 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 		}
 
 		state = State::READY;
-		socket_event.Set(GetSocket(), SocketEvent::READ|SocketEvent::PERSIST);
-		socket_event.Add();
+		socket_event.Open(SocketDescriptor(GetSocket()));
+		socket_event.ScheduleRead();
 
 		try {
 			handler.OnConnect();
@@ -227,7 +227,7 @@ AsyncConnection::Reconnect() noexcept
 {
 	assert(IsDefined());
 
-	socket_event.Delete();
+	socket_event.Cancel();
 	StartReconnect();
 	state = State::RECONNECTING;
 	PollReconnect();
@@ -239,7 +239,7 @@ AsyncConnection::Disconnect() noexcept
 	if (!IsDefined())
 		return;
 
-	socket_event.Delete();
+	socket_event.Cancel();
 	reconnect_timer.Cancel();
 	Connection::Disconnect();
 	state = State::DISCONNECTED;
@@ -265,10 +265,12 @@ AsyncConnection::OnSocketEvent(unsigned) noexcept
 		gcc_unreachable();
 
 	case State::CONNECTING:
+		socket_event.Cancel();
 		PollConnect();
 		break;
 
 	case State::RECONNECTING:
+		socket_event.Cancel();
 		PollReconnect();
 		break;
 
