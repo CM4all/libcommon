@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -45,19 +45,13 @@
 UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
 			 UdpHandler &_handler) noexcept
 	:fd(std::move(_fd)),
-	 event(event_loop, fd.Get(), SocketEvent::READ|SocketEvent::PERSIST,
-	       BIND_THIS_METHOD(EventCallback)),
+	 event(event_loop, BIND_THIS_METHOD(EventCallback), fd),
 	 handler(_handler)
 {
-	event.Add();
+	event.ScheduleRead();
 }
 
-UdpListener::~UdpListener() noexcept
-{
-	assert(fd.IsDefined());
-
-	event.Delete();
-}
+UdpListener::~UdpListener() noexcept = default;
 
 bool
 UdpListener::ReceiveAll()
@@ -76,7 +70,7 @@ try {
 		}
 	}
 } catch (...) {
-	event.Delete();
+	event.Cancel();
 	throw;
 }
 
@@ -102,7 +96,7 @@ try {
 } catch (...) {
 	/* unregister the SocketEvent, just in case the handler does
 	   not destroy us */
-	event.Delete();
+	event.Cancel();
 
 	handler.OnUdpError(std::current_exception());
 }
