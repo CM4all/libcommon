@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,25 +65,26 @@ public:
 	/**
 	 * Create an empty instance.
 	 */
-	CurlEasy(std::nullptr_t):handle(nullptr) {}
+	CurlEasy(std::nullptr_t) noexcept:handle(nullptr) {}
 
-	CurlEasy(CurlEasy &&src):handle(std::exchange(src.handle, nullptr)) {}
+	CurlEasy(CurlEasy &&src) noexcept
+		:handle(std::exchange(src.handle, nullptr)) {}
 
-	~CurlEasy() {
+	~CurlEasy() noexcept {
 		if (handle != nullptr)
 			curl_easy_cleanup(handle);
 	}
 
-	operator bool() const {
+	operator bool() const noexcept {
 		return handle != nullptr;
 	}
 
-	CurlEasy &operator=(CurlEasy &&src) {
+	CurlEasy &operator=(CurlEasy &&src) noexcept {
 		std::swap(handle, src.handle);
 		return *this;
 	}
 
-	CURL *Get() {
+	CURL *Get() noexcept {
 		return handle;
 	}
 
@@ -167,7 +168,7 @@ public:
 	}
 
 	template<typename T>
-	bool GetInfo(CURLINFO info, T value_r) const {
+	bool GetInfo(CURLINFO info, T value_r) const noexcept {
 		return ::curl_easy_getinfo(handle, info, value_r) == CURLE_OK;
 	}
 
@@ -175,14 +176,14 @@ public:
 	 * Returns the response body's size, or -1 if that is unknown.
 	 */
 	gcc_pure
-	int64_t GetContentLength() const {
+	int64_t GetContentLength() const noexcept {
 		double value;
 		return GetInfo(CURLINFO_CONTENT_LENGTH_DOWNLOAD, &value)
 			? (int64_t)value
 			: -1;
 	}
 
-	bool Unpause() {
+	bool Unpause() noexcept {
 		return ::curl_easy_pause(handle, CURLPAUSE_CONT) == CURLE_OK;
 	}
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 Max Kellermann <max@duempel.org>
+ * Copyright 2008-2018 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,15 +56,15 @@ public:
 	}
 
 	void Add(CurlRequest &r);
-	void Remove(CurlRequest &r);
+	void Remove(CurlRequest &r) noexcept;
 
-	void Assign(curl_socket_t fd, CurlSocket &cs) {
+	void Assign(curl_socket_t fd, CurlSocket &cs) noexcept {
 		curl_multi_assign(multi.Get(), fd, &cs);
 	}
 
-	void SocketAction(curl_socket_t fd, int ev_bitmask);
+	void SocketAction(curl_socket_t fd, int ev_bitmask) noexcept;
 
-	void InvalidateSockets() {
+	void InvalidateSockets() noexcept {
 		SocketAction(CURL_SOCKET_TIMEOUT, 0);
 	}
 
@@ -82,13 +82,13 @@ private:
 	/**
 	 * Check for finished HTTP responses.
 	 */
-	void ReadInfo();
+	void ReadInfo() noexcept;
 
-	void ScheduleTimeout(long timeout_ms);
-	static int TimerFunction(CURLM *multi, long timeout_ms, void *userp);
+	void ScheduleTimeout(long timeout_ms) noexcept;
+	static int TimerFunction(CURLM *multi, long timeout_ms, void *userp) noexcept;
 
-	void OnTimeout();
-	void OnDeferredReadInfo();
+	void OnTimeout() noexcept;
+	void OnDeferredReadInfo() noexcept;
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 Max Kellermann <max@duempel.org>
+ * Copyright 2008-2018 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -82,7 +82,7 @@ public:
 		    CurlResponseHandler &_handler);
 	CurlRequest(CurlGlobal &_global, CurlEasy &&_easy,
 		    CurlResponseHandler &_handler);
-	~CurlRequest();
+	~CurlRequest() noexcept;
 
 	CurlRequest(const CurlRequest &) = delete;
 	CurlRequest &operator=(const CurlRequest &) = delete;
@@ -100,9 +100,9 @@ public:
 	 *
 	 * This method must be called in the event loop thread.
 	 */
-	void Stop();
+	void Stop() noexcept;
 
-	CURL *Get() {
+	CURL *Get() noexcept {
 		return easy.Get();
 	}
 
@@ -112,36 +112,36 @@ public:
 	 */
 	struct Pause {};
 
-	void Resume();
+	void Resume() noexcept;
 
 	/**
 	 * A HTTP request is finished.  Called by #CurlGlobal.
 	 */
-	void Done(CURLcode result);
+	void Done(CURLcode result) noexcept;
 
 private:
 	/**
 	 * Frees the current "libcurl easy" handle, and everything
 	 * associated with it.
 	 */
-	void FreeEasy();
+	void FreeEasy() noexcept;
 
 	void FinishHeaders();
 	void FinishBody();
 
-	size_t DataReceived(const void *ptr, size_t size);
+	size_t DataReceived(const void *ptr, size_t size) noexcept;
 
-	void HeaderFunction(StringView s);
+	void HeaderFunction(StringView s) noexcept;
 
 	/** called by curl when new data is available */
 	static size_t _HeaderFunction(char *ptr, size_t size, size_t nmemb,
-				      void *stream);
+				      void *stream) noexcept;
 
 	/** called by curl when new data is available */
 	static size_t WriteFunction(char *ptr, size_t size, size_t nmemb,
-				    void *stream);
+				    void *stream) noexcept;
 
-	void OnDeferredError();
+	void OnDeferredError() noexcept;
 };
 
 #endif

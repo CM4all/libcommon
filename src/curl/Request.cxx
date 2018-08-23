@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 Max Kellermann <max@duempel.org>
+ * Copyright 2008-2018 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,7 +68,7 @@ CurlRequest::CurlRequest(CurlGlobal &_global, CurlEasy &&_easy,
 	easy.SetConnectTimeout(10);
 }
 
-CurlRequest::~CurlRequest()
+CurlRequest::~CurlRequest() noexcept
 {
 	FreeEasy();
 }
@@ -83,7 +83,7 @@ CurlRequest::Start()
 }
 
 void
-CurlRequest::Stop()
+CurlRequest::Stop() noexcept
 {
 	if (!registered)
 		return;
@@ -93,7 +93,7 @@ CurlRequest::Stop()
 }
 
 void
-CurlRequest::FreeEasy()
+CurlRequest::FreeEasy() noexcept
 {
 	if (!easy)
 		return;
@@ -103,7 +103,7 @@ CurlRequest::FreeEasy()
 }
 
 void
-CurlRequest::Resume()
+CurlRequest::Resume() noexcept
 {
 	assert(registered);
 
@@ -145,7 +145,7 @@ CurlRequest::FinishBody()
 }
 
 void
-CurlRequest::Done(CURLcode result)
+CurlRequest::Done(CURLcode result) noexcept
 {
 	Stop();
 
@@ -172,7 +172,7 @@ CurlRequest::Done(CURLcode result)
 }
 
 inline void
-CurlRequest::HeaderFunction(StringView s)
+CurlRequest::HeaderFunction(StringView s) noexcept
 {
 	if (state > State::HEADERS)
 		return;
@@ -207,7 +207,8 @@ CurlRequest::HeaderFunction(StringView s)
 }
 
 size_t
-CurlRequest::_HeaderFunction(char *ptr, size_t size, size_t nmemb, void *stream)
+CurlRequest::_HeaderFunction(char *ptr, size_t size, size_t nmemb,
+			     void *stream) noexcept
 {
 	CurlRequest &c = *(CurlRequest *)stream;
 
@@ -218,7 +219,7 @@ CurlRequest::_HeaderFunction(char *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 inline size_t
-CurlRequest::DataReceived(const void *ptr, size_t received_size)
+CurlRequest::DataReceived(const void *ptr, size_t received_size) noexcept
 {
 	assert(received_size > 0);
 
@@ -239,7 +240,8 @@ CurlRequest::DataReceived(const void *ptr, size_t received_size)
 }
 
 size_t
-CurlRequest::WriteFunction(char *ptr, size_t size, size_t nmemb, void *stream)
+CurlRequest::WriteFunction(char *ptr, size_t size, size_t nmemb,
+			   void *stream) noexcept
 {
 	CurlRequest &c = *(CurlRequest *)stream;
 
@@ -251,7 +253,7 @@ CurlRequest::WriteFunction(char *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 void
-CurlRequest::OnDeferredError()
+CurlRequest::OnDeferredError() noexcept
 {
 	assert(postponed_error);
 

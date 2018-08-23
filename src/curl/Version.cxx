@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Max Kellermann <max@duempel.org>
+ * Copyright 2017-2018 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
 #include <curl/curl.h>
 
 bool
-IsCurlOlderThan(unsigned version_num)
+IsCurlOlderThan(unsigned version_num) noexcept
 {
 	const auto *const info = curl_version_info(CURLVERSION_FIRST);
 	return info == nullptr || info->version_num < version_num;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Max Kellermann <max@duempel.org>
+ * Copyright 2017-2018 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +34,6 @@
 
 gcc_const
 bool
-IsCurlOlderThan(unsigned version_num);
+IsCurlOlderThan(unsigned version_num) noexcept;
 
 #endif

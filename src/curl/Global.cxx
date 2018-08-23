@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2016 Max Kellermann <max@duempel.org>
+ * Copyright 2008-2018 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -50,11 +50,12 @@ class CurlSocket final {
 	SocketEvent socket_event;
 
 public:
-	CurlSocket(CurlGlobal &_global, EventLoop &_loop, curl_socket_t _fd)
+	CurlSocket(CurlGlobal &_global, EventLoop &_loop,
+		   curl_socket_t _fd) noexcept
 		:global(_global), fd(_fd),
 		 socket_event(_loop, fd, 0, BIND_THIS_METHOD(OnSocketReady)) {}
 
-	~CurlSocket() {
+	~CurlSocket() noexcept {
 		socket_event.Delete();
 
 		/* TODO: sometimes, CURL uses CURL_POLL_REMOVE after
@@ -66,7 +67,7 @@ public:
 		   better solution? */
 	}
 
-	void Schedule(unsigned events) {
+	void Schedule(unsigned events) noexcept {
 		socket_event.Delete();
 		socket_event.Set(fd, events|SocketEvent::PERSIST);
 		socket_event.Add();
@@ -77,18 +78,18 @@ public:
 	 */
 	static int SocketFunction(CURL *easy,
 				  curl_socket_t s, int action,
-				  void *userp, void *socketp);
+				  void *userp, void *socketp) noexcept;
 
 private:
-	void OnSocketReady(unsigned events);
+	void OnSocketReady(unsigned events) noexcept;
 
-	static constexpr int LibEventToCurlCSelect(unsigned flags) {
+	static constexpr int LibEventToCurlCSelect(unsigned flags) noexcept {
 		return (flags & SocketEvent::READ ? CURL_CSELECT_IN : 0) |
 			(flags & SocketEvent::WRITE ? CURL_CSELECT_OUT : 0);
 	}
 
 	gcc_const
-	static unsigned CurlPollToLibEvent(int action) {
+	static unsigned CurlPollToLibEvent(int action) noexcept {
 		switch (action) {
 		case CURL_POLL_NONE:
 			return 0;
@@ -123,7 +124,8 @@ CurlGlobal::CurlGlobal(EventLoop &_loop)
 int
 CurlSocket::SocketFunction(gcc_unused CURL *easy,
 			   curl_socket_t s, int action,
-			   void *userp, void *socketp) {
+			   void *userp, void *socketp) noexcept
+{
 	auto &global = *(CurlGlobal *)userp;
 	auto *cs = (CurlSocket *)socketp;
 
@@ -144,7 +146,7 @@ CurlSocket::SocketFunction(gcc_unused CURL *easy,
 }
 
 void
-CurlSocket::OnSocketReady(unsigned events)
+CurlSocket::OnSocketReady(unsigned events) noexcept
 {
 	global.SocketAction(fd, LibEventToCurlCSelect(events));
 }
@@ -161,7 +163,7 @@ CurlGlobal::Add(CurlRequest &r)
 }
 
 void
-CurlGlobal::Remove(CurlRequest &r)
+CurlGlobal::Remove(CurlRequest &r) noexcept
 {
 	curl_multi_remove_handle(multi.Get(), r.Get());
 	InvalidateSockets();
@@ -172,7 +174,7 @@ CurlGlobal::Remove(CurlRequest &r)
  */
 gcc_pure
 static CurlRequest *
-ToRequest(CURL *easy)
+ToRequest(CURL *easy) noexcept
 {
 	void *p;
 	CURLcode code = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &p);
@@ -183,7 +185,7 @@ ToRequest(CURL *easy)
 }
 
 static void
-Done(CURL *handle, CURLcode result)
+Done(CURL *handle, CURLcode result) noexcept
 {
 	auto *r = ToRequest(handle);
 	assert(r != nullptr);
@@ -192,7 +194,7 @@ Done(CURL *handle, CURLcode result)
 }
 
 inline void
-CurlGlobal::ReadInfo()
+CurlGlobal::ReadInfo() noexcept
 {
 	CURLMsg *msg;
 	int msgs_in_queue;
@@ -205,7 +207,7 @@ CurlGlobal::ReadInfo()
 }
 
 void
-CurlGlobal::SocketAction(curl_socket_t fd, int ev_bitmask)
+CurlGlobal::SocketAction(curl_socket_t fd, int ev_bitmask) noexcept
 {
 	int running_handles;
 	CURLMcode mcode = curl_multi_socket_action(multi.Get(), fd, ev_bitmask,
@@ -216,13 +218,13 @@ CurlGlobal::SocketAction(curl_socket_t fd, int ev_bitmask)
 }
 
 void
-CurlGlobal::OnDeferredReadInfo()
+CurlGlobal::OnDeferredReadInfo() noexcept
 {
 	ReadInfo();
 }
 
 inline void
-CurlGlobal::ScheduleTimeout(long timeout_ms)
+CurlGlobal::ScheduleTimeout(long timeout_ms) noexcept
 {
 	if (timeout_ms < 0) {
 		timeout_event.Cancel();
@@ -245,7 +247,8 @@ CurlGlobal::ScheduleTimeout(long timeout_ms)
 }
 
 int
-CurlGlobal::TimerFunction(gcc_unused CURLM *_multi, long timeout_ms, void *userp)
+CurlGlobal::TimerFunction(gcc_unused CURLM *_multi, long timeout_ms,
+			  void *userp) noexcept
 {
 	auto &global = *(CurlGlobal *)userp;
 	assert(_multi == global.multi.Get());
@@ -254,7 +257,7 @@ CurlGlobal::TimerFunction(gcc_unused CURLM *_multi, long timeout_ms, void *userp
 }
 
 void
-CurlGlobal::OnTimeout()
+CurlGlobal::OnTimeout() noexcept
 {
 	SocketAction(CURL_SOCKET_TIMEOUT, 0);
 }
