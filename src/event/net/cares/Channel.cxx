@@ -79,7 +79,6 @@ Channel::Channel(EventLoop &event_loop)
 
 Channel::~Channel() noexcept
 {
-	timeout_event.Cancel();
 	defer_process.Cancel();
 	ares_destroy(channel);
 }

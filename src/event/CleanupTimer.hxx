@@ -57,10 +57,6 @@ public:
 		 delay{time_t(delay_s), 0},
 		 callback(_callback) {}
 
-	~CleanupTimer() noexcept {
-		event.Cancel();
-	}
-
 	void Enable() noexcept;
 	void Disable() noexcept;
 

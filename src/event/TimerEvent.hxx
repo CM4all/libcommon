@@ -48,6 +48,10 @@ public:
 	TimerEvent(EventLoop &loop, BoundMethod<void()> _callback) noexcept
 		:event(loop, -1, 0, Callback, this), callback(_callback) {}
 
+	~TimerEvent() noexcept {
+		Cancel();
+	}
+
 	bool IsPending() const noexcept {
 		return event.IsTimerPending();
 	}
