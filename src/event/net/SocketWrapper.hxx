@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,7 +33,7 @@
 #pragma once
 
 #include "io/FdType.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "net/SocketDescriptor.hxx"
 #include "util/Compiler.h"
@@ -71,15 +71,14 @@ class SocketWrapper {
 	SocketDescriptor fd;
 	FdType fd_type;
 
-	SocketEvent read_event, write_event;
+	NewSocketEvent socket_event;
 	TimerEvent read_timeout_event, write_timeout_event;
 
 	SocketHandler &handler;
 
 public:
 	SocketWrapper(EventLoop &event_loop, SocketHandler &_handler) noexcept
-		:read_event(event_loop, BIND_THIS_METHOD(ReadEventCallback)),
-		 write_event(event_loop, BIND_THIS_METHOD(WriteEventCallback)),
+		:socket_event(event_loop, BIND_THIS_METHOD(SocketEventCallback)),
 		 read_timeout_event(event_loop, BIND_THIS_METHOD(TimeoutCallback)),
 		 write_timeout_event(event_loop, BIND_THIS_METHOD(TimeoutCallback)),
 		 handler(_handler) {}
@@ -87,7 +86,7 @@ public:
 	SocketWrapper(const SocketWrapper &) = delete;
 
 	EventLoop &GetEventLoop() noexcept {
-		return read_event.GetEventLoop();
+		return socket_event.GetEventLoop();
 	}
 
 	void Init(SocketDescriptor _fd, FdType _fd_type) noexcept;
@@ -129,7 +128,7 @@ public:
 	void ScheduleRead(const struct timeval *timeout) noexcept {
 		assert(IsValid());
 
-		read_event.Add();
+		socket_event.ScheduleRead();
 
 		if (timeout == nullptr)
 			read_timeout_event.Cancel();
@@ -138,14 +137,14 @@ public:
 	}
 
 	void UnscheduleRead() noexcept {
-		read_event.Delete();
+		socket_event.CancelRead();
 		read_timeout_event.Cancel();
 	}
 
 	void ScheduleWrite(const struct timeval *timeout) noexcept {
 		assert(IsValid());
 
-		write_event.Add();
+		socket_event.ScheduleWrite();
 
 		if (timeout == nullptr)
 			write_timeout_event.Cancel();
@@ -154,18 +153,18 @@ public:
 	}
 
 	void UnscheduleWrite() noexcept {
-		write_event.Delete();
+		socket_event.CancelWrite();
 		write_timeout_event.Cancel();
 	}
 
 	gcc_pure
 	bool IsReadPending() const noexcept {
-		return read_event.IsPending(SocketEvent::READ);
+		return socket_event.IsReadPending();
 	}
 
 	gcc_pure
 	bool IsWritePending() const noexcept {
-		return write_event.IsPending(SocketEvent::WRITE);
+		return socket_event.IsWritePending();
 	}
 
 	ssize_t ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer) noexcept;
@@ -181,7 +180,6 @@ public:
 			  size_t length) noexcept;
 
 private:
-	void ReadEventCallback(unsigned events) noexcept;
-	void WriteEventCallback(unsigned events) noexcept;
+	void SocketEventCallback(unsigned events) noexcept;
 	void TimeoutCallback() noexcept;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -38,23 +38,24 @@
 #include <sys/socket.h>
 
 void
-SocketWrapper::ReadEventCallback(unsigned) noexcept
+SocketWrapper::SocketEventCallback(unsigned events) noexcept
 {
 	assert(IsValid());
 
-	read_timeout_event.Cancel();
+	if (events & SocketEvent::READ)
+		read_timeout_event.Cancel();
 
-	handler.OnSocketRead();
-}
+	if (events & SocketEvent::WRITE)
+		write_timeout_event.Cancel();
 
-void
-SocketWrapper::WriteEventCallback(unsigned) noexcept
-{
-	assert(IsValid());
+	if (events & SocketEvent::READ) {
+		if (!handler.OnSocketRead())
+			return;
+	}
 
-	write_timeout_event.Cancel();
-
-	handler.OnSocketWrite();
+	if (events & SocketEvent::WRITE) {
+		handler.OnSocketWrite();
+	}
 }
 
 void
@@ -73,8 +74,7 @@ SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 	fd = _fd;
 	fd_type = _fd_type;
 
-	read_event.Set(fd.Get(), SocketEvent::READ|SocketEvent::PERSIST);
-	write_event.Set(fd.Get(), SocketEvent::WRITE|SocketEvent::PERSIST);
+	socket_event.Open(fd);
 }
 
 void
@@ -92,8 +92,7 @@ SocketWrapper::Close() noexcept
 	if (!fd.IsDefined())
 		return;
 
-	read_event.Delete();
-	write_event.Delete();
+	socket_event.Cancel();
 	read_timeout_event.Cancel();
 	write_timeout_event.Cancel();
 
@@ -105,8 +104,7 @@ SocketWrapper::Abandon() noexcept
 {
 	assert(fd.IsDefined());
 
-	read_event.Delete();
-	write_event.Delete();
+	socket_event.Cancel();
 	read_timeout_event.Cancel();
 	write_timeout_event.Cancel();
 
