@@ -97,12 +97,12 @@ public:
 
 protected:
 	void OnAccept(UniqueSocketDescriptor &&_fd,
-		      SocketAddress address) override {
+		      SocketAddress address) noexcept override {
 		auto *c = CreateConnection(std::move(_fd), address);
 		connections.push_front(*c);
 	};
 
-	void OnAcceptError(std::exception_ptr ep) override {
+	void OnAcceptError(std::exception_ptr ep) noexcept override {
 		PrintException(ep);
 	}
 
