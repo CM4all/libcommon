@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -42,7 +42,7 @@
 #include "Direct.hxx"
 #include "Registry.hxx"
 #include "ExitListener.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -159,7 +159,7 @@ class SpawnServerConnection
 
 	const LLogger logger;
 
-	SocketEvent event;
+	NewSocketEvent event;
 
 	typedef boost::intrusive::set<SpawnServerChild,
 				      boost::intrusive::member_hook<SpawnServerChild,
@@ -276,15 +276,15 @@ SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
 					     UniqueSocketDescriptor &&_socket)
 	:process(_process), socket(std::move(_socket)),
 	 logger("spawn"),
-	 event(process.GetEventLoop(), socket.Get(),
-	       SocketEvent::READ|SocketEvent::PERSIST,
-	       BIND_THIS_METHOD(ReadEventCallback)) {
-	event.Add();
+	 event(process.GetEventLoop(), BIND_THIS_METHOD(ReadEventCallback),
+	       socket)
+{
+	event.ScheduleRead();
 }
 
 SpawnServerConnection::~SpawnServerConnection()
 {
-	event.Delete();
+	event.Cancel();
 
 	auto &registry = process.GetChildProcessRegistry();
 	children.clear_and_dispose([&registry](SpawnServerChild *child){

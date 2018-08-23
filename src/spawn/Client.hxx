@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -35,7 +35,7 @@
 
 #include "Interface.hxx"
 #include "Config.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/NewSocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
 #include <map>
@@ -61,7 +61,7 @@ class SpawnServerClient final : public SpawnService {
 
 	std::map<int, ChildProcess> processes;
 
-	SocketEvent read_event;
+	NewSocketEvent event;
 
 	/**
 	 * Call UidGid::Verify() before sending the spawn request to the

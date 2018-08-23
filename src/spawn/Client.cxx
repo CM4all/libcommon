@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -57,12 +57,10 @@ SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 				     UniqueSocketDescriptor _socket,
 				     bool _verify)
 	:config(_config), socket(std::move(_socket)),
-	 read_event(event_loop, socket.Get(),
-		    SocketEvent::READ|SocketEvent::PERSIST,
-		    BIND_THIS_METHOD(OnSocketEvent)),
+	 event(event_loop, BIND_THIS_METHOD(OnSocketEvent), socket),
 	 verify(_verify)
 {
-	read_event.Add();
+	event.ScheduleRead();
 }
 
 SpawnServerClient::~SpawnServerClient()
@@ -84,8 +82,8 @@ SpawnServerClient::ReplaceSocket(UniqueSocketDescriptor new_socket)
 
 	socket = std::move(new_socket);
 
-	read_event.Set(socket.Get(), SocketEvent::READ|SocketEvent::PERSIST);
-	read_event.Add();
+	event.Open(socket);
+	event.ScheduleRead();
 }
 
 void
@@ -93,7 +91,7 @@ SpawnServerClient::Close()
 {
 	assert(socket.IsDefined());
 
-	read_event.Delete();
+	event.Cancel();
 	socket.Close();
 }
 
