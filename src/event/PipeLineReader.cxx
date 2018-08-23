@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -45,7 +45,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 
 	auto nbytes = fd.Read(w.data, w.size);
 	if (nbytes <= 0) {
-		event.Delete();
+		event.Cancel();
 		callback(nullptr);
 		return;
 	}

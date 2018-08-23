@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "SocketEvent.hxx"
+#include "NewSocketEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/BindMethod.hxx"
 #include "util/StaticFifoBuffer.hxx"
@@ -45,7 +45,7 @@
  */
 class PipeLineReader {
 	UniqueFileDescriptor fd;
-	SocketEvent event;
+	NewSocketEvent event;
 
 	StaticFifoBuffer<char, 8192> buffer;
 
@@ -63,14 +63,10 @@ public:
 		       UniqueFileDescriptor _fd,
 		       Callback _callback) noexcept
 		:fd(std::move(_fd)),
-		 event(event_loop, fd.Get(), SocketEvent::READ|SocketEvent::PERSIST,
-		       BIND_THIS_METHOD(OnPipeReadable)),
+		 event(event_loop, BIND_THIS_METHOD(OnPipeReadable),
+		       SocketDescriptor::FromFileDescriptor(fd)),
 		 callback(_callback) {
-		event.Add();
-	}
-
-	~PipeLineReader() noexcept {
-		event.Delete();
+		event.ScheduleRead();
 	}
 
 	EventLoop &GetEventLoop() noexcept {
