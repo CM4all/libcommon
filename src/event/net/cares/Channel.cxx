@@ -40,6 +40,7 @@
 #include <assert.h>
 #include <string.h>
 #include <netinet/in.h>
+#include <netdb.h>
 
 namespace Cares {
 
