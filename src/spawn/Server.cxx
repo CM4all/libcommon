@@ -43,6 +43,7 @@
 #include "Registry.hxx"
 #include "ExitListener.hxx"
 #include "event/NewSocketEvent.hxx"
+#include "event/Loop.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "io/UniqueFileDescriptor.hxx"
