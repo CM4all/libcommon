@@ -185,21 +185,6 @@ ssl = static_library('ssl',
   ])
 ssl_dep = declare_dependency(link_with: ssl)
 
-event = static_library('event',
-  'src/event/Loop.cxx',
-  'src/event/ShutdownListener.cxx',
-  'src/event/CleanupTimer.cxx',
-  'src/event/DeferEvent.cxx',
-  'src/event/NewSocketEvent.cxx',
-  'src/event/SignalEvent.cxx',
-  'src/event/PipeLineReader.cxx',
-  include_directories: inc,
-  dependencies: [
-    libevent,
-    util_dep,
-  ])
-event_dep = declare_dependency(link_with: event)
-
 io = static_library('io',
   'src/io/FileDescriptor.cxx',
   'src/io/WriteFile.cxx',
@@ -263,6 +248,21 @@ net = static_library('net',
   dependencies: [
   ])
 net_dep = declare_dependency(link_with: net)
+
+event = static_library('event',
+  'src/event/Loop.cxx',
+  'src/event/ShutdownListener.cxx',
+  'src/event/CleanupTimer.cxx',
+  'src/event/DeferEvent.cxx',
+  'src/event/NewSocketEvent.cxx',
+  'src/event/SignalEvent.cxx',
+  'src/event/PipeLineReader.cxx',
+  include_directories: inc,
+  dependencies: [
+    libevent,
+    util_dep,
+  ])
+event_dep = declare_dependency(link_with: event)
 
 event_net = static_library('event_net',
   'src/event/net/ConnectSocket.cxx',
