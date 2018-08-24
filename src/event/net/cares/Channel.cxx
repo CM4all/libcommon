@@ -49,17 +49,17 @@ class Channel::Socket {
 
 public:
 	Socket(Channel &_channel,
-	       evutil_socket_t fd, unsigned events) noexcept
+	       SocketDescriptor fd, unsigned events) noexcept
 		:channel(_channel),
 		 event(channel.GetEventLoop(), BIND_THIS_METHOD(OnSocket),
-		       SocketDescriptor(fd)) {
+		       fd) {
 		event.Schedule(events);
 	}
 
 private:
 	void OnSocket(unsigned events) noexcept {
 		event.Cancel();
-		channel.OnSocket(event.GetSocket().Get(), events);
+		channel.OnSocket(event.GetSocket(), events);
 	}
 };
 
@@ -103,7 +103,8 @@ Channel::UpdateSockets() noexcept
 			events |= SocketEvent::WRITE;
 
 		if (events != 0)
-			sockets.emplace_front(*this, i, events);
+			sockets.emplace_front(*this, SocketDescriptor(i),
+					      events);
 	}
 
 	struct timeval timeout_buffer;
@@ -120,13 +121,13 @@ Channel::DeferredProcess() noexcept
 }
 
 void
-Channel::OnSocket(evutil_socket_t fd, unsigned events) noexcept
+Channel::OnSocket(SocketDescriptor fd, unsigned events) noexcept
 {
 	if (events & SocketEvent::READ)
-		FD_SET(fd, &read_ready);
+		FD_SET(fd.Get(), &read_ready);
 
 	if (events & SocketEvent::WRITE)
-		FD_SET(fd, &write_ready);
+		FD_SET(fd.Get(), &write_ready);
 
 	ScheduleProcess();
 }

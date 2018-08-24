@@ -41,6 +41,7 @@
 #include <forward_list>
 
 class CancellablePointer;
+class SocketDescriptor;
 
 namespace Cares {
 
@@ -87,7 +88,7 @@ private:
 		defer_process.Schedule();
 	}
 
-	void OnSocket(evutil_socket_t fd, unsigned events) noexcept;
+	void OnSocket(SocketDescriptor fd, unsigned events) noexcept;
 	void OnTimeout() noexcept;
 };
 
