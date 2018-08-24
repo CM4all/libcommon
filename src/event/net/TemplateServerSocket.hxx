@@ -70,7 +70,7 @@ struct ApplyTuple<C, 0> {
  * given class for each connection.
  */
 template<typename C, typename... Params>
-class TemplateServerSocket : public ServerSocket {
+class TemplateServerSocket final : public ServerSocket {
 	static_assert(std::is_base_of<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>,
 		      C>::value,
 		      "Must use list_base_hook<auto_unlink>");
