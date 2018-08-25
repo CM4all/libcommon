@@ -196,7 +196,7 @@ public:
 	 * Return address of start of data segment.
 	 */
 	const T* raw() const {
-		return &data[0];
+		return &data.front();
 	}
 
 	/**
