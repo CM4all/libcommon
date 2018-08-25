@@ -40,7 +40,7 @@ template<class T, size_t max>
 class StaticArray: public TrivialArray<T, max> {
 public:
 	constexpr
-	StaticArray(): TrivialArray<T, max>(0) {}
+	StaticArray() noexcept:TrivialArray<T, max>(0) {}
 
 	StaticArray(typename TrivialArray<T, max>::size_type _size, const T &value)
 		:TrivialArray<T, max>(_size, value) {}
@@ -50,7 +50,8 @@ public:
 		:TrivialArray<T, max>(_begin, _end) {}
 
 	template<typename U>
-	StaticArray(std::initializer_list<U> init):TrivialArray<T, max>(init) {}
+	StaticArray(std::initializer_list<U> init) noexcept
+		:TrivialArray<T, max>(init) {}
 };
 
 #endif
