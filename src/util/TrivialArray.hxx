@@ -195,7 +195,7 @@ public:
 	/**
 	 * Return address of start of data segment.
 	 */
-	const T *raw() const noexcept {
+	constexpr const T *raw() const noexcept {
 		return &data.front();
 	}
 
