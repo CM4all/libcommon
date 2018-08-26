@@ -99,7 +99,7 @@ class EventLoop {
 	static constexpr int EVLOOP_NONBLOCK = 0x2;
 
 public:
-	EventLoop() = default;
+	EventLoop();
 	~EventLoop() noexcept;
 
 	EventLoop(const EventLoop &other) = delete;

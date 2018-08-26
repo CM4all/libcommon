@@ -37,6 +37,8 @@
 #include <stdio.h>
 #endif
 
+EventLoop::EventLoop() = default;
+
 EventLoop::~EventLoop() noexcept
 {
 #ifndef NDEBUG
