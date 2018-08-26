@@ -31,6 +31,7 @@
  */
 
 #include "Loop.hxx"
+#include "SocketEvent.hxx"
 
 #ifndef NDEBUG
 #include <stdio.h>
@@ -61,6 +62,40 @@ EventLoop::Reinit() noexcept
 
 		epoll.Add(i.GetSocket().Get(), i.GetScheduledFlags(), &i);
 	}
+}
+
+bool
+EventLoop::AddFD(int fd, unsigned events, SocketEvent &event) noexcept
+{
+	assert(events != 0);
+
+	if (!epoll.Add(fd, events, &event))
+		return false;
+
+	sockets.push_back(event);
+	return true;
+}
+
+bool
+EventLoop::ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept
+{
+	assert(events != 0);
+
+	return epoll.Modify(fd, events, &event);
+}
+
+bool
+EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
+{
+	for (auto &i : received_events)
+		if (i.data.ptr == &event)
+			i.events = 0;
+
+	if (!epoll.Remove(fd))
+		return false;
+
+	sockets.erase(sockets.iterator_to(event));
+	return true;
 }
 
 void

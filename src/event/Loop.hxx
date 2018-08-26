@@ -35,7 +35,6 @@
 
 #include "TimerEvent.hxx"
 #include "DeferEvent.hxx"
-#include "SocketEvent.hxx"
 #include "system/EpollFD.hxx"
 #include "util/BindMethod.hxx"
 #include "util/StaticArray.hxx"
@@ -77,6 +76,7 @@ class EventLoop {
 
 	using SocketList =
 		boost::intrusive::list<SocketEvent,
+				       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>>,
 				       boost::intrusive::constant_time_size<false>>;
 	SocketList sockets;
 
@@ -142,33 +142,9 @@ public:
 		return timers.empty() && defer.empty() && sockets.empty();
 	}
 
-	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept {
-		assert(events != 0);
-
-		if (!epoll.Add(fd, events, &event))
-			return false;
-
-		sockets.push_back(event);
-		return true;
-	}
-
-	bool ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept {
-		assert(events != 0);
-
-		return epoll.Modify(fd, events, &event);
-	}
-
-	bool RemoveFD(int fd, SocketEvent &event) noexcept {
-		for (auto &i : received_events)
-			if (i.data.ptr == &event)
-				i.events = 0;
-
-		if (!epoll.Remove(fd))
-			return false;
-
-		sockets.erase(sockets.iterator_to(event));
-		return true;
-	}
+	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept;
+	bool ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept;
+	bool RemoveFD(int fd, SocketEvent &event) noexcept;
 
 	void AddTimer(TimerEvent &t,
 		      std::chrono::steady_clock::duration d) noexcept;
