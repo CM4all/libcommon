@@ -44,11 +44,10 @@ class EventLoop;
  * move calls out of the current stack frame, to avoid surprising side
  * effects for callers up in the call chain.
  */
-class DeferEvent final {
+class DeferEvent final
+	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>>
+{
 	friend class EventLoop;
-
-	typedef boost::intrusive::list_member_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>> SiblingsHook;
-	SiblingsHook siblings;
 
 	EventLoop &loop;
 
@@ -67,7 +66,7 @@ public:
 	}
 
 	bool IsPending() const noexcept {
-		return siblings.is_linked();
+		return is_linked();
 	}
 
 	void Schedule() noexcept;

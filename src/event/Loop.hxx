@@ -34,8 +34,6 @@
 #define EVENT_BASE_HXX
 
 #include "Chrono.hxx"
-#include "TimerEvent.hxx"
-#include "DeferEvent.hxx"
 #include "system/EpollFD.hxx"
 #include "util/BindMethod.hxx"
 #include "util/StaticArray.hxx"
@@ -45,6 +43,8 @@
 
 #include <assert.h>
 
+class TimerEvent;
+class DeferEvent;
 class SocketEvent;
 
 /**
@@ -54,25 +54,20 @@ class EventLoop {
 	EpollFD epoll;
 
 	struct TimerCompare {
-		constexpr bool operator()(const TimerEvent &a,
-					  const TimerEvent &b) const noexcept {
-			return a.due < b.due;
-		}
+		gcc_pure
+		bool operator()(const TimerEvent &a,
+				const TimerEvent &b) const noexcept;
 	};
 
 	using TimerSet =
 		boost::intrusive::multiset<TimerEvent,
-					   boost::intrusive::member_hook<TimerEvent,
-									 TimerEvent::TimerSetHook,
-									 &TimerEvent::timer_set_hook>,
+					   boost::intrusive::base_hook<boost::intrusive::set_base_hook<>>,
 					   boost::intrusive::compare<TimerCompare>,
 					   boost::intrusive::constant_time_size<false>>;
 	TimerSet timers;
 
 	boost::intrusive::list<DeferEvent,
-			       boost::intrusive::member_hook<DeferEvent,
-							     DeferEvent::SiblingsHook,
-							     &DeferEvent::siblings>,
+			       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>>>,
 			       boost::intrusive::constant_time_size<false>> defer;
 
 	using SocketList =

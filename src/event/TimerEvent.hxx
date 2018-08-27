@@ -44,11 +44,10 @@ class EventLoop;
 /**
  * Invoke an event callback after a certain amount of time.
  */
-class TimerEvent {
+class TimerEvent final
+	: public boost::intrusive::set_base_hook<>
+{
 	friend class EventLoop;
-
-	typedef boost::intrusive::set_member_hook<> TimerSetHook;
-	TimerSetHook timer_set_hook;
 
 	EventLoop &loop;
 
@@ -73,7 +72,7 @@ public:
 	}
 
 	bool IsPending() const noexcept {
-		return timer_set_hook.is_linked();
+		return is_linked();
 	}
 
 	void Schedule(Event::Duration d) noexcept;

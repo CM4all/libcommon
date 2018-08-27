@@ -31,11 +31,20 @@
  */
 
 #include "Loop.hxx"
+#include "TimerEvent.hxx"
+#include "DeferEvent.hxx"
 #include "SocketEvent.hxx"
 
 #ifndef NDEBUG
 #include <stdio.h>
 #endif
+
+bool
+EventLoop::TimerCompare::operator()(const TimerEvent &a,
+				    const TimerEvent &b) const noexcept
+{
+	return a.due < b.due;
+}
 
 EventLoop::EventLoop() = default;
 
