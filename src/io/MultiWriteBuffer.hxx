@@ -48,7 +48,7 @@ class MultiWriteBuffer {
 public:
 	typedef WriteBuffer::Result Result;
 
-	void Push(const void *buffer, size_t size) {
+	void Push(const void *buffer, size_t size) noexcept {
 		assert(n < buffers.size());
 
 		buffers[n++] = WriteBuffer(buffer, size);
