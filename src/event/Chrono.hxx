@@ -30,27 +30,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TimerEvent.hxx"
-#include "Loop.hxx"
+#pragma once
 
-void
-TimerEvent::Cancel() noexcept
-{
-	if (IsPending())
-		loop.CancelTimer(*this);
-}
+#include <chrono>
 
-void
-TimerEvent::Schedule(Event::Duration d) noexcept
-{
-	Cancel();
+namespace Event {
 
-	loop.AddTimer(*this, d);
-}
+/**
+ * The clock used by class #EventLoop and class #TimerEvent.
+ */
+using Clock = std::chrono::steady_clock;
 
-void
-TimerEvent::Add(const struct timeval &tv) noexcept
-{
-	Schedule(Event::Duration(std::chrono::seconds(tv.tv_sec)) +
-		 Event::Duration(std::chrono::microseconds(tv.tv_usec)));
-}
+using Duration = Clock::duration;
+
+} // namespace Event

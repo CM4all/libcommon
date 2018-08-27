@@ -33,6 +33,7 @@
 #ifndef EVENT_BASE_HXX
 #define EVENT_BASE_HXX
 
+#include "Chrono.hxx"
 #include "TimerEvent.hxx"
 #include "DeferEvent.hxx"
 #include "system/EpollFD.hxx"
@@ -146,8 +147,7 @@ public:
 	bool ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept;
 	bool RemoveFD(int fd, SocketEvent &event) noexcept;
 
-	void AddTimer(TimerEvent &t,
-		      std::chrono::steady_clock::duration d) noexcept;
+	void AddTimer(TimerEvent &t, Event::Duration d) noexcept;
 	void CancelTimer(TimerEvent &t) noexcept;
 
 	void Defer(DeferEvent &e) noexcept;
@@ -166,7 +166,7 @@ private:
 	 * duration until the next timer expires.  Returns a negative
 	 * duration if there is no timeout.
 	 */
-	std::chrono::steady_clock::duration HandleTimers() noexcept;
+	Event::Duration HandleTimers() noexcept;
 
 	bool RunPost() noexcept {
 #ifndef NDEBUG

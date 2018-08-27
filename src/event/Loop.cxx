@@ -101,9 +101,9 @@ EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 }
 
 void
-EventLoop::AddTimer(TimerEvent &t, std::chrono::steady_clock::duration d) noexcept
+EventLoop::AddTimer(TimerEvent &t, Event::Duration d) noexcept
 {
-	t.due = std::chrono::steady_clock::now() + d;
+	t.due = Event::Clock::now() + d;
 	timers.insert(t);
 	again = true;
 }
@@ -114,12 +114,12 @@ EventLoop::CancelTimer(TimerEvent &t) noexcept
 	timers.erase(timers.iterator_to(t));
 }
 
-inline std::chrono::steady_clock::duration
+inline Event::Duration
 EventLoop::HandleTimers() noexcept
 {
-	const auto now = std::chrono::steady_clock::now();
+	const auto now = Event::Clock::now();
 
-	std::chrono::steady_clock::duration timeout;
+	Event::Duration timeout;
 
 	while (!quit) {
 		auto i = timers.begin();
@@ -136,7 +136,7 @@ EventLoop::HandleTimers() noexcept
 		t.Run();
 	}
 
-	return std::chrono::steady_clock::duration(-1);
+	return Event::Duration(-1);
 }
 
 void
@@ -168,7 +168,7 @@ EventLoop::RunDeferred() noexcept
  * value (= never times out) is translated to the magic value -1.
  */
 static constexpr int
-ExportTimeoutMS(std::chrono::steady_clock::duration timeout)
+ExportTimeoutMS(Event::Duration timeout)
 {
 	return timeout >= timeout.zero()
 		? int(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count())

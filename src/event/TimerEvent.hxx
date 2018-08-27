@@ -32,12 +32,11 @@
 
 #pragma once
 
+#include "Chrono.hxx"
 #include "util/BindMethod.hxx"
 #include "util/Compiler.h"
 
 #include <boost/intrusive/set_hook.hpp>
-
-#include <chrono>
 
 struct timeval;
 class EventLoop;
@@ -59,7 +58,7 @@ class TimerEvent {
 	 * When is this timer due?  This is only valid if IsActive()
 	 * returns true.
 	 */
-	std::chrono::steady_clock::time_point due;
+	Event::Clock::time_point due;
 
 public:
 	TimerEvent(EventLoop &_loop, BoundMethod<void()> _callback) noexcept
@@ -73,7 +72,7 @@ public:
 		return timer_set_hook.is_linked();
 	}
 
-	void Schedule(std::chrono::steady_clock::duration d) noexcept;
+	void Schedule(Event::Duration d) noexcept;
 	void Cancel() noexcept;
 
 	/**
