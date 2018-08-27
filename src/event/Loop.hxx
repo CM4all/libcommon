@@ -35,13 +35,14 @@
 
 #include "Chrono.hxx"
 #include "system/EpollFD.hxx"
-#include "util/BindMethod.hxx"
 #include "util/StaticArray.hxx"
+
+#ifndef NDEBUG
+#include "util/BindMethod.hxx"
+#endif
 
 #include <boost/intrusive/set.hpp>
 #include <boost/intrusive/list.hpp>
-
-#include <assert.h>
 
 class TimerEvent;
 class DeferEvent;
