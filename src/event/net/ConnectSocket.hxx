@@ -66,6 +66,10 @@ public:
 		      ConnectSocketHandler &_handler) noexcept;
 	~ConnectSocket() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	bool IsPending() const noexcept {
 		return fd.IsDefined();
 	}
