@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright (C) 2014-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,13 +34,13 @@
 #include <unistd.h>
 
 static int
-ioprio_set(int which, int who, int ioprio)
+ioprio_set(int which, int who, int ioprio) noexcept
 {
 	return syscall(__NR_ioprio_set, which, who, ioprio);
 }
 
 static void
-ioprio_set_idle()
+ioprio_set_idle() noexcept
 {
 	static constexpr int _IOPRIO_WHO_PROCESS = 1;
 	static constexpr int _IOPRIO_CLASS_IDLE = 3;
