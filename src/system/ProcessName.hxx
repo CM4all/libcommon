@@ -33,7 +33,7 @@
 #pragma once
 
 void
-InitProcessName(int argc, char **argv);
+InitProcessName(int argc, char **argv) noexcept;
 
 void
-SetProcessName(const char *name);
+SetProcessName(const char *name) noexcept;

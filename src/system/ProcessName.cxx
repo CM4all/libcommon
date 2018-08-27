@@ -43,7 +43,7 @@ static struct {
 } process_name;
 
 void
-InitProcessName(int argc, char **argv)
+InitProcessName(int argc, char **argv) noexcept
 {
 	assert(process_name.argc == 0);
 	assert(process_name.argv == nullptr);
@@ -57,7 +57,7 @@ InitProcessName(int argc, char **argv)
 }
 
 void
-SetProcessName(const char *name)
+SetProcessName(const char *name) noexcept
 {
 	prctl(PR_SET_NAME, (unsigned long)name, 0, 0, 0);
 
