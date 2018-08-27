@@ -1,0 +1,42 @@
+net = static_library(
+  'net',
+  'SocketAddress.cxx',
+  'StaticSocketAddress.cxx',
+  'AllocatedSocketAddress.cxx',
+  'MaskedSocketAddress.cxx',
+  'IPv4Address.cxx',
+  'IPv6Address.cxx',
+  'HostParser.cxx',
+  'AddressInfo.cxx',
+  'Resolver.cxx',
+  'Parser.cxx',
+  'ToString.cxx',
+  'Interface.cxx',
+  'SocketDescriptor.cxx',
+  'UniqueSocketDescriptor.cxx',
+  'SocketConfig.cxx',
+  'RBindSocket.cxx',
+  'RConnectSocket.cxx',
+  'ConnectSocket.cxx',
+  'MultiReceiveMessage.cxx',
+  'SendMessage.cxx',
+  'djb/NetstringInput.cxx',
+  'djb/NetstringHeader.cxx',
+  'djb/NetstringGenerator.cxx',
+  'Buffered.cxx',
+  'log/String.cxx',
+  'log/Parser.cxx',
+  'log/OneLine.cxx',
+  'log/Send.cxx',
+  include_directories: inc,
+  dependencies: [
+  ],
+)
+
+net_dep = declare_dependency(
+  link_with: net,
+  dependencies: [
+    system_dep,
+    io_dep,
+  ],
+)
