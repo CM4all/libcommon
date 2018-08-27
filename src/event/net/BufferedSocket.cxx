@@ -473,8 +473,8 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 {
 	base.Init(_fd, _fd_type);
 
-	read_timeout = nullptr;
-	write_timeout = nullptr;
+	read_timeout = Event::Duration(-1);
+	write_timeout = Event::Duration(-1);
 
 	handler = nullptr;
 	direct = false;
@@ -490,8 +490,8 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 
 void
 BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
-		     const struct timeval *_read_timeout,
-		     const struct timeval *_write_timeout,
+		     Event::Duration _read_timeout,
+		     Event::Duration _write_timeout,
 		     BufferedSocketHandler &_handler) noexcept
 {
 	assert(!input.IsDefined());
@@ -514,8 +514,8 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 }
 
 void
-BufferedSocket::Reinit(const struct timeval *_read_timeout,
-		       const struct timeval *_write_timeout,
+BufferedSocket::Reinit(Event::Duration _read_timeout,
+		       Event::Duration _write_timeout,
 		       BufferedSocketHandler &_handler) noexcept
 {
 	assert(IsValid());
@@ -658,7 +658,7 @@ BufferedSocket::DeferRead(bool _expect_more) noexcept
 
 void
 BufferedSocket::ScheduleReadTimeout(bool _expect_more,
-				    const struct timeval *timeout) noexcept
+				    Event::Duration timeout) noexcept
 {
 	assert(!ended);
 	assert(!destroyed);

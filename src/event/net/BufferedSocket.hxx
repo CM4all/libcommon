@@ -305,7 +305,11 @@ public:
 class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	SocketWrapper base;
 
-	const struct timeval *read_timeout, *write_timeout;
+	/**
+	 * The read/write timeouts; a negative value disables the
+	 * timeout.
+	 */
+	Event::Duration read_timeout, write_timeout;
 
 	/**
 	 * Postpone ScheduleRead(), calls Read().
@@ -357,12 +361,12 @@ public:
 	void Init(SocketDescriptor _fd, FdType _fd_type) noexcept;
 
 	void Init(SocketDescriptor _fd, FdType _fd_type,
-		  const struct timeval *_read_timeout,
-		  const struct timeval *_write_timeout,
+		  Event::Duration _read_timeout,
+		  Event::Duration _write_timeout,
 		  BufferedSocketHandler &_handler) noexcept;
 
-	void Reinit(const struct timeval *_read_timeout,
-		    const struct timeval *_write_timeout,
+	void Reinit(Event::Duration _read_timeout,
+		    Event::Duration _write_timeout,
 		    BufferedSocketHandler &_handler) noexcept;
 
 	void Shutdown() noexcept {
@@ -400,8 +404,8 @@ public:
 	 */
 	void Destroy() noexcept;
 
-	void SetTimeouts(const struct timeval *_read_timeout,
-			 const struct timeval *_write_timeout) noexcept {
+	void SetTimeouts(Event::Duration _read_timeout,
+			 Event::Duration _write_timeout) noexcept {
 		read_timeout = _read_timeout;
 		write_timeout = _write_timeout;
 	}
@@ -554,7 +558,7 @@ public:
 	void DeferRead(bool _expect_more) noexcept;
 
 	void ScheduleReadTimeout(bool _expect_more,
-				 const struct timeval *timeout) noexcept;
+				 Event::Duration timeout) noexcept;
 
 	/**
 	 * Schedules reading on the socket with timeout disabled, to indicate
@@ -564,7 +568,8 @@ public:
 	 * you should call BufferedSocket::Read() to enable the read timeout.
 	 */
 	void ScheduleReadNoTimeout(bool _expect_more) noexcept {
-		ScheduleReadTimeout(_expect_more, nullptr);
+		ScheduleReadTimeout(_expect_more,
+				    Event::Duration(-1));
 	}
 
 	void UnscheduleRead() noexcept {

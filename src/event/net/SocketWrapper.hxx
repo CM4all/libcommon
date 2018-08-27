@@ -125,15 +125,19 @@ public:
 		return fd_type;
 	}
 
-	void ScheduleRead(const struct timeval *timeout) noexcept {
+	/**
+	 * @param timeout the read timeout; a negative value disables
+	 * the timeout
+	 */
+	void ScheduleRead(Event::Duration timeout) noexcept {
 		assert(IsValid());
 
 		socket_event.ScheduleRead();
 
-		if (timeout == nullptr)
+		if (timeout < timeout.zero())
 			read_timeout_event.Cancel();
 		else
-			read_timeout_event.Add(*timeout);
+			read_timeout_event.Schedule(timeout);
 	}
 
 	void UnscheduleRead() noexcept {
@@ -141,15 +145,19 @@ public:
 		read_timeout_event.Cancel();
 	}
 
-	void ScheduleWrite(const struct timeval *timeout) noexcept {
+	/**
+	 * @param timeout the write timeout; a negative value disables
+	 * the timeout
+	 */
+	void ScheduleWrite(Event::Duration timeout) noexcept {
 		assert(IsValid());
 
 		socket_event.ScheduleWrite();
 
-		if (timeout == nullptr)
+		if (timeout < timeout.zero())
 			write_timeout_event.Cancel();
 		else
-			write_timeout_event.Add(*timeout);
+			write_timeout_event.Schedule(timeout);
 	}
 
 	void UnscheduleWrite() noexcept {
