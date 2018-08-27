@@ -63,6 +63,12 @@ public:
 	static constexpr unsigned ERROR = EPOLLERR;
 	static constexpr unsigned HANGUP = EPOLLHUP;
 
+	/**
+	 * These flags are always reported by epoll_wait() and don't
+	 * need to be registered with epoll_ctl().
+	 */
+	static constexpr unsigned IMPLICIT_FLAGS = ERROR|HANGUP;
+
 	SocketEvent(EventLoop &_loop, Callback _callback,
 		       SocketDescriptor _fd=SocketDescriptor::Undefined()) noexcept
 		:loop(_loop),
@@ -103,7 +109,7 @@ public:
 	}
 
 	void ScheduleRead() noexcept {
-		Schedule(GetScheduledFlags() | READ | HANGUP | ERROR);
+		Schedule(GetScheduledFlags() | READ);
 
 	}
 
@@ -112,7 +118,7 @@ public:
 	}
 
 	void CancelRead() noexcept {
-		Schedule(GetScheduledFlags() & ~(READ|HANGUP|ERROR));
+		Schedule(GetScheduledFlags() & ~READ);
 	}
 
 	void CancelWrite() noexcept {

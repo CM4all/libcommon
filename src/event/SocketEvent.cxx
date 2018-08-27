@@ -47,6 +47,8 @@ SocketEvent::Open(SocketDescriptor _fd) noexcept
 void
 SocketEvent::Schedule(unsigned flags) noexcept
 {
+	assert((flags & IMPLICIT_FLAGS) == 0);
+
 	if (flags == GetScheduledFlags())
 		return;
 
@@ -65,7 +67,7 @@ SocketEvent::Schedule(unsigned flags) noexcept
 void
 SocketEvent::Dispatch(unsigned flags) noexcept
 {
-	flags &= GetScheduledFlags();
+	flags &= GetScheduledFlags() | IMPLICIT_FLAGS;
 
 	if (flags != 0)
 		callback(flags);
