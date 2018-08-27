@@ -68,6 +68,10 @@ public:
 		Cancel();
 	}
 
+	auto &GetEventLoop() const noexcept {
+		return loop;
+	}
+
 	bool IsPending() const noexcept {
 		return timer_set_hook.is_linked();
 	}
