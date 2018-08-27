@@ -1,4 +1,5 @@
 time_sources = [
+  'Calendar.cxx',
   'Convert.cxx',
   'ISO8601.cxx',
 ]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2018 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,39 +30,18 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Calendar.hxx"
+#include "Convert.hxx"
 
-#include "util/Compiler.h"
-
-#include <chrono>
-
-constexpr bool
-IsLeapYear(unsigned y) noexcept
-{
-	return (y % 4) == 0 && ((y % 100) != 0 || (y % 400) == 0);
-}
-
-constexpr unsigned
-DaysInFebruary(unsigned year) noexcept
-{
-	return IsLeapYear(year) ? 29 : 28;
-}
-
-constexpr unsigned
-DaysInMonth(unsigned month, unsigned year) noexcept
-{
-	if (month == 4 || month == 6 || month == 9 || month == 11)
-		return 30;
-	else if (month != 2)
-		return 31;
-	else
-		return DaysInFebruary(year);
-}
-
-/**
- * Calculates the preceding midnight time point in the current time
- * zone.
- */
-gcc_const
 std::chrono::system_clock::time_point
-PrecedingMidnightLocal(std::chrono::system_clock::time_point t) noexcept;
+PrecedingMidnightLocal(std::chrono::system_clock::time_point t) noexcept
+try {
+	auto tm = LocalTime(t);
+	tm.tm_sec = 0;
+	tm.tm_min = 0;
+	tm.tm_hour = 0;
+	return MakeTime(tm);
+} catch (...) {
+	/* best-effort fallback for this exotic error condition */
+	return t;
+}
