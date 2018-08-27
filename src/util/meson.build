@@ -1,5 +1,4 @@
-util = static_library(
-  'util',
+util_sources = [
   'AllocatedString.cxx',
   'Exception.cxx',
   'LeakDetector.cxx',
@@ -9,8 +8,18 @@ util = static_library(
   'StringParser.cxx',
   'StringStrip.cxx',
   'StringView.cxx',
-  'HexFormat.c',
-  'djbhash.c',
+]
+
+if get_variable('libcommon_enable_c', true)
+  util_sources += [
+    'HexFormat.c',
+    'djbhash.c',
+  ]
+endif
+
+util = static_library(
+  'util',
+  util_sources,
   include_directories: inc,
 )
 
