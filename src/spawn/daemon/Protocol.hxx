@@ -55,7 +55,7 @@
   communication over local sockets (AF_LOCAL), and thus has no need
   for conversion to network byte order.
 
- */
+*/
 
 namespace SpawnDaemon {
 
@@ -65,63 +65,63 @@ namespace SpawnDaemon {
 static const uint32_t MAGIC = 0x63046173;
 
 struct DatagramHeader {
-    uint32_t magic;
-    uint32_t crc;
+	uint32_t magic;
+	uint32_t crc;
 };
 
 enum class RequestCommand : uint16_t {
-    NOP = 0,
+	NOP = 0,
 
-    /**
-     * Set the name of namespaces requested by this datagram.  Payload
-     * is a non-empty variable-length name (7 bit ASCII, no null
-     * bytes).
-     */
-    NAME = 1,
+	/**
+	 * Set the name of namespaces requested by this datagram.  Payload
+	 * is a non-empty variable-length name (7 bit ASCII, no null
+	 * bytes).
+	 */
+	NAME = 1,
 
-    /**
-     * Create a new IPC namespace.  No payload.
-     *
-     * Response may be #ResponseCommand::NAMESPACE_HANDLES or
-     * #ResponseCommand::ERROR.
-     */
-    IPC_NAMESPACE = 2,
+	/**
+	 * Create a new IPC namespace.  No payload.
+	 *
+	 * Response may be #ResponseCommand::NAMESPACE_HANDLES or
+	 * #ResponseCommand::ERROR.
+	 */
+	IPC_NAMESPACE = 2,
 
-    /**
-     * Create a new PID namespace.  No payload.
-     *
-     * Response may be #ResponseCommand::NAMESPACE_HANDLES or
-     * #ResponseCommand::ERROR.
-     */
-    PID_NAMESPACE = 3,
+	/**
+	 * Create a new PID namespace.  No payload.
+	 *
+	 * Response may be #ResponseCommand::NAMESPACE_HANDLES or
+	 * #ResponseCommand::ERROR.
+	 */
+	PID_NAMESPACE = 3,
 };
 
 struct RequestHeader {
-    uint16_t size;
-    RequestCommand command;
+	uint16_t size;
+	RequestCommand command;
 };
 
 enum class ResponseCommand : uint16_t {
-    /**
-     * The request has failed.
-     *
-     * Payload is a human-readable error message.
-     */
-    ERROR = 0,
+	/**
+	 * The request has failed.
+	 *
+	 * Payload is a human-readable error message.
+	 */
+	ERROR = 0,
 
-    /**
-     * Successful response to #RequestCommand::*_NAMESPACE.
-     *
-     * Payload is a list of "uint32_t" values, each of them denoting a
-     * single "CLONE_*" flag.  The defines the order in which the
-     * namespace file handles are being transmitted as ancillary data.
-     */
-    NAMESPACE_HANDLES = 1,
+	/**
+	 * Successful response to #RequestCommand::*_NAMESPACE.
+	 *
+	 * Payload is a list of "uint32_t" values, each of them denoting a
+	 * single "CLONE_*" flag.  The defines the order in which the
+	 * namespace file handles are being transmitted as ancillary data.
+	 */
+	NAMESPACE_HANDLES = 1,
 };
 
 struct ResponseHeader {
-    uint16_t size;
-    ResponseCommand command;
+	uint16_t size;
+	ResponseCommand command;
 };
 
 }

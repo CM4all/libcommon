@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPAWN_HOOK_HXX
-#define SPAWN_HOOK_HXX
+#pragma once
 
 struct PreparedChildProcess;
 
@@ -40,20 +39,18 @@ struct PreparedChildProcess;
  */
 class SpawnHook {
 public:
-    /**
-     * Verify the #PreparedChildProcess object, especially the #UidGid
-     * settings, whether these credentials are allowed.
-     *
-     * Throws std::runtime_error if the #PreparedChildProcess object
-     * is rejected.
-     *
-     * @return true if the #PreparedChildProcess object is accepted,
-     * false to apply the default checks instead (which may then
-     * result in acceptance or rejection)
-     */
-    virtual bool Verify(const PreparedChildProcess &) {
-        return false;
-    }
+	/**
+	 * Verify the #PreparedChildProcess object, especially the #UidGid
+	 * settings, whether these credentials are allowed.
+	 *
+	 * Throws std::runtime_error if the #PreparedChildProcess object
+	 * is rejected.
+	 *
+	 * @return true if the #PreparedChildProcess object is accepted,
+	 * false to apply the default checks instead (which may then
+	 * result in acceptance or rejection)
+	 */
+	virtual bool Verify(const PreparedChildProcess &) {
+		return false;
+	}
 };
-
-#endif

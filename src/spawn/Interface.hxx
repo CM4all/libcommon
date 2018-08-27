@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_SPAWN_INTERFACE_HXX
-#define BENG_PROXY_SPAWN_INTERFACE_HXX
+#pragma once
 
 struct PreparedChildProcess;
 class ExitListener;
@@ -63,5 +62,3 @@ public:
 	 */
 	void KillChildProcess(int pid);
 };
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -42,175 +42,175 @@
 #include <sys/resource.h>
 
 static constexpr struct timeval child_kill_timeout = {
-    .tv_sec = 60,
-    .tv_usec = 0,
+	.tv_sec = 60,
+	.tv_usec = 0,
 };
 
 static std::string
 MakeChildProcessLogDomain(unsigned pid, const char *name)
 {
-    return StringFormat<64>("spawn:%u:%s", pid, name).c_str();
+	return StringFormat<64>("spawn:%u:%s", pid, name).c_str();
 }
 
 ChildProcessRegistry::ChildProcess::ChildProcess(EventLoop &_event_loop,
-                                                 pid_t _pid, const char *_name,
-                                                 ExitListener *_listener)
-    :logger(MakeChildProcessLogDomain(_pid, _name)),
-     pid(_pid), name(_name),
-     start_time(std::chrono::steady_clock::now()),
-     listener(_listener),
-     kill_timeout_event(_event_loop, BIND_THIS_METHOD(KillTimeoutCallback))
+						 pid_t _pid, const char *_name,
+						 ExitListener *_listener)
+	:logger(MakeChildProcessLogDomain(_pid, _name)),
+	 pid(_pid), name(_name),
+	 start_time(std::chrono::steady_clock::now()),
+	 listener(_listener),
+	 kill_timeout_event(_event_loop, BIND_THIS_METHOD(KillTimeoutCallback))
 {
-    logger(5, "added child process");
+	logger(5, "added child process");
 }
 
 static constexpr double
 timeval_to_double(const struct timeval &tv)
 {
-    return tv.tv_sec + tv.tv_usec / 1000000.;
+	return tv.tv_sec + tv.tv_usec / 1000000.;
 }
 
 void
 ChildProcessRegistry::ChildProcess::OnExit(int status,
-                                           const struct rusage &rusage)
+					   const struct rusage &rusage)
 {
-    const int exit_status = WEXITSTATUS(status);
-    if (WIFSIGNALED(status)) {
-        int level = 1;
-        if (!WCOREDUMP(status) && WTERMSIG(status) == SIGTERM)
-            level = 4;
+	const int exit_status = WEXITSTATUS(status);
+	if (WIFSIGNALED(status)) {
+		int level = 1;
+		if (!WCOREDUMP(status) && WTERMSIG(status) == SIGTERM)
+			level = 4;
 
-        logger(level, "died from signal ",
-               WTERMSIG(status),
-               WCOREDUMP(status) ? " (core dumped)" : "");
-    } else if (exit_status == 0)
-        logger(5, "exited with success");
-    else
-        logger(2, "exited with status ", exit_status);
+		logger(level, "died from signal ",
+		       WTERMSIG(status),
+		       WCOREDUMP(status) ? " (core dumped)" : "");
+	} else if (exit_status == 0)
+		logger(5, "exited with success");
+	else
+		logger(2, "exited with status ", exit_status);
 
-    const auto duration = std::chrono::steady_clock::now() - start_time;
-    const auto duration_f = std::chrono::duration_cast<std::chrono::duration<double>>(duration);
+	const auto duration = std::chrono::steady_clock::now() - start_time;
+	const auto duration_f = std::chrono::duration_cast<std::chrono::duration<double>>(duration);
 
-    logger.Format(6, "stats: %1.3fs elapsed, %1.3fs user, %1.3fs sys, %ld/%ld faults, %ld/%ld switches",
-                  duration_f.count(),
-                  timeval_to_double(rusage.ru_utime),
-                  timeval_to_double(rusage.ru_stime),
-                  rusage.ru_minflt, rusage.ru_majflt,
-                  rusage.ru_nvcsw, rusage.ru_nivcsw);
+	logger.Format(6, "stats: %1.3fs elapsed, %1.3fs user, %1.3fs sys, %ld/%ld faults, %ld/%ld switches",
+		      duration_f.count(),
+		      timeval_to_double(rusage.ru_utime),
+		      timeval_to_double(rusage.ru_stime),
+		      rusage.ru_minflt, rusage.ru_majflt,
+		      rusage.ru_nvcsw, rusage.ru_nivcsw);
 
-    if (listener != nullptr)
-        listener->OnChildProcessExit(status);
+	if (listener != nullptr)
+		listener->OnChildProcessExit(status);
 }
 
 inline void
 ChildProcessRegistry::ChildProcess::KillTimeoutCallback()
 {
-    logger(3, "sending SIGKILL to due to timeout");
+	logger(3, "sending SIGKILL to due to timeout");
 
-    if (kill(pid, SIGKILL) < 0)
-        logger(1, "failed to kill child process: ", strerror(errno));
+	if (kill(pid, SIGKILL) < 0)
+		logger(1, "failed to kill child process: ", strerror(errno));
 }
 
 ChildProcessRegistry::ChildProcessRegistry(EventLoop &_event_loop)
-    :logger("spawn"), event_loop(_event_loop),
-     sigchld_event(event_loop, SIGCHLD, BIND_THIS_METHOD(OnSigChld))
+	:logger("spawn"), event_loop(_event_loop),
+	 sigchld_event(event_loop, SIGCHLD, BIND_THIS_METHOD(OnSigChld))
 {
-    sigchld_event.Enable();
+	sigchld_event.Enable();
 }
 
 void
 ChildProcessRegistry::Clear()
 {
-    children.clear_and_dispose(DeleteDisposer());
+	children.clear_and_dispose(DeleteDisposer());
 
-    CheckVolatileEvent();
+	CheckVolatileEvent();
 }
 
 void
 ChildProcessRegistry::Add(pid_t pid, const char *name, ExitListener *listener)
 {
-    assert(name != nullptr);
+	assert(name != nullptr);
 
-    if (volatile_event && IsEmpty())
-        sigchld_event.Enable();
+	if (volatile_event && IsEmpty())
+		sigchld_event.Enable();
 
-    auto child = new ChildProcess(event_loop, pid, name, listener);
+	auto child = new ChildProcess(event_loop, pid, name, listener);
 
-    children.insert(*child);
+	children.insert(*child);
 }
 
 void
 ChildProcessRegistry::SetExitListener(pid_t pid, ExitListener *listener)
 {
-    assert(pid > 0);
-    assert(listener != nullptr);
+	assert(pid > 0);
+	assert(listener != nullptr);
 
-    auto i = FindByPid(pid);
-    assert(i != children.end());
-    auto &child = *i;
+	auto i = FindByPid(pid);
+	assert(i != children.end());
+	auto &child = *i;
 
-    assert(child.listener == nullptr);
-    child.listener = listener;
+	assert(child.listener == nullptr);
+	child.listener = listener;
 }
 
 void
 ChildProcessRegistry::Kill(pid_t pid, int signo)
 {
-    auto i = FindByPid(pid);
-    assert(i != children.end());
-    auto *child = &*i;
+	auto i = FindByPid(pid);
+	assert(i != children.end());
+	auto *child = &*i;
 
-    logger(5, "sending ", strsignal(signo));
+	logger(5, "sending ", strsignal(signo));
 
-    assert(child->listener != nullptr);
-    child->listener = nullptr;
+	assert(child->listener != nullptr);
+	child->listener = nullptr;
 
-    if (kill(pid, signo) < 0) {
-        logger(1, "failed to kill child process: ", strerror(errno));
+	if (kill(pid, signo) < 0) {
+		logger(1, "failed to kill child process: ", strerror(errno));
 
-        /* if we can't kill the process, we can't do much, so let's
-           just ignore the process from now on and don't let it delay
-           the shutdown */
-        Remove(i);
-        delete child;
-        CheckVolatileEvent();
-        return;
-    }
+		/* if we can't kill the process, we can't do much, so let's
+		   just ignore the process from now on and don't let it delay
+		   the shutdown */
+		Remove(i);
+		delete child;
+		CheckVolatileEvent();
+		return;
+	}
 
-    child->kill_timeout_event.Add(child_kill_timeout);
+	child->kill_timeout_event.Add(child_kill_timeout);
 }
 
 void
 ChildProcessRegistry::Kill(pid_t pid)
 {
-    Kill(pid, SIGTERM);
+	Kill(pid, SIGTERM);
 }
 
 void
 ChildProcessRegistry::OnExit(pid_t pid, int status,
-                             const struct rusage &rusage)
+			     const struct rusage &rusage)
 {
-    auto i = FindByPid(pid);
-    if (i == children.end())
-        return;
+	auto i = FindByPid(pid);
+	if (i == children.end())
+		return;
 
-    auto *child = &*i;
-    Remove(i);
-    child->OnExit(status, rusage);
-    delete child;
+	auto *child = &*i;
+	Remove(i);
+	child->OnExit(status, rusage);
+	delete child;
 }
 
 
 void
 ChildProcessRegistry::OnSigChld(int)
 {
-    pid_t pid;
-    int status;
+	pid_t pid;
+	int status;
 
-    struct rusage rusage;
-    while ((pid = wait4(-1, &status, WNOHANG, &rusage)) > 0) {
-        OnExit(pid, status, rusage);
-    }
+	struct rusage rusage;
+	while ((pid = wait4(-1, &status, WNOHANG, &rusage)) > 0) {
+		OnExit(pid, status, rusage);
+	}
 
-    CheckVolatileEvent();
+	CheckVolatileEvent();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_SPAWN_PARSER_HXX
-#define BENG_PROXY_SPAWN_PARSER_HXX
+#pragma once
 
 #include "util/ConstBuffer.hxx"
 
@@ -44,51 +43,49 @@
 class MalformedSpawnPayloadError {};
 
 class SpawnPayload {
-    const uint8_t *begin, *const end;
+	const uint8_t *begin, *const end;
 
 public:
-    explicit SpawnPayload(ConstBuffer<uint8_t> _payload)
-        :begin(_payload.begin()), end(_payload.end()) {}
+	explicit SpawnPayload(ConstBuffer<uint8_t> _payload)
+		:begin(_payload.begin()), end(_payload.end()) {}
 
-    bool IsEmpty() const {
-        return begin == end;
-    }
+	bool IsEmpty() const {
+		return begin == end;
+	}
 
-    size_t GetSize() const {
-        return begin - end;
-    }
+	size_t GetSize() const {
+		return begin - end;
+	}
 
-    uint8_t ReadByte() {
-        assert(!IsEmpty());
-        return *begin++;
-    }
+	uint8_t ReadByte() {
+		assert(!IsEmpty());
+		return *begin++;
+	}
 
-    void Read(void *p, size_t size) {
-        if (GetSize() < size)
-            throw MalformedSpawnPayloadError();
+	void Read(void *p, size_t size) {
+		if (GetSize() < size)
+			throw MalformedSpawnPayloadError();
 
-        memcpy(p, begin, size);
-        begin += size;
-    }
+		memcpy(p, begin, size);
+		begin += size;
+	}
 
-    template<typename T>
-    void ReadT(T &value_r) {
-        Read(&value_r, sizeof(value_r));
-    }
+	template<typename T>
+	void ReadT(T &value_r) {
+		Read(&value_r, sizeof(value_r));
+	}
 
-    void ReadInt(int &value_r) {
-        ReadT(value_r);
-    }
+	void ReadInt(int &value_r) {
+		ReadT(value_r);
+	}
 
-    const char *ReadString() {
-        auto n = std::find(begin, end, 0);
-        if (n == end)
-            throw MalformedSpawnPayloadError();
+	const char *ReadString() {
+		auto n = std::find(begin, end, 0);
+		if (n == end)
+			throw MalformedSpawnPayloadError();
 
-        const char *value = (const char *)begin;
-        begin = n + 1;
-        return value;
-    }
+		const char *value = (const char *)begin;
+		begin = n + 1;
+		return value;
+	}
 };
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -42,27 +42,27 @@
 
 SpawnServerClient *
 StartSpawnServer(const SpawnConfig &config,
-                 ChildProcessRegistry &child_process_registry,
-                 SpawnHook *hook,
-                 std::function<void()> post_clone)
+		 ChildProcessRegistry &child_process_registry,
+		 SpawnHook *hook,
+		 std::function<void()> post_clone)
 {
-    UniqueSocketDescriptor s1, s2;
-    if (!UniqueSocketDescriptor::CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET, 0,
-                                                          s1, s2))
-        throw MakeErrno("socketpair() failed");
+	UniqueSocketDescriptor s1, s2;
+	if (!UniqueSocketDescriptor::CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET, 0,
+							      s1, s2))
+		throw MakeErrno("socketpair() failed");
 
-    auto pid = LaunchSpawnServer(config, hook, std::move(s1),
-                                 [&s2, post_clone](){
-                                     s2.Close();
-                                     post_clone();
-                                 });
+	auto pid = LaunchSpawnServer(config, hook, std::move(s1),
+				     [&s2, post_clone](){
+					     s2.Close();
+					     post_clone();
+				     });
 
-    child_process_registry.Add(pid, "spawn", nullptr);
+	child_process_registry.Add(pid, "spawn", nullptr);
 
-    return new SpawnServerClient(child_process_registry.GetEventLoop(),
-                                 config, std::move(s2),
-                                 /* don't verify if there is a hook,
-                                    because the hook may have its own
-                                    overriding rules */
-                                 hook == nullptr);
+	return new SpawnServerClient(child_process_registry.GetEventLoop(),
+				     config, std::move(s2),
+				     /* don't verify if there is a hook,
+					because the hook may have its own
+					overriding rules */
+				     hook == nullptr);
 }

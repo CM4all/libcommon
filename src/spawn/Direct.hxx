@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPAWN_DIRECT_HXX
-#define SPAWN_DIRECT_HXX
+#pragma once
 
 #include <sys/types.h>
 
@@ -45,6 +44,4 @@ struct CgroupState;
  */
 pid_t
 SpawnChildProcess(PreparedChildProcess &&params,
-                  const CgroupState &cgroup_state);
-
-#endif
+		  const CgroupState &cgroup_state);

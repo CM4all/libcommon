@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,22 +30,19 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPAWN_CONFIG_PARSER_HXX
-#define SPAWN_CONFIG_PARSER_HXX
+#pragma once
 
 #include "io/ConfigParser.hxx"
 
 struct SpawnConfig;
 
 class SpawnConfigParser final : public ConfigParser {
-    SpawnConfig &config;
+	SpawnConfig &config;
 
 public:
-    explicit SpawnConfigParser(SpawnConfig &_config):config(_config) {}
+	explicit SpawnConfigParser(SpawnConfig &_config):config(_config) {}
 
 protected:
-    /* virtual methods from class ConfigParser */
-    void ParseLine(FileLineParser &line) override;
+	/* virtual methods from class ConfigParser */
+	void ParseLine(FileLineParser &line) override;
 };
-
-#endif

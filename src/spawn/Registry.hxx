@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_SPAWN_REGISTRY_HXX
-#define BENG_PROXY_SPAWN_REGISTRY_HXX
+#pragma once
 
 #include "io/Logger.hxx"
 #include "event/TimerEvent.hxx"
@@ -55,153 +54,151 @@ class ExitListener;
  */
 class ChildProcessRegistry {
 
-    struct ChildProcess
-        : boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
+	struct ChildProcess
+		: boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
 
-        const Logger logger;
+		const Logger logger;
 
-        const pid_t pid;
+		const pid_t pid;
 
-        const std::string name;
+		const std::string name;
 
-        /**
-         * The time when this child process was started (registered in
-         * this library).
-         */
-        const std::chrono::steady_clock::time_point start_time;
+		/**
+		 * The time when this child process was started (registered in
+		 * this library).
+		 */
+		const std::chrono::steady_clock::time_point start_time;
 
-        ExitListener *listener;
+		ExitListener *listener;
 
-        /**
-         * This timer is set up by child_kill_signal().  If the child
-         * process hasn't exited after a certain amount of time, we send
-         * SIGKILL.
-         */
-        TimerEvent kill_timeout_event;
+		/**
+		 * This timer is set up by child_kill_signal().  If the child
+		 * process hasn't exited after a certain amount of time, we send
+		 * SIGKILL.
+		 */
+		TimerEvent kill_timeout_event;
 
-        ChildProcess(EventLoop &event_loop,
-                     pid_t _pid, const char *_name,
-                     ExitListener *_listener);
+		ChildProcess(EventLoop &event_loop,
+			     pid_t _pid, const char *_name,
+			     ExitListener *_listener);
 
-        void Disable() {
-            kill_timeout_event.Cancel();
-        }
+		void Disable() {
+			kill_timeout_event.Cancel();
+		}
 
-        void OnExit(int status, const struct rusage &rusage);
+		void OnExit(int status, const struct rusage &rusage);
 
-        void KillTimeoutCallback();
+		void KillTimeoutCallback();
 
-        struct Compare {
-            bool operator()(const ChildProcess &a, const ChildProcess &b) const {
-                return a.pid < b.pid;
-            }
+		struct Compare {
+			bool operator()(const ChildProcess &a, const ChildProcess &b) const {
+				return a.pid < b.pid;
+			}
 
-            bool operator()(const ChildProcess &a, pid_t b) const {
-                return a.pid < b;
-            }
+			bool operator()(const ChildProcess &a, pid_t b) const {
+				return a.pid < b;
+			}
 
-            bool operator()(pid_t a, const ChildProcess &b) const {
-                return a < b.pid;
-            }
-        };
-    };
+			bool operator()(pid_t a, const ChildProcess &b) const {
+				return a < b.pid;
+			}
+		};
+	};
 
-    const LLogger logger;
+	const LLogger logger;
 
-    EventLoop &event_loop;
+	EventLoop &event_loop;
 
-    typedef boost::intrusive::set<ChildProcess,
-                                  boost::intrusive::compare<ChildProcess::Compare>,
-                                  boost::intrusive::constant_time_size<true>> ChildProcessSet;
+	typedef boost::intrusive::set<ChildProcess,
+				      boost::intrusive::compare<ChildProcess::Compare>,
+				      boost::intrusive::constant_time_size<true>> ChildProcessSet;
 
-    ChildProcessSet children;
+	ChildProcessSet children;
 
-    SignalEvent sigchld_event;
+	SignalEvent sigchld_event;
 
-    /**
-     * Shall the #sigchld_event be disabled automatically when there
-     * is no registered child process?  This mode should be enabled
-     * during shutdown.
-     */
-    bool volatile_event = false;
+	/**
+	 * Shall the #sigchld_event be disabled automatically when there
+	 * is no registered child process?  This mode should be enabled
+	 * during shutdown.
+	 */
+	bool volatile_event = false;
 
 public:
-    ChildProcessRegistry(EventLoop &loop);
+	ChildProcessRegistry(EventLoop &loop);
 
-    EventLoop &GetEventLoop() {
-        return event_loop;
-    }
+	EventLoop &GetEventLoop() {
+		return event_loop;
+	}
 
-    void Disable() {
-        sigchld_event.Disable();
-    }
+	void Disable() {
+		sigchld_event.Disable();
+	}
 
-    bool IsEmpty() const {
-        return children.empty();
-    }
+	bool IsEmpty() const {
+		return children.empty();
+	}
 
-    /**
-     * Forget all registered children.  Call this in the new child process
-     * after forking.
-     */
-    void Clear();
+	/**
+	 * Forget all registered children.  Call this in the new child process
+	 * after forking.
+	 */
+	void Clear();
 
-    /**
-     * @param name a symbolic name for the process to be used in log
-     * messages
-     */
-    void Add(pid_t pid, const char *name, ExitListener *listener);
+	/**
+	 * @param name a symbolic name for the process to be used in log
+	 * messages
+	 */
+	void Add(pid_t pid, const char *name, ExitListener *listener);
 
-    void SetExitListener(pid_t pid, ExitListener *listener);
+	void SetExitListener(pid_t pid, ExitListener *listener);
 
-    /**
-     * Send a signal to a child process and unregister it.
-     */
-    void Kill(pid_t pid, int signo);
+	/**
+	 * Send a signal to a child process and unregister it.
+	 */
+	void Kill(pid_t pid, int signo);
 
-    /**
-     * Send a SIGTERM to a child process and unregister it.
-     */
-    void Kill(pid_t pid);
+	/**
+	 * Send a SIGTERM to a child process and unregister it.
+	 */
+	void Kill(pid_t pid);
 
-    /**
-     * Begin shutdown of this subsystem: wait for all children to exit,
-     * and then remove the event.
-     */
-    void SetVolatile() {
-        volatile_event = true;
-        CheckVolatileEvent();
-    }
+	/**
+	 * Begin shutdown of this subsystem: wait for all children to exit,
+	 * and then remove the event.
+	 */
+	void SetVolatile() {
+		volatile_event = true;
+		CheckVolatileEvent();
+	}
 
-    /**
-     * Returns the number of registered child processes.
-     */
-    gcc_pure
-    unsigned GetCount() const {
-        return children.size();
-    }
+	/**
+	 * Returns the number of registered child processes.
+	 */
+	gcc_pure
+	unsigned GetCount() const {
+		return children.size();
+	}
 
 private:
-    gcc_pure
-    ChildProcessSet::iterator FindByPid(pid_t pid) {
-        return children.find(pid, ChildProcess::Compare());
-    }
+	gcc_pure
+	ChildProcessSet::iterator FindByPid(pid_t pid) {
+		return children.find(pid, ChildProcess::Compare());
+	}
 
-    void Remove(ChildProcessSet::iterator i) {
-        assert(!children.empty());
+	void Remove(ChildProcessSet::iterator i) {
+		assert(!children.empty());
 
-        i->Disable();
+		i->Disable();
 
-        children.erase(i);
-    }
+		children.erase(i);
+	}
 
-    void CheckVolatileEvent() {
-        if (volatile_event && IsEmpty())
-            sigchld_event.Disable();
-    }
+	void CheckVolatileEvent() {
+		if (volatile_event && IsEmpty())
+			sigchld_event.Disable();
+	}
 
-    void OnExit(pid_t pid, int status, const struct rusage &rusage);
-    void OnSigChld(int signo);
+	void OnExit(pid_t pid, int status, const struct rusage &rusage);
+	void OnSigChld(int signo);
 };
-
-#endif
