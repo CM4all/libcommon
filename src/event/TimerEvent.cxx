@@ -34,13 +34,6 @@
 #include "Loop.hxx"
 
 void
-TimerEvent::Cancel() noexcept
-{
-	if (IsPending())
-		loop.CancelTimer(*this);
-}
-
-void
 TimerEvent::Schedule(Event::Duration d) noexcept
 {
 	Cancel();

@@ -45,7 +45,7 @@ class EventLoop;
  * Invoke an event callback after a certain amount of time.
  */
 class TimerEvent final
-	: public boost::intrusive::set_base_hook<>
+	: public boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>
 {
 	friend class EventLoop;
 
@@ -63,10 +63,6 @@ public:
 	TimerEvent(EventLoop &_loop, BoundMethod<void()> _callback) noexcept
 		:loop(_loop), callback(_callback) {}
 
-	~TimerEvent() noexcept {
-		Cancel();
-	}
-
 	auto &GetEventLoop() const noexcept {
 		return loop;
 	}
@@ -76,7 +72,10 @@ public:
 	}
 
 	void Schedule(Event::Duration d) noexcept;
-	void Cancel() noexcept;
+
+	void Cancel() noexcept {
+		unlink();
+	}
 
 	/**
 	 * Deprecated compatibility wrapper.  Use Schedule() instead.

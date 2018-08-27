@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -40,13 +40,4 @@ DeferEvent::Schedule() noexcept
 		loop.Defer(*this);
 
 	assert(IsPending());
-}
-
-void
-DeferEvent::Cancel() noexcept
-{
-	if (IsPending())
-		loop.CancelDefer(*this);
-
-	assert(!IsPending());
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -45,7 +45,7 @@ class EventLoop;
  * effects for callers up in the call chain.
  */
 class DeferEvent final
-	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>>
+	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>
 {
 	friend class EventLoop;
 
@@ -70,7 +70,10 @@ public:
 	}
 
 	void Schedule() noexcept;
-	void Cancel() noexcept;
+
+	void Cancel() noexcept {
+		unlink();
+	}
 
 protected:
 	void OnDeferred() noexcept {

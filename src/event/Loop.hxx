@@ -62,13 +62,13 @@ class EventLoop {
 
 	using TimerSet =
 		boost::intrusive::multiset<TimerEvent,
-					   boost::intrusive::base_hook<boost::intrusive::set_base_hook<>>,
+					   boost::intrusive::base_hook<boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>>,
 					   boost::intrusive::compare<TimerCompare>,
 					   boost::intrusive::constant_time_size<false>>;
 	TimerSet timers;
 
 	boost::intrusive::list<DeferEvent,
-			       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>>>,
+			       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>>,
 			       boost::intrusive::constant_time_size<false>> defer;
 
 	using SocketList =
@@ -144,10 +144,8 @@ public:
 	bool RemoveFD(int fd, SocketEvent &event) noexcept;
 
 	void AddTimer(TimerEvent &t, Event::Duration d) noexcept;
-	void CancelTimer(TimerEvent &t) noexcept;
 
 	void Defer(DeferEvent &e) noexcept;
-	void CancelDefer(DeferEvent &e) noexcept;
 
 private:
 	/**

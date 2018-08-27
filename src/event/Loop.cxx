@@ -117,12 +117,6 @@ EventLoop::AddTimer(TimerEvent &t, Event::Duration d) noexcept
 	again = true;
 }
 
-void
-EventLoop::CancelTimer(TimerEvent &t) noexcept
-{
-	timers.erase(timers.iterator_to(t));
-}
-
 inline Event::Duration
 EventLoop::HandleTimers() noexcept
 {
@@ -152,12 +146,6 @@ void
 EventLoop::Defer(DeferEvent &e) noexcept
 {
 	defer.push_front(e);
-}
-
-void
-EventLoop::CancelDefer(DeferEvent &e) noexcept
-{
-	defer.erase(defer.iterator_to(e));
 }
 
 bool
