@@ -39,14 +39,14 @@
 
 #include <avahi-common/error.h>
 
-AvahiServiceExplorer::Object::~Object()
+AvahiServiceExplorer::Object::~Object() noexcept
 {
 	if (resolver != nullptr)
 		avahi_service_resolver_free(resolver);
 }
 
 inline const std::string &
-AvahiServiceExplorer::Object::GetKey() const
+AvahiServiceExplorer::Object::GetKey() const noexcept
 {
 	/* this is a kludge which takes advantage of the fact that all
 	   instances of this class are inside std::map */
@@ -59,7 +59,7 @@ AvahiServiceExplorer::Object::Resolve(AvahiClient *client, AvahiIfIndex interfac
 				      AvahiProtocol protocol,
 				      const char *name,
 				      const char *type,
-				      const char *domain)
+				      const char *domain) noexcept
 {
 	assert(resolver == nullptr);
 
@@ -85,7 +85,7 @@ AvahiServiceExplorer::Object::Resolve(AvahiClient *client, AvahiIfIndex interfac
 }
 
 void
-AvahiServiceExplorer::Object::CancelResolve()
+AvahiServiceExplorer::Object::CancelResolve() noexcept
 {
 	if (resolver != nullptr) {
 		avahi_service_resolver_free(resolver);
@@ -94,13 +94,14 @@ AvahiServiceExplorer::Object::CancelResolve()
 }
 
 static AllocatedSocketAddress
-Import(const AvahiIPv4Address &src, unsigned port)
+Import(const AvahiIPv4Address &src, unsigned port) noexcept
 {
 	return AllocatedSocketAddress(IPv4Address({src.address}, port));
 }
 
 static AllocatedSocketAddress
-Import(AvahiIfIndex interface, const AvahiIPv6Address &src, unsigned port)
+Import(AvahiIfIndex interface, const AvahiIPv6Address &src,
+       unsigned port) noexcept
 {
 	struct in6_addr address;
 	static_assert(sizeof(src.address) == sizeof(address), "Wrong size");
@@ -109,7 +110,7 @@ Import(AvahiIfIndex interface, const AvahiIPv6Address &src, unsigned port)
 }
 
 static AllocatedSocketAddress
-Import(AvahiIfIndex interface, const AvahiAddress &src, unsigned port)
+Import(AvahiIfIndex interface, const AvahiAddress &src, unsigned port) noexcept
 {
 	switch (src.proto) {
 	case AVAHI_PROTO_INET:
@@ -126,7 +127,7 @@ void
 AvahiServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 						      AvahiResolverEvent event,
 						      const AvahiAddress *a,
-						      uint16_t port)
+						      uint16_t port) noexcept
 {
 	switch (event) {
 	case AVAHI_RESOLVER_FOUND:
@@ -154,7 +155,7 @@ AvahiServiceExplorer::Object::ServiceResolverCallback(AvahiServiceResolver *,
 						      uint16_t port,
 						      gcc_unused AvahiStringList *txt,
 						      gcc_unused AvahiLookupResultFlags flags,
-						      void *userdata)
+						      void *userdata) noexcept
 {
 	auto &object = *(AvahiServiceExplorer::Object *)userdata;
 	object.ServiceResolverCallback(interface, event, a, port);
@@ -165,7 +166,7 @@ AvahiServiceExplorer::AvahiServiceExplorer(MyAvahiClient &_avahi_client,
 					   AvahiIfIndex _interface,
 					   AvahiProtocol _protocol,
 					   const char *_type,
-					   const char *_domain)
+					   const char *_domain) noexcept
 	:logger("avahi"),
 	 avahi_client(_avahi_client),
 	 listener(_listener),
@@ -177,7 +178,7 @@ AvahiServiceExplorer::AvahiServiceExplorer(MyAvahiClient &_avahi_client,
 	avahi_client.Activate();
 }
 
-AvahiServiceExplorer::~AvahiServiceExplorer()
+AvahiServiceExplorer::~AvahiServiceExplorer() noexcept
 {
 	if (avahi_browser != nullptr)
 		avahi_service_browser_free(avahi_browser);
@@ -190,7 +191,7 @@ MakeKey(AvahiIfIndex interface,
 	AvahiProtocol protocol,
 	const char *name,
 	const char *type,
-	const char *domain)
+	const char *domain) noexcept
 {
 	char buffer[2048];
 	snprintf(buffer, sizeof(buffer), "%d/%d/%s/%s/%s",
@@ -206,7 +207,7 @@ AvahiServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 					     const char *name,
 					     const char *type,
 					     const char *domain,
-					     gcc_unused AvahiLookupResultFlags flags)
+					     gcc_unused AvahiLookupResultFlags flags) noexcept
 {
 	if (event == AVAHI_BROWSER_NEW) {
 		auto i = objects.emplace(std::piecewise_construct,
@@ -239,7 +240,7 @@ AvahiServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 					     const char *type,
 					     const char *domain,
 					     AvahiLookupResultFlags flags,
-					     void *userdata)
+					     void *userdata) noexcept
 {
 	auto &cluster = *(AvahiServiceExplorer *)userdata;
 	cluster.ServiceBrowserCallback(b, interface, protocol, event, name,
@@ -247,7 +248,7 @@ AvahiServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 }
 
 void
-AvahiServiceExplorer::OnAvahiConnect(AvahiClient *client)
+AvahiServiceExplorer::OnAvahiConnect(AvahiClient *client) noexcept
 {
 	avahi_browser = avahi_service_browser_new(client,
 						  query_interface, query_protocol,
@@ -261,7 +262,7 @@ AvahiServiceExplorer::OnAvahiConnect(AvahiClient *client)
 }
 
 void
-AvahiServiceExplorer::OnAvahiDisconnect()
+AvahiServiceExplorer::OnAvahiDisconnect() noexcept
 {
 	for (auto &i : objects)
 		i.second.CancelResolve();

@@ -36,6 +36,6 @@
 
 class AvahiConnectionListener {
 public:
-	virtual void OnAvahiConnect(AvahiClient *client) = 0;
-	virtual void OnAvahiDisconnect() = 0;
+	virtual void OnAvahiConnect(AvahiClient *client) noexcept = 0;
+	virtual void OnAvahiDisconnect() noexcept = 0;
 };

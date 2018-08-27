@@ -40,7 +40,7 @@ class MyAvahiPoll final : public AvahiPoll {
 	EventLoop &event_loop;
 
 public:
-	explicit MyAvahiPoll(EventLoop &_loop);
+	explicit MyAvahiPoll(EventLoop &_loop) noexcept;
 
 	MyAvahiPoll(const MyAvahiPoll &) = delete;
 	MyAvahiPoll &operator=(const MyAvahiPoll &) = delete;
@@ -53,10 +53,10 @@ private:
 	static AvahiWatch *WatchNew(const AvahiPoll *api, int fd,
 				    AvahiWatchEvent event,
 				    AvahiWatchCallback callback,
-				    void *userdata);
+				    void *userdata) noexcept;
 
 	static AvahiTimeout *TimeoutNew(const AvahiPoll *api,
 					const struct timeval *tv,
 					AvahiTimeoutCallback callback,
-					void *userdata);
+					void *userdata) noexcept;
 };

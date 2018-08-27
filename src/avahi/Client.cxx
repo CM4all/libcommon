@@ -61,20 +61,20 @@ MakePidName(const char *prefix)
 	return buffer;
 }
 
-MyAvahiClient::MyAvahiClient(EventLoop &event_loop, const char *_name)
+MyAvahiClient::MyAvahiClient(EventLoop &event_loop, const char *_name) noexcept
 	:logger("avahi"), name(MakePidName(_name)),
 	 reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer)),
 	 poll(event_loop)
 {
 }
 
-MyAvahiClient::~MyAvahiClient()
+MyAvahiClient::~MyAvahiClient() noexcept
 {
 	Close();
 }
 
 void
-MyAvahiClient::Activate()
+MyAvahiClient::Activate() noexcept
 {
 	assert(client == nullptr);
 
@@ -83,7 +83,7 @@ MyAvahiClient::Activate()
 
 void
 MyAvahiClient::AddService(AvahiIfIndex interface, AvahiProtocol protocol,
-			  const char *type, uint16_t port)
+			  const char *type, uint16_t port) noexcept
 {
 	/* cannot register any more services after initial connect */
 	assert(client == nullptr);
@@ -95,7 +95,7 @@ MyAvahiClient::AddService(AvahiIfIndex interface, AvahiProtocol protocol,
 
 void
 MyAvahiClient::AddService(const char *type, const char *interface,
-			  SocketAddress address)
+			  SocketAddress address) noexcept
 {
 	unsigned port = address.GetPort();
 	if (port == 0)
@@ -127,7 +127,7 @@ MyAvahiClient::AddService(const char *type, const char *interface,
 }
 
 void
-MyAvahiClient::Close()
+MyAvahiClient::Close() noexcept
 {
 	if (group != nullptr) {
 		avahi_entry_group_free(group);
@@ -146,7 +146,8 @@ MyAvahiClient::Close()
 }
 
 void
-MyAvahiClient::GroupCallback(AvahiEntryGroup *g, AvahiEntryGroupState state)
+MyAvahiClient::GroupCallback(AvahiEntryGroup *g,
+			     AvahiEntryGroupState state) noexcept
 {
 	switch (state) {
 	case AVAHI_ENTRY_GROUP_ESTABLISHED:
@@ -183,14 +184,14 @@ MyAvahiClient::GroupCallback(AvahiEntryGroup *g, AvahiEntryGroupState state)
 void
 MyAvahiClient::GroupCallback(AvahiEntryGroup *g,
 			     AvahiEntryGroupState state,
-			     void *userdata)
+			     void *userdata) noexcept
 {
 	auto &client = *(MyAvahiClient *)userdata;
 	client.GroupCallback(g, state);
 }
 
 void
-MyAvahiClient::RegisterServices(AvahiClient *c)
+MyAvahiClient::RegisterServices(AvahiClient *c) noexcept
 {
 	assert(visible_services);
 
@@ -227,7 +228,7 @@ MyAvahiClient::RegisterServices(AvahiClient *c)
 }
 
 void
-MyAvahiClient::ClientCallback(AvahiClient *c, AvahiClientState state)
+MyAvahiClient::ClientCallback(AvahiClient *c, AvahiClientState state) noexcept
 {
 	int error;
 
@@ -271,14 +272,14 @@ MyAvahiClient::ClientCallback(AvahiClient *c, AvahiClientState state)
 
 void
 MyAvahiClient::ClientCallback(AvahiClient *c, AvahiClientState state,
-			      void *userdata)
+			      void *userdata) noexcept
 {
 	auto &client = *(MyAvahiClient *)userdata;
 	client.ClientCallback(c, state);
 }
 
 void
-MyAvahiClient::OnReconnectTimer()
+MyAvahiClient::OnReconnectTimer() noexcept
 {
 	int error;
 	client = avahi_client_new(&poll, AVAHI_CLIENT_NO_FAIL,
@@ -293,7 +294,7 @@ MyAvahiClient::OnReconnectTimer()
 }
 
 void
-MyAvahiClient::HideServices()
+MyAvahiClient::HideServices() noexcept
 {
 	if (!visible_services)
 		return;
@@ -307,7 +308,7 @@ MyAvahiClient::HideServices()
 }
 
 void
-MyAvahiClient::ShowServices()
+MyAvahiClient::ShowServices() noexcept
 {
 	if (visible_services)
 		return;

@@ -34,8 +34,8 @@
 #include "event/SocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 
-static unsigned
-FromAvahiWatchEvent(AvahiWatchEvent e)
+static constexpr unsigned
+FromAvahiWatchEvent(AvahiWatchEvent e) noexcept
 {
 	// TODO: what about AVAHI_WATCH_ERR and AVAHI_WATCH_HUP?
 
@@ -43,8 +43,8 @@ FromAvahiWatchEvent(AvahiWatchEvent e)
 		(e & AVAHI_WATCH_OUT ? SocketEvent::WRITE : 0);
 }
 
-static AvahiWatchEvent
-ToAvahiWatchEvent(unsigned events)
+static constexpr AvahiWatchEvent
+ToAvahiWatchEvent(unsigned events) noexcept
 {
 	// TODO: what about AVAHI_WATCH_ERR and AVAHI_WATCH_HUP?
 
@@ -63,17 +63,18 @@ private:
 
 public:
 	AvahiWatch(EventLoop &_loop, int _fd, AvahiWatchEvent _event,
-		   AvahiWatchCallback _callback, void *_userdata)
+		   AvahiWatchCallback _callback, void *_userdata) noexcept
 		:event(_loop, BIND_THIS_METHOD(OnSocketReady), SocketDescriptor(_fd)),
 		 callback(_callback), userdata(_userdata) {
 		event.Schedule(FromAvahiWatchEvent(_event));
 	}
 
-	static void WatchUpdate(AvahiWatch *w, AvahiWatchEvent _event) {
+	static void WatchUpdate(AvahiWatch *w,
+				AvahiWatchEvent _event) noexcept {
 		w->event.Schedule(FromAvahiWatchEvent(_event));
 	}
 
-	static AvahiWatchEvent WatchGetEvents(AvahiWatch *w) {
+	static AvahiWatchEvent WatchGetEvents(AvahiWatch *w) noexcept {
 		return w->received;
 	}
 
@@ -82,7 +83,7 @@ public:
 	}
 
 protected:
-	void OnSocketReady(unsigned events) {
+	void OnSocketReady(unsigned events) noexcept {
 		received = ToAvahiWatchEvent(events);
 		callback(this, event.GetSocket().Get(), received, userdata);
 		received = AvahiWatchEvent(0);
@@ -97,31 +98,33 @@ private:
 
 public:
 	AvahiTimeout(EventLoop &_loop, const struct timeval *tv,
-		     AvahiTimeoutCallback _callback, void *_userdata)
+		     AvahiTimeoutCallback _callback, void *_userdata) noexcept
 		:event(_loop, BIND_THIS_METHOD(OnTimeout)),
 		 callback(_callback), userdata(_userdata) {
 		if (tv != nullptr)
 			event.Add(*tv);
 	}
 
-	static void TimeoutUpdate(AvahiTimeout *t, const struct timeval *tv) {
+	static void TimeoutUpdate(AvahiTimeout *t,
+				  const struct timeval *tv) noexcept {
 		if (tv != nullptr)
 			t->event.Add(*tv);
 		else
 			t->event.Cancel();
 	}
 
-	static void TimeoutFree(AvahiTimeout *t) {
+	static void TimeoutFree(AvahiTimeout *t) noexcept {
 		delete t;
 	}
 
 protected:
-	virtual void OnTimeout() {
+	virtual void OnTimeout() noexcept {
 		callback(this, userdata);
 	}
 };
 
-MyAvahiPoll::MyAvahiPoll(EventLoop &_loop):event_loop(_loop)
+MyAvahiPoll::MyAvahiPoll(EventLoop &_loop) noexcept
+	:event_loop(_loop)
 {
 	watch_new = WatchNew;
 	watch_update = AvahiWatch::WatchUpdate;
@@ -134,7 +137,8 @@ MyAvahiPoll::MyAvahiPoll(EventLoop &_loop):event_loop(_loop)
 
 AvahiWatch *
 MyAvahiPoll::WatchNew(const AvahiPoll *api, int fd, AvahiWatchEvent event,
-		      AvahiWatchCallback callback, void *userdata) {
+		      AvahiWatchCallback callback, void *userdata) noexcept
+{
 	const MyAvahiPoll &poll = *(const MyAvahiPoll *)api;
 
 	return new AvahiWatch(poll.event_loop, fd, event, callback, userdata);
@@ -142,7 +146,8 @@ MyAvahiPoll::WatchNew(const AvahiPoll *api, int fd, AvahiWatchEvent event,
 
 AvahiTimeout *
 MyAvahiPoll::TimeoutNew(const AvahiPoll *api, const struct timeval *tv,
-			AvahiTimeoutCallback callback, void *userdata) {
+			AvahiTimeoutCallback callback, void *userdata) noexcept
+{
 	const MyAvahiPoll &poll = *(const MyAvahiPoll *)api;
 
 	return new AvahiTimeout(poll.event_loop, tv, callback, userdata);

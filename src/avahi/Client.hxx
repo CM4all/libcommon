@@ -81,8 +81,8 @@ class MyAvahiClient final {
 	bool visible_services = true;
 
 public:
-	MyAvahiClient(EventLoop &event_loop, const char *_name);
-	~MyAvahiClient();
+	MyAvahiClient(EventLoop &event_loop, const char *_name) noexcept;
+	~MyAvahiClient() noexcept;
 
 	MyAvahiClient(const MyAvahiClient &) = delete;
 	MyAvahiClient &operator=(const MyAvahiClient &) = delete;
@@ -91,45 +91,46 @@ public:
 		return poll.GetEventLoop();
 	}
 
-	void Close();
+	void Close() noexcept;
 
-	void Activate();
+	void Activate() noexcept;
 
-	void AddListener(AvahiConnectionListener &listener) {
+	void AddListener(AvahiConnectionListener &listener) noexcept {
 		listeners.push_front(&listener);
 	}
 
-	void RemoveListener(AvahiConnectionListener &listener) {
+	void RemoveListener(AvahiConnectionListener &listener) noexcept {
 		listeners.remove(&listener);
 	}
 
 	void AddService(AvahiIfIndex interface, AvahiProtocol protocol,
-			const char *type, uint16_t port);
+			const char *type, uint16_t port) noexcept;
 	void AddService(const char *type, const char *interface,
-			SocketAddress address);
+			SocketAddress address) noexcept;
 
 	/**
 	 * Temporarily hide all registered services.  You can undo this
 	 * with ShowServices().
 	 */
-	void HideServices();
+	void HideServices() noexcept;
 
 	/**
 	 * Undo HideServices().
 	 */
-	void ShowServices();
+	void ShowServices() noexcept;
 
 private:
-	void GroupCallback(AvahiEntryGroup *g, AvahiEntryGroupState state);
+	void GroupCallback(AvahiEntryGroup *g,
+			   AvahiEntryGroupState state) noexcept;
 	static void GroupCallback(AvahiEntryGroup *g,
 				  AvahiEntryGroupState state,
-				  void *userdata);
+				  void *userdata) noexcept;
 
-	void RegisterServices(AvahiClient *c);
+	void RegisterServices(AvahiClient *c) noexcept;
 
-	void ClientCallback(AvahiClient *c, AvahiClientState state);
+	void ClientCallback(AvahiClient *c, AvahiClientState state) noexcept;
 	static void ClientCallback(AvahiClient *c, AvahiClientState state,
-				   void *userdata);
+				   void *userdata) noexcept;
 
-	void OnReconnectTimer();
+	void OnReconnectTimer() noexcept;
 };

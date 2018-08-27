@@ -39,6 +39,6 @@ class SocketAddress;
 class AvahiServiceExplorerListener {
 public:
 	virtual void OnAvahiNewObject(const std::string &key,
-				      SocketAddress address) = 0;
-	virtual void OnAvahiRemoveObject(const std::string &key) = 0;
+				      SocketAddress address) noexcept = 0;
+	virtual void OnAvahiRemoveObject(const std::string &key) noexcept = 0;
 };

@@ -71,20 +71,20 @@ class AvahiServiceExplorer final : AvahiConnectionListener {
 		AllocatedSocketAddress address;
 
 	public:
-		explicit Object(AvahiServiceExplorer &_explorer)
+		explicit Object(AvahiServiceExplorer &_explorer) noexcept
 			:explorer(_explorer) {}
-		~Object();
+		~Object() noexcept;
 
 		Object(const Object &) = delete;
 		Object &operator=(const Object &) = delete;
 
-		const std::string &GetKey() const;
+		const std::string &GetKey() const noexcept;
 
-		bool IsActive() const {
+		bool IsActive() const noexcept {
 			return !address.IsNull();
 		}
 
-		bool HasFailed() const {
+		bool HasFailed() const noexcept {
 			return resolver == nullptr && !IsActive();
 		}
 
@@ -92,14 +92,14 @@ class AvahiServiceExplorer final : AvahiConnectionListener {
 			     AvahiProtocol protocol,
 			     const char *name,
 			     const char *type,
-			     const char *domain);
-		void CancelResolve();
+			     const char *domain) noexcept;
+		void CancelResolve() noexcept;
 
 	private:
 		void ServiceResolverCallback(AvahiIfIndex interface,
 					     AvahiResolverEvent event,
 					     const AvahiAddress *a,
-					     uint16_t port);
+					     uint16_t port) noexcept;
 		static void ServiceResolverCallback(AvahiServiceResolver *r,
 						    AvahiIfIndex interface,
 						    AvahiProtocol protocol,
@@ -112,7 +112,7 @@ class AvahiServiceExplorer final : AvahiConnectionListener {
 						    uint16_t port,
 						    AvahiStringList *txt,
 						    AvahiLookupResultFlags flags,
-						    void *userdata);
+						    void *userdata) noexcept;
 	};
 
 	typedef std::map<std::string, Object> Map;
@@ -124,8 +124,8 @@ public:
 			     AvahiIfIndex _interface,
 			     AvahiProtocol _protocol,
 			     const char *_type,
-			     const char *_domain);
-	~AvahiServiceExplorer();
+			     const char *_domain) noexcept;
+	~AvahiServiceExplorer() noexcept;
 
 private:
 	void ServiceBrowserCallback(AvahiServiceBrowser *b,
@@ -135,7 +135,7 @@ private:
 				    const char *name,
 				    const char *type,
 				    const char *domain,
-				    AvahiLookupResultFlags flags);
+				    AvahiLookupResultFlags flags) noexcept;
 	static void ServiceBrowserCallback(AvahiServiceBrowser *b,
 					   AvahiIfIndex interface,
 					   AvahiProtocol protocol,
@@ -144,9 +144,9 @@ private:
 					   const char *type,
 					   const char *domain,
 					   AvahiLookupResultFlags flags,
-					   void *userdata);
+					   void *userdata) noexcept;
 
 	/* virtual methods from class AvahiConnectionListener */
-	void OnAvahiConnect(AvahiClient *client) override;
-	void OnAvahiDisconnect() override;
+	void OnAvahiConnect(AvahiClient *client) noexcept override;
+	void OnAvahiDisconnect() noexcept override;
 };
