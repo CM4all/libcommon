@@ -54,7 +54,7 @@ static constexpr FdTypeMask FD_ANY_SOCKET = FD_SOCKET | FD_TCP;
 static constexpr FdTypeMask FD_ANY = FD_FILE | FD_PIPE | FD_ANY_SOCKET;
 
 static constexpr inline bool
-IsAnySocket(FdType type)
+IsAnySocket(FdType type) noexcept
 {
 	return (FdTypeMask(type) & FD_ANY_SOCKET) != 0;
 }
