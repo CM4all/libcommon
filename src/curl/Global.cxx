@@ -231,12 +231,7 @@ CurlGlobal::ScheduleTimeout(long timeout_ms) noexcept
 		   of 10ms. */
 		timeout_ms = 10;
 
-	const struct timeval tv = {
-		.tv_sec = timeout_ms / 1000,
-		.tv_usec = (timeout_ms % 1000) * 1000,
-	};
-
-	timeout_event.Add(tv);
+	timeout_event.Schedule(std::chrono::milliseconds(timeout_ms));
 }
 
 int
