@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -51,12 +51,12 @@ LocalTime(std::chrono::system_clock::time_point tp);
  * Convert a UTC-based "struct tm" to a UTC-based time point.
  */
 std::chrono::system_clock::time_point
-TimeGm(struct tm &tm);
+TimeGm(struct tm &tm) noexcept;
 
 /**
  * Convert a local "struct tm" to a UTC-based time point.
  */
 std::chrono::system_clock::time_point
-MakeTime(struct tm &tm);
+MakeTime(struct tm &tm) noexcept;
 
 #endif
