@@ -248,12 +248,10 @@ AsyncConnection::Disconnect() noexcept
 void
 AsyncConnection::ScheduleReconnect() noexcept
 {
-	/* attempt to reconnect every 10 seconds */
-	static constexpr struct timeval delay{ 10, 0 };
-
 	assert(state == State::DISCONNECTED);
 
-	reconnect_timer.Add(delay);
+	/* attempt to reconnect every 10 seconds */
+	reconnect_timer.Schedule(std::chrono::seconds(10));
 }
 
 inline void
