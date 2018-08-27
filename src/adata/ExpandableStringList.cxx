@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -43,18 +43,18 @@
 #include <assert.h>
 
 ExpandableStringList::ExpandableStringList(AllocatorPtr alloc,
-                                           const ExpandableStringList &src)
+					   const ExpandableStringList &src)
 {
-    Builder builder(*this);
+	Builder builder(*this);
 
-    for (const auto *i = src.head; i != nullptr; i = i->next)
-        builder.Add(alloc, alloc.Dup(i->value),
+	for (const auto *i = src.head; i != nullptr; i = i->next)
+		builder.Add(alloc, alloc.Dup(i->value),
 #if TRANSLATION_ENABLE_EXPAND
-                    i->expandable
+			    i->expandable
 #else
-                    false
+			    false
 #endif
-                    );
+			    );
 }
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -62,40 +62,40 @@ ExpandableStringList::ExpandableStringList(AllocatorPtr alloc,
 bool
 ExpandableStringList::IsExpandable() const
 {
-    for (const auto *i = head; i != nullptr; i = i->next)
-        if (i->expandable)
-            return true;
+	for (const auto *i = head; i != nullptr; i = i->next)
+		if (i->expandable)
+			return true;
 
-    return false;
+	return false;
 }
 
 void
 ExpandableStringList::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 {
-    for (auto *i = head; i != nullptr; i = i->next) {
-        if (!i->expandable)
-            continue;
+	for (auto *i = head; i != nullptr; i = i->next) {
+		if (!i->expandable)
+			continue;
 
-        i->value = expand_string_unescaped(alloc, i->value, match_info);
-    }
+		i->value = expand_string_unescaped(alloc, i->value, match_info);
+	}
 }
 
 #endif
 
 void
 ExpandableStringList::Builder::Add(AllocatorPtr alloc,
-                                   const char *value, bool expandable)
+				   const char *value, bool expandable)
 {
-    auto *item = last = alloc.New<Item>(value, expandable);
-    *tail_r = item;
-    tail_r = &item->next;
+	auto *item = last = alloc.New<Item>(value, expandable);
+	*tail_r = item;
+	tail_r = &item->next;
 }
 
 ConstBuffer<const char *>
 ExpandableStringList::ToArray(AllocatorPtr alloc) const
 {
-    const size_t n = std::distance(begin(), end());
-    const char **p = alloc.NewArray<const char *>(n);
-    std::copy(begin(), end(), p);
-    return {p, n};
+	const size_t n = std::distance(begin(), end());
+	const char **p = alloc.NewArray<const char *>(n);
+	std::copy(begin(), end(), p);
+	return {p, n};
 }
