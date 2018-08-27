@@ -43,7 +43,8 @@
 void
 SocketConfig::Fixup()
 {
-	if (bind_address.IsV6Any() && multicast_group.IsDefined() &&
+	if (!bind_address.IsNull() && bind_address.IsV6Any() &&
+	    !multicast_group.IsNull() &&
 	    multicast_group.GetFamily() == AF_INET)
 		bind_address = IPv4Address(bind_address.GetPort());
 }
