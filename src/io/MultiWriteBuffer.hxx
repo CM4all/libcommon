@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MULTI_WRITE_BUFFER_HXX
-#define MULTI_WRITE_BUFFER_HXX
+#pragma once
 
 #include "WriteBuffer.hxx"
 
@@ -40,25 +39,23 @@
 #include <cassert>
 
 class MultiWriteBuffer {
-    static constexpr size_t MAX_BUFFERS = 32;
+	static constexpr size_t MAX_BUFFERS = 32;
 
-    unsigned i = 0, n = 0;
+	unsigned i = 0, n = 0;
 
-    std::array<WriteBuffer, MAX_BUFFERS> buffers;
+	std::array<WriteBuffer, MAX_BUFFERS> buffers;
 
 public:
-    typedef WriteBuffer::Result Result;
+	typedef WriteBuffer::Result Result;
 
-    void Push(const void *buffer, size_t size) {
-        assert(n < buffers.size());
+	void Push(const void *buffer, size_t size) {
+		assert(n < buffers.size());
 
-        buffers[n++] = WriteBuffer(buffer, size);
-    }
+		buffers[n++] = WriteBuffer(buffer, size);
+	}
 
-    /**
-     * Throws std::system_error on error.
-     */
-    Result Write(int fd);
+	/**
+	 * Throws std::system_error on error.
+	 */
+	Result Write(int fd);
 };
-
-#endif

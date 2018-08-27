@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -40,22 +40,22 @@
 WriteBuffer::Result
 WriteBuffer::Write(int fd)
 {
-    ssize_t nbytes = write(fd, buffer, GetSize());
-    if (nbytes < 0) {
-        switch (errno) {
-        case EAGAIN:
-        case EINTR:
-            return Result::MORE;
+	ssize_t nbytes = write(fd, buffer, GetSize());
+	if (nbytes < 0) {
+		switch (errno) {
+		case EAGAIN:
+		case EINTR:
+			return Result::MORE;
 
-        default:
-            throw MakeErrno("Failed to write");
-        }
-    }
+		default:
+			throw MakeErrno("Failed to write");
+		}
+	}
 
-    buffer += nbytes;
-    assert(buffer <= end);
+	buffer += nbytes;
+	assert(buffer <= end);
 
-    return buffer == end
-        ? Result::FINISHED
-        : Result::MORE;
+	return buffer == end
+		? Result::FINISHED
+		: Result::MORE;
 }

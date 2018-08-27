@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,39 +30,36 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WRITE_BUFFER_HXX
-#define WRITE_BUFFER_HXX
+#pragma once
 
 #include <cstddef>
 #include <cstdint>
 
 class WriteBuffer {
-    friend class MultiWriteBuffer;
+	friend class MultiWriteBuffer;
 
-    const uint8_t *buffer, *end;
+	const uint8_t *buffer, *end;
 
 public:
-    WriteBuffer() = default;
-    WriteBuffer(const void *_buffer, size_t size)
-        :buffer((const uint8_t *)_buffer), end(buffer + size) {}
+	WriteBuffer() = default;
+	WriteBuffer(const void *_buffer, size_t size)
+		:buffer((const uint8_t *)_buffer), end(buffer + size) {}
 
-    const void *GetData() const {
-        return buffer;
-    }
+	const void *GetData() const {
+		return buffer;
+	}
 
-    size_t GetSize() const {
-        return end - buffer;
-    }
+	size_t GetSize() const {
+		return end - buffer;
+	}
 
-    enum class Result {
-        MORE,
-        FINISHED,
-    };
+	enum class Result {
+		MORE,
+		FINISHED,
+	};
 
-    /**
-     * Throws std::system_error on error.
-     */
-    Result Write(int fd);
+	/**
+	 * Throws std::system_error on error.
+	 */
+	Result Write(int fd);
 };
-
-#endif

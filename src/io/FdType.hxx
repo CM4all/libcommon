@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,23 +30,22 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FD_TYPE_HXX
-#define FD_TYPE_HXX
+#pragma once
 
 enum FdType {
-    /**
-     * No file descriptor available.  Special value that is only
-     * supported by few libraries.
-     */
-    FD_NONE = 00,
+	/**
+	 * No file descriptor available.  Special value that is only
+	 * supported by few libraries.
+	 */
+	FD_NONE = 00,
 
-    FD_FILE = 01,
-    FD_PIPE = 02,
-    FD_SOCKET = 04,
-    FD_TCP = 010,
+	FD_FILE = 01,
+	FD_PIPE = 02,
+	FD_SOCKET = 04,
+	FD_TCP = 010,
 
-    /** a character device, such as /dev/zero or /dev/null */
-    FD_CHARDEV = 020,
+	/** a character device, such as /dev/zero or /dev/null */
+	FD_CHARDEV = 020,
 };
 
 typedef unsigned FdTypeMask;
@@ -57,7 +56,5 @@ static constexpr FdTypeMask FD_ANY = FD_FILE | FD_PIPE | FD_ANY_SOCKET;
 static constexpr inline bool
 IsAnySocket(FdType type)
 {
-    return (FdTypeMask(type) & FD_ANY_SOCKET) != 0;
+	return (FdTypeMask(type) & FD_ANY_SOCKET) != 0;
 }
-
-#endif
