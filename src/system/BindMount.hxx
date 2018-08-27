@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,13 +30,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BIND_MOUNT_HXX
-#define BIND_MOUNT_HXX
+#pragma once
 
 /**
  * Throws std::system_error on error.
  */
 void
 BindMount(const char *source, const char *target, int flags);
-
-#endif

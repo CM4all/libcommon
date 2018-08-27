@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,15 +30,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SYSTEM_PROCESS_NAME_HXX
-#define SYSTEM_PROCESS_NAME_HXX
-
-#include <sys/types.h>
+#pragma once
 
 void
 InitProcessName(int argc, char **argv);
 
 void
 SetProcessName(const char *name);
-
-#endif
