@@ -34,7 +34,7 @@
 #define ODBUS_WATCH_HXX
 
 #include "Connection.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "event/DeferEvent.hxx"
 #include "util/Compiler.h"
 
@@ -62,7 +62,7 @@ class WatchManager {
 	class Watch {
 		WatchManager &parent;
 		DBusWatch &watch;
-		NewSocketEvent event;
+		SocketEvent event;
 
 	public:
 		Watch(EventLoop &event_loop, WatchManager &_parent,

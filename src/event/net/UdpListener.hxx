@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
 #include <stddef.h>
@@ -45,7 +45,7 @@ class UdpHandler;
  */
 class UdpListener {
 	UniqueSocketDescriptor fd;
-	NewSocketEvent event;
+	SocketEvent event;
 
 	UdpHandler &handler;
 

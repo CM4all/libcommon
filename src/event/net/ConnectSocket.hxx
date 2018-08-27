@@ -33,7 +33,7 @@
 #pragma once
 
 #include "net/UniqueSocketDescriptor.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "util/Cancellable.hxx"
 
@@ -58,7 +58,7 @@ class ConnectSocket final : public Cancellable {
 
 	UniqueSocketDescriptor fd;
 
-	NewSocketEvent event;
+	SocketEvent event;
 	TimerEvent timeout_event;
 
 public:

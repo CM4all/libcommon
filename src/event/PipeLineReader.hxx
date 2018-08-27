@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "NewSocketEvent.hxx"
+#include "SocketEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/BindMethod.hxx"
 #include "util/StaticFifoBuffer.hxx"
@@ -45,7 +45,7 @@
  */
 class PipeLineReader {
 	UniqueFileDescriptor fd;
-	NewSocketEvent event;
+	SocketEvent event;
 
 	StaticFifoBuffer<char, 8192> buffer;
 

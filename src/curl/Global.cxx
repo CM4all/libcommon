@@ -29,7 +29,7 @@
 
 #include "Global.hxx"
 #include "Request.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "util/RuntimeError.hxx"
 
 #include <curl/curl.h>
@@ -47,7 +47,7 @@ class CurlSocket final {
 
 	const curl_socket_t fd;
 
-	NewSocketEvent socket_event;
+	SocketEvent socket_event;
 
 public:
 	CurlSocket(CurlGlobal &_global, EventLoop &_loop,

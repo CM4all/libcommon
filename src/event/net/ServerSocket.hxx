@@ -33,7 +33,7 @@
 #pragma once
 
 #include "net/UniqueSocketDescriptor.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 
 #include <exception>
 
@@ -44,7 +44,7 @@ class SocketAddress;
  */
 class ServerSocket {
 	UniqueSocketDescriptor fd;
-	NewSocketEvent event;
+	SocketEvent event;
 
 public:
 	explicit ServerSocket(EventLoop &event_loop) noexcept

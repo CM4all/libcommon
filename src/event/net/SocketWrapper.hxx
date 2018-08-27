@@ -33,7 +33,7 @@
 #pragma once
 
 #include "io/FdType.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "net/SocketDescriptor.hxx"
 #include "util/Compiler.h"
@@ -71,7 +71,7 @@ class SocketWrapper {
 	SocketDescriptor fd;
 	FdType fd_type;
 
-	NewSocketEvent socket_event;
+	SocketEvent socket_event;
 	TimerEvent read_timeout_event, write_timeout_event;
 
 	SocketHandler &handler;

@@ -34,7 +34,7 @@
 #define ASYNC_PG_CONNECTION_HXX
 
 #include "Connection.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 
 #include <cassert>
@@ -147,7 +147,7 @@ class AsyncConnection : public Connection {
 	 *
 	 * WAITING: not used.
 	 */
-	NewSocketEvent socket_event;
+	SocketEvent socket_event;
 
 	/**
 	 * A timer which reconnects during State::WAITING.

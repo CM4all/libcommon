@@ -33,7 +33,7 @@
 #include "Channel.hxx"
 #include "Handler.hxx"
 #include "Error.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 #include "util/Cancellable.hxx"
 
@@ -46,7 +46,7 @@ namespace Cares {
 
 class Channel::Socket {
 	Channel &channel;
-	NewSocketEvent event;
+	SocketEvent event;
 
 public:
 	Socket(Channel &_channel,

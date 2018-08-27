@@ -35,7 +35,7 @@
 
 #include "Interface.hxx"
 #include "Config.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
 #include <map>
@@ -61,7 +61,7 @@ class SpawnServerClient final : public SpawnService {
 
 	std::map<int, ChildProcess> processes;
 
-	NewSocketEvent event;
+	SocketEvent event;
 
 	/**
 	 * Call UidGid::Verify() before sending the spawn request to the

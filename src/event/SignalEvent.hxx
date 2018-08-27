@@ -33,7 +33,7 @@
 #ifndef SIGNAL_EVENT_HXX
 #define SIGNAL_EVENT_HXX
 
-#include "NewSocketEvent.hxx"
+#include "SocketEvent.hxx"
 #include "util/BindMethod.hxx"
 
 #include <assert.h>
@@ -50,7 +50,7 @@
 class SignalEvent {
 	int fd = -1;
 
-	NewSocketEvent event;
+	SocketEvent event;
 
 	sigset_t mask;
 

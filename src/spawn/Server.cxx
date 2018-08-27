@@ -42,7 +42,7 @@
 #include "Direct.hxx"
 #include "Registry.hxx"
 #include "ExitListener.hxx"
-#include "event/NewSocketEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "event/Loop.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/ReceiveMessage.hxx"
@@ -160,7 +160,7 @@ class SpawnServerConnection
 
 	const LLogger logger;
 
-	NewSocketEvent event;
+	SocketEvent event;
 
 	typedef boost::intrusive::set<SpawnServerChild,
 				      boost::intrusive::member_hook<SpawnServerChild,
