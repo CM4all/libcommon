@@ -104,10 +104,6 @@ public:
 			event.Add(*tv);
 	}
 
-	~AvahiTimeout() {
-		event.Cancel();
-	}
-
 	static void TimeoutUpdate(AvahiTimeout *t, const struct timeval *tv) {
 		if (tv != nullptr)
 			t->event.Add(*tv);
