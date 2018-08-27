@@ -41,10 +41,7 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 
-static constexpr struct timeval child_kill_timeout = {
-	.tv_sec = 60,
-	.tv_usec = 0,
-};
+static constexpr auto child_kill_timeout = std::chrono::minutes(1);
 
 static std::string
 MakeChildProcessLogDomain(unsigned pid, const char *name)
@@ -177,7 +174,7 @@ ChildProcessRegistry::Kill(pid_t pid, int signo)
 		return;
 	}
 
-	child->kill_timeout_event.Add(child_kill_timeout);
+	child->kill_timeout_event.Schedule(child_kill_timeout);
 }
 
 void
