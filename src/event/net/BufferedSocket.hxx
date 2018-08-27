@@ -349,7 +349,7 @@ public:
 		:base(_event_loop, *this),
 		 defer_read(_event_loop, BIND_THIS_METHOD(DeferReadCallback)) {}
 
-	EventLoop &GetEventLoop() noexcept {
+	EventLoop &GetEventLoop() const noexcept {
 		return defer_read.GetEventLoop();
 	}
 

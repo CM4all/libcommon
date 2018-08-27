@@ -69,7 +69,7 @@ public:
 	explicit Channel(EventLoop &event_loop);
 	~Channel() noexcept;
 
-	EventLoop &GetEventLoop() noexcept {
+	EventLoop &GetEventLoop() const noexcept {
 		return defer_process.GetEventLoop();
 	}
 

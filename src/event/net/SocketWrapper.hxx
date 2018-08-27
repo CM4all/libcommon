@@ -85,7 +85,7 @@ public:
 
 	SocketWrapper(const SocketWrapper &) = delete;
 
-	EventLoop &GetEventLoop() noexcept {
+	EventLoop &GetEventLoop() const noexcept {
 		return socket_event.GetEventLoop();
 	}
 

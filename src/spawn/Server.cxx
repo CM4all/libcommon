@@ -237,7 +237,7 @@ public:
 		return cgroup_state;
 	}
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() noexcept {
 		return loop;
 	}
 

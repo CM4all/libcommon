@@ -69,7 +69,7 @@ public:
 		event.ScheduleRead();
 	}
 
-	EventLoop &GetEventLoop() noexcept {
+	EventLoop &GetEventLoop() const noexcept {
 		return event.GetEventLoop();
 	}
 

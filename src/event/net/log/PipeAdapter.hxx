@@ -67,7 +67,7 @@ public:
 		datagram.valid_timestamp = true;
 	}
 
-	EventLoop &GetEventLoop() noexcept {
+	EventLoop &GetEventLoop() const noexcept {
 		return line_reader.GetEventLoop();
 	}
 

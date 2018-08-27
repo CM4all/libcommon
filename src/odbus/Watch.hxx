@@ -103,7 +103,7 @@ public:
 
 	void Shutdown() noexcept;
 
-	EventLoop &GetEventLoop() noexcept {
+	EventLoop &GetEventLoop() const noexcept {
 		return defer_dispatch.GetEventLoop();
 	}
 

@@ -127,7 +127,7 @@ class ChildProcessRegistry {
 public:
 	ChildProcessRegistry(EventLoop &loop);
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() const noexcept {
 		return event_loop;
 	}
 

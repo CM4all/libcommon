@@ -51,7 +51,7 @@ class CurlGlobal final {
 public:
 	explicit CurlGlobal(EventLoop &_loop);
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() const noexcept {
 		return event_loop;
 	}
 

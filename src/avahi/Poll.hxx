@@ -45,7 +45,7 @@ public:
 	MyAvahiPoll(const MyAvahiPoll &) = delete;
 	MyAvahiPoll &operator=(const MyAvahiPoll &) = delete;
 
-	EventLoop &GetEventLoop() {
+	EventLoop &GetEventLoop() const noexcept {
 		return event_loop;
 	}
 
