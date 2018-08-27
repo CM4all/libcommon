@@ -37,7 +37,7 @@
 
 #include <string.h>
 
-static constexpr timeval busy_timeout{5, 0};
+static constexpr auto busy_timeout = std::chrono::seconds(5);
 
 NetstringServer::NetstringServer(EventLoop &event_loop,
 				 UniqueSocketDescriptor _fd) noexcept
@@ -47,7 +47,7 @@ NetstringServer::NetstringServer(EventLoop &event_loop,
 	 input(16 * 1024 * 1024)
 {
 	event.ScheduleRead();
-	timeout_event.Add(busy_timeout);
+	timeout_event.Schedule(busy_timeout);
 }
 
 NetstringServer::~NetstringServer() noexcept = default;
@@ -86,7 +86,7 @@ NetstringServer::OnEvent(unsigned) noexcept
 try {
 	switch (input.Receive(fd.Get())) {
 	case NetstringInput::Result::MORE:
-		timeout_event.Add(busy_timeout);
+		timeout_event.Schedule(busy_timeout);
 		break;
 
 	case NetstringInput::Result::CLOSED:

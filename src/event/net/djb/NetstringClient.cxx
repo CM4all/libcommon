@@ -33,9 +33,9 @@
 #include "NetstringClient.hxx"
 #include "util/ConstBuffer.hxx"
 
-static constexpr timeval send_timeout{10, 0};
-static constexpr timeval recv_timeout{60, 0};
-static constexpr timeval busy_timeout{5, 0};
+static constexpr auto send_timeout = std::chrono::seconds(10);
+static constexpr auto recv_timeout = std::chrono::minutes(1);
+static constexpr auto busy_timeout = std::chrono::seconds(5);
 
 NetstringClient::NetstringClient(EventLoop &event_loop, size_t max_size,
 				 NetstringClientHandler &_handler) noexcept
@@ -73,7 +73,7 @@ NetstringClient::Request(int _out_fd, int _in_fd,
 
 	event.Open(SocketDescriptor(out_fd));
 	event.ScheduleWrite();
-	timeout_event.Add(send_timeout);
+	timeout_event.Schedule(send_timeout);
 }
 
 void
@@ -82,20 +82,20 @@ try {
 	if (events & SocketEvent::WRITE) {
 		switch (write.Write(out_fd)) {
 		case MultiWriteBuffer::Result::MORE:
-			timeout_event.Add(send_timeout);
+			timeout_event.Schedule(send_timeout);
 			break;
 
 		case MultiWriteBuffer::Result::FINISHED:
 			event.Cancel();
 			event.Open(SocketDescriptor(in_fd));
 			event.ScheduleRead();
-			timeout_event.Add(recv_timeout);
+			timeout_event.Schedule(recv_timeout);
 			break;
 		}
 	} else if (events & SocketEvent::READ) {
 		switch (input.Receive(in_fd)) {
 		case NetstringInput::Result::MORE:
-			timeout_event.Add(busy_timeout);
+			timeout_event.Schedule(busy_timeout);
 			break;
 
 		case NetstringInput::Result::CLOSED:
