@@ -42,7 +42,7 @@
 class CleanupTimer {
 	TimerEvent event;
 
-	const struct timeval delay;
+	const Event::Duration delay;
 
 	/**
 	 * @return true if another cleanup shall be scheduled
@@ -51,10 +51,10 @@ class CleanupTimer {
 	const Callback callback;
 
 public:
-	CleanupTimer(EventLoop &loop, unsigned delay_s,
+	CleanupTimer(EventLoop &loop, Event::Duration _delay,
 		     Callback _callback) noexcept
 		:event(loop, BIND_THIS_METHOD(OnTimer)),
-		 delay{time_t(delay_s), 0},
+		 delay(_delay),
 		 callback(_callback) {}
 
 	void Enable() noexcept;

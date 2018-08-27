@@ -43,7 +43,7 @@ void
 CleanupTimer::Enable() noexcept
 {
 	if (!event.IsPending())
-		event.Add(delay);
+		event.Schedule(delay);
 }
 
 void
