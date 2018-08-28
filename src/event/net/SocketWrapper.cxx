@@ -67,11 +67,10 @@ SocketWrapper::TimeoutCallback() noexcept
 }
 
 void
-SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
+SocketWrapper::Init(SocketDescriptor fd, FdType _fd_type) noexcept
 {
-	assert(_fd.IsDefined());
+	assert(fd.IsDefined());
 
-	fd = _fd;
 	fd_type = _fd_type;
 
 	socket_event.Open(fd);
@@ -80,35 +79,35 @@ SocketWrapper::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 void
 SocketWrapper::Shutdown() noexcept
 {
-	if (!fd.IsDefined())
+	if (!IsValid())
 		return;
 
-	shutdown(fd.Get(), SHUT_RDWR);
+	shutdown(GetSocket().Get(), SHUT_RDWR);
 }
 
 void
 SocketWrapper::Close() noexcept
 {
-	if (!fd.IsDefined())
+	if (!IsValid())
 		return;
 
 	socket_event.Cancel();
 	read_timeout_event.Cancel();
 	write_timeout_event.Cancel();
 
-	fd.Close();
+	socket_event.ReleaseSocket().Close();
 }
 
 void
 SocketWrapper::Abandon() noexcept
 {
-	assert(fd.IsDefined());
+	assert(IsValid());
 
 	socket_event.Cancel();
 	read_timeout_event.Cancel();
 	write_timeout_event.Cancel();
 
-	fd = SocketDescriptor::Undefined();
+	socket_event.ReleaseSocket();
 }
 
 int
@@ -116,7 +115,7 @@ SocketWrapper::AsFD() noexcept
 {
 	assert(IsValid());
 
-	const int result = fd.Get();
+	const int result = GetSocket().Get();
 	Abandon();
 	return result;
 }
@@ -126,7 +125,7 @@ SocketWrapper::ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer) noexcept
 {
 	assert(IsValid());
 
-	return ReceiveToBuffer(fd.Get(), buffer);
+	return ReceiveToBuffer(GetSocket().Get(), buffer);
 }
 
 bool
@@ -134,7 +133,7 @@ SocketWrapper::IsReadyForWriting() const noexcept
 {
 	assert(IsValid());
 
-	return fd.IsReadyForWriting();
+	return GetSocket().IsReadyForWriting();
 }
 
 ssize_t
@@ -142,7 +141,7 @@ SocketWrapper::Write(const void *data, size_t length) noexcept
 {
 	assert(IsValid());
 
-	return send(fd.Get(), data, length, MSG_DONTWAIT|MSG_NOSIGNAL);
+	return send(GetSocket().Get(), data, length, MSG_DONTWAIT|MSG_NOSIGNAL);
 }
 
 ssize_t
@@ -160,12 +159,13 @@ SocketWrapper::WriteV(const struct iovec *v, size_t n) noexcept
 		.msg_flags = 0,
 	};
 
-	return sendmsg(fd.Get(), &m, MSG_DONTWAIT|MSG_NOSIGNAL);
+	return sendmsg(GetSocket().Get(), &m, MSG_DONTWAIT|MSG_NOSIGNAL);
 }
 
 ssize_t
 SocketWrapper::WriteFrom(int other_fd, FdType other_fd_type,
 			 size_t length) noexcept
 {
-	return SpliceToSocket(other_fd_type, other_fd, fd.Get(), length);
+	return SpliceToSocket(other_fd_type, other_fd,
+			      GetSocket().Get(), length);
 }

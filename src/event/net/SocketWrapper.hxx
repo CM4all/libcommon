@@ -68,7 +68,6 @@ public:
 };
 
 class SocketWrapper {
-	SocketDescriptor fd;
 	FdType fd_type;
 
 	SocketEvent socket_event;
@@ -114,11 +113,11 @@ public:
 	int AsFD() noexcept;
 
 	bool IsValid() const noexcept {
-		return fd.IsDefined();
+		return socket_event.IsDefined();
 	}
 
 	SocketDescriptor GetSocket() const noexcept {
-		return fd;
+		return socket_event.GetSocket();
 	}
 
 	FdType GetType() const noexcept {
