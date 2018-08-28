@@ -96,6 +96,10 @@ public:
 		return fd;
 	}
 
+	SocketDescriptor ReleaseSocket() {
+		return std::exchange(fd, SocketDescriptor::Undefined());
+	}
+
 	void Open(SocketDescriptor fd) noexcept;
 
 	unsigned GetScheduledFlags() const noexcept {
