@@ -50,12 +50,4 @@ Push(lua_State *L, std::exception_ptr e) noexcept
 	lua_pushstring(L, GetFullMessage(e).c_str());
 }
 
-void
-Raise(lua_State *L, std::exception_ptr e) noexcept
-{
-	Push(L, e);
-	lua_error(L);
-	gcc_unreachable();
-}
-
 } // namespace Lua

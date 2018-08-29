@@ -56,14 +56,6 @@ PopError(lua_State *L);
 void
 Push(lua_State *L, std::exception_ptr e) noexcept;
 
-/**
- * Wrapper for lua_error() which raises a C++ exception as a Lua
- * error.
- */
-gcc_noreturn
-void
-Raise(lua_State *L, std::exception_ptr e) noexcept;
-
 }
 
 #endif
