@@ -614,4 +614,5 @@ private:
 	bool OnSocketRead() noexcept override;
 	bool OnSocketWrite() noexcept override;
 	bool OnSocketTimeout() noexcept override;
+	void OnSocketError(int error) noexcept override;
 };

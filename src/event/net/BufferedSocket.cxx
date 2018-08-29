@@ -463,6 +463,13 @@ BufferedSocket::OnSocketTimeout() noexcept
 	return handler->OnBufferedTimeout();
 }
 
+void
+BufferedSocket::OnSocketError(int error) noexcept
+{
+	handler->OnBufferedError(std::make_exception_ptr(MakeErrno(error,
+								   "Socket error")));
+}
+
 /*
  * public API
  *

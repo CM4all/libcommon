@@ -42,6 +42,11 @@ SocketWrapper::SocketEventCallback(unsigned events) noexcept
 {
 	assert(IsValid());
 
+	if (events & SocketEvent::ERROR) {
+		handler.OnSocketError(GetSocket().GetError());
+		return;
+	}
+
 	if (events & SocketEvent::READ)
 		read_timeout_event.Cancel();
 

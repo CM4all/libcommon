@@ -65,6 +65,14 @@ public:
 	 * @return false when the socket has been closed
 	 */
 	virtual bool OnSocketTimeout() noexcept = 0;
+
+	/**
+	 * An error has occurred (via EPOLLERR / SO_ERROR).  The
+	 * handler must close the #SocketWrapper.
+	 *
+	 * @param error an errno value
+	 */
+	virtual void OnSocketError(int error) noexcept = 0;
 };
 
 class SocketWrapper {
