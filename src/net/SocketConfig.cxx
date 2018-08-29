@@ -63,13 +63,12 @@ SocketConfig::Create(int type) const
 	if (!fd.CreateNonBlock(family, type, 0))
 		throw MakeErrno("Failed to create socket");
 
-	if (family == AF_LOCAL) {
-		const struct sockaddr_un *sun = (const struct sockaddr_un *)
-			bind_address.GetAddress();
-		if (sun->sun_path[0] != '\0')
-			/* delete non-abstract socket files before reusing them */
-			unlink(sun->sun_path);
+	const char *local_path = bind_address.GetLocalPath();
+	if (local_path != nullptr)
+		/* delete non-abstract socket files before reusing them */
+		unlink(local_path);
 
+	if (family == AF_LOCAL) {
 		if (pass_cred)
 			/* we want to receive the client's UID */
 			fd.SetBoolOption(SOL_SOCKET, SO_PASSCRED, true);
