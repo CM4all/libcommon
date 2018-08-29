@@ -78,7 +78,8 @@ private:
 
 	static constexpr int LibEventToCurlCSelect(unsigned flags) noexcept {
 		return (flags & SocketEvent::READ ? CURL_CSELECT_IN : 0) |
-			(flags & SocketEvent::WRITE ? CURL_CSELECT_OUT : 0);
+			(flags & SocketEvent::WRITE ? CURL_CSELECT_OUT : 0) |
+			(flags & SocketEvent::ERROR ? CURL_CSELECT_ERR : 0);
 	}
 
 	gcc_const
