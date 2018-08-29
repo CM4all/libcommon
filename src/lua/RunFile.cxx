@@ -37,6 +37,6 @@ extern "C" {
 void
 Lua::RunFile(lua_State *L, const char *path)
 {
-  if (luaL_loadfile(L, path) || lua_pcall(L, 0, 0, 0))
-    throw PopError(L);
+	if (luaL_loadfile(L, path) || lua_pcall(L, 0, 0, 0))
+		throw PopError(L);
 }
