@@ -31,6 +31,7 @@
  */
 
 #include "NetstringServer.hxx"
+#include "system/Error.hxx"
 #include "util/ConstBuffer.hxx"
 
 #include <stdexcept>
@@ -82,8 +83,11 @@ NetstringServer::SendResponse(const char *data) noexcept
 }
 
 void
-NetstringServer::OnEvent(unsigned) noexcept
+NetstringServer::OnEvent(unsigned flags) noexcept
 try {
+	if (flags & SocketEvent::ERROR)
+		throw MakeErrno(fd.GetError(), "Socket error");
+
 	switch (input.Receive(fd.Get())) {
 	case NetstringInput::Result::MORE:
 		timeout_event.Schedule(busy_timeout);
