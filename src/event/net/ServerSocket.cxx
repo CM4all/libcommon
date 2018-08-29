@@ -34,16 +34,13 @@
 #include "net/IPv4Address.hxx"
 #include "net/IPv6Address.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "net/SocketAddress.hxx"
 #include "net/StaticSocketAddress.hxx"
-#include "net/AllocatedSocketAddress.hxx"
+#include "net/SocketConfig.hxx"
 #include "system/Error.hxx"
 
 #include <assert.h>
 #include <stddef.h>
 #include <sys/socket.h>
-#include <sys/un.h>
-#include <netinet/tcp.h>
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
@@ -69,55 +66,19 @@ MakeListener(const SocketAddress address,
 	     bool free_bind,
 	     const char *bind_to_device)
 {
-	const int family = address.GetFamily();
 	constexpr int socktype = SOCK_STREAM;
-	constexpr int protocol = 0;
 
-	if (family == AF_LOCAL) {
-		const struct sockaddr_un *sun = (const struct sockaddr_un *)address.GetAddress();
-		if (sun->sun_path[0] != '\0')
-			/* delete non-abstract socket files before reusing them */
-			unlink(sun->sun_path);
-	}
+	SocketConfig config(address);
 
-	UniqueSocketDescriptor fd;
-	if (!fd.CreateNonBlock(family, socktype, protocol))
-		throw MakeErrno("Failed to create socket");
+	if (bind_to_device != nullptr)
+		config.interface = bind_to_device;
 
-	if (!fd.SetReuseAddress(true))
-		throw MakeErrno("Failed to set SO_REUSEADDR");
+	config.reuse_port = reuse_port;
+	config.free_bind = free_bind;
+	config.pass_cred = true;
+	config.listen = 64;
 
-	if (reuse_port && !fd.SetReusePort())
-		throw MakeErrno("Failed to set SO_REUSEPORT");
-
-	if (free_bind && !fd.SetFreeBind())
-		throw MakeErrno("Failed to set SO_FREEBIND");
-
-	if (address.IsV6Any())
-		fd.SetV6Only(false);
-
-	if (bind_to_device != nullptr && !fd.SetBindToDevice(bind_to_device))
-		throw MakeErrno("Failed to set SO_BINDTODEVICE");
-
-	if (!fd.Bind(address))
-		throw MakeErrno("Failed to bind");
-
-	switch (address.GetFamily()) {
-	case AF_INET:
-	case AF_INET6:
-		if (socktype == SOCK_STREAM)
-			fd.SetTcpFastOpen();
-		break;
-
-	case AF_LOCAL:
-		fd.SetBoolOption(SOL_SOCKET, SO_PASSCRED, true);
-		break;
-	}
-
-	if (!fd.Listen(64))
-		throw MakeErrno("Failed to listen");
-
-	return fd;
+	return config.Create(socktype);
 }
 
 static bool
