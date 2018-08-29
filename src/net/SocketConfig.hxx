@@ -36,6 +36,8 @@
 
 #include <string>
 
+#include <stdint.h>
+
 class UniqueSocketDescriptor;
 
 struct SocketConfig {
@@ -58,6 +60,12 @@ struct SocketConfig {
 	 * seconds.
 	 */
 	unsigned tcp_defer_accept = 0;
+
+	/**
+	 * If non-zero, sets the socket's file mode (overriding the
+	 * umask).
+	 */
+	uint16_t mode = 0;
 
 	bool reuse_port = false;
 
