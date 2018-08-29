@@ -15,4 +15,7 @@ odbus = static_library(
 
 odbus_dep = declare_dependency(
   link_with: odbus,
+  dependencies: [
+    libdbus,
+  ],
 )
