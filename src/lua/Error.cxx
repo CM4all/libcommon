@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,6 +28,7 @@
  */
 
 #include "Error.hxx"
+#include "util/Exception.hxx"
 
 extern "C" {
 #include <lua.h>
@@ -41,6 +42,20 @@ PopError(lua_State *L)
 	Error e(lua_tostring(L, -1));
 	lua_pop(L, 1);
 	return e;
+}
+
+void
+Push(lua_State *L, std::exception_ptr e) noexcept
+{
+	lua_pushstring(L, GetFullMessage(e).c_str());
+}
+
+void
+Raise(lua_State *L, std::exception_ptr e) noexcept
+{
+	Push(L, e);
+	lua_error(L);
+	gcc_unreachable();
 }
 
 } // namespace Lua

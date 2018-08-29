@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,8 @@
 #ifndef LUA_ERROR_HXX
 #define LUA_ERROR_HXX
 
+#include "util/Compiler.h"
+
 #include <stdexcept>
 
 struct lua_State;
@@ -47,6 +49,20 @@ public:
  */
 Error
 PopError(lua_State *L);
+
+/**
+ * Pushes a representation of the given C++ exception on the stack.
+ */
+void
+Push(lua_State *L, std::exception_ptr e) noexcept;
+
+/**
+ * Wrapper for lua_error() which raises a C++ exception as a Lua
+ * error.
+ */
+gcc_noreturn
+void
+Raise(lua_State *L, std::exception_ptr e) noexcept;
 
 }
 
