@@ -137,6 +137,9 @@ SocketConfig::Create(int type) const
 
 		if (tcp_defer_accept > 0)
 			fd.SetTcpDeferAccept(tcp_defer_accept);
+
+		if (tcp_user_timeout > 0)
+			fd.SetTcpUserTimeout(tcp_user_timeout);
 	}
 
 	if (listen > 0 && !fd.Listen(listen))

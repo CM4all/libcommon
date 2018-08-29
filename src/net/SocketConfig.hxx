@@ -62,6 +62,12 @@ struct SocketConfig {
 	unsigned tcp_defer_accept = 0;
 
 	/**
+	 * If non-zero, sets TCP_USER_TIMEOUT.  Value is a number of
+	 * milliseconds.
+	 */
+	unsigned tcp_user_timeout = 0;
+
+	/**
 	 * If non-zero, sets the socket's file mode (overriding the
 	 * umask).
 	 */
