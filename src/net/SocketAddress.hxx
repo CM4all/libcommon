@@ -107,6 +107,13 @@ public:
 	 */
 	gcc_pure
 	StringView GetLocalRaw() const noexcept;
+
+	/**
+	 * Returns the local socket path or nullptr if not applicable
+	 * (or if the path is corrupt).
+	 */
+	gcc_pure
+	const char *GetLocalPath() const noexcept;
 #endif
 
 #ifdef HAVE_TCP
