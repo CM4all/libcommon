@@ -58,8 +58,7 @@ spawn = static_library(
 
 spawn_dep = declare_dependency(
   link_with: spawn,
-  dependencies: [
-    spawn_dependencies,
+  dependencies: spawn_dependencies + [
     system_dep,
     io_dep,
     net_dep,
