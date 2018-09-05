@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Content Management AG
+ * Copyright 2017-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,7 +36,7 @@
 #include "WritableBuffer.hxx"
 #include "MemberIteratorAdapter.hxx"
 
-#include <boost/intrusive/list.hpp>
+#include <boost/intrusive/slist.hpp>
 
 #include <new>
 #include <iterator>
@@ -60,7 +60,7 @@ public:
 
 private:
 	struct Item {
-		typedef boost::intrusive::list_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> ListHook;
+		typedef boost::intrusive::slist_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> ListHook;
 		ListHook siblings;
 
 		T value;
@@ -84,11 +84,12 @@ private:
 		};
 	};
 
-	typedef boost::intrusive::list<Item,
-				       boost::intrusive::member_hook<Item,
-								     typename Item::ListHook,
-								     &Item::siblings>,
-				       boost::intrusive::constant_time_size<true>> List;
+	typedef boost::intrusive::slist<Item,
+					boost::intrusive::member_hook<Item,
+								      typename Item::ListHook,
+								      &Item::siblings>,
+					boost::intrusive::cache_last<true>,
+					boost::intrusive::constant_time_size<true>> List;
 
 	List *const list;
 	const size_t buffer_size;
@@ -282,7 +283,7 @@ private:
 			return FirstSlot();
 
 		auto first = list->begin();
-		auto last = std::prev(list->end());
+		auto last = list->last();
 		void *after_last = AfterLast(&*last);
 		void *const end_of_buffer = EndOfBuffer();
 		assert(after_last <= end_of_buffer);
