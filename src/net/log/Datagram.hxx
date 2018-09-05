@@ -51,20 +51,20 @@ struct Datagram {
 
 	const char *forwarded_to = nullptr;
 
-	http_method_t http_method;
-
 	const char *http_uri = nullptr, *http_referer = nullptr;
 	const char *user_agent = nullptr;
 
 	StringView message = nullptr;
-
-	http_status_t http_status;
 
 	uint64_t length;
 
 	uint64_t traffic_received, traffic_sent;
 
 	uint64_t duration;
+
+	http_method_t http_method;
+
+	http_status_t http_status;
 
 	Type type = Type::UNSPECIFIED;
 
@@ -85,12 +85,12 @@ struct Datagram {
 		 std::chrono::steady_clock::duration _duration) noexcept
 		:timestamp(ExportTimestamp(_timestamp)),
 		 remote_host(_remote_host), host(_host), site(_site),
-		 http_method(_method),
 		 http_uri(_uri), http_referer(_referer), user_agent(_user_agent),
-		 http_status(_status),
 		 length(_length),
 		 traffic_received(_traffic_received), traffic_sent(_traffic_sent),
 		 duration(ExportDuration(_duration)),
+		 http_method(_method),
+		 http_status(_status),
 		 valid_timestamp(true),
 		 valid_http_method(true), valid_http_status(true),
 		 valid_length(_length >= 0), valid_traffic(true),
