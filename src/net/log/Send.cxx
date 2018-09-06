@@ -90,7 +90,7 @@ Send(SocketDescriptor s, const Datagram &d)
 
 	uint64_t timestamp;
 
-	if (d.valid_timestamp) {
+	if (d.HasTimestamp()) {
 		v.push_back(MakeIovecAttribute<Attribute::TIMESTAMP>());
 		timestamp = ToBE64(d.timestamp.time_since_epoch().count());
 		v.push_back(MakeIovecT(timestamp));
@@ -117,7 +117,7 @@ Send(SocketDescriptor s, const Datagram &d)
 	}
 
 	uint8_t http_method;
-	if (d.valid_http_method) {
+	if (d.HasHttpMethod()) {
 		v.push_back(MakeIovecAttribute<Attribute::HTTP_METHOD>());
 		http_method = uint8_t(d.http_method);
 		v.push_back(MakeIovecT(http_method));
@@ -145,7 +145,7 @@ Send(SocketDescriptor s, const Datagram &d)
 	}
 
 	uint16_t http_status;
-	if (d.valid_http_status) {
+	if (d.HasHttpStatus()) {
 		v.push_back(MakeIovecAttribute<Attribute::HTTP_STATUS>());
 		http_status = ToBE16(int(d.http_status));
 		v.push_back(MakeIovecT(http_status));

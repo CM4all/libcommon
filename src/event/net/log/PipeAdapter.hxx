@@ -63,9 +63,7 @@ public:
 		    SocketDescriptor _socket) noexcept
 		:line_reader(event_loop, std::move(_pipe),
 			     BIND_THIS_METHOD(OnLine)),
-		 socket(_socket) {
-		datagram.valid_timestamp = true;
-	}
+		 socket(_socket) {}
 
 	EventLoop &GetEventLoop() const noexcept {
 		return line_reader.GetEventLoop();

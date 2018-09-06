@@ -114,14 +114,14 @@ static void
 LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 	       bool site)
 {
-	const char *method = d.valid_http_method &&
+	const char *method = d.HasHttpMethod() &&
 		http_method_is_valid(d.http_method)
 		? http_method_to_string(d.http_method)
 		: "?";
 
 	StringBuffer<32> stamp_buffer;
 	const char *stamp =
-		FormatOptionalTimestamp(stamp_buffer, d.valid_timestamp,
+		FormatOptionalTimestamp(stamp_buffer, d.HasTimestamp(),
 					d.timestamp);
 
 	char length_buffer[32];
@@ -176,7 +176,7 @@ LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
 
 	StringBuffer<32> stamp_buffer;
 	const char *stamp =
-		FormatOptionalTimestamp(stamp_buffer, d.valid_timestamp,
+		FormatOptionalTimestamp(stamp_buffer, d.HasTimestamp(),
 					d.timestamp);
 
 	char escaped_message[4096];
@@ -199,7 +199,7 @@ LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
 void
 LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d, bool site)
 {
-	if (d.http_uri != nullptr && d.valid_http_status)
+	if (d.http_uri != nullptr && d.HasHttpStatus())
 		LogOneLineHttp(fd, d, site);
 	else if (d.message != nullptr)
 		LogOneLineMessage(fd, d, site);

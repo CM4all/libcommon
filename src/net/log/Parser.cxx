@@ -128,7 +128,6 @@ log_server_apply_attributes(Deserializer d)
 
 		case Attribute::TIMESTAMP:
 			datagram.timestamp = Net::Log::TimePoint(Net::Log::Duration(d.ReadU64()));
-			datagram.valid_timestamp = true;
 			break;
 
 		case Attribute::REMOTE_HOST:
@@ -152,7 +151,6 @@ log_server_apply_attributes(Deserializer d)
 			if (!http_method_is_valid(datagram.http_method))
 				throw ProtocolError();
 
-			datagram.valid_http_method = true;
 			break;
 
 		case Attribute::HTTP_URI:
@@ -176,7 +174,6 @@ log_server_apply_attributes(Deserializer d)
 			if (!http_status_is_valid(datagram.http_status))
 				throw ProtocolError();
 
-			datagram.valid_http_status = true;
 			break;
 
 		case Attribute::LENGTH:

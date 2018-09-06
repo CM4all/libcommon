@@ -46,7 +46,7 @@ namespace Net {
 namespace Log {
 
 struct Datagram {
-	TimePoint timestamp;
+	TimePoint timestamp = TimePoint();
 
 	const char *remote_host = nullptr, *host = nullptr, *site = nullptr;
 
@@ -63,14 +63,12 @@ struct Datagram {
 
 	Duration duration;
 
-	http_method_t http_method;
+	http_method_t http_method = HTTP_METHOD_NULL;
 
-	http_status_t http_status;
+	http_status_t http_status = http_status_t(0);
 
 	Type type = Type::UNSPECIFIED;
 
-	bool valid_timestamp = false;
-	bool valid_http_method = false, valid_http_status = false;
 	bool valid_length = false, valid_traffic = false;
 	bool valid_duration = false;
 
@@ -92,21 +90,30 @@ struct Datagram {
 		 duration(_duration),
 		 http_method(_method),
 		 http_status(_status),
-		 valid_timestamp(true),
-		 valid_http_method(true), valid_http_status(true),
 		 valid_length(_length >= 0), valid_traffic(true),
 		 valid_duration(true) {}
 
 	explicit Datagram(StringView _message) noexcept
 		:message(_message) {}
 
+	bool HasTimestamp() const noexcept {
+		return timestamp != TimePoint();
+	}
+
 	void SetTimestamp(TimePoint t) noexcept {
 		timestamp = t;
-		valid_timestamp = true;
 	}
 
 	void SetTimestamp(std::chrono::system_clock::time_point t) noexcept {
 		SetTimestamp(FromSystem(t));
+	}
+
+	bool HasHttpMethod() const noexcept {
+		return http_method != HTTP_METHOD_NULL;
+	}
+
+	bool HasHttpStatus() const noexcept {
+		return http_status != http_status_t(0);
 	}
 };
 
