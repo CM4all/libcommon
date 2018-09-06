@@ -45,7 +45,7 @@ read_uint8(uint8_t *value_r, const void *p, const uint8_t *end)
 {
 	auto src = (const uint8_t *)p;
 	if (src + sizeof(*value_r) > end)
-		return nullptr;
+		throw ProtocolError();
 
 	*value_r = *src++;
 	return src;
@@ -55,7 +55,7 @@ static const void *
 read_uint16(uint16_t *value_r, const void *p, const uint8_t *end)
 {
 	if ((const uint8_t *)p + sizeof(*value_r) > end)
-		return nullptr;
+		throw ProtocolError();
 
 	auto src = (const uint16_t *)p;
 	uint16_t value;
@@ -69,7 +69,7 @@ static const void *
 read_uint64(uint64_t *value_r, const void *p, const uint8_t *end)
 {
 	if ((const uint8_t *)p + sizeof(*value_r) > end)
-		return nullptr;
+		throw ProtocolError();
 
 	auto src = (const uint64_t *)p;
 	uint64_t value;
@@ -87,7 +87,10 @@ read_string(const char **value_r, const void *p, const uint8_t *end)
 	*value_r = q;
 
 	q += strlen(q) + 1;
-	return q > (const char *)end ? nullptr : q;
+	if (q > (const char *)end)
+		throw ProtocolError();
+
+	return q;
 }
 
 static const void *
@@ -204,8 +207,7 @@ log_server_apply_attributes(const void *p, const uint8_t *end)
 
 		case Attribute::TRAFFIC:
 			p = read_uint64(&datagram.traffic_received, p, end);
-			if (p != nullptr)
-				p = read_uint64(&datagram.traffic_sent, p, end);
+			p = read_uint64(&datagram.traffic_sent, p, end);
 			datagram.valid_traffic = true;
 			break;
 
@@ -218,9 +220,6 @@ log_server_apply_attributes(const void *p, const uint8_t *end)
 			p = read_uint8(&(uint8_t &)datagram.type, p, end);
 			break;
 		}
-
-		if (p == nullptr)
-			throw ProtocolError();
 	}
 }
 
