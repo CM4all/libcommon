@@ -38,7 +38,8 @@
 
 #include <string.h>
 
-using namespace Net::Log;
+namespace Net {
+namespace Log {
 
 template<typename T>
 static const void *
@@ -222,7 +223,7 @@ log_server_apply_attributes(const void *p, const uint8_t *end)
 }
 
 Datagram
-Net::Log::ParseDatagram(ConstBuffer<void> _d)
+ParseDatagram(ConstBuffer<void> _d)
 {
 	auto d = ConstBuffer<uint8_t>::FromVoid(_d);
 
@@ -260,8 +261,10 @@ Net::Log::ParseDatagram(ConstBuffer<void> _d)
 }
 
 Datagram
-Net::Log::ParseDatagram(const void *p, const void *end)
+ParseDatagram(const void *p, const void *end)
 {
 	return ParseDatagram(ConstBuffer<uint8_t>((const uint8_t *)p,
 						  (const uint8_t *)end).ToVoid());
 }
+
+}} // namespace Net::Log
