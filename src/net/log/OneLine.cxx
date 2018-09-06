@@ -40,9 +40,10 @@
 
 template<size_t capacity>
 static const char *
-FormatTimestamp(StringBuffer<capacity> &buffer, uint64_t value)
+FormatTimestamp(StringBuffer<capacity> &buffer, Net::Log::TimePoint value)
 {
-	time_t t = value / 1000000;
+	using namespace std::chrono;
+	time_t t = duration_cast<seconds>(value.time_since_epoch()).count();
 	struct tm tm;
 	strftime(buffer.data(), buffer.capacity(),
 		 "%d/%b/%Y:%H:%M:%S %z", localtime_r(&t, &tm));
@@ -52,7 +53,7 @@ FormatTimestamp(StringBuffer<capacity> &buffer, uint64_t value)
 template<size_t capacity>
 static const char *
 FormatOptionalTimestamp(StringBuffer<capacity> &buffer, bool valid,
-			uint64_t value)
+			Net::Log::TimePoint value)
 {
 	return valid
 		? FormatTimestamp(buffer, value)
@@ -135,7 +136,7 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 	const char *duration = "-";
 	if (d.valid_duration) {
 		snprintf(duration_buffer, sizeof(duration_buffer), "%llu",
-			 (unsigned long long)d.duration);
+			 (unsigned long long)d.duration.count());
 		duration = duration_buffer;
 	}
 

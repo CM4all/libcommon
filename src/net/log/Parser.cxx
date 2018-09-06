@@ -127,7 +127,7 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::TIMESTAMP:
-			datagram.timestamp = d.ReadU64();
+			datagram.timestamp = Net::Log::TimePoint(Net::Log::Duration(d.ReadU64()));
 			datagram.valid_timestamp = true;
 			break;
 
@@ -191,7 +191,7 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::DURATION:
-			datagram.duration = d.ReadU64();
+			datagram.duration = Duration(d.ReadU64());
 			datagram.valid_duration = true;
 			break;
 

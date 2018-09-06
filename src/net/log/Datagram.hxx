@@ -33,6 +33,7 @@
 #pragma once
 
 #include "Protocol.hxx"
+#include "Chrono.hxx"
 #include "http/Method.h"
 #include "http/Status.h"
 #include "util/StringView.hxx"
@@ -45,7 +46,7 @@ namespace Net {
 namespace Log {
 
 struct Datagram {
-	uint64_t timestamp;
+	TimePoint timestamp;
 
 	const char *remote_host = nullptr, *host = nullptr, *site = nullptr;
 
@@ -60,7 +61,7 @@ struct Datagram {
 
 	uint64_t traffic_received, traffic_sent;
 
-	uint64_t duration;
+	Duration duration;
 
 	http_method_t http_method;
 
@@ -75,20 +76,20 @@ struct Datagram {
 
 	Datagram() = default;
 
-	Datagram(std::chrono::system_clock::time_point _timestamp,
+	Datagram(TimePoint _timestamp,
 		 http_method_t _method, const char *_uri,
 		 const char *_remote_host,
 		 const char *_host, const char *_site,
 		 const char *_referer, const char *_user_agent,
 		 http_status_t _status, int64_t _length,
 		 uint64_t _traffic_received, uint64_t _traffic_sent,
-		 std::chrono::steady_clock::duration _duration) noexcept
-		:timestamp(ExportTimestamp(_timestamp)),
+		 Duration _duration) noexcept
+		:timestamp(_timestamp),
 		 remote_host(_remote_host), host(_host), site(_site),
 		 http_uri(_uri), http_referer(_referer), user_agent(_user_agent),
 		 length(_length),
 		 traffic_received(_traffic_received), traffic_sent(_traffic_sent),
-		 duration(ExportDuration(_duration)),
+		 duration(_duration),
 		 http_method(_method),
 		 http_status(_status),
 		 valid_timestamp(true),
@@ -99,17 +100,13 @@ struct Datagram {
 	explicit Datagram(StringView _message) noexcept
 		:message(_message) {}
 
-	void SetTimestamp(std::chrono::system_clock::time_point t) noexcept {
-		timestamp = ExportTimestamp(t);
+	void SetTimestamp(TimePoint t) noexcept {
+		timestamp = t;
 		valid_timestamp = true;
 	}
 
-	static constexpr uint64_t ExportTimestamp(std::chrono::system_clock::time_point t) noexcept {
-		return std::chrono::duration_cast<std::chrono::microseconds>(t.time_since_epoch()).count();
-	}
-
-	static constexpr uint64_t ExportDuration(std::chrono::steady_clock::duration d) noexcept {
-		return std::chrono::duration_cast<std::chrono::microseconds>(d).count();
+	void SetTimestamp(std::chrono::system_clock::time_point t) noexcept {
+		SetTimestamp(FromSystem(t));
 	}
 };
 

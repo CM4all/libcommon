@@ -92,7 +92,7 @@ Send(SocketDescriptor s, const Datagram &d)
 
 	if (d.valid_timestamp) {
 		v.push_back(MakeIovecAttribute<Attribute::TIMESTAMP>());
-		timestamp = ToBE64(d.timestamp);
+		timestamp = ToBE64(d.timestamp.time_since_epoch().count());
 		v.push_back(MakeIovecT(timestamp));
 	}
 
@@ -172,7 +172,7 @@ Send(SocketDescriptor s, const Datagram &d)
 	uint64_t duration;
 	if (d.valid_duration) {
 		v.push_back(MakeIovecAttribute<Attribute::DURATION>());
-		duration = ToBE64(d.duration);
+		duration = ToBE64(d.duration.count());
 		v.push_back(MakeIovecT(duration));
 	}
 
