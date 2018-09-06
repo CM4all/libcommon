@@ -36,70 +36,72 @@
 #include "Crc.hxx"
 #include "util/ByteOrder.hxx"
 
+#include <assert.h>
 #include <string.h>
 
 namespace Net {
 namespace Log {
 
-template<typename T>
-static const void *
-ReadT(T &value_r, const void *p, const uint8_t *end)
-{
-	if ((const uint8_t *)p + sizeof(value_r) > end)
-		throw ProtocolError();
+class Deserializer {
+	const uint8_t *p;
+	const uint8_t *end;
 
-	auto src = (const T *)p;
-	memcpy(&value_r, src, sizeof(value_r));
-	return src + 1;
+public:
+	Deserializer(ConstBuffer<void> src) noexcept
+		:p((const uint8_t *)src.data), end(p + src.size) {
+		assert(p != nullptr);
+		assert(end != nullptr);
+		assert(p <= end);
+	}
 
-}
+	bool empty() const noexcept {
+		return p == end;
+	}
 
-static const void *
-read_uint8(uint8_t *value_r, const void *p, const uint8_t *end)
-{
-	return ReadT<uint8_t>(*value_r, p, end);
-}
+	uint8_t ReadByte() {
+		return *(const uint8_t *)ReadRaw(1);
+	}
 
-static const void *
-read_uint16(uint16_t *value_r, const void *p, const uint8_t *end)
-{
-	uint16_t value;
-	p = ReadT<uint16_t>(value, p, end);
-	*value_r = FromBE16(value);
-	return p;
-}
+	uint16_t ReadU16() {
+		return FromBE16(ReadT<uint16_t>());
+	}
 
-static const void *
-read_uint64(uint64_t *value_r, const void *p, const uint8_t *end)
-{
-	uint64_t value;
-	p = ReadT<uint64_t>(value, p, end);
-	*value_r = FromBE64(value);
-	return p;
-}
+	uint64_t ReadU64() {
+		return FromBE64(ReadT<uint64_t>());
+	}
 
-static const void *
-read_string(const char **value_r, const void *p, const uint8_t *end)
-{
-	auto q = (const char *)p;
+	StringView ReadStringView() {
+		const char *result = (const char *)p;
+		/* buffer is null-terminated, so strlen() is legal */
+		const size_t length = strlen(result);
+		const uint8_t *after = (const uint8_t *)(result + length + 1);
+		if (after > end)
+			throw ProtocolError();
+		p = after;
+		return {result, length};
+	}
 
-	*value_r = q;
+	const char *ReadString() {
+		return ReadStringView().data;
+	}
 
-	q += strlen(q) + 1;
-	if (q > (const char *)end)
-		throw ProtocolError();
+private:
+	const void *ReadRaw(size_t size) {
+		const uint8_t *result = p;
+		if (result + size > end)
+			throw ProtocolError();
 
-	return q;
-}
+		p += size;
+		return result;
+	}
 
-static const void *
-ReadStringView(StringView &value_r, const void *p, const uint8_t *end)
-{
-	const char *value;
-	p = read_string(&value, p, end);
-	value_r = value;
-	return p;
-}
+	template<typename T>
+	T ReadT() {
+		T value;
+		memcpy(&value, ReadRaw(sizeof(value)), sizeof(value));
+		return value;
+	}
+};
 
 static void
 FixUp(Datagram &d)
@@ -113,58 +115,40 @@ FixUp(Datagram &d)
 }
 
 static Datagram
-log_server_apply_attributes(const void *p, const uint8_t *end)
+log_server_apply_attributes(Deserializer d)
 {
-	assert(p != nullptr);
-	assert(end != nullptr);
-	assert((const char *)p < (const char *)end);
-
 	Datagram datagram;
 
-	while (true) {
-		auto attr_p = (const uint8_t *)p;
-		if (attr_p >= end) {
-			FixUp(datagram);
-			return datagram;
-		}
-
-		auto attr = (Attribute)*attr_p++;
-		p = attr_p;
+	while (!d.empty()) {
+		const auto attr = Attribute(d.ReadByte());
 
 		switch (attr) {
-			uint8_t u8;
-			uint16_t u16;
-
 		case Attribute::NOP:
 			break;
 
 		case Attribute::TIMESTAMP:
-			p = read_uint64(&datagram.timestamp, p, end);
+			datagram.timestamp = d.ReadU64();
 			datagram.valid_timestamp = true;
 			break;
 
 		case Attribute::REMOTE_HOST:
-			p = read_string(&datagram.remote_host, p, end);
+			datagram.remote_host = d.ReadString();
 			break;
 
 		case Attribute::FORWARDED_TO:
-			p = read_string(&datagram.forwarded_to, p, end);
+			datagram.forwarded_to = d.ReadString();
 			break;
 
 		case Attribute::HOST:
-			p = read_string(&datagram.host, p, end);
+			datagram.host = d.ReadString();
 			break;
 
 		case Attribute::SITE:
-			p = read_string(&datagram.site, p, end);
+			datagram.site = d.ReadString();
 			break;
 
 		case Attribute::HTTP_METHOD:
-			p = read_uint8(&u8, p, end);
-			if (p == nullptr)
-				throw ProtocolError();
-
-			datagram.http_method = http_method_t(u8);
+			datagram.http_method = http_method_t(d.ReadByte());
 			if (!http_method_is_valid(datagram.http_method))
 				throw ProtocolError();
 
@@ -172,27 +156,23 @@ log_server_apply_attributes(const void *p, const uint8_t *end)
 			break;
 
 		case Attribute::HTTP_URI:
-			p = read_string(&datagram.http_uri, p, end);
+			datagram.http_uri = d.ReadString();
 			break;
 
 		case Attribute::HTTP_REFERER:
-			p = read_string(&datagram.http_referer, p, end);
+			datagram.http_referer = d.ReadString();
 			break;
 
 		case Attribute::USER_AGENT:
-			p = read_string(&datagram.user_agent, p, end);
+			datagram.user_agent = d.ReadString();
 			break;
 
 		case Attribute::MESSAGE:
-			p = ReadStringView(datagram.message, p, end);
+			datagram.message = d.ReadString();
 			break;
 
 		case Attribute::HTTP_STATUS:
-			p = read_uint16(&u16, p, end);
-			if (p == nullptr)
-				throw ProtocolError();
-
-			datagram.http_status = http_status_t(u16);
+			datagram.http_status = http_status_t(d.ReadU16());
 			if (!http_status_is_valid(datagram.http_status))
 				throw ProtocolError();
 
@@ -200,26 +180,29 @@ log_server_apply_attributes(const void *p, const uint8_t *end)
 			break;
 
 		case Attribute::LENGTH:
-			p = read_uint64(&datagram.length, p, end);
+			datagram.length = d.ReadU64();
 			datagram.valid_length = true;
 			break;
 
 		case Attribute::TRAFFIC:
-			p = read_uint64(&datagram.traffic_received, p, end);
-			p = read_uint64(&datagram.traffic_sent, p, end);
+			datagram.traffic_received = d.ReadU64();
+			datagram.traffic_sent = d.ReadU64();
 			datagram.valid_traffic = true;
 			break;
 
 		case Attribute::DURATION:
-			p = read_uint64(&datagram.duration, p, end);
+			datagram.duration = d.ReadU64();
 			datagram.valid_duration = true;
 			break;
 
 		case Attribute::TYPE:
-			p = read_uint8(&(uint8_t &)datagram.type, p, end);
+			datagram.type = Type(d.ReadByte());
 			break;
 		}
 	}
+
+	FixUp(datagram);
+	return datagram;
 }
 
 Datagram
@@ -248,7 +231,7 @@ ParseDatagram(ConstBuffer<void> _d)
 		if (crc.checksum() != FromBE32(expected_crc))
 			throw ProtocolError();
 
-		return log_server_apply_attributes(d.data, d.data + d.size);
+		return log_server_apply_attributes(ConstBuffer<void>(d.data, d.size));
 	}
 
 	/* allow both little-endian and big-endian magic in the V1
@@ -257,7 +240,7 @@ ParseDatagram(ConstBuffer<void> _d)
 	if (*magic != ToLE32(MAGIC_V1) && *magic != ToBE32(MAGIC_V1))
 		throw ProtocolError();
 
-	return log_server_apply_attributes(d.data, d.data + d.size);
+	return log_server_apply_attributes(ConstBuffer<void>(d.data, d.size));
 }
 
 Datagram
