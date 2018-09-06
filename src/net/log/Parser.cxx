@@ -40,43 +40,41 @@
 
 using namespace Net::Log;
 
+template<typename T>
+static const void *
+ReadT(T &value_r, const void *p, const uint8_t *end)
+{
+	if ((const uint8_t *)p + sizeof(value_r) > end)
+		throw ProtocolError();
+
+	auto src = (const T *)p;
+	memcpy(&value_r, src, sizeof(value_r));
+	return src + 1;
+
+}
+
 static const void *
 read_uint8(uint8_t *value_r, const void *p, const uint8_t *end)
 {
-	auto src = (const uint8_t *)p;
-	if (src + sizeof(*value_r) > end)
-		throw ProtocolError();
-
-	*value_r = *src++;
-	return src;
+	return ReadT<uint8_t>(*value_r, p, end);
 }
 
 static const void *
 read_uint16(uint16_t *value_r, const void *p, const uint8_t *end)
 {
-	if ((const uint8_t *)p + sizeof(*value_r) > end)
-		throw ProtocolError();
-
-	auto src = (const uint16_t *)p;
 	uint16_t value;
-	memcpy(&value, src, sizeof(value));
-
+	p = ReadT<uint16_t>(value, p, end);
 	*value_r = FromBE16(value);
-	return src + 1;
+	return p;
 }
 
 static const void *
 read_uint64(uint64_t *value_r, const void *p, const uint8_t *end)
 {
-	if ((const uint8_t *)p + sizeof(*value_r) > end)
-		throw ProtocolError();
-
-	auto src = (const uint64_t *)p;
 	uint64_t value;
-	memcpy(&value, src, sizeof(value));
-
+	p = ReadT<uint64_t>(value, p, end);
 	*value_r = FromBE64(value);
-	return src + 1;
+	return p;
 }
 
 static const void *
