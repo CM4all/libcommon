@@ -40,8 +40,8 @@ TEST(FNVHash, u32)
 
 	/* zero-hash challenge results from
 	   http://www.isthe.com/chongo/tech/comp/fnv/ */
-	EXPECT_EQ(FNV1aHash32("\xcc\x24\x31\xc4"), 0);
-	EXPECT_EQ(FNV1aHash32("\xe0\x4d\x9f\xcb"), 0);
+	EXPECT_EQ(FNV1aHash32("\xcc\x24\x31\xc4"), 0u);
+	EXPECT_EQ(FNV1aHash32("\xe0\x4d\x9f\xcb"), 0u);
 
 	/* from IETF draft-eastlake-fnv Appendix C: A Few Test Vectors */
 	EXPECT_EQ(FNV1aHash32("a"), 0xe40c292c);
@@ -54,7 +54,7 @@ TEST(FNVHash, u64)
 
 	/* zero-hash challenge results from
 	   http://www.isthe.com/chongo/tech/comp/fnv/ */
-	EXPECT_EQ(FNV1aHash64("\xd5\x6b\xb9\x53\x42\x87\x08\x36"), 0);
+	EXPECT_EQ(FNV1aHash64("\xd5\x6b\xb9\x53\x42\x87\x08\x36"), 0u);
 
 	/* from IETF draft-eastlake-fnv Appendix C: A Few Test Vectors */
 	EXPECT_EQ(FNV1aHash64("a"), 0xaf63dc4c8601ec8c);
