@@ -43,17 +43,17 @@ TEST(IPv4AddressTest, Basic)
 TEST(IPv4AddressTest, Port)
 {
 	IPv4Address a(12345);
-	EXPECT_EQ(a.GetPort(), 12345);
+	EXPECT_EQ(a.GetPort(), 12345u);
 
 	a.SetPort(42);
-	EXPECT_EQ(a.GetPort(), 42);
+	EXPECT_EQ(a.GetPort(), 42u);
 }
 
 TEST(IPv4AddressTest, NumericAddress)
 {
 	IPv4Address a(12345);
-	EXPECT_EQ(a.GetNumericAddress(), 0);
-	EXPECT_EQ(a.GetNumericAddressBE(), 0);
+	EXPECT_EQ(a.GetNumericAddress(), 0u);
+	EXPECT_EQ(a.GetNumericAddressBE(), 0u);
 
 	a = IPv4Address(192, 168, 1, 2, 42);
 	EXPECT_EQ(a.GetNumericAddress(), 0xc0a80102);
