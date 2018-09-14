@@ -35,6 +35,7 @@
 
 #include "Chrono.hxx"
 #include "system/EpollFD.hxx"
+#include "util/ClockCache.hxx"
 #include "util/StaticArray.hxx"
 
 #ifndef NDEBUG
@@ -92,6 +93,8 @@ class EventLoop {
 
 	StaticArray<struct epoll_event, 32> received_events;
 
+	ClockCache<std::chrono::steady_clock> steady_clock_cache;
+
 	static constexpr int EVLOOP_ONCE = 0x1;
 	static constexpr int EVLOOP_NONBLOCK = 0x2;
 
@@ -146,6 +149,11 @@ public:
 	void AddTimer(TimerEvent &t, Event::Duration d) noexcept;
 
 	void Defer(DeferEvent &e) noexcept;
+
+	gcc_pure
+	const auto &SteadyNow() const noexcept {
+		return steady_clock_cache.now();
+	}
 
 private:
 	/**

@@ -82,6 +82,10 @@ class ChildProcessRegistry {
 			     pid_t _pid, const char *_name,
 			     ExitListener *_listener);
 
+		auto &GetEventLoop() {
+			return kill_timeout_event.GetEventLoop();
+		}
+
 		void Disable() {
 			kill_timeout_event.Cancel();
 		}

@@ -64,6 +64,7 @@ EventLoop::~EventLoop() noexcept
 void
 EventLoop::Reinit() noexcept
 {
+	steady_clock_cache.flush();
 	received_events.clear();
 
 	epoll = {};
@@ -112,7 +113,7 @@ EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 void
 EventLoop::AddTimer(TimerEvent &t, Event::Duration d) noexcept
 {
-	t.due = Event::Clock::now() + d;
+	t.due = SteadyNow() + d;
 	timers.insert(t);
 	again = true;
 }
@@ -120,7 +121,7 @@ EventLoop::AddTimer(TimerEvent &t, Event::Duration d) noexcept
 inline Event::Duration
 EventLoop::HandleTimers() noexcept
 {
-	const auto now = Event::Clock::now();
+	const auto now = SteadyNow();
 
 	Event::Duration timeout;
 
@@ -177,6 +178,8 @@ EventLoop::Loop(int flags) noexcept
 {
 	assert(received_events.empty());
 
+	steady_clock_cache.flush();
+
 	quit = false;
 
 	const bool once = flags & EVLOOP_ONCE;
@@ -212,6 +215,8 @@ EventLoop::Loop(int flags) noexcept
 
 		if (received_events.empty() && nonblock)
 			quit = true;
+
+		steady_clock_cache.flush();
 
 		/* invoke sockets */
 		for (auto &i : received_events) {

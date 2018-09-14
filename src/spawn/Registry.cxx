@@ -32,6 +32,7 @@
 
 #include "Registry.hxx"
 #include "ExitListener.hxx"
+#include "event/Loop.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/StringFormat.hxx"
 
@@ -54,7 +55,7 @@ ChildProcessRegistry::ChildProcess::ChildProcess(EventLoop &_event_loop,
 						 ExitListener *_listener)
 	:logger(MakeChildProcessLogDomain(_pid, _name)),
 	 pid(_pid), name(_name),
-	 start_time(std::chrono::steady_clock::now()),
+	 start_time(_event_loop.SteadyNow()),
 	 listener(_listener),
 	 kill_timeout_event(_event_loop, BIND_THIS_METHOD(KillTimeoutCallback))
 {
@@ -85,7 +86,7 @@ ChildProcessRegistry::ChildProcess::OnExit(int status,
 	else
 		logger(2, "exited with status ", exit_status);
 
-	const auto duration = std::chrono::steady_clock::now() - start_time;
+	const auto duration = GetEventLoop().SteadyNow() - start_time;
 	const auto duration_f = std::chrono::duration_cast<std::chrono::duration<double>>(duration);
 
 	logger.Format(6, "stats: %1.3fs elapsed, %1.3fs user, %1.3fs sys, %ld/%ld faults, %ld/%ld switches",
