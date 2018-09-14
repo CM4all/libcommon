@@ -57,6 +57,10 @@ public:
 		 delay(_delay),
 		 callback(_callback) {}
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	void Enable() noexcept;
 	void Disable() noexcept;
 
