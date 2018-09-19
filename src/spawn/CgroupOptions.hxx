@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include "util/ShallowCopy.hxx"
+
 class AllocatorPtr;
 struct StringView;
 struct CgroupState;
@@ -74,6 +76,14 @@ struct CgroupOptions {
 	CgroupOptions() = default;
 	CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src) noexcept;
 
+	constexpr CgroupOptions(ShallowCopy, const CgroupOptions &src) noexcept
+		:CgroupOptions(src) {}
+
+private:
+	CgroupOptions(const CgroupOptions &) = default;
+	CgroupOptions &operator=(const CgroupOptions &) = delete;
+
+public:
 	constexpr bool IsDefined() const noexcept {
 		return name != nullptr;
 	}

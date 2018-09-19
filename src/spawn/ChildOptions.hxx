@@ -115,7 +115,7 @@ struct ChildOptions {
 		stderr_path(src.stderr_path),
 		expand_stderr_path(src.expand_stderr_path),
 		env(shallow_copy, src.env),
-		cgroup(src.cgroup),
+		cgroup(shallow_copy, src.cgroup),
 		rlimits(src.rlimits),
 		refence(src.refence),
 		ns(src.ns),
