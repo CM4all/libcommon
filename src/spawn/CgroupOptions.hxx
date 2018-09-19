@@ -72,18 +72,19 @@ struct CgroupOptions {
 	SetItem *set_head = nullptr;
 
 	CgroupOptions() = default;
-	CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src);
+	CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src) noexcept;
 
-	bool IsDefined() const {
+	constexpr bool IsDefined() const noexcept {
 		return name != nullptr;
 	}
 
-	void Set(AllocatorPtr alloc, StringView name, StringView value);
+	void Set(AllocatorPtr alloc,
+		 StringView name, StringView value) noexcept;
 
 	/**
 	 * Throws std::runtime_error on error.
 	 */
 	void Apply(const CgroupState &state) const;
 
-	char *MakeId(char *p) const;
+	char *MakeId(char *p) const noexcept;
 };

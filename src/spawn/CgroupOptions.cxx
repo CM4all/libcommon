@@ -49,7 +49,8 @@
 #error This library requires Linux
 #endif
 
-CgroupOptions::CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src)
+CgroupOptions::CgroupOptions(AllocatorPtr alloc,
+			     const CgroupOptions &src) noexcept
 	:name(alloc.CheckDup(src.name))
 {
 	auto **set_tail = &set_head;
@@ -63,7 +64,8 @@ CgroupOptions::CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src)
 }
 
 void
-CgroupOptions::Set(AllocatorPtr alloc, StringView _name, StringView _value)
+CgroupOptions::Set(AllocatorPtr alloc,
+		   StringView _name, StringView _value) noexcept
 {
 	auto *new_set = alloc.New<SetItem>(alloc.DupZ(_name), alloc.DupZ(_value));
 	new_set->next = set_head;
@@ -143,7 +145,7 @@ CgroupOptions::Apply(const CgroupState &state) const
 }
 
 char *
-CgroupOptions::MakeId(char *p) const
+CgroupOptions::MakeId(char *p) const noexcept
 {
 	if (name != nullptr) {
 		p = (char *)mempcpy(p, ";cg", 3);
