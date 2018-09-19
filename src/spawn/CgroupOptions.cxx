@@ -32,7 +32,6 @@
 
 #include "CgroupOptions.hxx"
 #include "CgroupState.hxx"
-#include "Config.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
 #include "io/WriteFile.hxx"
@@ -40,13 +39,9 @@
 #include "util/RuntimeError.hxx"
 
 #include <assert.h>
-#include <sched.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/mount.h>
-#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <limits.h>
 

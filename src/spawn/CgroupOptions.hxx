@@ -32,8 +32,6 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 class AllocatorPtr;
 struct StringView;
 struct CgroupState;
