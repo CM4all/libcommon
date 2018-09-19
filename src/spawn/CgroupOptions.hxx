@@ -38,18 +38,39 @@ class AllocatorPtr;
 struct StringView;
 struct CgroupState;
 
+/**
+ * Options for how to configure the cgroups of a process.
+ */
 struct CgroupOptions {
+	/**
+	 * The name of the cgroup this process will be moved into.  It
+	 * is a name (without slashes) relative to the daemon's scope
+	 * cgroup.  For example, it could be an identification of the
+	 * hosting account which this process belongs to.
+	 */
 	const char *name = nullptr;
 
 	struct SetItem {
 		SetItem *next = nullptr;
+
+		/**
+		 * The filename of the controller setting,
+		 * e.g. "cpu.shares".
+		 */
 		const char *const name;
+
+		/**
+		 * The value to be written to the specified setting.
+		 */
 		const char *const value;
 
 		constexpr SetItem(const char *_name, const char *_value)
 		:name(_name), value(_value) {}
 	};
 
+	/**
+	 * A list of cgroup controller settings.
+	 */
 	SetItem *set_head = nullptr;
 
 	CgroupOptions() = default;
