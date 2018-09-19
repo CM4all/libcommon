@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_JAIL_PARAMS_HXX
-#define BENG_PROXY_JAIL_PARAMS_HXX
+#pragma once
 
 #include "translation/Features.hxx"
 
@@ -40,38 +39,36 @@ class AllocatorPtr;
 class MatchInfo;
 
 struct JailParams {
-    bool enabled = false;
+	bool enabled = false;
 
 #if TRANSLATION_ENABLE_EXPAND
-    bool expand_home_directory = false;
+	bool expand_home_directory = false;
 #endif
 
-    const char *account_id = nullptr;
-    const char *site_id = nullptr;
-    const char *user_name = nullptr;
-    const char *host_name = nullptr;
-    const char *home_directory = nullptr;
+	const char *account_id = nullptr;
+	const char *site_id = nullptr;
+	const char *user_name = nullptr;
+	const char *host_name = nullptr;
+	const char *home_directory = nullptr;
 
-    JailParams() = default;
-    JailParams(AllocatorPtr alloc, const JailParams &src);
+	JailParams() = default;
+	JailParams(AllocatorPtr alloc, const JailParams &src);
 
-    /**
-     * Throws std::runtime_error on error.
-     */
-    void Check() const;
+	/**
+	 * Throws std::runtime_error on error.
+	 */
+	void Check() const;
 
-    char *MakeId(char *p) const;
+	char *MakeId(char *p) const;
 
-    void InsertWrapper(PreparedChildProcess &p,
-                       const char *document_root) const;
+	void InsertWrapper(PreparedChildProcess &p,
+			   const char *document_root) const;
 
 #if TRANSLATION_ENABLE_EXPAND
-    bool IsExpandable() const {
-        return expand_home_directory;
-    }
+	bool IsExpandable() const {
+		return expand_home_directory;
+	}
 
-    void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
+	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
 #endif
 };
-
-#endif

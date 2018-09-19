@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -43,60 +43,60 @@
 #include <string.h>
 
 RefenceOptions::RefenceOptions(AllocatorPtr alloc, const RefenceOptions &src)
-    :data(alloc.Dup(src.data))
+	:data(alloc.Dup(src.data))
 {
 }
 
 inline unsigned
 RefenceOptions::GetHash() const
 {
-    return djb_hash(data.data, data.size);
+	return djb_hash(data.data, data.size);
 }
 
 char *
 RefenceOptions::MakeId(char *p) const
 {
-    if (!IsEmpty()) {
-        *p++ = ';';
-        *p++ = 'r';
-        *p++ = 'f';
-        p += sprintf(p, "%08x", GetHash());
-    }
+	if (!IsEmpty()) {
+		*p++ = ';';
+		*p++ = 'r';
+		*p++ = 'f';
+		p += sprintf(p, "%08x", GetHash());
+	}
 
-    return p;
+	return p;
 }
 
 inline void
 RefenceOptions::Apply(FileDescriptor fd) const
 {
-    // TODO: set name, script
+	// TODO: set name, script
 
-    auto p = data.begin();
-    const auto end = data.end();
+	auto p = data.begin();
+	const auto end = data.end();
 
-    while (true) {
-        const auto n = std::find(p, end, '\0');
-        ssize_t nbytes = fd.Write(p, n - p);
-        if (nbytes < 0)
-            throw MakeErrno("Failed to write to Refence");
+	while (true) {
+		const auto n = std::find(p, end, '\0');
+		ssize_t nbytes = fd.Write(p, n - p);
+		if (nbytes < 0)
+			throw MakeErrno("Failed to write to Refence");
 
-        if (n == end)
-            break;
+		if (n == end)
+			break;
 
-        p = n + 1;
-    }
+		p = n + 1;
+	}
 }
 
 void
 RefenceOptions::Apply() const
 {
-    if (IsEmpty())
-        return;
+	if (IsEmpty())
+		return;
 
-    constexpr auto path = "/proc/cm4all/refence/self";
-    UniqueFileDescriptor fd;
-    if (!fd.Open(path, O_WRONLY))
-        throw MakeErrno("Failed to open Refence");
+	constexpr auto path = "/proc/cm4all/refence/self";
+	UniqueFileDescriptor fd;
+	if (!fd.Open(path, O_WRONLY))
+		throw MakeErrno("Failed to open Refence");
 
-    Apply(fd);
+	Apply(fd);
 }

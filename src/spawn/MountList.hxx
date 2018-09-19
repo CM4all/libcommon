@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_MOUNT_LIST_HXX
-#define BENG_PROXY_MOUNT_LIST_HXX
+#pragma once
 
 #include "translation/Features.hxx"
 
@@ -41,70 +40,68 @@ class AllocatorPtr;
 class MatchInfo;
 
 struct MountList {
-    MountList *next;
+	MountList *next;
 
-    const char *source;
-    const char *target;
+	const char *source;
+	const char *target;
 
 #if TRANSLATION_ENABLE_EXPAND
-    bool expand_source;
+	bool expand_source;
 #endif
 
-    bool writable;
+	bool writable;
 
-    /**
-     * Omit the MS_NOEXEC flag?
-     */
-    bool exec;
+	/**
+	 * Omit the MS_NOEXEC flag?
+	 */
+	bool exec;
 
-    constexpr MountList(const char *_source, const char *_target,
+	constexpr MountList(const char *_source, const char *_target,
 #if !TRANSLATION_ENABLE_EXPAND
-                        gcc_unused
+			    gcc_unused
 #endif
-                        bool _expand_source=false, bool _writable=false,
-                        bool _exec=false)
-        :next(nullptr), source(_source), target(_target),
+			    bool _expand_source=false, bool _writable=false,
+			    bool _exec=false)
+		:next(nullptr), source(_source), target(_target),
 #if TRANSLATION_ENABLE_EXPAND
-         expand_source(_expand_source),
+		expand_source(_expand_source),
 #endif
-         writable(_writable), exec(_exec) {
-    }
+		writable(_writable), exec(_exec) {
+	}
 
-    MountList(AllocatorPtr alloc, const MountList &src);
+	MountList(AllocatorPtr alloc, const MountList &src);
 
 #if TRANSLATION_ENABLE_EXPAND
-    bool IsExpandable() const {
-        return expand_source;
-    }
+	bool IsExpandable() const {
+		return expand_source;
+	}
 
-    gcc_pure
-    static bool IsAnyExpandable(MountList *m) {
-        for (; m != nullptr; m = m->next)
-            if (m->IsExpandable())
-                return true;
+	gcc_pure
+	static bool IsAnyExpandable(MountList *m) {
+		for (; m != nullptr; m = m->next)
+			if (m->IsExpandable())
+				return true;
 
-        return false;
-    }
+		return false;
+	}
 
-    void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
-    static void ExpandAll(AllocatorPtr alloc, MountList *m,
-                          const MatchInfo &match_info);
+	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
+	static void ExpandAll(AllocatorPtr alloc, MountList *m,
+			      const MatchInfo &match_info);
 #endif
 
-    /**
-     * Throws std::system_error on error.
-     */
-    void Apply() const;
+	/**
+	 * Throws std::system_error on error.
+	 */
+	void Apply() const;
 
-    static MountList *CloneAll(AllocatorPtr alloc, const MountList *src);
+	static MountList *CloneAll(AllocatorPtr alloc, const MountList *src);
 
-    /**
-     * Throws std::system_error on error.
-     */
-    static void ApplyAll(const MountList *m);
+	/**
+	 * Throws std::system_error on error.
+	 */
+	static void ApplyAll(const MountList *m);
 
-    char *MakeId(char *p) const;
-    static char *MakeIdAll(char *p, const MountList *m);
+	char *MakeId(char *p) const;
+	static char *MakeIdAll(char *p, const MountList *m);
 };
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPAWN_SYSCALL_FILTER_HXX
-#define SPAWN_SYSCALL_FILTER_HXX
+#pragma once
 
 namespace Seccomp { class Filter; }
 
@@ -62,5 +61,3 @@ ForbidMulticast(Seccomp::Filter &sf);
  */
 void
 ForbidBind(Seccomp::Filter &sf);
-
-#endif

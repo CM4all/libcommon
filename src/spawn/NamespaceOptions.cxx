@@ -135,9 +135,9 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
 void
 NamespaceOptions::ReassociatePid() const
 {
-    assert(pid_namespace != nullptr);
+	assert(pid_namespace != nullptr);
 
-    ReassociatePidNamespace(pid_namespace);
+	ReassociatePidNamespace(pid_namespace);
 }
 
 void

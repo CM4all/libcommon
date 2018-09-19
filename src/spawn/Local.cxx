@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -41,28 +41,28 @@
 
 int
 LocalSpawnService::SpawnChildProcess(const char *name,
-                                     PreparedChildProcess &&params,
-                                     ExitListener *listener)
+				     PreparedChildProcess &&params,
+				     ExitListener *listener)
 {
-    if (params.uid_gid.IsEmpty())
-        params.uid_gid = config.default_uid_gid;
+	if (params.uid_gid.IsEmpty())
+		params.uid_gid = config.default_uid_gid;
 
-    pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState());
-    if (pid < 0)
-        throw MakeErrno("clone() failed");
+	pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState());
+	if (pid < 0)
+		throw MakeErrno("clone() failed");
 
-    registry.Add(pid, name, listener);
-    return pid;
+	registry.Add(pid, name, listener);
+	return pid;
 }
 
 void
 LocalSpawnService::SetExitListener(int pid, ExitListener *listener)
 {
-    registry.SetExitListener(pid, listener);
+	registry.SetExitListener(pid, listener);
 }
 
 void
 LocalSpawnService::KillChildProcess(int pid, int signo)
 {
-    registry.Kill(pid, signo);
+	registry.Kill(pid, signo);
 }

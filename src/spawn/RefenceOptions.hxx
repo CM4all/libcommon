@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_REFENCE_OPTIONS_HXX
-#define BENG_PROXY_REFENCE_OPTIONS_HXX
+#pragma once
 
 #include "util/StringView.hxx"
 
@@ -42,35 +41,33 @@ class FileDescriptor;
  * Options for Refence.
  */
 class RefenceOptions {
-    StringView data = nullptr;
+	StringView data = nullptr;
 
 public:
-    RefenceOptions() = default;
-    RefenceOptions(AllocatorPtr alloc, const RefenceOptions &src);
+	RefenceOptions() = default;
+	RefenceOptions(AllocatorPtr alloc, const RefenceOptions &src);
 
-    bool IsEmpty() const {
-        return data.empty();
-    }
+	bool IsEmpty() const {
+		return data.empty();
+	}
 
-    constexpr StringView Get() const {
-        return data;
-    }
+	constexpr StringView Get() const {
+		return data;
+	}
 
-    void Set(StringView _data) {
-        data = _data;
-    }
+	void Set(StringView _data) {
+		data = _data;
+	}
 
-    char *MakeId(char *p) const;
+	char *MakeId(char *p) const;
 
-    /**
-     * Throws std::system_error on error.
-     */
-    void Apply() const;
+	/**
+	 * Throws std::system_error on error.
+	 */
+	void Apply() const;
 
 private:
-    unsigned GetHash() const;
+	unsigned GetHash() const;
 
-    void Apply(FileDescriptor fd) const;
+	void Apply(FileDescriptor fd) const;
 };
-
-#endif

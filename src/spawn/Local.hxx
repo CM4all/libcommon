@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPAWN_LOCAL_HXX
-#define SPAWN_LOCAL_HXX
+#pragma once
 
 #include "Interface.hxx"
 #include "Config.hxx"
@@ -39,21 +38,19 @@
 class ChildProcessRegistry;
 
 class LocalSpawnService final : public SpawnService {
-    const SpawnConfig &config;
+	const SpawnConfig &config;
 
-    ChildProcessRegistry &registry;
+	ChildProcessRegistry &registry;
 
 public:
-    explicit LocalSpawnService(const SpawnConfig &_config,
-                               ChildProcessRegistry &_registry)
-        :config(_config), registry(_registry) {}
+	explicit LocalSpawnService(const SpawnConfig &_config,
+				   ChildProcessRegistry &_registry)
+		:config(_config), registry(_registry) {}
 
-    int SpawnChildProcess(const char *name, PreparedChildProcess &&params,
-                          ExitListener *listener) override;
+	int SpawnChildProcess(const char *name, PreparedChildProcess &&params,
+			      ExitListener *listener) override;
 
-    void SetExitListener(int pid, ExitListener *listener) override;
+	void SetExitListener(int pid, ExitListener *listener) override;
 
-    void KillChildProcess(int pid, int signo) override;
+	void KillChildProcess(int pid, int signo) override;
 };
-
-#endif

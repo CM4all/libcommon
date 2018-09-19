@@ -111,7 +111,7 @@ struct ChildOptions {
 	ChildOptions() = default;
 
 	constexpr ChildOptions(ShallowCopy shallow_copy, const ChildOptions &src)
-	:tag(src.tag),
+		:tag(src.tag),
 		stderr_path(src.stderr_path),
 		expand_stderr_path(src.expand_stderr_path),
 		env(shallow_copy, src.env),
