@@ -32,6 +32,7 @@
 
 #include "Direct.hxx"
 #include "Prepared.hxx"
+#include "CgroupOptions.hxx"
 #include "SeccompFilter.hxx"
 #include "SyscallFilter.hxx"
 #include "Init.hxx"
@@ -143,9 +144,11 @@ try {
 			stderr_fd = journal_fd;
 	}
 
-	p.cgroup.Apply(cgroup_state);
+	if (p.cgroup != nullptr)
+		p.cgroup->Apply(cgroup_state);
 
-	if (p.ns.enable_cgroup && p.cgroup.IsDefined()) {
+	if (p.ns.enable_cgroup &&
+	    p.cgroup != nullptr && p.cgroup->IsDefined()) {
 		/* if the process was just moved to another cgroup, we need to
 		   unshare the cgroup namespace again to hide our new cgroup
 		   membership */

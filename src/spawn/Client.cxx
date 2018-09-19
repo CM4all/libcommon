@@ -35,6 +35,7 @@
 #include "Builder.hxx"
 #include "Parser.hxx"
 #include "Prepared.hxx"
+#include "CgroupOptions.hxx"
 #include "MountList.hxx"
 #include "ExitListener.hxx"
 #include "system/Error.hxx"
@@ -277,7 +278,8 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 		s.WriteInt(p.priority);
 	}
 
-	Serialize(s, p.cgroup);
+	if (p.cgroup != nullptr)
+		Serialize(s, *p.cgroup);
 	Serialize(s, p.refence);
 	Serialize(s, p.ns);
 	Serialize(s, p.rlimits);

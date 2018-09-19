@@ -220,7 +220,7 @@ ChildOptions::CopyTo(PreparedChildProcess &dest
 	for (const char *e : env)
 		dest.PutEnv(e);
 
-	dest.cgroup = cgroup;
+	dest.cgroup = &cgroup;
 	dest.refence = refence;
 	dest.ns = ns;
 	if (rlimits != nullptr)

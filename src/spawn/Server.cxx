@@ -36,6 +36,7 @@
 #include "Parser.hxx"
 #include "Builder.hxx"
 #include "Prepared.hxx"
+#include "CgroupOptions.hxx"
 #include "Hook.hxx"
 #include "MountList.hxx"
 #include "CgroupState.hxx"
@@ -423,6 +424,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 	const char *name = payload.ReadString();
 
 	PreparedChildProcess p;
+	CgroupOptions cgroup;
 
 	MountList **mount_tail = &p.ns.mount.mounts;
 	assert(*mount_tail == nullptr);
@@ -585,11 +587,15 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::CGROUP:
-			p.cgroup.name = payload.ReadString();
+			if (p.cgroup != nullptr)
+				throw MalformedSpawnPayloadError();
+
+			cgroup.name = payload.ReadString();
+			p.cgroup = &cgroup;
 			break;
 
 		case SpawnExecCommand::CGROUP_SET:
-			{
+			if (p.cgroup != nullptr) {
 				const char *set_name = payload.ReadString();
 				const char *set_value = payload.ReadString();
 				strings.emplace_front(set_name);
@@ -599,9 +605,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 				cgroup_sets.emplace_front(set_name, set_value);
 				auto &set = cgroup_sets.front();
-				set.next = p.cgroup.set_head;
-				p.cgroup.set_head = &set;
-			}
+				set.next = cgroup.set_head;
+				cgroup.set_head = &set;
+			} else
+				throw MalformedSpawnPayloadError();
 
 			break;
 

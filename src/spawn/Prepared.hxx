@@ -33,7 +33,6 @@
 #ifndef PREPARED_CHILD_PROCESS_HXX
 #define PREPARED_CHILD_PROCESS_HXX
 
-#include "CgroupOptions.hxx"
 #include "ResourceLimits.hxx"
 #include "RefenceOptions.hxx"
 #include "NamespaceOptions.hxx"
@@ -45,6 +44,7 @@
 
 #include <assert.h>
 
+struct CgroupOptions;
 class UniqueFileDescriptor;
 class UniqueSocketDescriptor;
 template<typename T> struct ConstBuffer;
@@ -93,7 +93,7 @@ struct PreparedChildProcess {
 	 */
 	int priority = 0;
 
-	CgroupOptions cgroup;
+	const CgroupOptions *cgroup = nullptr;
 
 	RefenceOptions refence;
 
