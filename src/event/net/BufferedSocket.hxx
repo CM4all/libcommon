@@ -494,9 +494,8 @@ public:
 	/**
 	 * Mark the specified number of bytes of the input buffer as
 	 * "consumed".  Call this in the data() method.  Note that
-	 * this method does not invalidate the buffer passed to
-	 * BufferedSocketHandler::OnBufferedData().  It may be called
-	 * repeatedly.
+	 * this method does not invalidate the buffer obtained from
+	 * ReadBuffer().  It may be called repeatedly.
 	 */
 	void Consumed(size_t nbytes) noexcept;
 
