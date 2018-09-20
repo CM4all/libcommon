@@ -325,20 +325,20 @@ BufferedSocket::FillBuffer() noexcept
 		return true;
 	}
 
-	if (nbytes == 0)
-		/* socket closed */
-		return ClosedByPeer();
-
 	if (nbytes == -2) {
 		/* input buffer is full */
 		UnscheduleRead();
 		return true;
 	}
 
+	input.FreeIfEmpty();
+
+	if (nbytes == 0)
+		/* socket closed */
+		return ClosedByPeer();
+
 	if (nbytes == -1) {
 		if (errno == EAGAIN) {
-			input.FreeIfEmpty();
-
 			/* schedule read, but don't refresh timeout of old
 			   scheduled read */
 			if (!base.IsReadPending())
