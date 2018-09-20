@@ -111,7 +111,24 @@ BufferedSocket::GetAvailable() const noexcept
 }
 
 void
-BufferedSocket::Consumed(size_t nbytes) noexcept
+BufferedSocket::DisposeConsumed(size_t nbytes) noexcept
+{
+	assert(!ended);
+
+	if (nbytes == 0)
+		/* this shouldn't happen, but if a caller passes 0 and
+		   we have no buffer, the FreeIfEmpty() call may
+		   crash */
+		return;
+
+	assert(input.IsDefined());
+
+	input.Consume(nbytes);
+	input.FreeIfEmpty();
+}
+
+void
+BufferedSocket::KeepConsumed(size_t nbytes) noexcept
 {
 	assert(!ended);
 
@@ -185,7 +202,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		assert(!expect_more);
 
 		if (input.empty()) {
-			input.Free();
+			input.FreeIfDefined();
 
 			if (!IsConnected()) {
 				Ended();

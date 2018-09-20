@@ -492,12 +492,19 @@ public:
 	}
 
 	/**
+	 * Dispose the specified number of bytes from the input
+	 * buffer.  Call this after ReadBuffer().  It may be called
+	 * repeatedly.
+	 */
+	void DisposeConsumed(size_t nbytes) noexcept;
+
+	/**
 	 * Mark the specified number of bytes of the input buffer as
 	 * "consumed".  Call this after ReadBuffer().  Note that
 	 * this method does not invalidate the buffer obtained from
 	 * ReadBuffer().  It may be called repeatedly.
 	 */
-	void Consumed(size_t nbytes) noexcept;
+	void KeepConsumed(size_t nbytes) noexcept;
 
 	/**
 	 * The caller wants to read more data from the socket.  There
