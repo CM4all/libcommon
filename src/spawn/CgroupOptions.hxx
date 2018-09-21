@@ -79,6 +79,9 @@ struct CgroupOptions {
 	constexpr CgroupOptions(ShallowCopy, const CgroupOptions &src) noexcept
 		:CgroupOptions(src) {}
 
+	CgroupOptions(CgroupOptions &&) = default;
+	CgroupOptions &operator=(CgroupOptions &&) = default;
+
 private:
 	CgroupOptions(const CgroupOptions &) = default;
 	CgroupOptions &operator=(const CgroupOptions &) = delete;
