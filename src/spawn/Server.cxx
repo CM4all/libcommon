@@ -599,6 +599,13 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.cgroup = &cgroup;
 			break;
 
+		case SpawnExecCommand::CGROUP_SESSION:
+			if (p.cgroup == nullptr)
+				throw MalformedSpawnPayloadError();
+
+			cgroup.session = payload.ReadString();
+			break;
+
 		case SpawnExecCommand::CGROUP_SET:
 			if (p.cgroup != nullptr) {
 				const char *set_name = payload.ReadString();

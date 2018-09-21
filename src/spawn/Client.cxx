@@ -155,6 +155,7 @@ static void
 Serialize(SpawnSerializer &s, const CgroupOptions &c)
 {
 	s.WriteOptionalString(SpawnExecCommand::CGROUP, c.name);
+	s.WriteOptionalString(SpawnExecCommand::CGROUP_SESSION, c.session);
 
 	for (const auto *set = c.set_head; set != nullptr; set = set->next) {
 		s.Write(SpawnExecCommand::CGROUP_SET);

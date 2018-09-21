@@ -50,6 +50,12 @@ struct CgroupOptions {
 	 */
 	const char *name = nullptr;
 
+	/**
+	 * Create one child cgroup per session?  Set this to the name
+	 * of the session cgroup below the one created by #name above.
+	 */
+	const char *session = nullptr;
+
 	struct SetItem {
 		SetItem *next = nullptr;
 

@@ -80,6 +80,7 @@ enum class SpawnExecCommand : uint8_t {
 	FORBID_BIND,
 	NO_NEW_PRIVS,
 	CGROUP,
+	CGROUP_SESSION,
 	CGROUP_SET,
 	PRIORITY,
 	SCHED_IDLE_,

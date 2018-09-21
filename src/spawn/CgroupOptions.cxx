@@ -108,12 +108,28 @@ MakeCgroup(const char *mount_base_path, const char *controller,
 
 static UniqueFileDescriptor
 MoveToNewCgroup(const char *mount_base_path, const char *controller,
-		const char *delegated_group, const char *sub_group)
+		const char *delegated_group, const char *sub_group,
+		const char *session_group)
 {
 	auto fd = MakeCgroup(mount_base_path, controller,
 			     delegated_group, sub_group);
 
-	WriteFile(fd, "cgroup.procs", "0");
+	if (session_group != nullptr) {
+		if (mkdirat(fd.Get(), session_group, 0777) < 0) {
+			switch (errno) {
+			case EEXIST:
+				break;
+
+			default:
+				throw FormatErrno("mkdir('%s') failed",
+						  session_group);
+			}
+		}
+
+		auto session_fd = OpenPath(fd, session_group);
+		WriteFile(session_fd, "cgroup.procs", "0");
+	} else
+		WriteFile(fd, "cgroup.procs", "0");
 
 	return fd;
 }
@@ -133,7 +149,8 @@ CgroupOptions::Apply(const CgroupState &state) const
 	for (const auto &mount_point : state.mounts)
 		fds[mount_point] =
 			MoveToNewCgroup(mount_base_path, mount_point.c_str(),
-					state.group_path.c_str(), name);
+					state.group_path.c_str(), name,
+					session);
 
 	for (const auto *set = set_head; set != nullptr; set = set->next) {
 		const char *dot = strchr(set->name, '.');
@@ -161,6 +178,11 @@ CgroupOptions::MakeId(char *p) const noexcept
 	if (name != nullptr) {
 		p = (char *)mempcpy(p, ";cg", 3);
 		p = stpcpy(p, name);
+
+		if (session != nullptr) {
+			*p++ = '/';
+			p = stpcpy(p, session);
+		}
 	}
 
 	return p;

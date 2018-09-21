@@ -62,7 +62,6 @@ try {
 	p.stdin_fd = dup(STDIN_FILENO);
 	p.stdout_fd = dup(STDOUT_FILENO);
 	p.stderr_fd = dup(STDERR_FILENO);
-	p.session = false;
 
 	while (!args.empty() && *args.front() == '-') {
 		const char *arg = args.shift();
@@ -94,6 +93,11 @@ try {
 
 			cgroup_options.name = cgroup;
 			p.cgroup = &cgroup_options;
+		} else if (const char *session = StringAfterPrefix(arg, "--cgroup-session=")) {
+			if (p.cgroup == nullptr)
+				throw "--cgroup-session requires --cgroup";
+
+			cgroup_options.session = session;
 		} else if (const char *cgroup_set = StringAfterPrefix(arg, "--cgroup-set=")) {
 			if (p.cgroup == nullptr)
 				throw "--cgroup-set requires --cgroup";
@@ -140,7 +144,7 @@ try {
 		" [--uid=#] [--gid=#] [--userns]"
 		" [--pidns[=NAME]] [--netns[=NAME]]"
 		" [--root=PATH] [--mount-proc]"
-		" [--scope=NAME] [--cgroup=NAME] [--cgroup-set=NAME=VALUE]"
+		" [--scope=NAME] [--cgroup=NAME] [--cgroup-session=ID] [--cgroup-set=NAME=VALUE]"
 		"\n");
 	return EXIT_FAILURE;
 } catch (...) {
