@@ -493,7 +493,7 @@ public:
 
 	/**
 	 * Mark the specified number of bytes of the input buffer as
-	 * "consumed".  Call this in the data() method.  Note that
+	 * "consumed".  Call this after ReadBuffer().  Note that
 	 * this method does not invalidate the buffer obtained from
 	 * ReadBuffer().  It may be called repeatedly.
 	 */
