@@ -197,6 +197,14 @@ PreparedChildProcess::Finish()
 	}
 
 	args.push_back(nullptr);
+
+	if (GetEnv("PATH") == nullptr)
+		/* if no PATH was specified, use a sensible and secure
+		   default */
+		/* as a side effect, this overrides bash's insecure
+		   default PATH which includes "." */
+		env.push_back("PATH=/usr/local/bin:/usr/bin:/bin");
+
 	env.push_back(nullptr);
 
 	return path;
