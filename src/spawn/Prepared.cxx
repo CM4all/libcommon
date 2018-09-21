@@ -44,14 +44,18 @@ PreparedChildProcess::PreparedChildProcess()
 
 PreparedChildProcess::~PreparedChildProcess()
 {
-	if (stdin_fd >= 0)
+	/* note: the lower boundary here is 3 because we should never
+	   close 0, 1 or 2; these are the standard file descriptors
+	   and the caller still needs them */
+
+	if (stdin_fd >= 3)
 		close(stdin_fd);
-	if (stdout_fd >= 0 && stdout_fd != stdin_fd)
+	if (stdout_fd >= 3 && stdout_fd != stdin_fd)
 		close(stdout_fd);
-	if (stderr_fd >= 0 &&
+	if (stderr_fd >= 3 &&
 	    stderr_fd != stdout_fd && stderr_fd != stdin_fd)
 		close(stderr_fd);
-	if (control_fd >= 0)
+	if (control_fd >= 3)
 		close(control_fd);
 }
 
@@ -79,7 +83,7 @@ PreparedChildProcess::SetStdin(int fd)
 {
 	assert(fd != stdin_fd);
 
-	if (stdin_fd >= 0)
+	if (stdin_fd >= 3)
 		close(stdin_fd);
 	stdin_fd = fd;
 }
@@ -89,7 +93,7 @@ PreparedChildProcess::SetStdout(int fd)
 {
 	assert(fd != stdout_fd);
 
-	if (stdout_fd >= 0)
+	if (stdout_fd >= 3)
 		close(stdout_fd);
 	stdout_fd = fd;
 }
@@ -99,7 +103,7 @@ PreparedChildProcess::SetStderr(int fd)
 {
 	assert(fd != stderr_fd);
 
-	if (stderr_fd >= 0)
+	if (stderr_fd >= 3)
 		close(stderr_fd);
 	stderr_fd = fd;
 }
@@ -109,7 +113,7 @@ PreparedChildProcess::SetControl(int fd)
 {
 	assert(fd != control_fd);
 
-	if (control_fd >= 0)
+	if (control_fd >= 3)
 		close(control_fd);
 	control_fd = fd;
 }
