@@ -180,6 +180,8 @@ struct PreparedChildProcess {
 
 	void SetEnv(const char *name, const char *value);
 
+	const char *GetEnv(StringView name) const noexcept;
+
 	void SetStdin(int fd);
 	void SetStdout(int fd);
 	void SetStderr(int fd);

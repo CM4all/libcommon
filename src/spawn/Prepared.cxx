@@ -34,6 +34,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/ConstBuffer.hxx"
+#include "util/StringCompare.hxx"
 
 #include <string.h>
 #include <unistd.h>
@@ -76,6 +77,21 @@ PreparedChildProcess::SetEnv(const char *name, const char *value)
 	s.push_back('=');
 	s.append(value);
 	PutEnv(s.c_str());
+}
+
+const char *
+PreparedChildProcess::GetEnv(StringView name) const noexcept
+{
+	for (const char *i : env) {
+		if (i == nullptr)
+			break;
+
+		const char *s = StringAfterPrefix(i, name);
+		if (s != nullptr && *s == '=')
+			return s + 1;
+	}
+
+	return nullptr;
 }
 
 void
