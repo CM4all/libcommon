@@ -33,9 +33,12 @@
 #include "spawn/Direct.hxx"
 #include "spawn/Prepared.hxx"
 #include "spawn/CgroupState.hxx"
+#include "spawn/CgroupOptions.hxx"
+#include "spawn/Systemd.hxx"
 #include "system/Error.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
+#include "AllocatorPtr.hxx"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -48,9 +51,12 @@ main(int argc, char **argv)
 try {
 	ConstBuffer<const char *> args(argv + 1, argc - 1);
 
-	const CgroupState cgroup_state;
+	const char *scope_name;
 
+	Allocator alloc;
 	PreparedChildProcess p;
+	CgroupOptions cgroup_options;
+
 	p.exec_path = "/bin/bash";
 	p.args.emplace_back("bash");
 	p.stdin_fd = dup(STDIN_FILENO);
@@ -80,9 +86,32 @@ try {
 		} else if (StringIsEqual(arg, "--mount-proc")) {
 			p.ns.mount.enable_mount = true;
 			p.ns.mount.mount_proc = true;
+		} else if (const char *scope = StringAfterPrefix(arg, "--scope=")) {
+			scope_name = scope;
+		} else if (const char *cgroup = StringAfterPrefix(arg, "--cgroup=")) {
+			if (scope_name == nullptr)
+				throw "--cgroup requires --scope";
+
+			cgroup_options.name = cgroup;
+			p.cgroup = &cgroup_options;
+		} else if (const char *cgroup_set = StringAfterPrefix(arg, "--cgroup-set=")) {
+			if (p.cgroup == nullptr)
+				throw "--cgroup-set requires --cgroup";
+
+			const char *eq = strchr(cgroup_set, '=');
+			if (eq == nullptr || eq == cgroup_set)
+				throw "Malformed --cgroup-set value";
+
+			cgroup_options.Set(alloc, StringView(cgroup_set, eq),
+					   StringView(eq + 1));
 		} else
 			throw Usage();
 	}
+
+	const CgroupState cgroup_state = scope_name != nullptr
+		? CreateSystemdScope(scope_name, scope_name,
+				     getpid(), true, nullptr)
+		: CgroupState();
 
 	const auto pid = SpawnChildProcess(std::move(p), cgroup_state);
 
@@ -106,7 +135,12 @@ try {
 	fprintf(stderr, "%s\n", msg);
 	return EXIT_FAILURE;
 } catch (Usage) {
-	fprintf(stderr, "Usage: RunSpawn [--uid=#] [--gid=#] [--userns] [--pidns[=NAME]] [--netns[=NAME]] [--root=PATH] [--mount-proc]\n");
+	fprintf(stderr, "Usage: RunSpawn"
+		" [--uid=#] [--gid=#] [--userns]"
+		" [--pidns[=NAME]] [--netns[=NAME]]"
+		" [--root=PATH] [--mount-proc]"
+		" [--scope=NAME] [--cgroup=NAME] [--cgroup-set=NAME=VALUE]"
+		"\n");
 	return EXIT_FAILURE;
 } catch (...) {
 	PrintException(std::current_exception());
