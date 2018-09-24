@@ -82,8 +82,8 @@ WriteFile(FileDescriptor fd, const char *path, const char *data)
 }
 
 static UniqueFileDescriptor
-MoveToNewCgroup(const char *mount_base_path, const char *controller,
-		const char *delegated_group, const char *sub_group)
+MakeCgroup(const char *mount_base_path, const char *controller,
+	   const char *delegated_group, const char *sub_group)
 {
 	char path[PATH_MAX];
 
@@ -103,7 +103,15 @@ MoveToNewCgroup(const char *mount_base_path, const char *controller,
 		}
 	}
 
-	auto fd = OpenPath(path);
+	return OpenPath(path);
+}
+
+static UniqueFileDescriptor
+MoveToNewCgroup(const char *mount_base_path, const char *controller,
+		const char *delegated_group, const char *sub_group)
+{
+	auto fd = MakeCgroup(mount_base_path, controller,
+			     delegated_group, sub_group);
 
 	WriteFile(fd, "cgroup.procs", "0");
 
