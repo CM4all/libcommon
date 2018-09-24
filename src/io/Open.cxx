@@ -1,8 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
- * All rights reserved.
- *
- * author: Max Kellermann <mk@cm4all.com>
+ * Copyright 2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,33 +27,62 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "NetworkNamespace.hxx"
+#include "Open.hxx"
+#include "UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
-#include "io/UniqueFileDescriptor.hxx"
-#include "io/Open.hxx"
 
-#include <sched.h>
+#include <fcntl.h>
 
-/**
- * Open a network namespace in /run/netns.
- */
-static UniqueFileDescriptor
-OpenNetworkNS(const char *name)
+UniqueFileDescriptor
+OpenReadOnly(const char *path)
 {
-	char path[4096];
-	if (snprintf(path, sizeof(path),
-		     "/run/netns/%s", name) >= (int)sizeof(path))
-		throw std::runtime_error("Network namespace name is too long");
+	UniqueFileDescriptor fd;
+	if (!fd.OpenReadOnly(path))
+		throw FormatErrno("Failed to open '%s'", path);
 
-	return OpenReadOnly(path);
+	return fd;
 }
 
-void
-ReassociateNetworkNamespace(const char *name)
-{
-	assert(name != nullptr);
+#ifdef __linux__
 
-	if (setns(OpenNetworkNS(name).Get(), CLONE_NEWNET) < 0)
-		throw FormatErrno("Failed to reassociate with network namespace '%s'",
-				  name);
+UniqueFileDescriptor
+OpenPath(const char *path, int flags)
+{
+	UniqueFileDescriptor fd;
+	if (!fd.Open(path, O_PATH|flags))
+		throw FormatErrno("Failed to open '%s'", path);
+
+	return fd;
 }
+
+UniqueFileDescriptor
+OpenPath(FileDescriptor directory, const char *name, int flags)
+{
+	UniqueFileDescriptor fd;
+	if (!fd.Open(directory, name, O_PATH|flags))
+		throw FormatErrno("Failed to open '%s'", name);
+
+	return fd;
+}
+
+UniqueFileDescriptor
+OpenReadOnly(FileDescriptor directory, const char *name, int flags)
+{
+	UniqueFileDescriptor fd;
+	if (!fd.Open(directory, name, O_RDONLY|flags))
+		throw FormatErrno("Failed to open '%s'", name);
+
+	return fd;
+}
+
+UniqueFileDescriptor
+OpenDirectory(FileDescriptor directory, const char *name, int flags)
+{
+	UniqueFileDescriptor fd;
+	if (!fd.Open(directory, name, O_DIRECTORY|O_RDONLY|flags))
+		throw FormatErrno("Failed to open '%s'", name);
+
+	return fd;
+}
+
+#endif

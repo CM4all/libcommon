@@ -1,8 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
- * All rights reserved.
- *
- * author: Max Kellermann <mk@cm4all.com>
+ * Copyright 2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,33 +27,29 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "NetworkNamespace.hxx"
-#include "system/Error.hxx"
-#include "io/UniqueFileDescriptor.hxx"
-#include "io/Open.hxx"
+#ifndef OPEN_HXX
+#define OPEN_HXX
 
-#include <sched.h>
+class FileDescriptor;
+class UniqueFileDescriptor;
 
-/**
- * Open a network namespace in /run/netns.
- */
-static UniqueFileDescriptor
-OpenNetworkNS(const char *name)
-{
-	char path[4096];
-	if (snprintf(path, sizeof(path),
-		     "/run/netns/%s", name) >= (int)sizeof(path))
-		throw std::runtime_error("Network namespace name is too long");
+UniqueFileDescriptor
+OpenReadOnly(const char *path);
 
-	return OpenReadOnly(path);
-}
+#ifdef __linux__
 
-void
-ReassociateNetworkNamespace(const char *name)
-{
-	assert(name != nullptr);
+UniqueFileDescriptor
+OpenPath(const char *path, int flags=0);
 
-	if (setns(OpenNetworkNS(name).Get(), CLONE_NEWNET) < 0)
-		throw FormatErrno("Failed to reassociate with network namespace '%s'",
-				  name);
-}
+UniqueFileDescriptor
+OpenPath(FileDescriptor directory, const char *name, int flags=0);
+
+UniqueFileDescriptor
+OpenReadOnly(FileDescriptor directory, const char *name, int flags=0);
+
+UniqueFileDescriptor
+OpenDirectory(FileDescriptor directory, const char *name, int flags=0);
+
+#endif
+
+#endif

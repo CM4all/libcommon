@@ -3,6 +3,7 @@ boost = dependency('boost', modules: ['system', 'filesystem'], version: '>= 1.54
 io = static_library(
   'io',
   'FileDescriptor.cxx',
+  'Open.cxx',
   'WriteFile.cxx',
   'WriteBuffer.cxx',
   'MultiWriteBuffer.cxx',
