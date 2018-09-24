@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,8 @@
 #ifndef WRITE_FILE_HXX
 #define WRITE_FILE_HXX
 
+class FileDescriptor;
+
 enum class WriteFileResult {
 	/**
 	 * The operation was successful.
@@ -55,5 +57,18 @@ enum class WriteFileResult {
  */
 WriteFileResult
 TryWriteExistingFile(const char *path, const char *value) noexcept;
+
+#ifdef __linux__
+
+/**
+ * Attempt to write a string to the given file.  It must already
+ * exist, and it is not truncated or appended.  This function is
+ * useful to write "special" files like the ones in /proc.
+ */
+WriteFileResult
+TryWriteExistingFile(FileDescriptor directory, const char *path,
+		     const char *value) noexcept;
+
+#endif
 
 #endif

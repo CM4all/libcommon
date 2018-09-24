@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2018 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -61,4 +61,23 @@ WriteFileResult
 TryWriteExistingFile(const char *path, const char *value) noexcept
 {
 	return TryWriteExistingFile(path, StringView(value).ToVoid());
+}
+
+static WriteFileResult
+TryWriteExistingFile(FileDescriptor directory, const char *path,
+		     ConstBuffer<void> value) noexcept
+{
+	UniqueFileDescriptor fd;
+	if (!fd.Open(directory, path, O_WRONLY))
+		return WriteFileResult::ERROR;
+
+	return TryWrite(fd, value);
+}
+
+WriteFileResult
+TryWriteExistingFile(FileDescriptor directory, const char *path,
+		     const char *value) noexcept
+{
+	return TryWriteExistingFile(directory, path,
+				    StringView(value).ToVoid());
 }
