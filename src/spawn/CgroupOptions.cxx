@@ -81,7 +81,7 @@ WriteFile(FileDescriptor fd, const char *path, const char *data)
 		throw FormatErrno("write('%s') failed", path);
 }
 
-static void
+static UniqueFileDescriptor
 MoveToNewCgroup(const char *mount_base_path, const char *controller,
 		const char *delegated_group, const char *sub_group)
 {
@@ -106,6 +106,8 @@ MoveToNewCgroup(const char *mount_base_path, const char *controller,
 	auto fd = OpenPath(path);
 
 	WriteFile(fd, "cgroup.procs", "0");
+
+	return fd;
 }
 
 void
@@ -119,9 +121,11 @@ CgroupOptions::Apply(const CgroupState &state) const
 
 	const auto mount_base_path = "/sys/fs/cgroup";
 
+	std::map<std::string, UniqueFileDescriptor> fds;
 	for (const auto &mount_point : state.mounts)
-		MoveToNewCgroup(mount_base_path, mount_point.c_str(),
-				state.group_path.c_str(), name);
+		fds[mount_point] =
+			MoveToNewCgroup(mount_base_path, mount_point.c_str(),
+					state.group_path.c_str(), name);
 
 	for (const auto *set = set_head; set != nullptr; set = set->next) {
 		const char *dot = strchr(set->name, '.');
@@ -135,14 +139,10 @@ CgroupOptions::Apply(const CgroupState &state) const
 
 		const std::string &mount_point = i->second;
 
-		char path[PATH_MAX];
+		const auto j = fds.find(mount_point);
+		assert(j != fds.end());
 
-		if (snprintf(path, sizeof(path), "%s/%s%s/%s",
-			     mount_base_path, mount_point.c_str(),
-			     state.group_path.c_str(), name) >= (int)sizeof(path))
-			throw std::runtime_error("Path is too long");
-
-		const auto fd = OpenPath(path);
+		const FileDescriptor fd = j->second;
 		WriteFile(fd, set->name, set->value);
 	}
 }
