@@ -36,12 +36,8 @@
 #include <fcntl.h>
 
 static WriteFileResult
-TryWriteExistingFile(const char *path, ConstBuffer<void> value) noexcept
+TryWrite(FileDescriptor fd, ConstBuffer<void> value) noexcept
 {
-	UniqueFileDescriptor fd;
-	if (!fd.Open(path, O_WRONLY))
-		return WriteFileResult::ERROR;
-
 	ssize_t nbytes = fd.Write(value.data, value.size);
 	if (nbytes < 0)
 		return WriteFileResult::ERROR;
@@ -49,6 +45,16 @@ TryWriteExistingFile(const char *path, ConstBuffer<void> value) noexcept
 		return WriteFileResult::SUCCESS;
 	else
 		return WriteFileResult::SHORT;
+}
+
+static WriteFileResult
+TryWriteExistingFile(const char *path, ConstBuffer<void> value) noexcept
+{
+	UniqueFileDescriptor fd;
+	if (!fd.Open(path, O_WRONLY))
+		return WriteFileResult::ERROR;
+
+	return TryWrite(fd, value);
 }
 
 WriteFileResult
