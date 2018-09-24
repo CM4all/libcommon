@@ -36,7 +36,7 @@
 #include <fcntl.h>
 
 static WriteFileResult
-TryWriteExistingFile(const char *path, ConstBuffer<void> value)
+TryWriteExistingFile(const char *path, ConstBuffer<void> value) noexcept
 {
 	UniqueFileDescriptor fd;
 	if (!fd.Open(path, O_WRONLY))
@@ -52,7 +52,7 @@ TryWriteExistingFile(const char *path, ConstBuffer<void> value)
 }
 
 WriteFileResult
-TryWriteExistingFile(const char *path, const char *value)
+TryWriteExistingFile(const char *path, const char *value) noexcept
 {
 	return TryWriteExistingFile(path, StringView(value).ToVoid());
 }

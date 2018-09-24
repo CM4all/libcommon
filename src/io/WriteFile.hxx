@@ -54,6 +54,6 @@ enum class WriteFileResult {
  * useful to write "special" files like the ones in /proc.
  */
 WriteFileResult
-TryWriteExistingFile(const char *path, const char *value);
+TryWriteExistingFile(const char *path, const char *value) noexcept;
 
 #endif
