@@ -34,6 +34,8 @@
 #include "CgroupState.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
+#include "io/Open.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "util/StringView.hxx"
 #include "util/RuntimeError.hxx"
@@ -73,9 +75,9 @@ CgroupOptions::Set(AllocatorPtr alloc,
 }
 
 static void
-WriteFile(const char *path, const char *data)
+WriteFile(FileDescriptor fd, const char *path, const char *data)
 {
-	if (TryWriteExistingFile(path, data) == WriteFileResult::ERROR)
+	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
 		throw FormatErrno("write('%s') failed", path);
 }
 
@@ -101,8 +103,9 @@ MoveToNewCgroup(const char *mount_base_path, const char *controller,
 		}
 	}
 
-	strcat(path, "/cgroup.procs");
-	WriteFile(path, "0");
+	auto fd = OpenPath(path);
+
+	WriteFile(fd, "cgroup.procs", "0");
 }
 
 void
@@ -134,13 +137,13 @@ CgroupOptions::Apply(const CgroupState &state) const
 
 		char path[PATH_MAX];
 
-		if (snprintf(path, sizeof(path), "%s/%s%s/%s/%s",
+		if (snprintf(path, sizeof(path), "%s/%s%s/%s",
 			     mount_base_path, mount_point.c_str(),
-			     state.group_path.c_str(), name,
-			     set->name) >= (int)sizeof(path))
+			     state.group_path.c_str(), name) >= (int)sizeof(path))
 			throw std::runtime_error("Path is too long");
 
-		WriteFile(path, set->value);
+		const auto fd = OpenPath(path);
+		WriteFile(fd, set->name, set->value);
 	}
 }
 
