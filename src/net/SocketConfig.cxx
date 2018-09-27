@@ -142,6 +142,9 @@ SocketConfig::Create(int type) const
 			fd.SetTcpUserTimeout(tcp_user_timeout);
 	}
 
+	if (keepalive)
+		fd.SetKeepalive();
+
 	if (listen > 0 && !fd.Listen(listen))
 		throw MakeErrno("Failed to listen");
 

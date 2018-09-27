@@ -79,6 +79,11 @@ struct SocketConfig {
 
 	bool pass_cred = false;
 
+	/**
+	 * @see SO_KEEPALIVE
+	 */
+	bool keepalive = false;
+
 	SocketConfig() = default;
 
 	explicit SocketConfig(SocketAddress _bind_address)
