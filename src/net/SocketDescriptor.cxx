@@ -236,6 +236,12 @@ SocketDescriptor::SetOption(int level, int name,
 	return setsockopt(fd, level, name, value, size) == 0;
 }
 
+bool
+SocketDescriptor::SetKeepalive(bool value) noexcept
+{
+	return SetBoolOption(SOL_SOCKET, SO_KEEPALIVE, value);
+}
+
 #ifdef __linux__
 
 bool

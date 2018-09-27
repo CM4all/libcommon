@@ -169,6 +169,8 @@ public:
 		return SetOption(level, name, &value, sizeof(value));
 	}
 
+	bool SetKeepalive(bool value=true) noexcept;
+
 #ifdef __linux__
 	bool SetReuseAddress(bool value=true) noexcept;
 	bool SetReusePort(bool value=true) noexcept;
