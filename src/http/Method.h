@@ -36,6 +36,11 @@
 #include <assert.h>
 
 typedef enum {
+	/* The values below are part of the logging protocol (see
+	   net/log/Protocol.hxx); it must be kept stable and in this
+	   order.  Add new values at the end, right before
+	   HTTP_METHOD_INVALID. */
+
 	HTTP_METHOD_NULL = 0,
 	HTTP_METHOD_HEAD,
 	HTTP_METHOD_GET,
@@ -56,6 +61,9 @@ typedef enum {
 
 	/* RFC 5789 */
 	HTTP_METHOD_PATCH,
+
+	/* Versioning Extensions to WebDAV methods (RFC3253) */
+	HTTP_METHOD_REPORT,
 
 	HTTP_METHOD_INVALID,
 } http_method_t;

@@ -52,4 +52,7 @@ const char *const http_method_to_string_data[HTTP_METHOD_INVALID] = {
 
 	/* RFC 5789 */
 	[HTTP_METHOD_PATCH] = "PATCH",
+
+	/* Versioning Extensions to WebDAV methods (RFC3253) */
+	[HTTP_METHOD_REPORT] = "REPORT",
 };
