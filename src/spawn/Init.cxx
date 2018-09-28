@@ -137,7 +137,7 @@ SpawnInit(pid_t child_pid, bool remain)
 	if (geteuid() == 0)
 		DropCapabilities();
 
-	FileDescriptor init_signal_fd;
+	FileDescriptor init_signal_fd = FileDescriptor::Undefined();
 	if (!init_signal_fd.CreateSignalFD(&init_signal_mask, false))
 		throw MakeErrno("signalfd() failed");
 
