@@ -103,18 +103,6 @@ struct TranslateResponse {
     ResourceAddress address;
 #endif
 
-#if TRANSLATION_ENABLE_HTTP
-    /**
-     * Which request headers are forwarded?
-     */
-    struct header_forward_settings request_header_forward;
-
-    /**
-     * Which response headers are forwarded?
-     */
-    struct header_forward_settings response_header_forward;
-#endif
-
     const char *base;
 
 #if TRANSLATION_ENABLE_CACHE
@@ -165,91 +153,7 @@ struct TranslateResponse {
      */
     const char *expand_test_path;
 
-    bool uncached;
-
-#if TRANSLATION_ENABLE_RADDRESS
-    bool unsafe_base;
-
-    bool easy_base;
-#endif
-
-#if TRANSLATION_ENABLE_CACHE
-    bool regex_tail, regex_unescape, inverse_regex_unescape;
-#endif
-
-#if TRANSLATION_ENABLE_WIDGET
-    bool direct_addressing;
-#endif
-
 #if TRANSLATION_ENABLE_SESSION
-    bool stateful;
-
-    bool discard_session;
-
-    bool secure_cookie;
-#endif
-
-#if TRANSLATION_ENABLE_TRANSFORMATION
-    bool filter_4xx;
-#endif
-
-    bool previous;
-
-    bool transparent;
-
-#if TRANSLATION_ENABLE_HTTP
-    bool redirect_query_string;
-    bool redirect_full_uri;
-
-    /**
-     * Non-zero means the TranslationCommand::HTTPS_ONLY packet was
-     * received, and the value is the port number.
-     */
-    uint16_t https_only;
-#endif
-
-#if TRANSLATION_ENABLE_RADDRESS
-    bool auto_base;
-#endif
-
-#if TRANSLATION_ENABLE_WIDGET
-    bool widget_info;
-
-    bool anchor_absolute;
-#endif
-
-#if TRANSLATION_ENABLE_HTTP
-    bool dump_headers;
-#endif
-
-#if TRANSLATION_ENABLE_CACHE
-    /**
-     * @see #TranslationCommand::REGEX_ON_HOST_URI
-     */
-    bool regex_on_host_uri;
-
-    /**
-     * @see #TranslationCommand::REGEX_ON_USER_URI
-     */
-    bool regex_on_user_uri;
-#endif
-
-    /**
-     * @see #TranslationCommand::AUTO_DEFLATE
-     */
-    bool auto_deflate;
-
-    /**
-     * @see #TranslationCommand::AUTO_GZIP
-     */
-    bool auto_gzip;
-
-#if TRANSLATION_ENABLE_SESSION
-    /**
-     * @see #TranslationCommand::REALM_FROM_AUTH_BASE
-     */
-    bool realm_from_auth_base;
-
     ConstBuffer<void> session;
 #endif
 
@@ -305,7 +209,6 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_SESSION
     const char *user;
-    std::chrono::duration<uint32_t> user_max_age;
 
     const char *session_site;
 
@@ -314,7 +217,6 @@ struct TranslateResponse {
     const char *realm;
 
     HttpAddress *external_session_manager;
-    std::chrono::duration<uint16_t> external_session_keepalive;
 
     /**
      * The value of the "WWW-Authenticate" HTTP response header.
@@ -392,6 +294,107 @@ struct TranslateResponse {
         uint64_t mtime;
         const char *path;
     } validate_mtime;
+
+#if TRANSLATION_ENABLE_SESSION
+    std::chrono::duration<uint32_t> user_max_age;
+    std::chrono::duration<uint16_t> external_session_keepalive;
+#endif
+
+#if TRANSLATION_ENABLE_HTTP
+    /**
+     * Non-zero means the TranslationCommand::HTTPS_ONLY packet was
+     * received, and the value is the port number.
+     */
+    uint16_t https_only;
+
+    /**
+     * Which request headers are forwarded?
+     */
+    struct header_forward_settings request_header_forward;
+
+    /**
+     * Which response headers are forwarded?
+     */
+    struct header_forward_settings response_header_forward;
+#endif
+
+    bool uncached;
+
+#if TRANSLATION_ENABLE_RADDRESS
+    bool unsafe_base;
+
+    bool easy_base;
+#endif
+
+#if TRANSLATION_ENABLE_CACHE
+    bool regex_tail, regex_unescape, inverse_regex_unescape;
+#endif
+
+#if TRANSLATION_ENABLE_WIDGET
+    bool direct_addressing;
+#endif
+
+#if TRANSLATION_ENABLE_SESSION
+    bool stateful;
+
+    bool discard_session;
+
+    bool secure_cookie;
+
+    /**
+     * @see #TranslationCommand::REALM_FROM_AUTH_BASE
+     */
+    bool realm_from_auth_base;
+#endif
+
+#if TRANSLATION_ENABLE_TRANSFORMATION
+    bool filter_4xx;
+#endif
+
+    bool previous;
+
+    bool transparent;
+
+#if TRANSLATION_ENABLE_HTTP
+    bool redirect_query_string;
+    bool redirect_full_uri;
+#endif
+
+#if TRANSLATION_ENABLE_RADDRESS
+    bool auto_base;
+#endif
+
+#if TRANSLATION_ENABLE_WIDGET
+    bool widget_info;
+
+    bool anchor_absolute;
+#endif
+
+#if TRANSLATION_ENABLE_HTTP
+    bool dump_headers;
+#endif
+
+#if TRANSLATION_ENABLE_CACHE
+    /**
+     * @see #TranslationCommand::REGEX_ON_HOST_URI
+     */
+    bool regex_on_host_uri;
+
+    /**
+     * @see #TranslationCommand::REGEX_ON_USER_URI
+     */
+    bool regex_on_user_uri;
+#endif
+
+    /**
+     * @see #TranslationCommand::AUTO_DEFLATE
+     */
+    bool auto_deflate;
+
+    /**
+     * @see #TranslationCommand::AUTO_GZIP
+     */
+    bool auto_gzip;
 
     TranslateResponse() = default;
     TranslateResponse(TranslateResponse &&) = default;
