@@ -72,12 +72,12 @@ struct TranslateResponse {
      */
     unsigned protocol_version;
 
-    std::chrono::seconds max_age;
+    std::chrono::duration<uint32_t> max_age;
 
     /**
      * From #TranslationCommand::EXPIRES_RELATIVE
      */
-    std::chrono::seconds expires_relative;
+    std::chrono::duration<uint32_t> expires_relative;
 
 #if TRANSLATION_ENABLE_HTTP
     http_status_t status;
@@ -306,7 +306,7 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_SESSION
     const char *user;
-    std::chrono::seconds user_max_age;
+    std::chrono::duration<uint32_t> user_max_age;
 
     const char *session_site;
 
