@@ -75,6 +75,8 @@ TranslateResponse::Clear()
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
+    using namespace BengProxy;
+
     request_header_forward =
         (struct header_forward_settings){
         .modes = {

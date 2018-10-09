@@ -275,8 +275,9 @@ static void
 parse_header_forward(struct header_forward_settings *settings,
                      const void *payload, size_t payload_length)
 {
-    const beng_header_forward_packet *packet =
-        (const beng_header_forward_packet *)payload;
+    using namespace BengProxy;
+    const auto *packet =
+        (const HeaderForwardPacket *)payload;
 
     if (payload_length % sizeof(*packet) != 0)
         throw std::runtime_error("malformed header forward packet");
@@ -294,9 +295,9 @@ parse_header_forward(struct header_forward_settings *settings,
         if (packet->group == HEADER_GROUP_ALL) {
             for (unsigned i = 0; i < HEADER_GROUP_MAX; ++i)
                 if (i != HEADER_GROUP_SECURE && i != HEADER_GROUP_SSL)
-                    settings->modes[i] = beng_header_forward_mode(packet->mode);
+                    settings->modes[i] = HeaderForwardMode(packet->mode);
         } else
-            settings->modes[packet->group] = beng_header_forward_mode(packet->mode);
+            settings->modes[packet->group] = HeaderForwardMode(packet->mode);
 
         ++packet;
         payload_length -= sizeof(*packet);
