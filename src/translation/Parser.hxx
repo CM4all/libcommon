@@ -37,6 +37,7 @@
 #include "Response.hxx"
 #include "adata/ExpandableStringList.hxx"
 #include "AllocatorPtr.hxx"
+#include "util/TrivialArray.hxx"
 
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
 #include "translation/Request.hxx"
@@ -102,6 +103,8 @@ class TranslateParser {
     TranslateResponse response;
 
     TranslationCommand previous_command;
+
+    TrivialArray<const char *, 16> probe_suffixes_builder;
 
 #if TRANSLATION_ENABLE_RADDRESS
     /** the current resource address being edited */

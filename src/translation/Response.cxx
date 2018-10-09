@@ -244,22 +244,11 @@ TranslateResponse::Clear()
 #endif
     error_document = nullptr;
     probe_path_suffixes = nullptr;
-    probe_suffixes.clear();
+    probe_suffixes = nullptr;
     read_file = expand_read_file = nullptr;
 
     validate_mtime.mtime = 0;
     validate_mtime.path = nullptr;
-}
-
-template<size_t N>
-static void
-CopyArray(AllocatorPtr alloc, TrivialArray<const char *, N> &dest,
-          const TrivialArray<const char *, N> &src)
-{
-    const size_t size = src.size();
-    dest.resize(size);
-    for (size_t i = 0; i < size; ++i)
-        dest[i] = alloc.Dup(src[i]);
 }
 
 void
@@ -447,7 +436,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
     error_document = alloc.Dup(src.error_document);
     probe_path_suffixes = alloc.Dup(src.probe_path_suffixes);
-    CopyArray(alloc, probe_suffixes, src.probe_suffixes);
+    probe_suffixes = alloc.Dup(src.probe_suffixes);
     read_file = alloc.CheckDup(src.read_file);
     expand_read_file = alloc.CheckDup(src.expand_read_file);
 

@@ -357,7 +357,9 @@ FinishJailParams(JailParams *jail,
  * Throws std::runtime_error on error.
  */
 static void
-FinishTranslateResponse(TranslateResponse &response)
+FinishTranslateResponse(AllocatorPtr alloc,
+                        TranslateResponse &response,
+                        ConstBuffer<const char *> probe_suffixes)
 {
 #if TRANSLATION_ENABLE_RADDRESS
     if (response.easy_base && !response.address.IsValidBase())
@@ -403,6 +405,9 @@ FinishTranslateResponse(TranslateResponse &response)
     response.request_headers.Reverse();
     response.response_headers.Reverse();
 #endif
+
+    if (!probe_suffixes.IsNull())
+        response.probe_suffixes = alloc.Dup(probe_suffixes);
 
     if (!response.probe_path_suffixes.IsNull() &&
         response.probe_suffixes.empty())
@@ -2726,13 +2731,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.probe_path_suffixes.IsNull())
             throw std::runtime_error("misplaced PROBE_SUFFIX packet");
 
-        if (response.probe_suffixes.full())
+        if (probe_suffixes_builder.full())
             throw std::runtime_error("too many PROBE_SUFFIX packets");
 
         if (!CheckProbeSuffix(payload, payload_length))
             throw std::runtime_error("malformed PROBE_SUFFIX packets");
 
-        response.probe_suffixes.push_back(payload);
+        probe_suffixes_builder.push_back(payload);
         return;
 
     case TranslationCommand::AUTH_FILE:
@@ -3410,7 +3415,8 @@ TranslateParser::HandlePacket(TranslationCommand command,
 
     switch (command) {
     case TranslationCommand::END:
-        FinishTranslateResponse(response);
+        FinishTranslateResponse(alloc, response,
+                                {&probe_suffixes_builder.front(), probe_suffixes_builder.size()});
 
 #if TRANSLATION_ENABLE_WIDGET
         FinishView();

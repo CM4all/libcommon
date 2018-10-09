@@ -35,7 +35,6 @@
 
 #include "translation/Features.hxx"
 #include "util/ConstBuffer.hxx"
-#include "util/TrivialArray.hxx"
 #if TRANSLATION_ENABLE_HTTP
 #include "util/kvlist.hxx"
 #include "bp/ForwardHeaders.hxx"
@@ -385,7 +384,7 @@ struct TranslateResponse {
      */
     ConstBuffer<void> probe_path_suffixes;
 
-    TrivialArray<const char *, 16> probe_suffixes;
+    ConstBuffer<const char *> probe_suffixes;
 
     const char *read_file, *expand_read_file;
 
