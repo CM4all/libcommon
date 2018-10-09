@@ -283,18 +283,19 @@ parse_header_forward(struct header_forward_settings *settings,
         throw std::runtime_error("malformed header forward packet");
 
     while (payload_length > 0) {
-        if (packet->group < HEADER_GROUP_ALL ||
-            packet->group >= HEADER_GROUP_MAX ||
-            (packet->mode != HEADER_FORWARD_NO &&
-             packet->mode != HEADER_FORWARD_YES &&
-             packet->mode != HEADER_FORWARD_BOTH &&
-             packet->mode != HEADER_FORWARD_MANGLE) ||
+        if (packet->group < int(HeaderGroup::ALL) ||
+            packet->group >= int(HeaderGroup::MAX) ||
+            (packet->mode != unsigned(HeaderForwardMode::NO) &&
+             packet->mode != unsigned(HeaderForwardMode::YES) &&
+             packet->mode != unsigned(HeaderForwardMode::BOTH) &&
+             packet->mode != unsigned(HeaderForwardMode::MANGLE)) ||
             packet->reserved != 0)
             throw std::runtime_error("malformed header forward packet");
 
-        if (packet->group == HEADER_GROUP_ALL) {
-            for (unsigned i = 0; i < HEADER_GROUP_MAX; ++i)
-                if (i != HEADER_GROUP_SECURE && i != HEADER_GROUP_SSL)
+        if (HeaderGroup(packet->group) == HeaderGroup::ALL) {
+            for (unsigned i = 0; i < unsigned(HeaderGroup::MAX); ++i)
+                if (HeaderGroup(i) != HeaderGroup::SECURE &&
+                    HeaderGroup(i) != HeaderGroup::SSL)
                     settings->modes[i] = HeaderForwardMode(packet->mode);
         } else
             settings->modes[packet->group] = HeaderForwardMode(packet->mode);
