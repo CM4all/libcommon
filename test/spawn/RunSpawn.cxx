@@ -51,7 +51,7 @@ main(int argc, char **argv)
 try {
 	ConstBuffer<const char *> args(argv + 1, argc - 1);
 
-	const char *scope_name;
+	const char *scope_name = nullptr;
 
 	Allocator alloc;
 	PreparedChildProcess p;
