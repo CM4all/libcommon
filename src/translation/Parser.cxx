@@ -332,9 +332,9 @@ parse_header(AllocatorPtr alloc,
  * Throws std::runtime_error on error.
  */
 static void
-translate_jail_finish(JailParams *jail,
-                      const TranslateResponse *response,
-                      const char *document_root)
+FinishJailParams(JailParams *jail,
+                 const TranslateResponse &response,
+                 const char *document_root)
 {
     if (jail == nullptr || !jail->enabled)
         return;
@@ -346,7 +346,7 @@ translate_jail_finish(JailParams *jail,
         throw std::runtime_error("No home directory for JAIL");
 
     if (jail->site_id == nullptr)
-        jail->site_id = response->site;
+        jail->site_id = response.site;
 }
 
 #endif
@@ -357,64 +357,64 @@ translate_jail_finish(JailParams *jail,
  * Throws std::runtime_error on error.
  */
 static void
-translate_response_finish(TranslateResponse *response)
+FinishTranslateResponse(TranslateResponse &response)
 {
 #if TRANSLATION_ENABLE_RADDRESS
-    if (response->easy_base && !response->address.IsValidBase())
+    if (response.easy_base && !response.address.IsValidBase())
         /* EASY_BASE was enabled, but the resource address does not
            end with a slash, thus LoadBase() cannot work */
         throw std::runtime_error("Invalid base address");
 
-    if (response->address.IsCgiAlike()) {
-        auto &cgi = response->address.GetCgi();
+    if (response.address.IsCgiAlike()) {
+        auto &cgi = response.address.GetCgi();
 
         if (cgi.uri == nullptr)
-            cgi.uri = response->uri;
+            cgi.uri = response.uri;
 
         if (cgi.expand_uri == nullptr)
-            cgi.expand_uri = response->expand_uri;
+            cgi.expand_uri = response.expand_uri;
 
         if (cgi.document_root == nullptr)
-            cgi.document_root = response->document_root;
+            cgi.document_root = response.document_root;
 
-        translate_jail_finish(cgi.options.jail,
-                              response, cgi.document_root);
-    } else if (response->address.type == ResourceAddress::Type::LOCAL) {
-        auto &file = response->address.GetFile();
+        FinishJailParams(cgi.options.jail,
+                         response, cgi.document_root);
+    } else if (response.address.type == ResourceAddress::Type::LOCAL) {
+        auto &file = response.address.GetFile();
 
         if (file.delegate != nullptr) {
             if (file.delegate->child_options.jail != nullptr &&
                 file.delegate->child_options.jail->enabled &&
                 file.document_root == nullptr)
-                file.document_root = response->document_root;
+                file.document_root = response.document_root;
 
-            translate_jail_finish(file.delegate->child_options.jail,
-                                  response,
-                                  file.document_root);
+            FinishJailParams(file.delegate->child_options.jail,
+                             response,
+                             file.document_root);
         }
     }
 
-    response->address.Check();
+    response.address.Check();
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
     /* these lists are in reverse order because new items were added
        to the front; reverse them now */
-    response->request_headers.Reverse();
-    response->response_headers.Reverse();
+    response.request_headers.Reverse();
+    response.response_headers.Reverse();
 #endif
 
-    if (!response->probe_path_suffixes.IsNull() &&
-        response->probe_suffixes.empty())
+    if (!response.probe_path_suffixes.IsNull() &&
+        response.probe_suffixes.empty())
         throw std::runtime_error("PROBE_PATH_SUFFIX without PROBE_SUFFIX");
 
 #if TRANSLATION_ENABLE_HTTP
-    if (!response->internal_redirect.IsNull() &&
-        (response->uri == nullptr && response->expand_uri == nullptr))
+    if (!response.internal_redirect.IsNull() &&
+        (response.uri == nullptr && response.expand_uri == nullptr))
         throw std::runtime_error("INTERNAL_REDIRECT without URI");
 
-    if (!response->internal_redirect.IsNull() &&
-        !response->want_full_uri.IsNull())
+    if (!response.internal_redirect.IsNull() &&
+        !response.want_full_uri.IsNull())
         throw std::runtime_error("INTERNAL_REDIRECT conflicts with WANT_FULL_URI");
 #endif
 }
@@ -3410,7 +3410,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 
     switch (command) {
     case TranslationCommand::END:
-        translate_response_finish(&response);
+        FinishTranslateResponse(response);
 
 #if TRANSLATION_ENABLE_WIDGET
         FinishView();
