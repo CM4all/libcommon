@@ -42,6 +42,7 @@
 #include "util/Macros.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
+#include "util/PrintException.hxx"
 
 #include <systemd/sd-daemon.h>
 
@@ -346,7 +347,13 @@ CreateSystemdScope(const char *name, const char *description,
 			   failures caused by this */
 			fprintf(stderr, "Old unit %s didn't disappear; attempting to stop it\n",
 				name);
-			SystemdStopService(connection, name, "replace");
+			try {
+				SystemdStopService(connection, name, "replace");
+			} catch (...) {
+				fprintf(stderr, "Failed to stop unit %s: ", name);
+				PrintException(std::current_exception());
+			}
+
 			WaitUnitRemoved(connection, name, -1);
 		}
 
