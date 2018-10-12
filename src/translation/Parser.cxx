@@ -1256,8 +1256,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("malformed HTTP packet");
 
         http_address = http_address_parse(alloc, payload);
-        if (http_address->protocol != HttpAddress::Protocol::HTTP)
-            throw std::runtime_error("malformed HTTP packet");
 
         *resource_address = *http_address;
 
@@ -1578,21 +1576,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::AJP:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (resource_address == nullptr || resource_address->IsDefined())
-            throw std::runtime_error("misplaced AJP packet");
-
-        if (payload_length == 0)
-            throw std::runtime_error("malformed AJP packet");
-
-        http_address = http_address_parse(alloc, payload);
-        if (http_address->protocol != HttpAddress::Protocol::AJP)
-            throw std::runtime_error("malformed AJP packet");
-
-        *resource_address = *http_address;
-
-        address_list = &http_address->addresses;
-        default_port = 8009;
-        return;
+        throw std::runtime_error("AJP support has been removed");
 #else
         break;
 #endif
@@ -3122,8 +3106,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
         response.external_session_manager = http_address =
             http_address_parse(alloc, payload);
-        if (http_address->protocol != HttpAddress::Protocol::HTTP)
-            throw std::runtime_error("malformed EXTERNAL_SESSION_MANAGER packet");
 
         address_list = &http_address->addresses;
         default_port = http_address->GetDefaultPort();
