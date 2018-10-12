@@ -114,19 +114,19 @@ TranslateResponse::Clear()
 #if TRANSLATION_ENABLE_EXPAND
     regex = inverse_regex = nullptr;
 #endif
-    site = expand_site = nullptr;
+    site = nullptr;
     canonical_host = nullptr;
 #if TRANSLATION_ENABLE_HTTP
-    document_root = expand_document_root = nullptr;
+    document_root = nullptr;
 
-    redirect = expand_redirect = nullptr;
+    redirect = nullptr;
     bounce = nullptr;
 
     message = nullptr;
 
     scheme = nullptr;
     host = nullptr;
-    uri = expand_uri = nullptr;
+    uri = nullptr;
 
     local_uri = nullptr;
 
@@ -136,7 +136,7 @@ TranslateResponse::Clear()
     untrusted_raw_site_suffix = nullptr;
 #endif
 
-    test_path = expand_test_path = nullptr;
+    test_path = nullptr;
 
     uncached = false;
 
@@ -144,9 +144,19 @@ TranslateResponse::Clear()
     unsafe_base = false;
     easy_base = false;
 #endif
+
 #if TRANSLATION_ENABLE_EXPAND
     regex_tail = regex_unescape = inverse_regex_unescape = false;
+    expand_site = false;
+    expand_document_root = false;
+    expand_redirect = false;
+    expand_uri = false;
+    expand_test_path = false;
+    expand_auth_file = false;
+    expand_cookie_host = false;
+    expand_read_file = false;
 #endif
+
 #if TRANSLATION_ENABLE_WIDGET
     direct_addressing = false;
 #endif
@@ -193,7 +203,7 @@ TranslateResponse::Clear()
 #if TRANSLATION_ENABLE_SESSION
     check = nullptr;
     auth = nullptr;
-    auth_file = expand_auth_file = nullptr;
+    auth_file = nullptr;
     append_auth = nullptr;
     expand_append_auth = nullptr;
 #endif
@@ -215,7 +225,7 @@ TranslateResponse::Clear()
     www_authenticate = nullptr;
     authentication_info = nullptr;
 
-    cookie_domain = cookie_host = expand_cookie_host = cookie_path = nullptr;
+    cookie_domain = cookie_host = cookie_path = nullptr;
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
@@ -247,7 +257,7 @@ TranslateResponse::Clear()
     error_document = nullptr;
     probe_path_suffixes = nullptr;
     probe_suffixes = nullptr;
-    read_file = expand_read_file = nullptr;
+    read_file = nullptr;
 
     validate_mtime.mtime = 0;
     validate_mtime.path = nullptr;
@@ -287,19 +297,15 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     inverse_regex = alloc.CheckDup(src.inverse_regex);
 #endif
     site = alloc.CheckDup(src.site);
-    expand_site = alloc.CheckDup(src.expand_site);
     canonical_host = alloc.CheckDup(src.canonical_host);
 #if TRANSLATION_ENABLE_RADDRESS
     document_root = alloc.CheckDup(src.document_root);
-    expand_document_root = alloc.CheckDup(src.expand_document_root);
     redirect = alloc.CheckDup(src.redirect);
-    expand_redirect = alloc.CheckDup(src.expand_redirect);
     bounce = alloc.CheckDup(src.bounce);
     message = alloc.CheckDup(src.message);
     scheme = alloc.CheckDup(src.scheme);
     host = alloc.CheckDup(src.host);
     uri = alloc.CheckDup(src.uri);
-    expand_uri = alloc.CheckDup(src.expand_uri);
     local_uri = alloc.CheckDup(src.local_uri);
     untrusted = alloc.CheckDup(src.untrusted);
     untrusted_prefix = alloc.CheckDup(src.untrusted_prefix);
@@ -315,11 +321,21 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     unsafe_base = src.unsafe_base;
     easy_base = src.easy_base;
 #endif
+
 #if TRANSLATION_ENABLE_EXPAND
     regex_tail = src.regex_tail;
     regex_unescape = src.regex_unescape;
     inverse_regex_unescape = src.inverse_regex_unescape;
+    expand_site = src.expand_site;
+    expand_document_root = src.expand_document_root;
+    expand_redirect = src.expand_redirect;
+    expand_uri = src.expand_uri;
+    expand_test_path = src.expand_test_path;
+    expand_auth_file = src.expand_auth_file;
+    expand_cookie_host = src.expand_cookie_host;
+    expand_read_file = src.expand_read_file;
 #endif
+
 #if TRANSLATION_ENABLE_WIDGET
     direct_addressing = src.direct_addressing;
 #endif
@@ -346,10 +362,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     widget_group = alloc.CheckDup(src.widget_group);
 #endif
     test_path = alloc.CheckDup(src.test_path);
-    expand_test_path = alloc.CheckDup(src.expand_test_path);
 #if TRANSLATION_ENABLE_SESSION
     auth_file = alloc.CheckDup(src.auth_file);
-    expand_auth_file = alloc.CheckDup(src.expand_auth_file);
     append_auth = alloc.Dup(src.append_auth);
     expand_append_auth = alloc.CheckDup(src.expand_append_auth);
 #endif
@@ -406,7 +420,6 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     authentication_info = alloc.CheckDup(src.authentication_info);
     cookie_domain = alloc.CheckDup(src.cookie_domain);
     cookie_host = alloc.CheckDup(src.cookie_host);
-    expand_cookie_host = alloc.CheckDup(src.expand_cookie_host);
     cookie_path = alloc.CheckDup(src.cookie_path);
 #endif
 
@@ -440,7 +453,6 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
     probe_path_suffixes = alloc.Dup(src.probe_path_suffixes);
     probe_suffixes = alloc.Dup(src.probe_suffixes);
     read_file = alloc.CheckDup(src.read_file);
-    expand_read_file = alloc.CheckDup(src.expand_read_file);
 
     validate_mtime.mtime = src.validate_mtime.mtime;
     validate_mtime.path = alloc.CheckDup(src.validate_mtime.path);
@@ -558,15 +570,15 @@ bool
 TranslateResponse::IsExpandable() const
 {
     return regex != nullptr &&
-        (expand_redirect != nullptr ||
-         expand_site != nullptr ||
-         expand_document_root != nullptr ||
-         expand_uri != nullptr ||
-         expand_test_path != nullptr ||
-         expand_auth_file != nullptr ||
-         expand_read_file != nullptr ||
+        (expand_redirect ||
+         expand_site ||
+         expand_document_root ||
+         expand_uri ||
+         expand_test_path ||
+         expand_auth_file ||
+         expand_read_file ||
          expand_append_auth != nullptr ||
-         expand_cookie_host != nullptr ||
+         expand_cookie_host ||
          !expand_request_headers.IsEmpty() ||
          !expand_response_headers.IsEmpty() ||
          address.IsExpandable() ||
@@ -580,30 +592,41 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 {
     assert(regex != nullptr);
 
-    if (expand_redirect != nullptr)
-        redirect = expand_string_unescaped(alloc, expand_redirect, match_info);
+    if (expand_redirect) {
+        expand_redirect = false;
+        redirect = expand_string_unescaped(alloc, redirect, match_info);
+    }
 
-    if (expand_site != nullptr)
-        site = expand_string_unescaped(alloc, expand_site, match_info);
+    if (expand_site) {
+        expand_site = false;
+        site = expand_string_unescaped(alloc, site, match_info);
+    }
 
-    if (expand_document_root != nullptr)
-        document_root = expand_string_unescaped(alloc, expand_document_root,
+    if (expand_document_root) {
+        expand_document_root = false;
+        document_root = expand_string_unescaped(alloc, document_root,
                                                 match_info);
+    }
 
-    if (expand_uri != nullptr)
-        uri = expand_string_unescaped(alloc, expand_uri, match_info);
+    if (expand_uri) {
+        expand_uri = false;
+        uri = expand_string_unescaped(alloc, uri, match_info);
+    }
 
-    if (expand_test_path != nullptr)
-        test_path = expand_string_unescaped(alloc, expand_test_path,
-                                            match_info);
+    if (expand_test_path) {
+        expand_test_path = false;
+        test_path = expand_string_unescaped(alloc, test_path, match_info);
+    }
 
-    if (expand_auth_file != nullptr)
-        auth_file = expand_string_unescaped(alloc, expand_auth_file,
-                                            match_info);
+    if (expand_auth_file) {
+        expand_auth_file = false;
+        auth_file = expand_string_unescaped(alloc, auth_file, match_info);
+    }
 
-    if (expand_read_file != nullptr)
-        read_file = expand_string_unescaped(alloc, expand_read_file,
-                                            match_info);
+    if (expand_read_file) {
+        expand_read_file = false;
+        read_file = expand_string_unescaped(alloc, read_file, match_info);
+    }
 
     if (expand_append_auth != nullptr) {
         const char *value = expand_string_unescaped(alloc, expand_append_auth,
@@ -611,9 +634,10 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
         append_auth = { value, strlen(value) };
     }
 
-    if (expand_cookie_host != nullptr)
-        cookie_host = expand_string_unescaped(alloc, expand_cookie_host,
-                                              match_info);
+    if (expand_cookie_host) {
+        expand_cookie_host = false;
+        cookie_host = expand_string_unescaped(alloc, cookie_host, match_info);
+    }
 
     for (const auto &i : expand_request_headers) {
         const char *value = expand_string_unescaped(alloc, i.value, match_info);

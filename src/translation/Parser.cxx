@@ -372,14 +372,15 @@ FinishTranslateResponse(AllocatorPtr alloc,
     if (response.address.IsCgiAlike()) {
         auto &cgi = response.address.GetCgi();
 
-        if (cgi.uri == nullptr)
+        if (cgi.uri == nullptr) {
             cgi.uri = response.uri;
-
-        if (cgi.expand_uri == nullptr)
             cgi.expand_uri = response.expand_uri;
+        }
 
-        if (cgi.document_root == nullptr)
+        if (cgi.document_root == nullptr) {
             cgi.document_root = response.document_root;
+            cgi.expand_document_root = response.expand_document_root;
+        }
 
         FinishJailParams(cgi.options.jail,
                          response, cgi.document_root);
@@ -416,8 +417,7 @@ FinishTranslateResponse(AllocatorPtr alloc,
         throw std::runtime_error("PROBE_PATH_SUFFIX without PROBE_SUFFIX");
 
 #if TRANSLATION_ENABLE_HTTP
-    if (!response.internal_redirect.IsNull() &&
-        (response.uri == nullptr && response.expand_uri == nullptr))
+    if (!response.internal_redirect.IsNull() && response.uri == nullptr)
         throw std::runtime_error("INTERNAL_REDIRECT without URI");
 
     if (!response.internal_redirect.IsNull() &&
@@ -706,8 +706,7 @@ translate_client_file_not_found(TranslateResponse &response,
     if (!response.file_not_found.IsNull())
         throw std::runtime_error("duplicate FILE_NOT_FOUND packet");
 
-    if (response.test_path == nullptr &&
-        response.expand_test_path == nullptr) {
+    if (response.test_path == nullptr) {
         switch (response.address.type) {
         case ResourceAddress::Type::NONE:
             throw std::runtime_error("FIlE_NOT_FOUND without resource address");
@@ -789,8 +788,7 @@ translate_client_directory_index(TranslateResponse &response,
     if (!response.directory_index.IsNull())
         throw std::runtime_error("duplicate DIRECTORY_INDEX");
 
-    if (response.test_path == nullptr &&
-        response.expand_test_path == nullptr) {
+    if (response.test_path == nullptr) {
         switch (response.address.type) {
         case ResourceAddress::Type::NONE:
             throw std::runtime_error("DIRECTORY_INDEX without resource address");
@@ -1119,21 +1117,21 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
         if (response.regex == nullptr) {
             throw std::runtime_error("misplaced EXPAND_PATH packet");
-        } else if (cgi_address != nullptr &&
-                   cgi_address->expand_path == nullptr) {
-            cgi_address->expand_path = payload;
+        } else if (cgi_address != nullptr && !cgi_address->expand_path) {
+            cgi_address->path = payload;
+            cgi_address->expand_path = true;
             return;
-        } else if (nfs_address != nullptr &&
-                   nfs_address->expand_path == nullptr) {
-            nfs_address->expand_path = payload;
+        } else if (nfs_address != nullptr && !nfs_address->expand_path) {
+            nfs_address->path = payload;
+            nfs_address->expand_path = true;
             return;
-        } else if (file_address != nullptr &&
-                   file_address->expand_path == nullptr) {
-            file_address->expand_path = payload;
+        } else if (file_address != nullptr && !file_address->expand_path) {
+            file_address->path = payload;
+            file_address->expand_path = true;
             return;
-        } else if (http_address != NULL &&
-                   http_address->expand_path == NULL) {
-            http_address->expand_path = payload;
+        } else if (http_address != NULL && !http_address->expand_path) {
+            http_address->path = payload;
+            http_address->expand_path = true;
             return;
         } else
             throw std::runtime_error("misplaced EXPAND_PATH packet");
@@ -1149,8 +1147,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.regex == nullptr) {
             throw std::runtime_error("misplaced EXPAND_PATH_INFO packet");
         } else if (cgi_address != nullptr &&
-                   cgi_address->expand_path_info == nullptr) {
-            cgi_address->expand_path_info = payload;
+                   !cgi_address->expand_path_info) {
+            cgi_address->path_info = payload;
+            cgi_address->expand_path_info = true;
         } else if (file_address != nullptr) {
             /* don't emit an error when the resource is a local path.
                This combination might be useful one day, but isn't
@@ -1284,13 +1283,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_HTTP && TRANSLATION_ENABLE_EXPAND
         if (response.regex == nullptr ||
             response.redirect == nullptr ||
-            response.expand_redirect != nullptr)
+            response.expand_redirect)
             throw std::runtime_error("misplaced EXPAND_REDIRECT packet");
 
         if (!is_valid_nonempty_string(payload, payload_length))
             throw std::runtime_error("malformed EXPAND_REDIRECT packet");
 
-        response.expand_redirect = payload;
+        response.redirect = payload;
+        response.expand_redirect = true;
         return;
 #else
         break;
@@ -1698,10 +1698,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
         if (response.regex == nullptr ||
             cgi_address == nullptr ||
-            cgi_address->expand_script_name != nullptr)
+            cgi_address->expand_script_name)
             throw std::runtime_error("misplaced EXPAND_SCRIPT_NAME packet");
 
-        cgi_address->expand_script_name = payload;
+        cgi_address->script_name = payload;
+        cgi_address->expand_script_name = true;
         return;
 #else
         break;
@@ -1737,8 +1738,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         else if (file_address != nullptr &&
                  file_address->delegate != nullptr)
             file_address->expand_document_root = payload;
-        else
-            response.expand_document_root = payload;
+        else {
+            response.document_root = payload;
+            response.expand_document_root = true;
+        }
         return;
 #else
         break;
@@ -2390,15 +2393,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     case TranslationCommand::EXPAND_LHTTP_URI:
 #if TRANSLATION_ENABLE_RADDRESS
         if (lhttp_address == nullptr ||
-            lhttp_address->uri == nullptr ||
-            lhttp_address->expand_uri != nullptr ||
+            lhttp_address->expand_uri ||
             response.regex == nullptr)
             throw std::runtime_error("misplaced EXPAND_LHTTP_URI packet");
 
         if (!is_valid_nonempty_string(payload, payload_length))
             throw std::runtime_error("malformed EXPAND_LHTTP_URI packet");
 
-        lhttp_address->expand_uri = payload;
+        lhttp_address->uri = payload;
+        lhttp_address->expand_uri = true;
         return;
 #else
         break;
@@ -2575,10 +2578,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (!is_valid_nonempty_string(payload, payload_length))
             throw std::runtime_error("malformed EXPAND_TEST_PATH packet");
 
-        if (response.expand_test_path != nullptr)
+        if (response.expand_test_path)
             throw std::runtime_error("duplicate EXPAND_TEST_PATH packet");
 
-        response.expand_test_path = payload;
+        response.test_path = payload;
+        response.expand_test_path = true;
         return;
 #else
         break;
@@ -2590,8 +2594,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("malformed REDIRECT_QUERY_STRING packet");
 
         if (response.redirect_query_string ||
-            (response.redirect == nullptr &&
-             response.expand_redirect == nullptr))
+            response.redirect == nullptr)
             throw std::runtime_error("misplaced REDIRECT_QUERY_STRING packet");
 
         response.redirect_query_string = true;
@@ -2653,14 +2656,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     case TranslationCommand::EXPAND_URI:
 #if TRANSLATION_ENABLE_EXPAND
         if (response.regex == nullptr ||
-            response.uri == nullptr ||
-            response.expand_uri != nullptr)
+            response.expand_uri)
             throw std::runtime_error("misplaced EXPAND_URI packet");
 
         if (!is_valid_nonempty_string(payload, payload_length))
             throw std::runtime_error("malformed EXPAND_URI packet");
 
-        response.expand_uri = payload;
+        response.uri = payload;
+        response.expand_uri = true;
         return;
 #else
         break;
@@ -2670,13 +2673,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_EXPAND
         if (response.regex == nullptr ||
             response.site == nullptr ||
-            response.expand_site != nullptr)
+            response.expand_site)
             throw std::runtime_error("misplaced EXPAND_SITE packet");
 
         if (!is_valid_nonempty_string(payload, payload_length))
             throw std::runtime_error("malformed EXPAND_SITE packet");
 
-        response.expand_site = payload;
+        response.site = payload;
+        response.expand_site = true;
         return;
 #endif
 
@@ -2722,8 +2726,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::PROBE_PATH_SUFFIXES:
         if (!response.probe_path_suffixes.IsNull() ||
-            (response.test_path == nullptr &&
-             response.expand_test_path == nullptr))
+            response.test_path == nullptr)
             throw std::runtime_error("misplaced PROBE_PATH_SUFFIXES packet");
 
         response.probe_path_suffixes = { payload, payload_length };
@@ -2767,7 +2770,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.regex == nullptr)
             throw std::runtime_error("misplaced EXPAND_AUTH_FILE packet");
 
-        response.expand_auth_file = payload;
+        response.auth_file = payload;
+        response.expand_auth_file = true;
         return;
 #else
         break;
@@ -2813,7 +2817,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (!is_valid_nonempty_string(payload, payload_length))
             throw std::runtime_error("malformed EXPAND_COOKIE_HOST packet");
 
-        response.expand_cookie_host = payload;
+        response.cookie_host = payload;
+        response.expand_cookie_host = true;
         return;
 #else
         break;
@@ -2843,8 +2848,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
     case TranslationCommand::READ_FILE:
-        if (response.read_file != nullptr ||
-            response.expand_read_file != nullptr)
+        if (response.read_file != nullptr)
             throw std::runtime_error("duplicate READ_FILE packet");
 
         if (!is_valid_absolute_path(payload, payload_length))
@@ -2855,14 +2859,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EXPAND_READ_FILE:
 #if TRANSLATION_ENABLE_EXPAND
-        if (response.read_file != nullptr ||
-            response.expand_read_file != nullptr)
+        if (response.read_file != nullptr)
             throw std::runtime_error("duplicate EXPAND_READ_FILE packet");
 
         if (!is_valid_nonempty_string(payload, payload_length))
             throw std::runtime_error("malformed EXPAND_READ_FILE packet");
 
-        response.expand_read_file = payload;
+        response.read_file = payload;
+        response.expand_read_file = true;
         return;
 #else
         break;

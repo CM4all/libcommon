@@ -111,21 +111,13 @@ struct TranslateResponse {
 #endif
 
     const char *site;
-    const char *expand_site;
 
     const char *canonical_host;
 
 #if TRANSLATION_ENABLE_HTTP
     const char *document_root;
 
-    /**
-     * The value of #TranslationCommand::EXPAND_DOCUMENT_ROOT.  Only
-     * used by the translation cache.
-     */
-    const char *expand_document_root;
-
     const char *redirect;
-    const char *expand_redirect;
     const char *bounce;
 
     const char *message;
@@ -133,7 +125,6 @@ struct TranslateResponse {
     const char *scheme;
     const char *host;
     const char *uri;
-    const char *expand_uri;
 
     const char *local_uri;
 
@@ -147,11 +138,6 @@ struct TranslateResponse {
      * @see #TranslationCommand::TEST_PATH
      */
     const char *test_path;
-
-    /**
-     * @see #TranslationCommand::EXPAND_TEST_PATH
-     */
-    const char *expand_test_path;
 
 #if TRANSLATION_ENABLE_SESSION
     ConstBuffer<void> session;
@@ -185,7 +171,7 @@ struct TranslateResponse {
      * @see #TranslationCommand::AUTH_FILE,
      * #TranslationCommand::EXPAND_AUTH_FILE
      */
-    const char *auth_file, *expand_auth_file;
+    const char *auth_file;
 
     /**
      * @see #TranslationCommand::APPEND_AUTH
@@ -229,7 +215,7 @@ struct TranslateResponse {
     const char *authentication_info;
 
     const char *cookie_domain;
-    const char *cookie_host, *expand_cookie_host;
+    const char *cookie_host;
     const char *cookie_path;
 #endif
 
@@ -288,7 +274,7 @@ struct TranslateResponse {
 
     ConstBuffer<const char *> probe_suffixes;
 
-    const char *read_file, *expand_read_file;
+    const char *read_file;
 
     struct {
         uint64_t mtime;
@@ -328,6 +314,15 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_EXPAND
     bool regex_tail, regex_unescape, inverse_regex_unescape;
+
+    bool expand_site;
+    bool expand_document_root;
+    bool expand_redirect;
+    bool expand_uri;
+    bool expand_test_path;
+    bool expand_auth_file;
+    bool expand_cookie_host;
+    bool expand_read_file;
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
@@ -421,7 +416,7 @@ struct TranslateResponse {
     gcc_pure
     bool HasAuth() const {
         return !auth.IsNull() ||
-            auth_file != nullptr || expand_auth_file != nullptr;
+            auth_file != nullptr;
     }
 
     bool HasUntrusted() const {
