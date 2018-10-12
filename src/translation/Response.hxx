@@ -105,7 +105,7 @@ struct TranslateResponse {
 
     const char *base;
 
-#if TRANSLATION_ENABLE_CACHE
+#if TRANSLATION_ENABLE_EXPAND
     const char *regex;
     const char *inverse_regex;
 #endif
@@ -326,7 +326,7 @@ struct TranslateResponse {
     bool easy_base;
 #endif
 
-#if TRANSLATION_ENABLE_CACHE
+#if TRANSLATION_ENABLE_EXPAND
     bool regex_tail, regex_unescape, inverse_regex_unescape;
 #endif
 
@@ -374,7 +374,7 @@ struct TranslateResponse {
     bool dump_headers;
 #endif
 
-#if TRANSLATION_ENABLE_CACHE
+#if TRANSLATION_ENABLE_EXPAND
     /**
      * @see #TranslationCommand::REGEX_ON_HOST_URI
      */
