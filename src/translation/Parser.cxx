@@ -3418,6 +3418,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_RADDRESS
         resource_address = &response.address;
 #endif
+        probe_suffixes_builder.clear();
 #if TRANSLATION_ENABLE_JAILCGI
         jail = nullptr;
 #endif
