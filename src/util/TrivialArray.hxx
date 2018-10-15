@@ -195,7 +195,10 @@ public:
 	/**
 	 * Return address of start of data segment.
 	 */
-	constexpr T *raw() noexcept {
+#if !GCC_OLDER_THAN(5,0)
+	constexpr
+#endif
+	T *raw() noexcept {
 		return &data.front();
 	}
 
