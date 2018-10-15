@@ -3404,7 +3404,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
     switch (command) {
     case TranslationCommand::END:
         FinishTranslateResponse(alloc, response,
-                                {&probe_suffixes_builder.front(), probe_suffixes_builder.size()});
+                                {probe_suffixes_builder.raw(), probe_suffixes_builder.size()});
 
 #if TRANSLATION_ENABLE_WIDGET
         FinishView();
