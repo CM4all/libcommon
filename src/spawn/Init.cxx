@@ -123,6 +123,11 @@ LimitSysCalls(FileDescriptor read_fd, pid_t kill_pid)
 	using Seccomp::Arg;
 
 	Seccomp::Filter sf(SCMP_ACT_KILL);
+
+	/* this one is used by ~UniqueFileDescriptor() (created by
+	   CreateSignalFD()) */
+	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(close));
+
 	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(read), Arg(0) == read_fd.Get());
 	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(wait4));
 	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(waitid));
