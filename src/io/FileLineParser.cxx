@@ -39,7 +39,7 @@ ApplyPath(const fs::path &base, fs::path &&p)
 {
 	if (p.is_absolute())
 		/* is already absolute */
-		return p;
+		return std::move(p);
 
 	return base.parent_path() / p;
 }
