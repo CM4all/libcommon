@@ -92,7 +92,6 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(setns),
 	SCMP_SYS(settimeofday),
 	SCMP_SYS(stime),
-	SCMP_SYS(stime),
 	SCMP_SYS(swapoff),
 	SCMP_SYS(swapon),
 	SCMP_SYS(sysfs),
