@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,10 +39,11 @@
 
 namespace Pg {
 
-std::list<std::string>
+std::forward_list<std::string>
 DecodeArray(const char *p)
 {
-	std::list<std::string> dest;
+	std::forward_list<std::string> dest;
+	auto i = dest.before_begin();
 
 	if (p == nullptr || *p == 0)
 		return dest;
@@ -81,7 +82,7 @@ DecodeArray(const char *p)
 			if (*p != '}' && *p != ',')
 				throw std::invalid_argument("'}' or ',' expected");
 
-			dest.push_back(std::move(value));
+			i = dest.emplace_after(i, std::move(value));
 		} else if (*p == 0) {
 			throw std::invalid_argument("missing '}'");
 		} else if (*p == '{') {
@@ -94,7 +95,7 @@ DecodeArray(const char *p)
 					throw std::invalid_argument("missing '}'");
 			}
 
-			dest.push_back(std::string(p, end));
+			i = dest.emplace_after(i, std::string(p, end));
 
 			p = end;
 		}

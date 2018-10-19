@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2018 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -37,7 +37,7 @@
 #ifndef PG_ARRAY_HXX
 #define PG_ARRAY_HXX
 
-#include <list>
+#include <forward_list>
 #include <string>
 
 namespace Pg {
@@ -45,7 +45,7 @@ namespace Pg {
 /**
  * Throws std::invalid_argument on syntax error.
  */
-std::list<std::string>
+std::forward_list<std::string>
 DecodeArray(const char *p);
 
 template<typename L>

@@ -38,6 +38,7 @@
 #include "Array.hxx"
 
 #include <iterator>
+#include <list>
 #include <cinttypes>
 #include <cstdio>
 #include <cstddef>

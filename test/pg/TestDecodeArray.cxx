@@ -41,7 +41,7 @@
 static void
 check_decode(const char *input, const char *const* expected)
 {
-	std::list<std::string> a = Pg::DecodeArray(input);
+	const auto a = Pg::DecodeArray(input);
 
 	unsigned i = 0;
 	for (const auto &v : a) {
@@ -60,9 +60,9 @@ check_decode(const char *input, const char *const* expected)
 		++i;
 	}
 
-	if (expected[a.size()] != NULL) {
+	if (expected[i] != NULL) {
 		fprintf(stderr, "decode '%s': not enough elements in result ('%s')\n",
-			input, expected[a.size()]);
+			input, expected[i]);
 		FAIL();
 	}
 }
