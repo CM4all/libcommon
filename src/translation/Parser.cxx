@@ -177,6 +177,14 @@ TranslateParser::AddFilter()
     return &t->u.filter.address;
 }
 
+void
+TranslateParser::AddSubstYamlFile(const char *path) noexcept
+{
+    auto *t = AddTransformation();
+    t->type = Transformation::Type::SUBST;
+    t->u.subst.yaml_file = path;
+}
+
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
@@ -3382,6 +3390,17 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
         ns_options->pid_namespace = payload;
         return;
+
+    case TranslationCommand::SUBST_YAML_FILE:
+#if TRANSLATION_ENABLE_TRANSFORMATION
+        if (!is_valid_absolute_path(payload, payload_length))
+            throw std::runtime_error("malformed SUBST_YAML_FILE packet");
+
+        AddSubstYamlFile(payload);
+        return;
+#else
+        break;
+#endif
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

@@ -240,6 +240,7 @@ private:
 #if TRANSLATION_ENABLE_TRANSFORMATION
     Transformation *AddTransformation();
     ResourceAddress *AddFilter();
+    void AddSubstYamlFile(const char *path) noexcept;
 #endif
 
     void HandleBindMount(const char *payload, size_t payload_length,

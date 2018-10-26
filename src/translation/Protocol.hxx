@@ -944,6 +944,12 @@ enum class TranslationCommand : uint16_t {
      * the Spawn daemon).
      */
     PID_NAMESPACE_NAME = 204,
+
+    /**
+     * Substitute variables in the form "{{NAME}}" with values from
+     * the given YAML file.
+     */
+    SUBST_YAML_FILE = 205,
 };
 
 struct TranslationHeader {
