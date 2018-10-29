@@ -243,7 +243,7 @@ private:
     void AddSubstYamlFile(const char *path) noexcept;
 #endif
 
-    void HandleBindMount(const char *payload, size_t payload_length,
+    void HandleBindMount(StringView payload,
                          bool expand, bool writable, bool exec=false);
 
     void HandleRefence(StringView payload);
@@ -257,7 +257,7 @@ private:
 #endif
 
     void HandleRegularPacket(TranslationCommand command,
-                             const void *const _payload, size_t payload_length);
+                             ConstBuffer<void> payload);
 
     void HandleUidGid(ConstBuffer<void> payload);
     void HandleUmask(ConstBuffer<void> payload);
@@ -266,8 +266,7 @@ private:
 
     void HandleSubstYamlFile(StringView payload);
 
-    Result HandlePacket(TranslationCommand command,
-                        const void *const _payload, size_t payload_length);
+    Result HandlePacket(TranslationCommand command, ConstBuffer<void> payload);
 };
 
 #endif

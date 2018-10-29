@@ -60,6 +60,7 @@
 #endif
 #include "util/CharUtil.hxx"
 #include "util/RuntimeError.hxx"
+#include "util/StringCompare.hxx"
 
 #if TRANSLATION_ENABLE_HTTP
 #include "http/HeaderName.hxx"
@@ -281,16 +282,16 @@ TranslateParser::AddView(const char *name)
 
 static void
 parse_header_forward(struct header_forward_settings *settings,
-                     const void *payload, size_t payload_length)
+                     ConstBuffer<void> payload)
 {
     using namespace BengProxy;
     const auto *packet =
-        (const HeaderForwardPacket *)payload;
+        (const HeaderForwardPacket *)payload.data;
 
-    if (payload_length % sizeof(*packet) != 0)
+    if (payload.size % sizeof(*packet) != 0)
         throw std::runtime_error("malformed header forward packet");
 
-    while (payload_length > 0) {
+    while (payload.size > 0) {
         if (packet->group < int(HeaderGroup::ALL) ||
             packet->group >= int(HeaderGroup::MAX) ||
             (packet->mode != unsigned(HeaderForwardMode::NO) &&
@@ -309,7 +310,7 @@ parse_header_forward(struct header_forward_settings *settings,
             settings->modes[packet->group] = HeaderForwardMode(packet->mode);
 
         ++packet;
-        payload_length -= sizeof(*packet);
+        payload.size -= sizeof(*packet);
     }
 }
 
@@ -629,13 +630,13 @@ translate_client_mount_tmpfs(NamespaceOptions *ns, StringView payload)
 }
 
 inline void
-TranslateParser::HandleBindMount(const char *payload, size_t payload_length,
+TranslateParser::HandleBindMount(StringView payload,
                                  bool expand, bool writable, bool exec)
 {
-    if (*payload != '/')
+    if (payload.empty() || payload.front() != '/')
         throw std::runtime_error("malformed BIND_MOUNT packet");
 
-    const char *separator = (const char *)memchr(payload, 0, payload_length);
+    const char *separator = payload.Find('\0');
     if (separator == nullptr || separator[1] != '/')
         throw std::runtime_error("malformed BIND_MOUNT packet");
 
@@ -643,7 +644,7 @@ TranslateParser::HandleBindMount(const char *payload, size_t payload_length,
         throw std::runtime_error("misplaced BIND_MOUNT packet");
 
     auto *m = alloc.New<MountList>(/* skip the slash to make it relative */
-                                   payload + 1,
+                                   payload.data + 1,
                                    separator + 1,
                                    expand, writable, exec);
     *mount_list = m;
@@ -652,15 +653,15 @@ TranslateParser::HandleBindMount(const char *payload, size_t payload_length,
 
 static void
 translate_client_uts_namespace(NamespaceOptions *ns,
-                               const char *payload)
+                               StringView payload)
 {
-    if (*payload == 0)
+    if (IsValidNonEmptyString(payload))
         throw std::runtime_error("malformed MOUNT_UTS_NAMESPACE packet");
 
     if (ns == nullptr || ns->hostname != nullptr)
         throw std::runtime_error("misplaced MOUNT_UTS_NAMESPACE packet");
 
-    ns->hostname = payload;
+    ns->hostname = payload.data;
 }
 
 static void
@@ -1033,10 +1034,9 @@ TranslateParser::HandleSubstYamlFile(StringView payload)
 
 inline void
 TranslateParser::HandleRegularPacket(TranslationCommand command,
-                                     const void *const _payload,
-                                     size_t payload_length)
+                                     const ConstBuffer<void> payload)
 {
-    const char *const payload = (const char *)_payload;
+    const StringView string_payload(payload);
 
     switch (command) {
 #if TRANSLATION_ENABLE_TRANSFORMATION
@@ -1066,39 +1066,39 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         throw std::runtime_error("misplaced translate request packet");
 
     case TranslationCommand::UID_GID:
-        HandleUidGid({_payload, payload_length});
+        HandleUidGid(payload);
         return;
 
     case TranslationCommand::STATUS:
-        if (payload_length != 2)
+        if (payload.size != 2)
             throw std::runtime_error("size mismatch in STATUS packet from translation server");
 
 #if TRANSLATION_ENABLE_HTTP
-        response.status = http_status_t(*(const uint16_t*)(const void *)payload);
+        response.status = http_status_t(*(const uint16_t*)payload.data);
 
         if (!http_status_is_valid(response.status))
             throw FormatRuntimeError("invalid HTTP status code %u",
                                      response.status);
 #else
-        response.status = *(const uint16_t *)(const void *)payload;
+        response.status = *(const uint16_t *)payload.data;
 #endif
 
         return;
 
     case TranslationCommand::PATH:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed PATH packet");
 
         if (nfs_address != nullptr && *nfs_address->path == 0) {
-            nfs_address->path = payload;
+            nfs_address->path = string_payload.data;
             return;
         }
 
         if (resource_address == nullptr || resource_address->IsDefined())
             throw std::runtime_error("misplaced PATH packet");
 
-        file_address = alloc.New<FileAddress>(payload);
+        file_address = alloc.New<FileAddress>(string_payload.data);
         *resource_address = *file_address;
         return;
 #else
@@ -1107,12 +1107,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::PATH_INFO:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (HasNullByte({payload, payload_length}))
+        if (HasNullByte(payload))
             throw std::runtime_error("malformed PATH_INFO packet");
 
         if (cgi_address != nullptr &&
             cgi_address->path_info == nullptr) {
-            cgi_address->path_info = payload;
+            cgi_address->path_info = string_payload.data;
             return;
         } else if (file_address != nullptr) {
             /* don't emit an error when the resource is a local path.
@@ -1127,25 +1127,25 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EXPAND_PATH:
 #if TRANSLATION_ENABLE_RADDRESS && TRANSLATION_ENABLE_EXPAND
-        if (HasNullByte({payload, payload_length}))
+        if (HasNullByte(payload))
             throw std::runtime_error("malformed EXPAND_PATH packet");
 
         if (response.regex == nullptr) {
             throw std::runtime_error("misplaced EXPAND_PATH packet");
         } else if (cgi_address != nullptr && !cgi_address->expand_path) {
-            cgi_address->path = payload;
+            cgi_address->path = string_payload.data;
             cgi_address->expand_path = true;
             return;
         } else if (nfs_address != nullptr && !nfs_address->expand_path) {
-            nfs_address->path = payload;
+            nfs_address->path = string_payload.data;
             nfs_address->expand_path = true;
             return;
         } else if (file_address != nullptr && !file_address->expand_path) {
-            file_address->path = payload;
+            file_address->path = string_payload.data;
             file_address->expand_path = true;
             return;
         } else if (http_address != NULL && !http_address->expand_path) {
-            http_address->path = payload;
+            http_address->path = string_payload.data;
             http_address->expand_path = true;
             return;
         } else
@@ -1156,14 +1156,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EXPAND_PATH_INFO:
 #if TRANSLATION_ENABLE_RADDRESS && TRANSLATION_ENABLE_EXPAND
-        if (HasNullByte({payload, payload_length}))
+        if (HasNullByte(payload))
             throw std::runtime_error("malformed EXPAND_PATH_INFO packet");
 
         if (response.regex == nullptr) {
             throw std::runtime_error("misplaced EXPAND_PATH_INFO packet");
         } else if (cgi_address != nullptr &&
                    !cgi_address->expand_path_info) {
-            cgi_address->path_info = payload;
+            cgi_address->path_info = string_payload.data;
             cgi_address->expand_path_info = true;
         } else if (file_address != nullptr) {
             /* don't emit an error when the resource is a local path.
@@ -1179,11 +1179,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::DEFLATED:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed DEFLATED packet");
 
         if (file_address != nullptr) {
-            file_address->deflated = payload;
+            file_address->deflated = string_payload.data;
             return;
         } else if (nfs_address != nullptr) {
             /* ignore for now */
@@ -1196,7 +1196,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::GZIPPED:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed GZIPPED packet");
 
         if (file_address != nullptr) {
@@ -1204,7 +1204,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
                 file_address->gzipped != nullptr)
                 throw std::runtime_error("misplaced GZIPPED packet");
 
-            file_address->gzipped = payload;
+            file_address->gzipped = string_payload.data;
             return;
         } else if (nfs_address != nullptr) {
             /* ignore for now */
@@ -1222,15 +1222,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_RADDRESS
         assert(resource_address != nullptr);
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed SITE packet");
 
         if (resource_address == &response.address)
 #endif
-            response.site = payload;
+            response.site = (const char *)payload.data;
 #if TRANSLATION_ENABLE_RADDRESS
         else if (jail != nullptr && jail->enabled)
-            jail->site_id = payload;
+            jail->site_id = string_payload.data;
         else
             throw std::runtime_error("misplaced SITE packet");
 #endif
@@ -1239,21 +1239,21 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::CONTENT_TYPE:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed CONTENT_TYPE packet");
 
         if (file_address != nullptr) {
             if (!file_address->content_type_lookup.IsNull())
                 throw std::runtime_error("CONTENT_TYPE/CONTENT_TYPE_LOOKUP conflict");
 
-            file_address->content_type = payload;
+            file_address->content_type = string_payload.data;
         } else if (nfs_address != nullptr) {
             if (!nfs_address->content_type_lookup.IsNull())
                 throw std::runtime_error("CONTENT_TYPE/CONTENT_TYPE_LOOKUP conflict");
 
-            nfs_address->content_type = payload;
+            nfs_address->content_type = string_payload.data;
         } else if (from_request.content_type_lookup) {
-            response.content_type = payload;
+            response.content_type = string_payload.data;
         } else
             throw std::runtime_error("misplaced CONTENT_TYPE packet");
 
@@ -1267,10 +1267,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (resource_address == nullptr || resource_address->IsDefined())
             throw std::runtime_error("misplaced HTTP packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed HTTP packet");
 
-        http_address = http_address_parse(alloc, payload);
+        http_address = http_address_parse(alloc, string_payload.data);
 
         *resource_address = *http_address;
 
@@ -1283,10 +1283,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::REDIRECT:
 #if TRANSLATION_ENABLE_HTTP
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed REDIRECT packet");
 
-        response.redirect = payload;
+        response.redirect = string_payload.data;
         return;
 #else
         break;
@@ -1299,10 +1299,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             response.expand_redirect)
             throw std::runtime_error("misplaced EXPAND_REDIRECT packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_REDIRECT packet");
 
-        response.redirect = payload;
+        response.redirect = string_payload.data;
         response.expand_redirect = true;
         return;
 #else
@@ -1311,10 +1311,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::BOUNCE:
 #if TRANSLATION_ENABLE_HTTP
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed BOUNCE packet");
 
-        response.bounce = payload;
+        response.bounce = string_payload.data;
         return;
 #else
         break;
@@ -1388,7 +1388,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::GROUP_CONTAINER:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed GROUP_CONTAINER packet");
 
         if (transformation == nullptr ||
@@ -1396,7 +1396,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             throw std::runtime_error("misplaced GROUP_CONTAINER packet");
 
         transformation->u.processor.options |= PROCESSOR_CONTAINER;
-        response.container_groups.Add(alloc, payload);
+        response.container_groups.Add(alloc, string_payload.data);
         return;
 #else
         break;
@@ -1404,10 +1404,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::WIDGET_GROUP:
 #if TRANSLATION_ENABLE_WIDGET
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed WIDGET_GROUP packet");
 
-        response.widget_group = payload;
+        response.widget_group = string_payload.data;
         return;
 #else
         break;
@@ -1415,15 +1415,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::UNTRUSTED:
 #if TRANSLATION_ENABLE_WIDGET
-        if (!IsValidNonEmptyString({payload, payload_length}) ||
-            *payload == '.' ||
-            payload[payload_length - 1] == '.')
+        if (!IsValidNonEmptyString(string_payload) ||
+            string_payload.front() == '.' ||
+            string_payload.back() == '.')
             throw std::runtime_error("malformed UNTRUSTED packet");
 
         if (response.HasUntrusted())
             throw std::runtime_error("misplaced UNTRUSTED packet");
 
-        response.untrusted = payload;
+        response.untrusted = string_payload.data;
         return;
 #else
         break;
@@ -1431,14 +1431,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::UNTRUSTED_PREFIX:
 #if TRANSLATION_ENABLE_HTTP
-        if (!IsValidNonEmptyString({payload, payload_length}) || *payload == '.' ||
-            payload[payload_length - 1] == '.')
+        if (!IsValidNonEmptyString(string_payload) ||
+            string_payload.front() == '.' ||
+            string_payload.back() == '.')
             throw std::runtime_error("malformed UNTRUSTED_PREFIX packet");
 
         if (response.HasUntrusted())
             throw std::runtime_error("misplaced UNTRUSTED_PREFIX packet");
 
-        response.untrusted_prefix = payload;
+        response.untrusted_prefix = string_payload.data;
         return;
 #else
         break;
@@ -1446,15 +1447,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::UNTRUSTED_SITE_SUFFIX:
 #if TRANSLATION_ENABLE_HTTP
-        if (!IsValidNonEmptyString({payload, payload_length}) ||
-            *payload == '.' ||
-            payload[payload_length - 1] == '.')
+        if (!IsValidNonEmptyString(string_payload) ||
+            string_payload.front() == '.' ||
+            string_payload.back() == '.')
             throw std::runtime_error("malformed UNTRUSTED_SITE_SUFFIX packet");
 
         if (response.HasUntrusted())
             throw std::runtime_error("misplaced UNTRUSTED_SITE_SUFFIX packet");
 
-        response.untrusted_site_suffix = payload;
+        response.untrusted_site_suffix = string_payload.data;
         return;
 #else
         break;
@@ -1462,10 +1463,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::SCHEME:
 #if TRANSLATION_ENABLE_HTTP
-        if (strncmp(payload, "http", 4) != 0)
-            throw std::runtime_error("misplaced SCHEME packet");
+        if (!string_payload.StartsWith("http"))
+            throw std::runtime_error("malformed SCHEME packet");
 
-        response.scheme = payload;
+        response.scheme = string_payload.data;
         return;
 #else
         break;
@@ -1473,7 +1474,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::HOST:
 #if TRANSLATION_ENABLE_HTTP
-        response.host = payload;
+        response.host = string_payload.data;
         return;
 #else
         break;
@@ -1481,10 +1482,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::URI:
 #if TRANSLATION_ENABLE_HTTP
-        if (!IsValidAbsoluteUriPath({payload, payload_length}))
+        if (!IsValidAbsoluteUriPath(string_payload))
             throw std::runtime_error("malformed URI packet");
 
-        response.uri = payload;
+        response.uri = string_payload.data;
         return;
 #else
         break;
@@ -1506,7 +1507,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::SESSION:
 #if TRANSLATION_ENABLE_SESSION
-        response.session = { payload, payload_length };
+        response.session = payload;
         return;
 #else
         break;
@@ -1514,7 +1515,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::USER:
 #if TRANSLATION_ENABLE_SESSION
-        response.user = payload;
+        response.user = string_payload.data;
         previous_command = command;
         return;
 #else
@@ -1523,7 +1524,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::REALM:
 #if TRANSLATION_ENABLE_SESSION
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REALM packet");
 
         if (response.realm != nullptr)
@@ -1532,7 +1533,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.realm_from_auth_base)
             throw std::runtime_error("misplaced REALM packet");
 
-        response.realm = payload;
+        response.realm = string_payload.data;
         return;
 #else
         break;
@@ -1540,7 +1541,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::LANGUAGE:
 #if TRANSLATION_ENABLE_SESSION
-        response.language = payload;
+        response.language = string_payload.data;
         return;
 #else
         break;
@@ -1551,10 +1552,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (resource_address == nullptr || resource_address->IsDefined())
             throw std::runtime_error("misplaced PIPE packet");
 
-        if (payload_length == 0)
+        if (payload.empty())
             throw std::runtime_error("malformed PIPE packet");
 
-        SetCgiAddress(ResourceAddress::Type::PIPE, payload);
+        SetCgiAddress(ResourceAddress::Type::PIPE, string_payload.data);
         return;
 #else
         break;
@@ -1565,10 +1566,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (resource_address == nullptr || resource_address->IsDefined())
             throw std::runtime_error("misplaced CGI packet");
 
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed CGI packet");
 
-        SetCgiAddress(ResourceAddress::Type::CGI, payload);
+        SetCgiAddress(ResourceAddress::Type::CGI, string_payload.data);
         cgi_address->document_root = response.document_root;
         return;
 #else
@@ -1580,10 +1581,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (resource_address == nullptr || resource_address->IsDefined())
             throw std::runtime_error("misplaced FASTCGI packet");
 
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed FASTCGI packet");
 
-        SetCgiAddress(ResourceAddress::Type::FASTCGI, payload);
+        SetCgiAddress(ResourceAddress::Type::FASTCGI, string_payload.data);
         address_list = &cgi_address->address_list;
         default_port = 9000;
         return;
@@ -1603,10 +1604,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (resource_address == nullptr || resource_address->IsDefined())
             throw std::runtime_error("misplaced NFS_SERVER packet");
 
-        if (payload_length == 0)
+        if (payload.empty())
             throw std::runtime_error("malformed NFS_SERVER packet");
 
-        nfs_address = alloc.New<NfsAddress>(payload, "", "");
+        nfs_address = alloc.New<NfsAddress>(string_payload.data, "", "");
         *resource_address = *nfs_address;
         return;
 #else
@@ -1619,10 +1620,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             *nfs_address->export_name != 0)
             throw std::runtime_error("misplaced NFS_EXPORT packet");
 
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed NFS_EXPORT packet");
 
-        nfs_address->export_name = payload;
+        nfs_address->export_name = string_payload.data;
         return;
 #else
         break;
@@ -1646,7 +1647,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_JAILCGI
                               jail,
 #endif
-                              {payload, payload_length});
+                              string_payload);
         return;
 
     case TranslationCommand::INTERPRETER:
@@ -1657,7 +1658,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             cgi_address->interpreter != nullptr)
             throw std::runtime_error("misplaced INTERPRETER packet");
 
-        cgi_address->interpreter = payload;
+        cgi_address->interpreter = string_payload.data;
         return;
 #else
         break;
@@ -1671,7 +1672,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             cgi_address->action != nullptr)
             throw std::runtime_error("misplaced ACTION packet");
 
-        cgi_address->action = payload;
+        cgi_address->action = string_payload.data;
         return;
 #else
         break;
@@ -1686,7 +1687,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             cgi_address->script_name != nullptr)
             throw std::runtime_error("misplaced SCRIPT_NAME packet");
 
-        cgi_address->script_name = payload;
+        cgi_address->script_name = string_payload.data;
         return;
 #else
         break;
@@ -1694,7 +1695,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EXPAND_SCRIPT_NAME:
 #if TRANSLATION_ENABLE_RADDRESS && TRANSLATION_ENABLE_EXPAND
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_SCRIPT_NAME packet");
 
         if (response.regex == nullptr ||
@@ -1702,7 +1703,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             cgi_address->expand_script_name)
             throw std::runtime_error("misplaced EXPAND_SCRIPT_NAME packet");
 
-        cgi_address->script_name = payload;
+        cgi_address->script_name = string_payload.data;
         cgi_address->expand_script_name = true;
         return;
 #else
@@ -1711,16 +1712,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::DOCUMENT_ROOT:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed DOCUMENT_ROOT packet");
 
         if (cgi_address != nullptr)
-            cgi_address->document_root = payload;
+            cgi_address->document_root = string_payload.data;
         else if (file_address != nullptr &&
                  file_address->delegate != nullptr)
-            file_address->document_root = payload;
+            file_address->document_root = string_payload.data;
         else
-            response.document_root = payload;
+            response.document_root = string_payload.data;
         return;
 #else
         break;
@@ -1728,19 +1729,19 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EXPAND_DOCUMENT_ROOT:
 #if TRANSLATION_ENABLE_RADDRESS && TRANSLATION_ENABLE_EXPAND
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_DOCUMENT_ROOT packet");
 
         if (response.regex == nullptr)
             throw std::runtime_error("misplaced EXPAND_DOCUMENT_ROOT packet");
 
         if (cgi_address != nullptr)
-            cgi_address->expand_document_root = payload;
+            cgi_address->expand_document_root = string_payload.data;
         else if (file_address != nullptr &&
                  file_address->delegate != nullptr)
-            file_address->expand_document_root = payload;
+            file_address->expand_document_root = string_payload.data;
         else {
-            response.document_root = payload;
+            response.document_root = string_payload.data;
             response.expand_document_root = true;
         }
         return;
@@ -1753,12 +1754,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (address_list == nullptr)
             throw std::runtime_error("misplaced ADDRESS packet");
 
-        if (payload_length < 2)
+        if (payload.size < 2)
             throw std::runtime_error("malformed ADDRESS packet");
 
         address_list->Add(alloc,
-                          SocketAddress((const struct sockaddr *)_payload,
-                                        payload_length));
+                          SocketAddress((const struct sockaddr *)payload.data,
+                                        payload.size));
         return;
 #else
         break;
@@ -1769,12 +1770,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (address_list == nullptr)
             throw std::runtime_error("misplaced ADDRESS_STRING packet");
 
-        if (payload_length == 0)
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed ADDRESS_STRING packet");
 
         try {
             parse_address_string(alloc, address_list,
-                                 payload, default_port);
+                                 string_payload.data, default_port);
         } catch (const std::exception &e) {
             throw FormatRuntimeError("malformed ADDRESS_STRING packet: %s",
                                      e.what());
@@ -1787,27 +1788,27 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::VIEW:
 #if TRANSLATION_ENABLE_WIDGET
-        if (!valid_view_name(payload))
+        if (!valid_view_name(string_payload.data))
             throw std::runtime_error("invalid view name");
 
-        AddView(payload);
+        AddView(string_payload.data);
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::MAX_AGE:
-        if (payload_length != 4)
+        if (payload.size != 4)
             throw std::runtime_error("malformed MAX_AGE packet");
 
         switch (previous_command) {
         case TranslationCommand::BEGIN:
-            response.max_age = std::chrono::seconds(*(const uint32_t *)_payload);
+            response.max_age = std::chrono::seconds(*(const uint32_t *)payload.data);
             break;
 
 #if TRANSLATION_ENABLE_SESSION
         case TranslationCommand::USER:
-            response.user_max_age = std::chrono::seconds(*(const uint32_t *)_payload);
+            response.user_max_age = std::chrono::seconds(*(const uint32_t *)payload.data);
             break;
 #endif
 
@@ -1819,31 +1820,31 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::VARY:
 #if TRANSLATION_ENABLE_CACHE
-        if (payload_length == 0 ||
-            payload_length % sizeof(response.vary.data[0]) != 0)
+        if (payload.empty() ||
+            payload.size % sizeof(response.vary.data[0]) != 0)
             throw std::runtime_error("malformed VARY packet");
 
-        response.vary.data = (const TranslationCommand *)_payload;
-        response.vary.size = payload_length / sizeof(response.vary.data[0]);
+        response.vary.data = (const TranslationCommand *)payload.data;
+        response.vary.size = payload.size / sizeof(response.vary.data[0]);
 #endif
         return;
 
     case TranslationCommand::INVALIDATE:
 #if TRANSLATION_ENABLE_CACHE
-        if (payload_length == 0 ||
-            payload_length % sizeof(response.invalidate.data[0]) != 0)
+        if (payload.empty() ||
+            payload.size % sizeof(response.invalidate.data[0]) != 0)
             throw std::runtime_error("malformed INVALIDATE packet");
 
-        response.invalidate.data = (const TranslationCommand *)_payload;
-        response.invalidate.size = payload_length /
+        response.invalidate.data = (const TranslationCommand *)payload.data;
+        response.invalidate.size = payload.size /
             sizeof(response.invalidate.data[0]);
 #endif
         return;
 
     case TranslationCommand::BASE:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (!IsValidAbsoluteUriPath({payload, payload_length}) ||
-            payload[payload_length - 1] != '/')
+        if (!IsValidAbsoluteUriPath(string_payload) ||
+            string_payload.back() != '/')
             throw std::runtime_error("malformed BASE packet");
 
         if (from_request.uri == nullptr ||
@@ -1851,10 +1852,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             response.base != nullptr)
             throw std::runtime_error("misplaced BASE packet");
 
-        if (memcmp(from_request.uri, payload, payload_length) != 0)
+        if (!StringStartsWith(from_request.uri, string_payload))
             throw std::runtime_error("BASE mismatches request URI");
 
-        response.base = payload;
+        response.base = string_payload.data;
         return;
 #else
         break;
@@ -1862,7 +1863,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::UNSAFE_BASE:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed UNSAFE_BASE packet");
 
         if (response.base == nullptr)
@@ -1876,7 +1877,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EASY_BASE:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed EASY_BASE");
 
         if (response.base == nullptr)
@@ -1899,10 +1900,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.regex != nullptr)
             throw std::runtime_error("duplicate REGEX");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed REGEX packet");
 
-        response.regex = payload;
+        response.regex = string_payload.data;
         return;
 #else
         break;
@@ -1916,10 +1917,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.inverse_regex != nullptr)
             throw std::runtime_error("duplicate INVERSE_REGEX");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed INVERSE_REGEX packet");
 
-        response.inverse_regex = payload;
+        response.inverse_regex = string_payload.data;
         return;
 #else
         break;
@@ -1927,7 +1928,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::REGEX_TAIL:
 #if TRANSLATION_ENABLE_EXPAND
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REGEX_TAIL packet");
 
         if (response.regex == nullptr && response.inverse_regex == nullptr)
@@ -1944,7 +1945,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::REGEX_UNESCAPE:
 #if TRANSLATION_ENABLE_EXPAND
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REGEX_UNESCAPE packet");
 
         if (response.regex == nullptr && response.inverse_regex == nullptr)
@@ -1964,10 +1965,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (file_address == nullptr)
             throw std::runtime_error("misplaced DELEGATE packet");
 
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed DELEGATE packet");
 
-        file_address->delegate = alloc.New<DelegateAddress>(payload);
+        file_address->delegate = alloc.New<DelegateAddress>(string_payload.data);
         SetChildOptions(file_address->delegate->child_options);
         return;
 #else
@@ -1975,25 +1976,25 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
     case TranslationCommand::APPEND:
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed APPEND packet");
 
         if (!HasArgs())
             throw std::runtime_error("misplaced APPEND packet");
 
-        args_builder.Add(alloc, payload, false);
+        args_builder.Add(alloc, (const char *)payload.data, false);
         return;
 
     case TranslationCommand::EXPAND_APPEND:
 #if TRANSLATION_ENABLE_EXPAND
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_APPEND packet");
 
         if (response.regex == nullptr || !HasArgs() ||
             !args_builder.CanSetExpand())
             throw std::runtime_error("misplaced EXPAND_APPEND packet");
 
-        args_builder.SetExpand(payload);
+        args_builder.SetExpand(string_payload.data);
         return;
 #else
         break;
@@ -2005,14 +2006,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             resource_address->type != ResourceAddress::Type::CGI &&
             resource_address->type != ResourceAddress::Type::PIPE) {
             translate_client_pair(alloc, params_builder, "PAIR",
-                                  {payload, payload_length});
+                                  string_payload);
             return;
         }
 #endif
 
         if (child_options != nullptr) {
             translate_client_pair(alloc, env_builder, "PAIR",
-                                  {payload, payload_length});
+                                  string_payload);
         } else
             throw std::runtime_error("misplaced PAIR packet");
         return;
@@ -2029,11 +2030,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
                 : params_builder;
 
             translate_client_expand_pair(builder, "EXPAND_PAIR",
-                                         {payload, payload_length});
+                                         string_payload);
         } else if (lhttp_address != nullptr) {
             translate_client_expand_pair(env_builder,
                                          "EXPAND_PAIR",
-                                         {payload, payload_length});
+                                         string_payload);
         } else
             throw std::runtime_error("misplaced EXPAND_PAIR packet");
         return;
@@ -2053,10 +2054,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_HTTP
         if (view != nullptr)
             parse_header_forward(&view->request_header_forward,
-                                 payload, payload_length);
+                                 payload);
         else
             parse_header_forward(&response.request_header_forward,
-                                 payload, payload_length);
+                                 payload);
         return;
 #else
         break;
@@ -2066,10 +2067,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_HTTP
         if (view != nullptr)
             parse_header_forward(&view->response_header_forward,
-                                 payload, payload_length);
+                                 payload);
         else
             parse_header_forward(&response.response_header_forward,
-                                 payload, payload_length);
+                                 payload);
         return;
 #else
         break;
@@ -2077,10 +2078,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::WWW_AUTHENTICATE:
 #if TRANSLATION_ENABLE_SESSION
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed WWW_AUTHENTICATE packet");
 
-        response.www_authenticate = payload;
+        response.www_authenticate = string_payload.data;
         return;
 #else
         break;
@@ -2088,10 +2089,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::AUTHENTICATION_INFO:
 #if TRANSLATION_ENABLE_SESSION
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed AUTHENTICATION_INFO packet");
 
-        response.authentication_info = payload;
+        response.authentication_info = string_payload.data;
         return;
 #else
         break;
@@ -2100,7 +2101,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     case TranslationCommand::HEADER:
 #if TRANSLATION_ENABLE_HTTP
         parse_header(alloc, response.response_headers,
-                     "HEADER", {payload, payload_length});
+                     "HEADER", string_payload);
         return;
 #else
         break;
@@ -2119,17 +2120,17 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.cookie_domain != nullptr)
             throw std::runtime_error("misplaced COOKIE_DOMAIN packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed COOKIE_DOMAIN packet");
 
-        response.cookie_domain = payload;
+        response.cookie_domain = string_payload.data;
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::ERROR_DOCUMENT:
-        response.error_document = { payload, payload_length };
+        response.error_document = payload;
         return;
 
     case TranslationCommand::CHECK:
@@ -2137,7 +2138,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (!response.check.IsNull())
             throw std::runtime_error("duplicate CHECK packet");
 
-        response.check = { payload, payload_length };
+        response.check = payload;
         return;
 #else
         break;
@@ -2152,10 +2153,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (resource_address == nullptr || resource_address->IsDefined())
             throw std::runtime_error("misplaced WAS packet");
 
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed WAS packet");
 
-        SetCgiAddress(ResourceAddress::Type::WAS, payload);
+        SetCgiAddress(ResourceAddress::Type::WAS, string_payload.data);
         return;
 #else
         break;
@@ -2193,10 +2194,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (resource_address == nullptr || !resource_address->IsDefined())
             throw std::runtime_error("misplaced COOKIE_HOST packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed COOKIE_HOST packet");
 
-        response.cookie_host = payload;
+        response.cookie_host = string_payload.data;
         return;
 #else
         break;
@@ -2207,10 +2208,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.cookie_path != nullptr)
             throw std::runtime_error("misplaced COOKIE_PATH packet");
 
-        if (!IsValidAbsoluteUriPath({payload, payload_length}))
+        if (!IsValidAbsoluteUriPath(string_payload))
             throw std::runtime_error("malformed COOKIE_PATH packet");
 
-        response.cookie_path = payload;
+        response.cookie_path = string_payload.data;
         return;
 #else
         break;
@@ -2322,10 +2323,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.local_uri != nullptr)
             throw std::runtime_error("misplaced LOCAL_URI packet");
 
-        if (payload_length == 0 || payload[payload_length - 1] != '/')
+        if (string_payload.empty() || string_payload.back() != '/')
             throw std::runtime_error("malformed LOCAL_URI packet");
 
-        response.local_uri = payload;
+        response.local_uri = string_payload.data;
         return;
 #else
         break;
@@ -2349,13 +2350,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
     case TranslationCommand::VALIDATE_MTIME:
-        if (payload_length < 10 || payload[8] != '/' ||
-            memchr(payload + 9, 0, payload_length - 9) != nullptr)
+        if (string_payload.size < 10 || string_payload[8] != '/' ||
+            memchr(string_payload.data + 9, 0,
+                   string_payload.size - 9) != nullptr)
             throw std::runtime_error("malformed VALIDATE_MTIME packet");
 
-        response.validate_mtime.mtime = *(const uint64_t *)_payload;
+        response.validate_mtime.mtime = *(const uint64_t *)payload.data;
         response.validate_mtime.path =
-            alloc.DupZ({payload + 8, payload_length - 8});
+            alloc.DupZ({string_payload.data + 8, string_payload.size - 8});
         return;
 
     case TranslationCommand::LHTTP_PATH:
@@ -2363,10 +2365,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (resource_address == nullptr || resource_address->IsDefined())
             throw std::runtime_error("misplaced LHTTP_PATH packet");
 
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed LHTTP_PATH packet");
 
-        lhttp_address = alloc.New<LhttpAddress>(payload);
+        lhttp_address = alloc.New<LhttpAddress>(string_payload.data);
         *resource_address = *lhttp_address;
 
         args_builder = lhttp_address->args;
@@ -2382,10 +2384,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             lhttp_address->uri != nullptr)
             throw std::runtime_error("misplaced LHTTP_HOST packet");
 
-        if (!IsValidAbsoluteUriPath({payload, payload_length}))
+        if (!IsValidAbsoluteUriPath(string_payload))
             throw std::runtime_error("malformed LHTTP_URI packet");
 
-        lhttp_address->uri = payload;
+        lhttp_address->uri = string_payload.data;
         return;
 #else
         break;
@@ -2398,10 +2400,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             response.regex == nullptr)
             throw std::runtime_error("misplaced EXPAND_LHTTP_URI packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_LHTTP_URI packet");
 
-        lhttp_address->uri = payload;
+        lhttp_address->uri = string_payload.data;
         lhttp_address->expand_uri = true;
         return;
 #else
@@ -2414,10 +2416,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             lhttp_address->host_and_port != nullptr)
             throw std::runtime_error("misplaced LHTTP_HOST packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed LHTTP_HOST packet");
 
-        lhttp_address->host_and_port = payload;
+        lhttp_address->host_and_port = string_payload.data;
         return;
 #else
         break;
@@ -2428,10 +2430,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (lhttp_address == nullptr)
             throw std::runtime_error("misplaced CONCURRENCY packet");
 
-        if (payload_length != 2)
+        if (payload.size != 2)
             throw std::runtime_error("malformed CONCURRENCY packet");
 
-        lhttp_address->concurrency = *(const uint16_t *)_payload;
+        lhttp_address->concurrency = *(const uint16_t *)payload.data;
         return;
 #else
         break;
@@ -2445,14 +2447,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (!response.want_full_uri.IsNull())
             throw std::runtime_error("duplicate WANT_FULL_URI packet");
 
-        response.want_full_uri = { payload, payload_length };
+        response.want_full_uri = payload;
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::USER_NAMESPACE:
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed USER_NAMESPACE packet");
 
         if (ns_options != nullptr) {
@@ -2463,7 +2465,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         return;
 
     case TranslationCommand::PID_NAMESPACE:
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed PID_NAMESPACE packet");
 
         if (ns_options != nullptr) {
@@ -2477,7 +2479,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         return;
 
     case TranslationCommand::NETWORK_NAMESPACE:
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed NETWORK_NAMESPACE packet");
 
         if (ns_options == nullptr)
@@ -2493,37 +2495,36 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         return;
 
     case TranslationCommand::PIVOT_ROOT:
-        translate_client_pivot_root(ns_options, {payload, payload_length});
+        translate_client_pivot_root(ns_options, string_payload);
         return;
 
     case TranslationCommand::MOUNT_PROC:
-        translate_client_mount_proc(ns_options, payload_length);
+        translate_client_mount_proc(ns_options, payload.size);
         return;
 
     case TranslationCommand::MOUNT_HOME:
-        translate_client_mount_home(ns_options, {payload, payload_length});
+        translate_client_mount_home(ns_options, string_payload);
         return;
 
     case TranslationCommand::BIND_MOUNT:
-        HandleBindMount(payload, payload_length, false, false);
+        HandleBindMount(string_payload, false, false);
         return;
 
     case TranslationCommand::MOUNT_TMP_TMPFS:
-        translate_client_mount_tmp_tmpfs(ns_options,
-                                         { payload, payload_length });
+        translate_client_mount_tmp_tmpfs(ns_options, string_payload);
         return;
 
     case TranslationCommand::UTS_NAMESPACE:
-        translate_client_uts_namespace(ns_options, payload);
+        translate_client_uts_namespace(ns_options, string_payload);
         return;
 
     case TranslationCommand::RLIMITS:
-        translate_client_rlimits(alloc, child_options, payload);
+        translate_client_rlimits(alloc, child_options, string_payload.data);
         return;
 
     case TranslationCommand::WANT:
 #if TRANSLATION_ENABLE_WANT
-        HandleWant((const TranslationCommand *)_payload, payload_length);
+        HandleWant((const TranslationCommand *)payload.data, payload.size);
         return;
 #else
         break;
@@ -2531,8 +2532,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::FILE_NOT_FOUND:
 #if TRANSLATION_ENABLE_RADDRESS
-        translate_client_file_not_found(response,
-                                        { _payload, payload_length });
+        translate_client_file_not_found(response, payload);
         return;
 #else
         break;
@@ -2540,7 +2540,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::CONTENT_TYPE_LOOKUP:
 #if TRANSLATION_ENABLE_RADDRESS
-        HandleContentTypeLookup({ _payload, payload_length });
+        HandleContentTypeLookup(payload);
         return;
 #else
         break;
@@ -2548,27 +2548,25 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::DIRECTORY_INDEX:
 #if TRANSLATION_ENABLE_RADDRESS
-        translate_client_directory_index(response,
-                                         { _payload, payload_length });
+        translate_client_directory_index(response, payload);
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::EXPIRES_RELATIVE:
-        translate_client_expires_relative(response,
-                                          { _payload, payload_length });
+        translate_client_expires_relative(response, payload);
         return;
 
 
     case TranslationCommand::TEST_PATH:
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed TEST_PATH packet");
 
         if (response.test_path != nullptr)
             throw std::runtime_error("duplicate TEST_PATH packet");
 
-        response.test_path = payload;
+        response.test_path = string_payload.data;
         return;
 
     case TranslationCommand::EXPAND_TEST_PATH:
@@ -2576,13 +2574,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.regex == nullptr)
             throw std::runtime_error("misplaced EXPAND_TEST_PATH packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_TEST_PATH packet");
 
         if (response.expand_test_path)
             throw std::runtime_error("duplicate EXPAND_TEST_PATH packet");
 
-        response.test_path = payload;
+        response.test_path = string_payload.data;
         response.expand_test_path = true;
         return;
 #else
@@ -2591,7 +2589,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::REDIRECT_QUERY_STRING:
 #if TRANSLATION_ENABLE_HTTP
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REDIRECT_QUERY_STRING packet");
 
         if (response.redirect_query_string ||
@@ -2606,7 +2604,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::ENOTDIR_:
 #if TRANSLATION_ENABLE_RADDRESS
-        translate_client_enotdir(response, { _payload, payload_length });
+        translate_client_enotdir(response, payload);
         return;
 #else
         break;
@@ -2614,7 +2612,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::STDERR_PATH:
         translate_client_stderr_path(child_options,
-                                     { _payload, payload_length },
+                                     payload,
                                      false);
         return;
 
@@ -2623,7 +2621,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.HasAuth())
             throw std::runtime_error("duplicate AUTH packet");
 
-        response.auth = { payload, payload_length };
+        response.auth = payload;
         return;
 #else
         break;
@@ -2633,7 +2631,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (child_options != nullptr) {
             translate_client_pair(alloc, env_builder,
                                   "SETENV",
-                                  {payload, payload_length});
+                                  string_payload);
         } else
             throw std::runtime_error("misplaced SETENV packet");
         return;
@@ -2646,7 +2644,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (child_options != nullptr) {
             translate_client_expand_pair(env_builder,
                                          "EXPAND_SETENV",
-                                         {payload, payload_length});
+                                         string_payload);
         } else
             throw std::runtime_error("misplaced SETENV packet");
         return;
@@ -2660,10 +2658,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             response.expand_uri)
             throw std::runtime_error("misplaced EXPAND_URI packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_URI packet");
 
-        response.uri = payload;
+        response.uri = string_payload.data;
         response.expand_uri = true;
         return;
 #else
@@ -2677,10 +2675,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             response.expand_site)
             throw std::runtime_error("misplaced EXPAND_SITE packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_SITE packet");
 
-        response.site = payload;
+        response.site = string_payload.data;
         response.expand_site = true;
         return;
 #endif
@@ -2688,7 +2686,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     case TranslationCommand::REQUEST_HEADER:
 #if TRANSLATION_ENABLE_HTTP
         parse_header(alloc, response.request_headers,
-                     "REQUEST_HEADER", {payload, payload_length});
+                     "REQUEST_HEADER", string_payload);
         return;
 #else
         break;
@@ -2701,7 +2699,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
         parse_header(alloc,
                      response.expand_request_headers,
-                     "EXPAND_REQUEST_HEADER", {payload, payload_length});
+                     "EXPAND_REQUEST_HEADER", string_payload);
         return;
 #else
         break;
@@ -2709,7 +2707,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::AUTO_GZIPPED:
 #if TRANSLATION_ENABLE_EXPAND
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed AUTO_GZIPPED packet");
 
         if (file_address != nullptr) {
@@ -2730,7 +2728,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             response.test_path == nullptr)
             throw std::runtime_error("misplaced PROBE_PATH_SUFFIXES packet");
 
-        response.probe_path_suffixes = { payload, payload_length };
+        response.probe_path_suffixes = payload;
         return;
 
     case TranslationCommand::PROBE_SUFFIX:
@@ -2740,10 +2738,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (probe_suffixes_builder.full())
             throw std::runtime_error("too many PROBE_SUFFIX packets");
 
-        if (!CheckProbeSuffix({payload, payload_length}))
+        if (!CheckProbeSuffix(string_payload))
             throw std::runtime_error("malformed PROBE_SUFFIX packets");
 
-        probe_suffixes_builder.push_back(payload);
+        probe_suffixes_builder.push_back(string_payload.data);
         return;
 
     case TranslationCommand::AUTH_FILE:
@@ -2751,10 +2749,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.HasAuth())
             throw std::runtime_error("duplicate AUTH_FILE packet");
 
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed AUTH_FILE packet");
 
-        response.auth_file = payload;
+        response.auth_file = string_payload.data;
         return;
 #else
         break;
@@ -2765,13 +2763,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.HasAuth())
             throw std::runtime_error("duplicate EXPAND_AUTH_FILE packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_AUTH_FILE packet");
 
         if (response.regex == nullptr)
             throw std::runtime_error("misplaced EXPAND_AUTH_FILE packet");
 
-        response.auth_file = payload;
+        response.auth_file = string_payload.data;
         response.expand_auth_file = true;
         return;
 #else
@@ -2785,7 +2783,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             response.expand_append_auth != nullptr)
             throw std::runtime_error("misplaced APPEND_AUTH packet");
 
-        response.append_auth = { payload, payload_length };
+        response.append_auth = payload;
         return;
 #else
         break;
@@ -2799,10 +2797,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             response.expand_append_auth != nullptr)
             throw std::runtime_error("misplaced EXPAND_APPEND_AUTH packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_APPEND_AUTH packet");
 
-        response.expand_append_auth = payload;
+        response.expand_append_auth = string_payload.data;
         return;
 #else
         break;
@@ -2815,10 +2813,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             !resource_address->IsDefined())
             throw std::runtime_error("misplaced EXPAND_COOKIE_HOST packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_COOKIE_HOST packet");
 
-        response.cookie_host = payload;
+        response.cookie_host = string_payload.data;
         response.expand_cookie_host = true;
         return;
 #else
@@ -2827,7 +2825,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EXPAND_BIND_MOUNT:
 #if TRANSLATION_ENABLE_EXPAND
-        HandleBindMount(payload, payload_length, true, false);
+        HandleBindMount(string_payload, true, false);
         return;
 #else
         break;
@@ -2835,7 +2833,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::NON_BLOCKING:
 #if TRANSLATION_ENABLE_RADDRESS
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed NON_BLOCKING packet");
 
         if (lhttp_address != nullptr) {
@@ -2852,10 +2850,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.read_file != nullptr)
             throw std::runtime_error("duplicate READ_FILE packet");
 
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed READ_FILE packet");
 
-        response.read_file = payload;
+        response.read_file = string_payload.data;
         return;
 
     case TranslationCommand::EXPAND_READ_FILE:
@@ -2863,10 +2861,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.read_file != nullptr)
             throw std::runtime_error("duplicate EXPAND_READ_FILE packet");
 
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXPAND_READ_FILE packet");
 
-        response.read_file = payload;
+        response.read_file = string_payload.data;
         response.expand_read_file = true;
         return;
 #else
@@ -2880,7 +2878,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
         parse_header(alloc,
                      response.expand_response_headers,
-                     "EXPAND_HEADER", {payload, payload_length});
+                     "EXPAND_HEADER", string_payload);
         return;
 #else
         break;
@@ -2895,7 +2893,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.regex_on_host_uri)
             throw std::runtime_error("duplicate REGEX_ON_HOST_URI");
 
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REGEX_ON_HOST_URI packet");
 
         response.regex_on_host_uri = true;
@@ -2906,14 +2904,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::SESSION_SITE:
 #if TRANSLATION_ENABLE_SESSION
-        response.session_site = payload;
+        response.session_site = string_payload.data;
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::IPC_NAMESPACE:
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed IPC_NAMESPACE packet");
 
         if (ns_options != nullptr) {
@@ -2924,7 +2922,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         return;
 
     case TranslationCommand::AUTO_DEFLATE:
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed AUTO_DEFLATE packet");
 
         if (response.auto_deflate)
@@ -2939,7 +2937,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_JAILCGI
                                      jail,
 #endif
-                                     {payload, payload_length});
+                                     string_payload);
         return;
 #else
         break;
@@ -2948,7 +2946,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     case TranslationCommand::EXPAND_STDERR_PATH:
 #if TRANSLATION_ENABLE_EXPAND
         translate_client_expand_stderr_path(child_options,
-                                            { payload, payload_length });
+                                            string_payload);
         return;
 #else
         break;
@@ -2963,7 +2961,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.regex_on_user_uri)
             throw std::runtime_error("duplicate REGEX_ON_USER_URI");
 
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REGEX_ON_USER_URI packet");
 
         response.regex_on_user_uri = true;
@@ -2973,7 +2971,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
     case TranslationCommand::AUTO_GZIP:
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed AUTO_GZIP packet");
 
         if (response.auto_gzip)
@@ -2987,19 +2985,19 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (!response.internal_redirect.IsNull())
             throw std::runtime_error("duplicate INTERNAL_REDIRECT packet");
 
-        response.internal_redirect = { payload, payload_length };
+        response.internal_redirect = payload;
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::REFENCE:
-        HandleRefence({payload, payload_length});
+        HandleRefence(string_payload);
         return;
 
     case TranslationCommand::INVERSE_REGEX_UNESCAPE:
 #if TRANSLATION_ENABLE_EXPAND
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed INVERSE_REGEX_UNESCAPE packet");
 
         if (response.inverse_regex == nullptr)
@@ -3015,12 +3013,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
     case TranslationCommand::BIND_MOUNT_RW:
-        HandleBindMount(payload, payload_length, false, true);
+        HandleBindMount(string_payload, false, true);
         return;
 
     case TranslationCommand::EXPAND_BIND_MOUNT_RW:
 #if TRANSLATION_ENABLE_EXPAND
-        HandleBindMount(payload, payload_length, true, true);
+        HandleBindMount(string_payload, true, true);
         return;
 #else
         break;
@@ -3028,26 +3026,26 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::UNTRUSTED_RAW_SITE_SUFFIX:
 #if TRANSLATION_ENABLE_SESSION
-        if (!IsValidNonEmptyString({payload, payload_length}) ||
-            payload[payload_length - 1] == '.')
+        if (!IsValidNonEmptyString(string_payload) ||
+            string_payload.back() == '.')
             throw std::runtime_error("malformed UNTRUSTED_RAW_SITE_SUFFIX packet");
 
         if (response.HasUntrusted())
             throw std::runtime_error("misplaced UNTRUSTED_RAW_SITE_SUFFIX packet");
 
-        response.untrusted_raw_site_suffix = payload;
+        response.untrusted_raw_site_suffix = string_payload.data;
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::MOUNT_TMPFS:
-        translate_client_mount_tmpfs(ns_options, {payload, payload_length});
+        translate_client_mount_tmpfs(ns_options, string_payload);
         return;
 
     case TranslationCommand::REVEAL_USER:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REVEAL_USER packet");
 
         if (transformation == nullptr ||
@@ -3063,7 +3061,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::REALM_FROM_AUTH_BASE:
 #if TRANSLATION_ENABLE_SESSION
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REALM_FROM_AUTH_BASE packet");
 
         if (response.realm_from_auth_base)
@@ -3082,7 +3080,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (child_options == nullptr || child_options->forbid_user_ns)
             throw std::runtime_error("misplaced FORBID_USER_NS packet");
 
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed FORBID_USER_NS packet");
 
         child_options->forbid_user_ns = true;
@@ -3092,7 +3090,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (child_options == nullptr || child_options->no_new_privs)
             throw std::runtime_error("misplaced NO_NEW_PRIVS packet");
 
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed NO_NEW_PRIVS packet");
 
         child_options->no_new_privs = true;
@@ -3103,26 +3101,26 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
             child_options->cgroup.name != nullptr)
             throw std::runtime_error("misplaced CGROUP packet");
 
-        if (!valid_view_name(payload))
+        if (!valid_view_name(string_payload.data))
             throw std::runtime_error("malformed CGROUP packet");
 
-        child_options->cgroup.name = payload;
+        child_options->cgroup.name = string_payload.data;
         return;
 
     case TranslationCommand::CGROUP_SET:
-        HandleCgroupSet({payload, payload_length});
+        HandleCgroupSet(string_payload);
         return;
 
     case TranslationCommand::EXTERNAL_SESSION_MANAGER:
 #if TRANSLATION_ENABLE_SESSION
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed EXTERNAL_SESSION_MANAGER packet");
 
         if (response.external_session_manager != nullptr)
             throw std::runtime_error("duplicate EXTERNAL_SESSION_MANAGER packet");
 
         response.external_session_manager = http_address =
-            http_address_parse(alloc, payload);
+            http_address_parse(alloc, string_payload.data);
 
         address_list = &http_address->addresses;
         default_port = http_address->GetDefaultPort();
@@ -3133,8 +3131,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EXTERNAL_SESSION_KEEPALIVE: {
 #if TRANSLATION_ENABLE_SESSION
-        const uint16_t *value = (const uint16_t *)(const void *)payload;
-        if (payload_length != sizeof(*value) || *value == 0)
+        const uint16_t *value = (const uint16_t *)payload.data;
+        if (payload.size != sizeof(*value) || *value == 0)
             throw std::runtime_error("malformed EXTERNAL_SESSION_KEEPALIVE packet");
 
         if (response.external_session_manager == nullptr)
@@ -3151,19 +3149,19 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     }
 
     case TranslationCommand::BIND_MOUNT_EXEC:
-        HandleBindMount(payload, payload_length, false, false, true);
+        HandleBindMount(string_payload, false, false, true);
         return;
 
     case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
 #if TRANSLATION_ENABLE_EXPAND
-        HandleBindMount(payload, payload_length, true, false, true);
+        HandleBindMount(string_payload, true, false, true);
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::STDERR_NULL:
-        if (payload_length > 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed STDERR_NULL packet");
 
         if (child_options == nullptr || child_options->stderr_path != nullptr)
@@ -3177,13 +3175,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::EXECUTE:
 #if TRANSLATION_ENABLE_EXECUTE
-        if (!IsValidAbsolutePath({payload, payload_length}))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed EXECUTE packet");
 
         if (response.execute != nullptr)
             throw std::runtime_error("duplicate EXECUTE packet");
 
-        response.execute = payload;
+        response.execute = string_payload.data;
         args_builder = response.args;
         return;
 #else
@@ -3191,63 +3189,61 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
     case TranslationCommand::POOL:
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed POOL packet");
 
-        response.pool = payload;
+        response.pool = string_payload.data;
         return;
 
     case TranslationCommand::MESSAGE:
 #if TRANSLATION_ENABLE_HTTP
-        if (payload_length > 1024 ||
-            !IsValidNonEmptyString({payload, payload_length}))
+        if (string_payload.size > 1024 ||
+            !IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed MESSAGE packet");
 
-        response.message = payload;
+        response.message = string_payload.data;
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::CANONICAL_HOST:
-        if (!IsValidNonEmptyString({payload, payload_length}))
+        if (!IsValidNonEmptyString(string_payload))
             throw std::runtime_error("malformed CANONICAL_HOST packet");
 
-        response.canonical_host = payload;
+        response.canonical_host = string_payload.data;
         return;
 
     case TranslationCommand::SHELL:
 #if TRANSLATION_ENABLE_EXECUTE
-        if (!IsValidAbsolutePath(payload, payload_length))
+        if (!IsValidAbsolutePath(string_payload))
             throw std::runtime_error("malformed SHELL packet");
 
         if (response.shell != nullptr)
             throw std::runtime_error("duplicate SHELL packet");
 
-        response.shell = payload;
+        response.shell = string_payload.data;
         return;
 #else
         break;
 #endif
 
     case TranslationCommand::TOKEN:
-        if (HasNullByte({payload, payload_length}))
+        if (HasNullByte(payload))
             throw std::runtime_error("malformed TOKEN packet");
-        response.token = payload;
+        response.token = string_payload.data;
         return;
 
     case TranslationCommand::STDERR_PATH_JAILED:
-        translate_client_stderr_path(child_options,
-                                     { _payload, payload_length },
-                                     true);
+        translate_client_stderr_path(child_options, payload, true);
         return;
 
     case TranslationCommand::UMASK:
-        HandleUmask({_payload, payload_length});
+        HandleUmask(payload);
         return;
 
     case TranslationCommand::CGROUP_NAMESPACE:
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed CGROUP_NAMESPACE packet");
 
         if (ns_options != nullptr) {
@@ -3262,7 +3258,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::REDIRECT_FULL_URI:
 #if TRANSLATION_ENABLE_HTTP
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed REDIRECT_FULL_URI packet");
 
         if (response.base == nullptr)
@@ -3285,14 +3281,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.https_only != 0)
             throw std::runtime_error("duplicate HTTPS_ONLY packet");
 
-        if (payload_length == sizeof(response.https_only)) {
-            response.https_only = *(const uint16_t *)_payload;
+        if (payload.size == sizeof(response.https_only)) {
+            response.https_only = *(const uint16_t *)payload.data;
             if (response.https_only == 0)
                 /* zero in the packet means "default port", but we
                    change it here to 443 because in the variable, zero
                    means "not set" */
                 response.https_only = 443;
-        } else if (payload_length == 0)
+        } else if (payload.empty())
             response.https_only = 443;
         else
             throw std::runtime_error("malformed HTTPS_ONLY packet");
@@ -3306,7 +3302,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (child_options == nullptr || child_options->forbid_multicast)
             throw std::runtime_error("misplaced FORBID_MULTICAST packet");
 
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed FORBID_MULTICAST packet");
 
         child_options->forbid_multicast = true;
@@ -3316,14 +3312,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (child_options == nullptr || child_options->forbid_bind)
             throw std::runtime_error("misplaced FORBID_BIND packet");
 
-        if (payload_length != 0)
+        if (!payload.empty())
             throw std::runtime_error("malformed FORBID_BIND packet");
 
         child_options->forbid_bind = true;
         return;
 
     case TranslationCommand::NETWORK_NAMESPACE_NAME:
-        if (!IsValidName({payload, payload_length}))
+        if (!IsValidName(string_payload))
             throw std::runtime_error("malformed NETWORK_NAMESPACE_NAME packet");
 
         if (ns_options == nullptr)
@@ -3335,15 +3331,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (ns_options->enable_network)
             throw std::runtime_error("Can't combine NETWORK_NAMESPACE_NAME with NETWORK_NAMESPACE");
 
-        ns_options->network_namespace = payload;
+        ns_options->network_namespace = string_payload.data;
         return;
 
     case TranslationCommand::MOUNT_ROOT_TMPFS:
-        translate_client_mount_root_tmpfs(ns_options, payload_length);
+        translate_client_mount_root_tmpfs(ns_options, payload.size);
         return;
 
     case TranslationCommand::CHILD_TAG:
-        if (HasNullByte({payload, payload_length}))
+        if (HasNullByte(payload))
             throw std::runtime_error("malformed CHILD_TAG packet");
 
         if (child_options == nullptr)
@@ -3352,7 +3348,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (child_options->tag != nullptr)
             throw std::runtime_error("duplicate CHILD_TAG packet");
 
-        child_options->tag = payload;
+        child_options->tag = string_payload.data;
         return;
 
     case TranslationCommand::CERTIFICATE:
@@ -3363,10 +3359,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (http_address->certificate != nullptr)
             throw std::runtime_error("duplicate CERTIFICATE packet");
 
-        if (!IsValidName({payload, payload_length}))
+        if (!IsValidName(string_payload))
             throw std::runtime_error("malformed CERTIFICATE packet");
 
-        http_address->certificate = payload;
+        http_address->certificate = string_payload.data;
         return;
 #else
         break;
@@ -3385,7 +3381,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         return;
 
     case TranslationCommand::PID_NAMESPACE_NAME:
-        if (!IsValidName({payload, payload_length}))
+        if (!IsValidName(string_payload))
             throw std::runtime_error("malformed PID_NAMESPACE_NAME packet");
 
         if (ns_options == nullptr)
@@ -3397,12 +3393,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (ns_options->enable_pid)
             throw std::runtime_error("Can't combine PID_NAMESPACE_NAME with PID_NAMESPACE");
 
-        ns_options->pid_namespace = payload;
+        ns_options->pid_namespace = string_payload.data;
         return;
 
     case TranslationCommand::SUBST_YAML_FILE:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        HandleSubstYamlFile({payload, payload_length});
+        HandleSubstYamlFile(string_payload);
         return;
 #else
         break;
@@ -3414,7 +3410,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 inline TranslateParser::Result
 TranslateParser::HandlePacket(TranslationCommand command,
-                              const void *const payload, size_t payload_length)
+                              ConstBuffer<void> payload)
 {
     assert(payload != nullptr);
 
@@ -3475,13 +3471,13 @@ TranslateParser::HandlePacket(TranslationCommand command,
         transformation_tail = &response.views->transformation;
 #endif
 
-        if (payload_length >= sizeof(uint8_t))
-            response.protocol_version = *(const uint8_t *)payload;
+        if (payload.size >= sizeof(uint8_t))
+            response.protocol_version = *(const uint8_t *)payload.data;
 
         return Result::MORE;
 
     default:
-        HandleRegularPacket(command, payload, payload_length);
+        HandleRegularPacket(command, payload);
         return Result::MORE;
     }
 }
@@ -3493,6 +3489,5 @@ TranslateParser::Process()
         /* need more data */
         return Result::MORE;
 
-    return HandlePacket(reader.GetCommand(),
-                        reader.GetPayload(), reader.GetLength());
+    return HandlePacket(reader.GetCommand(), reader.GetPayload());
 }

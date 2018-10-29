@@ -34,6 +34,8 @@
 #define BENG_PROXY_TRANSLATE_READER_HXX
 
 #include "Protocol.hxx"
+#include "util/Compiler.h"
+#include "util/ConstBuffer.hxx"
 
 #include <assert.h>
 #include <stddef.h>
@@ -76,18 +78,11 @@ public:
         return header.command;
     }
 
-    const void *GetPayload() const {
+    gcc_pure
+    ConstBuffer<void> GetPayload() const noexcept {
         assert(IsComplete());
 
-        return payload != nullptr
-            ? payload
-            : "";
-    }
-
-    size_t GetLength() const {
-        assert(IsComplete());
-
-        return header.length;
+        return {payload != nullptr ? payload : "", header.length};
     }
 };
 
