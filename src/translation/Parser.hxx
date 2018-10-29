@@ -241,7 +241,8 @@ private:
     template<typename T>
     Transformation *AddTransformation(T type) noexcept;
     ResourceAddress *AddFilter();
-    void AddSubstYamlFile(const char *path) noexcept;
+    void AddSubstYamlFile(const char *file_path,
+                          const char *map_path) noexcept;
 #endif
 
     void HandleBindMount(StringView payload,
