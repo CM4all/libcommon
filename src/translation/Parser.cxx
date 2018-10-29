@@ -1024,6 +1024,19 @@ CheckProbeSuffix(const char *payload, size_t length)
         !has_null_byte(payload, length);
 }
 
+#if TRANSLATION_ENABLE_TRANSFORMATION
+
+inline void
+TranslateParser::HandleSubstYamlFile(StringView payload)
+{
+    if (!is_valid_absolute_path(payload.data, payload.size))
+        throw std::runtime_error("malformed SUBST_YAML_FILE packet");
+
+    AddSubstYamlFile(payload.data);
+}
+
+#endif
+
 inline void
 TranslateParser::HandleRegularPacket(TranslationCommand command,
                                      const void *const _payload,
@@ -3393,10 +3406,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::SUBST_YAML_FILE:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        if (!is_valid_absolute_path(payload, payload_length))
-            throw std::runtime_error("malformed SUBST_YAML_FILE packet");
-
-        AddSubstYamlFile(payload);
+        HandleSubstYamlFile({payload, payload_length});
         return;
 #else
         break;

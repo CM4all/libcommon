@@ -264,6 +264,8 @@ private:
 
     void HandleCgroupSet(StringView payload);
 
+    void HandleSubstYamlFile(StringView payload);
+
     Result HandlePacket(TranslationCommand command,
                         const void *const _payload, size_t payload_length);
 };
