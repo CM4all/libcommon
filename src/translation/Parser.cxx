@@ -185,10 +185,12 @@ TranslateParser::AddFilter()
 }
 
 void
-TranslateParser::AddSubstYamlFile(const char *file_path,
+TranslateParser::AddSubstYamlFile(const char *prefix,
+                                  const char *file_path,
                                   const char *map_path) noexcept
 {
     auto *t = AddTransformation(Transformation::Type::SUBST);
+    t->u.subst.prefix = prefix;
     t->u.subst.yaml_file = file_path;
     t->u.subst.yaml_map_path = map_path;
 }
@@ -1031,20 +1033,29 @@ CheckProbeSuffix(StringView payload) noexcept
 inline void
 TranslateParser::HandleSubstYamlFile(StringView payload)
 {
-    StringView yaml_file = payload;
-    StringView yaml_map_path = nullptr;
+    const auto prefix = payload.data;
 
     auto separator = payload.Find('\0');
-    if (separator != nullptr) {
-        yaml_file.SetEnd(separator);
-        yaml_map_path = {separator + 1, payload.end()};
-    }
-
-    if (!IsValidAbsolutePath(yaml_file) ||
-        HasNullByte(yaml_map_path.ToVoid()))
+    if (separator == nullptr)
         throw std::runtime_error("malformed SUBST_YAML_FILE packet");
 
-    AddSubstYamlFile(yaml_file.data, yaml_map_path.data);
+    const auto yaml_file = separator + 1;
+    if (!IsValidAbsolutePath(yaml_file))
+        throw std::runtime_error("malformed SUBST_YAML_FILE packet");
+
+    payload.MoveFront(yaml_file);
+    separator = payload.Find('\0');
+    if (separator == nullptr)
+        throw std::runtime_error("malformed SUBST_YAML_FILE packet");
+
+    const auto yaml_map_path = separator + 1;
+
+    payload.MoveFront(yaml_map_path);
+    separator = payload.Find('\0');
+    if (separator != nullptr)
+        throw std::runtime_error("malformed SUBST_YAML_FILE packet");
+
+    AddSubstYamlFile(prefix, yaml_file, yaml_map_path);
 }
 
 #endif

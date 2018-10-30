@@ -241,7 +241,8 @@ private:
     template<typename T>
     Transformation *AddTransformation(T type) noexcept;
     ResourceAddress *AddFilter();
-    void AddSubstYamlFile(const char *file_path,
+    void AddSubstYamlFile(const char *prefix,
+                          const char *file_path,
                           const char *map_path) noexcept;
 #endif
 
