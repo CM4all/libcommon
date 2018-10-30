@@ -137,9 +137,16 @@ IsValidName(StringView s)
 
 gcc_pure
 static bool
+IsValidAbsolutePath(const char *p) noexcept
+{
+    return *p == '/';
+}
+
+gcc_pure
+static bool
 IsValidAbsolutePath(StringView p) noexcept
 {
-    return IsValidNonEmptyString(p) && p.front() == '/';
+    return IsValidNonEmptyString(p) && IsValidAbsolutePath(p.data);
 }
 
 #if TRANSLATION_ENABLE_HTTP
