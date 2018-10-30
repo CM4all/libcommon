@@ -155,11 +155,11 @@ IsValidAbsoluteUriPath(StringView p) noexcept
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
 
+template<>
 Transformation *
-TranslateParser::AddTransformation()
+TranslateParser::AddTransformation(Transformation::Type type) noexcept
 {
-    auto t = alloc.New<Transformation>();
-    t->next = nullptr;
+    auto t = alloc.New<Transformation>(type);
 
     transformation = t;
     *transformation_tail = t;
@@ -171,8 +171,7 @@ TranslateParser::AddTransformation()
 ResourceAddress *
 TranslateParser::AddFilter()
 {
-    auto *t = AddTransformation();
-    t->type = Transformation::Type::FILTER;
+    auto *t = AddTransformation(Transformation::Type::FILTER);
     t->u.filter.address = nullptr;
     t->u.filter.reveal_user = false;
     return &t->u.filter.address;
@@ -181,8 +180,7 @@ TranslateParser::AddFilter()
 void
 TranslateParser::AddSubstYamlFile(const char *path) noexcept
 {
-    auto *t = AddTransformation();
-    t->type = Transformation::Type::SUBST;
+    auto *t = AddTransformation(Transformation::Type::SUBST);
     t->u.subst.yaml_file = path;
 }
 
@@ -1350,8 +1348,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::PROCESS:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        new_transformation = AddTransformation();
-        new_transformation->type = Transformation::Type::PROCESS;
+        new_transformation = AddTransformation(Transformation::Type::PROCESS);
         new_transformation->u.processor.options = PROCESSOR_REWRITE_URL;
         return;
 #else
@@ -2219,8 +2216,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::PROCESS_CSS:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        new_transformation = AddTransformation();
-        new_transformation->type = Transformation::Type::PROCESS_CSS;
+        new_transformation = AddTransformation(Transformation::Type::PROCESS_CSS);
         new_transformation->u.css_processor.options = CSS_PROCESSOR_REWRITE_URL;
         return;
 #else
@@ -2311,8 +2307,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::PROCESS_TEXT:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        new_transformation = AddTransformation();
-        new_transformation->type = Transformation::Type::PROCESS_TEXT;
+        new_transformation = AddTransformation(Transformation::Type::PROCESS_TEXT);
         return;
 #else
         break;
