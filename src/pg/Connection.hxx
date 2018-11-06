@@ -180,8 +180,12 @@ public:
 
 protected:
 	Result CheckResult(PGresult *result) {
-		if (result == nullptr)
+		if (result == nullptr) {
+			if (GetStatus() == CONNECTION_BAD)
+				throw std::runtime_error(GetErrorMessage());
+
 			throw std::bad_alloc();
+		}
 
 		return Result(result);
 	}
