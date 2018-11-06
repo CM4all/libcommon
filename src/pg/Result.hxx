@@ -56,7 +56,6 @@ public:
 	Result():result(nullptr) {}
 	explicit Result(PGresult *_result):result(_result) {}
 
-	Result(const Result &other) = delete;
 	Result(Result &&other) noexcept
 		:result(std::exchange(other.result, nullptr)) {}
 
@@ -69,7 +68,6 @@ public:
 		return result != nullptr;
 	}
 
-	Result &operator=(const Result &other) = delete;
 	Result &operator=(Result &&other) noexcept {
 		using std::swap;
 		swap(result, other.result);
