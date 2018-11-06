@@ -57,9 +57,10 @@ public:
 	explicit Result(PGresult *_result):result(_result) {}
 
 	Result(const Result &other) = delete;
-	Result(Result &&other):result(std::exchange(other.result, nullptr)) {}
+	Result(Result &&other) noexcept
+		:result(std::exchange(other.result, nullptr)) {}
 
-	~Result() {
+	~Result() noexcept {
 		if (result != nullptr)
 			::PQclear(result);
 	}
@@ -244,8 +245,8 @@ public:
 		unsigned row;
 
 	public:
-		constexpr RowIterator(PGresult *_result, unsigned _row)
-		:result(_result), row(_row) {}
+		constexpr RowIterator(PGresult *_result, unsigned _row) noexcept
+			:result(_result), row(_row) {}
 
 		constexpr bool operator==(const RowIterator &other) const noexcept {
 			return row == other.row;
