@@ -70,7 +70,8 @@ public:
 
 	Result &operator=(const Result &other) = delete;
 	Result &operator=(Result &&other) noexcept {
-		std::swap(result, other.result);
+		using std::swap;
+		swap(result, other.result);
 		return *this;
 	}
 
