@@ -37,6 +37,7 @@
 #include "DynamicParamWrapper.hxx"
 #include "Result.hxx"
 #include "Notify.hxx"
+#include "Error.hxx"
 
 #include "util/Compiler.h"
 
@@ -178,6 +179,19 @@ public:
 		return Notify(::PQnotifies(conn));
 	}
 
+private:
+	/**
+	 * Check if the #Result contains an error state, and throw a
+	 * #Error based on this condition.  If the #Result did not contain
+	 * an error, it is returned as-is.
+	 */
+	Result CheckError(Result &&result) {
+		if (result.IsError())
+			throw Error(std::move(result));
+
+		return std::move(result);
+	}
+
 protected:
 	Result CheckResult(PGresult *result) {
 		if (result == nullptr) {
@@ -187,7 +201,7 @@ protected:
 			throw std::bad_alloc();
 		}
 
-		return Result(result);
+		return CheckError(Result(result));
 	}
 
 	static size_t CountDynamic() noexcept {
@@ -289,13 +303,6 @@ public:
 	}
 
 	/**
-	 * Execute a command (with no result set).
-	 *
-	 * Throws #Error on error.
-	 */
-	void ExecuteOrThrow(const char *query);
-
-	/**
 	 * Wrapper for "SET ROLE ...".
 	 *
 	 * Throws #Error on error.
@@ -315,7 +322,7 @@ public:
 	 * Throws #Error on error.
 	 */
 	void BeginSerializable() {
-		ExecuteOrThrow("BEGIN ISOLATION LEVEL SERIALIZABLE");
+		Execute("BEGIN ISOLATION LEVEL SERIALIZABLE");
 	}
 
 	/**
@@ -324,7 +331,7 @@ public:
 	 * Throws #Error on error.
 	 */
 	void BeginRepeatableRead() {
-		ExecuteOrThrow("BEGIN ISOLATION LEVEL REPEATABLE READ");
+		Execute("BEGIN ISOLATION LEVEL REPEATABLE READ");
 	}
 
 	/**
@@ -333,7 +340,7 @@ public:
 	 * Throws #Error on error.
 	 */
 	void Commit() {
-		ExecuteOrThrow("COMMIT");
+		Execute("COMMIT");
 	}
 
 	/**
@@ -342,7 +349,7 @@ public:
 	 * Throws #Error on error.
 	 */
 	void Rollback() {
-		ExecuteOrThrow("ROLLBACK");
+		Execute("ROLLBACK");
 	}
 
 	/**

@@ -31,7 +31,6 @@
  */
 
 #include "Connection.hxx"
-#include "Error.hxx"
 
 #include <string.h>
 
@@ -64,25 +63,17 @@ Connection::StartConnect(const char *conninfo)
 }
 
 void
-Connection::ExecuteOrThrow(const char *query)
-{
-	auto result = Execute(query);
-	if (!result.IsCommandSuccessful())
-		throw Error(std::move(result));
-}
-
-void
 Connection::SetRole(const char *role_name)
 {
 	std::string sql = "SET ROLE '" + Escape(role_name) + "'";
-	ExecuteOrThrow(sql.c_str());
+	Execute(sql.c_str());
 }
 
 void
 Connection::SetSchema(const char *schema)
 {
 	std::string sql = "SET SCHEMA '" + Escape(schema) + "'";
-	ExecuteOrThrow(sql.c_str());
+	Execute(sql.c_str());
 }
 
 void

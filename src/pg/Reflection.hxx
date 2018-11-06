@@ -42,6 +42,8 @@ class Connection;
 /**
  * Does the specified table exist?
  *
+ * Throws on error.
+ *
  * @param schema the schema name (must not be nullptr or empty, as
  * there is no fallback to "public")
  */
@@ -52,6 +54,8 @@ TableExists(Connection &c, const char *schema,
 /**
  * Does a column with the specified name exist in the table?
  *
+ * Throws on error.
+ *
  * @param schema the schema name (must not be nullptr or empty, as
  * there is no fallback to "public")
  */
@@ -59,12 +63,17 @@ bool
 ColumnExists(Connection &c, const char *schema,
 	     const char *table_name, const char *column_name);
 
+/**
+ * Throws on error.
+ */
 std::string
 GetColumnType(Connection &c, const char *schema,
 	      const char *table_name, const char *column_name);
 
 /**
  * Does an index with the specified name exist in the table?
+ *
+ * Throws on error.
  *
  * @param schema the schema name (must not be nullptr or empty, as
  * there is no fallback to "public")
@@ -75,6 +84,8 @@ IndexExists(Connection &c, const char *schema,
 
 /**
  * Does a rule with the specified name exist in the table?
+ *
+ * Throws on error.
  *
  * @param schema the schema name (must not be nullptr or empty, as
  * there is no fallback to "public")

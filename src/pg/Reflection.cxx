@@ -32,7 +32,6 @@
 
 #include "Reflection.hxx"
 #include "Connection.hxx"
-#include "CheckError.hxx"
 #include "util/RuntimeError.hxx"
 
 namespace Pg {
@@ -44,9 +43,9 @@ TableExists(Pg::Connection &c, const char *schema, const char *table_name)
 	assert(*schema != 0);
 	assert(table_name != nullptr);
 
-	return CheckError(c.ExecuteParams("SELECT 1 FROM INFORMATION_SCHEMA.TABLES "
-					  "WHERE table_schema=$1 AND table_name=$2 AND table_type='BASE TABLE'",
-					  schema, table_name)).GetRowCount() > 0;
+	return c.ExecuteParams("SELECT 1 FROM INFORMATION_SCHEMA.TABLES "
+			       "WHERE table_schema=$1 AND table_name=$2 AND table_type='BASE TABLE'",
+			       schema, table_name).GetRowCount() > 0;
 
 }
 
@@ -57,9 +56,9 @@ ColumnExists(Pg::Connection &c, const char *schema,
 	assert(schema != nullptr);
 	assert(*schema != 0);
 
-	return CheckError(c.ExecuteParams("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS "
-					  "WHERE table_schema=$1 AND table_name=$2 AND column_name=$3",
-					  schema, table_name, column_name)).GetRowCount() > 0;
+	return c.ExecuteParams("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS "
+			       "WHERE table_schema=$1 AND table_name=$2 AND column_name=$3",
+			       schema, table_name, column_name).GetRowCount() > 0;
 
 }
 
@@ -71,9 +70,9 @@ GetColumnType(Pg::Connection &c, const char *schema,
 	assert(*schema != 0);
 
 	const auto result =
-		CheckError(c.ExecuteParams("SELECT data_type FROM INFORMATION_SCHEMA.COLUMNS "
-					   "WHERE table_schema=$1 AND table_name=$2 AND column_name=$3",
-					   schema, table_name, column_name));
+		c.ExecuteParams("SELECT data_type FROM INFORMATION_SCHEMA.COLUMNS "
+				"WHERE table_schema=$1 AND table_name=$2 AND column_name=$3",
+				schema, table_name, column_name);
 	if (result.GetRowCount() == 0)
 		throw FormatRuntimeError("No such column: %s", column_name);
 
@@ -88,9 +87,9 @@ IndexExists(Pg::Connection &c, const char *schema,
 	assert(schema != nullptr);
 	assert(*schema != 0);
 
-	return CheckError(c.ExecuteParams("SELECT 1 FROM pg_indexes "
-					  "WHERE schemaname=$1 AND tablename=$2 AND indexname=$3",
-					  schema, table_name, index_name)).GetRowCount() > 0;
+	return c.ExecuteParams("SELECT 1 FROM pg_indexes "
+			       "WHERE schemaname=$1 AND tablename=$2 AND indexname=$3",
+			       schema, table_name, index_name).GetRowCount() > 0;
 }
 
 bool
@@ -102,9 +101,9 @@ RuleExists(Pg::Connection &c, const char *schema,
 	assert(table_name != nullptr);
 	assert(rule_name != nullptr);
 
-	return CheckError(c.ExecuteParams("SELECT 1 FROM pg_rules "
-					  "WHERE schemaname=$1 AND tablename=$2 AND rulename=$3",
-					  schema, table_name, rule_name)).GetRowCount() > 0;
+	return c.ExecuteParams("SELECT 1 FROM pg_rules "
+			       "WHERE schemaname=$1 AND tablename=$2 AND rulename=$3",
+			       schema, table_name, rule_name).GetRowCount() > 0;
 
 }
 
