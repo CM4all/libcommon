@@ -57,9 +57,7 @@ public:
 	explicit Result(PGresult *_result):result(_result) {}
 
 	Result(const Result &other) = delete;
-	Result(Result &&other):result(other.result) {
-		other.result = nullptr;
-	}
+	Result(Result &&other):result(std::exchange(other.result, nullptr)) {}
 
 	~Result() {
 		if (result != nullptr)
