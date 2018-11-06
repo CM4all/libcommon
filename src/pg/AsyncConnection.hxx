@@ -197,6 +197,13 @@ public:
 		return state == State::READY && result_handler == nullptr;
 	}
 
+	/**
+	 * Call this after catching a fatal connection error.  This
+	 * will close the connection, notify the handler and schedule
+	 * a reconnect.
+	 */
+	void Error(std::exception_ptr e) noexcept;
+
 	template<typename... Params>
 	void SendQuery(AsyncResultHandler &_handler, Params... params) {
 		assert(IsIdle());

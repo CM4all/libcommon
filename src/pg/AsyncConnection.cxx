@@ -70,12 +70,18 @@ AsyncConnection::Error() noexcept
 }
 
 void
+AsyncConnection::Error(std::exception_ptr e) noexcept
+{
+	handler.OnError(std::move(e));
+	Error();
+}
+
+void
 AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 {
 	switch (status) {
 	case PGRES_POLLING_FAILED:
-		handler.OnError(std::make_exception_ptr(std::runtime_error(GetErrorMessage())));
-		Error();
+		Error(std::make_exception_ptr(std::runtime_error(GetErrorMessage())));
 		break;
 
 	case PGRES_POLLING_READING:
@@ -94,9 +100,7 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 			try {
 				SetSchema(schema.c_str());
 			} catch (...) {
-				handler.OnError(NestCurrentException(std::runtime_error("Failed to set schema")));
-
-				Error();
+				Error(NestCurrentException(std::runtime_error("Failed to set schema")));
 				break;
 			}
 		}
@@ -108,8 +112,7 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 		try {
 			handler.OnConnect();
 		} catch (...) {
-			handler.OnError(std::current_exception());
-			Error();
+			Error(std::current_exception());
 			break;
 		}
 
@@ -187,8 +190,7 @@ AsyncConnection::PollNotify() noexcept
 			if (!was_idle && IsIdle())
 				handler.OnIdle();
 		} catch (...) {
-			handler.OnError(std::current_exception());
-			Error();
+			Error(std::current_exception());
 		}
 
 		break;
@@ -214,8 +216,7 @@ AsyncConnection::Connect() noexcept
 		StartConnect(conninfo.c_str());
 	} catch (...) {
 		Connection::Disconnect();
-		handler.OnError(std::current_exception());
-		Error();
+		Error(std::current_exception());
 		return;
 	}
 
