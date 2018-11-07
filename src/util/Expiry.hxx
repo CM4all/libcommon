@@ -40,9 +40,10 @@
  * monotonic clock.
  */
 class Expiry {
-	typedef std::chrono::steady_clock clock_type;
-	typedef clock_type::time_point value_type;
-	typedef clock_type::duration duration_type;
+	using clock_type = std::chrono::steady_clock;
+	using value_type = clock_type::time_point;
+	using duration_type = clock_type::duration;
+
 	value_type value;
 
 	constexpr Expiry(value_type _value):value(_value) {}
