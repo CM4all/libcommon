@@ -120,6 +120,13 @@ public:
 	}
 
 	gcc_pure
+	const char *GetParameterStatus(const char *name) const noexcept {
+		assert(IsDefined());
+
+		return PQparameterStatus(conn, name);
+	}
+
+	gcc_pure
 	int GetBackendPID() const noexcept {
 		assert(IsDefined());
 
