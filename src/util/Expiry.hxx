@@ -46,10 +46,10 @@ class Expiry {
 
 	value_type value;
 
-	constexpr Expiry(value_type _value) noexcept:value(_value) {}
-
 public:
 	Expiry() = default;
+
+	constexpr Expiry(value_type _value) noexcept:value(_value) {}
 
 	static Expiry Now() noexcept {
 		return clock_type::now();
