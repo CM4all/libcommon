@@ -46,7 +46,7 @@ class Expiry {
 
 	value_type value;
 
-	constexpr Expiry(value_type _value):value(_value) {}
+	constexpr Expiry(value_type _value) noexcept:value(_value) {}
 
 public:
 	Expiry() = default;
