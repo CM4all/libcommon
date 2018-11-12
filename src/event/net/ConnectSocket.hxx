@@ -74,16 +74,15 @@ public:
 		return fd.IsDefined();
 	}
 
-	bool Connect(SocketAddress address,
-		     const struct timeval &timeout) noexcept;
+	/**
+	 * @param timeout a timeout or a negative value to disable
+	 * timeouts
+	 */
+	bool Connect(const SocketAddress address,
+		     Event::Duration timeout) noexcept;
 
 	bool Connect(const AddressInfo &address,
-		     const struct timeval *timeout) noexcept;
-
-	bool Connect(const AddressInfo &address,
-		     const struct timeval &timeout) noexcept {
-		return Connect(address, &timeout);
-	}
+		     Event::Duration timeout) noexcept;
 
 	/**
 	 * Wait until the given socket is connected (this method returns
@@ -91,12 +90,7 @@ public:
 	 * or error).
 	 */
 	void WaitConnected(UniqueSocketDescriptor _fd,
-			   const struct timeval *timeout) noexcept;
-
-	void WaitConnected(UniqueSocketDescriptor _fd,
-			   const struct timeval &timeout) noexcept {
-		WaitConnected(std::move(_fd), &timeout);
-	}
+			   Event::Duration timeout=Event::Duration(-1)) noexcept;
 
 	/* virtual methods from Cancellable */
 	void Cancel() noexcept override;

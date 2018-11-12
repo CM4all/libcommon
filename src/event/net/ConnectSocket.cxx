@@ -89,7 +89,7 @@ Connect(const SocketAddress address)
 
 bool
 ConnectSocket::Connect(const SocketAddress address,
-		       const struct timeval &timeout) noexcept
+		       Event::Duration timeout) noexcept
 {
 	assert(!fd.IsDefined());
 
@@ -118,7 +118,7 @@ Connect(const AddressInfo &address)
 
 bool
 ConnectSocket::Connect(const AddressInfo &address,
-		       const struct timeval *timeout) noexcept
+		       Event::Duration timeout) noexcept
 {
 	assert(!fd.IsDefined());
 
@@ -133,7 +133,7 @@ ConnectSocket::Connect(const AddressInfo &address,
 
 void
 ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
-			     const struct timeval *timeout) noexcept
+			     Event::Duration timeout) noexcept
 {
 	assert(!fd.IsDefined());
 
@@ -141,8 +141,8 @@ ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 	event.Open(fd);
 	event.ScheduleWrite();
 
-	if (timeout != nullptr)
-		timeout_event.Add(*timeout);
+	if (timeout >= Event::Duration{})
+		timeout_event.Schedule(timeout);
 }
 
 void
