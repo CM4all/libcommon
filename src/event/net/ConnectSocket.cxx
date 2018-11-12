@@ -43,8 +43,6 @@
 #include <string.h>
 #include <errno.h>
 
-static constexpr timeval connect_timeout{10, 0};
-
 void
 ConnectSocketHandler::OnSocketConnectTimeout() noexcept
 {
@@ -102,12 +100,6 @@ ConnectSocket::Connect(const SocketAddress address,
 		handler.OnSocketConnectError(std::current_exception());
 		return false;
 	}
-}
-
-bool
-ConnectSocket::Connect(const SocketAddress address) noexcept
-{
-	return Connect(address, connect_timeout);
 }
 
 static UniqueSocketDescriptor

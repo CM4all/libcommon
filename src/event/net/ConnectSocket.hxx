@@ -77,8 +77,6 @@ public:
 	bool Connect(SocketAddress address,
 		     const struct timeval &timeout) noexcept;
 
-	bool Connect(SocketAddress address) noexcept;
-
 	bool Connect(const AddressInfo &address,
 		     const struct timeval *timeout) noexcept;
 
