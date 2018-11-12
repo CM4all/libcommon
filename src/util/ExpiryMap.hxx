@@ -70,15 +70,26 @@ public:
 			i.first->second = value;
 	}
 
+	/**
+	 * @return the earliest remaining expiry (which is not yet
+	 * expired, of course) or Expiry{} if the map is now empty
+	 */
 	template<typename F>
-	void ForEach(Expiry now, F &&f) noexcept {
+	Expiry ForEach(Expiry now, F &&f) noexcept {
+		Expiry earliest{};
+
 		for (auto i = map.begin(), end = map.end(); i != end;) {
 			if (i->second.IsExpired(now)) {
 				i = map.erase(i);
 			} else {
+				if (i->second < earliest)
+					earliest = i->second;
+
 				f(i->first);
 				++i;
 			}
 		}
+
+		return earliest;
 	}
 };
