@@ -32,7 +32,6 @@
 
 #include "TimerEvent.hxx"
 #include "Loop.hxx"
-#include "time/Convert.hxx"
 
 void
 TimerEvent::Schedule(Event::Duration d) noexcept
@@ -47,10 +46,4 @@ TimerEvent::ScheduleEarlier(Event::Duration d) noexcept
 {
 	if (!IsPending() || loop.SteadyNow() + d < due)
 		Schedule(d);
-}
-
-void
-TimerEvent::Add(const struct timeval &tv) noexcept
-{
-	Schedule(ToSteadyClockDuration(tv));
 }

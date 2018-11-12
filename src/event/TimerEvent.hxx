@@ -38,7 +38,6 @@
 
 #include <boost/intrusive/set_hook.hpp>
 
-struct timeval;
 class EventLoop;
 
 /**
@@ -82,11 +81,6 @@ public:
 	void Cancel() noexcept {
 		unlink();
 	}
-
-	/**
-	 * Deprecated compatibility wrapper.  Use Schedule() instead.
-	 */
-	void Add(const struct timeval &tv) noexcept;
 
 private:
 	void Run() noexcept {

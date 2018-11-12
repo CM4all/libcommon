@@ -33,6 +33,7 @@
 #include "Poll.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/TimerEvent.hxx"
+#include "time/Convert.hxx"
 
 static constexpr unsigned
 FromAvahiWatchEvent(AvahiWatchEvent e) noexcept
@@ -104,13 +105,13 @@ public:
 		:event(_loop, BIND_THIS_METHOD(OnTimeout)),
 		 callback(_callback), userdata(_userdata) {
 		if (tv != nullptr)
-			event.Add(*tv);
+			event.Schedule(ToSteadyClockDuration(*tv));
 	}
 
 	static void TimeoutUpdate(AvahiTimeout *t,
 				  const struct timeval *tv) noexcept {
 		if (tv != nullptr)
-			t->event.Add(*tv);
+			t->event.Schedule(ToSteadyClockDuration(*tv));
 		else
 			t->event.Cancel();
 	}

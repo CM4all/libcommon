@@ -35,6 +35,7 @@
 #include "Error.hxx"
 #include "event/SocketEvent.hxx"
 #include "net/AllocatedSocketAddress.hxx"
+#include "time/Convert.hxx"
 #include "util/Cancellable.hxx"
 
 #include <assert.h>
@@ -111,7 +112,7 @@ Channel::UpdateSockets() noexcept
 	struct timeval timeout_buffer;
 	const auto *t = ares_timeout(channel, nullptr, &timeout_buffer);
 	if (t != nullptr)
-		timeout_event.Add(*t);
+		timeout_event.Schedule(ToSteadyClockDuration(*t));
 }
 
 void
