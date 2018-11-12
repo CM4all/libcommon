@@ -88,6 +88,10 @@ public:
 		return IsExpired(Now());
 	}
 
+	constexpr duration_type GetRemainingDuration(Expiry now) const noexcept {
+		return value - now.value;
+	}
+
 	constexpr bool operator==(Expiry other) const noexcept {
 		return value == other.value;
 	}
