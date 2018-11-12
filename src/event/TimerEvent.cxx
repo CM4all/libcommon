@@ -42,6 +42,13 @@ TimerEvent::Schedule(Event::Duration d) noexcept
 }
 
 void
+TimerEvent::ScheduleEarlier(Event::Duration d) noexcept
+{
+	if (!IsPending() || loop.SteadyNow() + d < due)
+		Schedule(d);
+}
+
+void
 TimerEvent::Add(const struct timeval &tv) noexcept
 {
 	Schedule(Event::Duration(std::chrono::seconds(tv.tv_sec)) +
