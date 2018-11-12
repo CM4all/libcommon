@@ -54,7 +54,7 @@ class TimerEvent final
 	const BoundMethod<void()> callback;
 
 	/**
-	 * When is this timer due?  This is only valid if IsActive()
+	 * When is this timer due?  This is only valid if IsPending()
 	 * returns true.
 	 */
 	Event::Clock::time_point due;
