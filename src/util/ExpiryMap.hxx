@@ -48,6 +48,10 @@ public:
 		return map.empty();
 	}
 
+	void clear() noexcept {
+		map.clear();
+	}
+
 	template<typename KK>
 	gcc_pure
 	bool IsExpired(KK &&key, Expiry now) noexcept {
