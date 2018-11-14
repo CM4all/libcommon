@@ -664,7 +664,7 @@ static void
 translate_client_uts_namespace(NamespaceOptions *ns,
                                StringView payload)
 {
-    if (IsValidNonEmptyString(payload))
+    if (!IsValidNonEmptyString(payload))
         throw std::runtime_error("malformed MOUNT_UTS_NAMESPACE packet");
 
     if (ns == nullptr || ns->hostname != nullptr)
