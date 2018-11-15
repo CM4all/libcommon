@@ -1091,6 +1091,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
     case TranslationCommand::CRON:
     case TranslationCommand::PASSWORD:
     case TranslationCommand::SERVICE:
+    case TranslationCommand::ALT_HOST:
         throw std::runtime_error("misplaced translate request packet");
 
     case TranslationCommand::UID_GID:

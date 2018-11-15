@@ -950,6 +950,12 @@ enum class TranslationCommand : uint16_t {
      * the given YAML file.
      */
     SUBST_YAML_FILE = 205,
+
+    /**
+     * The value of the "X-CM4all-AltHost" request header (if enabled
+     * on the listener).  Only used for #AUTH requests.
+     */
+    ALT_HOST = 206,
 };
 
 struct TranslationHeader {
