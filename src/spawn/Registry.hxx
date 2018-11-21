@@ -80,30 +80,33 @@ class ChildProcessRegistry {
 
 		ChildProcess(EventLoop &event_loop,
 			     pid_t _pid, const char *_name,
-			     ExitListener *_listener);
+			     ExitListener *_listener) noexcept;
 
-		auto &GetEventLoop() {
+		auto &GetEventLoop() noexcept {
 			return kill_timeout_event.GetEventLoop();
 		}
 
-		void Disable() {
+		void Disable() noexcept {
 			kill_timeout_event.Cancel();
 		}
 
-		void OnExit(int status, const struct rusage &rusage);
+		void OnExit(int status, const struct rusage &rusage) noexcept;
 
-		void KillTimeoutCallback();
+		void KillTimeoutCallback() noexcept;
 
 		struct Compare {
-			bool operator()(const ChildProcess &a, const ChildProcess &b) const {
+			bool operator()(const ChildProcess &a,
+					const ChildProcess &b) const noexcept {
 				return a.pid < b.pid;
 			}
 
-			bool operator()(const ChildProcess &a, pid_t b) const {
+			bool operator()(const ChildProcess &a,
+					pid_t b) const noexcept {
 				return a.pid < b;
 			}
 
-			bool operator()(pid_t a, const ChildProcess &b) const {
+			bool operator()(pid_t a,
+					const ChildProcess &b) const noexcept {
 				return a < b.pid;
 			}
 		};
@@ -129,17 +132,17 @@ class ChildProcessRegistry {
 	bool volatile_event = false;
 
 public:
-	ChildProcessRegistry(EventLoop &loop);
+	ChildProcessRegistry(EventLoop &loop) noexcept;
 
 	EventLoop &GetEventLoop() const noexcept {
 		return event_loop;
 	}
 
-	void Disable() {
+	void Disable() noexcept {
 		sigchld_event.Disable();
 	}
 
-	bool IsEmpty() const {
+	bool IsEmpty() const noexcept {
 		return children.empty();
 	}
 
@@ -147,31 +150,31 @@ public:
 	 * Forget all registered children.  Call this in the new child process
 	 * after forking.
 	 */
-	void Clear();
+	void Clear() noexcept;
 
 	/**
 	 * @param name a symbolic name for the process to be used in log
 	 * messages
 	 */
-	void Add(pid_t pid, const char *name, ExitListener *listener);
+	void Add(pid_t pid, const char *name, ExitListener *listener) noexcept;
 
-	void SetExitListener(pid_t pid, ExitListener *listener);
+	void SetExitListener(pid_t pid, ExitListener *listener) noexcept;
 
 	/**
 	 * Send a signal to a child process and unregister it.
 	 */
-	void Kill(pid_t pid, int signo);
+	void Kill(pid_t pid, int signo) noexcept;
 
 	/**
 	 * Send a SIGTERM to a child process and unregister it.
 	 */
-	void Kill(pid_t pid);
+	void Kill(pid_t pid) noexcept;
 
 	/**
 	 * Begin shutdown of this subsystem: wait for all children to exit,
 	 * and then remove the event.
 	 */
-	void SetVolatile() {
+	void SetVolatile() noexcept {
 		volatile_event = true;
 		CheckVolatileEvent();
 	}
@@ -180,17 +183,17 @@ public:
 	 * Returns the number of registered child processes.
 	 */
 	gcc_pure
-	unsigned GetCount() const {
+	unsigned GetCount() const noexcept {
 		return children.size();
 	}
 
 private:
 	gcc_pure
-	ChildProcessSet::iterator FindByPid(pid_t pid) {
+	ChildProcessSet::iterator FindByPid(pid_t pid) noexcept {
 		return children.find(pid, ChildProcess::Compare());
 	}
 
-	void Remove(ChildProcessSet::iterator i) {
+	void Remove(ChildProcessSet::iterator i) noexcept {
 		assert(!children.empty());
 
 		i->Disable();
@@ -198,11 +201,11 @@ private:
 		children.erase(i);
 	}
 
-	void CheckVolatileEvent() {
+	void CheckVolatileEvent() noexcept {
 		if (volatile_event && IsEmpty())
 			sigchld_event.Disable();
 	}
 
-	void OnExit(pid_t pid, int status, const struct rusage &rusage);
-	void OnSigChld(int signo);
+	void OnExit(pid_t pid, int status, const struct rusage &rusage) noexcept;
+	void OnSigChld(int signo) noexcept;
 };

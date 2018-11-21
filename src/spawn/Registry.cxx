@@ -45,14 +45,14 @@
 static constexpr auto child_kill_timeout = std::chrono::minutes(1);
 
 static std::string
-MakeChildProcessLogDomain(unsigned pid, const char *name)
+MakeChildProcessLogDomain(unsigned pid, const char *name) noexcept
 {
 	return StringFormat<64>("spawn:%u:%s", pid, name).c_str();
 }
 
 ChildProcessRegistry::ChildProcess::ChildProcess(EventLoop &_event_loop,
 						 pid_t _pid, const char *_name,
-						 ExitListener *_listener)
+						 ExitListener *_listener) noexcept
 	:logger(MakeChildProcessLogDomain(_pid, _name)),
 	 pid(_pid), name(_name),
 	 start_time(_event_loop.SteadyNow()),
@@ -63,14 +63,14 @@ ChildProcessRegistry::ChildProcess::ChildProcess(EventLoop &_event_loop,
 }
 
 static constexpr double
-timeval_to_double(const struct timeval &tv)
+timeval_to_double(const struct timeval &tv) noexcept
 {
 	return tv.tv_sec + tv.tv_usec / 1000000.;
 }
 
 void
 ChildProcessRegistry::ChildProcess::OnExit(int status,
-					   const struct rusage &rusage)
+					   const struct rusage &rusage) noexcept
 {
 	const int exit_status = WEXITSTATUS(status);
 	if (WIFSIGNALED(status)) {
@@ -101,7 +101,7 @@ ChildProcessRegistry::ChildProcess::OnExit(int status,
 }
 
 inline void
-ChildProcessRegistry::ChildProcess::KillTimeoutCallback()
+ChildProcessRegistry::ChildProcess::KillTimeoutCallback() noexcept
 {
 	logger(3, "sending SIGKILL to due to timeout");
 
@@ -109,7 +109,7 @@ ChildProcessRegistry::ChildProcess::KillTimeoutCallback()
 		logger(1, "failed to kill child process: ", strerror(errno));
 }
 
-ChildProcessRegistry::ChildProcessRegistry(EventLoop &_event_loop)
+ChildProcessRegistry::ChildProcessRegistry(EventLoop &_event_loop) noexcept
 	:logger("spawn"), event_loop(_event_loop),
 	 sigchld_event(event_loop, SIGCHLD, BIND_THIS_METHOD(OnSigChld))
 {
@@ -117,7 +117,7 @@ ChildProcessRegistry::ChildProcessRegistry(EventLoop &_event_loop)
 }
 
 void
-ChildProcessRegistry::Clear()
+ChildProcessRegistry::Clear() noexcept
 {
 	children.clear_and_dispose(DeleteDisposer());
 
@@ -125,7 +125,8 @@ ChildProcessRegistry::Clear()
 }
 
 void
-ChildProcessRegistry::Add(pid_t pid, const char *name, ExitListener *listener)
+ChildProcessRegistry::Add(pid_t pid, const char *name,
+			  ExitListener *listener) noexcept
 {
 	assert(name != nullptr);
 
@@ -138,7 +139,8 @@ ChildProcessRegistry::Add(pid_t pid, const char *name, ExitListener *listener)
 }
 
 void
-ChildProcessRegistry::SetExitListener(pid_t pid, ExitListener *listener)
+ChildProcessRegistry::SetExitListener(pid_t pid,
+				      ExitListener *listener) noexcept
 {
 	assert(pid > 0);
 	assert(listener != nullptr);
@@ -152,7 +154,7 @@ ChildProcessRegistry::SetExitListener(pid_t pid, ExitListener *listener)
 }
 
 void
-ChildProcessRegistry::Kill(pid_t pid, int signo)
+ChildProcessRegistry::Kill(pid_t pid, int signo) noexcept
 {
 	auto i = FindByPid(pid);
 	assert(i != children.end());
@@ -179,14 +181,14 @@ ChildProcessRegistry::Kill(pid_t pid, int signo)
 }
 
 void
-ChildProcessRegistry::Kill(pid_t pid)
+ChildProcessRegistry::Kill(pid_t pid) noexcept
 {
 	Kill(pid, SIGTERM);
 }
 
 void
 ChildProcessRegistry::OnExit(pid_t pid, int status,
-			     const struct rusage &rusage)
+			     const struct rusage &rusage) noexcept
 {
 	auto i = FindByPid(pid);
 	if (i == children.end())
@@ -200,7 +202,7 @@ ChildProcessRegistry::OnExit(pid_t pid, int status,
 
 
 void
-ChildProcessRegistry::OnSigChld(int)
+ChildProcessRegistry::OnSigChld(int) noexcept
 {
 	pid_t pid;
 	int status;
