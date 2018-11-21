@@ -263,6 +263,18 @@ TranslateResponse::Clear()
     validate_mtime.path = nullptr;
 }
 
+static ConstBuffer<const char *>
+DupStringArray(AllocatorPtr alloc, ConstBuffer<const char *> src) noexcept
+{
+    const char **dest = alloc.NewArray<const char *>(src.size);
+
+    const char **p = dest;
+    for (const char *s : src)
+        *p++ = alloc.Dup(s);
+
+    return {dest, src.size};
+}
+
 void
 TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 {
@@ -451,7 +463,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
     error_document = alloc.Dup(src.error_document);
     probe_path_suffixes = alloc.Dup(src.probe_path_suffixes);
-    probe_suffixes = alloc.Dup(src.probe_suffixes);
+    probe_suffixes = DupStringArray(alloc, src.probe_suffixes);
     read_file = alloc.CheckDup(src.read_file);
 
     validate_mtime.mtime = src.validate_mtime.mtime;
