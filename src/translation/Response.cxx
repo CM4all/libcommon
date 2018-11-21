@@ -266,6 +266,9 @@ TranslateResponse::Clear()
 static ConstBuffer<const char *>
 DupStringArray(AllocatorPtr alloc, ConstBuffer<const char *> src) noexcept
 {
+    if (src.empty())
+        return nullptr;
+
     const char **dest = alloc.NewArray<const char *>(src.size);
 
     const char **p = dest;
