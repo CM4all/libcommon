@@ -77,8 +77,8 @@ public:
 	explicit SpawnServerClient(EventLoop &event_loop,
 				   const SpawnConfig &_config,
 				   UniqueSocketDescriptor _socket,
-				   bool _verify=true);
-	~SpawnServerClient();
+				   bool _verify=true) noexcept;
+	~SpawnServerClient() noexcept;
 
 	/**
 	 * Does the server support cgroups?  This requires a systemd new
@@ -88,25 +88,25 @@ public:
 	 * the SpawnResponseCommand::CGROUPS_AVAILABLE packet.  Don't rely
 	 * on its value right after creating the spawner.
 	 */
-	bool SupportsCgroups() const {
+	bool SupportsCgroups() const noexcept {
 		return cgroups;
 	}
 
-	void ReplaceSocket(UniqueSocketDescriptor new_socket);
+	void ReplaceSocket(UniqueSocketDescriptor new_socket) noexcept;
 
-	void Shutdown();
+	void Shutdown() noexcept;
 
 	UniqueSocketDescriptor Connect();
 
 private:
-	int MakePid() {
+	int MakePid() noexcept {
 		++last_pid;
 		if (last_pid >= 0x40000000)
 			last_pid = 1;
 		return last_pid;
 	}
 
-	void Close();
+	void Close() noexcept;
 
 	/**
 	 * Check if the spawner is alive, and if not, commit suicide, and
@@ -115,14 +115,14 @@ private:
 	 * Failing hard and awaiting a restart is better than failing
 	 * softly over and over.
 	 */
-	void CheckOrAbort();
+	void CheckOrAbort() noexcept;
 
 	void Send(ConstBuffer<void> payload, ConstBuffer<int> fds);
 	void Send(const SpawnSerializer &s);
 
 	void HandleExitMessage(SpawnPayload payload);
 	void HandleMessage(ConstBuffer<uint8_t> payload);
-	void OnSocketEvent(unsigned events);
+	void OnSocketEvent(unsigned events) noexcept;
 
 public:
 	/* virtual methods from class SpawnService */

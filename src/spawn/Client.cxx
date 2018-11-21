@@ -56,7 +56,7 @@ static constexpr size_t MAX_FDS = 8;
 SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 				     const SpawnConfig &_config,
 				     UniqueSocketDescriptor _socket,
-				     bool _verify)
+				     bool _verify) noexcept
 	:config(_config), socket(std::move(_socket)),
 	 event(event_loop, BIND_THIS_METHOD(OnSocketEvent), socket),
 	 verify(_verify)
@@ -64,14 +64,14 @@ SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 	event.ScheduleRead();
 }
 
-SpawnServerClient::~SpawnServerClient()
+SpawnServerClient::~SpawnServerClient() noexcept
 {
 	if (socket.IsDefined())
 		Close();
 }
 
 void
-SpawnServerClient::ReplaceSocket(UniqueSocketDescriptor new_socket)
+SpawnServerClient::ReplaceSocket(UniqueSocketDescriptor new_socket) noexcept
 {
 	assert(socket.IsDefined());
 	assert(new_socket.IsDefined());
@@ -88,7 +88,7 @@ SpawnServerClient::ReplaceSocket(UniqueSocketDescriptor new_socket)
 }
 
 void
-SpawnServerClient::Close()
+SpawnServerClient::Close() noexcept
 {
 	assert(socket.IsDefined());
 
@@ -97,7 +97,7 @@ SpawnServerClient::Close()
 }
 
 void
-SpawnServerClient::Shutdown()
+SpawnServerClient::Shutdown() noexcept
 {
 	shutting_down = true;
 
@@ -106,7 +106,7 @@ SpawnServerClient::Shutdown()
 }
 
 void
-SpawnServerClient::CheckOrAbort()
+SpawnServerClient::CheckOrAbort() noexcept
 {
 	if (!socket.IsDefined()) {
 		fprintf(stderr, "SpawnChildProcess: the spawner is gone, emergency!\n");
@@ -426,7 +426,7 @@ SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
 }
 
 inline void
-SpawnServerClient::OnSocketEvent(unsigned)
+SpawnServerClient::OnSocketEvent(unsigned) noexcept
 {
 	constexpr size_t N = 64;
 	std::array<uint8_t[16], N> payloads;
