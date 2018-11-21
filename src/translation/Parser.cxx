@@ -1763,12 +1763,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (response.regex == nullptr)
             throw std::runtime_error("misplaced EXPAND_DOCUMENT_ROOT packet");
 
-        if (cgi_address != nullptr)
-            cgi_address->expand_document_root = string_payload.data;
-        else if (file_address != nullptr &&
-                 file_address->delegate != nullptr)
-            file_address->expand_document_root = string_payload.data;
-        else {
+        if (cgi_address != nullptr) {
+            cgi_address->document_root = string_payload.data;
+            cgi_address->expand_document_root = true;
+        } else if (file_address != nullptr &&
+                   file_address->delegate != nullptr) {
+            file_address->document_root = string_payload.data;
+            file_address->expand_document_root = true;
+        } else {
             response.document_root = string_payload.data;
             response.expand_document_root = true;
         }
