@@ -133,7 +133,7 @@ public:
 	}
 
 	/* virtual methods from ExitListener */
-	void OnChildProcessExit(int status) override;
+	void OnChildProcessExit(int status) noexcept override;
 
 	/* boost::instrusive::set hooks */
 	typedef boost::intrusive::set_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> IdHook;
@@ -175,12 +175,13 @@ public:
 			      UniqueSocketDescriptor &&_socket);
 	~SpawnServerConnection();
 
-	void OnChildProcessExit(int id, int status, SpawnServerChild *child);
+	void OnChildProcessExit(int id, int status,
+				SpawnServerChild *child) noexcept;
 
 private:
 	void RemoveConnection();
 
-	void SendExit(int id, int status);
+	void SendExit(int id, int status) noexcept;
 	void SpawnChild(int id, const char *name, PreparedChildProcess &&p);
 
 	void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
@@ -192,14 +193,14 @@ private:
 };
 
 void
-SpawnServerChild::OnChildProcessExit(int status)
+SpawnServerChild::OnChildProcessExit(int status) noexcept
 {
 	connection.OnChildProcessExit(id, status, this);
 }
 
 void
 SpawnServerConnection::OnChildProcessExit(int id, int status,
-					  SpawnServerChild *child)
+					  SpawnServerChild *child) noexcept
 {
 	children.erase(children.iterator_to(*child));
 	delete child;
@@ -302,7 +303,7 @@ SpawnServerConnection::RemoveConnection()
 }
 
 void
-SpawnServerConnection::SendExit(int id, int status)
+SpawnServerConnection::SendExit(int id, int status) noexcept
 {
 	SpawnSerializer s(SpawnResponseCommand::EXIT);
 	s.WriteInt(id);

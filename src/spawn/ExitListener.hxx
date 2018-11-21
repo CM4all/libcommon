@@ -38,5 +38,5 @@
  */
 class ExitListener {
 public:
-	virtual void OnChildProcessExit(int status) = 0;
+	virtual void OnChildProcessExit(int status) noexcept = 0;
 };
