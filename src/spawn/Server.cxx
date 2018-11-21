@@ -82,11 +82,11 @@ public:
 
 	SpawnFdList &operator=(SpawnFdList &&src) = default;
 
-	bool IsEmpty() {
+	bool IsEmpty() noexcept {
 		return list.empty();
 	}
 
-	size_t size() const {
+	size_t size() const noexcept {
 		return std::distance(list.begin(), list.end());
 	}
 
@@ -118,17 +118,18 @@ class SpawnServerChild final : public ExitListener {
 public:
 	explicit SpawnServerChild(SpawnServerConnection &_connection,
 				  int _id, pid_t _pid,
-				  const char *_name)
+				  const char *_name) noexcept
 		:connection(_connection), id(_id), pid(_pid), name(_name) {}
 
 	SpawnServerChild(const SpawnServerChild &) = delete;
 	SpawnServerChild &operator=(const SpawnServerChild &) = delete;
 
-	const char *GetName() const {
+	const char *GetName() const noexcept {
 		return name.c_str();
 	}
 
-	void Kill(ChildProcessRegistry &child_process_registry, int signo) {
+	void Kill(ChildProcessRegistry &child_process_registry,
+		  int signo) noexcept {
 		child_process_registry.Kill(pid, signo);
 	}
 
@@ -140,15 +141,18 @@ public:
 	IdHook id_hook;
 
 	struct CompareId {
-		bool operator()(const SpawnServerChild &a, const SpawnServerChild &b) const {
+		bool operator()(const SpawnServerChild &a,
+				const SpawnServerChild &b) const noexcept {
 			return a.id < b.id;
 		}
 
-		bool operator()(int a, const SpawnServerChild &b) const {
+		bool operator()(int a,
+				const SpawnServerChild &b) const noexcept {
 			return a < b.id;
 		}
 
-		bool operator()(const SpawnServerChild &a, int b) const {
+		bool operator()(const SpawnServerChild &a,
+				int b) const noexcept {
 			return a.id < b;
 		}
 	};
@@ -172,24 +176,25 @@ class SpawnServerConnection
 
 public:
 	SpawnServerConnection(SpawnServerProcess &_process,
-			      UniqueSocketDescriptor &&_socket);
-	~SpawnServerConnection();
+			      UniqueSocketDescriptor &&_socket) noexcept;
+	~SpawnServerConnection() noexcept;
 
 	void OnChildProcessExit(int id, int status,
 				SpawnServerChild *child) noexcept;
 
 private:
-	void RemoveConnection();
+	void RemoveConnection() noexcept;
 
 	void SendExit(int id, int status) noexcept;
-	void SpawnChild(int id, const char *name, PreparedChildProcess &&p);
+	void SpawnChild(int id, const char *name,
+			PreparedChildProcess &&p) noexcept;
 
 	void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
 	void HandleKillMessage(SpawnPayload payload, SpawnFdList &&fds);
 	void HandleMessage(ConstBuffer<uint8_t> payload, SpawnFdList &&fds);
 	void HandleMessage(ReceiveMessageResult &&result);
 
-	void ReadEventCallback(unsigned events);
+	void ReadEventCallback(unsigned events) noexcept;
 };
 
 void
@@ -226,16 +231,16 @@ class SpawnServerProcess {
 public:
 	SpawnServerProcess(const SpawnConfig &_config,
 			   const CgroupState &_cgroup_state,
-			   SpawnHook *_hook)
+			   SpawnHook *_hook) noexcept
 		:config(_config), cgroup_state(_cgroup_state), hook(_hook),
 		 logger("spawn"),
 		 child_process_registry(loop) {}
 
-	const SpawnConfig &GetConfig() const {
+	const SpawnConfig &GetConfig() const noexcept {
 		return config;
 	}
 
-	const CgroupState &GetCgroupState() const {
+	const CgroupState &GetCgroupState() const noexcept {
 		return cgroup_state;
 	}
 
@@ -243,20 +248,20 @@ public:
 		return loop;
 	}
 
-	ChildProcessRegistry &GetChildProcessRegistry() {
+	ChildProcessRegistry &GetChildProcessRegistry() noexcept {
 		return child_process_registry;
 	}
 
-	bool Verify(const PreparedChildProcess &p) const {
+	bool Verify(const PreparedChildProcess &p) const noexcept {
 		return hook != nullptr && hook->Verify(p);
 	}
 
-	void AddConnection(UniqueSocketDescriptor &&_socket) {
+	void AddConnection(UniqueSocketDescriptor &&_socket) noexcept {
 		auto connection = new SpawnServerConnection(*this, std::move(_socket));
 		connections.push_back(*connection);
 	}
 
-	void RemoveConnection(SpawnServerConnection &connection) {
+	void RemoveConnection(SpawnServerConnection &connection) noexcept {
 		connections.erase_and_dispose(connections.iterator_to(connection),
 					      DeleteDisposer());
 
@@ -265,10 +270,10 @@ public:
 			Quit();
 	}
 
-	void Run();
+	void Run() noexcept;
 
 private:
-	void Quit() {
+	void Quit() noexcept {
 		assert(connections.empty());
 
 		child_process_registry.SetVolatile();
@@ -276,7 +281,7 @@ private:
 };
 
 SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
-					     UniqueSocketDescriptor &&_socket)
+					     UniqueSocketDescriptor &&_socket) noexcept
 	:process(_process), socket(std::move(_socket)),
 	 logger("spawn"),
 	 event(process.GetEventLoop(), BIND_THIS_METHOD(ReadEventCallback),
@@ -285,7 +290,7 @@ SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
 	event.ScheduleRead();
 }
 
-SpawnServerConnection::~SpawnServerConnection()
+SpawnServerConnection::~SpawnServerConnection() noexcept
 {
 	event.Cancel();
 
@@ -297,7 +302,7 @@ SpawnServerConnection::~SpawnServerConnection()
 }
 
 inline void
-SpawnServerConnection::RemoveConnection()
+SpawnServerConnection::RemoveConnection() noexcept
 {
 	process.RemoveConnection(*this);
 }
@@ -348,7 +353,7 @@ SpawnServerConnection::SendExit(int id, int status) noexcept
 
 inline void
 SpawnServerConnection::SpawnChild(int id, const char *name,
-				  PreparedChildProcess &&p)
+				  PreparedChildProcess &&p) noexcept
 {
 	const auto &config = process.GetConfig();
 
@@ -690,7 +695,7 @@ SpawnServerConnection::HandleMessage(ReceiveMessageResult &&result)
 }
 
 inline void
-SpawnServerConnection::ReadEventCallback(unsigned)
+SpawnServerConnection::ReadEventCallback(unsigned) noexcept
 try {
 	ReceiveMessageBuffer<8192, CMSG_SPACE(sizeof(int) * 32)> rmb;
 
@@ -711,7 +716,7 @@ try {
 }
 
 inline void
-SpawnServerProcess::Run()
+SpawnServerProcess::Run() noexcept
 {
 	loop.Dispatch();
 }
@@ -719,7 +724,7 @@ SpawnServerProcess::Run()
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 	       SpawnHook *hook,
-	       UniqueSocketDescriptor socket)
+	       UniqueSocketDescriptor socket) noexcept
 {
 	if (cgroup_state.IsEnabled()) {
 		/* tell the client that the cgroups feature is available;

@@ -41,6 +41,6 @@ class UniqueSocketDescriptor;
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 	       SpawnHook *hook,
-	       UniqueSocketDescriptor fd);
+	       UniqueSocketDescriptor fd) noexcept;
 
 #endif
