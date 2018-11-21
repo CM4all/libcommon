@@ -41,7 +41,7 @@
 class ShutdownListener {
 	SignalEvent event;
 
-	typedef BoundMethod<> Callback;
+	typedef BoundMethod<void() noexcept> Callback;
 	const Callback callback;
 
 public:

@@ -51,7 +51,7 @@ class TimerEvent final
 
 	EventLoop &loop;
 
-	const BoundMethod<void()> callback;
+	const BoundMethod<void() noexcept> callback;
 
 	/**
 	 * When is this timer due?  This is only valid if IsPending()
@@ -60,7 +60,7 @@ class TimerEvent final
 	Event::Clock::time_point due;
 
 public:
-	TimerEvent(EventLoop &_loop, BoundMethod<void()> _callback) noexcept
+	TimerEvent(EventLoop &_loop, BoundMethod<void() noexcept> _callback) noexcept
 		:loop(_loop), callback(_callback) {}
 
 	auto &GetEventLoop() const noexcept {

@@ -49,7 +49,7 @@ class PipeLineReader {
 
 	StaticFifoBuffer<char, 8192> buffer;
 
-	typedef BoundMethod<bool(WritableBuffer<char> line)> Callback;
+	typedef BoundMethod<bool(WritableBuffer<char> line) noexcept> Callback;
 	const Callback callback;
 
 public:

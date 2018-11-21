@@ -47,7 +47,7 @@ class CleanupTimer {
 	/**
 	 * @return true if another cleanup shall be scheduled
 	 */
-	typedef BoundMethod<bool()> Callback;
+	typedef BoundMethod<bool() noexcept> Callback;
 	const Callback callback;
 
 public:

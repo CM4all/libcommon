@@ -46,7 +46,7 @@ class SocketEvent
 {
 	EventLoop &loop;
 
-	using Callback = BoundMethod<void(unsigned events)>;
+	using Callback = BoundMethod<void(unsigned events) noexcept>;
 	const Callback callback;
 
 	SocketDescriptor fd;
