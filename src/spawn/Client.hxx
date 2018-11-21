@@ -129,9 +129,10 @@ public:
 	int SpawnChildProcess(const char *name, PreparedChildProcess &&params,
 			      ExitListener *listener) override;
 
-	void SetExitListener(int pid, ExitListener *listener) override;
+	void SetExitListener(int pid,
+			     ExitListener *listener) noexcept override;
 
-	void KillChildProcess(int pid, int signo) override;
+	void KillChildProcess(int pid, int signo) noexcept override;
 };
 
 #endif

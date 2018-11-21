@@ -352,7 +352,7 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 }
 
 void
-SpawnServerClient::SetExitListener(int pid, ExitListener *listener)
+SpawnServerClient::SetExitListener(int pid, ExitListener *listener) noexcept
 {
 	auto i = processes.find(pid);
 	assert(i != processes.end());
@@ -362,7 +362,7 @@ SpawnServerClient::SetExitListener(int pid, ExitListener *listener)
 }
 
 void
-SpawnServerClient::KillChildProcess(int pid, int signo)
+SpawnServerClient::KillChildProcess(int pid, int signo) noexcept
 {
 	CheckOrAbort();
 
@@ -371,11 +371,11 @@ SpawnServerClient::KillChildProcess(int pid, int signo)
 	assert(i->second.listener != nullptr);
 	processes.erase(i);
 
-	SpawnSerializer s(SpawnRequestCommand::KILL);
-	s.WriteInt(pid);
-	s.WriteInt(signo);
-
 	try {
+		SpawnSerializer s(SpawnRequestCommand::KILL);
+		s.WriteInt(pid);
+		s.WriteInt(signo);
+
 		Send(s.GetPayload(), s.GetFds());
 	} catch (const std::runtime_error &e) {
 		fprintf(stderr, "failed to send KILL(%d) to spawner: %s\n",

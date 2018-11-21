@@ -50,7 +50,7 @@ public:
 				      PreparedChildProcess &&params,
 				      ExitListener *listener) = 0;
 
-	virtual void SetExitListener(int pid, ExitListener *listener) = 0;
+	virtual void SetExitListener(int pid, ExitListener *listener) noexcept = 0;
 
 	/**
 	 * Send a signal to a child process and unregister it.

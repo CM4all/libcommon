@@ -56,13 +56,13 @@ LocalSpawnService::SpawnChildProcess(const char *name,
 }
 
 void
-LocalSpawnService::SetExitListener(int pid, ExitListener *listener)
+LocalSpawnService::SetExitListener(int pid, ExitListener *listener) noexcept
 {
 	registry.SetExitListener(pid, listener);
 }
 
 void
-LocalSpawnService::KillChildProcess(int pid, int signo)
+LocalSpawnService::KillChildProcess(int pid, int signo) noexcept
 {
 	registry.Kill(pid, signo);
 }
