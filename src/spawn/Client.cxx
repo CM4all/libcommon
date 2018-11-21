@@ -39,6 +39,7 @@
 #include "MountList.hxx"
 #include "ExitListener.hxx"
 #include "system/Error.hxx"
+#include "util/PrintException.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/ScopeExit.hxx"
 
@@ -469,6 +470,10 @@ SpawnServerClient::OnSocketEvent(unsigned) noexcept
 			return;
 		}
 
-		HandleMessage({payloads[i], msgs[i].msg_len});
+		try {
+			HandleMessage({payloads[i], msgs[i].msg_len});
+		} catch (...) {
+			PrintException(std::current_exception());
+		}
 	}
 }
