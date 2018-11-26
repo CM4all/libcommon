@@ -296,12 +296,12 @@ struct TranslateResponse {
     /**
      * Which request headers are forwarded?
      */
-    struct header_forward_settings request_header_forward;
+    HeaderForwardSettings request_header_forward;
 
     /**
      * Which response headers are forwarded?
      */
-    struct header_forward_settings response_header_forward;
+    HeaderForwardSettings response_header_forward;
 #endif
 
     bool uncached;

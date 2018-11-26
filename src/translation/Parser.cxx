@@ -290,7 +290,7 @@ TranslateParser::AddView(const char *name)
 #if TRANSLATION_ENABLE_HTTP
 
 static void
-parse_header_forward(struct header_forward_settings *settings,
+parse_header_forward(HeaderForwardSettings *settings,
                      ConstBuffer<void> payload)
 {
     using namespace BengProxy;
