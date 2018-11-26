@@ -313,6 +313,7 @@ parse_header_forward(HeaderForwardSettings *settings,
         if (HeaderGroup(packet->group) == HeaderGroup::ALL) {
             for (unsigned i = 0; i < unsigned(HeaderGroup::MAX); ++i)
                 if (HeaderGroup(i) != HeaderGroup::SECURE &&
+                    HeaderGroup(i) != HeaderGroup::AUTH &&
                     HeaderGroup(i) != HeaderGroup::SSL)
                     settings->modes[i] = HeaderForwardMode(packet->mode);
         } else
