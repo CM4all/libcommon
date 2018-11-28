@@ -262,8 +262,7 @@ TranslateParser::AddView(const char *name)
 {
     FinishView();
 
-    auto new_view = alloc.New<WidgetView>();
-    new_view->Init(name);
+    auto new_view = alloc.New<WidgetView>(name);
     new_view->request_header_forward = response.request_header_forward;
     new_view->response_header_forward = response.response_header_forward;
 
@@ -3489,8 +3488,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
-        response.views = alloc.New<WidgetView>();
-        response.views->Init(nullptr);
+        response.views = alloc.New<WidgetView>(nullptr);
         view = nullptr;
         widget_view_tail = &response.views->next;
 #endif
