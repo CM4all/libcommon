@@ -946,7 +946,7 @@ enum class TranslationCommand : uint16_t {
     PID_NAMESPACE_NAME = 204,
 
     /**
-     * Substitute variables in the form "{{NAME}}" with values from
+     * Substitute variables in the form "{%NAME%}" with values from
      * the given YAML file.
      */
     SUBST_YAML_FILE = 205,
@@ -956,6 +956,12 @@ enum class TranslationCommand : uint16_t {
      * on the listener).  Only used for #AUTH requests.
      */
     ALT_HOST = 206,
+
+    /**
+     * Use an alternative syntax for substitutions
+     * (e.g. #SUBST_YAML_FILE).
+     */
+    SUBST_ALT_SYNTAX = 207,
 };
 
 struct TranslationHeader {

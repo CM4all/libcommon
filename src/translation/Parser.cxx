@@ -3431,6 +3431,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
         break;
 #endif
+
+    case TranslationCommand::SUBST_ALT_SYNTAX:
+#if TRANSLATION_ENABLE_TRANSFORMATION
+        if (!payload.empty())
+            throw std::runtime_error("malformed SUBST_ALT_SYNTAX packet");
+
+        if (response.subst_alt_syntax)
+            throw std::runtime_error("duplicate SUBST_ALT_SYNTAX packet");
+
+        response.subst_alt_syntax = true;
+        return;
+#else
+        break;
+#endif
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

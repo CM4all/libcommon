@@ -344,6 +344,8 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
     bool filter_4xx;
+
+    bool subst_alt_syntax;
 #endif
 
     bool previous;

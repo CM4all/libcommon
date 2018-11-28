@@ -136,6 +136,7 @@ TranslateResponse::Clear()
 #endif
 #if TRANSLATION_ENABLE_TRANSFORMATION
     filter_4xx = false;
+    subst_alt_syntax = false;
 #endif
     previous = false;
     transparent = false;
@@ -330,6 +331,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
 #if TRANSLATION_ENABLE_TRANSFORMATION
     filter_4xx = src.filter_4xx;
+    subst_alt_syntax = src.subst_alt_syntax;
 #endif
     previous = src.previous;
     transparent = src.transparent;
