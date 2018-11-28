@@ -44,7 +44,7 @@ static constexpr size_t HUGE_PAGE_SIZE = 512 * 4096;
 /**
  * Align the given size to the next huge page size, rounding up.
  */
-inline constexpr size_t
+constexpr size_t
 AlignHugePageUp(size_t size) noexcept
 {
 	return ((size - 1) | (HUGE_PAGE_SIZE - 1)) + 1;
@@ -58,7 +58,7 @@ static_assert(AlignHugePageUp(HUGE_PAGE_SIZE) == HUGE_PAGE_SIZE, "Rounding bug")
 /**
  * Align the given size to the next huge page size, rounding down.
  */
-inline constexpr size_t
+constexpr size_t
 AlignHugePageDown(size_t size) noexcept
 {
 	return size & ~(HUGE_PAGE_SIZE - 1);

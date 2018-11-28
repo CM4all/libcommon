@@ -64,39 +64,39 @@
 #  endif
 #endif
 
-static inline constexpr bool
+constexpr bool
 IsLittleEndian()
 {
 	return IS_LITTLE_ENDIAN;
 }
 
-static inline constexpr bool
+constexpr bool
 IsBigEndian()
 {
 	return IS_BIG_ENDIAN;
 }
 
-static inline constexpr uint16_t
+constexpr uint16_t
 GenericByteSwap16(uint16_t value)
 {
 	return (value >> 8) | (value << 8);
 }
 
-static inline constexpr uint32_t
+constexpr uint32_t
 GenericByteSwap32(uint32_t value)
 {
 	return (value >> 24) | ((value >> 8) & 0x0000ff00) |
 		((value << 8) & 0x00ff0000) | (value << 24);
 }
 
-static inline constexpr uint64_t
+constexpr uint64_t
 GenericByteSwap64(uint64_t value)
 {
 	return uint64_t(GenericByteSwap32(uint32_t(value >> 32)))
 		| (uint64_t(GenericByteSwap32(value)) << 32);
 }
 
-static inline constexpr uint16_t
+constexpr uint16_t
 ByteSwap16(uint16_t value)
 {
 #if CLANG_OR_GCC_VERSION(4,8)
@@ -106,7 +106,7 @@ ByteSwap16(uint16_t value)
 #endif
 }
 
-static inline constexpr uint32_t
+constexpr uint32_t
 ByteSwap32(uint32_t value)
 {
 #if CLANG_OR_GCC_VERSION(4,3)
@@ -116,7 +116,7 @@ ByteSwap32(uint32_t value)
 #endif
 }
 
-static inline constexpr uint64_t
+constexpr uint64_t
 ByteSwap64(uint64_t value)
 {
 #if CLANG_OR_GCC_VERSION(4,3)
@@ -129,7 +129,7 @@ ByteSwap64(uint64_t value)
 /**
  * Converts a 16bit value from big endian to the system's byte order
  */
-static inline constexpr uint16_t
+constexpr uint16_t
 FromBE16(uint16_t value)
 {
 	return IsBigEndian() ? value : ByteSwap16(value);
@@ -138,7 +138,7 @@ FromBE16(uint16_t value)
 /**
  * Converts a 32bit value from big endian to the system's byte order
  */
-static inline constexpr uint32_t
+constexpr uint32_t
 FromBE32(uint32_t value)
 {
 	return IsBigEndian() ? value : ByteSwap32(value);
@@ -147,7 +147,7 @@ FromBE32(uint32_t value)
 /**
  * Converts a 64bit value from big endian to the system's byte order
  */
-static inline constexpr uint64_t
+constexpr uint64_t
 FromBE64(uint64_t value)
 {
 	return IsBigEndian() ? value : ByteSwap64(value);
@@ -156,7 +156,7 @@ FromBE64(uint64_t value)
 /**
  * Converts a 16bit value from little endian to the system's byte order
  */
-static inline constexpr uint16_t
+constexpr uint16_t
 FromLE16(uint16_t value)
 {
 	return IsLittleEndian() ? value : ByteSwap16(value);
@@ -165,7 +165,7 @@ FromLE16(uint16_t value)
 /**
  * Converts a 32bit value from little endian to the system's byte order
  */
-static inline constexpr uint32_t
+constexpr uint32_t
 FromLE32(uint32_t value)
 {
 	return IsLittleEndian() ? value : ByteSwap32(value);
@@ -174,7 +174,7 @@ FromLE32(uint32_t value)
 /**
  * Converts a 64bit value from little endian to the system's byte order
  */
-static inline constexpr uint64_t
+constexpr uint64_t
 FromLE64(uint64_t value)
 {
 	return IsLittleEndian() ? value : ByteSwap64(value);
@@ -183,7 +183,7 @@ FromLE64(uint64_t value)
 /**
  * Converts a 16bit value from the system's byte order to big endian
  */
-static inline constexpr uint16_t
+constexpr uint16_t
 ToBE16(uint16_t value)
 {
 	return IsBigEndian() ? value : ByteSwap16(value);
@@ -192,7 +192,7 @@ ToBE16(uint16_t value)
 /**
  * Converts a 32bit value from the system's byte order to big endian
  */
-static inline constexpr uint32_t
+constexpr uint32_t
 ToBE32(uint32_t value)
 {
 	return IsBigEndian() ? value : ByteSwap32(value);
@@ -201,7 +201,7 @@ ToBE32(uint32_t value)
 /**
  * Converts a 64bit value from the system's byte order to big endian
  */
-static inline constexpr uint64_t
+constexpr uint64_t
 ToBE64(uint64_t value)
 {
 	return IsBigEndian() ? value : ByteSwap64(value);
@@ -210,7 +210,7 @@ ToBE64(uint64_t value)
 /**
  * Converts a 16bit value from the system's byte order to little endian
  */
-static inline constexpr uint16_t
+constexpr uint16_t
 ToLE16(uint16_t value)
 {
 	return IsLittleEndian() ? value : ByteSwap16(value);
@@ -219,7 +219,7 @@ ToLE16(uint16_t value)
 /**
  * Converts a 32bit value from the system's byte order to little endian
  */
-static inline constexpr uint32_t
+constexpr uint32_t
 ToLE32(uint32_t value)
 {
 	return IsLittleEndian() ? value : ByteSwap32(value);
@@ -228,7 +228,7 @@ ToLE32(uint32_t value)
 /**
  * Converts a 64bit value from the system's byte order to little endian
  */
-static inline constexpr uint64_t
+constexpr uint64_t
 ToLE64(uint64_t value)
 {
 	return IsLittleEndian() ? value : ByteSwap64(value);
