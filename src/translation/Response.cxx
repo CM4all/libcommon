@@ -35,7 +35,7 @@
 #include "widget/View.hxx"
 #endif
 #if TRANSLATION_ENABLE_CACHE
-#include "uri/uri_base.hxx"
+#include "uri/Base.hxx"
 #include "uri/Compare.hxx"
 #include "puri_escape.hxx"
 #include "HttpMessageResponse.hxx"
