@@ -50,14 +50,14 @@ OffsetCast(const U *p, ptrdiff_t offset)
 }
 
 template<class C, class A>
-constexpr inline ptrdiff_t
+constexpr ptrdiff_t
 ContainerAttributeOffset(const C *null_c, const A C::*p)
 {
 	return ptrdiff_t((const char *)&(null_c->*p) - (const char *)null_c);
 }
 
 template<class C, class A>
-constexpr inline ptrdiff_t
+constexpr ptrdiff_t
 ContainerAttributeOffset(const A C::*p)
 {
 	return ContainerAttributeOffset<C, A>(nullptr, p);

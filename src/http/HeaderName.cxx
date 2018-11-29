@@ -35,7 +35,7 @@
 #include <assert.h>
 #include <string.h>
 
-static constexpr inline bool
+static constexpr bool
 http_header_name_char_valid(char ch) noexcept
 {
 	return (signed char)ch > 0x20 && ch != ':';
