@@ -64,6 +64,8 @@ struct Boolean {
 	:value(_value) {}
 };
 
+using Uint32 = BasicValue<dbus_uint32_t>;
+
 template<typename T, template<typename U> class WrapTraits>
 struct WrapValue {
 	typedef typename T::Traits ContainedTraits;
