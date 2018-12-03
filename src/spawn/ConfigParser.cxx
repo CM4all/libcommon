@@ -34,9 +34,11 @@
 #include "Config.hxx"
 #include "io/FileLineParser.hxx"
 #include "util/RuntimeError.hxx"
+#include "util/StringCompare.hxx"
 
 #include <pwd.h>
 #include <grp.h>
+#include <inttypes.h>
 
 static uid_t
 ParseUser(const char *name)
@@ -68,6 +70,119 @@ ParseGroup(const char *name)
 	return gr->gr_gid;
 }
 
+static uint64_t
+ParseUint64(const char *s)
+{
+	char *endptr;
+	const auto value = strtoull(s, &endptr, 10);
+	if (endptr == s || *endptr != 0)
+		throw FormatRuntimeError("Failed to parse number: %s", s);
+
+	return value;
+}
+
+static uint64_t
+ParseRangeUint64(const char *s, uint64_t min, uint64_t max)
+{
+	const auto value = ParseUint64(s);
+	if (value < min)
+		throw FormatRuntimeError("Value too small; must be at least %" PRIu64, min);
+
+	if (value > max)
+		throw FormatRuntimeError("Value too large; must be at most %" PRIu64, min);
+
+	return value;
+}
+
+static uint64_t
+ParseCPUWeight(const char *s)
+{
+	return ParseRangeUint64(s, 1, 10000);
+}
+
+static uint64_t
+ParseTasksMax(const char *s)
+{
+	return ParseRangeUint64(s, 1, uint64_t(1) << 31);
+}
+
+static uint64_t
+ParseIOWeight(const char *s)
+{
+	return ParseRangeUint64(s, 1, 10000);
+}
+
+gcc_pure
+static uint64_t
+ParseByteUnit(const char *s) noexcept
+{
+	uint64_t value;
+
+	switch (*s) {
+	case 'B':
+		++s;
+		if (*s != 0)
+			return 0;
+
+		value = 1;
+		break;
+
+	case 'k':
+	case 'K':
+		value = uint64_t(1) << 10;
+		break;
+
+	case 'M':
+		value = uint64_t(1) << 20;
+		break;
+
+	case 'G':
+		value = uint64_t(1) << 30;
+		break;
+
+	case 'T':
+		value = uint64_t(1) << 40;
+		break;
+
+	default:
+		return 0;
+	}
+
+	++s;
+	if (*s == 'i')
+		++s;
+
+	if (*s == 'B')
+		++s;
+
+	if (*s != 0)
+		return 0;
+
+	return value;
+}
+
+static uint64_t
+ParsePositiveBytes(const char *s)
+{
+	char *endptr;
+	uint64_t value = strtoull(s, &endptr, 10);
+	if (endptr == s)
+		throw FormatRuntimeError("Failed to parse number: %s", s);
+
+	if (value == 0)
+		throw std::runtime_error("Value must not be zero");
+
+	s = StripLeft(endptr);
+	if (*s != 0) {
+		auto unit = ParseByteUnit(s);
+		if (unit == 0)
+			throw FormatRuntimeError("Unknown byte unit: %s", s);
+		value *= unit;
+	}
+
+	return value;
+}
+
 void
 SpawnConfigParser::ParseLine(FileLineParser &line)
 {
@@ -77,6 +192,18 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 		config.allowed_uids.insert(ParseUser(line.ExpectValueAndEnd()));
 	} else if (strcmp(word, "allow_group") == 0) {
 		config.allowed_gids.insert(ParseGroup(line.ExpectValueAndEnd()));
+	} else if (StringIsEqualIgnoreCase(word, "CPUWeight")) {
+		config.systemd_scope_properties.cpu_weight =
+			ParseCPUWeight(line.ExpectValueAndEnd());
+	} else if (StringIsEqualIgnoreCase(word, "TasksMax")) {
+		config.systemd_scope_properties.tasks_max =
+			ParseTasksMax(line.ExpectValueAndEnd());
+	} else if (StringIsEqualIgnoreCase(word, "MemoryMax")) {
+		config.systemd_scope_properties.memory_max =
+			ParsePositiveBytes(line.ExpectValueAndEnd());
+	} else if (StringIsEqualIgnoreCase(word, "IOWeight")) {
+		config.systemd_scope_properties.io_weight =
+			ParseIOWeight(line.ExpectValueAndEnd());
 	} else
 		throw LineParser::Error("Unknown option");
 }

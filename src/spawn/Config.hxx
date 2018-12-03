@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "Systemd.hxx"
 #include "UidGid.hxx"
 #include "util/RuntimeError.hxx"
 
@@ -50,6 +51,8 @@ struct SpawnConfig {
 	std::string systemd_scope;
 
 	std::string systemd_scope_description;
+
+	SystemdUnitProperties systemd_scope_properties;
 
 	UidGid default_uid_gid;
 

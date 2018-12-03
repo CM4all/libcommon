@@ -32,7 +32,33 @@
 
 #pragma once
 
+#include <stdint.h>
+
 struct CgroupState;
+
+struct SystemdUnitProperties {
+	/**
+	 * CPUWeight; 0 means "undefined" (i.e. use systemd's
+	 * default).
+	 */
+	uint64_t cpu_weight = 0;
+
+	/**
+	 * TasksMax; 0 means "undefined" (i.e. use systemd's default).
+	 */
+	uint64_t tasks_max = 0;
+
+	/**
+	 * MemoryMax; 0 means "undefined" (i.e. use systemd's
+	 * default).
+	 */
+	uint64_t memory_max = 0;
+
+	/**
+	 * IOWeight; 0 means "undefined" (i.e. use systemd's default).
+	 */
+	uint64_t io_weight = 0;
+};
 
 /**
  * Obtain cgroup membership information from the cgroups assigned by
@@ -49,8 +75,10 @@ LoadSystemdCgroupState(unsigned pid) noexcept;
  *
  * Throws std::runtime_error on error.
  *
+ * @param properties properties to be passed to systemd
  * @param slice create the new scope in this slice (optional)
  */
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
+		   const SystemdUnitProperties &properties,
 		   int pid, bool delegate=false, const char *slice=nullptr);

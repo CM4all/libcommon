@@ -262,6 +262,7 @@ SystemdStopService(ODBus::Connection &connection,
 
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
+		   const SystemdUnitProperties &properties,
 		   int pid, bool delegate, const char *slice)
 {
 	if (!sd_booted())
@@ -312,6 +313,18 @@ CreateSystemdScope(const char *name, const char *description,
 		.AppendOptional(slice != nullptr,
 				Struct(String("Slice"),
 				       Variant(String(slice))))
+		.AppendOptional(properties.cpu_weight > 0,
+				Struct(String("CPUWeight"),
+				       Variant(Uint64(properties.cpu_weight))))
+		.AppendOptional(properties.tasks_max > 0,
+				Struct(String("TasksMax"),
+				       Variant(Uint64(properties.tasks_max))))
+		.AppendOptional(properties.memory_max > 0,
+				Struct(String("MemoryMax"),
+				       Variant(Uint64(properties.memory_max))))
+		.AppendOptional(properties.io_weight > 0,
+				Struct(String("IOWeight"),
+				       Variant(Uint64(properties.io_weight))))
 		.CloseContainer(args);
 
 	using AuxTypeTraits = StructTypeTraits<StringTypeTraits,

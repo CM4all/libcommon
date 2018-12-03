@@ -115,6 +115,7 @@ RunSpawnServer2(void *p)
 			cgroup_state =
 				CreateSystemdScope(ctx.config.systemd_scope.c_str(),
 						   ctx.config.systemd_scope_description.c_str(),
+						   ctx.config.systemd_scope_properties,
 						   real_pid, true);
 		} catch (const std::runtime_error &e) {
 			fprintf(stderr, "Failed to create systemd scope: ");

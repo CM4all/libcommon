@@ -110,6 +110,7 @@ try {
 
 	const CgroupState cgroup_state = scope_name != nullptr
 		? CreateSystemdScope(scope_name, scope_name,
+				     {},
 				     getpid(), true, nullptr)
 		: CgroupState();
 
