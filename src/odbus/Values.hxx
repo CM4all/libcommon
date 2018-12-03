@@ -65,6 +65,7 @@ struct Boolean {
 };
 
 using Uint32 = BasicValue<dbus_uint32_t>;
+using Uint64 = BasicValue<dbus_uint64_t>;
 
 template<typename T, template<typename U> class WrapTraits>
 struct WrapValue {
