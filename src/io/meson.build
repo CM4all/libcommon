@@ -4,6 +4,7 @@ io = static_library(
   'io',
   'FileDescriptor.cxx',
   'Open.cxx',
+  'DirectoryReader.cxx',
   'WriteFile.cxx',
   'WriteBuffer.cxx',
   'MultiWriteBuffer.cxx',
