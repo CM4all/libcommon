@@ -65,6 +65,16 @@ SocketEvent::Schedule(unsigned flags) noexcept
 }
 
 void
+SocketEvent::ScheduleImplicit() noexcept
+{
+	assert(IsDefined());
+	assert(scheduled_flags == 0);
+
+	scheduled_flags = IMPLICIT_FLAGS;
+	loop.AddFD(fd.Get(), scheduled_flags, *this);
+}
+
+void
 SocketEvent::Dispatch(unsigned flags) noexcept
 {
 	flags &= GetScheduledFlags() | IMPLICIT_FLAGS;
