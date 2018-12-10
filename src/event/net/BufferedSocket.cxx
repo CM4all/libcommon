@@ -317,7 +317,7 @@ BufferedSocket::SubmitDirect() noexcept
 		return false;
 
 	case DirectResult::ERRNO:
-		handler->OnBufferedError(std::make_exception_ptr(MakeErrno()));
+		handler->OnBufferedError(std::make_exception_ptr(MakeErrno("splice() from socket failed")));
 		return false;
 	}
 
