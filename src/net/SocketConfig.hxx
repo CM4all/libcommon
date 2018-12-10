@@ -86,10 +86,10 @@ struct SocketConfig {
 
 	SocketConfig() = default;
 
-	explicit SocketConfig(SocketAddress _bind_address)
+	explicit SocketConfig(SocketAddress _bind_address) noexcept
 		:bind_address(_bind_address) {}
 
-	explicit SocketConfig(AllocatedSocketAddress &&_bind_address)
+	explicit SocketConfig(AllocatedSocketAddress &&_bind_address) noexcept
 		:bind_address(std::move(_bind_address)) {}
 
 	/**
@@ -98,7 +98,7 @@ struct SocketConfig {
 	 * - if bind_address is IPv6-wildcard, but multicast_group is
 	 *   IPv4, then change bind_address to IPv4-wildcard
 	 */
-	void Fixup();
+	void Fixup() noexcept;
 
 	/**
 	 * Create a listening socket.

@@ -43,7 +43,7 @@
 #include <unistd.h>
 
 void
-SocketConfig::Fixup()
+SocketConfig::Fixup() noexcept
 {
 	if (!bind_address.IsNull() && bind_address.IsV6Any() &&
 	    !multicast_group.IsNull() &&
