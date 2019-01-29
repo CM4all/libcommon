@@ -150,6 +150,12 @@ public:
 
 	void Defer(DeferEvent &e) noexcept;
 
+	/**
+	 * Caching wrapper for std::chrono::steady_clock::now().  The
+	 * real clock is queried at most once per event loop
+	 * iteration, because it is assumed that the event loop runs
+	 * for a negligible duration.
+	 */
 	gcc_pure
 	const auto &SteadyNow() const noexcept {
 		return steady_clock_cache.now();
