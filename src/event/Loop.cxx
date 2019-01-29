@@ -65,6 +65,7 @@ void
 EventLoop::Reinit() noexcept
 {
 	steady_clock_cache.flush();
+	system_clock_cache.flush();
 	received_events.clear();
 
 	epoll = {};
@@ -179,6 +180,7 @@ EventLoop::Loop(int flags) noexcept
 	assert(received_events.empty());
 
 	steady_clock_cache.flush();
+	system_clock_cache.flush();
 
 	quit = false;
 
@@ -217,6 +219,7 @@ EventLoop::Loop(int flags) noexcept
 			quit = true;
 
 		steady_clock_cache.flush();
+		system_clock_cache.flush();
 
 		/* invoke sockets */
 		for (auto &i : received_events) {

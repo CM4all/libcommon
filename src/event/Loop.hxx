@@ -94,6 +94,7 @@ class EventLoop {
 	StaticArray<struct epoll_event, 32> received_events;
 
 	ClockCache<std::chrono::steady_clock> steady_clock_cache;
+	ClockCache<std::chrono::system_clock> system_clock_cache;
 
 	static constexpr int EVLOOP_ONCE = 0x1;
 	static constexpr int EVLOOP_NONBLOCK = 0x2;
@@ -159,6 +160,17 @@ public:
 	gcc_pure
 	const auto &SteadyNow() const noexcept {
 		return steady_clock_cache.now();
+	}
+
+	/**
+	 * Caching wrapper for std::chrono::system_clock::now().  The
+	 * real clock is queried at most once per event loop
+	 * iteration, because it is assumed that the event loop runs
+	 * for a negligible duration.
+	 */
+	gcc_pure
+	const auto &SystemNow() const noexcept {
+		return system_clock_cache.now();
 	}
 
 private:
