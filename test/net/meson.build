@@ -4,5 +4,6 @@ test('TestNet', executable('TestNet',
   'TestHostParser.cxx',
   'TestAddressString.cxx',
   'TestMaskedSocketAddress.cxx',
+  'TestLog.cxx',
   include_directories: inc,
-  dependencies: [gtest, net_dep]))
+  dependencies: [gtest, net_dep, http_dep]))

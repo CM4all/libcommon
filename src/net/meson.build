@@ -28,6 +28,7 @@ net = static_library(
   'log/Parser.cxx',
   'log/OneLine.cxx',
   'log/Send.cxx',
+  'log/Serializer.cxx',
   include_directories: inc,
   dependencies: [
   ],
