@@ -44,6 +44,11 @@ FormatISO8601(const struct tm &tm);
 std::string
 FormatISO8601(std::chrono::system_clock::time_point tp);
 
+/**
+ * Parse a time stamp in ISO8601 format.
+ *
+ * Throws on error.
+ */
 std::chrono::system_clock::time_point
 ParseISO8601(const char *s);
 
