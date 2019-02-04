@@ -88,7 +88,7 @@ TEST(Log, Serializer)
 
 	memset(buffer, 0xff, sizeof(buffer));
 	size_t size = Net::Log::Serialize(buffer, sizeof(buffer), d);
-	ASSERT_EQ(size, 8);
+	ASSERT_EQ(size, 8u);
 	EXPECT_EQ(memcmp(buffer, "\x63\x04\x61\x03", 4), 0);
 	EXPECT_TRUE(Net::Log::ParseDatagram({buffer, size}) == d);
 
