@@ -33,8 +33,9 @@
 #ifndef TIME_ISO8601_HXX
 #define TIME_ISO8601_HXX
 
-#include <string>
 #include <chrono>
+#include <string>
+#include <utility>
 
 struct tm;
 
@@ -48,8 +49,12 @@ FormatISO8601(std::chrono::system_clock::time_point tp);
  * Parse a time stamp in ISO8601 format.
  *
  * Throws on error.
+ *
+ * @return a pair consisting of the time point and the specified
+ * precision; e.g. for a date, the second value is "one day"
  */
-std::chrono::system_clock::time_point
+std::pair<std::chrono::system_clock::time_point,
+	  std::chrono::system_clock::duration>
 ParseISO8601(const char *s);
 
 #endif
