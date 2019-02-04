@@ -55,7 +55,7 @@ std::pair<std::chrono::system_clock::time_point,
 	  std::chrono::system_clock::duration>
 ParseISO8601(const char *s)
 {
-	struct tm tm;
+	struct tm tm{};
 	const char *end = strptime(s, "%FT%TZ", &tm);
 	if (end == nullptr || *end != 0)
 		throw std::runtime_error("Failed to parse ISO8601");
