@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2018-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,6 +31,7 @@
 
 #include <dirent.h>
 
+class FileDescriptor;
 class UniqueFileDescriptor;
 
 class DirectoryReader {
@@ -54,4 +55,6 @@ public:
 			? ent->d_name
 			: nullptr;
 	}
+
+	FileDescriptor GetFileDescriptor() const noexcept;
 };

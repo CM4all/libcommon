@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2018-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,3 +51,9 @@ OpenDir(UniqueFileDescriptor &&fd)
 
 DirectoryReader::DirectoryReader(UniqueFileDescriptor &&fd)
 	:dir(OpenDir(std::move(fd))) {}
+
+FileDescriptor
+DirectoryReader::GetFileDescriptor() const noexcept
+{
+	return FileDescriptor(dirfd(dir));
+}
