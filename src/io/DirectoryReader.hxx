@@ -46,6 +46,8 @@ public:
 		closedir(dir);
 	}
 
+	DirectoryReader &operator=(const DirectoryReader &) = delete;
+
 	const char *Read() noexcept {
 		const auto *ent = readdir(dir);
 		return ent != nullptr
