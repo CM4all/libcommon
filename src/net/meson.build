@@ -1,5 +1,4 @@
-net = static_library(
-  'net',
+net_sources = [
   'SocketAddress.cxx',
   'StaticSocketAddress.cxx',
   'AllocatedSocketAddress.cxx',
@@ -24,11 +23,27 @@ net = static_library(
   'djb/NetstringHeader.cxx',
   'djb/NetstringGenerator.cxx',
   'Buffered.cxx',
-  'log/String.cxx',
-  'log/Parser.cxx',
-  'log/OneLine.cxx',
-  'log/Send.cxx',
-  'log/Serializer.cxx',
+]
+
+net_dependencies = [
+  system_dep,
+  io_dep,
+]
+
+if get_variable('libcommon_enable_net_log', true)
+  net_sources += [
+    'log/String.cxx',
+    'log/Parser.cxx',
+    'log/OneLine.cxx',
+    'log/Send.cxx',
+    'log/Serializer.cxx',
+  ]
+  net_dependencies += http_dep
+endif
+
+net = static_library(
+  'net',
+  net_sources,
   include_directories: inc,
   dependencies: [
   ],
@@ -36,8 +51,5 @@ net = static_library(
 
 net_dep = declare_dependency(
   link_with: net,
-  dependencies: [
-    system_dep,
-    io_dep,
-  ],
+  dependencies: net_dependencies,
 )
