@@ -210,7 +210,12 @@ public:
 
 		result_handler = &_handler;
 
-		Connection::SendQuery(params...);
+		try {
+			Connection::SendQuery(params...);
+		} catch (...) {
+			result_handler = nullptr;
+			throw;
+		}
 	}
 
 	void CheckNotify() noexcept {
