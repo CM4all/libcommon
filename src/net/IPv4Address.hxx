@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2012-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,21 +51,12 @@ class IPv4Address {
 #ifdef _WIN32
 	static constexpr struct in_addr ConstructInAddr(uint8_t a, uint8_t b,
 							uint8_t c, uint8_t d) noexcept {
-		return {{{ a, b, c, d }}};
-	}
-
-	/**
-	 * @param x the 32 bit IP address in network byte order
-	 */
-	static constexpr struct in_addr ConstructInAddrBE(uint32_t x) noexcept {
-		return (struct in_addr){{.S_addr=x}};
-	}
-
-	/**
-	 * @param x the 32 bit IP address in host byte order
-	 */
-	static constexpr struct in_addr ConstructInAddr(uint32_t x) noexcept {
-		return ConstructInAddr(x >> 24, x >> 16, x >> 8, x);
+		struct in_addr result{};
+		result.s_net = a;
+		result.s_host = b;
+		result.s_lh = c;
+		result.s_impno = d;
+		return result;
 	}
 #else
 
@@ -78,11 +69,19 @@ class IPv4Address {
 		return ToBE32((a << 24) | (b << 16) | (c << 8) | d);
 	}
 
+	static constexpr struct in_addr ConstructInAddr(uint8_t a, uint8_t b,
+							uint8_t c, uint8_t d) noexcept {
+		return ConstructInAddrBE(ConstructInAddrT(a, b, c, d));
+	}
+#endif
+
 	/**
 	 * @param x the 32 bit IP address in network byte order
 	 */
 	static constexpr struct in_addr ConstructInAddrBE(uint32_t x) noexcept {
-		return { x };
+		struct in_addr ia{};
+		ia.s_addr = x;
+		return ia;
 	}
 
 	/**
@@ -92,26 +91,16 @@ class IPv4Address {
 		return ConstructInAddrBE(ToBE32(x));
 	}
 
-	static constexpr struct in_addr ConstructInAddr(uint8_t a, uint8_t b,
-							uint8_t c, uint8_t d) noexcept {
-		return { ConstructInAddrT(a, b, c, d) };
-	}
-#endif
-
 	/**
 	 * @param port the port number in host byte order
 	 */
 	static constexpr struct sockaddr_in Construct(struct in_addr address,
 						      uint16_t port) noexcept {
-		return {
-#if defined(__APPLE__)
-			sizeof(struct sockaddr_in),
-#endif
-			AF_INET,
-			ToBE16(port),
-			address,
-			{},
-		};
+		struct sockaddr_in sin{};
+		sin.sin_family = AF_INET;
+		sin.sin_port = ToBE16(port);
+		sin.sin_addr = address;
+		return sin;
 	}
 
 	/**
@@ -174,7 +163,7 @@ public:
 	 */
 	static constexpr const IPv4Address &Cast(const SocketAddress &src) noexcept {
 		/* this reinterpret_cast works because this class is
-		   just a wrapper for struct sockaddr_in6 */
+		   just a wrapper for struct sockaddr_in */
 		return *(const IPv4Address *)(const void *)src.GetAddress();
 	}
 

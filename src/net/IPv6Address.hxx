@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2012-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,31 +53,35 @@ class IPv6Address {
 						   uint16_t c, uint16_t d,
 						   uint16_t e, uint16_t f,
 						   uint16_t g, uint16_t h) noexcept {
-		return {{{
-			uint8_t(a >> 8), uint8_t(a),
-			uint8_t(b >> 8), uint8_t(b),
-			uint8_t(c >> 8), uint8_t(c),
-			uint8_t(d >> 8), uint8_t(d),
-			uint8_t(e >> 8), uint8_t(e),
-			uint8_t(f >> 8), uint8_t(f),
-			uint8_t(g >> 8), uint8_t(g),
-			uint8_t(h >> 8), uint8_t(h),
-		}}};
+		struct in6_addr result{};
+		result.s6_addr[0] = a >> 8;
+		result.s6_addr[1] = a;
+		result.s6_addr[2] = b >> 8;
+		result.s6_addr[3] = b;
+		result.s6_addr[4] = c >> 8;
+		result.s6_addr[5] = c;
+		result.s6_addr[6] = d >> 8;
+		result.s6_addr[7] = d;
+		result.s6_addr[8] = e >> 8;
+		result.s6_addr[9] = e;
+		result.s6_addr[10] = f >> 8;
+		result.s6_addr[11] = f;
+		result.s6_addr[12] = g >> 8;
+		result.s6_addr[13] = g;
+		result.s6_addr[14] = h >> 8;
+		result.s6_addr[15] = h;
+		return result;
 	}
 
 	static constexpr struct sockaddr_in6 Construct(struct in6_addr address,
 						       uint16_t port,
 						       uint32_t scope_id) noexcept {
-		return {
-#if defined(__APPLE__)
-			sizeof(struct sockaddr_in6),
-#endif
-			AF_INET6,
-			ToBE16(port),
-			0,
-			address,
-			scope_id,
-		};
+		struct sockaddr_in6 sin{};
+		sin.sin6_family = AF_INET6;
+		sin.sin6_port = ToBE16(port);
+		sin.sin6_addr = address;
+		sin.sin6_scope_id = scope_id;
+		return sin;
 	}
 
 public:
@@ -172,7 +176,7 @@ public:
 	/**
 	 * Is this an IPv4 address mapped inside struct sockaddr_in6?
 	 */
-#if !GCC_OLDER_THAN(5,0)
+#if defined(__linux__) && !GCC_OLDER_THAN(5,0)
 	constexpr
 #endif
 	bool IsV4Mapped() const noexcept {
