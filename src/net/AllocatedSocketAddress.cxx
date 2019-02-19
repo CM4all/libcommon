@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2012-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -71,7 +71,7 @@ AllocatedSocketAddress::SetSize(size_type new_size) noexcept
 #ifdef HAVE_UN
 
 StringView
-AllocatedSocketAddress::GetLocalRaw() const
+AllocatedSocketAddress::GetLocalRaw() const noexcept
 {
 	return SocketAddress(*this).GetLocalRaw();
 }

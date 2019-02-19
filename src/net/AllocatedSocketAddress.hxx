@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2012-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -144,7 +144,7 @@ public:
 	 * @see SocketAddress::GetLocalRaw()
 	 */
 	gcc_pure
-	StringView GetLocalRaw() const;
+	StringView GetLocalRaw() const noexcept;
 
 	/**
 	 * @see SocketAddress::GetLocalPath()
