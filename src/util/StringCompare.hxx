@@ -38,6 +38,7 @@
 #include "WStringCompare.hxx"
 #endif
 
+gcc_pure gcc_nonnull_all
 static inline bool
 StringIsEmpty(const char *string) noexcept
 {
@@ -51,7 +52,7 @@ StringStartsWith(const char *haystack, StringView needle) noexcept
 	return StringIsEqual(haystack, needle.data, needle.size);
 }
 
-gcc_pure
+gcc_pure gcc_nonnull_all
 bool
 StringEndsWith(const char *haystack, const char *needle) noexcept;
 
@@ -93,7 +94,7 @@ StringAfterPrefixIgnoreCase(const char *haystack, StringView needle) noexcept
  * Check if the given string ends with the specified suffix.  If yes,
  * returns the position of the suffix, and nullptr otherwise.
  */
-gcc_pure
+gcc_pure gcc_nonnull_all
 const char *
 FindStringSuffix(const char *p, const char *suffix) noexcept;
 
