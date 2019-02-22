@@ -1,17 +1,25 @@
-libcap = dependency('libcap')
-
-system = static_library(
-  'system',
+system_sources = [
   'LargeAllocation.cxx',
   'BindMount.cxx',
-  'CapabilityState.cxx',
   'ProcessName.cxx',
   'LinuxFD.cxx',
   'EpollFD.cxx',
+]
+
+system_dependencies = [
+]
+
+if get_variable('libcommon_enable_libcap', true)
+  libcap = dependency('libcap')
+  system_sources += 'CapabilityState.cxx'
+  system_dependencies += libcap
+endif
+
+system = static_library(
+  'system',
+  system_sources,
   include_directories: inc,
-  dependencies: [
-    libcap,
-  ],
+  dependencies: system_dependencies,
 )
 
 system_dep = declare_dependency(
