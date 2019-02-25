@@ -47,6 +47,15 @@ PipeAdapter::OnLine(WritableBuffer<char> line) noexcept
 
 	datagram.SetTimestamp(GetEventLoop().SystemNow());
 
+	constexpr size_t MAX_LENGTH = 1024;
+	if (line.size >= MAX_LENGTH) {
+		/* truncate long lines */
+		line[MAX_LENGTH - 3] = '.';
+		line[MAX_LENGTH - 2] = '.';
+		line[MAX_LENGTH - 1] = '.';
+		line.size = MAX_LENGTH;
+	}
+
 	datagram.message = {line.data, line.size};
 
 	try {
