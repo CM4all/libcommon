@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,6 +31,7 @@
  */
 
 #include "PipeAdapter.hxx"
+#include "event/Loop.hxx"
 #include "net/log/Send.hxx"
 
 namespace Net {
@@ -44,7 +45,7 @@ PipeAdapter::OnLine(WritableBuffer<char> line) noexcept
 
 	// TODO: erase/quote "dangerous" characters?
 
-	datagram.SetTimestamp(std::chrono::system_clock::now());
+	datagram.SetTimestamp(GetEventLoop().SystemNow());
 
 	datagram.message = {line.data, line.size};
 
