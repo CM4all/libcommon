@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -44,7 +44,7 @@ class SocketAddress;
  * @return true on success
  */
 bool
-ToString(char *buffer, size_t buffer_size, SocketAddress address);
+ToString(char *buffer, size_t buffer_size, SocketAddress address) noexcept;
 
 /**
  * Generates the string representation of a #SocketAddress into the
@@ -53,6 +53,6 @@ ToString(char *buffer, size_t buffer_size, SocketAddress address);
  * @return true on success
  */
 bool
-HostToString(char *buffer, size_t buffer_size, SocketAddress address);
+HostToString(char *buffer, size_t buffer_size, SocketAddress address) noexcept;
 
 #endif

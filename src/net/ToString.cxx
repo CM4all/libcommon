@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -44,7 +44,7 @@
 #include <stdint.h>
 
 static SocketAddress
-ipv64_normalize_mapped(SocketAddress address)
+ipv64_normalize_mapped(SocketAddress address) noexcept
 {
 	const auto &a6 = *(const struct sockaddr_in6 *)(const void *)address.GetAddress();
 
@@ -63,7 +63,7 @@ ipv64_normalize_mapped(SocketAddress address)
 
 static bool
 LocalToString(char *buffer, size_t buffer_size,
-	      const struct sockaddr_un *sun, size_t length)
+	      const struct sockaddr_un *sun, size_t length) noexcept
 {
 	const size_t prefix = (size_t)((struct sockaddr_un *)nullptr)->sun_path;
 	assert(length >= prefix);
@@ -89,7 +89,7 @@ LocalToString(char *buffer, size_t buffer_size,
 
 bool
 ToString(char *buffer, size_t buffer_size,
-	 SocketAddress address)
+	 SocketAddress address) noexcept
 {
 	if (address.IsNull())
 		return false;
@@ -137,7 +137,7 @@ ToString(char *buffer, size_t buffer_size,
 
 bool
 HostToString(char *buffer, size_t buffer_size,
-	     SocketAddress address)
+	     SocketAddress address) noexcept
 {
 	if (address.IsNull())
 		return false;
