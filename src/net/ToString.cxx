@@ -135,6 +135,15 @@ ToString(char *buffer, size_t buffer_size,
 	return true;
 }
 
+const char *
+ToString(char *buffer, size_t buffer_size, SocketAddress address,
+	 const char *fallback) noexcept
+{
+	return ToString(buffer, buffer_size, address)
+		? buffer
+		: fallback;
+}
+
 bool
 HostToString(char *buffer, size_t buffer_size,
 	     SocketAddress address) noexcept

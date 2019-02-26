@@ -47,6 +47,14 @@ bool
 ToString(char *buffer, size_t buffer_size, SocketAddress address) noexcept;
 
 /**
+ * Like ToString() above, but return the string pointer (or on error:
+ * return the given fallback pointer).
+ */
+const char *
+ToString(char *buffer, size_t buffer_size, SocketAddress address,
+	 const char *fallback) noexcept;
+
+/**
  * Generates the string representation of a #SocketAddress into the
  * specified buffer, without the port number.
  *
