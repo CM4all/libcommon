@@ -239,11 +239,12 @@ AsyncConnection::Reconnect() noexcept
 void
 AsyncConnection::Disconnect() noexcept
 {
+	reconnect_timer.Cancel();
+
 	if (!IsDefined())
 		return;
 
 	socket_event.Cancel();
-	reconnect_timer.Cancel();
 	Connection::Disconnect();
 	state = State::DISCONNECTED;
 }
