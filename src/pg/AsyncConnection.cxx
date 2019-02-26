@@ -210,6 +210,7 @@ AsyncConnection::Connect() noexcept
 	assert(!IsDefined());
 	assert(state == State::DISCONNECTED);
 
+	reconnect_timer.Cancel();
 	state = State::CONNECTING;
 
 	try {
@@ -228,6 +229,7 @@ AsyncConnection::Reconnect() noexcept
 {
 	assert(IsDefined());
 
+	reconnect_timer.Cancel();
 	socket_event.Cancel();
 	StartReconnect();
 	state = State::RECONNECTING;
