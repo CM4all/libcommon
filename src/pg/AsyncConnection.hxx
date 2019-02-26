@@ -163,10 +163,6 @@ public:
 			const char *conninfo, const char *schema,
 			AsyncConnectionHandler &handler) noexcept;
 
-	~AsyncConnection() noexcept {
-		Disconnect();
-	}
-
 	const std::string &GetSchemaName() const noexcept {
 		return schema;
 	}
