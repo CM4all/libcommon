@@ -144,13 +144,11 @@ class AsyncConnection : public Connection {
 	 * RECONNECTING: used by PollReconnect().
 	 *
 	 * READY: used by PollNotify().
-	 *
-	 * WAITING: not used.
 	 */
 	SocketEvent socket_event;
 
 	/**
-	 * A timer which reconnects during State::WAITING.
+	 * A timer which reconnects during State::DISCONNECTED.
 	 */
 	TimerEvent reconnect_timer;
 
