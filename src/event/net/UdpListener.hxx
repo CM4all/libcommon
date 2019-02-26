@@ -54,6 +54,10 @@ public:
 		    UdpHandler &_handler) noexcept;
 	~UdpListener() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	/**
 	 * Enable the object after it has been disabled by Disable().  A
 	 * new object is enabled by default.
