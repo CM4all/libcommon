@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2018 Content Management AG
+ * Copyright 2006-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,10 +30,21 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TIME_MATH_HXX
-#define TIME_MATH_HXX
+#pragma once
+
+#include "util/Compiler.h"
+
+#include <chrono>
 
 struct tm;
+
+/**
+ * Calculates the preceding midnight time point in the current time
+ * zone.
+ */
+gcc_const
+std::chrono::system_clock::time_point
+PrecedingMidnightLocal(std::chrono::system_clock::time_point t) noexcept;
 
 /**
  * Calculate the next day, keeping month/year wraparounds and leap
@@ -43,5 +54,3 @@ struct tm;
  */
 void
 IncrementDay(struct tm &tm);
-
-#endif

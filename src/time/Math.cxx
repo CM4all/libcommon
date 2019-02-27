@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2018 Content Management AG
+ * Copyright 2006-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,9 +31,23 @@
  */
 
 #include "Math.hxx"
-#include "time/Calendar.hxx"
+#include "Calendar.hxx"
+#include "Convert.hxx"
 
 #include <time.h>
+
+std::chrono::system_clock::time_point
+PrecedingMidnightLocal(std::chrono::system_clock::time_point t) noexcept
+try {
+	auto tm = LocalTime(t);
+	tm.tm_sec = 0;
+	tm.tm_min = 0;
+	tm.tm_hour = 0;
+	return MakeTime(tm);
+} catch (...) {
+	/* best-effort fallback for this exotic error condition */
+	return t;
+}
 
 void
 IncrementDay(struct tm &tm)

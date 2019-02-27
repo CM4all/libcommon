@@ -32,10 +32,6 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
-#include <chrono>
-
 constexpr bool
 IsLeapYear(unsigned y) noexcept
 {
@@ -58,11 +54,3 @@ DaysInMonth(unsigned month, unsigned year) noexcept
 	else
 		return DaysInFebruary(year);
 }
-
-/**
- * Calculates the preceding midnight time point in the current time
- * zone.
- */
-gcc_const
-std::chrono::system_clock::time_point
-PrecedingMidnightLocal(std::chrono::system_clock::time_point t) noexcept;
