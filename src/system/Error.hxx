@@ -130,18 +130,6 @@ MakeErrno(const char *msg) noexcept
 	return MakeErrno(errno, msg);
 }
 
-static inline std::system_error
-MakeErrno(int code) noexcept
-{
-	return MakeErrno(code, strerror(code));
-}
-
-static inline std::system_error
-MakeErrno() noexcept
-{
-	return MakeErrno(errno);
-}
-
 template<typename... Args>
 static inline std::system_error
 FormatErrno(int code, const char *fmt, Args&&... args) noexcept
