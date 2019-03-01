@@ -87,7 +87,7 @@ SocketWrapper::Shutdown() noexcept
 	if (!IsValid())
 		return;
 
-	shutdown(GetSocket().Get(), SHUT_RDWR);
+	GetSocket().Shutdown();
 }
 
 void
