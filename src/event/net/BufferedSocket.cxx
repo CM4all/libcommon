@@ -480,11 +480,12 @@ BufferedSocket::OnSocketTimeout() noexcept
 	return handler->OnBufferedTimeout();
 }
 
-void
+bool
 BufferedSocket::OnSocketError(int error) noexcept
 {
 	handler->OnBufferedError(std::make_exception_ptr(MakeErrno(error,
 								   "Socket error")));
+	return false;
 }
 
 /*

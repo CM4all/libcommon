@@ -67,12 +67,12 @@ public:
 	virtual bool OnSocketTimeout() noexcept = 0;
 
 	/**
-	 * An error has occurred (via EPOLLERR / SO_ERROR).  The
-	 * handler must close the #SocketWrapper.
+	 * An error has occurred (via EPOLLERR / SO_ERROR).
 	 *
 	 * @param error an errno value
+	 * @return false if the #SocketWrapper has been closed
 	 */
-	virtual void OnSocketError(int error) noexcept = 0;
+	virtual bool OnSocketError(int error) noexcept = 0;
 };
 
 class SocketWrapper {

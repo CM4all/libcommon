@@ -43,8 +43,8 @@ SocketWrapper::SocketEventCallback(unsigned events) noexcept
 	assert(IsValid());
 
 	if (events & SocketEvent::ERROR) {
-		handler.OnSocketError(GetSocket().GetError());
-		return;
+		if (!handler.OnSocketError(GetSocket().GetError()))
+			return;
 	}
 
 	if (events & SocketEvent::READ)
