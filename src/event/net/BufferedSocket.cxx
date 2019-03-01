@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -483,6 +483,39 @@ BufferedSocket::OnSocketTimeout() noexcept
 bool
 BufferedSocket::OnSocketError(int error) noexcept
 {
+	if (error == EPIPE || error == ECONNRESET) {
+		/* this happens when the peer does a shutdown(SHUT_RD)
+		   because he's not interested in more data; now our
+		   handler gets a chance to say "that's ok, but I want
+		   to continue reading" */
+		/* TODO: how can we exclude ECONNRESET from this
+		   check?  It happened in tests after one send() had
+		   returned -EPIPE, and EPOLLOUT had already been
+		   removed from the mask */
+
+		const auto result = handler->OnBufferedBroken();
+		switch (result) {
+		case WRITE_BROKEN:
+			/* continue reading */
+			UnscheduleWrite();
+			return true;
+
+		case WRITE_ERRNO:
+			/* report the error to OnBufferedError() */
+			break;
+
+		case WRITE_DESTROYED:
+			/* this object was destroyed; return without
+			   touching anything */
+			return false;
+
+		case WRITE_BLOCKING:
+		case WRITE_SOURCE_EOF:
+			/* these enum values are not allowed here */
+			gcc_unreachable();
+		}
+	}
+
 	handler->OnBufferedError(std::make_exception_ptr(MakeErrno(error,
 								   "Socket error")));
 	return false;
