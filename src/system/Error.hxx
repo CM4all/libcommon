@@ -150,6 +150,14 @@ FormatErrno(const char *fmt, Args&&... args) noexcept
 #endif
 
 gcc_pure
+inline bool
+IsErrno(const std::system_error &e, int code) noexcept
+{
+	return e.code().category() == ErrnoCategory() &&
+		e.code().value() == code;
+}
+
+gcc_pure
 static inline bool
 IsFileNotFound(const std::system_error &e) noexcept
 {
@@ -157,8 +165,7 @@ IsFileNotFound(const std::system_error &e) noexcept
 	return e.code().category() == std::system_category() &&
 		e.code().value() == ERROR_FILE_NOT_FOUND;
 #else
-	return e.code().category() == ErrnoCategory() &&
-		e.code().value() == ENOENT;
+	return IsErrno(e, ENOENT);
 #endif
 }
 
@@ -170,8 +177,7 @@ IsPathNotFound(const std::system_error &e) noexcept
 	return e.code().category() == std::system_category() &&
 		e.code().value() == ERROR_PATH_NOT_FOUND;
 #else
-	return e.code().category() == ErrnoCategory() &&
-		e.code().value() == ENOTDIR;
+	return IsErrno(e, ENOTDIR);
 #endif
 }
 
@@ -183,8 +189,7 @@ IsAccessDenied(const std::system_error &e) noexcept
 	return e.code().category() == std::system_category() &&
 		e.code().value() == ERROR_ACCESS_DENIED;
 #else
-	return e.code().category() == ErrnoCategory() &&
-		e.code().value() == EACCES;
+	return IsErrno(e, EACCES);
 #endif
 }
 

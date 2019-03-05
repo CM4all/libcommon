@@ -61,8 +61,7 @@ try {
 			if (!ReceiveOne())
 				return false;
 		} catch (const std::system_error &e) {
-			if (e.code().category() == ErrnoCategory() &&
-			    e.code().value() == EAGAIN)
+			if (IsErrno(e, EAGAIN))
 				/* no more pending datagrams */
 				return true;
 

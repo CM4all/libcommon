@@ -318,8 +318,7 @@ SpawnServerConnection::SendExit(int id, int status) noexcept
 		try {
 			::Send<1>(socket, s);
 		} catch (const std::system_error &e) {
-			if (e.code().category() == std::system_category() &&
-			    e.code().value() == EAGAIN) {
+			if (IsErrno(e, EAGAIN)) {
 				/* the client may be busy, while the datagram queue
 				   has filled (see /proc/sys/net/unix/max_dgram_qlen);
 				   wait some more before giving up */

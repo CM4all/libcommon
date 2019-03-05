@@ -146,8 +146,7 @@ BuildSyscallFilter(Seccomp::Filter &sf)
 		try {
 			sf.AddRule(SCMP_ACT_KILL, i);
 		} catch (const std::system_error &e) {
-			if (e.code().category() == ErrnoCategory() &&
-			    e.code().value() == EFAULT) {
+			if (IsErrno(e, EFAULT)) {
 				/* system call not supported by this kernel - ignore
 				   this problem silently, because an unsupported
 				   syscall doesn't need to be filtered */
