@@ -167,7 +167,7 @@ EventLoop::RunDeferred() noexcept
  * value (= never times out) is translated to the magic value -1.
  */
 static constexpr int
-ExportTimeoutMS(Event::Duration timeout)
+ExportTimeoutMS(Event::Duration timeout) noexcept
 {
 	return timeout >= timeout.zero()
 		? int(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count())
