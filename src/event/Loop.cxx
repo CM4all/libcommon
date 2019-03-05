@@ -39,7 +39,7 @@
 #include <stdio.h>
 #endif
 
-bool
+inline bool
 EventLoop::TimerCompare::operator()(const TimerEvent &a,
 				    const TimerEvent &b) const noexcept
 {
