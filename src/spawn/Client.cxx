@@ -377,7 +377,21 @@ SpawnServerClient::KillChildProcess(int pid, int signo) noexcept
 		s.WriteInt(pid);
 		s.WriteInt(signo);
 
-		Send(s.GetPayload(), s.GetFds());
+		try {
+			Send(s.GetPayload(), s.GetFds());
+		} catch (const std::system_error &e) {
+			/* if the server is getting flooded with a
+			   large number of KILL comands, the
+			   /proc/sys/net/unix/max_dgram_qlen limit may
+			   be reached; wait a little bit before giving
+			   up */
+			if (IsErrno(e, EAGAIN) &&
+			    socket.WaitWritable(100) > 0)
+				/* try again (may throw another exception) */
+				Send(s.GetPayload(), s.GetFds());
+			else
+				throw;
+		}
 	} catch (const std::runtime_error &e) {
 		fprintf(stderr, "failed to send KILL(%d) to spawner: %s\n",
 			pid,e.what());
