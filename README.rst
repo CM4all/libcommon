@@ -20,7 +20,7 @@ Building libcommon
 
 You need:
 
-- a C++14 compiler (gcc 4.9 or clang)
+- a C++17 compiler (gcc 6 or clang)
 - `meson 0.37 <http://mesonbuild.com/>`__
 - `Boost <http://boost.org/>`__
 - `libevent <http://libevent.org/>`__
