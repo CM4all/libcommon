@@ -30,18 +30,24 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Parser.hxx"
-#include "Math.hxx"
-#include "ISO8601.hxx"
-#include "util/StringCompare.hxx"
+#include "time/Parser.hxx"
 
-std::pair<std::chrono::system_clock::time_point,
-	  std::chrono::system_clock::duration>
-ParseTimePoint(const char *s)
+#include <gtest/gtest.h>
+
+#include <time.h>
+
+TEST(Parser, Today)
 {
-	if (StringIsEqual(s, "today"))
-		return std::make_pair(PrecedingMidnightLocal(std::chrono::system_clock::now()),
-				      std::chrono::hours(24));
+	const time_t now = time(nullptr);
+	struct tm tm;
+	localtime_r(&now, &tm);
+	tm.tm_sec = 0;
+	tm.tm_min = 0;
+	tm.tm_hour = 0;
+	const time_t expected = mktime(&tm);
 
-	return ParseISO8601(s);
+	const auto result = ParseTimePoint("today");
+	EXPECT_NEAR(std::chrono::system_clock::to_time_t(result.first), expected, 10);
+	EXPECT_EQ(result.second,
+		  std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::hours(24)));
 }
