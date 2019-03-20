@@ -53,4 +53,4 @@ PrecedingMidnightLocal(std::chrono::system_clock::time_point t) noexcept;
  * transitions.
  */
 void
-IncrementDay(struct tm &tm);
+IncrementDay(struct tm &tm) noexcept;

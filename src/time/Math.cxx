@@ -50,7 +50,7 @@ try {
 }
 
 void
-IncrementDay(struct tm &tm)
+IncrementDay(struct tm &tm) noexcept
 {
 	const unsigned max_day = DaysInMonth(tm.tm_mon + 1, tm.tm_year + 1900);
 
