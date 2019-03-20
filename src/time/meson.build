@@ -1,6 +1,7 @@
 time_sources = [
   'Convert.cxx',
   'ISO8601.cxx',
+  'Parser.cxx',
   'Math.cxx',
 ]
 
