@@ -113,7 +113,7 @@ enum class ResponseCommand : uint16_t {
 	 * Successful response to #RequestCommand::*_NAMESPACE.
 	 *
 	 * Payload is a list of "uint32_t" values, each of them denoting a
-	 * single "CLONE_*" flag.  The defines the order in which the
+	 * single "CLONE_*" flag.  This defines the order in which the
 	 * namespace file handles are being transmitted as ancillary data.
 	 */
 	NAMESPACE_HANDLES = 1,
