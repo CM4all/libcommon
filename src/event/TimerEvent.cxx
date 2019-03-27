@@ -32,6 +32,7 @@
 
 #include "TimerEvent.hxx"
 #include "Loop.hxx"
+#include "time/Convert.hxx"
 
 void
 TimerEvent::Schedule(Event::Duration d) noexcept
@@ -51,6 +52,5 @@ TimerEvent::ScheduleEarlier(Event::Duration d) noexcept
 void
 TimerEvent::Add(const struct timeval &tv) noexcept
 {
-	Schedule(Event::Duration(std::chrono::seconds(tv.tv_sec)) +
-		 Event::Duration(std::chrono::microseconds(tv.tv_usec)));
+	Schedule(ToSteadyClockDuration(tv));
 }

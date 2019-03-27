@@ -37,6 +37,8 @@
 
 #include <chrono>
 
+struct timeval;
+
 /**
  * Convert a UTC-based time point to a UTC-based "struct tm".
  *
@@ -66,5 +68,8 @@ TimeGm(struct tm &tm) noexcept;
 gcc_pure
 std::chrono::system_clock::time_point
 MakeTime(struct tm &tm) noexcept;
+
+std::chrono::steady_clock::duration
+ToSteadyClockDuration(const struct timeval &tv) noexcept;
 
 #endif

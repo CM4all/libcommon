@@ -15,6 +15,7 @@ event_dep = declare_dependency(
   link_with: event,
   dependencies: [
     system_dep,
+    time_dep,
     util_dep,
   ],
 )
