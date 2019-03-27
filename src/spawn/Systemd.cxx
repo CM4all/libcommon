@@ -32,6 +32,7 @@
 
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
+#include "odbus/Systemd.hxx"
 #include "odbus/Connection.hxx"
 #include "odbus/Message.hxx"
 #include "odbus/AppendIter.hxx"
@@ -151,115 +152,6 @@ LoadSystemdCgroupState(unsigned pid) noexcept
 	return state;
 }
 
-static void
-WaitJobRemoved(DBusConnection *connection, const char *object_path)
-{
-	using namespace ODBus;
-
-	while (true) {
-		auto msg = Message::Pop(*connection);
-		if (!msg.IsDefined()) {
-			if (dbus_connection_read_write(connection, -1))
-				continue;
-			else
-				break;
-		}
-
-		if (msg.IsSignal("org.freedesktop.systemd1.Manager", "JobRemoved")) {
-			DBusError err;
-			dbus_error_init(&err);
-
-			dbus_uint32_t job_id;
-			const char *removed_object_path, *unit_name, *result_string;
-			if (!msg.GetArgs(err,
-					 DBUS_TYPE_UINT32, &job_id,
-					 DBUS_TYPE_OBJECT_PATH, &removed_object_path,
-					 DBUS_TYPE_STRING, &unit_name,
-					 DBUS_TYPE_STRING, &result_string)) {
-				fprintf(stderr, "JobRemoved failed: %s\n", err.message);
-				dbus_error_free(&err);
-				break;
-			}
-
-			if (strcmp(removed_object_path, object_path) == 0)
-				break;
-		}
-	}
-}
-
-/**
- * Wait for the UnitRemoved signal for the specified unit name.
- */
-static bool
-WaitUnitRemoved(ODBus::Connection &connection, const char *name,
-		int timeout_ms)
-{
-	using namespace ODBus;
-
-	bool was_empty = false;
-
-	while (true) {
-		auto msg = Message::Pop(*connection);
-		if (!msg.IsDefined()) {
-			if (was_empty)
-				return false;
-
-			was_empty = true;
-
-			if (dbus_connection_read_write(connection, timeout_ms))
-				continue;
-			else
-				return false;
-		}
-
-		if (msg.IsSignal("org.freedesktop.systemd1.Manager", "UnitRemoved")) {
-			DBusError err;
-			dbus_error_init(&err);
-
-			const char *unit_name, *object_path;
-			if (!msg.GetArgs(err,
-					 DBUS_TYPE_STRING, &unit_name,
-					 DBUS_TYPE_OBJECT_PATH, &object_path)) {
-				dbus_error_free(&err);
-				return false;
-			}
-
-			if (strcmp(unit_name, name) == 0)
-				return true;
-		}
-	}
-}
-
-static void
-SystemdStopService(ODBus::Connection &connection,
-		   const char *name, const char *mode)
-{
-	using namespace ODBus;
-
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-					  "/org/freedesktop/systemd1",
-					  "org.freedesktop.systemd1.Manager",
-					  "StopUnit");
-
-	AppendMessageIter(*msg.Get()).Append(name).Append(mode);
-
-	auto pending = PendingCall::SendWithReply(connection, msg.Get());
-
-	dbus_connection_flush(connection);
-
-	pending.Block();
-
-	Message reply = Message::StealReply(*pending.Get());
-	reply.CheckThrowError();
-
-	Error error;
-	const char *object_path;
-	if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
-		error.Throw("StopUnit reply failed");
-
-	WaitJobRemoved(connection, object_path);
-}
-
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
 		   const SystemdUnitProperties &properties,
@@ -348,7 +240,7 @@ CreateSystemdScope(const char *name, const char *description,
 	    strcmp(reply.GetErrorName(),
 		   "org.freedesktop.systemd1.UnitExists") == 0) {
 
-		if (!WaitUnitRemoved(connection, name, 2000)) {
+		if (!Systemd::WaitUnitRemoved(connection, name, 2000)) {
 			/* if the old scope is still alive, stop it
 			   forcefully; this works around a known
 			   problem with LXC and systemd's cgroups1
@@ -361,13 +253,12 @@ CreateSystemdScope(const char *name, const char *description,
 			fprintf(stderr, "Old unit %s didn't disappear; attempting to stop it\n",
 				name);
 			try {
-				SystemdStopService(connection, name, "replace");
+				Systemd::StopService(connection, name);
+				Systemd::WaitUnitRemoved(connection, name, -1);
 			} catch (...) {
 				fprintf(stderr, "Failed to stop unit %s: ", name);
 				PrintException(std::current_exception());
 			}
-
-			WaitUnitRemoved(connection, name, -1);
 		}
 
 		/* send the StartTransientUnit message again and hope it
@@ -384,7 +275,7 @@ CreateSystemdScope(const char *name, const char *description,
 	if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
 		error.Throw("StartTransientUnit reply failed");
 
-	WaitJobRemoved(connection, object_path);
+	Systemd::WaitJobRemoved(connection, object_path);
 
 	return delegate
 		? LoadSystemdCgroupState(0)

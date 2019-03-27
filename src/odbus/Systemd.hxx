@@ -32,53 +32,32 @@
 
 #pragma once
 
-#include <stdint.h>
+namespace ODBus {
+class Connection;
+}
 
-struct CgroupState;
-
-struct SystemdUnitProperties {
-	/**
-	 * CPUWeight; 0 means "undefined" (i.e. use systemd's
-	 * default).
-	 */
-	uint64_t cpu_weight = 0;
-
-	/**
-	 * TasksMax; 0 means "undefined" (i.e. use systemd's default).
-	 */
-	uint64_t tasks_max = 0;
-
-	/**
-	 * MemoryMax; 0 means "undefined" (i.e. use systemd's
-	 * default).
-	 */
-	uint64_t memory_max = 0;
-
-	/**
-	 * IOWeight; 0 means "undefined" (i.e. use systemd's default).
-	 */
-	uint64_t io_weight = 0;
-};
+namespace Systemd {
 
 /**
- * Obtain cgroup membership information from the cgroups assigned by
- * systemd to the specified process, and return it as a #CgroupState
- * instance.  Returns an empty #CgroupState on error.
- *
- * @param pid the process id or 0 for the current process
+ * Throws on error.
  */
-CgroupState
-LoadSystemdCgroupState(unsigned pid) noexcept;
+void
+WaitJobRemoved(ODBus::Connection &connection, const char *object_path);
 
 /**
- * Create a new systemd scope and move the current process into it.
- *
- * Throws std::runtime_error on error.
- *
- * @param properties properties to be passed to systemd
- * @param slice create the new scope in this slice (optional)
+ * Wait for the UnitRemoved signal for the specified unit name.
  */
-CgroupState
-CreateSystemdScope(const char *name, const char *description,
-		   const SystemdUnitProperties &properties,
-		   int pid, bool delegate=false, const char *slice=nullptr);
+bool
+WaitUnitRemoved(ODBus::Connection &connection, const char *name,
+		int timeout_ms) noexcept;
+
+/**
+ * Note: the caller must establish a match on "JobRemoved".
+ *
+ * Throws on error.
+ */
+void
+StopService(ODBus::Connection &connection,
+	    const char *name, const char *mode="replace");
+
+}

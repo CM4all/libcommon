@@ -7,6 +7,7 @@ odbus = static_library(
   'Message.cxx',
   'Watch.cxx',
   'ScopeMatch.cxx',
+  'Systemd.cxx',
   include_directories: inc,
   dependencies: [
     libdbus,
