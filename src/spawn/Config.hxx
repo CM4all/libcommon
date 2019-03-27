@@ -54,6 +54,12 @@ struct SpawnConfig {
 
 	SystemdUnitProperties systemd_scope_properties;
 
+	/**
+	 * If non-empty, then the new systemd scope is created in the
+	 * specified slice.
+	 */
+	std::string systemd_slice;
+
 	UidGid default_uid_gid;
 
 	std::set<uid_t> allowed_uids;
