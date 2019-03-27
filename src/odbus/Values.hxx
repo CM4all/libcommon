@@ -48,12 +48,12 @@ struct BasicValue {
 	const T &value;
 
 	explicit constexpr BasicValue(const T &_value) noexcept
-	:value(_value) {}
+		:value(_value) {}
 };
 
 struct String : BasicValue<const char *> {
 	explicit constexpr String(const char *const&_value) noexcept
-	:BasicValue(_value) {}
+		:BasicValue(_value) {}
 };
 
 struct Boolean {
@@ -61,7 +61,7 @@ struct Boolean {
 	dbus_bool_t value;
 
 	explicit constexpr Boolean(bool _value) noexcept
-	:value(_value) {}
+		:value(_value) {}
 };
 
 using Uint32 = BasicValue<dbus_uint32_t>;
@@ -74,7 +74,7 @@ struct WrapValue {
 	const T &value;
 
 	explicit constexpr WrapValue(const T &_value) noexcept
-	:value(_value) {}
+		:value(_value) {}
 };
 
 template<typename T>
@@ -83,7 +83,7 @@ struct WrapVariant : BasicValue<T> {
 	typedef VariantTypeTraits Traits;
 
 	explicit constexpr WrapVariant(const T &_value) noexcept
-	:BasicValue<T>(_value) {}
+		:BasicValue<T>(_value) {}
 };
 
 template<typename T>
@@ -99,7 +99,7 @@ struct WrapFixedArray {
 
 	explicit constexpr WrapFixedArray(const T *_data,
 					  size_t _size) noexcept
-	:value(_data, _size) {}
+		:value(_data, _size) {}
 };
 
 template<typename T>
@@ -115,7 +115,7 @@ struct WrapStruct {
 	std::tuple<const T&...> values;
 
 	explicit constexpr WrapStruct(const T&... _values) noexcept
-	:values(_values...) {}
+		:values(_values...) {}
 };
 
 template<typename... T>
