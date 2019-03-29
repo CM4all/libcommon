@@ -73,7 +73,12 @@ void
 AsyncConnection::Error(std::exception_ptr e) noexcept
 {
 	handler.OnError(std::move(e));
-	Error();
+
+	if (IsReady())
+		/* invoke Error() only if state==READY to allow
+		   calling this method without triggering an assertion
+		   failure in Error() */
+		Error();
 }
 
 void
