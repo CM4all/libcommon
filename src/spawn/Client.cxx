@@ -111,7 +111,7 @@ SpawnServerClient::CheckOrAbort() noexcept
 {
 	if (!socket.IsDefined()) {
 		fprintf(stderr, "SpawnChildProcess: the spawner is gone, emergency!\n");
-		exit(EXIT_FAILURE);
+		_exit(EXIT_FAILURE);
 	}
 }
 
