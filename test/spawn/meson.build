@@ -9,3 +9,16 @@ executable(
     util_dep,
   ],
 )
+
+executable(
+  'KillCgroup',
+  'KillCgroup.cxx',
+  include_directories: inc,
+  dependencies: [
+    spawn_dep,
+    event_dep,
+    net_dep,
+    system_dep,
+    util_dep,
+  ],
+)

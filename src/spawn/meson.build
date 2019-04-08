@@ -32,6 +32,7 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
     'JailParams.cxx',
     'ChildOptions.cxx',
     'CgroupOptions.cxx',
+    'CgroupKill.cxx',
     'RefenceOptions.cxx',
     'Server.cxx',
     'Launch.cxx',
