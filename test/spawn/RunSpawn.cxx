@@ -136,9 +136,6 @@ try {
 
 	fprintf(stderr, "Unknown child status\n");
 	return EXIT_FAILURE;
-} catch (const char *msg) {
-	fprintf(stderr, "%s\n", msg);
-	return EXIT_FAILURE;
 } catch (Usage) {
 	fprintf(stderr, "Usage: RunSpawn"
 		" [--uid=#] [--gid=#] [--userns]"
