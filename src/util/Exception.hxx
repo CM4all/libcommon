@@ -45,7 +45,7 @@ gcc_noreturn
 inline void
 ThrowException(T &&t)
 {
-	throw t;
+	throw std::forward<T>(t);
 }
 
 gcc_noreturn
