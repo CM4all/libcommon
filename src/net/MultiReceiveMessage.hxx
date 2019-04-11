@@ -86,7 +86,7 @@ public:
 			    size_t _max_fds=0);
 
 	MultiReceiveMessage(MultiReceiveMessage &&) noexcept = default;
-	MultiReceiveMessage &operator=(MultiReceiveMessage &&) noexcept = default;
+	MultiReceiveMessage &operator=(MultiReceiveMessage &&) noexcept = delete;
 
 	/**
 	 * Receive new datagrams.  Any previous ones will be discarded.
