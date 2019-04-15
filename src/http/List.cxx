@@ -34,7 +34,7 @@
 #include "util/StringView.hxx"
 
 static StringView
-http_trim(StringView s)
+http_trim(StringView s) noexcept
 {
 	/* trim whitespace */
 
@@ -53,13 +53,13 @@ http_trim(StringView s)
 }
 
 static bool
-http_equals(StringView a, StringView b)
+http_equals(StringView a, StringView b) noexcept
 {
 	return http_trim(a).Equals(http_trim(b));
 }
 
 bool
-http_list_contains(const char *list, const char *_item)
+http_list_contains(const char *list, const char *_item) noexcept
 {
 	const StringView item(_item);
 
@@ -79,13 +79,13 @@ http_list_contains(const char *list, const char *_item)
 }
 
 static bool
-http_equals_i(StringView a, StringView b)
+http_equals_i(StringView a, StringView b) noexcept
 {
 	return http_trim(a).EqualsIgnoreCase(b);
 }
 
 bool
-http_list_contains_i(const char *list, const char *_item)
+http_list_contains_i(const char *list, const char *_item) noexcept
 {
 	const StringView item(_item);
 
