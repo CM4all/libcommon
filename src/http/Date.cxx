@@ -65,21 +65,22 @@ static constexpr char months[13][5] = {
 };
 
 static gcc_always_inline const char *
-wday_name(int wday)
+wday_name(int wday) noexcept
 {
 	return wdays[gcc_likely(wday >= 0 && wday < 7)
 		     ? wday : 7];
 }
 
 static gcc_always_inline const char *
-month_name(int month)
+month_name(int month) noexcept
 {
 	return months[gcc_likely(month >= 0 && month < 12)
 		      ? month : 12];
 }
 
 void
-http_date_format_r(char *buffer, std::chrono::system_clock::time_point t)
+http_date_format_r(char *buffer,
+		   std::chrono::system_clock::time_point t) noexcept
 {
 	static struct tm tm_buffer;
 	const struct tm *tm = sysx_time_gmtime(std::chrono::system_clock::to_time_t(t), &tm_buffer);
@@ -103,14 +104,14 @@ http_date_format_r(char *buffer, std::chrono::system_clock::time_point t)
 static char buffer[30];
 
 const char *
-http_date_format(std::chrono::system_clock::time_point t)
+http_date_format(std::chrono::system_clock::time_point t) noexcept
 {
 	http_date_format_r(buffer, t);
 	return buffer;
 }
 
 static int
-parse_2digit(const char *p)
+parse_2digit(const char *p) noexcept
 {
 	if (!IsDigitASCII(p[0]) || !IsDigitASCII(p[1]))
 		return -1;
@@ -119,7 +120,7 @@ parse_2digit(const char *p)
 }
 
 static int
-parse_4digit(const char *p)
+parse_4digit(const char *p) noexcept
 {
 	if (!IsDigitASCII(p[0]) || !IsDigitASCII(p[1]) ||
 	    !IsDigitASCII(p[2]) || !IsDigitASCII(p[3]))
@@ -135,7 +136,7 @@ parse_4digit(const char *p)
 #endif
 
 static int
-parse_month_name(const char *p)
+parse_month_name(const char *p) noexcept
 {
 	int i;
 
@@ -151,7 +152,7 @@ parse_month_name(const char *p)
 #endif
 
 std::chrono::system_clock::time_point
-http_date_parse(const char *p)
+http_date_parse(const char *p) noexcept
 {
 	struct tm tm;
 
