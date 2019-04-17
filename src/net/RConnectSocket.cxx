@@ -99,8 +99,7 @@ ResolveConnectSocket(const char *host_and_port, int default_port,
 		return ParseConnectSocket(host_and_port, default_port,
 					  socktype, timeout);
 
-	struct addrinfo hints;
-	memset(&hints, 0, sizeof(hints));
+	struct addrinfo hints{};
 	hints.ai_flags = AI_ADDRCONFIG;
 	hints.ai_socktype = socktype;
 

@@ -146,8 +146,7 @@ AsSocketAddress(const struct hostent &he, F &&f)
 	switch (he.h_addrtype) {
 	case AF_INET:
 		{
-			struct sockaddr_in sin;
-			memset(&sin, 0, sizeof(sin));
+			struct sockaddr_in sin{};
 			memcpy(&sin.sin_addr, he.h_addr_list[0], he.h_length);
 			sin.sin_family = AF_INET;
 
@@ -158,8 +157,7 @@ AsSocketAddress(const struct hostent &he, F &&f)
 
 	case AF_INET6:
 		{
-			struct sockaddr_in6 sin;
-			memset(&sin, 0, sizeof(sin));
+			struct sockaddr_in6 sin{};
 			memcpy(&sin.sin6_addr, he.h_addr_list[0], he.h_length);
 			sin.sin6_family = AF_INET6;
 
