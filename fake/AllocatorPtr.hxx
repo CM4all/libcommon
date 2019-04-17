@@ -148,47 +148,47 @@ public:
 	constexpr AllocatorPtr(Allocator &_allocator) noexcept
 		:allocator(_allocator) {}
 
-	const char *Dup(const char *src) noexcept {
+	const char *Dup(const char *src) const noexcept {
 		return allocator.Dup(src);
 	}
 
-	const char *CheckDup(const char *src) noexcept {
+	const char *CheckDup(const char *src) const noexcept {
 		return allocator.CheckDup(src);
 	}
 
 	template<typename... Args>
-	char *Concat(Args&&... args) noexcept {
+	char *Concat(Args&&... args) const noexcept {
 		return allocator.Concat(std::forward<Args>(args)...);
 	}
 
 	template<typename T, typename... Args>
-	T *New(Args&&... args) noexcept {
+	T *New(Args&&... args) const noexcept {
 		return allocator.New<T>(std::forward<Args>(args)...);
 	}
 
 	template<typename T>
-	T *NewArray(size_t n) noexcept {
+	T *NewArray(size_t n) const noexcept {
 		return allocator.NewArray<T>(n);
 	}
 
-	void *Dup(const void *data, size_t size) noexcept {
+	void *Dup(const void *data, size_t size) const noexcept {
 		auto p = allocator.Allocate(size);
 		memcpy(p, data, size);
 		return p;
 	}
 
-	ConstBuffer<void> Dup(ConstBuffer<void> src) noexcept;
+	ConstBuffer<void> Dup(ConstBuffer<void> src) const noexcept;
 
 	template<typename T>
-	ConstBuffer<T> Dup(ConstBuffer<T> src) noexcept {
+	ConstBuffer<T> Dup(ConstBuffer<T> src) const noexcept {
 		return ConstBuffer<T>::FromVoid(Dup(src.ToVoid()));
 	}
 
-	StringView Dup(StringView src) noexcept {
+	StringView Dup(StringView src) const noexcept {
 		return DupZ(src);
 	}
 
-	const char *DupZ(StringView src) noexcept {
+	const char *DupZ(StringView src) const noexcept {
 		return allocator.DupZ(src);
 	}
 };
