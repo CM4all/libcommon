@@ -3441,6 +3441,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
         break;
 #endif
+
+    case TranslationCommand::CACHE_TAG:
+#if TRANSLATION_ENABLE_TRANSFORMATION
+        if (!IsValidNonEmptyString(string_payload))
+            throw std::runtime_error("malformed CACHE_TAG packet");
+
+        if (filter != nullptr) {
+            if (filter->cache_tag != nullptr)
+                throw std::runtime_error("duplicate CACHE_TAG packet");
+
+            filter->cache_tag = string_payload.data;
+            return;
+        } else
+            throw std::runtime_error("misplaced CACHE_TAG packet");
+#else
+        break;
+#endif
     }
 
     throw FormatRuntimeError("unknown translation packet: %u", command);

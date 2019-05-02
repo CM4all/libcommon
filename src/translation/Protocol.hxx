@@ -962,6 +962,12 @@ enum class TranslationCommand : uint16_t {
      * (e.g. #SUBST_YAML_FILE).
      */
     SUBST_ALT_SYNTAX = 207,
+
+    /**
+     * An opaque tag string to be assigned to the cache item (if the
+     * response is going to be cached).
+     */
+    CACHE_TAG = 208,
 };
 
 struct TranslationHeader {
