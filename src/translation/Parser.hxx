@@ -241,8 +241,8 @@ private:
 #endif
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
-    template<typename T>
-    Transformation *AddTransformation(T type) noexcept;
+    template<typename... Args>
+    Transformation *AddTransformation(Args&&... args) noexcept;
     ResourceAddress *AddFilter();
     void AddSubstYamlFile(const char *prefix,
                           const char *file_path,

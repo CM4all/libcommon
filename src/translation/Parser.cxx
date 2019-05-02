@@ -162,11 +162,11 @@ IsValidAbsoluteUriPath(StringView p) noexcept
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
 
-template<>
+template<typename... Args>
 Transformation *
-TranslateParser::AddTransformation(Transformation::Type type) noexcept
+TranslateParser::AddTransformation(Args&&... args) noexcept
 {
-    auto t = alloc.New<Transformation>(type);
+    auto t = alloc.New<Transformation>(std::forward<Args>(args)...);
 
     filter = nullptr;
     transformation = t;
@@ -179,7 +179,7 @@ TranslateParser::AddTransformation(Transformation::Type type) noexcept
 ResourceAddress *
 TranslateParser::AddFilter()
 {
-    auto *t = AddTransformation(Transformation::Type::FILTER);
+    auto *t = AddTransformation(FilterTransformation{});
     filter = &t->u.filter;
     filter->address = nullptr;
     filter->reveal_user = false;
@@ -191,7 +191,7 @@ TranslateParser::AddSubstYamlFile(const char *prefix,
                                   const char *file_path,
                                   const char *map_path) noexcept
 {
-    auto *t = AddTransformation(Transformation::Type::SUBST);
+    auto *t = AddTransformation(SubstTransformation{});
     t->u.subst.prefix = prefix;
     t->u.subst.yaml_file = file_path;
     t->u.subst.yaml_map_path = map_path;
@@ -1382,7 +1382,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::PROCESS:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        new_transformation = AddTransformation(Transformation::Type::PROCESS);
+        new_transformation = AddTransformation(XmlProcessorTransformation{});
         new_transformation->u.processor.options = PROCESSOR_REWRITE_URL;
         return;
 #else
@@ -2252,7 +2252,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::PROCESS_CSS:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        new_transformation = AddTransformation(Transformation::Type::PROCESS_CSS);
+        new_transformation = AddTransformation(CssProcessorTransformation{});
         new_transformation->u.css_processor.options = CSS_PROCESSOR_REWRITE_URL;
         return;
 #else
@@ -2343,7 +2343,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
     case TranslationCommand::PROCESS_TEXT:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-        new_transformation = AddTransformation(Transformation::Type::PROCESS_TEXT);
+        new_transformation = AddTransformation(TextProcessorTransformation{});
         return;
 #else
         break;
