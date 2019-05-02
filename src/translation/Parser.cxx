@@ -191,10 +191,7 @@ TranslateParser::AddSubstYamlFile(const char *prefix,
                                   const char *file_path,
                                   const char *map_path) noexcept
 {
-    auto *t = AddTransformation(SubstTransformation{});
-    t->u.subst.prefix = prefix;
-    t->u.subst.yaml_file = file_path;
-    t->u.subst.yaml_map_path = map_path;
+    AddTransformation(SubstTransformation{prefix, file_path, map_path});
 }
 
 #endif
