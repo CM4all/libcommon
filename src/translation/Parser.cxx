@@ -181,8 +181,6 @@ TranslateParser::AddFilter()
 {
     auto *t = AddTransformation(FilterTransformation{});
     filter = &t->u.filter;
-    filter->address = nullptr;
-    filter->reveal_user = false;
     return &t->u.filter.address;
 }
 
