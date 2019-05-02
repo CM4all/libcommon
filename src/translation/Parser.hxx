@@ -54,6 +54,7 @@ struct NamespaceOptions;
 struct MountList;
 struct AddressList;
 struct Transformation;
+struct FilterTransformation;
 struct StringView;
 
 /**
@@ -168,6 +169,8 @@ class TranslateParser {
 
     /** pointer to the tail of the transformation linked list */
     Transformation **transformation_tail;
+
+    FilterTransformation *filter;
 #endif
 
 public:

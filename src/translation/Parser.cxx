@@ -168,6 +168,7 @@ TranslateParser::AddTransformation(Transformation::Type type) noexcept
 {
     auto t = alloc.New<Transformation>(type);
 
+    filter = nullptr;
     transformation = t;
     *transformation_tail = t;
     transformation_tail = &t->next;
@@ -179,8 +180,9 @@ ResourceAddress *
 TranslateParser::AddFilter()
 {
     auto *t = AddTransformation(Transformation::Type::FILTER);
-    t->u.filter.address = nullptr;
-    t->u.filter.reveal_user = false;
+    filter = &t->u.filter;
+    filter->address = nullptr;
+    filter->reveal_user = false;
     return &t->u.filter.address;
 }
 
@@ -282,6 +284,7 @@ TranslateParser::AddView(const char *name)
     address_list = nullptr;
     transformation_tail = &new_view->transformation;
     transformation = nullptr;
+    filter = nullptr;
 }
 
 #endif
@@ -3076,12 +3079,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         if (!payload.empty())
             throw std::runtime_error("malformed REVEAL_USER packet");
 
-        if (transformation == nullptr ||
-            transformation->type != Transformation::Type::FILTER ||
-            transformation->u.filter.reveal_user)
+        if (filter == nullptr || filter->reveal_user)
             throw std::runtime_error("misplaced REVEAL_USER packet");
 
-        transformation->u.filter.reveal_user = true;
+        filter->reveal_user = true;
         return;
 #else
         break;
@@ -3510,6 +3511,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_TRANSFORMATION
         transformation = nullptr;
         transformation_tail = &response.views->transformation;
+        filter = nullptr;
 #endif
 
         if (payload.size >= sizeof(uint8_t))
