@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -42,7 +42,13 @@ std::string
 FormatISO8601(const struct tm &tm) noexcept
 {
 	char buffer[64];
-	strftime(buffer, sizeof(buffer), "%FT%TZ", &tm);
+	strftime(buffer, sizeof(buffer),
+#ifdef _WIN32
+		 "%Y-%m-%dT%H:%M:%SZ",
+#else
+		 "%FT%TZ",
+#endif
+		 &tm);
 	return buffer;
 }
 
