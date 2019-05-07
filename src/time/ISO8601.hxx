@@ -40,7 +40,7 @@
 struct tm;
 
 std::string
-FormatISO8601(const struct tm &tm);
+FormatISO8601(const struct tm &tm) noexcept;
 
 std::string
 FormatISO8601(std::chrono::system_clock::time_point tp);

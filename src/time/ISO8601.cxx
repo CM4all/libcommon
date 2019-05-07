@@ -39,7 +39,7 @@
 #include <time.h>
 
 std::string
-FormatISO8601(const struct tm &tm)
+FormatISO8601(const struct tm &tm) noexcept
 {
 	char buffer[64];
 	strftime(buffer, sizeof(buffer), "%FT%TZ", &tm);
