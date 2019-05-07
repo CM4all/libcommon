@@ -32,17 +32,18 @@
 
 #include "ISO8601.hxx"
 #include "Convert.hxx"
+#include "util/StringBuffer.hxx"
 
 #include <stdexcept>
 
 #include <assert.h>
 #include <time.h>
 
-std::string
+StringBuffer<64>
 FormatISO8601(const struct tm &tm) noexcept
 {
-	char buffer[64];
-	strftime(buffer, sizeof(buffer),
+	StringBuffer<64> buffer;
+	strftime(buffer.data(), buffer.capacity(),
 #ifdef _WIN32
 		 "%Y-%m-%dT%H:%M:%SZ",
 #else
@@ -52,7 +53,7 @@ FormatISO8601(const struct tm &tm) noexcept
 	return buffer;
 }
 
-std::string
+StringBuffer<64>
 FormatISO8601(std::chrono::system_clock::time_point tp)
 {
 	return FormatISO8601(GmTime(tp));
