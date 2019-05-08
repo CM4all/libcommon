@@ -33,6 +33,8 @@
 #ifndef TIME_ISO8601_HXX
 #define TIME_ISO8601_HXX
 
+#include "util/Compiler.h"
+
 #include <chrono>
 #include <utility>
 
@@ -41,9 +43,11 @@
 struct tm;
 template<size_t CAPACITY> class StringBuffer;
 
+gcc_pure
 StringBuffer<64>
 FormatISO8601(const struct tm &tm) noexcept;
 
+gcc_pure
 StringBuffer<64>
 FormatISO8601(std::chrono::system_clock::time_point tp);
 
