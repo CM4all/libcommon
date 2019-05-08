@@ -37,8 +37,6 @@
 
 #include <chrono>
 
-struct timeval;
-
 /**
  * Convert a UTC-based time point to a UTC-based "struct tm".
  *
