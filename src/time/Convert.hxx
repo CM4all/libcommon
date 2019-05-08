@@ -71,6 +71,7 @@ gcc_pure
 std::chrono::system_clock::time_point
 MakeTime(struct tm &tm) noexcept;
 
+gcc_pure
 std::chrono::steady_clock::duration
 ToSteadyClockDuration(const struct timeval &tv) noexcept;
 
