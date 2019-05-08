@@ -58,11 +58,15 @@ LocalTime(std::chrono::system_clock::time_point tp)
 	return *tm;
 }
 
+#ifdef __GLIBC__
+
 std::chrono::system_clock::time_point
 TimeGm(struct tm &tm) noexcept
 {
 	return std::chrono::system_clock::from_time_t(timegm(&tm));
 }
+
+#endif
 
 std::chrono::system_clock::time_point
 MakeTime(struct tm &tm) noexcept
