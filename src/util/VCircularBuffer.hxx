@@ -69,16 +69,16 @@ private:
 		explicit Item(Args&&... args)
 			:value(std::forward<Args>(args)...) {}
 
-		static const Item &Cast(const_reference v) {
+		static constexpr const Item &Cast(const_reference v) noexcept {
 			return ContainerCast(v, &Item::value);
 		}
 
-		static Item &Cast(reference v) {
+		static constexpr Item &Cast(reference v) noexcept {
 			return ContainerCast(v, &Item::value);
 		}
 
 		struct Disposer {
-			void operator()(Item *item) {
+			void operator()(Item *item) noexcept {
 				item->~Item();
 			}
 		};
@@ -103,7 +103,7 @@ public:
 		assert(buffer.size >= sizeof(List) + sizeof(Item));
 	}
 
-	~VCircularBuffer() {
+	~VCircularBuffer() noexcept {
 		clear();
 		list->~List();
 	}
@@ -162,15 +162,15 @@ public:
 						     const Item, const T,
 						     &Item::value>;
 
-	constexpr const_iterator begin() const {
+	constexpr const_iterator begin() const noexcept {
 		return list->cbegin();
 	}
 
-	constexpr const_iterator end() const {
+	constexpr const_iterator end() const noexcept {
 		return list->cend();
 	}
 
-	constexpr const_iterator iterator_to(const_reference value) const {
+	constexpr const_iterator iterator_to(const_reference value) const noexcept {
 		return list->iterator_to(Item::Cast(value));
 	}
 
@@ -181,21 +181,21 @@ public:
 #if !GCC_OLDER_THAN(5,0)
 	constexpr
 #endif
-	iterator begin() {
+	iterator begin() noexcept {
 		return list->begin();
 	}
 
 #if !GCC_OLDER_THAN(5,0)
 	constexpr
 #endif
-	iterator end() {
+	iterator end() noexcept {
 		return list->end();
 	}
 
 #if !GCC_OLDER_THAN(5,0)
 	constexpr
 #endif
-	iterator iterator_to(reference value) {
+	iterator iterator_to(reference value) noexcept {
 		return list->iterator_to(Item::Cast(value));
 	}
 
