@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -43,6 +43,10 @@ class ClockCache {
 	mutable value_type value = {};
 
 public:
+	ClockCache() = default;
+	ClockCache(const ClockCache &) = delete;
+	ClockCache &operator=(const ClockCache &) = delete;
+
 	gcc_pure
 	const auto &now() const noexcept {
 		if (value <= value_type())
