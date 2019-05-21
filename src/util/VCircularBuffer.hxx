@@ -158,6 +158,30 @@ public:
 		return item->value;
 	}
 
+	/**
+	 * Like emplace_back(), but call a check function with the new
+	 * item.  That function may throw an exception, which rolls
+	 * back the newly constructed item.
+	 */
+	template<typename C, typename... Args>
+	reference check_emplace_back(C &&check,
+				     size_t value_size, Args&&... args) {
+		const size_t item_size = ValueSizeToItemSize(value_size);
+		void *p = MakeFree(item_size);
+		auto *item = ::new(p) Item(std::forward<Args>(args)...);
+
+		try {
+			check(item->value);
+		} catch (...) {
+			item->~Item();
+			throw;
+		}
+
+		list->push_back(*item);
+		tail_item_size = item_size;
+		return item->value;
+	}
+
 	using const_iterator = MemberIteratorAdapter<typename List::const_iterator,
 						     const Item, const T,
 						     &Item::value>;
