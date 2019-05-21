@@ -148,12 +148,6 @@ public:
 		list->pop_front_and_dispose(typename Item::Disposer());
 	}
 
-	void pop_back() noexcept {
-		assert(!empty());
-
-		list->pop_back_and_dispose(typename Item::Disposer());
-	}
-
 	template<typename... Args>
 	reference emplace_back(size_t value_size, Args&&... args) {
 		const size_t item_size = ValueSizeToItemSize(value_size);
