@@ -46,6 +46,6 @@ ParseTimestamp(const char *s);
  * zone.
  */
 StringBuffer<64>
-FormatTimestamp(std::chrono::system_clock::time_point tp);
+FormatTimestamp(std::chrono::system_clock::time_point tp) noexcept;
 
 }
