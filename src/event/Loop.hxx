@@ -151,6 +151,14 @@ public:
 
 	void Defer(DeferEvent &e) noexcept;
 
+	const auto &GetSteadyClockCache() const noexcept {
+		return steady_clock_cache;
+	}
+
+	const auto &GetSystemClockCache() const noexcept {
+		return system_clock_cache;
+	}
+
 	/**
 	 * Caching wrapper for std::chrono::steady_clock::now().  The
 	 * real clock is queried at most once per event loop
