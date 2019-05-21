@@ -40,7 +40,7 @@
 template<typename Clock>
 class ClockCache {
 	using value_type = typename Clock::time_point;
-	mutable value_type value = {};
+	mutable value_type value;
 
 public:
 	ClockCache() = default;
