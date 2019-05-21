@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -132,16 +132,4 @@ ParseSize(const char *s)
 		throw std::runtime_error("Unknown size suffix");
 
 	return value;
-}
-
-std::chrono::seconds
-ParseDuration(const char *s)
-{
-	return std::chrono::seconds(ParseUnsignedLong(s));
-}
-
-std::chrono::seconds
-ParsePositiveDuration(const char *s)
-{
-	return std::chrono::seconds(ParsePositiveLong(s));
 }

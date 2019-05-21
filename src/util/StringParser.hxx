@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,8 +32,6 @@
 
 #include "Compiler.h"
 
-#include <chrono>
-
 #include <stddef.h>
 
 /**
@@ -59,13 +57,5 @@ ParsePositiveLong(const char *s, unsigned long max_value);
 gcc_pure
 size_t
 ParseSize(const char *s);
-
-gcc_pure
-std::chrono::seconds
-ParseDuration(const char *s);
-
-gcc_pure
-std::chrono::seconds
-ParsePositiveDuration(const char *s);
 
 #endif
