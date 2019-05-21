@@ -60,7 +60,8 @@ public:
 
 private:
 	struct Item {
-		typedef boost::intrusive::slist_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> ListHook;
+		using ListHook =
+			boost::intrusive::slist_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>;
 		ListHook siblings;
 
 		T value;
@@ -84,12 +85,13 @@ private:
 		};
 	};
 
-	typedef boost::intrusive::slist<Item,
+	using List =
+		boost::intrusive::slist<Item,
 					boost::intrusive::member_hook<Item,
 								      typename Item::ListHook,
 								      &Item::siblings>,
 					boost::intrusive::cache_last<true>,
-					boost::intrusive::constant_time_size<true>> List;
+					boost::intrusive::constant_time_size<true>>;
 
 	List *const list;
 	const size_t buffer_size;
