@@ -121,6 +121,26 @@ public:
 		return list->size();
 	}
 
+	/**
+	 * @return the number of bytes used in the given buffer
+	 */
+	gcc_pure
+	size_t GetMemoryUsage() const noexcept {
+		if (empty())
+			return sizeof(*list);
+
+		const auto first = &*list->begin();
+		const auto last = &*list->last();
+
+		const auto after_last = (const uint8_t *)AfterLast(&*last);
+
+		if (first <= last)
+			return after_last - (const uint8_t *)first;
+
+		const auto buffer_end = (const uint8_t *)EndOfBuffer();
+		return (after_last - (const uint8_t *)list) + (buffer_end - (const uint8_t *)first);
+	}
+
 	void clear() noexcept {
 		list->clear_and_dispose(typename Item::Disposer());
 	}
