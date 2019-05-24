@@ -54,7 +54,7 @@ TEST(VCircularBuffer, Basic)
 		ASSERT_EQ(cb.back().value, i - 1);
 	} while (cb.front().value == 0);
 
-	EXPECT_EQ(cb.size(), i - 1);
+	EXPECT_EQ(cb.size(), size_t(i - 1));
 
 	ASSERT_EQ(cb.front().value, 1);
 	cb.emplace_back(sizeof(Foo), i++);
