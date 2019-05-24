@@ -114,6 +114,9 @@ public:
 		return list->empty();
 	}
 
+	/**
+	 * @return the number of items
+	 */
 	constexpr size_t size() const noexcept {
 		return list->size();
 	}
