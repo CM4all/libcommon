@@ -276,7 +276,7 @@ private:
 		return Align(list + 1);
 	}
 
-	constexpr void *AtBuffer(size_t offset) noexcept {
+	constexpr void *AtBuffer(size_t offset) const noexcept {
 		return OffsetPointer(list, offset);
 	}
 
@@ -285,7 +285,7 @@ private:
 			     alignof(Item));
 	}
 
-	constexpr void *EndOfBuffer() noexcept {
+	constexpr void *EndOfBuffer() const noexcept {
 		return AtBuffer(buffer_size);
 	}
 
