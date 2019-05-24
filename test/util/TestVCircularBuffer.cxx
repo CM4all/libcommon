@@ -45,6 +45,7 @@ TEST(VCircularBuffer, Basic)
 	uint8_t buffer[4096];
 	VCircularBuffer<Foo> cb(WritableBuffer<void>(buffer, sizeof(buffer)));
 	ASSERT_TRUE(cb.empty());
+	EXPECT_EQ(cb.size(), 0u);
 
 	int i = 0;
 	do {
@@ -52,6 +53,8 @@ TEST(VCircularBuffer, Basic)
 		ASSERT_FALSE(cb.empty());
 		ASSERT_EQ(cb.back().value, i - 1);
 	} while (cb.front().value == 0);
+
+	EXPECT_EQ(cb.size(), i - 1);
 
 	ASSERT_EQ(cb.front().value, 1);
 	cb.emplace_back(sizeof(Foo), i++);
