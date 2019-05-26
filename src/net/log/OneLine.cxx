@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -140,33 +140,36 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 		duration = duration_buffer;
 	}
 
+	char buffer[16384];
 	char escaped_uri[4096], escaped_referer[2048], escaped_ua[1024];
 
 	if (site)
-		dprintf(fd.Get(),
-			"%s %s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
-			OptionalString(d.site),
-			OptionalString(d.remote_host),
-			stamp, method,
-			EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
-			d.http_status, length,
-			EscapeString(OptionalString(d.http_referer),
-				     escaped_referer, sizeof(escaped_referer)),
-			EscapeString(OptionalString(d.user_agent),
-				     escaped_ua, sizeof(escaped_ua)),
-			duration);
+		snprintf(buffer, std::size(buffer),
+			 "%s %s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
+			 OptionalString(d.site),
+			 OptionalString(d.remote_host),
+			 stamp, method,
+			 EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
+			 d.http_status, length,
+			 EscapeString(OptionalString(d.http_referer),
+				      escaped_referer, sizeof(escaped_referer)),
+			 EscapeString(OptionalString(d.user_agent),
+				      escaped_ua, sizeof(escaped_ua)),
+			 duration);
 	else
-		dprintf(fd.Get(),
-			"%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
-			OptionalString(d.remote_host),
-			stamp, method,
-			EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
-			d.http_status, length,
-			EscapeString(OptionalString(d.http_referer),
-				     escaped_referer, sizeof(escaped_referer)),
-			EscapeString(OptionalString(d.user_agent),
-				     escaped_ua, sizeof(escaped_ua)),
-			duration);
+		snprintf(buffer, std::size(buffer),
+			 "%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
+			 OptionalString(d.remote_host),
+			 stamp, method,
+			 EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
+			 d.http_status, length,
+			 EscapeString(OptionalString(d.http_referer),
+				      escaped_referer, sizeof(escaped_referer)),
+			 EscapeString(OptionalString(d.user_agent),
+				      escaped_ua, sizeof(escaped_ua)),
+			 duration);
+
+	fd.Write(buffer, strlen(buffer));
 }
 
 static void
@@ -179,22 +182,25 @@ LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
 		FormatOptionalTimestamp(stamp_buffer, d.HasTimestamp(),
 					d.timestamp);
 
+	char buffer[16384];
 	char escaped_message[4096];
 
 	if (site)
-		dprintf(fd.Get(),
-			"%s [%s] %s\n",
-			OptionalString(d.site),
-			stamp,
-			EscapeString(d.message, escaped_message,
+		snprintf(buffer, std::size(buffer),
+			 "%s [%s] %s\n",
+			 OptionalString(d.site),
+			 stamp,
+			 EscapeString(d.message, escaped_message,
 				     sizeof(escaped_message)));
 	else
-		dprintf(fd.Get(),
-			"[%s] %s\n",
-			stamp,
-			EscapeString(d.message, escaped_message,
-				     sizeof(escaped_message)));}
+		snprintf(buffer, std::size(buffer),
+			 "[%s] %s\n",
+			 stamp,
+			 EscapeString(d.message, escaped_message,
+				      sizeof(escaped_message)));
 
+	fd.Write(buffer, strlen(buffer));
+}
 
 void
 LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d, bool site)
