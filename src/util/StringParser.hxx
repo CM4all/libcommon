@@ -48,6 +48,11 @@ ParsePositiveLong(const char *s);
 unsigned long
 ParsePositiveLong(const char *s, unsigned long max_value);
 
+/**
+ * Parse a string as a byte size.
+ *
+ * Throws on error.
+ */
 size_t
 ParseSize(const char *s);
 
