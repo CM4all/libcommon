@@ -40,31 +40,24 @@
  * Parse a bool represented by either "yes" or "no"; throws
  * std::runtime_error on error.
  */
-gcc_pure
 bool
 ParseBool(const char *s);
 
-gcc_pure
 unsigned long
 ParseUnsignedLong(const char *s);
 
-gcc_pure
 unsigned long
 ParsePositiveLong(const char *s);
 
-gcc_pure
 unsigned long
 ParsePositiveLong(const char *s, unsigned long max_value);
 
-gcc_pure
 size_t
 ParseSize(const char *s);
 
-gcc_pure
 std::chrono::seconds
 ParseDuration(const char *s);
 
-gcc_pure
 std::chrono::seconds
 ParsePositiveDuration(const char *s);
 
