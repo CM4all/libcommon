@@ -84,6 +84,11 @@ struct SocketConfig {
 	 */
 	bool keepalive = false;
 
+	/**
+	 * @see IPV6_V6ONLY
+	 */
+	bool v6only = false;
+
 	SocketConfig() = default;
 
 	explicit SocketConfig(SocketAddress _bind_address) noexcept
