@@ -33,6 +33,7 @@
 #include "PipeAdapter.hxx"
 #include "event/Loop.hxx"
 #include "net/log/Send.hxx"
+#include "time/Cast.hxx"
 
 namespace Net {
 namespace Log {
@@ -42,6 +43,14 @@ PipeAdapter::OnLine(WritableBuffer<char> line) noexcept
 {
 	if (line.IsNull())
 		return true;
+
+	if (rate_limit > 0) {
+		const auto now = GetEventLoop().SteadyNow();
+		const auto float_now = ToFloatSeconds(now.time_since_epoch());
+		if (!token_bucket.Check(float_now, rate_limit, burst, 1))
+			/* rate limit exceeded: discard */
+			return true;
+	}
 
 	// TODO: erase/quote "dangerous" characters?
 

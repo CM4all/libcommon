@@ -35,6 +35,7 @@
 #include "net/SocketDescriptor.hxx"
 #include "net/log/Datagram.hxx"
 #include "event/PipeLineReader.hxx"
+#include "util/TokenBucket.hxx"
 
 namespace Net {
 namespace Log {
@@ -52,6 +53,10 @@ class PipeAdapter {
 	SocketDescriptor socket;
 
 	Datagram datagram;
+
+	TokenBucket token_bucket;
+
+	double rate_limit = -1, burst;
 
 public:
 	/**
@@ -77,6 +82,11 @@ public:
 	 */
 	Datagram &GetDatagram() noexcept {
 		return datagram;
+	}
+
+	void SetRateLimit(double _rate_limit, double _burst) noexcept {
+		rate_limit = _rate_limit;
+		burst = _burst;
 	}
 
 	void Flush() noexcept {
