@@ -43,6 +43,10 @@ class TokenBucket {
 	double zero_time = 0;
 
 public:
+	void Reset() noexcept {
+		zero_time = 0;
+	}
+
 	/**
 	 * @return true if the given transmission is conforming, false
 	 * to discard it
