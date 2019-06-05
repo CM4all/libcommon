@@ -40,7 +40,7 @@
  * @see https://en.wikipedia.org/wiki/Token_bucket
  */
 class TokenBucket {
-	double zero_time;
+	double zero_time = 0;
 
 public:
 	/**
