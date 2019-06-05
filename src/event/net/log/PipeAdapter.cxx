@@ -12,10 +12,10 @@ namespace Net::Log {
 bool
 PipeAdapter::OnPipeLine(std::span<char> line) noexcept
 {
-	if (rate_limit > 0) {
+	if (rate_limit.rate > 0) {
 		const auto now = GetEventLoop().SteadyNow();
 		const auto float_now = ToFloatSeconds(now.time_since_epoch());
-		if (!token_bucket.Check(float_now, rate_limit, burst, 1))
+		if (!token_bucket.Check(rate_limit, float_now, 1))
 			/* rate limit exceeded: discard */
 			return true;
 	}

@@ -9,35 +9,35 @@
 
 TEST(TokenBucket, Check)
 {
-	constexpr double rate = 10, burst = 50;
+	constexpr TokenBucketConfig config{.rate = 10, .burst = 50};
 
 	double now = 1234;
 
 	TokenBucket tb;
 
-	EXPECT_FALSE(tb.Check(now, rate, burst, burst + 0.1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, burst - 0.1));
-	EXPECT_FALSE(tb.Check(now, rate, burst, 1));
+	EXPECT_FALSE(tb.Check(config, now, config.burst + 0.1));
+	EXPECT_TRUE(tb.Check(config, now, config.burst - 0.1));
+	EXPECT_FALSE(tb.Check(config, now, 1));
 
 	now += 1;
-	EXPECT_TRUE(tb.Check(now, rate, burst, rate));
-	EXPECT_FALSE(tb.Check(now, rate, burst, 1));
+	EXPECT_TRUE(tb.Check(config, now, config.rate));
+	EXPECT_FALSE(tb.Check(config, now, 1));
 
 	now += 1;
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, 1));
-	EXPECT_FALSE(tb.Check(now, rate, burst, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_TRUE(tb.Check(config, now, 1));
+	EXPECT_FALSE(tb.Check(config, now, 1));
 
-	now += burst * 10;
-	EXPECT_FALSE(tb.Check(now, rate, burst, burst + 0.1));
-	EXPECT_TRUE(tb.Check(now, rate, burst, burst - 0.1));
-	EXPECT_FALSE(tb.Check(now, rate, burst, 1));
+	now += config.burst * 10;
+	EXPECT_FALSE(tb.Check(config, now, config.burst + 0.1));
+	EXPECT_TRUE(tb.Check(config, now, config.burst - 0.1));
+	EXPECT_FALSE(tb.Check(config, now, 1));
 }

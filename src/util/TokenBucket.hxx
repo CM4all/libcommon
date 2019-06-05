@@ -6,6 +6,10 @@
 
 #include <algorithm> // for std::min()
 
+struct TokenBucketConfig {
+	double rate, burst;
+};
+
 /**
  * An implementation of the "token bucket" rate limiter algorithm.
  *
@@ -29,20 +33,21 @@ public:
 	/**
 	 * Calculate how many tokens are available.
 	 */
-	constexpr double GetAvailable(double now, double rate, double burst) const noexcept {
-		return std::min((now - zero_time) * rate, burst);
+	constexpr double GetAvailable(const TokenBucketConfig config, double now) const noexcept {
+		return std::min((now - zero_time) * config.rate, config.burst);
 	}
 
 	/**
 	 * @return true if the given transmission is conforming, false
 	 * to discard it
 	 */
-	constexpr bool Check(double now, double rate, double burst, double size) noexcept {
-		double available = GetAvailable(now, rate, burst) - size;
+	constexpr bool Check(const TokenBucketConfig config,
+			     double now, double size) noexcept {
+		double available = GetAvailable(config, now) - size;
 		if (available < 0)
 			return false;
 
-		zero_time = now - available / rate;
+		zero_time = now - available / config.rate;
 		return true;
 	}
 
@@ -52,9 +57,9 @@ public:
 	 * @return the numer of tokens that are available after the
 	 * update
 	 */
-	constexpr double Update(double now, double rate, double burst, double size) noexcept {
-		double available = GetAvailable(now, rate, burst) - size;
-		zero_time = now - available / rate;
+	constexpr double Update(const TokenBucketConfig config, double now, double size) noexcept {
+		double available = GetAvailable(config, now) - size;
+		zero_time = now - available / config.rate;
 		return available;
 	}
 };

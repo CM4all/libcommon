@@ -28,7 +28,7 @@ class PipeAdapter final : PipeLineReaderHandler {
 
 	TokenBucket token_bucket;
 
-	double rate_limit = -1, burst;
+	TokenBucketConfig rate_limit{-1, -1};
 
 public:
 	/**
@@ -56,9 +56,8 @@ public:
 		return datagram;
 	}
 
-	void SetRateLimit(double _rate_limit, double _burst) noexcept {
+	void SetRateLimit(const TokenBucketConfig &_rate_limit) noexcept {
 		rate_limit = _rate_limit;
-		burst = _burst;
 	}
 
 	void Flush() noexcept {
