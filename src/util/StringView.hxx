@@ -34,6 +34,8 @@
 #include "StringAPI.hxx"
 #include "Compiler.h"
 
+#include <utility>
+
 #if !GCC_OLDER_THAN(7,0)
 #include <string_view>
 #endif
@@ -79,6 +81,8 @@ struct BasicStringView : ConstBuffer<T> {
 #endif
 
 	using ConstBuffer<T>::empty;
+	using ConstBuffer<T>::begin;
+	using ConstBuffer<T>::end;
 	using ConstBuffer<T>::front;
 	using ConstBuffer<T>::back;
 	using ConstBuffer<T>::pop_front;
@@ -88,6 +92,20 @@ struct BasicStringView : ConstBuffer<T> {
 	gcc_pure
 	pointer_type Find(value_type ch) const noexcept {
 		return StringFind(data, ch, this->size);
+	}
+
+	/**
+	 * Split the string at the first occurrence of the given
+	 * character.  If the character is not found, then the first
+	 * value is the whole string and the second value is nullptr.
+	 */
+	gcc_pure
+	std::pair<BasicStringView<T>, BasicStringView<T>> Split(value_type ch) const noexcept {
+		const auto separator = Find(ch);
+		if (separator == nullptr)
+			return {*this, nullptr};
+
+		return {{begin(), separator}, {separator + 1, end()}};
 	}
 
 	gcc_pure
