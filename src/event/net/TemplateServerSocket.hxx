@@ -98,8 +98,12 @@ public:
 protected:
 	void OnAccept(UniqueSocketDescriptor &&_fd,
 		      SocketAddress address) noexcept override {
-		auto *c = CreateConnection(std::move(_fd), address);
-		connections.push_front(*c);
+		try {
+			auto *c = CreateConnection(std::move(_fd), address);
+			connections.push_front(*c);
+		} catch (...) {
+			OnAcceptError(std::current_exception());
+		}
 	};
 
 	void OnAcceptError(std::exception_ptr ep) noexcept override {
