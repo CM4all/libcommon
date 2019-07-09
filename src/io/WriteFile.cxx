@@ -32,7 +32,6 @@
 #include "util/ConstBuffer.hxx"
 #include "util/StringView.hxx"
 
-#include <errno.h>
 #include <fcntl.h>
 
 static WriteFileResult

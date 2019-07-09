@@ -40,7 +40,6 @@
 
 #include <stdio.h>
 #include <fcntl.h>
-#include <string.h>
 
 RefenceOptions::RefenceOptions(AllocatorPtr alloc, const RefenceOptions &src)
 	:data(alloc.Dup(src.data))

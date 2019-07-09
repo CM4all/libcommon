@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -35,7 +35,7 @@
 
 #include "LineParser.hxx"
 
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 
 class FileLineParser : public LineParser {
 	const boost::filesystem::path &base_path;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2018 Max Kellermann <max@duempel.org>
+ * Copyright 2008-2019 Max Kellermann <max@duempel.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,10 +34,7 @@
 
 #include <curl/curl.h>
 
-#include <string>
-
 #include <assert.h>
-#include <string.h>
 
 /**
  * Monitor for one socket created by CURL.

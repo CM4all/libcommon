@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -45,7 +45,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/prctl.h>
 #include <sys/signal.h>
 #include <sys/mount.h>
 

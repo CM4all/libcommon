@@ -31,6 +31,7 @@
  */
 
 #include "Local.hxx"
+#include "Config.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
 #include "Prepared.hxx"

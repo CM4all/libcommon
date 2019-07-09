@@ -33,9 +33,6 @@
 #include "BufferedSocket.hxx"
 #include "system/Error.hxx"
 #include "net/SocketProtocolError.hxx"
-#include "util/ConstBuffer.hxx"
-
-#include <utility>
 
 #include <errno.h>
 

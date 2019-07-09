@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -37,7 +37,6 @@
 #include "net/djb/NetstringInput.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/TimerEvent.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <list>
 #include <exception>

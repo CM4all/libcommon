@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,10 +39,7 @@
 #endif
 
 #include <sys/mount.h>
-#include <unistd.h>
 #include <string.h>
-#include <stdio.h>
-#include <errno.h>
 
 inline
 MountList::MountList(AllocatorPtr alloc, const MountList &src)

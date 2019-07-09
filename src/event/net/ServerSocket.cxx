@@ -39,13 +39,8 @@
 #include "system/Error.hxx"
 
 #include <assert.h>
-#include <stddef.h>
 #include <sys/socket.h>
-#include <stdio.h>
 #include <errno.h>
-#include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
 
 ServerSocket::~ServerSocket() noexcept = default;
 

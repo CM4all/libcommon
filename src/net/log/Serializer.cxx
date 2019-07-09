@@ -34,15 +34,9 @@
 #include "Datagram.hxx"
 #include "Protocol.hxx"
 #include "Crc.hxx"
-#include "net/SocketDescriptor.hxx"
-#include "net/SendMessage.hxx"
-#include "system/Error.hxx"
 #include "util/ByteOrder.hxx"
-#include "util/StaticArray.hxx"
 
 #include <sys/socket.h>
-
-class SocketDescriptor;
 
 namespace Net {
 namespace Log {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,7 +36,8 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/BindMethod.hxx"
 #include "util/StaticFifoBuffer.hxx"
-#include "util/WritableBuffer.hxx"
+
+template <typename T> struct WritableBuffer;
 
 /**
  * Read text lines from a (non-blocking) pipe.  Whenever a newline

@@ -34,11 +34,9 @@
 #include "Features.hxx"
 #include "util/Compiler.h"
 
-#include <algorithm>
+#include <utility>
 
 #include <stdlib.h>
-
-struct sockaddr;
 
 class AllocatedSocketAddress {
 public:

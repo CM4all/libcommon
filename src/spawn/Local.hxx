@@ -33,8 +33,8 @@
 #pragma once
 
 #include "Interface.hxx"
-#include "Config.hxx"
 
+struct SpawnConfig;
 class ChildProcessRegistry;
 
 class LocalSpawnService final : public SpawnService {

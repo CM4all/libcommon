@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,8 +32,6 @@
 
 #include "PipeLineReader.hxx"
 #include "util/ExtractLine.hxx"
-
-#include <string.h>
 
 void
 PipeLineReader::TryRead(bool flush) noexcept

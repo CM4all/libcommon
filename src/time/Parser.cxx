@@ -33,7 +33,7 @@
 #include "Parser.hxx"
 #include "Math.hxx"
 #include "ISO8601.hxx"
-#include "util/StringCompare.hxx"
+#include "util/StringAPI.hxx"
 
 std::pair<std::chrono::system_clock::time_point,
 	  std::chrono::system_clock::duration>

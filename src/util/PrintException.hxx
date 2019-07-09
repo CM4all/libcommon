@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,7 +33,7 @@
 #ifndef PRINT_EXCEPTION_HXX
 #define PRINT_EXCEPTION_HXX
 
-#include <stdexcept>
+#include <exception>
 
 /**
  * Print this exception (and its nested exceptions, if any) to stderr.

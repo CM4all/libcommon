@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -40,7 +40,6 @@
 #include "util/Macros.hxx"
 #include "util/PrintException.hxx"
 
-#include <assert.h>
 #include <sys/wait.h>
 #include <sys/signalfd.h>
 #include <sys/capability.h>

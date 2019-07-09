@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -40,10 +40,9 @@
 #include "ExitListener.hxx"
 #include "system/Error.hxx"
 #include "util/PrintException.hxx"
-#include "util/RuntimeError.hxx"
-#include "util/ScopeExit.hxx"
 
 #include <array>
+#include <stdexcept>
 
 #include <assert.h>
 #include <errno.h>

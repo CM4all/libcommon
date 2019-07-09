@@ -37,9 +37,7 @@
 #include "system/Error.hxx"
 
 #include <assert.h>
-#include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/un.h>
 #include <unistd.h>
 
 void

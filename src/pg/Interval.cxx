@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,7 +33,6 @@
 #include "Interval.hxx"
 #include "util/StringCompare.hxx"
 #include "util/StringStrip.hxx"
-#include "util/CharUtil.hxx"
 
 #include <stdexcept>
 

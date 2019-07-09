@@ -36,7 +36,6 @@
 #include "odbus/Connection.hxx"
 #include "odbus/Message.hxx"
 #include "odbus/AppendIter.hxx"
-#include "odbus/ReadIter.hxx"
 #include "odbus/PendingCall.hxx"
 #include "odbus/Error.hxx"
 #include "odbus/ScopeMatch.hxx"
@@ -49,7 +48,7 @@
 
 #include <forward_list>
 
-#include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 static FILE *

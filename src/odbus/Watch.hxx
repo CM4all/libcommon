@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,7 +36,6 @@
 #include "Connection.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/DeferEvent.hxx"
-#include "util/Compiler.h"
 
 #include <dbus/dbus.h>
 

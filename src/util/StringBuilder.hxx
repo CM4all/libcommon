@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,8 +29,6 @@
 
 #ifndef STRING_BUILDER_HXX
 #define STRING_BUILDER_HXX
-
-#include <utility>
 
 #include <stddef.h>
 

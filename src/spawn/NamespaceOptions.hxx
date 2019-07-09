@@ -38,8 +38,6 @@
 #include "util/Compiler.h"
 
 class AllocatorPtr;
-struct MountList;
-struct SpawnConfig;
 struct UidGid;
 class MatchInfo;
 

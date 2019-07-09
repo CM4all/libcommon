@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -38,6 +38,8 @@
 #include "util/Cast.hxx"
 
 #include <avahi-common/error.h>
+
+#include <algorithm>
 
 AvahiServiceExplorer::Object::~Object() noexcept
 {

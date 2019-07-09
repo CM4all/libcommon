@@ -39,7 +39,6 @@
 
 #include <exception>
 
-class Error;
 class SocketAddress;
 class AddressInfo;
 

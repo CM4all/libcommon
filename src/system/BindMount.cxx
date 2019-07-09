@@ -34,10 +34,7 @@
 #include "system/Error.hxx"
 
 #include <sys/mount.h>
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
-#include <unistd.h>
 
 void
 BindMount(const char *source, const char *target, int flags)

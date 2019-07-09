@@ -35,8 +35,6 @@
 #include "SocketAddress.hxx"
 #include "util/ConstBuffer.hxx"
 
-#include <utility>
-
 #include <sys/socket.h>
 
 template<typename T> struct ConstBuffer;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,8 +33,6 @@
 #include "JailParams.hxx"
 #include "Prepared.hxx"
 #include "AllocatorPtr.hxx"
-#include "util/CharUtil.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND

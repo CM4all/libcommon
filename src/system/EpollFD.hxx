@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2013-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,8 +34,6 @@
 
 #include <sys/epoll.h>
 #include <stdint.h>
-
-struct epoll_event;
 
 /**
  * A class that wraps Linux epoll.

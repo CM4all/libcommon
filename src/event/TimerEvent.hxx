@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,7 +34,6 @@
 
 #include "Chrono.hxx"
 #include "util/BindMethod.hxx"
-#include "util/Compiler.h"
 
 #include <boost/intrusive/set_hook.hpp>
 

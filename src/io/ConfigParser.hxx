@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,7 +33,7 @@
 #ifndef CONFIG_PARSER_HXX
 #define CONFIG_PARSER_HXX
 
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <memory>
 #include <map>

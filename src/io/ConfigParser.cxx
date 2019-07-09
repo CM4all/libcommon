@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,8 +34,9 @@
 #include "FileLineParser.hxx"
 #include "system/Error.hxx"
 #include "util/ScopeExit.hxx"
-
 #include "util/Compiler.h"
+
+#include <boost/filesystem.hpp>
 
 #include <assert.h>
 #include <errno.h>

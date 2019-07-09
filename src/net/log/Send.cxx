@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,13 +36,10 @@
 #include "Crc.hxx"
 #include "net/SocketDescriptor.hxx"
 #include "net/SendMessage.hxx"
-#include "system/Error.hxx"
 #include "util/ByteOrder.hxx"
 #include "util/StaticArray.hxx"
 
 #include <sys/socket.h>
-
-class SocketDescriptor;
 
 namespace Net {
 namespace Log {

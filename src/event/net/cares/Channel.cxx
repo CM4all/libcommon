@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 Content Management AG
+ * Copyright 2017-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,7 +34,7 @@
 #include "Handler.hxx"
 #include "Error.hxx"
 #include "event/SocketEvent.hxx"
-#include "net/AllocatedSocketAddress.hxx"
+#include "net/SocketAddress.hxx"
 #include "time/Convert.hxx"
 #include "util/Cancellable.hxx"
 

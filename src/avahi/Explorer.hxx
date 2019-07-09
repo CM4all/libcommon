@@ -41,7 +41,6 @@
 #include <map>
 #include <string>
 
-class EventLoop;
 class MyAvahiClient;
 class AvahiServiceExplorerListener;
 

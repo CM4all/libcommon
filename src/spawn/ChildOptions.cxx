@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -49,9 +49,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 ChildOptions::ChildOptions(AllocatorPtr alloc,
 			   const ChildOptions &src)

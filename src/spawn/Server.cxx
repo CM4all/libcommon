@@ -50,16 +50,12 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/ConstBuffer.hxx"
-#include "util/StaticArray.hxx"
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
 
 #include <boost/intrusive/list.hpp>
 
 #include <system_error>
-#include <algorithm>
-#include <memory>
-#include <map>
 
 #include <unistd.h>
 #include <sys/socket.h>

@@ -33,7 +33,6 @@
 #include "ToString.hxx"
 #include "SocketAddress.hxx"
 #include "IPv4Address.hxx"
-#include "IPv6Address.hxx"
 
 #include <algorithm>
 

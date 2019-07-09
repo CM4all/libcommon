@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -43,11 +43,10 @@
 #endif
 
 #include <assert.h>
-#include <sched.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 
