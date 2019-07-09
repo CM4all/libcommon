@@ -43,24 +43,6 @@
 #include <string.h>
 #include <stdint.h>
 
-static SocketAddress
-ipv64_normalize_mapped(SocketAddress address) noexcept
-{
-	const auto &a6 = *(const struct sockaddr_in6 *)(const void *)address.GetAddress();
-
-	if (!address.IsV4Mapped())
-		return address;
-
-	struct in_addr inaddr;
-	memcpy(&inaddr, ((const char *)&a6.sin6_addr) + 12, sizeof(inaddr));
-	const uint16_t port = FromBE16(a6.sin6_port);
-
-	static IPv4Address a4;
-	a4 = {inaddr, port};
-
-	return a4;
-}
-
 static bool
 LocalToString(char *buffer, size_t buffer_size,
 	      const struct sockaddr_un *sun, size_t length) noexcept
@@ -99,7 +81,9 @@ ToString(char *buffer, size_t buffer_size,
 				     (const struct sockaddr_un *)address.GetAddress(),
 				     address.GetSize());
 
-	address = ipv64_normalize_mapped(address);
+	IPv4Address ipv4_buffer;
+	if (address.IsV4Mapped())
+		address = ipv4_buffer = address.UnmapV4();
 
 	char serv[16];
 	int ret = getnameinfo(address.GetAddress(), address.GetSize(),
@@ -156,7 +140,9 @@ HostToString(char *buffer, size_t buffer_size,
 				     (const struct sockaddr_un *)address.GetAddress(),
 				     address.GetSize());
 
-	address = ipv64_normalize_mapped(address);
+	IPv4Address ipv4_buffer;
+	if (address.IsV4Mapped())
+		address = ipv4_buffer = address.UnmapV4();
 
 	return getnameinfo(address.GetAddress(), address.GetSize(),
 			   buffer, buffer_size,
