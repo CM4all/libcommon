@@ -41,7 +41,7 @@ struct StringView;
 class CurlGlobal;
 class CurlResponseHandler;
 
-class CurlRequest {
+class CurlRequest final {
 	CurlGlobal &global;
 
 	CurlResponseHandler &handler;
