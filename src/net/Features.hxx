@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,10 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NET_FEATURES_HXX
-#define NET_FEATURES_HXX
+#pragma once
 
 #define HAVE_UN
 #define HAVE_TCP
-
-#endif
+#define HAVE_STRUCT_UCRED

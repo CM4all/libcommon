@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2012-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -235,6 +235,8 @@ SocketDescriptor::GetOption(int level, int name,
 		: 0;
 }
 
+#ifdef HAVE_STRUCT_UCRED
+
 struct ucred
 SocketDescriptor::GetPeerCredentials() const noexcept
 {
@@ -244,6 +246,8 @@ SocketDescriptor::GetPeerCredentials() const noexcept
 		cred.pid = -1;
 	return cred;
 }
+
+#endif
 
 #ifdef _WIN32
 
@@ -329,11 +333,15 @@ SocketDescriptor::SetBindToDevice(const char *name) noexcept
 	return SetOption(SOL_SOCKET, SO_BINDTODEVICE, name, strlen(name));
 }
 
+#ifdef TCP_FASTOPEN
+
 bool
 SocketDescriptor::SetTcpFastOpen(int qlen) noexcept
 {
 	return SetOption(SOL_TCP, TCP_FASTOPEN, &qlen, sizeof(qlen));
 }
+
+#endif
 
 bool
 SocketDescriptor::AddMembership(const IPv4Address &address) noexcept

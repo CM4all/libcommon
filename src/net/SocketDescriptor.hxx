@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2012-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,7 @@
 #ifndef SOCKET_DESCRIPTOR_HXX
 #define SOCKET_DESCRIPTOR_HXX
 
+#include "Features.hxx"
 #include "io/FileDescriptor.hxx"
 
 #include <type_traits>
@@ -158,16 +159,20 @@ public:
 	/**
 	 * @return the value size or 0 on error
 	 */
-	size_t GetOption(int level, int name, void *value, size_t size) const noexcept;
+	size_t GetOption(int level, int name,
+			 void *value, size_t size) const noexcept;
 
+#ifdef HAVE_STRUCT_UCRED
 	/**
 	 * Receive peer credentials (SO_PEERCRED).  On error, the pid
 	 * is -1.
 	 */
 	gcc_pure
 	struct ucred GetPeerCredentials() const noexcept;
+#endif
 
-	bool SetOption(int level, int name, const void *value, size_t size) noexcept;
+	bool SetOption(int level, int name,
+		       const void *value, size_t size) noexcept;
 
 	bool SetBoolOption(int level, int name, bool _value) noexcept {
 		const int value = _value;
