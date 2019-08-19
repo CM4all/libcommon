@@ -46,7 +46,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#ifndef __linux
+#ifndef __linux__
 #error This library requires Linux
 #endif
 

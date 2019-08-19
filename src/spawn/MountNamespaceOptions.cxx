@@ -50,7 +50,7 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 
-#ifndef __linux
+#ifndef __linux__
 #error This library requires Linux
 #endif
 

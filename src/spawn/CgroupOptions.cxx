@@ -47,7 +47,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 
-#ifndef __linux
+#ifndef __linux__
 #error This library requires Linux
 #endif
 
