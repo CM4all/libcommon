@@ -45,7 +45,7 @@ class CurlGlobal final {
 
 	CurlMulti multi;
 
-	DeferEvent read_info_event;
+	DeferEvent defer_read_info;
 	TimerEvent timeout_event;
 
 public:
@@ -84,8 +84,9 @@ private:
 	 */
 	void ReadInfo() noexcept;
 
-	void ScheduleTimeout(long timeout_ms) noexcept;
-	static int TimerFunction(CURLM *multi, long timeout_ms, void *userp) noexcept;
+	void UpdateTimeout(long timeout_ms) noexcept;
+	static int TimerFunction(CURLM *multi, long timeout_ms,
+				 void *userp) noexcept;
 
 	void OnTimeout() noexcept;
 	void OnDeferredReadInfo() noexcept;

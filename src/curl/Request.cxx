@@ -53,8 +53,8 @@ CurlRequest::CurlRequest(CurlGlobal &_global, CurlEasy &&_easy,
 			 CurlResponseHandler &_handler)
 	:global(_global), handler(_handler),
 	 easy(std::move(_easy)),
-	 defer_error_event(global.GetEventLoop(),
-			   BIND_THIS_METHOD(OnDeferredError))
+	 postpone_error_event(global.GetEventLoop(),
+			      BIND_THIS_METHOD(OnPostponeError))
 {
 	error_buffer[0] = 0;
 
@@ -234,7 +234,7 @@ CurlRequest::DataReceived(const void *ptr, size_t received_size) noexcept
 		/* move the CurlResponseHandler::OnError() call into a
 		   "safe" stack frame */
 		postponed_error = std::current_exception();
-		defer_error_event.Schedule();
+		postpone_error_event.Schedule();
 		return CURL_WRITEFUNC_PAUSE;
 	}
 }
@@ -253,7 +253,7 @@ CurlRequest::WriteFunction(char *ptr, size_t size, size_t nmemb,
 }
 
 void
-CurlRequest::OnDeferredError() noexcept
+CurlRequest::OnPostponeError() noexcept
 {
 	assert(postponed_error);
 

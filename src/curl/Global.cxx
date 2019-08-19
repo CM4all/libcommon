@@ -102,7 +102,7 @@ private:
 
 CurlGlobal::CurlGlobal(EventLoop &_loop)
 	:event_loop(_loop),
-	 read_info_event(_loop, BIND_THIS_METHOD(OnDeferredReadInfo)),
+	 defer_read_info(_loop, BIND_THIS_METHOD(ReadInfo)),
 	 timeout_event(_loop, BIND_THIS_METHOD(OnTimeout))
 {
 	multi.SetOption(CURLMOPT_SOCKETFUNCTION, CurlSocket::SocketFunction);
@@ -205,17 +205,11 @@ CurlGlobal::SocketAction(curl_socket_t fd, int ev_bitmask) noexcept
 						   &running_handles);
 	(void)mcode;
 
-	read_info_event.Schedule();
-}
-
-void
-CurlGlobal::OnDeferredReadInfo() noexcept
-{
-	ReadInfo();
+	defer_read_info.Schedule();
 }
 
 inline void
-CurlGlobal::ScheduleTimeout(long timeout_ms) noexcept
+CurlGlobal::UpdateTimeout(long timeout_ms) noexcept
 {
 	if (timeout_ms < 0) {
 		timeout_event.Cancel();
@@ -238,7 +232,7 @@ CurlGlobal::TimerFunction(gcc_unused CURLM *_multi, long timeout_ms,
 {
 	auto &global = *(CurlGlobal *)userp;
 	assert(_multi == global.multi.Get());
-	global.ScheduleTimeout(timeout_ms);
+	global.UpdateTimeout(timeout_ms);
 	return 0;
 }
 

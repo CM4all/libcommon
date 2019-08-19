@@ -57,8 +57,6 @@ class CurlRequest {
 
 	std::multimap<std::string, std::string> headers;
 
-	DeferEvent defer_error_event;
-
 	/**
 	 * An exception caught by DataReceived(), which will be
 	 * forwarded into a "safe" stack frame by
@@ -68,6 +66,8 @@ class CurlRequest {
 	 * (i.e. DataReceived()).
 	 */
 	std::exception_ptr postponed_error;
+
+	DeferEvent postpone_error_event;
 
 	/** error message provided by libcurl */
 	char error_buffer[CURL_ERROR_SIZE];
@@ -133,6 +133,8 @@ private:
 
 	void HeaderFunction(StringView s) noexcept;
 
+	void OnPostponeError() noexcept;
+
 	/** called by curl when new data is available */
 	static size_t _HeaderFunction(char *ptr, size_t size, size_t nmemb,
 				      void *stream) noexcept;
@@ -140,8 +142,6 @@ private:
 	/** called by curl when new data is available */
 	static size_t WriteFunction(char *ptr, size_t size, size_t nmemb,
 				    void *stream) noexcept;
-
-	void OnDeferredError() noexcept;
 };
 
 #endif
