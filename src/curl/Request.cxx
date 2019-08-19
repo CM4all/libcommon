@@ -171,13 +171,20 @@ CurlRequest::Done(CURLcode result) noexcept
 	}
 }
 
+gcc_pure
+static bool
+IsResponseBoundaryHeader(StringView s) noexcept
+{
+	return s.size > 5 && s.StartsWith("HTTP/");
+}
+
 inline void
 CurlRequest::HeaderFunction(StringView s) noexcept
 {
 	if (state > State::HEADERS)
 		return;
 
-	if (s.size > 5 && memcmp(s.data, "HTTP/", 5) == 0) {
+	if (IsResponseBoundaryHeader(s)) {
 		/* this is the boundary to a new response, for example
 		   after a redirect */
 		headers.clear();
