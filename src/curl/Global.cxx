@@ -103,7 +103,7 @@ private:
 CurlGlobal::CurlGlobal(EventLoop &_loop)
 	:event_loop(_loop),
 	 read_info_event(_loop, BIND_THIS_METHOD(OnDeferredReadInfo)),
-	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout))
+	 timeout_event(_loop, BIND_THIS_METHOD(OnTimeout))
 {
 	multi.SetOption(CURLMOPT_SOCKETFUNCTION, CurlSocket::SocketFunction);
 	multi.SetOption(CURLMOPT_SOCKETDATA, this);
