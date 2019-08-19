@@ -49,7 +49,7 @@ ParseSocketAddress(const char *p, int default_port, bool passive)
 	}
 
 	if (*p == '@') {
-#ifdef __linux
+#ifdef __linux__
 		/* abstract unix domain socket */
 
 		AllocatedSocketAddress address;

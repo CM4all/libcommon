@@ -49,7 +49,7 @@
 #include <errno.h>
 #include <sys/prctl.h>
 
-#ifndef __linux
+#ifndef __linux__
 #error This library requires Linux
 #endif
 
