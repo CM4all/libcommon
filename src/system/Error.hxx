@@ -90,7 +90,7 @@ FormatLastError(const char *fmt, Args&&... args) noexcept
 			       std::forward<Args>(args)...);
 }
 
-#else
+#endif /* _WIN32 */
 
 #include <errno.h>
 #include <string.h>
@@ -146,8 +146,6 @@ FormatErrno(const char *fmt, Args&&... args) noexcept
 {
 	return FormatErrno(errno, fmt, std::forward<Args>(args)...);
 }
-
-#endif
 
 gcc_pure
 inline bool
