@@ -107,7 +107,7 @@ CurlRequest::Resume() noexcept
 {
 	assert(registered);
 
-	curl_easy_pause(easy.Get(), CURLPAUSE_CONT);
+	easy.Unpause();
 
 	if (IsCurlOlderThan(0x072000))
 		/* libcurl older than 7.32.0 does not update
