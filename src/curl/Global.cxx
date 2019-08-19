@@ -42,16 +42,14 @@
 class CurlSocket final {
 	CurlGlobal &global;
 
-	const curl_socket_t fd;
-
 	SocketEvent socket_event;
 
 public:
 	CurlSocket(CurlGlobal &_global, EventLoop &_loop,
 		   curl_socket_t _fd) noexcept
-		:global(_global), fd(_fd),
+		:global(_global),
 		 socket_event(_loop, BIND_THIS_METHOD(OnSocketReady),
-			      SocketDescriptor(fd)) {}
+			      SocketDescriptor(_fd)) {}
 
 	~CurlSocket() noexcept {
 		/* TODO: sometimes, CURL uses CURL_POLL_REMOVE after
@@ -71,6 +69,10 @@ public:
 				  void *userp, void *socketp) noexcept;
 
 private:
+	SocketDescriptor GetSocket() const noexcept {
+		return socket_event.GetSocket();
+	}
+
 	void OnSocketReady(unsigned events) noexcept;
 
 	static constexpr int LibEventToCurlCSelect(unsigned flags) noexcept {
@@ -138,7 +140,7 @@ CurlSocket::SocketFunction(gcc_unused CURL *easy,
 void
 CurlSocket::OnSocketReady(unsigned events) noexcept
 {
-	global.SocketAction(fd, LibEventToCurlCSelect(events));
+	global.SocketAction(GetSocket().Get(), LibEventToCurlCSelect(events));
 }
 
 void
