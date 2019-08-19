@@ -41,8 +41,6 @@ class CurlRequest;
  * Manager for the global CURLM object.
  */
 class CurlGlobal final {
-	EventLoop &event_loop;
-
 	CurlMulti multi;
 
 	DeferEvent defer_read_info;
@@ -52,7 +50,7 @@ public:
 	explicit CurlGlobal(EventLoop &_loop);
 
 	auto &GetEventLoop() const noexcept {
-		return event_loop;
+		return timeout_event.GetEventLoop();
 	}
 
 	void Add(CurlRequest &r);
