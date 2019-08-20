@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -59,7 +59,8 @@ class NetstringServer {
 
 public:
 	NetstringServer(EventLoop &event_loop,
-			UniqueSocketDescriptor _fd) noexcept;
+			UniqueSocketDescriptor _fd,
+			size_t max_size=16*1024*1024) noexcept;
 	~NetstringServer() noexcept;
 
 protected:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -41,11 +41,12 @@
 static constexpr auto busy_timeout = std::chrono::seconds(5);
 
 NetstringServer::NetstringServer(EventLoop &event_loop,
-				 UniqueSocketDescriptor _fd) noexcept
+				 UniqueSocketDescriptor _fd,
+				 size_t max_size) noexcept
 	:fd(std::move(_fd)),
 	 event(event_loop, BIND_THIS_METHOD(OnEvent), fd),
 	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout)),
-	 input(16 * 1024 * 1024)
+	 input(max_size)
 {
 	event.ScheduleRead();
 	timeout_event.Schedule(busy_timeout);
