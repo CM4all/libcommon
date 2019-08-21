@@ -52,7 +52,7 @@ Push(lua_State *L, std::exception_ptr e) noexcept
 }
 
 void
-Raise(lua_State *L, std::exception_ptr e) noexcept
+Raise(lua_State *L, std::exception_ptr e)
 {
 	Push(L, std::move(e));
 	lua_error(L);

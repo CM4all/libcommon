@@ -58,10 +58,14 @@ Push(lua_State *L, std::exception_ptr e) noexcept;
  * Raise a Lua error (using lua_error()) based on the given C++
  * exception.  This function never returns because lua_error() uses
  * longjmp(); therefore, it will skip all destructors!
+ *
+ * Note that this function cannot be `noexcept`, because this would
+ * break _Unwind_RaiseException() which is used by Lua to raise
+ * errors.
  */
 [[noreturn]]
 void
-Raise(lua_State *L, std::exception_ptr e) noexcept;
+Raise(lua_State *L, std::exception_ptr e);
 
 }
 
