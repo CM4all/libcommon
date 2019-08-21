@@ -35,6 +35,8 @@ extern "C" {
 #include <lua.h>
 }
 
+#include <assert.h>
+
 namespace Lua {
 
 Error
@@ -48,6 +50,8 @@ PopError(lua_State *L)
 void
 Push(lua_State *L, std::exception_ptr e) noexcept
 {
+	assert(e);
+
 	lua_pushstring(L, GetFullMessage(e).c_str());
 }
 
