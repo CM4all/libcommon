@@ -54,6 +54,15 @@ PopError(lua_State *L);
 void
 Push(lua_State *L, std::exception_ptr e) noexcept;
 
+/**
+ * Raise a Lua error (using lua_error()) based on the given C++
+ * exception.  This function never returns because lua_error() uses
+ * longjmp(); therefore, it will skip all destructors!
+ */
+[[noreturn]]
+void
+Raise(lua_State *L, std::exception_ptr e) noexcept;
+
 }
 
 #endif
