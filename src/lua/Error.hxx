@@ -67,6 +67,15 @@ Push(lua_State *L, std::exception_ptr e) noexcept;
 void
 Raise(lua_State *L, std::exception_ptr e);
 
+/**
+ * Wrapper for Raise() which uses std::current_exception.  As a
+ * special case, this supports Lua errors caught by a "catch(...)" and
+ * rethrows them as-is.
+ */
+[[noreturn]]
+void
+RaiseCurrent(lua_State *L);
+
 }
 
 #endif

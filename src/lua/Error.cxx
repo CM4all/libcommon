@@ -66,4 +66,14 @@ Raise(lua_State *L, std::exception_ptr e)
 	gcc_unreachable();
 }
 
+void
+RaiseCurrent(lua_State *L)
+{
+	auto e = std::current_exception();
+	if (e)
+		Raise(L, std::move(e));
+	else
+		throw;
+}
+
 } // namespace Lua
