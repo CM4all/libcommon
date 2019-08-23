@@ -39,7 +39,7 @@ class FileDescriptor;
 
 /**
  * Convert the given datagram to a text line (without a trailing
- * newline character).
+ * newline character and without a null terminator).
  *
  * @param site log the site name?
  * @return a pointer to the end of the line
