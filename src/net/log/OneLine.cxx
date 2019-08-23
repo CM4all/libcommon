@@ -113,7 +113,7 @@ EscapeString(StringView value, char *const buffer, size_t buffer_size) noexcept
 	return buffer;
 }
 
-static void
+static bool
 LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 	       bool site) noexcept
 {
@@ -172,10 +172,10 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 				      escaped_ua, sizeof(escaped_ua)),
 			 duration);
 
-	fd.Write(buffer, strlen(buffer));
+	return fd.Write(buffer, strlen(buffer)) >= 0;
 }
 
-static void
+static bool
 LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
 		  bool site) noexcept
 {
@@ -202,14 +202,16 @@ LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
 			 EscapeString(d.message, escaped_message,
 				      sizeof(escaped_message)));
 
-	fd.Write(buffer, strlen(buffer));
+	return fd.Write(buffer, strlen(buffer)) >= 0;
 }
 
-void
+bool
 LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d, bool site) noexcept
 {
 	if (d.http_uri != nullptr && d.HasHttpStatus())
-		LogOneLineHttp(fd, d, site);
+		return LogOneLineHttp(fd, d, site);
 	else if (d.message != nullptr)
-		LogOneLineMessage(fd, d, site);
+		return LogOneLineMessage(fd, d, site);
+	else
+		return true;
 }

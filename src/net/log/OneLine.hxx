@@ -40,7 +40,8 @@ class FileDescriptor;
  * "combined" log format.
  *
  * @param site log the site name?
+ * @return true on success, false on error (errno set)
  */
-void
+bool
 LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d,
 	   bool site=true) noexcept;
