@@ -32,8 +32,21 @@
 
 #pragma once
 
+#include <stddef.h>
+
 namespace Net { namespace Log { struct Datagram; }}
 class FileDescriptor;
+
+/**
+ * Convert the given datagram to a text line (without a trailing
+ * newline character).
+ *
+ * @param site log the site name?
+ * @return a pointer to the end of the line
+ */
+char *
+FormatOneLine(char *buffer, size_t buffer_size,
+	      const Net::Log::Datagram &d, bool site) noexcept;
 
 /**
  * Print the #Net::Log::Datagram in one line, similar to Apache's

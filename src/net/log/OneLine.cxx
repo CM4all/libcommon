@@ -113,9 +113,10 @@ EscapeString(StringView value, char *const buffer, size_t buffer_size) noexcept
 	return buffer;
 }
 
-static bool
-LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
-	       bool site) noexcept
+static char *
+FormatOneLineHttp(char *buffer, size_t buffer_size,
+		  const Net::Log::Datagram &d,
+		  bool site) noexcept
 {
 	const char *method = d.HasHttpMethod() &&
 		http_method_is_valid(d.http_method)
@@ -143,11 +144,10 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 		duration = duration_buffer;
 	}
 
-	char buffer[16384];
 	char escaped_uri[4096], escaped_referer[2048], escaped_ua[1024];
 
 	if (site)
-		snprintf(buffer, std::size(buffer),
+		snprintf(buffer, buffer_size,
 			 "%s %s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
 			 OptionalString(d.site),
 			 OptionalString(d.remote_host),
@@ -160,7 +160,7 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 				      escaped_ua, sizeof(escaped_ua)),
 			 duration);
 	else
-		snprintf(buffer, std::size(buffer),
+		snprintf(buffer, buffer_size,
 			 "%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
 			 OptionalString(d.remote_host),
 			 stamp, method,
@@ -172,46 +172,57 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 				      escaped_ua, sizeof(escaped_ua)),
 			 duration);
 
-	return fd.Write(buffer, strlen(buffer)) >= 0;
+	return buffer + strlen(buffer);
 }
 
-static bool
-LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
-		  bool site) noexcept
+static char *
+FormatOneLineMessage(char *buffer, size_t buffer_size,
+		     const Net::Log::Datagram &d,
+		     bool site) noexcept
 {
-
 	StringBuffer<32> stamp_buffer;
 	const char *stamp =
 		FormatOptionalTimestamp(stamp_buffer, d.HasTimestamp(),
 					d.timestamp);
 
-	char buffer[16384];
 	char escaped_message[4096];
 
 	if (site)
-		snprintf(buffer, std::size(buffer),
+		snprintf(buffer, buffer_size,
 			 "%s [%s] %s\n",
 			 OptionalString(d.site),
 			 stamp,
 			 EscapeString(d.message, escaped_message,
 				     sizeof(escaped_message)));
 	else
-		snprintf(buffer, std::size(buffer),
+		snprintf(buffer, buffer_size,
 			 "[%s] %s\n",
 			 stamp,
 			 EscapeString(d.message, escaped_message,
 				      sizeof(escaped_message)));
 
-	return fd.Write(buffer, strlen(buffer)) >= 0;
+	return buffer + strlen(buffer);
+}
+
+char *
+FormatOneLine(char *buffer, size_t buffer_size,
+	      const Net::Log::Datagram &d, bool site) noexcept
+{
+	if (d.http_uri != nullptr && d.HasHttpStatus())
+		return FormatOneLineHttp(buffer, buffer_size, d, site);
+	else if (d.message != nullptr)
+		return FormatOneLineMessage(buffer, buffer_size, d, site);
+	else
+		return buffer;
 }
 
 bool
 LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d, bool site) noexcept
 {
-	if (d.http_uri != nullptr && d.HasHttpStatus())
-		return LogOneLineHttp(fd, d, site);
-	else if (d.message != nullptr)
-		return LogOneLineMessage(fd, d, site);
-	else
+	char buffer[16384];
+	char *end = FormatOneLine(buffer, sizeof(buffer), d, site);
+	if (end == buffer)
 		return true;
+
+	return fd.Write(buffer, end - buffer) >= 0;
 }
