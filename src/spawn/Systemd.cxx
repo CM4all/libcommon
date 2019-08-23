@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,7 +39,6 @@
 #include "odbus/PendingCall.hxx"
 #include "odbus/Error.hxx"
 #include "odbus/ScopeMatch.hxx"
-#include "util/Macros.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/PrintException.hxx"
@@ -198,7 +197,7 @@ CreateSystemdScope(const char *name, const char *description,
 		.Append(Struct(String("Description"),
 			       Variant(String(description))))
 		.Append(Struct(String("PIDs"),
-			       Variant(FixedArray(pids_value, ARRAY_SIZE(pids_value)))))
+			       Variant(FixedArray(pids_value, std::size(pids_value)))))
 		.Append(Struct(String("Delegate"),
 			       Variant(Boolean(delegate))))
 		.AppendOptional(slice != nullptr,
