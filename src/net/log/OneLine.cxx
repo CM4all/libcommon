@@ -34,6 +34,7 @@
 #include "Datagram.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/StringBuffer.hxx"
+#include "util/StringBuilder.hxx"
 
 #include <stdio.h>
 #include <time.h>
@@ -117,7 +118,17 @@ static char *
 FormatOneLineHttp(char *buffer, size_t buffer_size,
 		  const Net::Log::Datagram &d,
 		  bool site) noexcept
-{
+try {
+	StringBuilder<> b(buffer, buffer_size);
+
+	if (site) {
+		b.Append(OptionalString(d.site));
+		b.Append(' ');
+
+		buffer = b.GetTail();
+		buffer_size = b.GetRemainingSize();
+	}
+
 	const char *method = d.HasHttpMethod() &&
 		http_method_is_valid(d.http_method)
 		? http_method_to_string(d.http_method)
@@ -146,40 +157,38 @@ FormatOneLineHttp(char *buffer, size_t buffer_size,
 
 	char escaped_uri[4096], escaped_referer[2048], escaped_ua[1024];
 
-	if (site)
-		snprintf(buffer, buffer_size,
-			 "%s %s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
-			 OptionalString(d.site),
-			 OptionalString(d.remote_host),
-			 stamp, method,
-			 EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
-			 d.http_status, length,
-			 EscapeString(OptionalString(d.http_referer),
-				      escaped_referer, sizeof(escaped_referer)),
-			 EscapeString(OptionalString(d.user_agent),
-				      escaped_ua, sizeof(escaped_ua)),
-			 duration);
-	else
-		snprintf(buffer, buffer_size,
-			 "%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
-			 OptionalString(d.remote_host),
-			 stamp, method,
-			 EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
-			 d.http_status, length,
-			 EscapeString(OptionalString(d.http_referer),
-				      escaped_referer, sizeof(escaped_referer)),
-			 EscapeString(OptionalString(d.user_agent),
-				      escaped_ua, sizeof(escaped_ua)),
-			 duration);
+	snprintf(buffer, buffer_size,
+		 "%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
+		 OptionalString(d.remote_host),
+		 stamp, method,
+		 EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
+		 d.http_status, length,
+		 EscapeString(OptionalString(d.http_referer),
+			      escaped_referer, sizeof(escaped_referer)),
+		 EscapeString(OptionalString(d.user_agent),
+			      escaped_ua, sizeof(escaped_ua)),
+		 duration);
 
 	return buffer + strlen(buffer);
+} catch (StringBuilder<>::Overflow) {
+	return buffer;
 }
 
 static char *
 FormatOneLineMessage(char *buffer, size_t buffer_size,
 		     const Net::Log::Datagram &d,
 		     bool site) noexcept
-{
+try {
+	StringBuilder<> b(buffer, buffer_size);
+
+	if (site) {
+		b.Append(OptionalString(d.site));
+		b.Append(' ');
+
+		buffer = b.GetTail();
+		buffer_size = b.GetRemainingSize();
+	}
+
 	StringBuffer<32> stamp_buffer;
 	const char *stamp =
 		FormatOptionalTimestamp(stamp_buffer, d.HasTimestamp(),
@@ -187,21 +196,15 @@ FormatOneLineMessage(char *buffer, size_t buffer_size,
 
 	char escaped_message[4096];
 
-	if (site)
-		snprintf(buffer, buffer_size,
-			 "%s [%s] %s\n",
-			 OptionalString(d.site),
-			 stamp,
-			 EscapeString(d.message, escaped_message,
-				     sizeof(escaped_message)));
-	else
-		snprintf(buffer, buffer_size,
-			 "[%s] %s\n",
-			 stamp,
-			 EscapeString(d.message, escaped_message,
+	snprintf(buffer, buffer_size,
+		 "[%s] %s\n",
+		 stamp,
+		 EscapeString(d.message, escaped_message,
 				      sizeof(escaped_message)));
 
 	return buffer + strlen(buffer);
+} catch (StringBuilder<>::Overflow) {
+	return buffer;
 }
 
 char *
