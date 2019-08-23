@@ -43,4 +43,4 @@ class FileDescriptor;
  */
 void
 LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d,
-	   bool site=true);
+	   bool site=true) noexcept;

@@ -40,7 +40,8 @@
 
 template<size_t capacity>
 static const char *
-FormatTimestamp(StringBuffer<capacity> &buffer, Net::Log::TimePoint value)
+FormatTimestamp(StringBuffer<capacity> &buffer,
+		Net::Log::TimePoint value) noexcept
 {
 	using namespace std::chrono;
 	time_t t = duration_cast<seconds>(value.time_since_epoch()).count();
@@ -53,15 +54,16 @@ FormatTimestamp(StringBuffer<capacity> &buffer, Net::Log::TimePoint value)
 template<size_t capacity>
 static const char *
 FormatOptionalTimestamp(StringBuffer<capacity> &buffer, bool valid,
-			Net::Log::TimePoint value)
+			Net::Log::TimePoint value) noexcept
 {
 	return valid
 		? FormatTimestamp(buffer, value)
 		: "-";
 }
 
+gcc_const
 static const char *
-OptionalString(const char *p)
+OptionalString(const char *p) noexcept
 {
 	if (p == nullptr)
 		return "-";
@@ -69,14 +71,15 @@ OptionalString(const char *p)
 	return p;
 }
 
-static bool
-IsHarmlessChar(signed char ch)
+static constexpr bool
+IsHarmlessChar(signed char ch) noexcept
 {
 	return ch >= 0x20 && ch != '"' && ch != '\\';
 }
 
 static const char *
-EscapeString(const char *value, char *const buffer, size_t buffer_size)
+EscapeString(const char *value,
+	     char *const buffer, size_t buffer_size) noexcept
 {
 	char *p = buffer, *const buffer_limit = buffer + buffer_size - 4;
 	char ch;
@@ -92,7 +95,7 @@ EscapeString(const char *value, char *const buffer, size_t buffer_size)
 }
 
 static const char *
-EscapeString(StringView value, char *const buffer, size_t buffer_size)
+EscapeString(StringView value, char *const buffer, size_t buffer_size) noexcept
 {
 	char *p = buffer, *const buffer_limit = buffer + buffer_size - 4;
 
@@ -112,7 +115,7 @@ EscapeString(StringView value, char *const buffer, size_t buffer_size)
 
 static void
 LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
-	       bool site)
+	       bool site) noexcept
 {
 	const char *method = d.HasHttpMethod() &&
 		http_method_is_valid(d.http_method)
@@ -174,7 +177,7 @@ LogOneLineHttp(FileDescriptor fd, const Net::Log::Datagram &d,
 
 static void
 LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
-		  bool site)
+		  bool site) noexcept
 {
 
 	StringBuffer<32> stamp_buffer;
@@ -203,7 +206,7 @@ LogOneLineMessage(FileDescriptor fd, const Net::Log::Datagram &d,
 }
 
 void
-LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d, bool site)
+LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d, bool site) noexcept
 {
 	if (d.http_uri != nullptr && d.HasHttpStatus())
 		LogOneLineHttp(fd, d, site);
