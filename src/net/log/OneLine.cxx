@@ -88,6 +88,48 @@ AppendEscape(StringBuilder<> &b, StringView value)
 	b.Extend(n);
 }
 
+static void
+AppendAnonymize(StringBuilder<> &b, const char *value)
+{
+	const char *p = strchr(value, '.');
+	if (p != nullptr) {
+		/* IPv4: zero the last octet */
+
+		const char *q = strrchr(p + 1, '.');
+		if (q != nullptr) {
+			b.Append(value, q + 1 - value);
+			b.Append('0');
+			return;
+		}
+	}
+
+	p = strchr(value, ':');
+	if (p != nullptr) {
+		/* IPv6: truncate after the first 64 bit */
+
+		for (unsigned i = 1; i < 4; ++i) {
+			const char *q = strchr(p + 1, ':');
+			if (q == p) {
+				b.Append(value, q + 1 - value);
+				return;
+			}
+
+			if (q == nullptr) {
+				b.Append(value);
+				return;
+			}
+
+			p = q;
+		}
+
+		b.Append(value, p + 1 - value);
+		b.Append(':');
+		return;
+	}
+
+	b.Append(value);
+}
+
 template<typename... Args>
 static inline void
 AppendFormat(StringBuilder<> &b, const char *fmt, Args&&... args)
@@ -102,7 +144,7 @@ AppendFormat(StringBuilder<> &b, const char *fmt, Args&&... args)
 static char *
 FormatOneLineHttp(char *buffer, size_t buffer_size,
 		  const Net::Log::Datagram &d,
-		  bool site) noexcept
+		  bool site, bool anonymize) noexcept
 try {
 	StringBuilder<> b(buffer, buffer_size);
 
@@ -111,9 +153,14 @@ try {
 		b.Append(' ');
 	}
 
-	AppendFormat(b,
-		     "%s - - [",
-		     OptionalString(d.remote_host));
+	if (d.remote_host == nullptr)
+		b.Append('-');
+	else if (anonymize)
+		AppendAnonymize(b, d.remote_host);
+	else
+		b.Append(d.remote_host);
+
+	b.Append(" - - [");
 
 	if (d.HasTimestamp())
 		AppendTimestamp(b, d.timestamp);
@@ -182,10 +229,11 @@ try {
 
 char *
 FormatOneLine(char *buffer, size_t buffer_size,
-	      const Net::Log::Datagram &d, bool site) noexcept
+	      const Net::Log::Datagram &d, bool site, bool anonymize) noexcept
 {
 	if (d.http_uri != nullptr && d.HasHttpStatus())
-		return FormatOneLineHttp(buffer, buffer_size, d, site);
+		return FormatOneLineHttp(buffer, buffer_size, d,
+					 site, anonymize);
 	else if (d.message != nullptr)
 		return FormatOneLineMessage(buffer, buffer_size, d, site);
 	else

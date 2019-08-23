@@ -42,11 +42,14 @@ class FileDescriptor;
  * newline character and without a null terminator).
  *
  * @param site log the site name?
+ * @param anonymize anonymize IP addresses by zeroing a portion at the
+ * end?
  * @return a pointer to the end of the line
  */
 char *
 FormatOneLine(char *buffer, size_t buffer_size,
-	      const Net::Log::Datagram &d, bool site) noexcept;
+	      const Net::Log::Datagram &d, bool site,
+	      bool anonymize=false) noexcept;
 
 /**
  * Print the #Net::Log::Datagram in one line, similar to Apache's
