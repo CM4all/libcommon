@@ -354,7 +354,8 @@ SocketDescriptor::AddMembership(const IPv4Address &address) noexcept
 bool
 SocketDescriptor::AddMembership(const IPv6Address &address) noexcept
 {
-	struct ipv6_mreq r{address.GetAddress(), address.GetScopeId()};
+	struct ipv6_mreq r{address.GetAddress(), 0};
+	r.ipv6mr_interface = address.GetScopeId();
 	return setsockopt(fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP,
 			  &r, sizeof(r)) == 0;
 }
