@@ -38,6 +38,8 @@
 
 #include <stdlib.h>
 
+struct sockaddr;
+
 class AllocatedSocketAddress {
 public:
 	typedef SocketAddress::size_type size_type;
