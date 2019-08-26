@@ -45,11 +45,9 @@ class CurlSocket final {
 	SocketEvent socket_event;
 
 public:
-	CurlSocket(CurlGlobal &_global, EventLoop &_loop,
-		   curl_socket_t _fd) noexcept
+	CurlSocket(CurlGlobal &_global, EventLoop &_loop, SocketDescriptor _fd)
 		:global(_global),
-		 socket_event(_loop, BIND_THIS_METHOD(OnSocketReady),
-			      SocketDescriptor(_fd)) {}
+		 socket_event(_loop, BIND_THIS_METHOD(OnSocketReady), _fd) {}
 
 	~CurlSocket() noexcept {
 		/* TODO: sometimes, CURL uses CURL_POLL_REMOVE after
@@ -127,7 +125,8 @@ CurlSocket::SocketFunction(gcc_unused CURL *easy,
 	}
 
 	if (cs == nullptr) {
-		cs = new CurlSocket(global, global.GetEventLoop(), s);
+		cs = new CurlSocket(global, global.GetEventLoop(),
+				    SocketDescriptor(s));
 		global.Assign(s, *cs);
 	}
 
