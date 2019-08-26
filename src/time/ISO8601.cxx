@@ -37,7 +37,6 @@
 #include <stdexcept>
 
 #include <assert.h>
-#include <time.h>
 
 StringBuffer<64>
 FormatISO8601(const struct tm &tm) noexcept
@@ -113,6 +112,13 @@ std::pair<std::chrono::system_clock::time_point,
 	  std::chrono::system_clock::duration>
 ParseISO8601(const char *s)
 {
+	assert(s != nullptr);
+
+#ifdef _WIN32
+	/* TODO: emulate strptime()? */
+	(void)s;
+	throw std::runtime_error("Time parsing not implemented on Windows");
+#else
 	struct tm tm{};
 
 	/* parse the date */
@@ -150,4 +156,5 @@ ParseISO8601(const char *s)
 		throw std::runtime_error("Garbage at end of time stamp");
 
 	return std::make_pair(tp, precision);
+#endif /* !_WIN32 */
 }
