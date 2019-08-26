@@ -32,8 +32,6 @@
 #include "event/SocketEvent.hxx"
 #include "util/RuntimeError.hxx"
 
-#include <curl/curl.h>
-
 #include <assert.h>
 
 /**
