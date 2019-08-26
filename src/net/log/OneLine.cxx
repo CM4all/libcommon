@@ -114,6 +114,18 @@ EscapeString(StringView value, char *const buffer, size_t buffer_size) noexcept
 	return buffer;
 }
 
+
+template<typename... Args>
+static inline void
+AppendFormat(StringBuilder<> &b, const char *fmt, Args&&... args)
+{
+	size_t size = b.GetRemainingSize();
+	size_t n = snprintf(b.GetTail(), size, fmt, args...);
+	if (n >= size - 1)
+		throw StringBuilder<>::Overflow();
+	b.Extend(n);
+}
+
 static char *
 FormatOneLineHttp(char *buffer, size_t buffer_size,
 		  const Net::Log::Datagram &d,
@@ -124,9 +136,6 @@ try {
 	if (site) {
 		b.Append(OptionalString(d.site));
 		b.Append(' ');
-
-		buffer = b.GetTail();
-		buffer_size = b.GetRemainingSize();
 	}
 
 	const char *method = d.HasHttpMethod() &&
@@ -157,19 +166,19 @@ try {
 
 	char escaped_uri[4096], escaped_referer[2048], escaped_ua[1024];
 
-	snprintf(buffer, buffer_size,
-		 "%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
-		 OptionalString(d.remote_host),
-		 stamp, method,
-		 EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
-		 d.http_status, length,
-		 EscapeString(OptionalString(d.http_referer),
-			      escaped_referer, sizeof(escaped_referer)),
-		 EscapeString(OptionalString(d.user_agent),
-			      escaped_ua, sizeof(escaped_ua)),
-		 duration);
+	AppendFormat(b,
+		     "%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
+		     OptionalString(d.remote_host),
+		     stamp, method,
+		     EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
+		     d.http_status, length,
+		     EscapeString(OptionalString(d.http_referer),
+				  escaped_referer, sizeof(escaped_referer)),
+		     EscapeString(OptionalString(d.user_agent),
+				  escaped_ua, sizeof(escaped_ua)),
+		     duration);
 
-	return buffer + strlen(buffer);
+	return b.GetTail();
 } catch (StringBuilder<>::Overflow) {
 	return buffer;
 }
@@ -184,9 +193,6 @@ try {
 	if (site) {
 		b.Append(OptionalString(d.site));
 		b.Append(' ');
-
-		buffer = b.GetTail();
-		buffer_size = b.GetRemainingSize();
 	}
 
 	StringBuffer<32> stamp_buffer;
@@ -196,13 +202,13 @@ try {
 
 	char escaped_message[4096];
 
-	snprintf(buffer, buffer_size,
-		 "[%s] %s\n",
-		 stamp,
-		 EscapeString(d.message, escaped_message,
-				      sizeof(escaped_message)));
+	AppendFormat(b,
+		     "[%s] %s\n",
+		     stamp,
+		     EscapeString(d.message, escaped_message,
+				  sizeof(escaped_message)));
 
-	return buffer + strlen(buffer);
+	return b.GetTail();
 } catch (StringBuilder<>::Overflow) {
 	return buffer;
 }
