@@ -39,27 +39,18 @@
 #include <stdio.h>
 #include <time.h>
 
-template<size_t capacity>
-static const char *
-FormatTimestamp(StringBuffer<capacity> &buffer,
-		Net::Log::TimePoint value) noexcept
+static void
+AppendTimestamp(StringBuilder<> &b, Net::Log::TimePoint value)
 {
 	using namespace std::chrono;
 	time_t t = duration_cast<seconds>(value.time_since_epoch()).count();
 	struct tm tm;
-	strftime(buffer.data(), buffer.capacity(),
-		 "%d/%b/%Y:%H:%M:%S %z", localtime_r(&t, &tm));
-	return buffer.c_str();
-}
+	size_t n = strftime(b.GetTail(), b.GetRemainingSize(),
+			    "%d/%b/%Y:%H:%M:%S %z", localtime_r(&t, &tm));
+	if (n == 0)
+		throw StringBuilder<>::Overflow();
 
-template<size_t capacity>
-static const char *
-FormatOptionalTimestamp(StringBuffer<capacity> &buffer, bool valid,
-			Net::Log::TimePoint value) noexcept
-{
-	return valid
-		? FormatTimestamp(buffer, value)
-		: "-";
+	b.Extend(n);
 }
 
 gcc_const
@@ -78,42 +69,24 @@ IsHarmlessChar(signed char ch) noexcept
 	return ch >= 0x20 && ch != '"' && ch != '\\';
 }
 
-static const char *
-EscapeString(const char *value,
-	     char *const buffer, size_t buffer_size) noexcept
+static void
+AppendEscape(StringBuilder<> &b, StringView value)
 {
-	char *p = buffer, *const buffer_limit = buffer + buffer_size - 4;
-	char ch;
-	while (p < buffer_limit && (ch = *value++) != 0) {
-		if (IsHarmlessChar(ch))
-			*p++ = ch;
-		else
-			p += sprintf(p, "\\x%02X", (unsigned char)ch);
-	}
+	if (b.GetRemainingSize() < value.size * 4)
+		throw StringBuilder<>::Overflow();
 
-	*p = 0;
-	return buffer;
-}
-
-static const char *
-EscapeString(StringView value, char *const buffer, size_t buffer_size) noexcept
-{
-	char *p = buffer, *const buffer_limit = buffer + buffer_size - 4;
+	char *p = b.GetTail();
+	size_t n = 0;
 
 	for (char ch : value) {
-		if (p >= buffer_limit)
-			break;
-
 		if (IsHarmlessChar(ch))
-			*p++ = ch;
+			p[n++] = ch;
 		else
-			p += sprintf(p, "\\x%02X", (unsigned char)ch);
+			n += sprintf(p + n, "\\x%02X", (unsigned char)ch);
 	}
 
-	*p = 0;
-	return buffer;
+	b.Extend(n);
 }
-
 
 template<typename... Args>
 static inline void
@@ -138,45 +111,42 @@ try {
 		b.Append(' ');
 	}
 
+	AppendFormat(b,
+		     "%s - - [",
+		     OptionalString(d.remote_host));
+
+	if (d.HasTimestamp())
+		AppendTimestamp(b, d.timestamp);
+	else
+		b.Append('-');
+
 	const char *method = d.HasHttpMethod() &&
 		http_method_is_valid(d.http_method)
 		? http_method_to_string(d.http_method)
 		: "?";
 
-	StringBuffer<32> stamp_buffer;
-	const char *stamp =
-		FormatOptionalTimestamp(stamp_buffer, d.HasTimestamp(),
-					d.timestamp);
+	AppendFormat(b, "] \"%s ", method);
 
-	char length_buffer[32];
-	const char *length = "-";
-	if (d.valid_length) {
-		snprintf(length_buffer, sizeof(length_buffer), "%llu",
-			 (unsigned long long)d.length);
-		length = length_buffer;
-	}
+	AppendEscape(b, d.http_uri);
 
-	char duration_buffer[32];
-	const char *duration = "-";
-	if (d.valid_duration) {
-		snprintf(duration_buffer, sizeof(duration_buffer), "%llu",
-			 (unsigned long long)d.duration.count());
-		duration = duration_buffer;
-	}
+	AppendFormat(b, " HTTP/1.1\" %u ", d.http_status);
 
-	char escaped_uri[4096], escaped_referer[2048], escaped_ua[1024];
+	if (d.valid_length)
+		AppendFormat(b, "%llu", (unsigned long long)d.length);
+	else
+		b.Append('-');
 
-	AppendFormat(b,
-		     "%s - - [%s] \"%s %s HTTP/1.1\" %u %s \"%s\" \"%s\" %s\n",
-		     OptionalString(d.remote_host),
-		     stamp, method,
-		     EscapeString(d.http_uri, escaped_uri, sizeof(escaped_uri)),
-		     d.http_status, length,
-		     EscapeString(OptionalString(d.http_referer),
-				  escaped_referer, sizeof(escaped_referer)),
-		     EscapeString(OptionalString(d.user_agent),
-				  escaped_ua, sizeof(escaped_ua)),
-		     duration);
+	b.Append(" \"");
+	AppendEscape(b, OptionalString(d.http_referer));
+	b.Append("\" \"");
+	AppendEscape(b, OptionalString(d.user_agent));
+	b.Append("\" ");
+
+	if (d.valid_duration)
+		AppendFormat(b, "%llu", (unsigned long long)d.duration.count());
+	else
+		b.Append('-');
+	b.Append('\n');
 
 	return b.GetTail();
 } catch (StringBuilder<>::Overflow) {
@@ -195,18 +165,15 @@ try {
 		b.Append(' ');
 	}
 
-	StringBuffer<32> stamp_buffer;
-	const char *stamp =
-		FormatOptionalTimestamp(stamp_buffer, d.HasTimestamp(),
-					d.timestamp);
+	b.Append('[');
+	if (d.HasTimestamp())
+		AppendTimestamp(b, d.timestamp);
+	else
+		b.Append('-');
 
-	char escaped_message[4096];
-
-	AppendFormat(b,
-		     "[%s] %s\n",
-		     stamp,
-		     EscapeString(d.message, escaped_message,
-				  sizeof(escaped_message)));
+	b.Append("] ");
+	AppendEscape(b, d.message);
+	b.Append('\n');
 
 	return b.GetTail();
 } catch (StringBuilder<>::Overflow) {
