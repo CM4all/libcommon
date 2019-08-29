@@ -193,7 +193,6 @@ try {
 		AppendFormat(b, "%llu", (unsigned long long)d.duration.count());
 	else
 		b.Append('-');
-	b.Append('\n');
 
 	return b.GetTail();
 } catch (StringBuilder<>::Overflow) {
@@ -220,7 +219,6 @@ try {
 
 	b.Append("] ");
 	AppendEscape(b, d.message);
-	b.Append('\n');
 
 	return b.GetTail();
 } catch (StringBuilder<>::Overflow) {
@@ -244,9 +242,10 @@ bool
 LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d, bool site) noexcept
 {
 	char buffer[16384];
-	char *end = FormatOneLine(buffer, sizeof(buffer), d, site);
+	char *end = FormatOneLine(buffer, sizeof(buffer) - 1, d, site);
 	if (end == buffer)
 		return true;
 
+	*end++ = '\n';
 	return fd.Write(buffer, end - buffer) >= 0;
 }
