@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2018 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2011-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,6 +44,8 @@ class FileWriter {
 
 	std::string tmp_path;
 
+	const FileDescriptor directory_fd;
+
 	UniqueFileDescriptor fd;
 
 public:
@@ -51,6 +53,8 @@ public:
 	 * Throws std::system_error on error.
 	 */
 	explicit FileWriter(const char *_path);
+
+	FileWriter(FileDescriptor _directory_fd, const char *_path);
 
 	~FileWriter() noexcept {
 		if (fd.IsDefined())
