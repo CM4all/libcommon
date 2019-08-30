@@ -40,15 +40,17 @@
  * previous state.
  */
 class FileWriter {
-	const std::string path;
+	std::string path;
 
 	std::string tmp_path;
 
-	const FileDescriptor directory_fd;
+	FileDescriptor directory_fd;
 
 	UniqueFileDescriptor fd;
 
 public:
+	FileWriter() = default;
+
 	/**
 	 * Throws std::system_error on error.
 	 */
@@ -59,6 +61,24 @@ public:
 	~FileWriter() noexcept {
 		if (fd.IsDefined())
 			Cancel();
+	}
+
+	FileWriter(FileWriter &&src) noexcept = default;
+
+	FileWriter &operator=(FileWriter &&src) noexcept {
+		using std::swap;
+		if (IsDefined())
+			Cancel();
+
+		path = std::move(src.path);
+		tmp_path = std::move(src.tmp_path);
+		directory_fd = src.directory_fd;
+		fd = std::move(src.fd);
+		return *this;
+	}
+
+	bool IsDefined() const noexcept {
+		return fd.IsDefined();
 	}
 
 	FileDescriptor GetFileDescriptor() noexcept {
