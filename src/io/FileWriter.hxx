@@ -52,12 +52,12 @@ public:
 	 */
 	explicit FileWriter(const char *_path);
 
-	~FileWriter() {
+	~FileWriter() noexcept {
 		if (fd.IsDefined())
 			Cancel();
 	}
 
-	FileDescriptor GetFileDescriptor() {
+	FileDescriptor GetFileDescriptor() noexcept {
 		return fd;
 	}
 
@@ -67,7 +67,7 @@ public:
 	 * fragmentation.  This is a hint, and there is no error
 	 * checking.
 	 */
-	void Allocate(off_t size);
+	void Allocate(off_t size) noexcept;
 
 	/**
 	 * Throws std::runtime_error on error.
@@ -82,7 +82,7 @@ public:
 	/**
 	 * Attempt to undo the changes by this class.
 	 */
-	void Cancel();
+	void Cancel() noexcept;
 };
 
 #endif

@@ -37,7 +37,7 @@
 #include <fcntl.h>
 
 static std::string
-GetDirectory(const char *path)
+GetDirectory(const char *path) noexcept
 {
 	const char *slash = strrchr(path, '/');
 	if (slash == nullptr)
@@ -82,7 +82,7 @@ FileWriter::FileWriter(const char *_path)
 }
 
 void
-FileWriter::Allocate(off_t size)
+FileWriter::Allocate(off_t size) noexcept
 {
 	fallocate(fd.Get(), FALLOC_FL_KEEP_SIZE, 0, size);
 }
@@ -125,7 +125,7 @@ FileWriter::Commit()
 }
 
 void
-FileWriter::Cancel()
+FileWriter::Cancel() noexcept
 {
 	assert(fd.IsDefined());
 
