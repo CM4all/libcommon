@@ -48,4 +48,14 @@ class UniqueFileDescriptor;
 UniqueFileDescriptor
 MakeDirectory(FileDescriptor parent_fd, const char *name, mode_t mode=0777);
 
+/**
+ * Like MakeDirectory(), but create parent directories as well.
+ *
+ * @param path a relative path which may contain segments separated by
+ * slash; however, it must not contain "." and ".." segments
+ */
+UniqueFileDescriptor
+MakeNestedDirectory(FileDescriptor parent_fd, const char *path,
+		    mode_t mode=0777);
+
 #endif
