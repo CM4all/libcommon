@@ -43,6 +43,7 @@ class UniqueFileDescriptor;
  *
  * @param mode the mode parameter for the mkdir() call; it has no
  * effect if the directory already exists
+ * @return an O_PATH file handle to the directory
  */
 UniqueFileDescriptor
 MakeDirectory(FileDescriptor parent_fd, const char *name, mode_t mode=0777);
