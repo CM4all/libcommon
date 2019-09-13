@@ -11,6 +11,7 @@ io = static_library(
   'MultiWriteBuffer.cxx',
   'FileWriter.cxx',
   'FdOutputStream.cxx',
+  'BufferedOutputStream.cxx',
   'LineParser.cxx',
   'FileLineParser.cxx',
   'ConfigParser.cxx',
