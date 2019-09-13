@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,6 +39,8 @@
 #include <cassert>
 #include <cstdint>
 
+class FileDescriptor;
+
 /**
  * A netstring input buffer.
  */
@@ -72,7 +74,7 @@ public:
 	/**
 	 * Throws std::runtime_error on error.
 	 */
-	Result Receive(int fd);
+	Result Receive(FileDescriptor fd);
 
 	AllocatedArray<uint8_t> &GetValue() noexcept {
 		assert(state == State::FINISHED);
@@ -81,9 +83,9 @@ public:
 	}
 
 private:
-	Result ReceiveHeader(int fd);
+	Result ReceiveHeader(FileDescriptor fd);
 	Result ValueData(size_t nbytes);
-	Result ReceiveValue(int fd);
+	Result ReceiveValue(FileDescriptor fd);
 };
 
 #endif

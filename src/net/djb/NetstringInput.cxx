@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,6 +31,7 @@
  */
 
 #include "NetstringInput.hxx"
+#include "io/FileDescriptor.hxx"
 #include "system/Error.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/CharUtil.hxx"
@@ -51,10 +52,10 @@ OnlyDigits(const char *p, size_t size) noexcept
 }
 
 inline NetstringInput::Result
-NetstringInput::ReceiveHeader(int fd)
+NetstringInput::ReceiveHeader(FileDescriptor fd)
 {
-	ssize_t nbytes = read(fd, header_buffer + header_position,
-			      sizeof(header_buffer) - header_position);
+	ssize_t nbytes = fd.Read(header_buffer + header_position,
+				 sizeof(header_buffer) - header_position);
 	if (nbytes < 0) {
 		switch (errno) {
 		case EAGAIN:
@@ -124,10 +125,10 @@ NetstringInput::ValueData(size_t nbytes)
 }
 
 inline NetstringInput::Result
-NetstringInput::ReceiveValue(int fd)
+NetstringInput::ReceiveValue(FileDescriptor fd)
 {
-	ssize_t nbytes = read(fd, &value.front() + value_position,
-			      value.size() - value_position);
+	ssize_t nbytes = fd.Read(&value.front() + value_position,
+				 value.size() - value_position);
 	if (nbytes < 0) {
 		switch (errno) {
 		case EAGAIN:
@@ -149,7 +150,7 @@ NetstringInput::ReceiveValue(int fd)
 }
 
 NetstringInput::Result
-NetstringInput::Receive(int fd)
+NetstringInput::Receive(FileDescriptor fd)
 {
 	switch (state) {
 	case State::FINISHED:

@@ -93,7 +93,7 @@ try {
 			break;
 		}
 	} else if (events & SocketEvent::READ) {
-		switch (input.Receive(in_fd)) {
+		switch (input.Receive(FileDescriptor(in_fd))) {
 		case NetstringInput::Result::MORE:
 			timeout_event.Schedule(busy_timeout);
 			break;
