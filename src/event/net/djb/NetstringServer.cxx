@@ -62,7 +62,7 @@ try {
 	for (const auto &i : list)
 		write.Push(i.data, i.size);
 
-	switch (write.Write(fd.Get())) {
+	switch (write.Write(fd.ToFileDescriptor())) {
 	case MultiWriteBuffer::Result::MORE:
 		throw std::runtime_error("short write");
 

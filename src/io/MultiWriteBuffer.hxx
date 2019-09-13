@@ -38,6 +38,8 @@
 #include <cstddef>
 #include <cassert>
 
+class FileDescriptor;
+
 class MultiWriteBuffer {
 	static constexpr size_t MAX_BUFFERS = 32;
 
@@ -57,5 +59,5 @@ public:
 	/**
 	 * Throws std::system_error on error.
 	 */
-	Result Write(int fd);
+	Result Write(FileDescriptor fd);
 };

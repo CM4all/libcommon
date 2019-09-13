@@ -80,7 +80,7 @@ void
 NetstringClient::OnEvent(unsigned events) noexcept
 try {
 	if (events & SocketEvent::WRITE) {
-		switch (write.Write(out_fd.Get())) {
+		switch (write.Write(out_fd)) {
 		case MultiWriteBuffer::Result::MORE:
 			timeout_event.Schedule(send_timeout);
 			break;

@@ -31,13 +31,14 @@
  */
 
 #include "MultiWriteBuffer.hxx"
+#include "io/FileDescriptor.hxx"
 #include "system/Error.hxx"
 
 #include <sys/uio.h>
 #include <errno.h>
 
 MultiWriteBuffer::Result
-MultiWriteBuffer::Write(int fd)
+MultiWriteBuffer::Write(FileDescriptor fd)
 {
 	assert(i < n);
 
@@ -48,7 +49,7 @@ MultiWriteBuffer::Write(int fd)
 		iov[k].iov_len = buffers[k].GetSize();
 	};
 
-	ssize_t nbytes = writev(fd, &iov[i], n - i);
+	ssize_t nbytes = writev(fd.Get(), &iov[i], n - i);
 	if (nbytes < 0) {
 		switch (errno) {
 		case EAGAIN:
