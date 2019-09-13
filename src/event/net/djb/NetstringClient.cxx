@@ -45,24 +45,24 @@ NetstringClient::NetstringClient(EventLoop &event_loop, size_t max_size,
 
 NetstringClient::~NetstringClient() noexcept
 {
-	if (out_fd >= 0 || in_fd >= 0)
+	if (out_fd.IsDefined() || in_fd.IsDefined())
 		event.Cancel();
 
-	if (out_fd >= 0)
-		close(out_fd);
+	if (out_fd.IsDefined())
+		out_fd.Close();
 
-	if (in_fd >= 0 && in_fd != out_fd)
-		close(in_fd);
+	if (in_fd.IsDefined() && in_fd != out_fd)
+		in_fd.Close();
 }
 
 void
-NetstringClient::Request(int _out_fd, int _in_fd,
+NetstringClient::Request(FileDescriptor _out_fd, FileDescriptor _in_fd,
 			 std::list<ConstBuffer<void>> &&data) noexcept
 {
-	assert(in_fd < 0);
-	assert(out_fd < 0);
-	assert(_in_fd >= 0);
-	assert(_out_fd >= 0);
+	assert(!in_fd.IsDefined());
+	assert(!out_fd.IsDefined());
+	assert(_in_fd.IsDefined());
+	assert(_out_fd.IsDefined());
 
 	out_fd = _out_fd;
 	in_fd = _in_fd;
@@ -71,7 +71,7 @@ NetstringClient::Request(int _out_fd, int _in_fd,
 	for (const auto &i : data)
 		write.Push(i.data, i.size);
 
-	event.Open(SocketDescriptor(out_fd));
+	event.Open(SocketDescriptor::FromFileDescriptor(out_fd));
 	event.ScheduleWrite();
 	timeout_event.Schedule(send_timeout);
 }
@@ -80,20 +80,20 @@ void
 NetstringClient::OnEvent(unsigned events) noexcept
 try {
 	if (events & SocketEvent::WRITE) {
-		switch (write.Write(out_fd)) {
+		switch (write.Write(out_fd.Get())) {
 		case MultiWriteBuffer::Result::MORE:
 			timeout_event.Schedule(send_timeout);
 			break;
 
 		case MultiWriteBuffer::Result::FINISHED:
 			event.Cancel();
-			event.Open(SocketDescriptor(in_fd));
+			event.Open(SocketDescriptor::FromFileDescriptor(in_fd));
 			event.ScheduleRead();
 			timeout_event.Schedule(recv_timeout);
 			break;
 		}
 	} else if (events & SocketEvent::READ) {
-		switch (input.Receive(FileDescriptor(in_fd))) {
+		switch (input.Receive(in_fd)) {
 		case NetstringInput::Result::MORE:
 			timeout_event.Schedule(busy_timeout);
 			break;

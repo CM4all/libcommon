@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "io/FileDescriptor.hxx"
 #include "io/MultiWriteBuffer.hxx"
 #include "net/djb/NetstringGenerator.hxx"
 #include "net/djb/NetstringInput.hxx"
@@ -61,7 +62,8 @@ public:
  * It is not possible to reuse an instance for a second email.
  */
 class NetstringClient final {
-	int out_fd = -1, in_fd = -1;
+	FileDescriptor out_fd = FileDescriptor::Undefined();
+	FileDescriptor in_fd = FileDescriptor::Undefined();
 
 	SocketEvent event;
 	TimerEvent timeout_event;
@@ -92,7 +94,7 @@ public:
 	 * request has been sent (i.e. until the #NetstringClientHandler
 	 * has been invoked)
 	 */
-	void Request(int _out_fd, int _in_fd,
+	void Request(FileDescriptor _out_fd, FileDescriptor _in_fd,
 		     std::list<ConstBuffer<void>> &&data) noexcept;
 
 private:

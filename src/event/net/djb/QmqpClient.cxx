@@ -43,7 +43,7 @@ QmqpClient::AppendNetstring(StringView value) noexcept
 }
 
 void
-QmqpClient::Commit(int out_fd, int in_fd) noexcept
+QmqpClient::Commit(FileDescriptor out_fd, FileDescriptor in_fd) noexcept
 {
 	assert(!netstring_headers.empty());
 	assert(!request.empty());

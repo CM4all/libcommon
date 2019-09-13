@@ -101,7 +101,7 @@ public:
 		AppendNetstring(recipient);
 	}
 
-	void Commit(int out_fd, int in_fd) noexcept;
+	void Commit(FileDescriptor out_fd, FileDescriptor in_fd) noexcept;
 
 private:
 	void AppendNetstring(StringView value) noexcept;
