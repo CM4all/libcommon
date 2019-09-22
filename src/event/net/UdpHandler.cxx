@@ -30,28 +30,20 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "UdpHandler.hxx"
+#include "net/SocketAddress.hxx"
+#include "io/UniqueFileDescriptor.hxx"
+#include "util/ConstBuffer.hxx"
+#include "util/WritableBuffer.hxx"
 
-#include "FullUdpHandler.hxx"
+bool
+UdpHandler::OnUdpDatagram(ConstBuffer<void> payload,
+			  WritableBuffer<UniqueFileDescriptor> fds,
+			  SocketAddress address, int uid)
+{
+	for (auto &i : fds)
+		i.Close();
 
-#include <exception>
-
-/**
- * Compatibility interface for those who havn't migrated to
- * #FullUdpHandler yet.
- */
-class UdpHandler : public FullUdpHandler {
-public:
-	bool OnUdpDatagram(ConstBuffer<void> payload,
-			   WritableBuffer<UniqueFileDescriptor> fds,
-			   SocketAddress address, int uid) final;
-
-	/**
-	 * Exceptions thrown by this method will be passed to OnUdpError().
-	 *
-	 * @param uid the peer process uid, or -1 if unknown
-	 * @return false if the #UdpHandler was destroyed inside this method
-	 */
-	virtual bool OnUdpDatagram(const void *data, size_t length,
-				   SocketAddress address, int uid) = 0;
-};
+	return OnUdpDatagram(payload.data, payload.size,
+			     address, uid);
+}

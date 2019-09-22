@@ -1,6 +1,7 @@
 event_net_sources = [
   'ConnectSocket.cxx',
   'ServerSocket.cxx',
+  'UdpHandler.cxx',
   'UdpListener.cxx',
   'MultiUdpListener.cxx',
   'SocketWrapper.cxx',

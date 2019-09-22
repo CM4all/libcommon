@@ -31,10 +31,11 @@
  */
 
 #include "UdpListener.hxx"
-#include "UdpHandler.hxx"
+#include "FullUdpHandler.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "system/Error.hxx"
+#include "util/WritableBuffer.hxx"
 
 #include <assert.h>
 #include <errno.h>
@@ -42,7 +43,7 @@
 #include <unistd.h>
 
 UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
-			 UdpHandler &_handler) noexcept
+			 FullUdpHandler &_handler) noexcept
 	:fd(std::move(_fd)),
 	 event(event_loop, BIND_THIS_METHOD(EventCallback), fd),
 	 handler(_handler)
@@ -77,12 +78,16 @@ UdpListener::ReceiveOne()
 {
 	ReceiveMessageBuffer<4096, 1024> buffer;
 	auto result = ReceiveMessage(fd, buffer, MSG_DONTWAIT);
-	result.fds.clear();
 	int uid = result.cred != nullptr
 		? result.cred->uid
 		: -1;
-	return handler.OnUdpDatagram(result.payload.data,
-				     result.payload.size,
+
+	WritableBuffer<UniqueFileDescriptor> fds;
+	if (!result.fds.empty())
+		fds =  {&result.fds.front(), result.fds.size()};
+
+	return handler.OnUdpDatagram(result.payload,
+				     fds,
 				     result.address,
 				     uid);
 }

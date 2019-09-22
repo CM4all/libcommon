@@ -40,7 +40,7 @@
 MultiUdpListener::MultiUdpListener(EventLoop &event_loop,
 				   UniqueSocketDescriptor _socket,
 				   MultiReceiveMessage &&_multi,
-				   UdpHandler &_handler) noexcept
+				   FullUdpHandler &_handler) noexcept
 	:socket(std::move(_socket)),
 	 event(event_loop, BIND_THIS_METHOD(EventCallback), socket),
 	 multi(std::move(_multi)),
@@ -55,12 +55,13 @@ void
 MultiUdpListener::EventCallback(unsigned) noexcept
 try {
 	if (!multi.Receive(socket)) {
-		handler.OnUdpDatagram(nullptr, 0, nullptr, -1);
+		handler.OnUdpDatagram(nullptr, nullptr, nullptr, -1);
 		return;
 	}
 
 	for (auto &d : multi)
-		if (!handler.OnUdpDatagram(d.payload.data, d.payload.size,
+		if (!handler.OnUdpDatagram(d.payload,
+					   d.fds,
 					   d.address,
 					   d.cred != nullptr
 					   ? d.cred->uid

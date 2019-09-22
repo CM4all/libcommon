@@ -32,81 +32,37 @@
 
 #pragma once
 
-#include "event/SocketEvent.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
+#include <exception>
 
 #include <stddef.h>
 
+template<typename T> struct ConstBuffer;
+template<typename T> struct WritableBuffer;
 class SocketAddress;
-class FullUdpHandler;
+class UniqueFileDescriptor;
 
 /**
- * Listener on a UDP port.
+ * Handler for a #UdpListener.
+ *
+ * This is a class for a smooth API transition away from #UdpHandler
+ * to an interface which allows receiving file descriptors.
  */
-class UdpListener {
-	UniqueSocketDescriptor fd;
-	SocketEvent event;
-
-	FullUdpHandler &handler;
-
+class FullUdpHandler {
 public:
-	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
-		    FullUdpHandler &_handler) noexcept;
-	~UdpListener() noexcept;
-
-	auto &GetEventLoop() const noexcept {
-		return event.GetEventLoop();
-	}
-
 	/**
-	 * Enable the object after it has been disabled by Disable().  A
-	 * new object is enabled by default.
-	 */
-	void Enable() noexcept {
-		event.ScheduleRead();
-	}
-
-	/**
-	 * Disable the object temporarily.  To undo this, call Enable().
-	 */
-	void Disable() noexcept {
-		event.Cancel();
-	}
-
-	/**
-	 * Obtains the underlying socket, which can be used to send
-	 * replies.
-	 */
-	SocketDescriptor GetSocket() noexcept {
-		return fd;
-	}
-
-	/**
-	 * Send a reply datagram to a client.
+	 * Exceptions thrown by this method will be passed to OnUdpError().
 	 *
-	 * Throws std::runtime_error on error.
+	 * @param uid the peer process uid, or -1 if unknown
+	 * @return false if the #UdpHandler was destroyed inside this method
 	 */
-	void Reply(SocketAddress address,
-		   const void *data, size_t data_length);
+	virtual bool OnUdpDatagram(ConstBuffer<void> payload,
+				   WritableBuffer<UniqueFileDescriptor> fds,
+				   SocketAddress address, int uid) = 0;
 
 	/**
-	 * Receive all pending datagram from the stocket and pass them
-	 * to the handler (until the handler returns false).  Throws
-	 * exception on error.
-	 *
-	 * @return false if one FullUdpHandler::OnUdpDatagram()
-	 * invocation has returned false
+	 * An I/O error has occurred, and the socket is defunct.
+	 * After returning, it is assumed that the #UdpListener has
+	 * been destroyed.
 	 */
-	bool ReceiveAll();
-
-private:
-	/**
-	 * Receive one datagram and pass it to the handler.  Throws
-	 * exception on error.
-	 *
-	 * @return FullUdpHandler::OnUdpDatagram()
-	 */
-	bool ReceiveOne();
-
-	void EventCallback(unsigned events) noexcept;
+	virtual void OnUdpError(std::exception_ptr ep) noexcept = 0;
 };
