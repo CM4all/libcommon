@@ -114,9 +114,9 @@ ReceiveMessage(SocketDescriptor s,
 		} else if (cmsg->cmsg_level == SOL_SOCKET &&
 			   cmsg->cmsg_type == SCM_RIGHTS) {
 			const int *fds = (const int *)CMSG_DATA(cmsg);
-			const unsigned n = (cmsg->cmsg_len - CMSG_LEN(0)) / sizeof(fds[0]);
+			const size_t n = (cmsg->cmsg_len - CMSG_LEN(0)) / sizeof(fds[0]);
 
-			for (unsigned i = 0; i < n; ++i)
+			for (size_t i = 0; i < n; ++i)
 				fds_tail = result.fds.emplace_after(fds_tail,
 								    FileDescriptor(fds[i]));
 		}
