@@ -68,31 +68,31 @@
 class SpawnServerProcess;
 
 class SpawnFdList {
-	std::forward_list<UniqueFileDescriptor> list;
+	std::vector<UniqueFileDescriptor> v;
+	decltype(v)::iterator i;
 
 public:
-	SpawnFdList(std::forward_list<UniqueFileDescriptor> &&_list) noexcept
-		:list(std::move(_list)) {}
+	SpawnFdList(std::vector<UniqueFileDescriptor> &&_v) noexcept
+		:v(std::move(_v)),
+		 i(v.begin()) {}
 
 	SpawnFdList(SpawnFdList &&src) = default;
 
 	SpawnFdList &operator=(SpawnFdList &&src) = default;
 
 	bool IsEmpty() noexcept {
-		return list.empty();
+		return i == v.end();
 	}
 
 	size_t size() const noexcept {
-		return std::distance(list.begin(), list.end());
+		return v.size();
 	}
 
 	UniqueFileDescriptor Get() {
 		if (IsEmpty())
 			throw MalformedSpawnPayloadError();
 
-		auto result = std::move(list.front());
-		list.pop_front();
-		return result;
+		return std::move(*i++);
 	}
 
 	UniqueSocketDescriptor GetSocket() {

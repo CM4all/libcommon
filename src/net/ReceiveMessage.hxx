@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -38,7 +38,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/ConstBuffer.hxx"
 
-#include <forward_list>
+#include <vector>
 
 #include <stdint.h>
 
@@ -60,7 +60,7 @@ struct ReceiveMessageResult {
 
 	const struct ucred *cred = nullptr;
 
-	std::forward_list<UniqueFileDescriptor> fds;
+	std::vector<UniqueFileDescriptor> fds;
 };
 
 template<size_t PAYLOAD_SIZE, size_t CMSG_SIZE>
@@ -99,8 +99,6 @@ ReceiveMessage(SocketDescriptor s,
 	result.address = {buffer.address, msg.msg_namelen};
 	result.payload = {buffer.payload, size_t(nbytes)};
 
-	auto fds_tail = result.fds.before_begin();
-
 #ifdef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
@@ -115,10 +113,10 @@ ReceiveMessage(SocketDescriptor s,
 			   cmsg->cmsg_type == SCM_RIGHTS) {
 			const int *fds = (const int *)CMSG_DATA(cmsg);
 			const size_t n = (cmsg->cmsg_len - CMSG_LEN(0)) / sizeof(fds[0]);
+			result.fds.reserve(result.fds.size() + n);
 
 			for (size_t i = 0; i < n; ++i)
-				fds_tail = result.fds.emplace_after(fds_tail,
-								    FileDescriptor(fds[i]));
+				result.fds.emplace_back(FileDescriptor(fds[i]));
 		}
 
 		cmsg = CMSG_NXTHDR(&msg, cmsg);

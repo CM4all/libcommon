@@ -86,7 +86,7 @@ SendPidNamespaceRequest(SocketDescriptor s, StringView name)
 }
 
 template<size_t PAYLOAD_SIZE, size_t CMSG_SIZE>
-static std::pair<ConstBuffer<void>, std::forward_list<UniqueFileDescriptor>>
+static std::pair<ConstBuffer<void>, std::vector<UniqueFileDescriptor>>
 ReceiveDatagram(SocketDescriptor s,
 		ReceiveMessageBuffer<PAYLOAD_SIZE, CMSG_SIZE> &buffer)
 {
@@ -142,8 +142,7 @@ MakePidNamespace(SocketDescriptor s, const char *name)
 	case ResponseCommand::NAMESPACE_HANDLES:
 		if (rh.size != sizeof(uint32_t) ||
 		    *(const uint32_t *)payload.data != CLONE_NEWPID ||
-		    fds.begin() == fds.end() ||
-		    std::next(fds.begin()) != fds.end())
+		    fds.size() != 1)
 			throw std::runtime_error("Malformed NAMESPACE_HANDLES payload");
 
 		return std::move(fds.front());
