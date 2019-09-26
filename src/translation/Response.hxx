@@ -336,6 +336,8 @@ struct TranslateResponse {
 
     bool secure_cookie;
 
+    bool require_csrf_token, send_csrf_token;
+
     /**
      * @see #TranslationCommand::REALM_FROM_AUTH_BASE
      */

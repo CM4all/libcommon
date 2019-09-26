@@ -968,6 +968,18 @@ enum class TranslationCommand : uint16_t {
      * response is going to be cached).
      */
     CACHE_TAG = 208,
+
+    /**
+     * Require a valid "X-CM4all-CSRF-Token" header for modifying
+     * requests (POST etc.).
+     */
+    REQUIRE_CSRF_TOKEN = 209,
+
+    /**
+     * A valid "X-CM4all-CSRF-Token" header will be added to the
+     * response.
+     */
+    SEND_CSRF_TOKEN = 210,
 };
 
 struct TranslationHeader {

@@ -2143,6 +2143,22 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
         break;
 #endif
 
+    case TranslationCommand::REQUIRE_CSRF_TOKEN:
+#if TRANSLATION_ENABLE_SESSION
+        response.require_csrf_token = true;
+        return;
+#else
+        break;
+#endif
+
+    case TranslationCommand::SEND_CSRF_TOKEN:
+#if TRANSLATION_ENABLE_SESSION
+        response.send_csrf_token = true;
+        return;
+#else
+        break;
+#endif
+
     case TranslationCommand::COOKIE_DOMAIN:
 #if TRANSLATION_ENABLE_SESSION
         if (response.cookie_domain != nullptr)

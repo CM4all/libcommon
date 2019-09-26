@@ -132,6 +132,8 @@ TranslateResponse::Clear()
     stateful = false;
     discard_session = false;
     secure_cookie = false;
+    require_csrf_token = false;
+    send_csrf_token = false;
 #endif
 #if TRANSLATION_ENABLE_TRANSFORMATION
     filter_4xx = false;
@@ -325,6 +327,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
 #if TRANSLATION_ENABLE_SESSION
     stateful = src.stateful;
+    require_csrf_token = src.require_csrf_token;
+    send_csrf_token = src.send_csrf_token;
     discard_session = src.discard_session;
     secure_cookie = src.secure_cookie;
 #endif
