@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,16 +30,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_TRANSLATE_HANDLER_HXX
-#define BENG_PROXY_TRANSLATE_HANDLER_HXX
+#pragma once
 
 #include <exception>
 
 struct TranslateResponse;
 
-struct TranslateHandler {
-    void (*response)(TranslateResponse &response, void *ctx);
-    void (*error)(std::exception_ptr ep, void *ctx);
+class TranslateHandler {
+public:
+    virtual void OnTranslateResponse(TranslateResponse &response) noexcept = 0;
+    virtual void OnTranslateError(std::exception_ptr error) noexcept = 0;
 };
-
-#endif
