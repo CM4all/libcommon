@@ -31,6 +31,7 @@
  */
 
 #include "AsyncConnection.hxx"
+#include "Error.hxx"
 #include "util/Exception.hxx"
 
 namespace Pg {
@@ -79,6 +80,31 @@ AsyncConnection::Error(std::exception_ptr e) noexcept
 		   calling this method without triggering an assertion
 		   failure in Error() */
 		Error();
+}
+
+gcc_pure
+static bool
+IsFatalPgError(std::exception_ptr ep) noexcept
+{
+	try {
+		FindRetrowNested<Pg::Error>(ep);
+		return false;
+	} catch (const Pg::Error &e) {
+		return e.IsFatal();
+	} catch (...) {
+		return false;
+	}
+}
+
+bool
+AsyncConnection::CheckError(std::exception_ptr e) noexcept
+{
+	const bool fatal = IsFatalPgError(e);
+	if (fatal)
+		Error(std::move(e));
+	else
+		handler.OnError(std::move(e));
+	return fatal;
 }
 
 void
