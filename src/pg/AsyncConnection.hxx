@@ -198,6 +198,15 @@ public:
 	 */
 	void Error(std::exception_ptr e) noexcept;
 
+	/**
+	 * Call this after catching an exception.  If it is a "fatal"
+	 * #Pg::Error, it will call Error(); otherwise, it will only
+	 * forward the exception on AsyncConnectionHandler::OnError().
+	 *
+	 * @return true if the error was fatal
+	 */
+	bool CheckError(std::exception_ptr e) noexcept;
+
 	template<typename... Params>
 	void SendQuery(AsyncResultHandler &_handler, Params... params) {
 		assert(IsIdle());
