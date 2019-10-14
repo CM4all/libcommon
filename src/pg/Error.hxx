@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -37,6 +37,8 @@
 
 #include <exception>
 
+struct StringView;
+
 namespace Pg {
 
 class Error final : public std::exception {
@@ -73,6 +75,9 @@ public:
 
 	gcc_pure
 	bool IsType(const char *type) const noexcept;
+
+	gcc_pure
+	bool HasTypePrefix(StringView type_prefix) const noexcept;
 
 	/**
 	 * Is this a serialization failure, i.e. a problem with "BEGIN

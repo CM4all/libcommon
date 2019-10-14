@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,6 +31,7 @@
  */
 
 #include "Error.hxx"
+#include "util/StringCompare.hxx"
 
 #include <string.h>
 
@@ -40,4 +41,12 @@ Pg::Error::IsType(const char *expected_type) const noexcept
 	const char *actual_type = GetType();
 	return actual_type != nullptr &&
 		strcmp(actual_type, expected_type) == 0;
+}
+
+bool
+Pg::Error::HasTypePrefix(StringView type_prefix) const noexcept
+{
+	const char *actual_type = GetType();
+	return actual_type != nullptr &&
+		StringStartsWith(actual_type, type_prefix);
 }
