@@ -82,7 +82,7 @@ UdpListener::ReceiveOne()
 		? result.cred->uid
 		: -1;
 
-	WritableBuffer<UniqueFileDescriptor> fds;
+	WritableBuffer<UniqueFileDescriptor> fds = nullptr;
 	if (!result.fds.empty())
 		fds =  {&result.fds.front(), result.fds.size()};
 
