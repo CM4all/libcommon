@@ -80,6 +80,13 @@ public:
 	bool HasTypePrefix(StringView type_prefix) const noexcept;
 
 	/**
+	 * Is this error fatal, i.e. has the connection become
+	 * unusable?
+	 */
+	gcc_pure
+	bool IsFatal() const noexcept;
+
+	/**
 	 * Is this a serialization failure, i.e. a problem with "BEGIN
 	 * SERIALIZABLE" or Pg::Connection::BeginSerializable().
 	 */

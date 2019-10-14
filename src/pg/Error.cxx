@@ -50,3 +50,11 @@ Pg::Error::HasTypePrefix(StringView type_prefix) const noexcept
 	return actual_type != nullptr &&
 		StringStartsWith(actual_type, type_prefix);
 }
+
+bool
+Pg::Error::IsFatal() const noexcept
+{
+	/* Class 08 - Connection Exception; see
+	   https://www.postgresql.org/docs/9.6/errcodes-appendix.html */
+	return HasTypePrefix("08");
+}
