@@ -8,6 +8,7 @@ util_sources = [
   'StringParser.cxx',
   'StringStrip.cxx',
   'StringView.cxx',
+  'UTF8.cxx',
 ]
 
 if get_variable('libcommon_enable_c', true)
