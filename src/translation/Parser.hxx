@@ -38,7 +38,7 @@
 #include "AllocatorPtr.hxx"
 #include "util/TrivialArray.hxx"
 
-#ifdef TRANSLATION_ENABLE_RADDRESS
+#if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
 #endif
 
