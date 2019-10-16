@@ -61,218 +61,220 @@ struct StringView;
  * Parse translation response packets.
  */
 class TranslateParser {
-    AllocatorPtr alloc;
+	AllocatorPtr alloc;
 
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
-    struct FromRequest {
+	struct FromRequest {
 #if TRANSLATION_ENABLE_RADDRESS
-        const char *uri;
+		const char *uri;
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
-        bool want_full_uri;
+		bool want_full_uri;
 #endif
 
-        bool want;
+		bool want;
 
 #if TRANSLATION_ENABLE_RADDRESS
-        bool content_type_lookup;
+		bool content_type_lookup;
 #endif
 
-        explicit FromRequest(const TranslateRequest &r)
-            :
+		explicit FromRequest(const TranslateRequest &r)
+			:
 #if TRANSLATION_ENABLE_RADDRESS
-            uri(r.uri),
+			uri(r.uri),
 #endif
 #if TRANSLATION_ENABLE_HTTP
-             want_full_uri(!r.want_full_uri.IsNull()),
+			want_full_uri(!r.want_full_uri.IsNull()),
 #endif
-             want(!r.want.empty())
+			want(!r.want.empty())
 #if TRANSLATION_ENABLE_RADDRESS
-            , content_type_lookup(!r.content_type_lookup.IsNull())
+			, content_type_lookup(!r.content_type_lookup.IsNull())
 #endif
-        {}
-    } from_request;
-#endif
-
-    /**
-     * Has #TranslationCommand::BEGIN been seen already?
-     */
-    bool begun = false;
-
-    TranslatePacketReader reader;
-    TranslateResponse response;
-
-    TranslationCommand previous_command;
-
-    TrivialArray<const char *, 16> probe_suffixes_builder;
-
-#if TRANSLATION_ENABLE_RADDRESS
-    /** the current resource address being edited */
-    ResourceAddress *resource_address;
+		{}
+	} from_request;
 #endif
 
-    /** the current JailCGI parameters being edited */
-    JailParams *jail;
+	/**
+	 * Has #TranslationCommand::BEGIN been seen already?
+	 */
+	bool begun = false;
 
-    /** the current child process options being edited */
-    ChildOptions *child_options;
+	TranslatePacketReader reader;
+	TranslateResponse response;
 
-    /** the current namespace options being edited */
-    NamespaceOptions *ns_options;
+	TranslationCommand previous_command;
 
-    /** the tail of the current mount_list */
-    MountList **mount_list;
+	TrivialArray<const char *, 16> probe_suffixes_builder;
 
 #if TRANSLATION_ENABLE_RADDRESS
-    /** the current local file address being edited */
-    FileAddress *file_address;
-
-    /** the current HTTP/AJP address being edited */
-    HttpAddress *http_address;
-
-    /** the current CGI/FastCGI/WAS address being edited */
-    CgiAddress *cgi_address;
-
-    /** the current NFS address being edited */
-    NfsAddress *nfs_address;
-
-    /** the current "local HTTP" address being edited */
-    LhttpAddress *lhttp_address;
-
-    /** the current address list being edited */
-    AddressList *address_list;
+	/** the current resource address being edited */
+	ResourceAddress *resource_address;
 #endif
 
-    ExpandableStringList::Builder env_builder, args_builder;
+	/** the current JailCGI parameters being edited */
+	JailParams *jail;
+
+	/** the current child process options being edited */
+	ChildOptions *child_options;
+
+	/** the current namespace options being edited */
+	NamespaceOptions *ns_options;
+
+	/** the tail of the current mount_list */
+	MountList **mount_list;
 
 #if TRANSLATION_ENABLE_RADDRESS
-    ExpandableStringList::Builder params_builder;
+	/** the current local file address being edited */
+	FileAddress *file_address;
 
-    /**
-     * Default port for #TranslationCommand::ADDRESS_STRING.
-     */
-    int default_port;
+	/** the current HTTP/AJP address being edited */
+	HttpAddress *http_address;
+
+	/** the current CGI/FastCGI/WAS address being edited */
+	CgiAddress *cgi_address;
+
+	/** the current NFS address being edited */
+	NfsAddress *nfs_address;
+
+	/** the current "local HTTP" address being edited */
+	LhttpAddress *lhttp_address;
+
+	/** the current address list being edited */
+	AddressList *address_list;
+#endif
+
+	ExpandableStringList::Builder env_builder, args_builder;
+
+#if TRANSLATION_ENABLE_RADDRESS
+	ExpandableStringList::Builder params_builder;
+
+	/**
+	 * Default port for #TranslationCommand::ADDRESS_STRING.
+	 */
+	int default_port;
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
-    /** the current widget view */
-    WidgetView *view;
+	/** the current widget view */
+	WidgetView *view;
 
-    /** pointer to the tail of the transformation view linked list */
-    WidgetView **widget_view_tail;
+	/** pointer to the tail of the transformation view linked list */
+	WidgetView **widget_view_tail;
 #endif
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
-    /** the current transformation */
-    Transformation *transformation;
+	/** the current transformation */
+	Transformation *transformation;
 
-    /** pointer to the tail of the transformation linked list */
-    Transformation **transformation_tail;
+	/** pointer to the tail of the transformation linked list */
+	Transformation **transformation_tail;
 
-    FilterTransformation *filter;
+	FilterTransformation *filter;
 #endif
 
 public:
-    explicit TranslateParser(AllocatorPtr _alloc
+	explicit TranslateParser(AllocatorPtr _alloc
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
-                             , const TranslateRequest &r
+				 , const TranslateRequest &r
 #endif
-                             )
-        :alloc(_alloc)
+				 )
+		:alloc(_alloc)
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
-        , from_request(r)
+		, from_request(r)
 #endif
-    {
-    }
+	{
+	}
 
-    size_t Feed(const uint8_t *data, size_t length) {
-        return reader.Feed(alloc, data, length);
-    }
+	size_t Feed(const uint8_t *data, size_t length) {
+		return reader.Feed(alloc, data, length);
+	}
 
-    enum class Result {
-        MORE,
-        DONE,
-    };
+	enum class Result {
+		MORE,
+		DONE,
+	};
 
-    /**
-     * Throws std::runtime_error on error.
-     */
-    Result Process();
+	/**
+	 * Throws std::runtime_error on error.
+	 */
+	Result Process();
 
-    TranslateResponse &GetResponse() {
-        return response;
-    }
+	TranslateResponse &GetResponse() {
+		return response;
+	}
 
 private:
-    bool HasArgs() const {
+	bool HasArgs() const {
 #if TRANSLATION_ENABLE_RADDRESS
-        if (cgi_address != nullptr || lhttp_address != nullptr)
-            return true;
+		if (cgi_address != nullptr || lhttp_address != nullptr)
+			return true;
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
-        if (response.execute != nullptr)
-            return true;
+		if (response.execute != nullptr)
+			return true;
 #endif
 
-        return false;
-    }
+		return false;
+	}
 
-    void SetChildOptions(ChildOptions &_child_options);
+	void SetChildOptions(ChildOptions &_child_options);
 
 #if TRANSLATION_ENABLE_RADDRESS
-    void SetCgiAddress(ResourceAddress::Type type, const char *path);
+	void SetCgiAddress(ResourceAddress::Type type, const char *path);
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
-    /**
-     * Throws std::runtime_error on error.
-     */
-    void AddView(const char *name);
+	/**
+	 * Throws std::runtime_error on error.
+	 */
+	void AddView(const char *name);
 
-    /**
-     * Finish the settings in the current view, i.e. copy attributes
-     * from the "parent" view.
-     *
-     * Throws std::runtime_error on error.
-     */
-    void FinishView();
+	/**
+	 * Finish the settings in the current view, i.e. copy attributes
+	 * from the "parent" view.
+	 *
+	 * Throws std::runtime_error on error.
+	 */
+	void FinishView();
 #endif
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
-    template<typename... Args>
-    Transformation *AddTransformation(Args&&... args) noexcept;
-    ResourceAddress *AddFilter();
-    void AddSubstYamlFile(const char *prefix,
-                          const char *file_path,
-                          const char *map_path) noexcept;
+	template<typename... Args>
+	Transformation *AddTransformation(Args&&... args) noexcept;
+	ResourceAddress *AddFilter();
+	void AddSubstYamlFile(const char *prefix,
+			      const char *file_path,
+			      const char *map_path) noexcept;
 #endif
 
-    void HandleBindMount(StringView payload,
-                         bool expand, bool writable, bool exec=false);
+	void HandleBindMount(StringView payload,
+			     bool expand, bool writable, bool exec=false);
 
-    void HandleRefence(StringView payload);
+	void HandleRefence(StringView payload);
 
 #if TRANSLATION_ENABLE_WANT
-    void HandleWant(const TranslationCommand *payload, size_t payload_length);
+	void HandleWant(const TranslationCommand *payload,
+			size_t payload_length);
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
-    void HandleContentTypeLookup(ConstBuffer<void> payload);
+	void HandleContentTypeLookup(ConstBuffer<void> payload);
 #endif
 
-    void HandleRegularPacket(TranslationCommand command,
-                             ConstBuffer<void> payload);
+	void HandleRegularPacket(TranslationCommand command,
+				 ConstBuffer<void> payload);
 
-    void HandleUidGid(ConstBuffer<void> payload);
-    void HandleUmask(ConstBuffer<void> payload);
+	void HandleUidGid(ConstBuffer<void> payload);
+	void HandleUmask(ConstBuffer<void> payload);
 
-    void HandleCgroupSet(StringView payload);
+	void HandleCgroupSet(StringView payload);
 
-    void HandleSubstYamlFile(StringView payload);
+	void HandleSubstYamlFile(StringView payload);
 
-    Result HandlePacket(TranslationCommand command, ConstBuffer<void> payload);
+	Result HandlePacket(TranslationCommand command,
+			    ConstBuffer<void> payload);
 };
 
 #endif
