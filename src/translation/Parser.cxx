@@ -31,6 +31,7 @@
  */
 
 #include "Parser.hxx"
+#include "Response.hxx"
 #if TRANSLATION_ENABLE_TRANSFORMATION
 #include "translation/Transformation.hxx"
 #include "bp/XmlProcessor.hxx"

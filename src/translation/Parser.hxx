@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,15 +34,19 @@
 #define BENG_PROXY_TRANSLATE_PARSER_HXX
 
 #include "PReader.hxx"
-#include "Response.hxx"
 #include "adata/ExpandableStringList.hxx"
 #include "AllocatorPtr.hxx"
 #include "util/TrivialArray.hxx"
+
+#ifdef TRANSLATION_ENABLE_RADDRESS
+#include "ResourceAddress.hxx"
+#endif
 
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
 #include "translation/Request.hxx"
 #endif
 
+struct TranslateResponse;
 struct FileAddress;
 struct CgiAddress;
 struct HttpAddress;
@@ -56,6 +60,7 @@ struct AddressList;
 struct Transformation;
 struct FilterTransformation;
 struct StringView;
+struct WidgetView;
 
 /**
  * Parse translation response packets.
@@ -101,7 +106,7 @@ class TranslateParser {
 	bool begun = false;
 
 	TranslatePacketReader reader;
-	TranslateResponse response;
+	TranslateResponse &response;
 
 	TranslationCommand previous_command;
 
@@ -174,15 +179,16 @@ class TranslateParser {
 #endif
 
 public:
-	explicit TranslateParser(AllocatorPtr _alloc
+	explicit TranslateParser(AllocatorPtr _alloc,
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
-				 , const TranslateRequest &r
+				 const TranslateRequest &r,
 #endif
-				 )
-		:alloc(_alloc)
+				 TranslateResponse &_response)
+		:alloc(_alloc),
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
-		, from_request(r)
+		 from_request(r),
 #endif
+		 response(_response)
 	{
 	}
 
