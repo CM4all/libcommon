@@ -49,10 +49,34 @@ struct SystemdUnitProperties {
 	uint64_t tasks_max = 0;
 
 	/**
+	 * MemoryMin; 0 means "undefined" (i.e. use systemd's
+	 * default).
+	 */
+	uint64_t memory_min = 0;
+
+	/**
+	 * MemoryLow; 0 means "undefined" (i.e. use systemd's
+	 * default).
+	 */
+	uint64_t memory_low = 0;
+
+	/**
+	 * MemoryHigh; 0 means "undefined" (i.e. use systemd's
+	 * default).
+	 */
+	uint64_t memory_high = 0;
+
+	/**
 	 * MemoryMax; 0 means "undefined" (i.e. use systemd's
 	 * default).
 	 */
 	uint64_t memory_max = 0;
+
+	/**
+	 * MemorySwapMax; 0 means "undefined" (i.e. use systemd's
+	 * default).
+	 */
+	uint64_t memory_swap_max = 0;
 
 	/**
 	 * IOWeight; 0 means "undefined" (i.e. use systemd's default).

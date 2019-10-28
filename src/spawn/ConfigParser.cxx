@@ -205,8 +205,20 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 	} else if (StringIsEqualIgnoreCase(word, "TasksMax")) {
 		config.systemd_scope_properties.tasks_max =
 			ParseTasksMax(line.ExpectValueAndEnd());
+	} else if (StringIsEqualIgnoreCase(word, "MemoryMin")) {
+		config.systemd_scope_properties.memory_min =
+			ParseMemorySize(line.ExpectValueAndEnd());
+	} else if (StringIsEqualIgnoreCase(word, "MemoryLow")) {
+		config.systemd_scope_properties.memory_low =
+			ParseMemorySize(line.ExpectValueAndEnd());
+	} else if (StringIsEqualIgnoreCase(word, "MemoryHigh")) {
+		config.systemd_scope_properties.memory_high =
+			ParseMemorySize(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryMax")) {
 		config.systemd_scope_properties.memory_max =
+			ParseMemorySize(line.ExpectValueAndEnd());
+	} else if (StringIsEqualIgnoreCase(word, "MemorySwapMax")) {
+		config.systemd_scope_properties.memory_swap_max =
 			ParseMemorySize(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "IOWeight")) {
 		config.systemd_scope_properties.io_weight =
