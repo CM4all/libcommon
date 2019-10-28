@@ -440,8 +440,8 @@ SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
 	}
 }
 
-inline bool
-SpawnServerClient::ReceiveAndHandle() noexcept
+inline void
+SpawnServerClient::ReceiveAndHandle()
 {
 	constexpr size_t N = 64;
 	std::array<uint8_t[16], N> payloads;
@@ -466,23 +466,17 @@ SpawnServerClient::ReceiveAndHandle() noexcept
 			 MSG_DONTWAIT|MSG_CMSG_CLOEXEC, nullptr);
 	if (n <= 0) {
 		if (n < 0)
-			fprintf(stderr, "recvmsg() from spawner failed: %s\n",
-				strerror(errno));
+			throw MakeErrno("recvmsg() from spawner failed");
 		else
-			fprintf(stderr, "spawner closed the socket\n");
-		Close();
-		return false;
+			throw std::runtime_error("spawner closed the socket");
 	}
 
 	for (int i = 0; i < n; ++i) {
-		if (msgs[i].msg_len == 0) {
+		if (msgs[i].msg_len == 0)
 			/* when the peer closes the socket, recvmmsg() doesn't
 			   return 0; insteaed, it fills the mmsghdr array with
 			   empty packets */
-			fprintf(stderr, "spawner closed the socket\n");
-			Close();
-			return false;
-		}
+			throw std::runtime_error("spawner closed the socket");
 
 		try {
 			HandleMessage({payloads[i], msgs[i].msg_len});
@@ -490,12 +484,13 @@ SpawnServerClient::ReceiveAndHandle() noexcept
 			PrintException(std::current_exception());
 		}
 	}
-
-	return true;
 }
 
 inline void
 SpawnServerClient::OnSocketEvent(unsigned) noexcept
-{
+try {
 	ReceiveAndHandle();
+} catch (...) {
+	PrintException(std::current_exception());
+	Close();
 }
