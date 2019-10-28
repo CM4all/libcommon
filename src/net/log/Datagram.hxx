@@ -115,6 +115,10 @@ struct Datagram {
 	bool HasHttpStatus() const noexcept {
 		return http_status != http_status_t(0);
 	}
+
+	bool GuessIsHttpAccess() const noexcept {
+		return http_uri != nullptr && HasHttpStatus();
+	}
 };
 
 }}
