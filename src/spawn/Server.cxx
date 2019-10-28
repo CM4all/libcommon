@@ -58,6 +58,7 @@
 
 #include <system_error>
 #include <algorithm>
+#include <forward_list>
 #include <memory>
 #include <map>
 
@@ -65,7 +66,6 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <poll.h>
 #include <string.h>
 #include <errno.h>
 
@@ -174,6 +174,16 @@ class SpawnServerConnection
 				      boost::intrusive::compare<SpawnServerChild::CompareId>> ChildIdMap;
 	ChildIdMap children;
 
+	struct ExitQueueItem {
+		int id;
+		int status;
+	};
+
+	/**
+	 * Filled by SendExit() if sendmsg()==EAGAIN.
+	 */
+	std::forward_list<ExitQueueItem> exit_queue;
+
 public:
 	SpawnServerConnection(SpawnServerProcess &_process,
 			      UniqueSocketDescriptor &&_socket) noexcept;
@@ -195,6 +205,7 @@ private:
 	void HandleMessage(ReceiveMessageResult &&result);
 
 	void ReceiveAndHandle();
+	void FlushExitQueue();
 
 	void OnSocketEvent(unsigned events) noexcept;
 };
@@ -321,29 +332,10 @@ SpawnServerConnection::SendExit(int id, int status) noexcept
 			::Send<1>(socket, s);
 		} catch (const std::system_error &e) {
 			if (IsErrno(e, EAGAIN)) {
-				/* the client may be busy, while the datagram queue
-				   has filled (see /proc/sys/net/unix/max_dgram_qlen);
-				   wait some more before giving up */
-				struct pollfd pfd;
-				pfd.fd = socket.Get();
-				pfd.events = POLLOUT;
-
-				static const struct timespec timeout = {10, 0};
-
-				/* ignore all signals while waiting, or else the poll
-				   may be interrupted too early by the next SIGCHLD */
-				sigset_t signals;
-				sigfillset(&signals);
-
-				if (ppoll(&pfd, 1, &timeout, &signals) > 0) {
-					/* try again (may throw another exception) */
-					::Send<1>(socket, s);
-					/* yay, it worked! */
-					return;
-				}
-			}
-
-			throw;
+				exit_queue.push_front({id, status});
+				event.ScheduleWrite();
+			} else
+				throw;
 		}
 	} catch (...) {
 		logger(1, "Failed to send EXIT to worker: ",
@@ -714,6 +706,30 @@ SpawnServerConnection::ReceiveAndHandle()
 }
 
 inline void
+SpawnServerConnection::FlushExitQueue()
+{
+	while (!exit_queue.empty()) {
+		const auto &i = exit_queue.front();
+
+		SpawnSerializer s(SpawnResponseCommand::EXIT);
+		s.WriteInt(i.id);
+		s.WriteInt(i.status);
+
+		try {
+			::Send<1>(socket, s);
+		} catch (const std::system_error &e) {
+			if (IsErrno(e, EAGAIN))
+				return;
+			throw;
+		}
+
+		exit_queue.pop_front();
+	}
+
+	event.CancelWrite();
+}
+
+inline void
 SpawnServerConnection::OnSocketEvent(unsigned events) noexcept
 try {
 	if (events & event.ERROR)
@@ -724,7 +740,11 @@ try {
 		return;
 	}
 
-	ReceiveAndHandle();
+	if (events & event.WRITE)
+		FlushExitQueue();
+
+	if (events & event.READ)
+		ReceiveAndHandle();
 } catch (...) {
 	logger(2, std::current_exception());
 	RemoveConnection();
