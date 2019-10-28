@@ -385,11 +385,10 @@ SpawnServerClient::KillChildProcess(int pid, int signo) noexcept
 			   /proc/sys/net/unix/max_dgram_qlen limit may
 			   be reached; wait a little bit before giving
 			   up */
-			if (IsErrno(e, EAGAIN) &&
-			    socket.WaitWritable(100) > 0)
-				/* try again (may throw another exception) */
-				Send(s.GetPayload(), s.GetFds());
-			else
+			if (IsErrno(e, EAGAIN)) {
+				kill_queue.push_front({pid, signo});
+				event.ScheduleWrite();
+			} else
 				throw;
 		}
 	} catch (const std::runtime_error &e) {
@@ -438,6 +437,30 @@ SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
 		HandleExitMessage(SpawnPayload(payload));
 		break;
 	}
+}
+
+inline void
+SpawnServerClient::FlushKillQueue()
+{
+	while (!kill_queue.empty()) {
+		const auto &i = kill_queue.front();
+
+		SpawnSerializer s(SpawnRequestCommand::KILL);
+		s.WriteInt(i.pid);
+		s.WriteInt(i.signo);
+
+		try {
+			Send(s.GetPayload(), s.GetFds());
+		} catch (const std::system_error &e) {
+			if (IsErrno(e, EAGAIN))
+				return;
+			throw;
+		}
+
+		kill_queue.pop_front();
+	}
+
+	event.CancelWrite();
 }
 
 inline void
@@ -495,7 +518,11 @@ try {
 	if (events & event.HANGUP)
 		throw std::runtime_error("Spawner hung up");
 
-	ReceiveAndHandle();
+	if (events & event.WRITE)
+		FlushKillQueue();
+
+	if (events & event.READ)
+		ReceiveAndHandle();
 } catch (...) {
 	PrintException(std::current_exception());
 	Close();
