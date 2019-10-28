@@ -38,6 +38,7 @@
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
+#include <forward_list>
 #include <map>
 
 template<typename T> struct ConstBuffer;
@@ -53,6 +54,11 @@ class SpawnServerClient final : public SpawnService {
 			:listener(_listener) {}
 	};
 
+	struct KillQueueItem {
+		int pid;
+		int signo;
+	};
+
 	const SpawnConfig config;
 
 	UniqueSocketDescriptor socket;
@@ -60,6 +66,11 @@ class SpawnServerClient final : public SpawnService {
 	unsigned last_pid = 0;
 
 	std::map<int, ChildProcess> processes;
+
+	/**
+	 * Filled by KillChildProcess() if sendmsg()==EAGAIN.
+	 */
+	std::forward_list<KillQueueItem> kill_queue;
 
 	SocketEvent event;
 
@@ -122,6 +133,17 @@ private:
 
 	void HandleExitMessage(SpawnPayload payload);
 	void HandleMessage(ConstBuffer<uint8_t> payload);
+
+	/**
+	 * Throws on error.
+	 */
+	void FlushKillQueue();
+
+	/**
+	 * Throws on error.
+	 */
+	void ReceiveAndHandle();
+
 	void OnSocketEvent(unsigned events) noexcept;
 
 public:
