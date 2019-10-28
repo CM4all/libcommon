@@ -714,8 +714,16 @@ SpawnServerConnection::ReceiveAndHandle()
 }
 
 inline void
-SpawnServerConnection::OnSocketEvent(unsigned) noexcept
+SpawnServerConnection::OnSocketEvent(unsigned events) noexcept
 try {
+	if (events & event.ERROR)
+		throw MakeErrno(socket.GetError(), "Spawner socket error");
+
+	if (events & event.HANGUP) {
+		RemoveConnection();
+		return;
+	}
+
 	ReceiveAndHandle();
 } catch (...) {
 	logger(2, std::current_exception());
