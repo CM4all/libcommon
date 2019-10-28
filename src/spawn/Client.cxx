@@ -487,8 +487,14 @@ SpawnServerClient::ReceiveAndHandle()
 }
 
 inline void
-SpawnServerClient::OnSocketEvent(unsigned) noexcept
+SpawnServerClient::OnSocketEvent(unsigned events) noexcept
 try {
+	if (events & event.ERROR)
+		throw MakeErrno(socket.GetError(), "Spawner socket error");
+
+	if (events & event.HANGUP)
+		throw std::runtime_error("Spawner hung up");
+
 	ReceiveAndHandle();
 } catch (...) {
 	PrintException(std::current_exception());
