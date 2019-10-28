@@ -184,6 +184,12 @@ ParsePositiveBytes(const char *s)
 	return value;
 }
 
+static uint64_t
+ParseMemorySize(const char *s)
+{
+	return ParsePositiveBytes(s);
+}
+
 void
 SpawnConfigParser::ParseLine(FileLineParser &line)
 {
@@ -201,7 +207,7 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 			ParseTasksMax(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryMax")) {
 		config.systemd_scope_properties.memory_max =
-			ParsePositiveBytes(line.ExpectValueAndEnd());
+			ParseMemorySize(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "IOWeight")) {
 		config.systemd_scope_properties.io_weight =
 			ParseIOWeight(line.ExpectValueAndEnd());
