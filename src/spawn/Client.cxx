@@ -440,8 +440,8 @@ SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
 	}
 }
 
-inline void
-SpawnServerClient::OnSocketEvent(unsigned) noexcept
+inline bool
+SpawnServerClient::ReceiveAndHandle() noexcept
 {
 	constexpr size_t N = 64;
 	std::array<uint8_t[16], N> payloads;
@@ -471,7 +471,7 @@ SpawnServerClient::OnSocketEvent(unsigned) noexcept
 		else
 			fprintf(stderr, "spawner closed the socket\n");
 		Close();
-		return;
+		return false;
 	}
 
 	for (int i = 0; i < n; ++i) {
@@ -481,7 +481,7 @@ SpawnServerClient::OnSocketEvent(unsigned) noexcept
 			   empty packets */
 			fprintf(stderr, "spawner closed the socket\n");
 			Close();
-			return;
+			return false;
 		}
 
 		try {
@@ -490,4 +490,12 @@ SpawnServerClient::OnSocketEvent(unsigned) noexcept
 			PrintException(std::current_exception());
 		}
 	}
+
+	return true;
+}
+
+inline void
+SpawnServerClient::OnSocketEvent(unsigned) noexcept
+{
+	ReceiveAndHandle();
 }

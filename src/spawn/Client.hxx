@@ -122,6 +122,11 @@ private:
 
 	void HandleExitMessage(SpawnPayload payload);
 	void HandleMessage(ConstBuffer<uint8_t> payload);
+
+	/**
+	 * @return false if the #SpawnServerClient has been closed
+	 */
+	bool ReceiveAndHandle() noexcept;
 	void OnSocketEvent(unsigned events) noexcept;
 
 public:
