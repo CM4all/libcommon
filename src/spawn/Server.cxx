@@ -194,7 +194,9 @@ private:
 	void HandleMessage(ConstBuffer<uint8_t> payload, SpawnFdList &&fds);
 	void HandleMessage(ReceiveMessageResult &&result);
 
-	void ReadEventCallback(unsigned events) noexcept;
+	void ReceiveAndHandle();
+
+	void OnSocketEvent(unsigned events) noexcept;
 };
 
 void
@@ -284,7 +286,7 @@ SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
 					     UniqueSocketDescriptor &&_socket) noexcept
 	:process(_process), socket(std::move(_socket)),
 	 logger("spawn"),
-	 event(process.GetEventLoop(), BIND_THIS_METHOD(ReadEventCallback),
+	 event(process.GetEventLoop(), BIND_THIS_METHOD(OnSocketEvent),
 	       socket)
 {
 	event.ScheduleRead();
@@ -694,8 +696,8 @@ SpawnServerConnection::HandleMessage(ReceiveMessageResult &&result)
 }
 
 inline void
-SpawnServerConnection::ReadEventCallback(unsigned) noexcept
-try {
+SpawnServerConnection::ReceiveAndHandle()
+{
 	ReceiveMessageBuffer<8192, CMSG_SPACE(sizeof(int) * 32)> rmb;
 
 	auto result = ReceiveMessage(socket, rmb, MSG_DONTWAIT);
@@ -709,6 +711,12 @@ try {
 	} catch (MalformedSpawnPayloadError) {
 		logger(3, "Malformed spawn payload");
 	}
+}
+
+inline void
+SpawnServerConnection::OnSocketEvent(unsigned) noexcept
+try {
+	ReceiveAndHandle();
 } catch (...) {
 	logger(2, std::current_exception());
 	RemoveConnection();
