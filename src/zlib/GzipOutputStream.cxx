@@ -55,6 +55,29 @@ GzipOutputStream::~GzipOutputStream()
 }
 
 void
+GzipOutputStream::SyncFlush()
+{
+	/* no more input */
+	z.next_in = nullptr;
+	z.avail_in = 0;
+
+	do {
+		Bytef output[4096];
+		z.next_out = output;
+		z.avail_out = sizeof(output);
+
+		int result = deflate(&z, Z_SYNC_FLUSH);
+		if (result != Z_OK)
+			throw ZlibError(result);
+
+		if (z.next_out == output)
+			break;
+
+		next.Write(output, z.next_out - output);
+	} while (z.avail_out == 0);
+}
+
+void
 GzipOutputStream::Finish()
 {
 	/* no more input */

@@ -52,6 +52,8 @@ public:
 	explicit GzipOutputStream(OutputStream &_next);
 	~GzipOutputStream();
 
+	void SyncFlush();
+
 	/**
 	 * Finish the file and write all data remaining in zlib's
 	 * output buffer.
