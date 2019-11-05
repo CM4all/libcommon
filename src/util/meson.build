@@ -11,7 +11,7 @@ util_sources = [
 ]
 
 if get_variable('libcommon_enable_boost', true)
-  sources += [
+  util_sources += [
     'LeakDetector.cxx',
   ]
 endif
