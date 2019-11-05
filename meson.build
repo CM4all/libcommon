@@ -94,5 +94,6 @@ subdir('src/pg')
 subdir('src/odbus')
 subdir('src/spawn')
 subdir('src/translation')
+subdir('src/translation/server')
 
 subdir('test')
