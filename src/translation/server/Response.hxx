@@ -169,6 +169,22 @@ public:
 	class CgiAlikeChildContext : public ChildContext {
 	public:
 		using ChildContext::ChildContext;
+
+		void Uri(const char *payload) noexcept {
+			response.Packet(TranslationCommand::URI, payload);
+		}
+
+		void ScriptName(const char *payload) noexcept {
+			response.Packet(TranslationCommand::SCRIPT_NAME, payload);
+		}
+
+		void PathInfo(const char *payload) noexcept {
+			response.Packet(TranslationCommand::PATH_INFO, payload);
+		}
+
+		void QueryString(const char *payload) noexcept {
+			response.Packet(TranslationCommand::QUERY_STRING, payload);
+		}
 	};
 
 	class WasChildContext : public CgiAlikeChildContext {
