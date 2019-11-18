@@ -4,6 +4,7 @@ translation_server = static_library(
   'Response.cxx',
   'Connection.cxx',
   'Listener.cxx',
+  'Server.cxx',
   include_directories: inc,
 )
 
