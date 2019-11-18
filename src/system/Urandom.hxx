@@ -35,9 +35,18 @@
 
 #include <stddef.h>
 
+/**
+ * Generate some pseudo-random data, and block until at least one byte
+ * has been generated.  Throws if no data at all could be obtained.
+ *
+ * @return the number of bytes filled with random data
+ */
 size_t
 UrandomRead(void *p, size_t size);
 
+/**
+ * Fill the given buffer with pseudo-random data.  May block.  Throws on error.
+ */
 void
 UrandomFill(void *p, size_t size);
 
