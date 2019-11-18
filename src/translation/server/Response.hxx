@@ -42,6 +42,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+struct StringView;
+
 namespace Translation::Server {
 
 class Response {
@@ -72,6 +74,8 @@ public:
 
 	void Packet(TranslationCommand cmd,
 		    ConstBuffer<void> payload) noexcept;
+
+	void Packet(TranslationCommand cmd, StringView payload) noexcept;
 
 	void Packet(TranslationCommand cmd,
 		    const void *payload, size_t length) noexcept {
