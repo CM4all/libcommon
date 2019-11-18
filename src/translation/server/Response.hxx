@@ -166,11 +166,14 @@ public:
 		}
 	};
 
-	class WasChildContext : public ChildContext{
+	class CgiAlikeChildContext : public ChildContext {
 	public:
-		constexpr explicit
-		WasChildContext(Response &_response) noexcept
-			:ChildContext(_response) {}
+		using ChildContext::ChildContext;
+	};
+
+	class WasChildContext : public CgiAlikeChildContext {
+	public:
+		using CgiAlikeChildContext::CgiAlikeChildContext;
 
 		void Parameter(const char *s) noexcept {
 			response.Packet(TranslationCommand::PAIR, s);
