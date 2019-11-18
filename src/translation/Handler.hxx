@@ -38,6 +38,6 @@ struct TranslateResponse;
 
 class TranslateHandler {
 public:
-    virtual void OnTranslateResponse(TranslateResponse &response) noexcept = 0;
-    virtual void OnTranslateError(std::exception_ptr error) noexcept = 0;
+	virtual void OnTranslateResponse(TranslateResponse &response) noexcept = 0;
+	virtual void OnTranslateError(std::exception_ptr error) noexcept = 0;
 };

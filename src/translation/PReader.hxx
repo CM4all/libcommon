@@ -47,43 +47,43 @@ class AllocatorPtr;
  * Parse translation response packets.
  */
 class TranslatePacketReader {
-    enum class State {
-        HEADER,
-        PAYLOAD,
-        COMPLETE,
-    };
+	enum class State {
+		HEADER,
+		PAYLOAD,
+		COMPLETE,
+	};
 
-    State state = State::HEADER;
+	State state = State::HEADER;
 
-    TranslationHeader header;
+	TranslationHeader header;
 
-    char *payload;
-    size_t payload_position;
+	char *payload;
+	size_t payload_position;
 
 public:
-    /**
-     * Read a packet from the socket.
-     *
-     * @return the number of bytes consumed
-     */
-    size_t Feed(AllocatorPtr alloc, const uint8_t *data, size_t length);
+	/**
+	 * Read a packet from the socket.
+	 *
+	 * @return the number of bytes consumed
+	 */
+	size_t Feed(AllocatorPtr alloc, const uint8_t *data, size_t length);
 
-    bool IsComplete() const {
-        return state == State::COMPLETE;
-    }
+	bool IsComplete() const {
+		return state == State::COMPLETE;
+	}
 
-    TranslationCommand GetCommand() const {
-        assert(IsComplete());
+	TranslationCommand GetCommand() const {
+		assert(IsComplete());
 
-        return header.command;
-    }
+		return header.command;
+	}
 
-    gcc_pure
-    ConstBuffer<void> GetPayload() const noexcept {
-        assert(IsComplete());
+	gcc_pure
+	ConstBuffer<void> GetPayload() const noexcept {
+		assert(IsComplete());
 
-        return {payload != nullptr ? payload : "", header.length};
-    }
+		return {payload != nullptr ? payload : "", header.length};
+	}
 };
 
 #endif
