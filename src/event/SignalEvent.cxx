@@ -75,7 +75,8 @@ void
 SignalEvent::EventCallback(unsigned) noexcept
 {
 	struct signalfd_siginfo info;
-	ssize_t nbytes = event.GetSocket().Read(&info, sizeof(info));
+	FileDescriptor fd = event.GetSocket().ToFileDescriptor();
+	ssize_t nbytes = fd.Read(&info, sizeof(info));
 	if (nbytes <= 0) {
 		// TODO: log error?
 		Disable();
