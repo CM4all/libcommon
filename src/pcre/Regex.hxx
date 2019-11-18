@@ -33,6 +33,7 @@
 #pragma once
 
 #include "MatchInfo.hxx"
+#include "util/Compiler.h"
 
 #include <pcre.h>
 
@@ -46,11 +47,12 @@ protected:
 	unsigned n_capture = 0;
 
 public:
-	constexpr bool IsDefined() const {
+	constexpr bool IsDefined() const noexcept {
 		return re != nullptr;
 	}
 
-	bool Match(const char *s) const {
+	gcc_pure
+	bool Match(const char *s) const noexcept {
 		/* we don't need the data written to ovector, but PCRE can
 		   omit internal allocations if we pass a buffer to
 		   pcre_exec() */
@@ -59,7 +61,8 @@ public:
 				 0, 0, ovector, MatchInfo::OVECTOR_SIZE) >= 0;
 	}
 
-	MatchInfo MatchCapture(const char *s) const {
+	gcc_pure
+	MatchInfo MatchCapture(const char *s) const noexcept {
 		MatchInfo mi(s);
 		mi.n = pcre_exec(re, extra, s, strlen(s),
 				 0, 0, mi.ovector, mi.OVECTOR_SIZE);
@@ -85,12 +88,12 @@ public:
 		Compile(pattern, anchored, capture);
 	}
 
-	UniqueRegex(UniqueRegex &&src):RegexPointer(src) {
+	UniqueRegex(UniqueRegex &&src) noexcept:RegexPointer(src) {
 		src.re = nullptr;
 		src.extra = nullptr;
 	}
 
-	~UniqueRegex() {
+	~UniqueRegex() noexcept {
 		pcre_free(re);
 #ifdef PCRE_CONFIG_JIT
 		pcre_free_study(extra);
@@ -99,7 +102,7 @@ public:
 #endif
 	}
 
-	UniqueRegex &operator=(UniqueRegex &&src) {
+	UniqueRegex &operator=(UniqueRegex &&src) noexcept {
 		std::swap<RegexPointer>(*this, src);
 		return *this;
 	}
