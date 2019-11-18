@@ -4,6 +4,7 @@ system_sources = [
   'ProcessName.cxx',
   'LinuxFD.cxx',
   'EpollFD.cxx',
+  'Urandom.cxx',
 ]
 
 system_dependencies = [
