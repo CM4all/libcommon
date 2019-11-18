@@ -84,6 +84,38 @@ public:
 
 	void Packet(TranslationCommand cmd, const char *payload) noexcept;
 
+	void Base(const char *payload) noexcept {
+		Packet(TranslationCommand::BASE, payload);
+	}
+
+	void UnsafeBase() noexcept {
+		Packet(TranslationCommand::UNSAFE_BASE);
+	}
+
+	void EasyBase() noexcept {
+		Packet(TranslationCommand::EASY_BASE);
+	}
+
+	void Regex(const char *payload) noexcept {
+		Packet(TranslationCommand::REGEX, payload);
+	}
+
+	void InverseRegex(const char *payload) noexcept {
+		Packet(TranslationCommand::INVERSE_REGEX, payload);
+	}
+
+	void RegexTail() noexcept {
+		Packet(TranslationCommand::REGEX_TAIL);
+	}
+
+	void RegexUnescape() noexcept {
+		Packet(TranslationCommand::REGEX_UNESCAPE);
+	}
+
+	void InverseRegexUnescape() noexcept {
+		Packet(TranslationCommand::INVERSE_REGEX_UNESCAPE);
+	}
+
 	void Status(http_status_t _status) noexcept {
 		uint16_t status = uint16_t(_status);
 		Packet(TranslationCommand::STATUS, &status, sizeof(status));
