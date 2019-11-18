@@ -34,6 +34,7 @@
 
 #include "util/StringView.hxx"
 
+#include <assert.h>
 #include <stddef.h>
 
 class MatchInfo {
