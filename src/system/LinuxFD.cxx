@@ -42,7 +42,7 @@ CreateEventFD(unsigned initval)
 	if (fd < 0)
 		throw MakeErrno("eventfd() failed");
 
-	return UniqueFileDescriptor(FileDescriptor(fd));
+	return UniqueFileDescriptor(fd);
 }
 
 UniqueFileDescriptor
@@ -56,7 +56,7 @@ CreateSignalFD(const sigset_t &mask, bool nonblock)
 	if (fd < 0)
 		throw MakeErrno("signalfd() failed");
 
-	return UniqueFileDescriptor(FileDescriptor(fd));
+	return UniqueFileDescriptor(fd);
 }
 
 UniqueFileDescriptor
@@ -66,5 +66,5 @@ CreateInotify()
 	if (fd < 0)
 		throw MakeErrno("inotify_init1() failed");
 
-	return UniqueFileDescriptor(FileDescriptor(fd));
+	return UniqueFileDescriptor(fd);
 }
