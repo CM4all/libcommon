@@ -32,6 +32,7 @@ You need:
 - `libseccomp <https://github.com/seccomp/libseccomp>`__
 - `OpenSSL <https://www.openssl.org/>`__
 - `LuaJit <http://luajit.org/>`__
+- `PCRE <https://www.pcre.org/>`__
 
 To build it, type::
 
@@ -57,6 +58,7 @@ Each directory below ``src`` contains a sub-library:
 - ``lua``: `Lua <http://www.lua.org/>`__ C++ wrappers
 - ``curl``: `libcurl <https://curl.haxx.se/>`__ C++ wrappers with
   libevent integration
+- ``pcre``: `PCRE <https://www.pcre.org/>`__ C++ wrappers
 - ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers with
   libevent integration
 - ``odbus``: `libdbus
