@@ -42,17 +42,16 @@ namespace Translation::Server {
 class Handler;
 
 class Listener final : private ServerSocket {
-	EventLoop &event_loop;
-
 	Handler &handler;
 
 	std::list<Connection> connections;
 
 public:
 	Listener(EventLoop &_event_loop, Handler &_handler) noexcept
-		:ServerSocket(_event_loop), event_loop(_event_loop),
+		:ServerSocket(_event_loop),
 		 handler(_handler) {}
 
+	using ServerSocket::GetEventLoop;
 	using ServerSocket::ListenPath;
 
 	void RemoveConnection(Connection &connection) noexcept;

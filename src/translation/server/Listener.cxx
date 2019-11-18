@@ -46,7 +46,8 @@ void
 Listener::OnAccept(UniqueSocketDescriptor &&new_fd,
 		   SocketAddress) noexcept
 {
-	connections.emplace_back(event_loop, *this, handler, std::move(new_fd));
+	connections.emplace_back(GetEventLoop(), *this,
+				 handler, std::move(new_fd));
 }
 
 void

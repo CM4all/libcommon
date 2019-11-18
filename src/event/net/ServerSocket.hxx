@@ -58,6 +58,10 @@ public:
 
 	~ServerSocket() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	void Listen(UniqueSocketDescriptor _fd) noexcept;
 
 	/**
