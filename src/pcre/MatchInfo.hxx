@@ -33,6 +33,7 @@
 #pragma once
 
 #include "util/StringView.hxx"
+#include "util/Compiler.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -51,11 +52,12 @@ class MatchInfo {
 public:
 	MatchInfo() = default;
 
-	constexpr bool IsDefined() const {
+	constexpr bool IsDefined() const noexcept {
 		return n >= 0;
 	}
 
-	StringView GetCapture(unsigned i) const {
+	gcc_pure
+	StringView GetCapture(unsigned i) const noexcept {
 		assert(n >= 0);
 
 		if (i >= unsigned(n))
