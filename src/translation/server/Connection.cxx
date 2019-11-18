@@ -139,7 +139,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 		state = State::PROCESSING;
 		event.CancelRead();
 		handler.OnTranslationRequest(*this, request);
-		return false;
+		return true;
 	}
 
 	try {
