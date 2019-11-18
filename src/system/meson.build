@@ -16,6 +16,12 @@ if get_variable('libcommon_enable_libcap', true)
   system_dependencies += libcap
 endif
 
+if compiler.has_header('sys/random.h')
+  system_dependencies += declare_dependency(
+    compile_args: ['-DHAVE_SYS_RANDOM_H'],
+  )
+endif
+
 system = static_library(
   'system',
   system_sources,

@@ -32,6 +32,10 @@
 
 #include "Urandom.hxx"
 #include "Error.hxx"
+
+#ifdef HAVE_SYS_RANDOM_H
+#include <sys/random.h>
+#else
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/RuntimeError.hxx"
@@ -69,14 +73,33 @@ FullRead(const char *path, void *p, size_t size)
 	FullRead(path, OpenReadOnly(path), p, size);
 }
 
+#endif /* !HAVE_SYS_RANDOM_H */
+
 size_t
 UrandomRead(void *p, size_t size)
 {
+#ifdef HAVE_SYS_RANDOM_H
+	ssize_t nbytes = getrandom(p, size, 0);
+	if (nbytes < 0)
+		throw MakeErrno("getrandom() failed");
+
+	return nbytes;
+#else
 	return Read("/dev/urandom", p, size);
+#endif
 }
 
 void
 UrandomFill(void *p, size_t size)
 {
+#ifdef HAVE_SYS_RANDOM_H
+	ssize_t nbytes = getrandom(p, size, 0);
+	if (nbytes < 0)
+		throw MakeErrno("getrandom() failed");
+
+	if (size_t(nbytes) != size)
+		throw std::runtime_error("getrandom() was incomplete");
+#else
 	FullRead("/dev/urandom", p, size);
+#endif
 }
