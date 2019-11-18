@@ -50,6 +50,10 @@ public:
 	ShutdownListener(const ShutdownListener &) = delete;
 	ShutdownListener &operator=(const ShutdownListener &) = delete;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	void Enable() {
 		event.Enable();
 	}
