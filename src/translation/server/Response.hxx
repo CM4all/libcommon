@@ -51,7 +51,9 @@ class Response {
 public:
 	Response() noexcept
 	{
-		Packet(TranslationCommand::BEGIN);
+		static constexpr uint8_t protocol_version = 3;
+		Packet(TranslationCommand::BEGIN,
+		       {&protocol_version, sizeof(protocol_version)});
 	}
 
 	Response(Response &&other) noexcept
