@@ -44,16 +44,16 @@ SignalEvent::SignalEvent(EventLoop &loop, Callback _callback) noexcept
 
 SignalEvent::~SignalEvent() noexcept
 {
-	if (fd >= 0) {
+	if (IsDefined()) {
 		Disable();
-		close(fd);
+		event.ReleaseSocket().Close();
 	}
 }
 
 void
 SignalEvent::Enable()
 {
-	fd = signalfd(fd, &mask, SFD_NONBLOCK|SFD_CLOEXEC);
+	int fd = signalfd(-1, &mask, SFD_NONBLOCK|SFD_CLOEXEC);
 	if (fd < 0)
 		throw MakeErrno("signalfd() failed");
 
@@ -75,7 +75,7 @@ void
 SignalEvent::EventCallback(unsigned) noexcept
 {
 	struct signalfd_siginfo info;
-	ssize_t nbytes = read(fd, &info, sizeof(info));
+	ssize_t nbytes = event.GetSocket().Read(&info, sizeof(info));
 	if (nbytes <= 0) {
 		// TODO: log error?
 		Disable();

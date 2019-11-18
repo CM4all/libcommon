@@ -48,8 +48,6 @@
  * called again.
  */
 class SignalEvent {
-	int fd = -1;
-
 	SocketEvent event;
 
 	sigset_t mask;
@@ -72,11 +70,11 @@ public:
 	}
 
 	bool IsDefined() const noexcept {
-		return fd >= 0;
+		return event.IsDefined();
 	}
 
 	void Add(int signo) noexcept {
-		assert(fd < 0);
+		assert(!IsDefined());
 
 		sigaddset(&mask, signo);
 	}
