@@ -52,6 +52,7 @@ public:
 		 handler(_handler) {}
 
 	using ServerSocket::GetEventLoop;
+	using ServerSocket::Listen;
 	using ServerSocket::ListenPath;
 
 	void RemoveConnection(Connection &connection) noexcept;

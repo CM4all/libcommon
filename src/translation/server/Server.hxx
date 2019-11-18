@@ -46,7 +46,9 @@ class Server final {
 
 public:
 	/**
-	 * Create a listener for the default address.
+	 * Create a listener for the default address.  Uses systemd
+	 * sockets instead of this process was launched by socket
+	 * activation.
 	 */
 	Server(EventLoop &_event_loop, Handler &_handler);
 
