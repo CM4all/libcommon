@@ -67,6 +67,10 @@ public:
 
 	~SignalEvent() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	bool IsDefined() const noexcept {
 		return fd >= 0;
 	}
