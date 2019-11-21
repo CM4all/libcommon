@@ -10,6 +10,8 @@ else
   libsystemd = dependency('', required: false)
 endif
 
+boost = dependency('boost', version: '>= 1.54')
+
 translation_server = static_library(
   'translation_server',
   'AllocatedRequest.cxx',
@@ -20,6 +22,7 @@ translation_server = static_library(
   include_directories: inc,
   dependencies: [
     libsystemd,
+    boost,
   ],
 )
 
@@ -28,5 +31,6 @@ translation_server_dep = declare_dependency(
   dependencies: [
     event_dep,
     event_net_dep,
+    boost,
   ],
 )

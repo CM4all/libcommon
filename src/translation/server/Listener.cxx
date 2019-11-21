@@ -33,21 +33,29 @@
 #include "Listener.hxx"
 #include "net/SocketAddress.hxx"
 #include "io/Logger.hxx"
+#include "util/DeleteDisposer.hxx"
 
 namespace Translation::Server {
+
+Listener::~Listener() noexcept
+{
+	connections.clear_and_dispose(DeleteDisposer());
+}
 
 void
 Listener::RemoveConnection(Connection &connection) noexcept
 {
-	connections.remove(connection);
+	connections.erase_and_dispose(connections.iterator_to(connection),
+				      DeleteDisposer());
 }
 
 void
 Listener::OnAccept(UniqueSocketDescriptor &&new_fd,
 		   SocketAddress) noexcept
 {
-	connections.emplace_back(GetEventLoop(), *this,
-				 handler, std::move(new_fd));
+	auto *connection = new Connection(GetEventLoop(), *this,
+					  handler, std::move(new_fd));
+	connections.push_back(*connection);
 }
 
 void

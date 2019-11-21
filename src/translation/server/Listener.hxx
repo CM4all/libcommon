@@ -35,7 +35,7 @@
 #include "Connection.hxx"
 #include "event/net/ServerSocket.hxx"
 
-#include <list>
+#include <boost/intrusive/list.hpp>
 
 namespace Translation::Server {
 
@@ -44,12 +44,15 @@ class Handler;
 class Listener final : private ServerSocket {
 	Handler &handler;
 
-	std::list<Connection> connections;
+	boost::intrusive::list<Connection,
+			       boost::intrusive::constant_time_size<false>> connections;
 
 public:
 	Listener(EventLoop &_event_loop, Handler &_handler) noexcept
 		:ServerSocket(_event_loop),
 		 handler(_handler) {}
+
+	~Listener() noexcept;
 
 	using ServerSocket::GetEventLoop;
 	using ServerSocket::Listen;

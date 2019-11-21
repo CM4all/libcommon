@@ -46,7 +46,9 @@ class Response;
 class Listener;
 class Handler;
 
-class Connection {
+class Connection
+	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>
+{
 	Listener &listener;
 	Handler &handler;
 
@@ -73,13 +75,6 @@ public:
 		   Listener &_listener, Handler &_handler,
 		   UniqueSocketDescriptor &&_fd) noexcept;
 	~Connection() noexcept;
-
-	/**
-	 * For Listener::connections.
-	 */
-	bool operator==(const Connection &other) const noexcept {
-		return fd == other.fd;
-	}
 
 	void SendResponse(Response &&response) noexcept;
 
