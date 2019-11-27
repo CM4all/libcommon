@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,6 +34,8 @@
 
 #include "util/Compiler.h"
 
+struct StringView;
+
 /**
  * Determines if the specified name consists only of valid characters
  * (RFC 822 3.2).
@@ -41,6 +43,10 @@
 gcc_pure
 bool
 http_header_name_valid(const char *name) noexcept;
+
+gcc_pure
+bool
+http_header_name_valid(StringView name) noexcept;
 
 /**
  * Determines if the specified name is a hop-by-hop header.  In

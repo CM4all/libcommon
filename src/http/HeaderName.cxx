@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2019 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,6 +31,7 @@
  */
 
 #include "HeaderName.hxx"
+#include "util/StringView.hxx"
 
 #include <assert.h>
 #include <string.h>
@@ -48,6 +49,19 @@ http_header_name_valid(const char *name) noexcept
 		if (!http_header_name_char_valid(*name))
 			return false;
 	} while (*++name != 0);
+
+	return true;
+}
+
+bool
+http_header_name_valid(StringView name) noexcept
+{
+	if (name.empty())
+		return false;
+
+	for (char ch : name)
+		if (!http_header_name_char_valid(ch))
+			return false;
 
 	return true;
 }
