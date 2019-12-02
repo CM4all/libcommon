@@ -721,11 +721,11 @@ translate_client_file_not_found(TranslateResponse &response,
 	if (response.test_path == nullptr) {
 		switch (response.address.type) {
 		case ResourceAddress::Type::NONE:
-			throw std::runtime_error("FIlE_NOT_FOUND without resource address");
+			throw std::runtime_error("FILE_NOT_FOUND without resource address");
 
 		case ResourceAddress::Type::HTTP:
 		case ResourceAddress::Type::PIPE:
-			throw std::runtime_error("FIlE_NOT_FOUND not compatible with resource address");
+			throw std::runtime_error("FILE_NOT_FOUND not compatible with resource address");
 
 		case ResourceAddress::Type::LOCAL:
 		case ResourceAddress::Type::NFS:
