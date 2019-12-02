@@ -44,7 +44,7 @@
 #include "file_address.hxx"
 #include "delegate/Address.hxx"
 #include "lhttp_address.hxx"
-#include "http_address.hxx"
+#include "http/Address.hxx"
 #include "cgi/Address.hxx"
 #include "nfs/Address.hxx"
 #endif

@@ -46,7 +46,7 @@
 #include "pexpand.hxx"
 #endif
 #if TRANSLATION_ENABLE_SESSION
-#include "http_address.hxx"
+#include "http/Address.hxx"
 #endif
 
 void
