@@ -434,7 +434,7 @@ struct TranslateResponse {
     /**
      * Copy data from #src for storing in the translation cache.
      *
-     * Throws HttpMessageResponse(HTTP_STATUS_BAD_REQUEST) on base
+     * Throws HttpMessageResponse(HTTP_STATUS_BAD_GATEWAY) on base
      * mismatch.
      */
     void CacheStore(AllocatorPtr alloc, const TranslateResponse &src,

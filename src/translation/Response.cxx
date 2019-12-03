@@ -477,12 +477,10 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 
                 if (uri == nullptr && !internal_redirect.IsNull())
                     /* this BASE mismatch is fatal, because it
-                       invalidates a required attribute; clearing
-                       "base" is an trigger for tcache_store() to fail
-                       on this translation response */
-                    // TODO: throw an exception instead of this kludge
-                    base = nullptr;
-            }
+		       invalidates a required attribute */
+                    throw HttpMessageResponse(HTTP_STATUS_BAD_GATEWAY,
+                                              "Base mismatch");
+	    }
 
             if (redirect != nullptr) {
                 size_t length = base_string(redirect, tail);
