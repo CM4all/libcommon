@@ -485,6 +485,7 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 					   attribute */
 					throw HttpMessageResponse(HTTP_STATUS_BAD_GATEWAY,
 								  "Base mismatch");
+			}
 
 			if (redirect != nullptr) {
 				size_t length = base_string(redirect, tail);
