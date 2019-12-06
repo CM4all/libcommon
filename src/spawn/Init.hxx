@@ -41,11 +41,12 @@
  *
  * Throws an exception on error.
  *
+ * @param name a name for this init process; it appears on the its name
  * @return 0 if this is the child process, or the child's process id
  * if this is "init"
  */
 pid_t
-SpawnInitFork();
+SpawnInitFork(const char *name=nullptr);
 
 /**
  * An "init" implementation for PID namespaces.

@@ -39,6 +39,7 @@
 
 #include <list>
 #include <forward_list>
+#include <stdexcept>
 
 #include <assert.h>
 

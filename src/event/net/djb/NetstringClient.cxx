@@ -33,6 +33,8 @@
 #include "NetstringClient.hxx"
 #include "util/ConstBuffer.hxx"
 
+#include <stdexcept>
+
 static constexpr auto send_timeout = std::chrono::seconds(10);
 static constexpr auto recv_timeout = std::chrono::minutes(1);
 static constexpr auto busy_timeout = std::chrono::seconds(5);
