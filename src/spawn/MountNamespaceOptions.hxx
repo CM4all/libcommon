@@ -95,11 +95,6 @@ struct MountNamespaceOptions {
 
 	MountList *mounts = nullptr;
 
-	/**
-	 * The hostname of the new UTS namespace.
-	 */
-	const char *hostname = nullptr;
-
 	MountNamespaceOptions() = default;
 	MountNamespaceOptions(AllocatorPtr alloc,
 			      const MountNamespaceOptions &src) noexcept;

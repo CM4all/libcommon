@@ -277,10 +277,6 @@ MountNamespaceOptions::Setup() const
 			     MS_NODEV|MS_NOEXEC|MS_NOSUID,
 			     options);
 	}
-
-	if (hostname != nullptr &&
-	    sethostname(hostname, strlen(hostname)) < 0)
-		throw MakeErrno("sethostname() failed");
 }
 
 char *
