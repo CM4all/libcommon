@@ -225,7 +225,11 @@ try {
 	if (p.ns.enable_pid && p.ns.pid_namespace == nullptr) {
 		setsid();
 
-		const auto pid = SpawnInitFork();
+		const char *name = nullptr;
+		if (p.cgroup != nullptr)
+			name = p.cgroup->name;
+
+		const auto pid = SpawnInitFork(name);
 		assert(pid >= 0);
 
 		if (pid > 0)

@@ -46,7 +46,9 @@
 #include <sys/capability.h>
 #include <unistd.h>
 #include <sched.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <dirent.h>
 
 static sigset_t init_signal_mask;
@@ -73,7 +75,7 @@ CloseAllFiles()
 }
 
 pid_t
-SpawnInitFork()
+SpawnInitFork(const char *name)
 {
 	sigemptyset(&init_signal_mask);
 	sigaddset(&init_signal_mask, SIGINT);
@@ -90,7 +92,18 @@ SpawnInitFork()
 	if (pid == 0) {
 		sigprocmask(SIG_UNBLOCK, &init_signal_mask, nullptr);
 	} else {
-		SetProcessName("init");
+		if (name != nullptr) {
+			char buffer[16];
+			size_t length = strlen(name);
+
+			const char *prefix = length > 10
+				? "i" : "init";
+
+			snprintf(buffer, sizeof(buffer), "%s-%s",
+				 prefix, name);
+			SetProcessName(buffer);
+		} else
+			SetProcessName("init");
 
 		CloseAllFiles();
 	}
