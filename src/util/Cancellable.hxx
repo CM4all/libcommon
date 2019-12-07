@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,9 +48,7 @@ public:
 	constexpr CancellablePointer() = default;
 
 	CancellablePointer(CancellablePointer &&src) noexcept
-		:cancellable(src.cancellable) {
-		src.cancellable = nullptr;
-	}
+		:cancellable(std::exchange(src.cancellable, nullptr)) {}
 
 	CancellablePointer &operator=(CancellablePointer &&src) noexcept {
 		using std::swap;
