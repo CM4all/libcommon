@@ -32,6 +32,9 @@
 
 #include <algorithm>
 
+#include <stdarg.h>
+#include <stdio.h>
+
 template<typename T>
 void
 BasicStringBuilder<T>::Append(const_pointer src)
@@ -49,3 +52,21 @@ BasicStringBuilder<T>::Append(const_pointer src, size_t length)
 }
 
 template class BasicStringBuilder<char>;
+
+template<>
+gcc_printf(2, 3)
+void
+BasicStringBuilder<char>::Format(const_pointer fmt, ...)
+{
+	size_t size = GetRemainingSize();
+
+	va_list ap;
+	va_start(ap, fmt);
+	size_t n = vsnprintf(GetTail(), size, fmt, ap);
+	va_end(ap);
+
+	if (n >= size - 1)
+		throw Overflow();
+
+	Extend(n);
+}

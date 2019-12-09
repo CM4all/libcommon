@@ -31,6 +31,7 @@
 #define STRING_BUILDER_HXX
 
 #include "WritableBuffer.hxx"
+#include "Compiler.h"
 
 #include <stddef.h>
 
@@ -100,6 +101,9 @@ public:
 
 	void Append(const_pointer src);
 	void Append(const_pointer src, size_t length);
+
+	gcc_printf(2, 3)
+	void Format(const_pointer fmt, ...);
 };
 
 class StringBuilder : public BasicStringBuilder<char> {
