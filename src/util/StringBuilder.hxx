@@ -30,6 +30,8 @@
 #ifndef STRING_BUILDER_HXX
 #define STRING_BUILDER_HXX
 
+#include "WritableBuffer.hxx"
+
 #include <stddef.h>
 
 /**
@@ -49,6 +51,9 @@ class BasicStringBuilder {
 	static constexpr value_type SENTINEL = '\0';
 
 public:
+	constexpr explicit BasicStringBuilder(WritableBuffer<value_type> b) noexcept
+		:p(b.begin()), end(b.end()) {}
+
 	constexpr BasicStringBuilder(pointer _p, pointer _end) noexcept
 		:p(_p), end(_end) {}
 
