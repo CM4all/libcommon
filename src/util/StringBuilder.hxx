@@ -37,7 +37,7 @@
  * end, truncating the string if the buffer is full.
  */
 template<typename T=char>
-class StringBuilder {
+class BasicStringBuilder {
 	using value_type = T;
 	using pointer = T *;
 	using const_pointer = const T *;
@@ -49,10 +49,10 @@ class StringBuilder {
 	static constexpr value_type SENTINEL = '\0';
 
 public:
-	constexpr StringBuilder(pointer _p, pointer _end) noexcept
+	constexpr BasicStringBuilder(pointer _p, pointer _end) noexcept
 		:p(_p), end(_end) {}
 
-	constexpr StringBuilder(pointer _p, size_type size) noexcept
+	constexpr BasicStringBuilder(pointer _p, size_type size) noexcept
 		:p(_p), end(p + size) {}
 
 	constexpr pointer GetTail() const noexcept {
@@ -95,6 +95,11 @@ public:
 
 	void Append(const_pointer src);
 	void Append(const_pointer src, size_t length);
+};
+
+class StringBuilder : public BasicStringBuilder<char> {
+public:
+	using BasicStringBuilder<char>::BasicStringBuilder;
 };
 
 #endif

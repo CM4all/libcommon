@@ -40,7 +40,7 @@
 #include <time.h>
 
 static void
-AppendTimestamp(StringBuilder<> &b, Net::Log::TimePoint value)
+AppendTimestamp(StringBuilder &b, Net::Log::TimePoint value)
 {
 	using namespace std::chrono;
 	time_t t = duration_cast<seconds>(value.time_since_epoch()).count();
@@ -48,7 +48,7 @@ AppendTimestamp(StringBuilder<> &b, Net::Log::TimePoint value)
 	size_t n = strftime(b.GetTail(), b.GetRemainingSize(),
 			    "%d/%b/%Y:%H:%M:%S %z", localtime_r(&t, &tm));
 	if (n == 0)
-		throw StringBuilder<>::Overflow();
+		throw StringBuilder::Overflow();
 
 	b.Extend(n);
 }
@@ -70,10 +70,10 @@ IsHarmlessChar(signed char ch) noexcept
 }
 
 static void
-AppendEscape(StringBuilder<> &b, StringView value)
+AppendEscape(StringBuilder &b, StringView value)
 {
 	if (b.GetRemainingSize() < value.size * 4)
-		throw StringBuilder<>::Overflow();
+		throw StringBuilder::Overflow();
 
 	char *p = b.GetTail();
 	size_t n = 0;
@@ -89,7 +89,7 @@ AppendEscape(StringBuilder<> &b, StringView value)
 }
 
 static void
-AppendAnonymize(StringBuilder<> &b, const char *value)
+AppendAnonymize(StringBuilder &b, const char *value)
 {
 	const char *p = strchr(value, '.');
 	if (p != nullptr) {
@@ -132,12 +132,12 @@ AppendAnonymize(StringBuilder<> &b, const char *value)
 
 template<typename... Args>
 static inline void
-AppendFormat(StringBuilder<> &b, const char *fmt, Args&&... args)
+AppendFormat(StringBuilder &b, const char *fmt, Args&&... args)
 {
 	size_t size = b.GetRemainingSize();
 	size_t n = snprintf(b.GetTail(), size, fmt, args...);
 	if (n >= size - 1)
-		throw StringBuilder<>::Overflow();
+		throw StringBuilder::Overflow();
 	b.Extend(n);
 }
 
@@ -146,7 +146,7 @@ FormatOneLineHttp(char *buffer, size_t buffer_size,
 		  const Net::Log::Datagram &d,
 		  bool site, bool anonymize) noexcept
 try {
-	StringBuilder<> b(buffer, buffer_size);
+	StringBuilder b(buffer, buffer_size);
 
 	if (site) {
 		b.Append(OptionalString(d.site));
@@ -195,7 +195,7 @@ try {
 		b.Append('-');
 
 	return b.GetTail();
-} catch (StringBuilder<>::Overflow) {
+} catch (StringBuilder::Overflow) {
 	return buffer;
 }
 
@@ -204,7 +204,7 @@ FormatOneLineMessage(char *buffer, size_t buffer_size,
 		     const Net::Log::Datagram &d,
 		     bool site) noexcept
 try {
-	StringBuilder<> b(buffer, buffer_size);
+	StringBuilder b(buffer, buffer_size);
 
 	if (site) {
 		b.Append(OptionalString(d.site));
@@ -221,7 +221,7 @@ try {
 	AppendEscape(b, d.message);
 
 	return b.GetTail();
-} catch (StringBuilder<>::Overflow) {
+} catch (StringBuilder::Overflow) {
 	return buffer;
 }
 

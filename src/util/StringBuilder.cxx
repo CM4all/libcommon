@@ -34,18 +34,18 @@
 
 template<typename T>
 void
-StringBuilder<T>::Append(const_pointer src)
+BasicStringBuilder<T>::Append(const_pointer src)
 {
 	Append(src, StringLength(src));
 }
 
 template<typename T>
 void
-StringBuilder<T>::Append(const_pointer src, size_t length)
+BasicStringBuilder<T>::Append(const_pointer src, size_t length)
 {
 	CheckAppend(length);
 	p = std::copy_n(src, length, p);
 	*p = SENTINEL;
 }
 
-template class StringBuilder<char>;
+template class BasicStringBuilder<char>;
