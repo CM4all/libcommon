@@ -980,6 +980,11 @@ enum class TranslationCommand : uint16_t {
 	 * response.
 	 */
 	SEND_CSRF_TOKEN = 210,
+
+	/**
+	 * Force the #HTTP address to be HTTP/2.
+	 */
+	HTTP2 = 211,
 };
 
 struct TranslationHeader {

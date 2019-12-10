@@ -3475,6 +3475,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::HTTP2:
+#if TRANSLATION_ENABLE_HTTP
+		if (http_address == nullptr)
+			throw std::runtime_error("misplaced HTTP2 packet");
+
+		if (http_address->http2)
+			throw std::runtime_error("duplicate HTTP2 packet");
+
+		if (!payload.empty())
+			throw std::runtime_error("malformed HTTP2 packet");
+
+		http_address->http2 = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
