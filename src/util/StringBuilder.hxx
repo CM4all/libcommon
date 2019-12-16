@@ -106,7 +106,11 @@ public:
 	void Append(const_pointer src);
 	void Append(const_pointer src, size_t length);
 
+#ifndef __clang__
+	/* clang thinks the "format argument not a string type"
+	   because it depends on a template argument */
 	gcc_printf(2, 3)
+#endif
 	void Format(const_pointer fmt, ...);
 };
 
