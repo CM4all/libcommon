@@ -77,8 +77,6 @@ SocketEvent::ScheduleImplicit() noexcept
 void
 SocketEvent::Abandon() noexcept
 {
-	assert(IsDefined());
-
 	fd = SocketDescriptor::Undefined();
 	if (std::exchange(scheduled_flags, 0) != 0)
 		loop.AbandonFD(*this);
