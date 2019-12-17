@@ -53,7 +53,7 @@ AsyncConnection::Error() noexcept
 	       state == State::RECONNECTING ||
 	       state == State::READY);
 
-	socket_event.Cancel();
+	socket_event.Abandon();
 
 	const bool was_connected = state == State::READY;
 	state = State::DISCONNECTED;
