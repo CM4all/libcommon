@@ -112,6 +112,12 @@ EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 }
 
 void
+EventLoop::AbandonFD(SocketEvent &event) noexcept
+{
+	sockets.erase(sockets.iterator_to(event));
+}
+
+void
 EventLoop::AddTimer(TimerEvent &t, Event::Duration d) noexcept
 {
 	t.due = SteadyNow() + d;

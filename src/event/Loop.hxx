@@ -146,6 +146,7 @@ public:
 	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept;
 	bool ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept;
 	bool RemoveFD(int fd, SocketEvent &event) noexcept;
+	void AbandonFD(SocketEvent &event) noexcept;
 
 	void AddTimer(TimerEvent &t, Event::Duration d) noexcept;
 

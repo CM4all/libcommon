@@ -136,6 +136,18 @@ public:
 	 */
 	void ScheduleImplicit() noexcept;
 
+	/**
+	 * Call this instead of Cancel() to unregister this object
+	 * after the underlying socket has already been closed.  This
+	 * skips the `EPOLL_CTL_DEL` call because the kernel
+	 * automatically removes closed file descriptors from epoll.
+	 *
+	 * Doing `EPOLL_CTL_DEL` on a closed file descriptor usually
+	 * fails with `-EBADF` or could unregister a different socket
+	 * which happens to be on the same file descriptor number.
+	 */
+	void Abandon() noexcept;
+
 	bool IsReadPending() const noexcept {
 		return GetScheduledFlags() & READ;
 	}

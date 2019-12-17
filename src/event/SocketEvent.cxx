@@ -75,6 +75,14 @@ SocketEvent::ScheduleImplicit() noexcept
 }
 
 void
+SocketEvent::Abandon() noexcept
+{
+	fd = SocketDescriptor::Undefined();
+	if (std::exchange(scheduled_flags, 0) != 0)
+		loop.AbandonFD(*this);
+}
+
+void
 SocketEvent::Dispatch(unsigned flags) noexcept
 {
 	flags &= GetScheduledFlags() | IMPLICIT_FLAGS;
