@@ -70,6 +70,22 @@
 #include <assert.h>
 #include <string.h>
 
+inline bool
+TranslateParser::HasArgs() const noexcept
+{
+#if TRANSLATION_ENABLE_RADDRESS
+	if (cgi_address != nullptr || lhttp_address != nullptr)
+		return true;
+#endif
+
+#if TRANSLATION_ENABLE_EXECUTE
+	if (response.execute != nullptr)
+		return true;
+#endif
+
+	return false;
+}
+
 void
 TranslateParser::SetChildOptions(ChildOptions &_child_options)
 {

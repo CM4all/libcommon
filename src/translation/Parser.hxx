@@ -211,19 +211,7 @@ public:
 	}
 
 private:
-	bool HasArgs() const {
-#if TRANSLATION_ENABLE_RADDRESS
-		if (cgi_address != nullptr || lhttp_address != nullptr)
-			return true;
-#endif
-
-#if TRANSLATION_ENABLE_EXECUTE
-		if (response.execute != nullptr)
-			return true;
-#endif
-
-		return false;
-	}
+	bool HasArgs() const noexcept;
 
 	void SetChildOptions(ChildOptions &_child_options);
 
