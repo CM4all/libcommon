@@ -75,7 +75,7 @@ AsyncConnection::Error(std::exception_ptr e) noexcept
 {
 	handler.OnError(std::move(e));
 
-	if (IsReady())
+	if (state != State::DISCONNECTED)
 		/* invoke Error() only if state==READY to allow
 		   calling this method without triggering an assertion
 		   failure in Error() */
