@@ -33,6 +33,7 @@
 #pragma once
 
 #include "MatchInfo.hxx"
+#include "util/StringView.hxx"
 #include "util/Compiler.h"
 
 #include <pcre.h>
@@ -52,19 +53,19 @@ public:
 	}
 
 	gcc_pure
-	bool Match(const char *s) const noexcept {
+	bool Match(StringView s) const noexcept {
 		/* we don't need the data written to ovector, but PCRE can
 		   omit internal allocations if we pass a buffer to
 		   pcre_exec() */
 		int ovector[MatchInfo::OVECTOR_SIZE];
-		return pcre_exec(re, extra, s, strlen(s),
+		return pcre_exec(re, extra, s.data, s.size,
 				 0, 0, ovector, MatchInfo::OVECTOR_SIZE) >= 0;
 	}
 
 	gcc_pure
-	MatchInfo MatchCapture(const char *s) const noexcept {
-		MatchInfo mi(s);
-		mi.n = pcre_exec(re, extra, s, strlen(s),
+	MatchInfo MatchCapture(StringView s) const noexcept {
+		MatchInfo mi(s.data);
+		mi.n = pcre_exec(re, extra, s.data, s.size,
 				 0, 0, mi.ovector, mi.OVECTOR_SIZE);
 		if (mi.n == 0)
 			/* not enough room in the array - assume it's full */
