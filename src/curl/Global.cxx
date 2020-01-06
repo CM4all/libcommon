@@ -155,7 +155,6 @@ void
 CurlGlobal::Remove(CurlRequest &r) noexcept
 {
 	curl_multi_remove_handle(multi.Get(), r.Get());
-	InvalidateSockets();
 }
 
 /**
