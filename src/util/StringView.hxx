@@ -40,8 +40,6 @@
 #include <string_view>
 #endif
 
-#include <utility>
-
 template<typename T>
 struct BasicStringView : ConstBuffer<T> {
 	using typename ConstBuffer<T>::size_type;
