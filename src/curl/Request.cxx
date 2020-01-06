@@ -109,12 +109,6 @@ CurlRequest::Resume() noexcept
 
 	easy.Unpause();
 
-	if (IsCurlOlderThan(0x072000))
-		/* libcurl older than 7.32.0 does not update
-		   its sockets after curl_easy_pause(); force
-		   libcurl to do it now */
-		global.ResumeSockets();
-
 	global.InvalidateSockets();
 }
 
