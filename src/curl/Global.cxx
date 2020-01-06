@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2016 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2008-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -71,14 +71,14 @@ private:
 
 	void OnSocketReady(unsigned events) noexcept;
 
-	static constexpr int LibEventToCurlCSelect(unsigned flags) noexcept {
+	static constexpr int FlagsToCurlCSelect(unsigned flags) noexcept {
 		return (flags & SocketEvent::READ ? CURL_CSELECT_IN : 0) |
 			(flags & SocketEvent::WRITE ? CURL_CSELECT_OUT : 0) |
 			(flags & SocketEvent::ERROR ? CURL_CSELECT_ERR : 0);
 	}
 
 	gcc_const
-	static unsigned CurlPollToLibEvent(int action) noexcept {
+	static unsigned CurlPollToFlags(int action) noexcept {
 		switch (action) {
 		case CURL_POLL_NONE:
 			return 0;
@@ -128,16 +128,16 @@ CurlSocket::SocketFunction(gcc_unused CURL *easy,
 		global.Assign(s, *cs);
 	}
 
-	unsigned flags = CurlPollToLibEvent(action);
+	unsigned flags = CurlPollToFlags(action);
 	if (flags != 0)
 		cs->socket_event.Schedule(flags);
 	return 0;
 }
 
 void
-CurlSocket::OnSocketReady(unsigned events) noexcept
+CurlSocket::OnSocketReady(unsigned flags) noexcept
 {
-	global.SocketAction(GetSocket().Get(), LibEventToCurlCSelect(events));
+	global.SocketAction(GetSocket().Get(), FlagsToCurlCSelect(flags));
 }
 
 void
