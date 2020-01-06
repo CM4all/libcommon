@@ -1,4 +1,9 @@
-libpq = dependency('libpq', version: '>= 8.4')
+libpq = dependency('libpq', version: '>= 8.4',
+                   required: get_variable('libcommon_require_pg', true))
+if not libpq.found()
+  pg_dep = dependency('', required: false)
+  subdir_done()
+endif
 
 pg = static_library(
   'pg',
