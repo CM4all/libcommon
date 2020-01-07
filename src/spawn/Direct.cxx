@@ -46,7 +46,9 @@
 
 #include "util/Compiler.h"
 
+#ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-journal.h>
+#endif
 
 #include <stdexcept>
 
@@ -131,6 +133,7 @@ try {
 	TryWriteExistingFile("/proc/self/oom_score_adj", "800");
 
 	int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
+#ifdef HAVE_LIBSYSTEMD
 	if (stdout_fd < 0 || (stderr_fd < 0 && p.stderr_path == nullptr)) {
 		/* if no log destination was specified, log to the systemd
 		   journal */
@@ -143,6 +146,7 @@ try {
 		if (stderr_fd < 0 && p.stderr_path == nullptr)
 			stderr_fd = journal_fd;
 	}
+#endif
 
 	if (p.cgroup != nullptr)
 		p.cgroup->Apply(cgroup_state);

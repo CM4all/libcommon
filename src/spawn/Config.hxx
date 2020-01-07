@@ -32,11 +32,13 @@
 
 #pragma once
 
-#include "Systemd.hxx"
 #include "UidGid.hxx"
 #include "util/RuntimeError.hxx"
-
 #include "util/Compiler.h"
+
+#ifdef HAVE_LIBSYSTEMD
+#include "Systemd.hxx"
+#endif
 
 #include <set>
 
@@ -44,6 +46,7 @@
  * Configuration for the spawner.
  */
 struct SpawnConfig {
+#ifdef HAVE_LIBSYSTEMD
 	/**
 	 * If non-empty, then a new systemd scope is created for the
 	 * spawner process.
@@ -59,6 +62,7 @@ struct SpawnConfig {
 	 * specified slice.
 	 */
 	std::string systemd_slice;
+#endif
 
 	UidGid default_uid_gid;
 

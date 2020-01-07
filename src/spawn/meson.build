@@ -1,10 +1,21 @@
-libsystemd = dependency('libsystemd')
+if get_variable('libcommon_enable_libsystemd', true)
+  libsystemd = dependency('libsystemd')
+  libsystemd = declare_dependency(
+    compile_args: ['-DHAVE_LIBSYSTEMD'],
+    dependencies: [
+      libsystemd,
+      odbus_dep,
+    ],
+  )
+else
+  libsystemd = dependency('', required: false)
+endif
+
 libseccomp = dependency('libseccomp')
 
 spawn_sources = [
   'SeccompFilter.cxx',
   'SyscallFilter.cxx',
-  'Systemd.cxx',
   'Registry.cxx',
   'Init.cxx',
   'UserNamespace.cxx',
@@ -45,12 +56,17 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
   ]
 endif
 
+if libsystemd.found()
+  spawn_sources += [
+    'Systemd.cxx',
+  ]
+endif
+
 spawn = static_library(
   'spawn',
   spawn_sources,
   include_directories: inc,
   dependencies: [
-    libdbus,
     libcap,
     libseccomp,
     libsystemd,
@@ -63,6 +79,6 @@ spawn_dep = declare_dependency(
     system_dep,
     io_dep,
     net_dep,
-    odbus_dep,
+    libsystemd,
   ],
 )

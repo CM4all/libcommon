@@ -71,6 +71,8 @@ ParseGroup(const char *name)
 	return gr->gr_gid;
 }
 
+#ifdef HAVE_LIBSYSTEMD
+
 static uint64_t
 ParseUint64(const char *s)
 {
@@ -190,6 +192,8 @@ ParseMemorySize(const char *s)
 	return ParsePositiveBytes(s);
 }
 
+#endif
+
 void
 SpawnConfigParser::ParseLine(FileLineParser &line)
 {
@@ -199,6 +203,7 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 		config.allowed_uids.insert(ParseUser(line.ExpectValueAndEnd()));
 	} else if (strcmp(word, "allow_group") == 0) {
 		config.allowed_gids.insert(ParseGroup(line.ExpectValueAndEnd()));
+#ifdef HAVE_LIBSYSTEMD
 	} else if (StringIsEqualIgnoreCase(word, "CPUWeight")) {
 		config.systemd_scope_properties.cpu_weight =
 			ParseCPUWeight(line.ExpectValueAndEnd());
@@ -223,6 +228,7 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 	} else if (StringIsEqualIgnoreCase(word, "IOWeight")) {
 		config.systemd_scope_properties.io_weight =
 			ParseIOWeight(line.ExpectValueAndEnd());
+#endif
 	} else
 		throw LineParser::Error("Unknown option");
 }

@@ -109,6 +109,7 @@ RunSpawnServer2(void *p)
 
 	CgroupState cgroup_state;
 
+#ifdef HAVE_LIBSYSTEMD
 	if (!ctx.config.systemd_scope.empty()) {
 		try {
 			cgroup_state =
@@ -122,6 +123,7 @@ RunSpawnServer2(void *p)
 			PrintException(e);
 		}
 	}
+#endif
 
 	RunSpawnServer(ctx.config, cgroup_state, ctx.hook, std::move(ctx.socket));
 	return 0;
