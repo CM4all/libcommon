@@ -41,8 +41,8 @@
 
 #include "util/Compiler.h"
 
-#include <postgresql/libpq-fe.h>
-#include <postgresql/pg_config.h>
+#include <libpq-fe.h>
+#include <pg_config.h>
 
 #include <new>
 #include <memory>
