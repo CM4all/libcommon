@@ -134,7 +134,7 @@ public:
 	}
 
 	ConstBuffer<int> GetFds() const {
-		return {fds.begin(), fds.size()};
+		return fds;
 	}
 };
 

@@ -82,6 +82,7 @@ public:
 
 		header.crc = crc.checksum();
 
-		return ConstBuffer<struct iovec>(&v.front(), v.size());
+		const ConstBuffer<struct iovec> b = v;
+		return b;
 	}
 };

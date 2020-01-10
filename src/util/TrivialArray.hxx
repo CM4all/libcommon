@@ -30,6 +30,8 @@
 #ifndef TRIVIAL_ARRAY_HXX
 #define TRIVIAL_ARRAY_HXX
 
+#include "ConstBuffer.hxx"
+#include "WritableBuffer.hxx"
 #include "Compiler.h"
 
 #include <array>
@@ -85,6 +87,14 @@ public:
 		assert(init.size() <= max);
 
 		std::move(init.begin(), init.end(), data.begin());
+	}
+
+	constexpr operator ConstBuffer<T>() const noexcept {
+		return {raw(), size()};
+	}
+
+	operator WritableBuffer<T>() noexcept {
+		return {raw(), size()};
 	}
 
 	constexpr

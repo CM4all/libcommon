@@ -118,7 +118,7 @@ JailParams::InsertWrapper(PreparedChildProcess &p,
 
 	w.push_back("--");
 
-	p.InsertWrapper({w.raw(), w.size()});
+	p.InsertWrapper(w);
 }
 
 #if TRANSLATION_ENABLE_EXPAND
