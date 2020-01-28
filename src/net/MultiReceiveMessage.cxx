@@ -32,6 +32,7 @@
 
 #include "MultiReceiveMessage.hxx"
 #include "SocketDescriptor.hxx"
+#include "MsgHdr.hxx"
 #include "system/Error.hxx"
 
 #include <sys/socket.h>
@@ -61,15 +62,11 @@ MultiReceiveMessage::MultiReceiveMessage(size_t _allocated_datagrams,
 	for (size_t i = 0; i < allocated_datagrams; ++i) {
 		v[i] = {GetPayload(i), max_payload_size};
 
-		m[i].msg_hdr = {
-			.msg_name = (struct sockaddr *)&a[i],
-			.msg_namelen = sizeof(struct sockaddr_storage),
-			.msg_iov = &v[i],
-			.msg_iovlen = 1,
-			.msg_control = max_cmsg_size > 0 ? GetCmsg(i) : nullptr,
-			.msg_controllen = max_cmsg_size,
-			.msg_flags = 0,
-		};
+		ConstBuffer<void> cmsg = nullptr;
+		if (max_cmsg_size > 0)
+			cmsg = {GetCmsg(i), max_cmsg_size};
+
+		m[i].msg_hdr = MakeMsgHdr(*a, {v, 1}, cmsg);
 	}
 }
 

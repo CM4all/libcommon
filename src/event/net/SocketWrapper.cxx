@@ -33,8 +33,7 @@
 #include "SocketWrapper.hxx"
 #include "io/Splice.hxx"
 #include "net/Buffered.hxx"
-
-#include <sys/socket.h>
+#include "net/MsgHdr.hxx"
 
 void
 SocketWrapper::SocketEventCallback(unsigned events) noexcept
@@ -153,15 +152,7 @@ SocketWrapper::WriteV(const struct iovec *v, size_t n) noexcept
 {
 	assert(IsValid());
 
-	struct msghdr m = {
-		.msg_name = nullptr,
-		.msg_namelen = 0,
-		.msg_iov = const_cast<struct iovec *>(v),
-		.msg_iovlen = n,
-		.msg_control = nullptr,
-		.msg_controllen = 0,
-		.msg_flags = 0,
-	};
+	auto m = MakeMsgHdr({v, n});
 
 	return sendmsg(GetSocket().Get(), &m, MSG_DONTWAIT|MSG_NOSIGNAL);
 }

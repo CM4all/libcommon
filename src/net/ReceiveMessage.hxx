@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,6 +34,7 @@
 
 #include "SocketDescriptor.hxx"
 #include "StaticSocketAddress.hxx"
+#include "MsgHdr.hxx"
 #include "system/Error.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/ConstBuffer.hxx"
@@ -78,15 +79,8 @@ ReceiveMessage(SocketDescriptor s,
 	iov.iov_base = buffer.payload;
 	iov.iov_len = sizeof(buffer.payload);
 
-	struct msghdr msg = {
-		.msg_name = (struct sockaddr *)buffer.address,
-		.msg_namelen = buffer.address.GetCapacity(),
-		.msg_iov = &iov,
-		.msg_iovlen = 1,
-		.msg_control = buffer.cmsg,
-		.msg_controllen = sizeof(buffer.cmsg),
-		.msg_flags = 0,
-	};
+	auto msg = MakeMsgHdr(buffer.address, {&iov, 1},
+			      {buffer.cmsg, sizeof(buffer.cmsg)});
 
 	auto nbytes = recvmsg(s.Get(), &msg, flags);
 	if (nbytes < 0)
