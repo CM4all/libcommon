@@ -36,9 +36,11 @@
 
 #include <sys/uio.h>
 
+template<typename T>
 constexpr struct iovec
-MakeIovec(ConstBuffer<void> b) noexcept
+MakeIovec(ConstBuffer<T> t) noexcept
 {
+	auto b = t.ToVoid();
 	return { const_cast<void *>(b.data), b.size };
 }
 
