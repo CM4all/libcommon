@@ -36,6 +36,7 @@
 #include "Crc.hxx"
 #include "net/SocketDescriptor.hxx"
 #include "net/SendMessage.hxx"
+#include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
 #include "util/StaticArray.hxx"
 
@@ -45,30 +46,9 @@ namespace Net {
 namespace Log {
 
 static struct iovec
-MakeIovec(ConstBuffer<void> b) noexcept
-{
-	return { const_cast<void *>(b.data), b.size };
-}
-
-static struct iovec
 MakeIovec(const char *s) noexcept
 {
 	return { const_cast<char *>(s), strlen(s) + 1 };
-}
-
-template<typename T>
-static constexpr struct iovec
-MakeIovecT(const T &t) noexcept
-{
-	return { const_cast<T *>(&t), sizeof(t) };
-}
-
-template<typename T, T _value>
-static auto
-MakeIovecStatic() noexcept
-{
-	static constexpr T value = _value;
-	return MakeIovecT<T>(value);
 }
 
 template<Attribute value>
