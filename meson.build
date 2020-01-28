@@ -34,11 +34,6 @@ endif
 test_cxxflags = [
   '-Wno-non-virtual-dtor',
 
-  # work around bogus GCC7 warning "mangled name for ... will change
-  # in C++17 because the exception specification is part of a function
-  # type"
-  '-Wno-noexcept-type',
-
   # the only warnings we got from this are from formatted error
   # messages, and their truncation is harmless
   '-Wno-format-truncation',
