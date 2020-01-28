@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -38,6 +38,7 @@
 #include "net/SendMessage.hxx"
 #include "IProtocol.hxx"
 #include "system/Error.hxx"
+#include "io/Iovec.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"
 
@@ -144,10 +145,7 @@ Send(SocketDescriptor s, ConstBuffer<void> payload, ConstBuffer<int> fds)
 {
 	assert(s.IsDefined());
 
-	struct iovec vec = {
-		.iov_base = const_cast<void *>(payload.data),
-		.iov_len = payload.size,
-	};
+	auto vec = MakeIovec(payload);
 
 	MessageHeader msg(ConstBuffer<struct iovec>(&vec, 1));
 
