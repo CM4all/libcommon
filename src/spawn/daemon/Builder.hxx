@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,6 +34,7 @@
 
 #include "Protocol.hxx"
 #include "net/SendMessage.hxx"
+#include "io/Iovec.hxx"
 #include "util/StaticArray.hxx"
 
 #include <boost/crc.hpp>
@@ -54,7 +55,7 @@ public:
 	DatagramBuilder &operator=(const DatagramBuilder &) = delete;
 
 	void AppendRaw(ConstBuffer<void> b) noexcept {
-		v.append() = { const_cast<void *>(b.data), b.size };
+		v.append() = MakeIovec(b);
 	}
 
 	void AppendPadded(ConstBuffer<void> b) noexcept {
