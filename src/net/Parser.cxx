@@ -39,6 +39,26 @@
 
 #include <netdb.h>
 
+static constexpr struct addrinfo
+MakeActiveHints() noexcept
+{
+	struct addrinfo ai{};
+	ai.ai_flags = AI_NUMERICHOST|AI_ADDRCONFIG;
+	ai.ai_family = AF_UNSPEC;
+	ai.ai_socktype = SOCK_STREAM;
+	return ai;
+}
+
+static constexpr struct addrinfo
+MakePassiveHints() noexcept
+{
+	struct addrinfo ai{};
+	ai.ai_flags = AI_NUMERICHOST|AI_ADDRCONFIG|AI_PASSIVE;
+	ai.ai_family = AF_UNSPEC;
+	ai.ai_socktype = SOCK_STREAM;
+	return ai;
+}
+
 AllocatedSocketAddress
 ParseSocketAddress(const char *p, int default_port, bool passive)
 {
@@ -61,27 +81,8 @@ ParseSocketAddress(const char *p, int default_port, bool passive)
 #endif
 	}
 
-	static constexpr struct addrinfo hints = {
-		.ai_flags = AI_NUMERICHOST|AI_ADDRCONFIG,
-		.ai_family = AF_UNSPEC,
-		.ai_socktype = SOCK_STREAM,
-		.ai_protocol = 0,
-		.ai_addrlen = 0,
-		.ai_addr = nullptr,
-		.ai_canonname = nullptr,
-		.ai_next = nullptr,
-	};
-
-	static constexpr struct addrinfo passive_hints = {
-		.ai_flags = AI_NUMERICHOST|AI_ADDRCONFIG|AI_PASSIVE,
-		.ai_family = AF_UNSPEC,
-		.ai_socktype = SOCK_STREAM,
-		.ai_protocol = 0,
-		.ai_addrlen = 0,
-		.ai_addr = nullptr,
-		.ai_canonname = nullptr,
-		.ai_next = nullptr,
-	};
+	static constexpr struct addrinfo hints = MakeActiveHints();
+	static constexpr struct addrinfo passive_hints = MakePassiveHints();
 
 	const auto ai = Resolve(p, default_port,
 				passive ? &passive_hints : &hints);
