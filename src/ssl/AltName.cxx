@@ -36,7 +36,7 @@
 static void
 FillNameList(std::forward_list<std::string> &list, OpenSSL::GeneralNames src)
 {
-	for (const auto &name : src) {
+	for (const OpenSSL::GeneralName name : src) {
 		if (name.GetType() == GEN_DNS) {
 			const auto dns_name = name.GetDnsName();
 			if (dns_name == nullptr)
