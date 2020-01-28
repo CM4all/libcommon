@@ -256,6 +256,16 @@ public:
 		return CheckResult(::PQexec(conn, query));
 	}
 
+	Result Execute(bool result_binary, const char *query) {
+		assert(IsDefined());
+		assert(query != nullptr);
+
+		return CheckResult(::PQexecParams(conn, query, 0,
+						  nullptr, nullptr,
+						  nullptr, nullptr,
+						  result_binary));
+	}
+
 	template<typename... Params>
 	Result ExecuteParams(bool result_binary,
 			     const char *query, Params... _params) {
