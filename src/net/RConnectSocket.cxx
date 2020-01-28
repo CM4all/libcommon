@@ -99,11 +99,10 @@ ResolveConnectSocket(const char *host_and_port, int default_port,
 		return ParseConnectSocket(host_and_port, default_port,
 					  socktype, timeout);
 
-	struct addrinfo hints{};
-	hints.ai_flags = AI_ADDRCONFIG;
-	hints.ai_socktype = socktype;
-
-	return ResolveConnectSocket(host_and_port, default_port, hints, timeout);
+	return ResolveConnectSocket(host_and_port, default_port,
+				    MakeAddrInfo(AI_ADDRCONFIG,
+						 AF_UNSPEC, socktype),
+				    timeout);
 }
 
 UniqueSocketDescriptor

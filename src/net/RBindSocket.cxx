@@ -56,11 +56,9 @@ ResolveBindSocket(const char *host_and_port, int default_port,
 static UniqueSocketDescriptor
 ResolveBindSocket(const char *host_and_port, int default_port, int socktype)
 {
-	struct addrinfo hints{};
-	hints.ai_flags = AI_ADDRCONFIG|AI_PASSIVE;
-	hints.ai_socktype = socktype;
-
-	return ResolveBindSocket(host_and_port, default_port, hints);
+	return ResolveBindSocket(host_and_port, default_port,
+				 MakeAddrInfo(AI_ADDRCONFIG|AI_PASSIVE,
+					      AF_UNSPEC, socktype));
 }
 
 UniqueSocketDescriptor

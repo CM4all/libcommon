@@ -42,21 +42,15 @@
 static constexpr struct addrinfo
 MakeActiveHints() noexcept
 {
-	struct addrinfo ai{};
-	ai.ai_flags = AI_NUMERICHOST|AI_ADDRCONFIG;
-	ai.ai_family = AF_UNSPEC;
-	ai.ai_socktype = SOCK_STREAM;
-	return ai;
+	return MakeAddrInfo(AI_NUMERICHOST|AI_ADDRCONFIG,
+			    AF_UNSPEC, SOCK_STREAM);
 }
 
 static constexpr struct addrinfo
 MakePassiveHints() noexcept
 {
-	struct addrinfo ai{};
-	ai.ai_flags = AI_NUMERICHOST|AI_ADDRCONFIG|AI_PASSIVE;
-	ai.ai_family = AF_UNSPEC;
-	ai.ai_socktype = SOCK_STREAM;
-	return ai;
+	return MakeAddrInfo(AI_NUMERICHOST|AI_ADDRCONFIG|AI_PASSIVE,
+			    AF_UNSPEC, SOCK_STREAM);
 }
 
 AllocatedSocketAddress
