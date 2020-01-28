@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,6 +31,7 @@
  */
 
 #include "Logger.hxx"
+#include "Iovec.hxx"
 #include "util/StaticArray.hxx"
 #include "util/Exception.hxx"
 
@@ -43,17 +44,11 @@ unsigned LoggerDetail::max_level = 1;
 LoggerDetail::ParamWrapper<std::exception_ptr>::ParamWrapper(std::exception_ptr ep)
 	:ParamWrapper<std::string>(GetFullMessage(ep)) {}
 
-static constexpr struct iovec
-ToIovec(StringView s)
-{
-	return {const_cast<char *>(s.data), s.size};
-}
-
 gcc_pure
 static struct iovec
-ToIovec(const char *s)
+MakeIovec(const char *s)
 {
-	return ToIovec(StringView(s));
+	return MakeIovec(StringView(s));
 }
 
 void
@@ -63,19 +58,19 @@ LoggerDetail::WriteV(StringView domain,
 	StaticArray<struct iovec, 64> v;
 
 	if (!domain.empty()) {
-		v.push_back(ToIovec("["));
-		v.push_back(ToIovec(domain));
-		v.push_back(ToIovec("] "));
+		v.push_back(MakeIovec("["));
+		v.push_back(MakeIovec(domain));
+		v.push_back(MakeIovec("] "));
 	}
 
 	for (const auto i : buffers) {
 		if (v.size() >= v.capacity() - 1)
 			break;
 
-		v.push_back(ToIovec(i));
+		v.push_back(MakeIovec(i));
 	}
 
-	v.push_back(ToIovec("\n"));
+	v.push_back(MakeIovec("\n"));
 
 	ssize_t nbytes =
 		writev(STDERR_FILENO, v.raw(), v.size());
