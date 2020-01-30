@@ -47,7 +47,7 @@ MakeAddrInfo(int flags, int family, int socktype, int protocol=0) noexcept
 	ai.ai_flags = flags;
 	ai.ai_family = family;
 	ai.ai_socktype = socktype;
-	ai.ai_socktype = protocol;
+	ai.ai_protocol = protocol;
 	return ai;
 }
 
