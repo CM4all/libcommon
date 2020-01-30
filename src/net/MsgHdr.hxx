@@ -33,6 +33,7 @@
 #pragma once
 
 #include "SocketAddress.hxx"
+#include "StaticSocketAddress.hxx"
 #include "util/ConstBuffer.hxx"
 
 #include <sys/socket.h>
@@ -58,6 +59,18 @@ MakeMsgHdr(SocketAddress name, ConstBuffer<struct iovec> iov,
 	auto mh = MakeMsgHdr(iov);
 	mh.msg_name = const_cast<struct sockaddr *>(name.GetAddress());
 	mh.msg_namelen = name.GetSize();
+	mh.msg_control = const_cast<void *>(control.data);
+	mh.msg_controllen = control.size;
+	return mh;
+}
+
+inline constexpr struct msghdr
+MakeMsgHdr(StaticSocketAddress name, ConstBuffer<struct iovec> iov,
+	   ConstBuffer<void> control) noexcept
+{
+	auto mh = MakeMsgHdr(iov);
+	mh.msg_name = name;
+	mh.msg_namelen = name.GetCapacity();
 	mh.msg_control = const_cast<void *>(control.data);
 	mh.msg_controllen = control.size;
 	return mh;
