@@ -19,9 +19,6 @@ gtest = declare_dependency(
   compile_args: gtest_warning_flags + [
     '-Wno-undef',
     '-Wno-missing-declarations',
-
-    # needed on Jessie for gtest's IsNullLiteralHelper
-    '-Wno-conversion-null',
   ],
 )
 
