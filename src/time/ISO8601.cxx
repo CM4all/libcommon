@@ -186,8 +186,12 @@ ParseISO8601(const char *s)
 
 	/* parse the date */
 	const char *end = strptime(s, "%F", &tm);
-	if (end == nullptr)
-		throw std::runtime_error("Failed to parse date");
+	if (end == nullptr) {
+		/* try without field separators */
+		end = strptime(s, "%Y%m%d", &tm);
+		if (end == nullptr)
+			throw std::runtime_error("Failed to parse date");
+	}
 
 	s = end;
 
