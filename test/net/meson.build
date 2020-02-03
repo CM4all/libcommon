@@ -6,6 +6,7 @@ endif
 
 
 test('TestNet', executable('TestNet',
+  'TestAnonymize.cxx',
   'TestIPv4Address.cxx',
   'TestIPv6Address.cxx',
   'TestHostParser.cxx',

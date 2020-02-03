@@ -1,4 +1,5 @@
 net_sources = [
+  'Anonymize.cxx',
   'SocketAddress.cxx',
   'StaticSocketAddress.cxx',
   'AllocatedSocketAddress.cxx',

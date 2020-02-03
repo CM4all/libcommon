@@ -32,6 +32,7 @@
 
 #include "OneLine.hxx"
 #include "Datagram.hxx"
+#include "net/Anonymize.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/StringBuffer.hxx"
 #include "util/StringBuilder.hxx"
@@ -91,43 +92,9 @@ AppendEscape(StringBuilder &b, StringView value)
 static void
 AppendAnonymize(StringBuilder &b, const char *value)
 {
-	const char *p = strchr(value, '.');
-	if (p != nullptr) {
-		/* IPv4: zero the last octet */
-
-		const char *q = strrchr(p + 1, '.');
-		if (q != nullptr) {
-			b.Append(value, q + 1 - value);
-			b.Append('0');
-			return;
-		}
-	}
-
-	p = strchr(value, ':');
-	if (p != nullptr) {
-		/* IPv6: truncate after the first 64 bit */
-
-		for (unsigned i = 1; i < 4; ++i) {
-			const char *q = strchr(p + 1, ':');
-			if (q == p) {
-				b.Append(value, q + 1 - value);
-				return;
-			}
-
-			if (q == nullptr) {
-				b.Append(value);
-				return;
-			}
-
-			p = q;
-		}
-
-		b.Append(value, p + 1 - value);
-		b.Append(':');
-		return;
-	}
-
-	b.Append(value);
+	auto result = AnonymizeAddress(value);
+	b.Append(result.first);
+	b.Append(result.second);
 }
 
 template<typename... Args>
