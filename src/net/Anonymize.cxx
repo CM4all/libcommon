@@ -32,12 +32,13 @@
 
 #include "Anonymize.hxx"
 #include "util/StringView.hxx"
+#include "util/CharUtil.hxx"
 
 std::pair<StringView, StringView>
 AnonymizeAddress(StringView value) noexcept
 {
 	const char *p = value.Find('.');
-	if (p != nullptr) {
+	if (p != nullptr && IsDigitASCII(value.back())) {
 		/* IPv4: zero the last octet */
 
 		auto rest = value.substr(p + 1);
