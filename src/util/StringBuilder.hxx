@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,7 @@
 #ifndef STRING_BUILDER_HXX
 #define STRING_BUILDER_HXX
 
+#include "ConstBuffer.hxx"
 #include "WritableBuffer.hxx"
 #include "Compiler.h"
 
@@ -105,6 +106,10 @@ public:
 
 	void Append(const_pointer src);
 	void Append(const_pointer src, size_t length);
+
+	void Append(ConstBuffer<T> src) {
+		Append(src.data, src.size);
+	}
 
 #ifndef __clang__
 	/* clang thinks the "format argument not a string type"
