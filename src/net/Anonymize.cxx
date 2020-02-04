@@ -54,11 +54,11 @@ AnonymizeAddress(StringView value) noexcept
 	if (p != nullptr &&
 	    (IsHexDigit(value.front()) || value.front() == ':') &&
 	    (IsHexDigit(value.back()) || value.back() == ':')) {
-		/* IPv6: truncate after the first 64 bit */
+		/* IPv6: truncate after the first 40 bit */
 
 		auto rest = value.substr(p + 1);
 
-		for (unsigned i = 1; i < 4; ++i) {
+		for (unsigned i = 1; i < 2; ++i) {
 			const char *q = rest.Find(':');
 			if (q == rest.data)
 				return std::make_pair(StringView{value.data, q + 1},
@@ -69,6 +69,12 @@ AnonymizeAddress(StringView value) noexcept
 
 			rest = rest.substr(q + 1);
 		}
+
+		/* clear the low 8 bit of the third segment */
+		const auto third_segment = rest.Split(':').first;
+		if (third_segment.size > 2)
+			return std::make_pair(StringView{value.data, third_segment.end() - 2},
+					      "00::");
 
 		return std::make_pair(StringView{value.data, rest.data},
 				      ":");

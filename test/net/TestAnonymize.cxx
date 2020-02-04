@@ -77,17 +77,26 @@ TEST(Anonymize, IPv4)
 
 TEST(Anonymize, IPv6)
 {
-	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5:6:7:8"), "1:2:3:4::");
-	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5:6:7::"), "1:2:3:4::");
-	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5::"), "1:2:3:4::");
-	EXPECT_EQ(AnonymizeAddress("1:2:3:4::"), "1:2:3:4::");
-	EXPECT_EQ(AnonymizeAddress("1:2:3::"), "1:2:3::");
+	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5:6:7:8"), "1:2::");
+	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5:6:7:8"), "1:2::");
+	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5:6:7::"), "1:2::");
+	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5::"), "1:2::");
+	EXPECT_EQ(AnonymizeAddress("1:2:3:4::"), "1:2::");
+	EXPECT_EQ(AnonymizeAddress("1:2:3::"), "1:2::");
+
+	EXPECT_EQ(AnonymizeAddress("1:2:ab:4:5:6:7:8"), "1:2::");
+	EXPECT_EQ(AnonymizeAddress("1:2:abc:4:5:6:7:8"), "1:2:a00::");
+	EXPECT_EQ(AnonymizeAddress("1:2:abcd:4:5:6:7:8"), "1:2:ab00::");
+	EXPECT_EQ(AnonymizeAddress("1:2:abcd:4:5:6:7::"), "1:2:ab00::");
+	EXPECT_EQ(AnonymizeAddress("1:2:abcd:4:5::"), "1:2:ab00::");
+	EXPECT_EQ(AnonymizeAddress("1:2:abcd:4::"), "1:2:ab00::");
+	EXPECT_EQ(AnonymizeAddress("1:2:abcd::"), "1:2:ab00::");
 	EXPECT_EQ(AnonymizeAddress("1:2::"), "1:2::");
 	EXPECT_EQ(AnonymizeAddress("1::"), "1::");
 	EXPECT_EQ(AnonymizeAddress("::1"), "::");
-	EXPECT_EQ(AnonymizeAddress("1:2:3::6:7:8"), "1:2:3::");
-	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5::7:8"), "1:2:3:4::");
-	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5::8"), "1:2:3:4::");
+	EXPECT_EQ(AnonymizeAddress("1:2:abcd::6:7:8"), "1:2:ab00::");
+	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5::7:8"), "1:2::");
+	EXPECT_EQ(AnonymizeAddress("1:2:3:4:5::8"), "1:2::");
 	EXPECT_EQ(AnonymizeAddress("1:2::8"), "1:2::");
 	EXPECT_EQ(AnonymizeAddress("1:2::7:8"), "1:2::");
 }
