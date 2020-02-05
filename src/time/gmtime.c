@@ -38,8 +38,6 @@ typedef uint8_t xuint8;
 typedef uint16_t xuint16;
 typedef uint32_t xuint32;
 
-# define LIBCORE_d64C INT64_C
-
 /*
 // ---------- macros -------------------------------------------
 */
