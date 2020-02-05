@@ -3,13 +3,8 @@ time_sources = [
   'ISO8601.cxx',
   'Parser.cxx',
   'Math.cxx',
+  'gmtime.cxx',
 ]
-
-if get_variable('libcommon_enable_c', true)
-  time_sources += [
-    'gmtime.c',
-  ]
-endif
 
 time = static_library(
   'time',

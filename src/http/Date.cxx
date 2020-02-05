@@ -31,7 +31,7 @@
  */
 
 #include "Date.hxx"
-#include "time/gmtime.h"
+#include "time/gmtime.hxx"
 #include "util/CharUtil.hxx"
 #include "util/DecimalFormat.h"
 
