@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * libcm4all-core-1.20.8+psql revision 847.
  */
 
-#ifndef __BENG_GMTIME_H
-#define __BENG_GMTIME_H
+#pragma once
 
 #include <stdint.h>
 #include <time.h>
@@ -52,6 +51,4 @@ sysx_time_gmtime(time_t tm32, xbrokentime *tmrec);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif
