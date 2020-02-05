@@ -35,9 +35,10 @@
 
 #pragma once
 
+#include "util/Compiler.h"
+
 #include <time.h>
 
-typedef struct tm xbrokentime;
-
-xbrokentime *
-sysx_time_gmtime(time_t tm32, xbrokentime *tmrec) noexcept;
+gcc_const
+struct tm
+sysx_time_gmtime(time_t t) noexcept;

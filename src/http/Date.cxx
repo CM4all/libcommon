@@ -82,21 +82,20 @@ void
 http_date_format_r(char *buffer,
 		   std::chrono::system_clock::time_point t) noexcept
 {
-	static struct tm tm_buffer;
-	const struct tm *tm = sysx_time_gmtime(std::chrono::system_clock::to_time_t(t), &tm_buffer);
+	const struct tm tm = sysx_time_gmtime(std::chrono::system_clock::to_time_t(t));
 
-	*(uint32_t *)(void *)buffer = *(const uint32_t *)(const void *)wday_name(tm->tm_wday);
+	*(uint32_t *)(void *)buffer = *(const uint32_t *)(const void *)wday_name(tm.tm_wday);
 	buffer[4] = ' ';
-	format_2digit(buffer + 5, tm->tm_mday);
+	format_2digit(buffer + 5, tm.tm_mday);
 	buffer[7] = ' ';
-	*(uint32_t *)(void *)(buffer + 8) = *(const uint32_t *)(const void *)month_name(tm->tm_mon);
-	format_4digit(buffer + 12, tm->tm_year + 1900);
+	*(uint32_t *)(void *)(buffer + 8) = *(const uint32_t *)(const void *)month_name(tm.tm_mon);
+	format_4digit(buffer + 12, tm.tm_year + 1900);
 	buffer[16] = ' ';
-	format_2digit(buffer + 17, tm->tm_hour);
+	format_2digit(buffer + 17, tm.tm_hour);
 	buffer[19] = ':';
-	format_2digit(buffer + 20, tm->tm_min);
+	format_2digit(buffer + 20, tm.tm_min);
 	buffer[22] = ':';
-	format_2digit(buffer + 23, tm->tm_sec);
+	format_2digit(buffer + 23, tm.tm_sec);
 	buffer[25] = ' ';
 	*(uint32_t *)(void *)(buffer + 26) = *(const uint32_t *)(const void *)"GMT";
 }

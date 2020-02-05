@@ -29,7 +29,6 @@
  */
 
 #include "gmtime.hxx"
-#include "util/Compiler.h"
 
 #include <assert.h>
 #include <stdint.h>
@@ -194,8 +193,8 @@ LEAP_IN_GREG(unsigned year) noexcept
  * "efficient timestamp input and output" by
  * C. Dyreson and R. Snodgrass. (Chapter 4.3).
  */
-xbrokentime *
-sysx_time_gmtime(time_t tm32, xbrokentime *tmrec) noexcept
+struct tm
+sysx_time_gmtime(time_t tm32) noexcept
 {
 	const unsigned utm32 = (unsigned)tm32; /* year 2037 problem! */
 	unsigned days, year, secs;
@@ -210,7 +209,8 @@ sysx_time_gmtime(time_t tm32, xbrokentime *tmrec) noexcept
 
 	assert((int)days >= 0);
 
-	tmrec->tm_wday = (days + 1) % 7;
+	struct tm result;
+	result.tm_wday = (days + 1) % 7;
 
 	year = days / 365;
 	days = days % 365 - years_to_leap_days[year];
@@ -222,15 +222,15 @@ sysx_time_gmtime(time_t tm32, xbrokentime *tmrec) noexcept
 	} else
 		leap = LEAP_IN_GREG(year);
 
-	tmrec->tm_year = tm_greg * 400 + year + 1 - 1900;
-	tmrec->tm_mon  = day_to_mon[days] >> 4 * leap & 0x0f;
-	tmrec->tm_mday = day_to_day[days] >> 8 * leap & 0xff;
-	tmrec->tm_yday = days;
+	result.tm_year = tm_greg * 400 + year + 1 - 1900;
+	result.tm_mon  = day_to_mon[days] >> 4 * leap & 0x0f;
+	result.tm_mday = day_to_day[days] >> 8 * leap & 0xff;
+	result.tm_yday = days;
 
-	tmrec->tm_hour = secs / 3600;
+	result.tm_hour = secs / 3600;
 	secs %= 3600;
-	tmrec->tm_min  = secs / 60;
-	tmrec->tm_sec  = secs % 60;
+	result.tm_min  = secs / 60;
+	result.tm_sec  = secs % 60;
 
-	return tmrec;
+	return result;
 }
