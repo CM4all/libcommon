@@ -33,6 +33,7 @@
 #include "Client.hxx"
 #include "ConnectionListener.hxx"
 #include "net/SocketAddress.hxx"
+#include "net/IPv6Address.hxx"
 #include "net/Interface.hxx"
 
 #include <avahi-common/error.h>
@@ -95,7 +96,7 @@ MyAvahiClient::AddService(AvahiIfIndex interface, AvahiProtocol protocol,
 
 void
 MyAvahiClient::AddService(const char *type, const char *interface,
-			  SocketAddress address) noexcept
+			  SocketAddress address, bool v6only) noexcept
 {
 	unsigned port = address.GetPort();
 	if (port == 0)
@@ -119,7 +120,11 @@ MyAvahiClient::AddService(const char *type, const char *interface,
 		break;
 
 	case AF_INET6:
-		protocol = AVAHI_PROTO_INET6;
+		/* don't restrict to AVAHI_PROTO_INET6 if IPv4
+		   connections are possible (i.e. this is a wildcard
+		   listener and v6only disabled) */
+		if (v6only || !IPv6Address::Cast(address).IsAny())
+			protocol = AVAHI_PROTO_INET6;
 		break;
 	}
 

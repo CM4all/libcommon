@@ -105,8 +105,13 @@ public:
 
 	void AddService(AvahiIfIndex interface, AvahiProtocol protocol,
 			const char *type, uint16_t port) noexcept;
+
+	/**
+	 * @param v6only the value of IPV6_V6ONLY (if this describes
+	 * an IPv6 address)
+	 */
 	void AddService(const char *type, const char *interface,
-			SocketAddress address) noexcept;
+			SocketAddress address, bool v6only) noexcept;
 
 	/**
 	 * Temporarily hide all registered services.  You can undo this
