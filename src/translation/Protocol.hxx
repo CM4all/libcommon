@@ -985,6 +985,12 @@ enum class TranslationCommand : uint16_t {
 	 * Force the #HTTP address to be HTTP/2.
 	 */
 	HTTP2 = 211,
+
+	/**
+	 * Pass the CGI parameter "REQUEST_URI" verbatim instead of
+	 * building it from SCRIPT_NAME, PATH_INFO and QUERY_STRING.
+	 */
+	REQUEST_URI_VERBATIM = 212,
 };
 
 struct TranslationHeader {

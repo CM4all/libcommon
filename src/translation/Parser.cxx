@@ -3508,6 +3508,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::REQUEST_URI_VERBATIM:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (cgi_address == nullptr)
+			throw std::runtime_error("misplaced REQUEST_URI_VERBATIM packet");
+
+		if (!payload.empty())
+			throw std::runtime_error("malformed REQUEST_URI_VERBATIM packet");
+
+		if (cgi_address->request_uri_verbatim)
+			throw std::runtime_error("duplicate REQUEST_URI_VERBATIM packet");
+
+		cgi_address->request_uri_verbatim = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
