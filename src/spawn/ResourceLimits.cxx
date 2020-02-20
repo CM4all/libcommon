@@ -133,6 +133,14 @@ rlimit_apply(int pid, int resource, const ResourceLimit &r)
 	if (r.IsEmpty())
 		return;
 
+#ifdef __SANITIZE_ADDRESS__
+	if (resource == RLIMIT_AS)
+		/* ignore the AddressSpace limit when AddressSanitizer
+		   is enabled because we'll hit this limit before we
+		   can even execute the new child process */
+		return;
+#endif
+
 	ResourceLimit buffer;
 	const auto &r2 = complete_rlimit(pid, resource, r, buffer);
 	r2.Set(pid, resource);
