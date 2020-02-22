@@ -104,11 +104,8 @@ EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 		if (i.data.ptr == &event)
 			i.events = 0;
 
-	if (!epoll.Remove(fd))
-		return false;
-
 	sockets.erase(sockets.iterator_to(event));
-	return true;
+	return epoll.Remove(fd);
 }
 
 void
