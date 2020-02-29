@@ -42,14 +42,14 @@
 static constexpr struct addrinfo
 MakeActiveHints() noexcept
 {
-	return MakeAddrInfo(AI_NUMERICHOST|AI_ADDRCONFIG,
+	return MakeAddrInfo(AI_NUMERICHOST,
 			    AF_UNSPEC, SOCK_STREAM);
 }
 
 static constexpr struct addrinfo
 MakePassiveHints() noexcept
 {
-	return MakeAddrInfo(AI_NUMERICHOST|AI_ADDRCONFIG|AI_PASSIVE,
+	return MakeAddrInfo(AI_NUMERICHOST|AI_PASSIVE,
 			    AF_UNSPEC, SOCK_STREAM);
 }
 
