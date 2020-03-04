@@ -65,7 +65,7 @@ MakeMsgHdr(SocketAddress name, ConstBuffer<struct iovec> iov,
 }
 
 inline constexpr struct msghdr
-MakeMsgHdr(StaticSocketAddress name, ConstBuffer<struct iovec> iov,
+MakeMsgHdr(StaticSocketAddress &name, ConstBuffer<struct iovec> iov,
 	   ConstBuffer<void> control) noexcept
 {
 	auto mh = MakeMsgHdr(iov);
