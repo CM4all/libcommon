@@ -45,6 +45,22 @@ StringIsEmpty(const char *string) noexcept
 	return *string == 0;
 }
 
+[[gnu::pure]]
+static inline bool
+StringIsEqual(std::string_view a, std::string_view b) noexcept
+{
+	return a.size() == b.size() &&
+		StringIsEqual(a.data(), b.data(), b.size());
+}
+
+[[gnu::pure]]
+static inline bool
+StringIsEqualIgnoreCase(std::string_view a, std::string_view b) noexcept
+{
+	return a.size() == b.size() &&
+		StringIsEqualIgnoreCase(a.data(), b.data(), b.size());
+}
+
 [[gnu::pure]] [[gnu::nonnull]]
 static inline bool
 StringStartsWith(const char *haystack, std::string_view needle) noexcept
