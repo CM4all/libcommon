@@ -163,11 +163,11 @@ class SpawnServerConnection
 
 	SocketEvent event;
 
-	typedef boost::intrusive::set<SpawnServerChild,
-				      boost::intrusive::member_hook<SpawnServerChild,
-								    SpawnServerChild::IdHook,
-								    &SpawnServerChild::id_hook>,
-				      boost::intrusive::compare<SpawnServerChild::CompareId>> ChildIdMap;
+	using ChildIdMap = boost::intrusive::set<SpawnServerChild,
+						 boost::intrusive::member_hook<SpawnServerChild,
+									       SpawnServerChild::IdHook,
+									       &SpawnServerChild::id_hook>,
+						 boost::intrusive::compare<SpawnServerChild::CompareId>>;
 	ChildIdMap children;
 
 	struct ExitQueueItem {
@@ -233,8 +233,8 @@ class SpawnServerProcess {
 
 	ChildProcessRegistry child_process_registry;
 
-	typedef boost::intrusive::list<SpawnServerConnection,
-				       boost::intrusive::constant_time_size<false>> ConnectionList;
+	using ConnectionList = boost::intrusive::list<SpawnServerConnection,
+						      boost::intrusive::constant_time_size<false>>;
 	ConnectionList connections;
 
 public:

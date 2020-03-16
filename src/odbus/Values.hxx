@@ -57,7 +57,7 @@ struct String : BasicValue<const char *> {
 };
 
 struct Boolean {
-	typedef BooleanTypeTraits Traits;
+	using Traits = BooleanTypeTraits;
 	dbus_bool_t value;
 
 	explicit constexpr Boolean(bool _value) noexcept
@@ -69,8 +69,8 @@ using Uint64 = BasicValue<dbus_uint64_t>;
 
 template<typename T, template<typename U> class WrapTraits>
 struct WrapValue {
-	typedef typename T::Traits ContainedTraits;
-	typedef WrapTraits<ContainedTraits> Traits;
+	using ContainedTraits = typename T::Traits;
+	using Traits = WrapTraits<ContainedTraits>;
 	const T &value;
 
 	explicit constexpr WrapValue(const T &_value) noexcept
@@ -79,8 +79,8 @@ struct WrapValue {
 
 template<typename T>
 struct WrapVariant : BasicValue<T> {
-	typedef typename T::Traits ContainedTraits;
-	typedef VariantTypeTraits Traits;
+	using ContainedTraits = typename T::Traits;
+	using Traits = VariantTypeTraits;
 
 	explicit constexpr WrapVariant(const T &_value) noexcept
 		:BasicValue<T>(_value) {}
@@ -93,8 +93,8 @@ static WrapVariant<T> Variant(const T &_value) noexcept {
 
 template<typename T>
 struct WrapFixedArray {
-	typedef TypeTraits<T> ContainedTraits;
-	typedef ArrayTypeTraits<ContainedTraits> Traits;
+	using ContainedTraits = TypeTraits<T>;
+	using Traits = ArrayTypeTraits<ContainedTraits>;
 	ConstBuffer<T> value;
 
 	explicit constexpr WrapFixedArray(const T *_data,
@@ -110,7 +110,7 @@ static WrapFixedArray<T> FixedArray(const T *_data,
 
 template<typename... T>
 struct WrapStruct {
-	typedef StructTypeTraits<T...> Traits;
+	using Traits = StructTypeTraits<T...>;
 
 	std::tuple<const T&...> values;
 

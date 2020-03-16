@@ -48,7 +48,7 @@ struct FNVTraits {};
 template<>
 struct FNVTraits<uint32_t> {
 	typedef uint32_t value_type;
-	typedef uint_fast32_t fast_type;
+	using fast_type = uint_fast32_t;
 
 	static constexpr value_type OFFSET_BASIS = 2166136261u;
 	static constexpr value_type PRIME = 16777619u;
@@ -56,8 +56,8 @@ struct FNVTraits<uint32_t> {
 
 template<>
 struct FNVTraits<uint64_t> {
-	typedef uint64_t value_type;
-	typedef uint_fast64_t fast_type;
+	using value_type = uint64_t;
+	using fast_type = uint_fast64_t;
 
 	static constexpr value_type OFFSET_BASIS = 14695981039346656037u;
 	static constexpr value_type PRIME = 1099511628211u;
@@ -65,8 +65,8 @@ struct FNVTraits<uint64_t> {
 
 template<typename Traits>
 struct FNV1aAlgorithm {
-	typedef typename Traits::value_type value_type;
-	typedef typename Traits::fast_type fast_type;
+	using value_type = typename Traits::value_type;
+	using fast_type = typename Traits::fast_type;
 
 	gcc_hot
 	static constexpr fast_type Update(fast_type hash, uint8_t b) noexcept {

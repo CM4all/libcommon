@@ -48,8 +48,8 @@ public:
 	using typename I::iterator_category;
 	typedef M value_type;
 	using typename I::difference_type;
-	typedef M *pointer;
-	typedef M &reference;
+	using pointer = M *;
+	using reference = M &;
 
 	template<typename T>
 	constexpr MemberIteratorAdapter(T &&t) noexcept

@@ -53,10 +53,10 @@ template<typename T>
 class VCircularBuffer {
 public:
 	typedef T value_type;
-	typedef T &reference;
-	typedef const T &const_reference;
-	typedef T *pointer;
-	typedef const T *const_pointer;
+	using reference = T &;
+	using const_reference = const T &;
+	using pointer = T *;
+	using const_pointer = const T *;
 
 private:
 	struct Item {
