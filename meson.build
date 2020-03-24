@@ -5,6 +5,11 @@ project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
   ],
 )
 
+version_h = configuration_data()
+version_h.set_quoted('PACKAGE', meson.project_name())
+version_h.set_quoted('VERSION', meson.project_version())
+configure_file(output: 'version.h', configuration: version_h)
+
 # TODO: use get_option('b_ndebug'), but that doesn't work with Meson 0.37.1
 if get_option('buildtype') == 'debug'
   debug = true
@@ -17,8 +22,6 @@ c_compiler = meson.get_compiler('c')
 
 common_flags = [
   '-D_REENTRANT', '-D_GNU_SOURCE',
-  '-DPACKAGE="' + meson.project_name() + '"',
-  '-DVERSION="' + meson.project_version() + '"',
   '-Wwrite-strings', '-Wcast-qual', '-Wcast-align', '-Wfloat-equal',
   '-Wshadow', '-Wpointer-arith', '-Wsign-compare',
   '-Wmissing-declarations', '-Wmissing-noreturn', '-Wmissing-format-attribute',
@@ -67,7 +70,7 @@ if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'c')
 endif
 
-inc = include_directories('src', 'fake')
+inc = include_directories('src', 'fake', '.')
 
 subdir('src/util')
 subdir('src/time')
