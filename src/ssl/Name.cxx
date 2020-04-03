@@ -54,7 +54,7 @@ NidToString(X509_NAME &name, int nid)
 	if (len < 0)
 		return nullptr;
 
-	return AllocatedString<>::Duplicate(buffer, len);
+	return AllocatedString<>::Duplicate({buffer, std::size_t(len)});
 }
 
 static AllocatedString<>
