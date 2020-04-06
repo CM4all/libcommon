@@ -36,9 +36,8 @@
 #include "util/Compiler.h"
 
 #include <chrono>
+#include <cstddef>
 #include <utility>
-
-#include <stddef.h>
 
 struct tm;
 template<size_t CAPACITY> class StringBuffer;

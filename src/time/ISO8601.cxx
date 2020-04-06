@@ -34,9 +34,8 @@
 #include "Convert.hxx"
 #include "util/StringBuffer.hxx"
 
+#include <cassert>
 #include <stdexcept>
-
-#include <assert.h>
 
 StringBuffer<64>
 FormatISO8601(const struct tm &tm) noexcept

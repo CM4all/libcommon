@@ -35,8 +35,8 @@
 #include "IPv4Address.hxx"
 
 #include <algorithm>
+#include <cassert>
 
-#include <assert.h>
 #include <sys/un.h>
 #include <netdb.h>
 #include <string.h>

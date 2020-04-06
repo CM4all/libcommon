@@ -32,8 +32,9 @@
 
 #include "io/UniqueFileDescriptor.hxx"
 
+#include <cstdint>
+
 #include <sys/epoll.h>
-#include <stdint.h>
 
 /**
  * A class that wraps Linux epoll.

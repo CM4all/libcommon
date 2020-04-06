@@ -32,7 +32,7 @@
 #include "event/SocketEvent.hxx"
 #include "util/RuntimeError.hxx"
 
-#include <assert.h>
+#include <cassert>
 
 /**
  * Monitor for one socket created by CURL.
