@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,22 +49,22 @@ private:
 
 public:
 	StringPointer() = default;
-	constexpr StringPointer(const_pointer _value)
+	constexpr StringPointer(const_pointer _value) noexcept
 		:value(_value) {}
 
 	/**
 	 * Check if this is a "nulled" instance.  A "nulled" instance
 	 * must not be used.
 	 */
-	constexpr bool IsNull() const {
+	constexpr bool IsNull() const noexcept {
 		return value == nullptr;
 	}
 
-	constexpr const_pointer c_str() const {
+	constexpr const_pointer c_str() const noexcept {
 		return value;
 	}
 
-	bool empty() const {
+	bool empty() const noexcept {
 		return *value == SENTINEL;
 	}
 };
