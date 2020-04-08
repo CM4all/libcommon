@@ -47,7 +47,7 @@ namespace Lua {
  */
 template<typename T, const char *name>
 struct Class {
-	typedef T value_type;
+	using value_type = T;
 	using pointer = T *;
 	using reference = T &;
 
