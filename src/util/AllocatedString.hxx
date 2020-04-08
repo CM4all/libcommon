@@ -43,7 +43,7 @@
 template<typename T=char>
 class AllocatedString {
 public:
-	typedef typename StringPointer<T>::value_type value_type;
+	using value_type = typename StringPointer<T>::value_type;
 	using reference = typename StringPointer<T>::reference;
 	using const_reference = typename StringPointer<T>::const_reference;
 	using pointer = typename StringPointer<T>::pointer;
