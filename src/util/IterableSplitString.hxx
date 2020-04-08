@@ -46,7 +46,7 @@ template<typename T>
 class BasicIterableSplitString {
 	typedef BasicStringView<T> StringView;
 
-	using value_type = typename StringView::value_type;
+	typedef typename StringView::value_type value_type;
 
 	StringView s;
 	value_type separator;
@@ -89,7 +89,7 @@ public:
 		}
 
 	public:
-		using iterator_category = std::forward_iterator_tag;
+		typedef std::forward_iterator_tag iterator_category;
 
 		Iterator &operator++() {
 			Next();
@@ -113,8 +113,8 @@ public:
 		}
 	};
 
-	using iterator = Iterator;
-	using const_iterator = Iterator;
+	typedef Iterator iterator;
+	typedef Iterator const_iterator;
 
 	const_iterator begin() const {
 		return {s, separator};
