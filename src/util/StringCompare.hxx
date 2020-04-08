@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2013-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -81,12 +81,36 @@ StringStartsWithIgnoreCase(const char *haystack, StringView needle) noexcept
 	return StringIsEqualIgnoreCase(haystack, needle.data, needle.size);
 }
 
+gcc_pure
+static inline bool
+StringStartsWithIgnoreCase(StringView haystack, StringView needle) noexcept
+{
+	return haystack.size >= needle.size &&
+		StringIsEqualIgnoreCase(haystack.data, needle.data, needle.size);
+}
+
+/**
+ * Returns the portion of the string after a prefix.  If the string
+ * does not begin with the specified prefix, this function returns
+ * nullptr.
+ * This function is case-independent.
+ */
 gcc_pure gcc_nonnull_all
 static inline const char *
 StringAfterPrefixIgnoreCase(const char *haystack, StringView needle) noexcept
 {
 	return StringStartsWithIgnoreCase(haystack, needle)
 		? haystack + needle.size
+		: nullptr;
+}
+
+gcc_pure
+static inline StringView
+StringAfterPrefixIgnoreCase(StringView haystack,
+			    StringView needle) noexcept
+{
+	return StringStartsWithIgnoreCase(haystack, needle)
+		? haystack.substr(needle.size)
 		: nullptr;
 }
 
