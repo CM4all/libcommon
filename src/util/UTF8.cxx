@@ -203,7 +203,7 @@ struct CheckSequenceUTF8 {
 };
 
 template<>
-struct CheckSequenceUTF8<0u> {
+struct CheckSequenceUTF8<0U> {
 	constexpr bool operator()(gcc_unused const char *p) const noexcept {
 		return true;
 	}
@@ -216,7 +216,7 @@ InnerSequenceLengthUTF8(const char *p) noexcept
 {
 	return CheckSequenceUTF8<L>()(p)
 		? L + 1
-		: 0u;
+		: 0U;
 }
 
 size_t
