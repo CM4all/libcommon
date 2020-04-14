@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2017-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -114,7 +114,7 @@ class AvahiServiceExplorer final : AvahiConnectionListener {
 						    void *userdata) noexcept;
 	};
 
-	typedef std::map<std::string, Object> Map;
+	using Map = std::map<std::string, Object>;
 	Map objects;
 
 public:
