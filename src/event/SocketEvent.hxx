@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2017-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -70,7 +70,7 @@ public:
 	static constexpr unsigned IMPLICIT_FLAGS = ERROR|HANGUP;
 
 	SocketEvent(EventLoop &_loop, Callback _callback,
-		       SocketDescriptor _fd=SocketDescriptor::Undefined()) noexcept
+		    SocketDescriptor _fd=SocketDescriptor::Undefined()) noexcept
 		:loop(_loop),
 		 callback(_callback),
 		 fd(_fd) {}
