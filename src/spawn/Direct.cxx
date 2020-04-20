@@ -130,7 +130,12 @@ try {
 	if (p.umask >= 0)
 		umask(p.umask);
 
-	TryWriteExistingFile("/proc/self/oom_score_adj", "800");
+	TryWriteExistingFile("/proc/self/oom_score_adj",
+			     p.ns.mount.pivot_root == nullptr
+			     ? "700"
+			     /* higher OOM score adjustment for jailed
+				(per-account?) processes */
+			     : "800");
 
 	int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
 #ifdef HAVE_LIBSYSTEMD
