@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2017-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,79 +32,11 @@
 
 #pragma once
 
-#include <stdint.h>
-
-/*
- * This header contains definitions for the internal protocol between
- * #SpawnServerClient and #SpawnServerConnection.  It is not a stable
- * protocol, because both client and server are contained in the same
- * executable (even though the server runs in a forked child process
- * as root).
+/**
+ * Handler for #SpawnServerClient.
  */
-
-enum class SpawnRequestCommand : uint8_t {
-	CONNECT,
-	EXEC,
-	KILL,
-};
-
-enum class SpawnExecCommand : uint8_t {
-	ARG,
-	SETENV,
-	UMASK,
-	STDIN,
-	STDOUT,
-	STDERR,
-	STDERR_PATH,
-	CONTROL,
-	TTY,
-	REFENCE,
-	USER_NS,
-	PID_NS,
-	NETWORK_NS,
-	NETWORK_NS_NAME,
-	IPC_NS,
-	MOUNT_NS,
-	MOUNT_PROC,
-	WRITABLE_PROC,
-	PIVOT_ROOT,
-	MOUNT_HOME,
-	MOUNT_TMP_TMPFS,
-	MOUNT_TMPFS,
-	BIND_MOUNT,
-	HOSTNAME,
-	RLIMIT,
-	UID_GID,
-	FORBID_USER_NS,
-	FORBID_MULTICAST,
-	FORBID_BIND,
-	NO_NEW_PRIVS,
-	CGROUP,
-	CGROUP_SESSION,
-	CGROUP_SET,
-	PRIORITY,
-	SCHED_IDLE_,
-	IOPRIO_IDLE,
-	CHROOT,
-	CHDIR,
-	HOOK_INFO,
-};
-
-enum class SpawnResponseCommand : uint16_t {
-	/**
-	 * Indicates that cgroups are available.
-	 */
-	CGROUPS_AVAILABLE,
-
-	/**
-	 * Memory usage is above the threshold.  Payload is a
-	 * #SpawnMemoryWarningPayload.
-	 */
-	MEMORY_WARNING,
-
-	EXIT,
-};
-
-struct SpawnMemoryWarningPayload {
-	uint64_t memory_usage, memory_max;
+class SpawnServerClientHandler {
+public:
+	virtual void OnMemoryWarning(uint64_t memory_usage,
+				     uint64_t memory_max) noexcept = 0;
 };

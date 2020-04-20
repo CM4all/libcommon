@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2017-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_SPAWN_CLIENT_HXX
-#define BENG_PROXY_SPAWN_CLIENT_HXX
+#pragma once
 
 #include "Interface.hxx"
 #include "Config.hxx"
@@ -45,6 +44,7 @@ template<typename T> struct ConstBuffer;
 struct PreparedChildProcess;
 class SpawnPayload;
 class SpawnSerializer;
+class SpawnServerClientHandler;
 
 class SpawnServerClient final : public SpawnService {
 	struct ChildProcess {
@@ -74,6 +74,8 @@ class SpawnServerClient final : public SpawnService {
 
 	SocketEvent event;
 
+	SpawnServerClientHandler *handler = nullptr;
+
 	/**
 	 * Call UidGid::Verify() before sending the spawn request to the
 	 * server?
@@ -101,6 +103,10 @@ public:
 	 */
 	bool SupportsCgroups() const noexcept {
 		return cgroups;
+	}
+
+	void SetHandler(SpawnServerClientHandler &_handler) noexcept {
+		handler = &_handler;
 	}
 
 	void ReplaceSocket(UniqueSocketDescriptor new_socket) noexcept;
@@ -156,5 +162,3 @@ public:
 
 	void KillChildProcess(int pid, int signo) noexcept override;
 };
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2017-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,6 +31,7 @@
  */
 
 #include "Client.hxx"
+#include "Handler.hxx"
 #include "IProtocol.hxx"
 #include "Builder.hxx"
 #include "Parser.hxx"
@@ -433,6 +434,15 @@ SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
 		cgroups = true;
 		break;
 
+	case SpawnResponseCommand::MEMORY_WARNING:
+		if (handler != nullptr) {
+			const auto &p = *(const SpawnMemoryWarningPayload *)payload.data;
+			assert(payload.size == sizeof(p));
+			handler->OnMemoryWarning(p.memory_usage, p.memory_max);
+		}
+
+		break;
+
 	case SpawnResponseCommand::EXIT:
 		HandleExitMessage(SpawnPayload(payload));
 		break;
@@ -467,7 +477,7 @@ inline void
 SpawnServerClient::ReceiveAndHandle()
 {
 	constexpr size_t N = 64;
-	std::array<uint8_t[16], N> payloads;
+	std::array<uint8_t[24], N> payloads;
 	std::array<struct iovec, N> iovs;
 	std::array<struct mmsghdr, N> msgs;
 

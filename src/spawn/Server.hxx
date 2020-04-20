@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2017-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_SPAWN_SERVER_HXX
-#define BENG_PROXY_SPAWN_SERVER_HXX
+#pragma once
 
 struct SpawnConfig;
 struct CgroupState;
@@ -42,5 +41,3 @@ void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 	       SpawnHook *hook,
 	       UniqueSocketDescriptor fd) noexcept;
-
-#endif

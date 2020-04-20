@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2017-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,6 +36,7 @@
 #include "Parser.hxx"
 #include "Builder.hxx"
 #include "Prepared.hxx"
+#include "CgroupWatch.hxx"
 #include "CgroupOptions.hxx"
 #include "Hook.hxx"
 #include "MountList.hxx"
@@ -56,6 +57,7 @@
 #include <boost/intrusive/list.hpp>
 
 #include <forward_list>
+#include <memory>
 #include <system_error>
 
 #include <unistd.h>
@@ -188,6 +190,9 @@ public:
 	void OnChildProcessExit(int id, int status,
 				SpawnServerChild *child) noexcept;
 
+	void SendMemoryWarning(uint64_t memory_usage,
+			       uint64_t memory_max) noexcept;
+
 private:
 	void RemoveConnection() noexcept;
 
@@ -233,6 +238,8 @@ class SpawnServerProcess {
 
 	ChildProcessRegistry child_process_registry;
 
+	std::unique_ptr<CgroupMemoryWatch> cgroup_memory_watch;
+
 	using ConnectionList = boost::intrusive::list<SpawnServerConnection,
 						      boost::intrusive::constant_time_size<false>>;
 	ConnectionList connections;
@@ -243,7 +250,15 @@ public:
 			   SpawnHook *_hook) noexcept
 		:config(_config), cgroup_state(_cgroup_state), hook(_hook),
 		 logger("spawn"),
-		 child_process_registry(loop) {}
+		 child_process_registry(loop)
+	{
+		if (config.systemd_scope_properties.memory_max > 0 &&
+		    cgroup_state.IsEnabled())
+			cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>
+				(loop, cgroup_state,
+				 config.systemd_scope_properties.memory_max * 15 / 16,
+				 BIND_THIS_METHOD(OnCgroupMemoryWarning));
+	}
 
 	const SpawnConfig &GetConfig() const noexcept {
 		return config;
@@ -285,7 +300,14 @@ private:
 	void Quit() noexcept {
 		assert(connections.empty());
 
+		cgroup_memory_watch.reset();
 		child_process_registry.SetVolatile();
+	}
+
+	void OnCgroupMemoryWarning(uint64_t memory_usage) noexcept {
+		for (auto &c : connections)
+			c.SendMemoryWarning(memory_usage,
+					    config.systemd_scope_properties.memory_max);
 	}
 };
 
@@ -314,6 +336,21 @@ inline void
 SpawnServerConnection::RemoveConnection() noexcept
 {
 	process.RemoveConnection(*this);
+}
+
+void
+SpawnServerConnection::SendMemoryWarning(uint64_t memory_usage,
+					 uint64_t memory_max) noexcept
+{
+	SpawnSerializer s(SpawnResponseCommand::MEMORY_WARNING);
+	s.WriteT(SpawnMemoryWarningPayload{memory_usage, memory_max});
+
+	try {
+		::Send<1>(socket, s);
+	} catch (...) {
+		logger(1, "Failed to send MEMORY_WARNING to worker: ",
+		       GetFullMessage(std::current_exception()).c_str());
+	}
 }
 
 void
