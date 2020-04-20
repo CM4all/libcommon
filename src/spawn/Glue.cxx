@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2017-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,7 +39,7 @@
 
 #include <sys/socket.h>
 
-SpawnServerClient *
+std::unique_ptr<SpawnServerClient>
 StartSpawnServer(const SpawnConfig &config,
 		 ChildProcessRegistry &child_process_registry,
 		 SpawnHook *hook,
@@ -58,10 +58,10 @@ StartSpawnServer(const SpawnConfig &config,
 
 	child_process_registry.Add(pid, "spawn", nullptr);
 
-	return new SpawnServerClient(child_process_registry.GetEventLoop(),
-				     config, std::move(s2),
-				     /* don't verify if there is a hook,
-					because the hook may have its own
-					overriding rules */
-				     hook == nullptr);
+	return std::make_unique<SpawnServerClient>
+		(child_process_registry.GetEventLoop(),
+		 config, std::move(s2),
+		 /* don't verify if there is a hook, because the hook
+		    may have its own overriding rules */
+		 hook == nullptr);
 }
