@@ -190,8 +190,10 @@ public:
 	void OnChildProcessExit(int id, int status,
 				SpawnServerChild *child) noexcept;
 
+#ifdef HAVE_LIBSYSTEMD
 	void SendMemoryWarning(uint64_t memory_usage,
 			       uint64_t memory_max) noexcept;
+#endif
 
 private:
 	void RemoveConnection() noexcept;
@@ -238,7 +240,9 @@ class SpawnServerProcess {
 
 	ChildProcessRegistry child_process_registry;
 
+#ifdef HAVE_LIBSYSTEMD
 	std::unique_ptr<CgroupMemoryWatch> cgroup_memory_watch;
+#endif
 
 	using ConnectionList = boost::intrusive::list<SpawnServerConnection,
 						      boost::intrusive::constant_time_size<false>>;
@@ -252,12 +256,14 @@ public:
 		 logger("spawn"),
 		 child_process_registry(loop)
 	{
+#ifdef HAVE_LIBSYSTEMD
 		if (config.systemd_scope_properties.memory_max > 0 &&
 		    cgroup_state.IsEnabled())
 			cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>
 				(loop, cgroup_state,
 				 config.systemd_scope_properties.memory_max * 15 / 16,
 				 BIND_THIS_METHOD(OnCgroupMemoryWarning));
+#endif
 	}
 
 	const SpawnConfig &GetConfig() const noexcept {
@@ -300,15 +306,20 @@ private:
 	void Quit() noexcept {
 		assert(connections.empty());
 
+#ifdef HAVE_LIBSYSTEMD
 		cgroup_memory_watch.reset();
+#endif
+
 		child_process_registry.SetVolatile();
 	}
 
+#ifdef HAVE_LIBSYSTEMD
 	void OnCgroupMemoryWarning(uint64_t memory_usage) noexcept {
 		for (auto &c : connections)
 			c.SendMemoryWarning(memory_usage,
 					    config.systemd_scope_properties.memory_max);
 	}
+#endif
 };
 
 SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
@@ -338,6 +349,8 @@ SpawnServerConnection::RemoveConnection() noexcept
 	process.RemoveConnection(*this);
 }
 
+#ifdef HAVE_LIBSYSTEMD
+
 void
 SpawnServerConnection::SendMemoryWarning(uint64_t memory_usage,
 					 uint64_t memory_max) noexcept
@@ -352,6 +365,8 @@ SpawnServerConnection::SendMemoryWarning(uint64_t memory_usage,
 		       GetFullMessage(std::current_exception()).c_str());
 	}
 }
+
+#endif
 
 void
 SpawnServerConnection::SendExit(int id, int status) noexcept
