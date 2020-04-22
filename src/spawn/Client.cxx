@@ -436,7 +436,8 @@ SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
 
 	case SpawnResponseCommand::MEMORY_WARNING:
 		if (handler != nullptr) {
-			const auto &p = *(const SpawnMemoryWarningPayload *)payload.data;
+			// TODO: fix alignment
+			const auto &p = *(const SpawnMemoryWarningPayload *)(const void *)payload.data;
 			assert(payload.size == sizeof(p));
 			handler->OnMemoryWarning(p.memory_usage, p.memory_max);
 		}
