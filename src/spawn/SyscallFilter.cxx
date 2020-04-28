@@ -38,6 +38,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#ifndef __NR_clone3
+/* this is needed on Debian Buster and older */
+#define __NR_clone3 435
+#endif
+
 /**
  * The system calls which are forbidden unconditionally.
  */
@@ -171,6 +176,11 @@ ForbidNamespace(Seccomp::Filter &sf, int one_namespace_flag)
 
 	sf.AddRule(SCMP_ACT_ERRNO(EPERM), SCMP_SYS(clone),
 		   (Arg(0) & one_namespace_flag) == one_namespace_flag);
+
+	/* we can't inspect the clone3() flags parameter because we
+	   can't dereference "struct clone_args" - so let's pretend
+	   this kernel doesn't support clone3() */
+	sf.AddRule(SCMP_ACT_ERRNO(ENOSYS), SCMP_SYS(clone3));
 }
 
 void
