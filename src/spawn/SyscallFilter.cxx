@@ -180,7 +180,17 @@ ForbidNamespace(Seccomp::Filter &sf, int one_namespace_flag)
 	/* we can't inspect the clone3() flags parameter because we
 	   can't dereference "struct clone_args" - so let's pretend
 	   this kernel doesn't support clone3() */
-	sf.AddRule(SCMP_ACT_ERRNO(ENOSYS), SCMP_SYS(clone3));
+	try {
+		sf.AddRule(SCMP_ACT_ERRNO(ENOSYS), SCMP_SYS(clone3));
+	} catch (const std::system_error &e) {
+		if (IsErrno(e, EFAULT)) {
+			/* system call not supported by this kernel -
+			   ignore this problem silently, because an
+			   unsupported syscall doesn't need to be
+			   filtered */
+		} else
+			throw;
+	}
 }
 
 void
