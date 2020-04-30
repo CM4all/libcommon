@@ -2,7 +2,7 @@ libcommon
 =========
 
 libcommon is a collection of reusable C++ code shared by many C++
-projects at `Content Management AG <https://www.cm4all.com/>`__.
+projects at `CM4all GmbH <https://www.cm4all.com/>`__.
 
 The project was created when code duplication between C++ projects got
 out of hand.  Commonly used code was moved into this library, instead
