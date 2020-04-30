@@ -23,7 +23,6 @@ You need:
 - a C++17 compiler (gcc 6 or clang)
 - `meson 0.37 <http://mesonbuild.com/>`__
 - `Boost <http://boost.org/>`__
-- `libevent <http://libevent.org/>`__
 - `libcurl <https://curl.haxx.se/>`__
 - `libpq <https://www.postgresql.org/>`__
 - `libsystemd <https://www.freedesktop.org/wiki/Software/systemd/>`__
@@ -54,13 +53,11 @@ Each directory below ``src`` contains a sub-library:
 - ``system``: operating system utilities
 - ``io``: file I/O utilities
 - ``net``: networking/socket utilities
-- ``event``: `libevent <http://libevent.org/>`__ C++ wrapper
+- ``event``: a non-blocking I/O event loop
 - ``lua``: `Lua <http://www.lua.org/>`__ C++ wrappers
-- ``curl``: `libcurl <https://curl.haxx.se/>`__ C++ wrappers with
-  libevent integration
+- ``curl``: `libcurl <https://curl.haxx.se/>`__ C++ wrappers
 - ``pcre``: `PCRE <https://www.pcre.org/>`__ C++ wrappers
-- ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers with
-  libevent integration
+- ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers
 - ``odbus``: `libdbus
   <https://www.freedesktop.org/wiki/Software/dbus/>`__ C++ wrappers
 - ``translation``: implementation of the CM4all translation protocol
