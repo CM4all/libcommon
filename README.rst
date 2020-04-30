@@ -29,6 +29,7 @@ You need:
 - `libdbus <https://www.freedesktop.org/wiki/Software/dbus/>`__
 - `libcap <https://sites.google.com/site/fullycapable/>`__
 - `libseccomp <https://github.com/seccomp/libseccomp>`__
+- `liburing <https://github.com/axboe/liburing>`__
 - `OpenSSL <https://www.openssl.org/>`__
 - `LuaJit <http://luajit.org/>`__
 - `PCRE <https://www.pcre.org/>`__
@@ -52,6 +53,8 @@ Each directory below ``src`` contains a sub-library:
 - ``adata``: data structures using our pool allocator
 - ``system``: operating system utilities
 - ``io``: file I/O utilities
+- ``io/uring``: `liburing <https://github.com/axboe/liburing>`__ C++
+  wrapper
 - ``net``: networking/socket utilities
 - ``event``: a non-blocking I/O event loop
 - ``lua``: `Lua <http://www.lua.org/>`__ C++ wrappers
