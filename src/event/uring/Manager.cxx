@@ -33,8 +33,10 @@
 #include "Manager.hxx"
 #include "util/PrintException.hxx"
 
+namespace Uring {
+
 void
-UringManager::OnReady(unsigned) noexcept
+Manager::OnReady(unsigned) noexcept
 {
 	try {
 		DispatchCompletions();
@@ -46,7 +48,7 @@ UringManager::OnReady(unsigned) noexcept
 }
 
 void
-UringManager::DeferredSubmit() noexcept
+Manager::DeferredSubmit() noexcept
 {
 	try {
 		Submit();
@@ -54,3 +56,5 @@ UringManager::DeferredSubmit() noexcept
 		PrintException(std::current_exception());
 	}
 }
+
+} // namespace Uring

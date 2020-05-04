@@ -36,20 +36,22 @@
 #include "event/DeferEvent.hxx"
 #include "event/SocketEvent.hxx"
 
-class UringManager : public Uring::Queue {
+namespace Uring {
+
+class Manager : public Queue {
 	SocketEvent event;
 
 	/**
-	 * Responsible for invoking Uring::Queue::Submit() only once
-	 * per #EventLoop iteration.
+	 * Responsible for invoking Queue::Submit() only once per
+	 * #EventLoop iteration.
 	 */
 	DeferEvent defer_submit_event;
 
 	bool volatile_event = false;
 
 public:
-	explicit UringManager(EventLoop &event_loop)
-		:Uring::Queue(1024, 0),
+	explicit Manager(EventLoop &event_loop)
+		:Queue(1024, 0),
 		 event(event_loop, BIND_THIS_METHOD(OnReady),
 		       SocketDescriptor::FromFileDescriptor(GetFileDescriptor())),
 		 defer_submit_event(event_loop,
@@ -64,8 +66,8 @@ public:
 	}
 
 	void AddPending(struct io_uring_sqe &sqe,
-			Uring::Operation &operation) noexcept {
-		Uring::Queue::AddPending(sqe, operation);
+			Operation &operation) noexcept {
+		Queue::AddPending(sqe, operation);
 		defer_submit_event.Schedule();
 	}
 
@@ -78,3 +80,5 @@ private:
 	void OnReady(unsigned events) noexcept;
 	void DeferredSubmit() noexcept;
 };
+
+} // namespace Uring
