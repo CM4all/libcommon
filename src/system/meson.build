@@ -2,6 +2,7 @@ system_sources = [
   'LargeAllocation.cxx',
   'BindMount.cxx',
   'ProcessName.cxx',
+  'KernelVersion.cxx',
   'LinuxFD.cxx',
   'EpollFD.cxx',
   'Urandom.cxx',
