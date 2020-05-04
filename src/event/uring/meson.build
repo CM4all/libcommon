@@ -6,6 +6,7 @@ endif
 event_uring = static_library(
   'event_uring',
   'Manager.cxx',
+  'OpenStat.cxx',
   include_directories: inc,
   dependencies: [
     liburing,
