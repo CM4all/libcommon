@@ -35,7 +35,6 @@
 #include "Queue.hxx"
 #include "system/Error.hxx"
 #include "system/KernelVersion.hxx"
-#include "util/PrintException.hxx"
 
 #include <fcntl.h>
 
