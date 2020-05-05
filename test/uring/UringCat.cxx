@@ -94,8 +94,7 @@ private:
 		iov = MakeIovec(w);
 		io_uring_prep_readv(s, read_fd.Get(), &iov, 1, read_offset);
 
-		queue.AddPending(*s, *this);
-		queue.Submit();
+		queue.Push(*s, *this);
 	}
 
 	void Write() {
@@ -109,8 +108,7 @@ private:
 		iov = MakeIovec(r);
 		io_uring_prep_writev(s, write_fd.Get(), &iov, 1, write_offset);
 
-		queue.AddPending(*s, *this);
-		queue.Submit();
+		queue.Push(*s, *this);
 	}
 
 	void OnUringCompletion(int res) noexcept override

@@ -32,7 +32,7 @@
 
 #include "OpenStat.hxx"
 #include "Handler.hxx"
-#include "Manager.hxx"
+#include "io/uring/Queue.hxx"
 #include "system/Error.hxx"
 #include "system/KernelVersion.hxx"
 #include "util/PrintException.hxx"
@@ -47,12 +47,12 @@ OpenStat::StartOpenStatReadOnly(FileDescriptor directory_fd,
 {
 	assert(!fd.IsDefined());
 
-	auto *s = manager.GetSubmitEntry();
+	auto *s = queue.GetSubmitEntry();
 	assert(s != nullptr); // TODO: what if the submit queue is full?
 
 	io_uring_prep_openat(s, directory_fd.Get(), path,
 			     O_RDONLY|O_NOCTTY|O_CLOEXEC, 0);
-	manager.AddPending(*s, *this);
+	queue.Push(*s, *this);
 }
 
 void
@@ -72,7 +72,7 @@ try {
 	if (!fd.IsDefined()) {
 		fd = UniqueFileDescriptor(res);
 
-		auto *s = manager.GetSubmitEntry();
+		auto *s = queue.GetSubmitEntry();
 		assert(s != nullptr); // TODO: what if the submit queue is full?
 
 		constexpr unsigned statx_mask =
@@ -81,7 +81,7 @@ try {
 		if (IsKernelVersionOrNewer({5, 7})) {
 			io_uring_prep_statx(s, res, "", AT_EMPTY_PATH,
 					    statx_mask, &st);
-			manager.AddPending(*s, *this);
+			queue.Push(*s, *this);
 		} else {
 			/* fall back to plain statx() because OP_STATX
 			   is broken on kernel 5.6, fixed in 5.7 by

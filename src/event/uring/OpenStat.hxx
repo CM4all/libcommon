@@ -41,7 +41,7 @@
 
 namespace Uring {
 
-class Manager;
+class Queue;
 class OpenStatHandler;
 
 /**
@@ -50,7 +50,7 @@ class OpenStatHandler;
  * #OpenStatHandler on completion.
  */
 class OpenStat : Operation {
-	Manager &manager;
+	Queue &queue;
 
 	OpenStatHandler &handler;
 
@@ -59,11 +59,11 @@ class OpenStat : Operation {
 	struct statx st;
 
 public:
-	OpenStat(Manager &_manager, OpenStatHandler &_handler) noexcept
-		:manager(_manager), handler(_handler) {}
+	OpenStat(Queue &_queue, OpenStatHandler &_handler) noexcept
+		:queue(_queue), handler(_handler) {}
 
-	auto &GetUring() const noexcept {
-		return manager;
+	auto &GetQueue() const noexcept {
+		return queue;
 	}
 
 	void StartOpenStatReadOnly(FileDescriptor directory_fd,

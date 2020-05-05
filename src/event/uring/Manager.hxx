@@ -38,7 +38,7 @@
 
 namespace Uring {
 
-class Manager : public Queue {
+class Manager final : public Queue {
 	SocketEvent event;
 
 	/**
@@ -65,9 +65,9 @@ public:
 		CheckVolatileEvent();
 	}
 
-	void AddPending(struct io_uring_sqe &sqe,
-			Operation &operation) noexcept {
-		Queue::AddPending(sqe, operation);
+	void Push(struct io_uring_sqe &sqe,
+		  Operation &operation) noexcept override {
+		AddPending(sqe, operation);
 		defer_submit_event.Schedule();
 	}
 
