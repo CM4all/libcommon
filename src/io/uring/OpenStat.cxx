@@ -32,7 +32,7 @@
 
 #include "OpenStat.hxx"
 #include "Handler.hxx"
-#include "io/uring/Queue.hxx"
+#include "Queue.hxx"
 #include "system/Error.hxx"
 #include "system/KernelVersion.hxx"
 #include "util/PrintException.hxx"

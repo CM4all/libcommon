@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "io/uring/Operation.hxx"
+#include "Operation.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <exception>

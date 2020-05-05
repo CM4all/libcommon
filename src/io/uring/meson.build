@@ -9,6 +9,7 @@ uring = static_library(
   'Ring.cxx',
   'Queue.cxx',
   'Operation.cxx',
+  'OpenStat.cxx',
   include_directories: inc,
   dependencies: [
     liburing,
