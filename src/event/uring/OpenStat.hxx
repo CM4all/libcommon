@@ -62,6 +62,10 @@ public:
 	OpenStat(Manager &_manager, OpenStatHandler &_handler) noexcept
 		:manager(_manager), handler(_handler) {}
 
+	auto &GetUring() const noexcept {
+		return manager;
+	}
+
 	void StartOpenStatReadOnly(FileDescriptor directory_fd,
 				   const char *path) noexcept;
 
