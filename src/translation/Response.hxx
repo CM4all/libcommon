@@ -350,6 +350,8 @@ struct TranslateResponse {
 	bool subst_alt_syntax;
 #endif
 
+	bool defer;
+
 	bool previous;
 
 	bool transparent;

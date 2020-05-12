@@ -991,6 +991,11 @@ enum class TranslationCommand : uint16_t {
 	 * building it from SCRIPT_NAME, PATH_INFO and QUERY_STRING.
 	 */
 	REQUEST_URI_VERBATIM = 212,
+
+	/**
+	 * Defer the request to another translation server.
+	 */
+	DEFER = 213,
 };
 
 struct TranslationHeader {

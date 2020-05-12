@@ -142,6 +142,7 @@ TranslateResponse::Clear()
 	filter_4xx = false;
 	subst_alt_syntax = false;
 #endif
+	defer = false;
 	previous = false;
 	transparent = false;
 #if TRANSLATION_ENABLE_HTTP
@@ -342,6 +343,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	filter_4xx = src.filter_4xx;
 	subst_alt_syntax = src.subst_alt_syntax;
 #endif
+	defer = src.defer;
 	previous = src.previous;
 	transparent = src.transparent;
 #if TRANSLATION_ENABLE_HTTP

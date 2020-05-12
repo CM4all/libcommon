@@ -3543,6 +3543,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::DEFER:
+		if (!payload.empty())
+			throw std::runtime_error("malformed DEFER packet");
+
+		response.defer = true;
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
