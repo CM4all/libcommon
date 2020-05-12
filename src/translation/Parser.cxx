@@ -1914,6 +1914,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.base == nullptr)
 			throw std::runtime_error("misplaced UNSAFE_BASE packet");
 
+		if (response.unsafe_base)
+			throw std::runtime_error("duplicate UNSAFE_BASE");
+
 		response.unsafe_base = true;
 		return;
 #else
