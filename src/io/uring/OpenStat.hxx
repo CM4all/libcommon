@@ -71,6 +71,12 @@ public:
 
 	void StartOpenStatReadOnly(const char *path) noexcept;
 
+	/**
+	 * Same as StartOpenStatReadOnly(), but with RESOLVE_BENEATH.
+	 */
+	void StartOpenStatReadOnlyBeneath(FileDescriptor directory_fd,
+					  const char *path) noexcept;
+
 private:
 	/* virtual methods from class Operation */
 	void OnUringCompletion(int res) noexcept override;

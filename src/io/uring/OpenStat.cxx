@@ -38,6 +38,21 @@
 
 #include <fcntl.h>
 
+static constexpr auto
+MakeReadOnlyBeneath() noexcept
+{
+#ifndef RESOLVE_BENEATH
+	constexpr uint64_t RESOLVE_BENEATH = 0x08;
+#endif
+
+	struct open_how how{};
+	how.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC;
+	how.resolve = RESOLVE_BENEATH;
+	return how;
+}
+
+static constexpr auto ro_beneath = MakeReadOnlyBeneath();
+
 namespace Uring {
 
 void
@@ -58,6 +73,21 @@ void
 OpenStat::StartOpenStatReadOnly(const char *path) noexcept
 {
 	StartOpenStatReadOnly(FileDescriptor(AT_FDCWD), path);
+}
+
+void
+OpenStat::StartOpenStatReadOnlyBeneath(FileDescriptor directory_fd,
+				       const char *path) noexcept
+{
+	assert(!fd.IsDefined());
+
+	auto *s = queue.GetSubmitEntry();
+	assert(s != nullptr); // TODO: what if the submit queue is full?
+
+	io_uring_prep_openat2(s, directory_fd.Get(), path,
+			      /* why is this parameter not const? */
+			      const_cast<struct open_how *>(&ro_beneath));
+	queue.Push(*s, *this);
 }
 
 void
