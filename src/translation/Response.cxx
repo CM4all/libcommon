@@ -78,7 +78,10 @@ TranslateResponse::Clear()
 	response_header_forward = HeaderForwardSettings::MakeDefaultResponse();
 #endif
 
+#if TRANSLATION_ENABLE_RADDRESS
 	base = nullptr;
+#endif
+
 #if TRANSLATION_ENABLE_EXPAND
 	regex = inverse_regex = nullptr;
 #endif
@@ -277,7 +280,10 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	response_header_forward = src.response_header_forward;
 #endif
 
+#if TRANSLATION_ENABLE_RADDRESS
 	base = alloc.CheckDup(src.base);
+#endif
+
 #if TRANSLATION_ENABLE_EXPAND
 	regex = alloc.CheckDup(src.regex);
 	inverse_regex = alloc.CheckDup(src.inverse_regex);

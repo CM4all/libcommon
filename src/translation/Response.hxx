@@ -101,9 +101,9 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_RADDRESS
 	ResourceAddress address;
-#endif
 
 	const char *base;
+#endif
 
 #if TRANSLATION_ENABLE_EXPAND
 	const char *regex;
