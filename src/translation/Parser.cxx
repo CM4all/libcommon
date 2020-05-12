@@ -393,7 +393,10 @@ FinishJailParams(JailParams *jail,
  * Throws std::runtime_error on error.
  */
 static void
-FinishTranslateResponse(AllocatorPtr alloc, const char *base_suffix,
+FinishTranslateResponse(AllocatorPtr alloc,
+#if TRANSLATION_ENABLE_RADDRESS
+			const char *base_suffix,
+#endif
 			TranslateResponse &response,
 			ConstBuffer<const char *> probe_suffixes)
 {
@@ -3561,7 +3564,11 @@ TranslateParser::HandlePacket(TranslationCommand command,
 
 	switch (command) {
 	case TranslationCommand::END:
-		FinishTranslateResponse(alloc, base_suffix, response,
+		FinishTranslateResponse(alloc,
+#if TRANSLATION_ENABLE_RADDRESS
+					base_suffix,
+#endif
+					response,
 					{probe_suffixes_builder.raw(),
 					 probe_suffixes_builder.size()});
 
