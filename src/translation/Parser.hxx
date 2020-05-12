@@ -113,6 +113,8 @@ class TranslateParser {
 	TrivialArray<const char *, 16> probe_suffixes_builder;
 
 #if TRANSLATION_ENABLE_RADDRESS
+	const char *base_suffix = nullptr;
+
 	/** the current resource address being edited */
 	ResourceAddress *resource_address;
 #endif

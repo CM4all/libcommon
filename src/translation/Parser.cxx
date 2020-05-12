@@ -47,6 +47,7 @@
 #include "http/Address.hxx"
 #include "cgi/Address.hxx"
 #include "nfs/Address.hxx"
+#include "uri/Base.hxx"
 #endif
 #include "spawn/ChildOptions.hxx"
 #include "spawn/MountList.hxx"
@@ -392,7 +393,7 @@ FinishJailParams(JailParams *jail,
  * Throws std::runtime_error on error.
  */
 static void
-FinishTranslateResponse(AllocatorPtr alloc,
+FinishTranslateResponse(AllocatorPtr alloc, const char *base_suffix,
 			TranslateResponse &response,
 			ConstBuffer<const char *> probe_suffixes)
 {
@@ -429,6 +430,16 @@ FinishTranslateResponse(AllocatorPtr alloc,
 			FinishJailParams(file.delegate->child_options.jail,
 					 response,
 					 file.document_root);
+		} else if (response.base != nullptr) {
+			if (response.easy_base) {
+				file.base = file.path;
+				file.path = ".";
+			} else {
+				assert(base_suffix != nullptr);
+
+				if (!file.SplitBase(alloc, base_suffix))
+					throw std::runtime_error("Base mismatch");
+			}
 		}
 	}
 
@@ -1897,7 +1908,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		    response.base != nullptr)
 			throw std::runtime_error("misplaced BASE packet");
 
-		if (!StringStartsWith(from_request.uri, string_payload))
+		base_suffix = base_tail(from_request.uri, string_payload);
+		if (base_suffix == nullptr)
 			throw std::runtime_error("BASE mismatches request URI");
 
 		response.base = string_payload.data;
@@ -3549,7 +3561,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 
 	switch (command) {
 	case TranslationCommand::END:
-		FinishTranslateResponse(alloc, response,
+		FinishTranslateResponse(alloc, base_suffix, response,
 					{probe_suffixes_builder.raw(),
 					 probe_suffixes_builder.size()});
 
