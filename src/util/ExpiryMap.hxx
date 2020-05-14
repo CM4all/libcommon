@@ -86,7 +86,8 @@ public:
 			if (i->second.IsExpired(now)) {
 				i = map.erase(i);
 			} else {
-				if (i->second < earliest)
+				if (earliest == Expiry{} ||
+				    i->second < earliest)
 					earliest = i->second;
 
 				f(i->first);
