@@ -66,6 +66,12 @@ public:
 		return queue;
 	}
 
+	void StartOpenStat(FileDescriptor directory_fd, const char *path,
+			   int flags, mode_t mode=0) noexcept;
+
+	void StartOpenStat(const char *path,
+			   int flags, mode_t mode=0) noexcept;
+
 	void StartOpenStatReadOnly(FileDescriptor directory_fd,
 				   const char *path) noexcept;
 

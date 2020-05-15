@@ -56,8 +56,8 @@ static constexpr auto ro_beneath = MakeReadOnlyBeneath();
 namespace Uring {
 
 void
-OpenStat::StartOpenStatReadOnly(FileDescriptor directory_fd,
-				const char *path) noexcept
+OpenStat::StartOpenStat(FileDescriptor directory_fd, const char *path,
+			int flags, mode_t mode) noexcept
 {
 	assert(!fd.IsDefined());
 
@@ -65,8 +65,21 @@ OpenStat::StartOpenStatReadOnly(FileDescriptor directory_fd,
 	assert(s != nullptr); // TODO: what if the submit queue is full?
 
 	io_uring_prep_openat(s, directory_fd.Get(), path,
-			     O_RDONLY|O_NOCTTY|O_CLOEXEC, 0);
+			     flags|O_NOCTTY|O_CLOEXEC, mode);
 	queue.Push(*s, *this);
+}
+
+void
+OpenStat::StartOpenStat(const char *path, int flags, mode_t mode) noexcept
+{
+	StartOpenStat(FileDescriptor(AT_FDCWD), path, flags, mode);
+}
+
+void
+OpenStat::StartOpenStatReadOnly(FileDescriptor directory_fd,
+				const char *path) noexcept
+{
+	StartOpenStat(directory_fd, path, O_RDONLY);
 }
 
 void
