@@ -78,12 +78,12 @@ struct SpawnConfig {
 
 	void VerifyUid(uid_t uid) const {
 		if (allowed_uids.find(uid) == allowed_uids.end())
-			throw FormatRuntimeError("uid %d is not allowed", int(uid));
+			throw FormatRuntimeError("uid %u is not allowed", unsigned(uid));
 	}
 
 	void VerifyGid(gid_t gid) const {
 		if (allowed_gids.find(gid) == allowed_gids.end())
-			throw FormatRuntimeError("gid %d is not allowed", int(gid));
+			throw FormatRuntimeError("gid %u is not allowed", unsigned(gid));
 	}
 
 	template<typename I>
