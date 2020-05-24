@@ -36,13 +36,13 @@
 void
 SpawnConfig::VerifyUid(uid_t uid) const
 {
-	if (allowed_uids.find(uid) == allowed_uids.end())
+	if (!IsUidAllowed(uid))
 		throw FormatRuntimeError("uid %u is not allowed", unsigned(uid));
 }
 
 void
 SpawnConfig::VerifyGid(gid_t gid) const
 {
-	if (allowed_gids.find(gid) == allowed_gids.end())
+	if (!IsGidAllowed(gid))
 		throw FormatRuntimeError("gid %u is not allowed", unsigned(gid));
 }

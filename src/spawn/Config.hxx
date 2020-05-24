@@ -76,6 +76,16 @@ struct SpawnConfig {
 	 */
 	bool allow_any_uid_gid = false;
 
+	gcc_pure
+	bool IsUidAllowed(uid_t uid) const noexcept {
+		return allowed_uids.find(uid) != allowed_uids.end();
+	}
+
+	gcc_pure
+	bool IsGidAllowed(gid_t gid) const noexcept {
+		return allowed_gids.find(gid) != allowed_gids.end();
+	}
+
 	void VerifyUid(uid_t uid) const;
 	void VerifyGid(gid_t gid) const;
 
