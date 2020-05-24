@@ -66,6 +66,12 @@ struct SpawnConfig {
 
 	UidGid default_uid_gid;
 
+	/**
+	 * If non-zero, then all user ids from this value on are
+	 * allowed.
+	 */
+	uid_t allow_all_uids_from = 0;
+
 	std::set<uid_t> allowed_uids;
 	std::set<gid_t> allowed_gids;
 
@@ -78,7 +84,9 @@ struct SpawnConfig {
 
 	gcc_pure
 	bool IsUidAllowed(uid_t uid) const noexcept {
-		return allowed_uids.find(uid) != allowed_uids.end();
+		return (allow_all_uids_from > 0 &&
+			uid >= allow_all_uids_from) ||
+			allowed_uids.find(uid) != allowed_uids.end();
 	}
 
 	gcc_pure

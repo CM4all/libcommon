@@ -34,8 +34,11 @@
 #include "Config.hxx"
 #include "io/FileLineParser.hxx"
 #include "util/RuntimeError.hxx"
+#include "util/CharUtil.hxx"
 #include "util/StringAPI.hxx"
 #include "util/StringStrip.hxx"
+
+#include <climits>
 
 #include <pwd.h>
 #include <grp.h>
@@ -200,7 +203,23 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 	const char *word = line.ExpectWord();
 
 	if (strcmp(word, "allow_user") == 0) {
-		config.allowed_uids.insert(ParseUser(line.ExpectValueAndEnd()));
+		const char *s = line.ExpectValueAndEnd();
+
+		if (IsDigitASCII(*s) && s[strlen(s) - 1] == '-') {
+			char *endptr;
+			unsigned long value = strtoul(s, &endptr, 0);
+			assert(endptr > s);
+
+			if (*endptr == '-' && endptr[1] == 0 && value > 0 &&
+			    value <= UINT_MAX) {
+				if (config.allow_all_uids_from <= 0 ||
+				    value < config.allow_all_uids_from)
+					config.allow_all_uids_from = value;
+				return;
+			}
+		}
+
+		config.allowed_uids.insert(ParseUser(s));
 	} else if (strcmp(word, "allow_group") == 0) {
 		config.allowed_gids.insert(ParseGroup(line.ExpectValueAndEnd()));
 #ifdef HAVE_LIBSYSTEMD
