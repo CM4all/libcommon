@@ -23,6 +23,7 @@ spawn_sources = [
   'NetworkNamespace.cxx',
   'UidGid.cxx',
   'ResourceLimits.cxx',
+  'Config.cxx',
   'ConfigParser.cxx',
   'daemon/Client.cxx',
 ]
