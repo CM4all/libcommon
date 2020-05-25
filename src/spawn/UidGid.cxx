@@ -62,14 +62,14 @@ UidGid::Lookup(const char *username)
 }
 
 void
-UidGid::LoadEffective()
+UidGid::LoadEffective() noexcept
 {
 	uid = geteuid();
 	gid = getegid();
 }
 
 char *
-UidGid::MakeId(char *p) const
+UidGid::MakeId(char *p) const noexcept
 {
 	if (uid != 0)
 		p += sprintf(p, ";uid%u", int(uid));
@@ -81,7 +81,7 @@ UidGid::MakeId(char *p) const
 }
 
 static bool
-IsUid(uid_t uid)
+IsUid(uid_t uid) noexcept
 {
 	uid_t ruid, euid, suid;
 	return getresuid(&ruid, &euid, &suid) == 0 &&
@@ -89,7 +89,7 @@ IsUid(uid_t uid)
 }
 
 static bool
-IsGid(gid_t gid)
+IsGid(gid_t gid) noexcept
 {
 	gid_t rgid, egid, sgid;
 	return getresgid(&rgid, &egid, &sgid) == 0 &&
