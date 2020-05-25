@@ -72,10 +72,10 @@ char *
 UidGid::MakeId(char *p) const
 {
 	if (uid != 0)
-		p += sprintf(p, ";uid%d", int(uid));
+		p += sprintf(p, ";uid%u", int(uid));
 
 	if (gid != 0)
-		p += sprintf(p, ";gid%d", int(gid));
+		p += sprintf(p, ";gid%u", int(gid));
 
 	return p;
 }
