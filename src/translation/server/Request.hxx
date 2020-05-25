@@ -32,14 +32,21 @@
 
 #pragma once
 
+#include "http/Status.h"
+#include "util/ConstBuffer.hxx"
+
 namespace Translation::Server {
 
 struct Request {
 	unsigned protocol_version = 0;
 
+	http_status_t status = http_status_t(0);
+
 	const char *uri = nullptr;
 
 	const char *host = nullptr;
+
+	const char *user = nullptr;
 
 	const char *args = nullptr, *query_string = nullptr;
 
@@ -52,7 +59,33 @@ struct Request {
 	 */
 	const char *authorization = nullptr;
 
+	ConstBuffer<void> error_document = nullptr;
+
+	ConstBuffer<void> check = nullptr;
+
+	ConstBuffer<void> want_full_uri = nullptr;
+
+	ConstBuffer<void> file_not_found = nullptr;
+
+	ConstBuffer<void> content_type_lookup = nullptr;
+
+	const char *suffix = nullptr;
+
+	ConstBuffer<void> directory_index = nullptr;
+
+	ConstBuffer<void> enotdir = nullptr;
+
+	ConstBuffer<void> auth = nullptr;
+
+	ConstBuffer<void> probe_path_suffixes = nullptr;
+	const char *probe_suffix = nullptr;
+
 	const char *listener_tag = nullptr;
+
+	ConstBuffer<void> read_file = nullptr;
+	ConstBuffer<void> internal_redirect = nullptr;
+
+	const char *pool = nullptr;
 };
 
 } // namespace Translation::Server

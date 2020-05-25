@@ -73,6 +73,24 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		host = host_buffer.c_str();
 		break;
 
+	case TranslationCommand::USER:
+		user_buffer = ToString(payload);
+		user = user_buffer.c_str();
+		break;
+
+	case TranslationCommand::STATUS:
+		if (payload.size != 2)
+			throw std::runtime_error("size mismatch in STATUS packet");
+
+		status = http_status_t(*(const uint16_t*)payload.data);
+		/* TODO enable
+		if (!http_status_is_valid(status))
+			throw FormatRuntimeError("invalid HTTP status code %u",
+						 status);
+		*/
+
+		break;
+
 	case TranslationCommand::ARGS:
 		args_buffer = ToString(payload);
 		args = args_buffer.c_str();
@@ -103,9 +121,79 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		authorization = authorization_buffer.c_str();
 		break;
 
+	case TranslationCommand::ERROR_DOCUMENT:
+		error_document_buffer = ToString(payload);
+		error_document = {error_document_buffer.data(), error_document_buffer.size()};
+		break;
+
+	case TranslationCommand::CHECK:
+		check_buffer = ToString(payload);
+		check = {check_buffer.data(), check_buffer.size()};
+		break;
+
+	case TranslationCommand::WANT_FULL_URI:
+		want_full_uri_buffer = ToString(payload);
+		want_full_uri = {want_full_uri_buffer.data(), want_full_uri_buffer.size()};
+		break;
+
+	case TranslationCommand::FILE_NOT_FOUND:
+		file_not_found_buffer = ToString(payload);
+		file_not_found = {file_not_found_buffer.data(), file_not_found_buffer.size()};
+		break;
+
+	case TranslationCommand::CONTENT_TYPE_LOOKUP:
+		content_type_lookup_buffer = ToString(payload);
+		content_type_lookup = {content_type_lookup_buffer.data(), content_type_lookup_buffer.size()};
+		break;
+
+	case TranslationCommand::SUFFIX:
+		suffix_buffer = ToString(payload);
+		suffix = suffix_buffer.c_str();
+		break;
+
+	case TranslationCommand::DIRECTORY_INDEX:
+		directory_index_buffer = ToString(payload);
+		directory_index = {directory_index_buffer.data(), directory_index_buffer.size()};
+		break;
+
+	case TranslationCommand::ENOTDIR_:
+		enotdir_buffer = ToString(payload);
+		enotdir = {enotdir_buffer.data(), enotdir_buffer.size()};
+		break;
+
+	case TranslationCommand::AUTH:
+		auth_buffer = ToString(payload);
+		auth = {auth_buffer.data(), auth_buffer.size()};
+		break;
+
+	case TranslationCommand::PROBE_PATH_SUFFIXES:
+		probe_path_suffixes_buffer = ToString(payload);
+		probe_path_suffixes = {probe_path_suffixes_buffer.data(), probe_path_suffixes_buffer.size()};
+		break;
+
+	case TranslationCommand::PROBE_SUFFIX:
+		probe_suffix_buffer = ToString(payload);
+		probe_suffix = probe_suffix_buffer.c_str();
+		break;
+
 	case TranslationCommand::LISTENER_TAG:
 		listener_tag_buffer = ToString(payload);
 		listener_tag = listener_tag_buffer.c_str();
+		break;
+
+	case TranslationCommand::READ_FILE:
+		read_file_buffer = ToString(payload);
+		read_file = {read_file_buffer.data(), read_file_buffer.size()};
+		break;
+
+	case TranslationCommand::INTERNAL_REDIRECT:
+		internal_redirect_buffer = ToString(payload);
+		internal_redirect = {internal_redirect_buffer.data(), internal_redirect_buffer.size()};
+		break;
+
+	case TranslationCommand::POOL:
+		pool_buffer = ToString(payload);
+		pool = pool_buffer.c_str();
 		break;
 
 	case TranslationCommand::REMOTE_HOST:
