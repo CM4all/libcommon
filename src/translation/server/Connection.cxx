@@ -121,7 +121,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 
 	if (cmd == TranslationCommand::BEGIN) {
 		if (state != State::INIT) {
-			LogConcat(2, "ts", "Misplaced INIT");
+			LogConcat(1, "ts", "Misplaced INIT");
 			listener.RemoveConnection(*this);
 			return false;
 		}
@@ -130,7 +130,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 	}
 
 	if (state != State::REQUEST) {
-		LogConcat(2, "ts", "INIT expected");
+		LogConcat(1, "ts", "INIT expected");
 		listener.RemoveConnection(*this);
 		return false;
 	}
@@ -145,7 +145,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 	try {
 		request.Parse(cmd, payload);
 	} catch (...) {
-		LogConcat(2, "ts", std::current_exception());
+		LogConcat(1, "ts", std::current_exception());
 		listener.RemoveConnection(*this);
 		return false;
 	}
