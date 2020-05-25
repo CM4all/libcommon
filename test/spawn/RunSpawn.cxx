@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,6 +36,7 @@
 #include "spawn/CgroupOptions.hxx"
 #include "spawn/Systemd.hxx"
 #include "system/Error.hxx"
+#include "net/SocketDescriptor.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
 #include "AllocatorPtr.hxx"
@@ -118,7 +119,8 @@ try {
 				     getpid(), true, nullptr)
 		: CgroupState();
 
-	const auto pid = SpawnChildProcess(std::move(p), cgroup_state);
+	const auto pid = SpawnChildProcess(std::move(p), cgroup_state,
+					   SocketDescriptor::Undefined());
 
 	int status;
 	if (waitpid(pid, &status, 0) < 0)

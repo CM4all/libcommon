@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -56,6 +56,7 @@ enum class SpawnExecCommand : uint8_t {
 	STDOUT,
 	STDERR,
 	STDERR_PATH,
+	RETURN_STDERR,
 	CONTROL,
 	TTY,
 	REFENCE,

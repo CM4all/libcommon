@@ -43,12 +43,14 @@
 int
 LocalSpawnService::SpawnChildProcess(const char *name,
 				     PreparedChildProcess &&params,
+				     SocketDescriptor return_stderr,
 				     ExitListener *listener)
 {
 	if (params.uid_gid.IsEmpty())
 		params.uid_gid = config.default_uid_gid;
 
-	pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState());
+	pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState(),
+					return_stderr);
 	if (pid < 0)
 		throw MakeErrno("clone() failed");
 

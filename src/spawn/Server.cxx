@@ -200,7 +200,8 @@ private:
 
 	void SendExit(int id, int status) noexcept;
 	void SpawnChild(int id, const char *name,
-			PreparedChildProcess &&p) noexcept;
+			PreparedChildProcess &&p,
+			SocketDescriptor return_stderr) noexcept;
 
 	void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
 	void HandleKillMessage(SpawnPayload payload, SpawnFdList &&fds);
@@ -394,7 +395,8 @@ SpawnServerConnection::SendExit(int id, int status) noexcept
 
 inline void
 SpawnServerConnection::SpawnChild(int id, const char *name,
-				  PreparedChildProcess &&p) noexcept
+				  PreparedChildProcess &&p,
+				  SocketDescriptor return_stderr) noexcept
 {
 	const auto &config = process.GetConfig();
 
@@ -423,7 +425,8 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 
 	try {
 		pid = SpawnChildProcess(std::move(p),
-					process.GetCgroupState());
+					process.GetCgroupState(),
+					return_stderr);
 	} catch (...) {
 		logger(1, "Failed to spawn child process: ",
 		       GetFullMessage(std::current_exception()).c_str());
@@ -472,6 +475,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 	PreparedChildProcess p;
 	CgroupOptions cgroup;
+	UniqueSocketDescriptor return_stderr;
 
 	MountList **mount_tail = &p.ns.mount.mounts;
 	assert(*mount_tail == nullptr);
@@ -520,6 +524,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 		case SpawnExecCommand::STDERR_PATH:
 			p.stderr_path = payload.ReadString();
+			break;
+
+		case SpawnExecCommand::RETURN_STDERR:
+			return_stderr = UniqueSocketDescriptor(fds.Get().Steal());
 			break;
 
 		case SpawnExecCommand::CONTROL:
@@ -684,7 +692,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 		}
 	}
 
-	SpawnChild(id, name, std::move(p));
+	SpawnChild(id, name, std::move(p), return_stderr);
 }
 
 inline void

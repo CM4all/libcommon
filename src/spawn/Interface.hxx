@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,6 +33,7 @@
 #pragma once
 
 struct PreparedChildProcess;
+class SocketDescriptor;
 class ExitListener;
 
 /**
@@ -48,6 +49,7 @@ public:
 	 */
 	virtual int SpawnChildProcess(const char *name,
 				      PreparedChildProcess &&params,
+				      SocketDescriptor return_stderr,
 				      ExitListener *listener) = 0;
 
 	virtual void SetExitListener(int pid, ExitListener *listener) noexcept = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -37,6 +37,7 @@
 #include "SyscallFilter.hxx"
 #include "Init.hxx"
 #include "daemon/Client.hxx"
+#include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
@@ -122,6 +123,7 @@ static void
 Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&userns_setup_pipe_r,
+     SocketDescriptor return_stderr,
      const CgroupState &cgroup_state)
 try {
 	UnignoreSignals();
@@ -261,6 +263,14 @@ try {
 		}
 	}
 
+	if (return_stderr.IsDefined()) {
+		assert(stderr_fd >= 0);
+
+		EasySendMessage(return_stderr,
+				FileDescriptor(stderr_fd));
+		return_stderr.Close();
+	}
+
 	constexpr int CONTROL_FILENO = 3;
 	CheckedDup2(p.stdin_fd, STDIN_FILENO);
 	CheckedDup2(stdout_fd, STDOUT_FILENO);
@@ -326,6 +336,7 @@ try {
 struct SpawnChildProcessContext {
 	PreparedChildProcess &&params;
 	const CgroupState &cgroup_state;
+	const SocketDescriptor return_stderr;
 
 	const char *path;
 
@@ -342,9 +353,11 @@ struct SpawnChildProcessContext {
 	UniqueFileDescriptor wait_pipe_r, wait_pipe_w;
 
 	SpawnChildProcessContext(PreparedChildProcess &&_params,
-				 const CgroupState &_cgroup_state)
+				 const CgroupState &_cgroup_state,
+				 SocketDescriptor _return_stderr) noexcept
 		:params(std::move(_params)),
 		 cgroup_state(_cgroup_state),
+		 return_stderr(_return_stderr),
 		 path(_params.Finish()) {}
 };
 
@@ -359,17 +372,20 @@ spawn_fn(void *_ctx)
 	Exec(ctx.path, std::move(ctx.params),
 	     std::move(ctx.userns_create_pipe_w),
 	     std::move(ctx.wait_pipe_r),
+	     ctx.return_stderr,
 	     ctx.cgroup_state);
 }
 
 pid_t
 SpawnChildProcess(PreparedChildProcess &&params,
-		  const CgroupState &cgroup_state)
+		  const CgroupState &cgroup_state,
+		  SocketDescriptor return_stderr)
 {
 	int clone_flags = SIGCHLD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
-	SpawnChildProcessContext ctx(std::move(params), cgroup_state);
+	SpawnChildProcessContext ctx(std::move(params), cgroup_state,
+				     return_stderr);
 
 	UniqueFileDescriptor old_pidns;
 

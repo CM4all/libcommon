@@ -155,6 +155,7 @@ private:
 public:
 	/* virtual methods from class SpawnService */
 	int SpawnChildProcess(const char *name, PreparedChildProcess &&params,
+			      SocketDescriptor return_stderr,
 			      ExitListener *listener) override;
 
 	void SetExitListener(int pid,

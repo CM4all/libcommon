@@ -315,6 +315,7 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 int
 SpawnServerClient::SpawnChildProcess(const char *name,
 				     PreparedChildProcess &&p,
+				     SocketDescriptor return_stderr,
 				     ExitListener *listener)
 {
 	assert(!shutting_down);
@@ -337,6 +338,10 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 		s.WriteString(name);
 
 		Serialize(s, p);
+
+		if (return_stderr.IsDefined())
+			s.CheckWriteFd(SpawnExecCommand::RETURN_STDERR,
+				       return_stderr.Get());
 	} catch (SpawnPayloadTooLargeError) {
 		throw std::runtime_error("Spawn payload is too large");
 	}
