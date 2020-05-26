@@ -20,6 +20,7 @@ net_sources = [
   'ConnectSocket.cxx',
   'MultiReceiveMessage.cxx',
   'SendMessage.cxx',
+  'EasyMessage.cxx',
   'djb/NetstringInput.cxx',
   'djb/NetstringHeader.cxx',
   'djb/NetstringGenerator.cxx',
