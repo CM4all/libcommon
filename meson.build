@@ -1,7 +1,7 @@
 project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
   default_options: [
     'c_std=c99',
-    'cpp_std=c++17'
+    'cpp_std=c++2a',
   ],
 )
 
