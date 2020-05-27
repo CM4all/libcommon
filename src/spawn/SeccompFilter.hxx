@@ -81,6 +81,8 @@ public:
    SCMP_CMP() */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+/* work around "compound literals are a C99-specific feature" */
+#pragma GCC diagnostic ignored "-Wc99-extensions"
 #endif
 
 /**
