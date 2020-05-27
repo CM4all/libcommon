@@ -3,3 +3,6 @@
 *.o
 .dirstamp
 .deps/
+
+/.clangd/
+/compile_commands.json
