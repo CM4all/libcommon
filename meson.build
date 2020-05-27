@@ -2,6 +2,7 @@ project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
   default_options: [
     'c_std=c11',
     'cpp_std=c++2a',
+    'warning_level=3',
   ],
 )
 
