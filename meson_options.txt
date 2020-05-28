@@ -1,0 +1,2 @@
+option('coroutines', type: 'boolean', value: false,
+  description: 'Enable C++20 coroutines')

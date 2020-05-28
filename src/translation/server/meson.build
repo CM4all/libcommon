@@ -1,3 +1,5 @@
+translation_server_sources = []
+
 if get_variable('libcommon_enable_libsystemd', true)
   libsystemd = dependency('libsystemd')
   libsystemd = declare_dependency(
@@ -10,6 +12,10 @@ else
   libsystemd = dependency('', required: false)
 endif
 
+if get_option('coroutines')
+  translation_server_sources += 'CoHandler.cxx'
+endif
+
 boost = dependency('boost', version: '>= 1.54')
 
 translation_server = static_library(
@@ -19,6 +25,7 @@ translation_server = static_library(
   'Connection.cxx',
   'Listener.cxx',
   'Server.cxx',
+  translation_server_sources,
   include_directories: inc,
   dependencies: [
     libsystemd,

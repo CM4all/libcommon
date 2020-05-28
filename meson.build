@@ -71,6 +71,10 @@ if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'c')
 endif
 
+if get_option('coroutines')
+  add_global_arguments('-fcoroutines', language: 'cpp')
+endif
+
 inc = include_directories('src', 'fake', '.')
 
 subdir('src/util')
