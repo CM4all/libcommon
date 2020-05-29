@@ -30,65 +30,65 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CoHandler.hxx"
-#include "Response.hxx"
-#include "Connection.hxx"
-#include "co/Task.hxx"
-#include "co/InvokeTask.hxx"
-#include "util/Cancellable.hxx"
+#include <coroutine>
+#include <exception>
+#include <utility>
 
-#include <memory>
+#ifndef __cpp_impl_coroutine
+#error Need -fcoroutines
+#endif
 
-namespace Translation::Server {
+namespace Co {
 
-namespace {
+/**
+ * A helper task which invokes a coroutine from synchronous code.
+ */
+struct InvokeTask {
+	struct promise_type {
+		auto initial_suspend() noexcept {
+			return std::suspend_never{};
+		}
 
-class CoRequest final : Cancellable {
-	Connection &connection;
+		auto final_suspend() noexcept {
+			return std::suspend_always{};
+		}
 
-	/**
-	 * The CoHandler::OnTranslationRequest() virtual method
-	 * (coroutine) call.
-	 */
-	Co::Task<Response> task;
+		void return_void() noexcept {
+		}
 
-	/**
-         * Our Handle() coroutine call.
-	 */
-	Co::InvokeTask dummy_task;
+		InvokeTask get_return_object() noexcept {
+			return InvokeTask(std::coroutine_handle<promise_type>::from_promise(*this));
+		}
 
-public:
-	CoRequest(Connection &_connection, Co::Task<Response> &&_task) noexcept
-		:connection(_connection),
-		 task(std::move(_task)) {}
+		void unhandled_exception() noexcept {
+			std::terminate();
+		}
+	};
 
-	void Start(CancellablePointer &cancel_ptr) noexcept {
-		cancel_ptr = *this;
-		dummy_task = Handle();
+	std::coroutine_handle<promise_type> coroutine;
+
+	InvokeTask() noexcept {
 	}
 
-private:
-	Co::InvokeTask Handle() noexcept {
-		connection.SendResponse(co_await std::move(task));
-		delete this;
+	explicit InvokeTask(std::coroutine_handle<promise_type> _coroutine) noexcept
+		:coroutine(_coroutine)
+	{
 	}
 
-	/* virtual methods from class Cancellable */
-	void Cancel() noexcept override {
-		delete this;
+	InvokeTask(InvokeTask &&src) noexcept
+		:coroutine(std::exchange(src.coroutine, nullptr))
+	{
+	}
+
+	~InvokeTask() noexcept {
+		if (coroutine)
+			coroutine.destroy();
+	}
+
+	InvokeTask &operator=(InvokeTask &&src) noexcept {
+		coroutine = std::exchange(src.coroutine, nullptr);
+		return *this;
 	}
 };
 
-}
-
-void
-CoHandler::OnTranslationRequest(Connection &connection,
-				const Request &request,
-				CancellablePointer &cancel_ptr) noexcept
-{
-	auto *r = new CoRequest(connection,
-				OnTranslationRequest(request));
-	r->Start(cancel_ptr);
-}
-
-} // namespace Translation::Server
+} // namespace Co
