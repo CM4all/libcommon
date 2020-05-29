@@ -33,6 +33,7 @@
 #pragma once
 
 #include "AsyncConnection.hxx"
+#include "event/DeferEvent.hxx"
 
 #include <coroutine>
 
@@ -48,6 +49,13 @@ namespace Pg {
 class CoQuery final : public AsyncResultHandler {
 	AsyncConnection &connection;
 
+	/**
+	 * This moves resuming the coroutine onto a new stack frame,
+	 * out of the #AsyncResultHandler method calls.  Inside those,
+	 * it can be unsafe to use the #AsyncConnection.
+	 */
+	DeferEvent defer_resume;
+
 	Result result;
 
 	std::coroutine_handle<> continuation;
@@ -57,7 +65,9 @@ class CoQuery final : public AsyncResultHandler {
 public:
 	template<typename... Params>
 	CoQuery(AsyncConnection &_connection, Params... params) noexcept
-		:connection(_connection)
+		:connection(_connection),
+		 defer_resume(connection.GetEventLoop(),
+			      BIND_THIS_METHOD(OnDeferredResume))
 	{
 		// TODO are we connected?
 		connection.SendQuery(*this, params...);
@@ -90,24 +100,28 @@ public:
 	}
 
 private:
+	void OnDeferredResume() noexcept {
+		continuation.resume();
+	}
+
 	/* virtual methods from Pg::AsyncResultHandler */
 	void OnResult(Pg::Result &&_result) override {
 		result = std::move(_result);
 		ready = true;
-		continuation.resume();
+		defer_resume.Schedule();
 		// TODO: cancel, no more results
 		// TODO: yield for each row?
 	}
 
 	void OnResultEnd() override {
 		ready = true;
-		continuation.resume();
+		defer_resume.Schedule();
 	}
 
 	void OnResultError() noexcept override {
 		// TODO capture and rethrow exception?
 		ready = true;
-		continuation.resume();
+		defer_resume.Schedule();
 	}
 };
 
