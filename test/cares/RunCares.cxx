@@ -112,7 +112,7 @@ try {
 
 	MyHandler handler(event_loop);
 	CancellablePointer cancel_ptr;
-	channel.Lookup(hostname, handler, cancel_ptr);
+	channel.Lookup(hostname, AF_INET, handler, cancel_ptr);
 
 	if (!handler.IsDone())
 		event_loop.Dispatch();

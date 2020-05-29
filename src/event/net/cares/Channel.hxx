@@ -77,7 +77,7 @@ public:
 	 * Look up a host name and call a #Handler method upon
 	 * completion.
 	 */
-	void Lookup(const char *name, Handler &handler,
+	void Lookup(const char *name, int family, Handler &handler,
 		    CancellablePointer &cancel_ptr) noexcept;
 
 private:

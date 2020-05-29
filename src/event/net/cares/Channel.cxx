@@ -231,11 +231,11 @@ Channel::Request::HostCallback(int status, struct hostent *he) noexcept
 }
 
 void
-Channel::Lookup(const char *name, Handler &handler,
+Channel::Lookup(const char *name, int family, Handler &handler,
 		CancellablePointer &cancel_ptr) noexcept
 {
 	auto *request = new Request(handler, cancel_ptr);
-	request->Start(channel, name, AF_UNSPEC);
+	request->Start(channel, name, family);
 	UpdateSockets();
 }
 
