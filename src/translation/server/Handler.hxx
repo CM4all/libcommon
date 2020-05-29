@@ -32,6 +32,8 @@
 
 #pragma once
 
+class CancellablePointer;
+
 namespace Translation::Server {
 
 struct Request;
