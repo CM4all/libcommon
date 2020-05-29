@@ -4,12 +4,19 @@ if not liburing.found()
   subdir_done()
 endif
 
+uring_sources = []
+
+if get_option('coroutines')
+  uring_sources += 'CoOperation.cxx'
+endif
+
 uring = static_library(
   'uring',
   'Ring.cxx',
   'Queue.cxx',
   'Operation.cxx',
   'OpenStat.cxx',
+  uring_sources,
   include_directories: inc,
   dependencies: [
     liburing,
