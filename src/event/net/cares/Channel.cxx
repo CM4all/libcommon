@@ -142,13 +142,13 @@ Channel::OnTimeout() noexcept
 
 template<typename F>
 static void
-AsSocketAddress(const struct hostent &he, F &&f)
+AsSocketAddress(const struct hostent &he, const void *src, F &&f)
 {
 	switch (he.h_addrtype) {
 	case AF_INET:
 		{
 			struct sockaddr_in sin{};
-			memcpy(&sin.sin_addr, he.h_addr_list[0], he.h_length);
+			memcpy(&sin.sin_addr, src, he.h_length);
 			sin.sin_family = AF_INET;
 
 			f(SocketAddress((const struct sockaddr *)&sin,
@@ -159,7 +159,7 @@ AsSocketAddress(const struct hostent &he, F &&f)
 	case AF_INET6:
 		{
 			struct sockaddr_in6 sin{};
-			memcpy(&sin.sin6_addr, he.h_addr_list[0], he.h_length);
+			memcpy(&sin.sin6_addr, src, he.h_length);
 			sin.sin6_family = AF_INET6;
 
 			f(SocketAddress((const struct sockaddr *)&sin,
@@ -214,11 +214,14 @@ Channel::Request::HostCallback(int status, struct hostent *he) noexcept
 	try {
 		if (status != ARES_SUCCESS)
 			throw Error(status, "ares_gethostbyname() failed");
-		else if (he != nullptr)
-			AsSocketAddress(*he, [&handler = *handler](SocketAddress address){
-					handler.OnCaresSuccess(address);
-				});
-		else
+		else if (he != nullptr) {
+			for (auto i = he->h_addr_list; *i != nullptr; ++i)
+				AsSocketAddress(*he, *i, [&handler = *handler](SocketAddress address){
+						handler.OnCaresAddress(address);
+					});
+
+			handler->OnCaresSuccess();
+		} else
 			throw std::runtime_error("ares_gethostbyname() failed");
 	} catch (...) {
 		handler->OnCaresError(std::current_exception());

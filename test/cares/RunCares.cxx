@@ -55,11 +55,13 @@ public:
 	}
 
 	/* virtual methods from Cares::Handler */
-	void OnCaresSuccess(SocketAddress address) noexcept override {
+	void OnCaresAddress(SocketAddress address) noexcept override {
 		char buffer[256];
 		if (ToString(buffer, sizeof(buffer), address))
 			printf("%s\n", buffer);
+	}
 
+	void OnCaresSuccess() noexcept override {
 		event_loop.Break();
 		done = true;
 	}

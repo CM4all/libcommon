@@ -38,6 +38,7 @@
 
 #include <coroutine>
 #include <exception>
+#include <vector>
 
 #ifndef __cpp_impl_coroutine
 #error Need -fcoroutines
@@ -50,11 +51,13 @@ class Channel;
 class CoLookup final : Handler {
 	std::coroutine_handle<> continuation;
 
-	AllocatedSocketAddress value;
+	std::vector<AllocatedSocketAddress> value;
 
 	std::exception_ptr error;
 
 	CancellablePointer cancel_ptr{nullptr};
+
+	bool ready = false;
 
 public:
 	CoLookup(Channel &channel, const char *name) noexcept;
@@ -69,8 +72,7 @@ public:
 			CoLookup &lookup;
 
 			bool await_ready() const noexcept {
-				return !lookup.value.IsNull() ||
-					lookup.error;
+				return lookup.ready;
 			}
 
 			std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) noexcept {
@@ -91,13 +93,18 @@ public:
 
 private:
 	/* virtual methods from Cares::Handler */
-	void OnCaresSuccess(SocketAddress address) noexcept override {
-		value = AllocatedSocketAddress(address);
+	void OnCaresAddress(SocketAddress address) noexcept override {
+		value.emplace_back(address);
+	}
+
+	void OnCaresSuccess() noexcept override {
+		ready = true;
 		continuation.resume();
 	}
 
 	void OnCaresError(std::exception_ptr e) noexcept override {
 		error = std::move(e);
+		ready = true;
 		continuation.resume();
 	}
 };
