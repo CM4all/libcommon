@@ -37,6 +37,7 @@
 #include "util/Cancellable.hxx"
 
 #include <coroutine>
+#include <exception>
 
 #ifndef __cpp_impl_coroutine
 #error Need -fcoroutines
@@ -77,7 +78,10 @@ public:
 				return std::noop_coroutine();
 			}
 
-			decltype(auto) await_resume() noexcept {
+			decltype(auto) await_resume() {
+				if (lookup.error)
+					std::rethrow_exception(lookup.error);
+
 				return std::move(lookup.value);
 			}
 		};
