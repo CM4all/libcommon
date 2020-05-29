@@ -163,6 +163,10 @@ public:
 			const char *conninfo, const char *schema,
 			AsyncConnectionHandler &handler) noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return socket_event.GetEventLoop();
+	}
+
 	const std::string &GetSchemaName() const noexcept {
 		return schema;
 	}
