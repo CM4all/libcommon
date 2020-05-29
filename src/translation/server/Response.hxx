@@ -34,6 +34,7 @@
 
 #include "../Protocol.hxx"
 #include "http/Status.h"
+#include "net/SocketAddress.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/WritableBuffer.hxx"
 
@@ -292,9 +293,10 @@ public:
 			response.Packet(TranslationCommand::EXPAND_PATH, value);
 		}
 
-		void Address(const struct sockaddr *address,
-			     size_t length) noexcept {
-			response.Packet(TranslationCommand::ADDRESS, address, length);
+		void Address(SocketAddress address) noexcept {
+			response.Packet(TranslationCommand::ADDRESS,
+					address.GetAddress(),
+					address.GetSize());
 		}
 	};
 
