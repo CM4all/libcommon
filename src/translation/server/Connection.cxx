@@ -61,6 +61,9 @@ Connection::~Connection() noexcept
 {
 	if (state == State::RESPONSE)
 		delete[] response;
+
+	if (cancel_ptr)
+		cancel_ptr.Cancel();
 }
 
 inline bool
@@ -119,6 +122,13 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 {
 	assert(state != State::PROCESSING);
 
+	if (cancel_ptr) {
+		LogConcat(1, "ts",
+			  "Received more request packets while another request is still pending");
+		listener.RemoveConnection(*this);
+		return false;
+	}
+
 	if (cmd == TranslationCommand::BEGIN) {
 		if (state != State::INIT) {
 			LogConcat(1, "ts", "Misplaced INIT");
@@ -138,7 +148,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 	if (gcc_unlikely(cmd == TranslationCommand::END)) {
 		state = State::PROCESSING;
 		event.CancelRead();
-		handler.OnTranslationRequest(*this, request);
+		handler.OnTranslationRequest(*this, request, cancel_ptr);
 		return true;
 	}
 
@@ -189,6 +199,7 @@ Connection::SendResponse(Response &&_response) noexcept
 	state = State::RESPONSE;
 	output = _response.Finish();
 	response = output.data;
+	cancel_ptr = nullptr;
 
 	TryWrite();
 }

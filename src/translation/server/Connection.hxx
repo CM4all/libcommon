@@ -35,6 +35,7 @@
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/DynamicFifoBuffer.hxx"
+#include "util/Cancellable.hxx"
 #include "AllocatedRequest.hxx"
 
 enum class TranslationCommand : uint16_t;
@@ -65,6 +66,12 @@ class Connection
 	DynamicFifoBuffer<uint8_t> input;
 
 	AllocatedRequest request;
+
+	/**
+         * If this is set, then our #handler is currently handling the
+         * #request.
+	 */
+	CancellablePointer cancel_ptr{nullptr};
 
 	uint8_t *response;
 

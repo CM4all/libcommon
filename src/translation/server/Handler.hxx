@@ -40,7 +40,8 @@ class Connection;
 class Handler {
 public:
 	virtual void OnTranslationRequest(Connection &connection,
-					  const Request &request) noexcept = 0;
+					  const Request &request,
+					  CancellablePointer &cancel_ptr) noexcept = 0;
 };
 
 } // namespace Translation::Server
