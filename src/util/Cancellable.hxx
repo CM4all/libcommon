@@ -47,6 +47,9 @@ class CancellablePointer {
 public:
 	constexpr CancellablePointer() = default;
 
+	constexpr CancellablePointer(std::nullptr_t n) noexcept
+		:cancellable(n) {}
+
 	CancellablePointer(CancellablePointer &&src) noexcept
 		:cancellable(std::exchange(src.cancellable, nullptr)) {}
 
