@@ -177,6 +177,8 @@ class Channel::Request final : Cancellable {
 
 	unsigned pending;
 
+	bool success = false;
+
 public:
 	Request(Handler &_handler, unsigned _pending,
 		CancellablePointer &cancel_ptr)
@@ -229,6 +231,8 @@ Channel::Request::HostCallback(int status, struct hostent *he) noexcept
 		if (status != ARES_SUCCESS)
 			throw Error(status, "ares_gethostbyname() failed");
 		else if (he != nullptr) {
+			success = true;
+
 			for (auto i = he->h_addr_list; *i != nullptr; ++i)
 				AsSocketAddress(*he, *i, [&handler = *handler](SocketAddress address){
 						handler.OnCaresAddress(address);
@@ -239,8 +243,12 @@ Channel::Request::HostCallback(int status, struct hostent *he) noexcept
 		} else
 			throw std::runtime_error("ares_gethostbyname() failed");
 	} catch (...) {
-		if (pending == 0)
-			handler->OnCaresError(std::current_exception());
+		if (pending == 0) {
+			if (success)
+				handler->OnCaresSuccess();
+			else
+				handler->OnCaresError(std::current_exception());
+		}
 	}
 
 	if (pending == 0)
