@@ -67,6 +67,14 @@ public:
 		delete[] buffer;
 	}
 
+	Response &operator=(Response &&src) noexcept {
+		using std::swap;
+		swap(buffer, src.buffer);
+		swap(capacity, src.capacity);
+		swap(size, src.size);
+		return *this;
+	}
+
 	/**
 	 * Append an empty packet.
 	 */
