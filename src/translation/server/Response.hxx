@@ -298,6 +298,12 @@ public:
 					address.GetAddress(),
 					address.GetSize());
 		}
+
+		template<typename A>
+		void Addresses(const A &addresses) noexcept {
+			for (const auto &i : addresses)
+				Address(i);
+		}
 	};
 
 	HttpContext Http(const char *url) noexcept {
