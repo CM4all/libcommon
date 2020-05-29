@@ -44,4 +44,9 @@ CoLookup::CoLookup(Channel &channel, const char *name, int family) noexcept
 	channel.Lookup(name, family, *this, cancel_ptr);
 }
 
+CoLookup::CoLookup(Channel &channel, const char *name) noexcept
+{
+	channel.Lookup(name, *this, cancel_ptr);
+}
+
 } // namespace Cares

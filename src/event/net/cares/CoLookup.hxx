@@ -61,6 +61,7 @@ class CoLookup final : Handler {
 
 public:
 	CoLookup(Channel &channel, const char *name, int family) noexcept;
+	CoLookup(Channel &channel, const char *name) noexcept;
 
 	~CoLookup() noexcept {
 		if (cancel_ptr)

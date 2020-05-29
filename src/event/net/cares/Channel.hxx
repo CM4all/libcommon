@@ -80,6 +80,13 @@ public:
 	void Lookup(const char *name, int family, Handler &handler,
 		    CancellablePointer &cancel_ptr) noexcept;
 
+	/**
+	 * This overload submits two queries: AF_INET and AF_INET6 and
+	 * returns both results to the handler.
+	 */
+	void Lookup(const char *name, Handler &handler,
+		    CancellablePointer &cancel_ptr) noexcept;
+
 private:
 	void UpdateSockets() noexcept;
 	void DeferredProcess() noexcept;

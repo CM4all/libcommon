@@ -175,10 +175,15 @@ AsSocketAddress(const struct hostent &he, const void *src, F &&f)
 class Channel::Request final : Cancellable {
 	Handler *handler;
 
+	unsigned pending;
+
 public:
-	Request(Handler &_handler,
+	Request(Handler &_handler, unsigned _pending,
 		CancellablePointer &cancel_ptr)
-		:handler(&_handler) {
+		:handler(&_handler), pending(_pending)
+	{
+		assert(pending > 0);
+
 		cancel_ptr = *this;
 	}
 
@@ -193,6 +198,7 @@ public:
 private:
 	void Cancel() noexcept override {
 		assert(handler != nullptr);
+		assert(pending > 0);
 
 		/* c-ares doesn't support cancellation, so we emulate
 		   it here */
@@ -211,9 +217,13 @@ private:
 inline void
 Channel::Request::HostCallback(int status, struct hostent *he) noexcept
 {
+	assert(pending > 0);
+
 	if (handler == nullptr)
 		/* cancelled */
 		return;
+
+	--pending;
 
 	try {
 		if (status != ARES_SUCCESS)
@@ -224,22 +234,35 @@ Channel::Request::HostCallback(int status, struct hostent *he) noexcept
 						handler.OnCaresAddress(address);
 					});
 
-			handler->OnCaresSuccess();
+			if (pending == 0)
+				handler->OnCaresSuccess();
 		} else
 			throw std::runtime_error("ares_gethostbyname() failed");
 	} catch (...) {
-		handler->OnCaresError(std::current_exception());
+		if (pending == 0)
+			handler->OnCaresError(std::current_exception());
 	}
 
-	delete this;
+	if (pending == 0)
+		delete this;
 }
 
 void
 Channel::Lookup(const char *name, int family, Handler &handler,
 		CancellablePointer &cancel_ptr) noexcept
 {
-	auto *request = new Request(handler, cancel_ptr);
+	auto *request = new Request(handler, 1, cancel_ptr);
 	request->Start(channel, name, family);
+	UpdateSockets();
+}
+
+void
+Channel::Lookup(const char *name, Handler &handler,
+		CancellablePointer &cancel_ptr) noexcept
+{
+	auto *request = new Request(handler, 2, cancel_ptr);
+	request->Start(channel, name, AF_INET6);
+	request->Start(channel, name, AF_INET);
 	UpdateSockets();
 }
 
