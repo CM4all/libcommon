@@ -196,6 +196,11 @@ Connection::SendResponse(Response &&_response) noexcept
 void
 Connection::OnSocketReady(unsigned events) noexcept
 {
+	if (events & SocketEvent::HANGUP) {
+		listener.RemoveConnection(*this);
+		return;
+	}
+
 	if (events & SocketEvent::READ) {
 		if (!TryRead())
 			return;
