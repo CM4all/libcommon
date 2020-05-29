@@ -147,7 +147,6 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 
 	if (gcc_unlikely(cmd == TranslationCommand::END)) {
 		state = State::PROCESSING;
-		event.CancelRead();
 		handler.OnTranslationRequest(*this, request, cancel_ptr);
 		return true;
 	}
@@ -187,7 +186,7 @@ Connection::TryWrite() noexcept
 	if (output.empty()) {
 		delete[] response;
 		state = State::INIT;
-		event.Schedule(SocketEvent::READ);
+		event.CancelWrite();
 	}
 }
 
