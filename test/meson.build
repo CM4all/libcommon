@@ -32,3 +32,7 @@ subdir('cares')
 subdir('spawn')
 subdir('time')
 subdir('uring')
+
+if get_option('coroutines')
+  subdir('co')
+endif
