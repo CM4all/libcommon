@@ -194,6 +194,8 @@ private:
 	void Cancel() noexcept override {
 		assert(handler != nullptr);
 
+		/* c-ares doesn't support cancellation, so we emulate
+		   it here */
 		handler = nullptr;
 	}
 
@@ -209,7 +211,9 @@ private:
 inline void
 Channel::Request::HostCallback(int status, struct hostent *he) noexcept
 {
-	assert(handler != nullptr);
+	if (handler == nullptr)
+		/* cancelled */
+		return;
 
 	try {
 		if (status != ARES_SUCCESS)
