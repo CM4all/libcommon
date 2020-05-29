@@ -69,7 +69,14 @@ public:
 
 private:
 	Co::InvokeTask Handle() noexcept {
-		connection.SendResponse(co_await std::move(task));
+		try {
+			connection.SendResponse(co_await std::move(task));
+		} catch (...) {
+			Response response;
+			response.Status(HTTP_STATUS_INTERNAL_SERVER_ERROR);
+			connection.SendResponse(std::move(response));
+		}
+
 		delete this;
 	}
 
