@@ -130,7 +130,7 @@ public:
 				return coroutine;
 			}
 
-			decltype(auto) await_resume() noexcept {
+			decltype(auto) await_resume() {
 				auto &p = coroutine.promise();
 
 				if (p.error)
