@@ -92,7 +92,7 @@ ToString(char *buffer, size_t buffer_size,
 	if (ret != 0)
 		return false;
 
-	if (serv[0] != 0) {
+	if (serv[0] != 0 && (serv[0] != '0' || serv[1] != 0)) {
 		if (address.GetFamily() == AF_INET6) {
 			/* enclose IPv6 address in square brackets */
 
