@@ -113,7 +113,8 @@ public:
 	}
 
 	Task &operator=(Task &&src) noexcept {
-		coroutine = std::exchange(src.coroutine, nullptr);
+		using std::swap;
+		swap(coroutine, src.coroutine);
 		return *this;
 	}
 
