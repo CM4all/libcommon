@@ -184,6 +184,7 @@ AsyncConnection::PollResult()
 {
 	while (!IsBusy()) {
 		auto result = ReceiveResult();
+		const bool had_result = result.IsDefined();
 		if (result_handler != nullptr) {
 			if (result.IsDefined())
 				result_handler->OnResult(std::move(result));
@@ -194,7 +195,7 @@ AsyncConnection::PollResult()
 			}
 		}
 
-		if (!result.IsDefined())
+		if (!had_result)
 			break;
 	}
 }
