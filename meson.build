@@ -98,6 +98,7 @@ subdir('src/pcre')
 subdir('src/pg')
 subdir('src/odbus')
 subdir('src/spawn')
+subdir('src/stock')
 subdir('src/translation')
 subdir('src/translation/server')
 
