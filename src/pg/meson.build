@@ -16,6 +16,7 @@ pg = static_library(
   'Result.cxx',
   'Error.cxx',
   'Reflection.cxx',
+  'Stock.cxx',
   include_directories: inc,
   dependencies: [
     libpq,
