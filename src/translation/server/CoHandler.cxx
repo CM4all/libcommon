@@ -65,9 +65,14 @@ public:
 	void Start(CancellablePointer &cancel_ptr) noexcept {
 		cancel_ptr = *this;
 		dummy_task = Handle();
+		dummy_task.OnCompletion(BIND_THIS_METHOD(OnCompletion));
 	}
 
 private:
+	void OnCompletion() noexcept {
+		delete this;
+	}
+
 	Co::InvokeTask Handle() noexcept {
 		try {
 			connection.SendResponse(co_await std::move(task));
@@ -76,8 +81,6 @@ private:
 			response.Status(HTTP_STATUS_INTERNAL_SERVER_ERROR);
 			connection.SendResponse(std::move(response));
 		}
-
-		delete this;
 	}
 
 	/* virtual methods from class Cancellable */

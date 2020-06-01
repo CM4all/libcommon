@@ -30,6 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "util/BindMethod.hxx"
+
 #include <coroutine>
 #include <exception>
 #include <utility>
@@ -44,13 +46,32 @@ namespace Co {
  * A helper task which invokes a coroutine from synchronous code.
  */
 struct InvokeTask {
+	using Callback = BoundMethod<void() noexcept>;
+
 	struct promise_type {
+		Callback callback;
+
 		auto initial_suspend() noexcept {
 			return std::suspend_never{};
 		}
 
+		struct final_awaitable {
+			bool await_ready() const noexcept {
+				return false;
+			}
+
+			template<typename PROMISE>
+			void await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
+				if (coro.promise().callback)
+					coro.promise().callback();
+			}
+
+			void await_resume() const noexcept {
+			}
+		};
+
 		auto final_suspend() noexcept {
-			return std::suspend_always{};
+			return final_awaitable{};
 		}
 
 		void return_void() noexcept {
@@ -89,6 +110,13 @@ struct InvokeTask {
 		using std::swap;
 		swap(coroutine, src.coroutine);
 		return *this;
+	}
+
+	void OnCompletion(Callback callback) noexcept {
+		if (coroutine.done())
+			callback();
+		else
+			coroutine.promise().callback = callback;
 	}
 };
 
