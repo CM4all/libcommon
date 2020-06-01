@@ -26,6 +26,7 @@ pg_dep = declare_dependency(
   link_with: pg,
   dependencies: [
     event_dep,
+    util_dep,
     libpq,
   ],
 )
