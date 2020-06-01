@@ -108,7 +108,6 @@ private:
 	void OnResult(Pg::Result &&_result) override {
 		result = std::move(_result);
 		ready = true;
-		defer_resume.Schedule();
 		// TODO: cancel, no more results
 		// TODO: yield for each row?
 	}
