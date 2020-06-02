@@ -3,6 +3,7 @@
 #include "pg/Stock.hxx"
 #include "pg/CoStockQuery.hxx"
 #include "event/Loop.hxx"
+#include "event/ShutdownListener.hxx"
 #include "util/PrintException.hxx"
 
 #include <cstdio>
@@ -11,22 +12,30 @@
 
 struct Instance final {
 	EventLoop event_loop;
+	ShutdownListener shutdown_listener;
+
 	Pg::Stock db;
+
+	Co::InvokeTask task;
 
 	std::exception_ptr error;
 
 	Instance(const char *conninfo, const char *schema)
-		:db(event_loop, conninfo, schema, 4, 1)
+		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown)),
+		 db(event_loop, conninfo, schema, 4, 1)
 	{
+		shutdown_listener.Enable();
 	}
 
-	void Shutdown() noexcept {
+	void OnShutdown() noexcept {
+		task = {};
 		db.Shutdown();
 	}
 
 	void OnCompletion(std::exception_ptr _error) noexcept {
 		error = std::move(_error);
-		Shutdown();
+		db.Shutdown();
+		shutdown_listener.Disable();
 	}
 };
 
@@ -68,8 +77,8 @@ try {
 
 	Instance instance(conninfo, "");
 
-	auto task = Run(instance.db, sql);
-	task.OnCompletion(BIND_METHOD(instance, &Instance::OnCompletion));
+	instance.task = Run(instance.db, sql);
+	instance.task.OnCompletion(BIND_METHOD(instance, &Instance::OnCompletion));
 
 	instance.event_loop.Dispatch();
 
