@@ -37,6 +37,8 @@
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
+#include <array>
+
 #include <assert.h>
 #include <string.h>
 #include <sys/inotify.h>
