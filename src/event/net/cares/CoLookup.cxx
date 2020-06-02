@@ -33,10 +33,6 @@
 #include "CoLookup.hxx"
 #include "Channel.hxx"
 
-#ifndef __cpp_impl_coroutine
-#error Need -fcoroutines
-#endif
-
 namespace Cares {
 
 CoLookup::CoLookup(Channel &channel, const char *name, int family) noexcept
