@@ -109,7 +109,7 @@ AsyncConnection::CheckError(std::exception_ptr e) noexcept
 
 void
 AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
-{
+try {
 	switch (status) {
 	case PGRES_POLLING_FAILED:
 		Error(std::make_exception_ptr(std::runtime_error(GetErrorMessage())));
@@ -131,8 +131,7 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 			try {
 				SetSchema(schema.c_str());
 			} catch (...) {
-				Error(NestCurrentException(std::runtime_error("Failed to set schema")));
-				break;
+				std::throw_with_nested(std::runtime_error("Failed to set schema"));
 			}
 		}
 
@@ -140,12 +139,7 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 		socket_event.Open(SocketDescriptor(GetSocket()));
 		socket_event.ScheduleRead();
 
-		try {
-			handler.OnConnect();
-		} catch (...) {
-			Error(std::current_exception());
-			break;
-		}
+		handler.OnConnect(); /* may throw */
 
 		/* check the connection status, just in case the handler
 		   method has done awful things */
@@ -159,6 +153,8 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 		assert(false);
 		break;
 	}
+} catch (...) {
+	Error(std::current_exception());
 }
 
 void
