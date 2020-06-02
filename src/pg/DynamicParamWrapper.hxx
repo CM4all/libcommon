@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PG_DYNAMIC_PARAM_WRAPPER_HXX
-#define PG_DYNAMIC_PARAM_WRAPPER_HXX
+#pragma once
 
 #include "ParamWrapper.hxx"
 
@@ -89,5 +88,3 @@ struct DynamicParamWrapper<std::vector<T>> {
 };
 
 } /* namespace Pg */
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ASYNC_PG_CONNECTION_HXX
-#define ASYNC_PG_CONNECTION_HXX
+#pragma once
 
 #include "Connection.hxx"
 #include "event/SocketEvent.hxx"
@@ -253,5 +252,3 @@ private:
 };
 
 } /* namespace Pg */
-
-#endif
