@@ -112,8 +112,7 @@ AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 try {
 	switch (status) {
 	case PGRES_POLLING_FAILED:
-		Error(std::make_exception_ptr(std::runtime_error(GetErrorMessage())));
-		break;
+		throw std::runtime_error(GetErrorMessage());
 
 	case PGRES_POLLING_READING:
 		socket_event.Open(SocketDescriptor(GetSocket()));
