@@ -37,6 +37,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sched.h>
 
 #ifndef __NR_clone3
 /* this is needed on Debian Buster and older */

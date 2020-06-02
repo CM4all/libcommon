@@ -42,6 +42,8 @@
 
 #include <boost/crc.hpp>
 
+#include <sched.h>
+
 static UniqueSocketDescriptor
 CreateConnectLocalSocket(const char *path)
 {
