@@ -37,6 +37,7 @@
 #include "util/CharUtil.hxx"
 
 #include <stdexcept>
+#include <string>
 
 class LineParser {
 	char *p;
