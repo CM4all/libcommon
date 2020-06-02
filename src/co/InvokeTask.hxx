@@ -30,15 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Compat.hxx"
 #include "util/BindMethod.hxx"
 
-#include <coroutine>
 #include <exception>
 #include <utility>
-
-#ifndef __cpp_impl_coroutine
-#error Need -fcoroutines
-#endif
 
 namespace Co {
 

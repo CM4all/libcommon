@@ -32,13 +32,10 @@
 
 #pragma once
 
-#include <coroutine>
+#include "Compat.hxx"
+
 #include <exception>
 #include <utility>
-
-#ifndef __cpp_impl_coroutine
-#error Need -fcoroutines
-#endif
 
 namespace Co {
 

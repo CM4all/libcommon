@@ -34,12 +34,7 @@
 
 #include "AsyncConnection.hxx"
 #include "event/DeferEvent.hxx"
-
-#include <coroutine>
-
-#ifndef __cpp_impl_coroutine
-#error Need -fcoroutines
-#endif
+#include "co/Compat.hxx"
 
 namespace Pg {
 

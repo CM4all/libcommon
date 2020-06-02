@@ -72,7 +72,12 @@ if compiler.has_header('valgrind/memcheck.h')
 endif
 
 if get_option('coroutines')
-  add_global_arguments('-fcoroutines', language: 'cpp')
+  if compiler.get_id() == 'clang'
+    add_global_arguments('-fcoroutines-ts', '-stdlib=libc++', language: 'cpp')
+    add_global_link_arguments('-stdlib=libc++', language: 'cpp')
+  else
+    add_global_arguments('-fcoroutines', language: 'cpp')
+  endif
 endif
 
 inc = include_directories('src', 'fake', '.')

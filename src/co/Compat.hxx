@@ -32,22 +32,26 @@
 
 #pragma once
 
-#include "Stock.hxx"
-#include "CoQuery.hxx"
-#include "stock/CoGet.hxx"
-#include "co/Task.hxx"
-#include "util/ScopeExit.hxx"
+#include <utility>
 
-namespace Pg {
+#ifdef _LIBCPP_VERSION
+/* libc++ 10 has the coroutine definitions in the std::experimental
+   namespace */
 
-template<typename... Params>
-Co::Task<Result>
-CoStockQuery(Stock &stock, Params... params) noexcept
-{
-	auto *item = co_await CoStockGet(stock, {});
-	AtScopeExit(item) { item->Put(false); };
+#include <experimental/coroutine>
 
-	co_return co_await CoQuery(stock.GetConnection(*item), params...);
-}
+namespace std {
+using std::experimental::coroutine_handle;
+using std::experimental::suspend_never;
+using std::experimental::suspend_always;
+using std::experimental::noop_coroutine;
+};
 
-} // namespace Co
+#else /* not clang */
+
+#include <coroutine>
+#ifndef __cpp_impl_coroutine
+#error Need -fcoroutines
+#endif
+
+#endif /* not clang */

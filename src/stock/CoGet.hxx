@@ -34,12 +34,7 @@
 
 #include "Stock.hxx"
 #include "GetHandler.hxx"
-
-#include <coroutine>
-
-#ifndef __cpp_impl_coroutine
-#error Need -fcoroutines
-#endif
+#include "co/Compat.hxx"
 
 /**
  * Coroutine wrapper for Stock::Get().
