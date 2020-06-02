@@ -60,6 +60,10 @@ public:
 		return stock;
 	}
 
+	void Shutdown() noexcept {
+		stock.Shutdown();
+	}
+
 	static AsyncConnection &GetConnection(StockItem &item) noexcept;
 
 private:

@@ -11,17 +11,17 @@
 
 struct Instance final {
 	EventLoop event_loop;
-	std::unique_ptr<Pg::Stock> db;
+	Pg::Stock db;
 
 	std::exception_ptr error;
 
 	Instance(const char *conninfo, const char *schema)
-		:db(new Pg::Stock(event_loop, conninfo, schema, 4, 1))
+		:db(event_loop, conninfo, schema, 4, 1)
 	{
 	}
 
 	void Shutdown() noexcept {
-		db.reset();
+		db.Shutdown();
 	}
 
 	void OnCompletion(std::exception_ptr _error) noexcept {
@@ -68,7 +68,7 @@ try {
 
 	Instance instance(conninfo, "");
 
-	auto task = Run(*instance.db, sql);
+	auto task = Run(instance.db, sql);
 	task.OnCompletion(BIND_METHOD(instance, &Instance::OnCompletion));
 
 	instance.event_loop.Dispatch();

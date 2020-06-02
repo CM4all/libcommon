@@ -220,6 +220,12 @@ public:
 		// TODO: restart the "num_create" list?
 	}
 
+	/**
+	 * Enable shutdown mode where all returned items will be
+	 * destroyed and all events will be deregistered.
+	 */
+	void Shutdown() noexcept;
+
 private:
 	/**
 	 * Check if the stock has become empty, and invoke the handler.

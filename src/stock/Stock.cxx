@@ -79,6 +79,15 @@ Stock::FadeAll() noexcept
 	// TODO: restart the "num_create" list?
 }
 
+void
+Stock::Shutdown() noexcept
+{
+	FadeAll();
+
+	cleanup_event.Cancel();
+	clear_event.Cancel();
+}
+
 /*
  * The "empty()" handler method.
  *
