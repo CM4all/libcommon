@@ -30,6 +30,7 @@
 #include "StringParser.hxx"
 #include "StringStrip.hxx"
 
+#include <cstdint> // for SIZE_MAX
 #include <stdexcept>
 
 #include <string.h>
