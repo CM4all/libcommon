@@ -32,6 +32,8 @@
 
 #include "QmqpClient.hxx"
 
+#include <string> // TODO: migrate to std::string_view
+
 void
 QmqpClient::AppendNetstring(StringView value) noexcept
 {
