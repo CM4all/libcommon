@@ -95,11 +95,13 @@ private:
 	}
 
 	void OnCaresSuccess() noexcept override {
+		cancel_ptr = nullptr;
 		ready = true;
 		continuation.resume();
 	}
 
 	void OnCaresError(std::exception_ptr e) noexcept override {
+		cancel_ptr = nullptr;
 		error = std::move(e);
 		ready = true;
 		continuation.resume();
