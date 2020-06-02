@@ -33,16 +33,12 @@
 #pragma once
 
 #include "Handler.hxx"
+#include "co/Compat.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 #include "util/Cancellable.hxx"
 
-#include <coroutine>
 #include <exception>
 #include <vector>
-
-#ifndef __cpp_impl_coroutine
-#error Need -fcoroutines
-#endif
 
 namespace Cares {
 
@@ -76,8 +72,8 @@ public:
 				return lookup.ready;
 			}
 
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) noexcept {
-				lookup.continuation = continuation;
+			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
+				lookup.continuation = _continuation;
 				return std::noop_coroutine();
 			}
 
