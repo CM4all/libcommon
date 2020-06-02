@@ -33,14 +33,9 @@
 #pragma once
 
 #include "Operation.hxx"
-
-#include <coroutine>
+#include "co/Compat.hxx"
 
 #include <sys/types.h>
-
-#ifndef __cpp_impl_coroutine
-#error Need -fcoroutines
-#endif
 
 class FileDescriptor;
 class UniqueFileDescriptor;
