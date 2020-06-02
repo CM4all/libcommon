@@ -451,6 +451,12 @@ public:
 		return Result(PQgetResult(conn));
 	}
 
+	bool RequestCancel() noexcept {
+		assert(IsDefined());
+
+		return PQrequestCancel(conn) == 1;
+	}
+
 	gcc_pure
 	std::string Escape(const char *p, size_t length) const noexcept;
 

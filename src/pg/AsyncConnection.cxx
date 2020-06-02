@@ -64,6 +64,8 @@ AsyncConnection::Error() noexcept
 		rh->OnResultError();
 	}
 
+	cancelling = false;
+
 	if (was_connected)
 		handler.OnDisconnect();
 
@@ -188,6 +190,10 @@ AsyncConnection::PollResult()
 				result_handler = nullptr;
 				rh->OnResultEnd();
 			}
+		} else if (cancelling) {
+			/* discard results of cancelled queries */
+			if (!result.IsDefined())
+				cancelling = false;
 		}
 
 		if (!had_result)

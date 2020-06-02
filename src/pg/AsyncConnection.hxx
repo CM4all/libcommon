@@ -184,6 +184,8 @@ class AsyncConnection : public Connection {
 
 	AsyncResultHandler *result_handler = nullptr;
 
+	bool cancelling = false;
+
 public:
 	/**
 	 * Construct the object, but do not initiate the connect yet.
@@ -222,7 +224,8 @@ public:
 	bool IsIdle() const {
 		assert(IsDefined());
 
-		return state == State::READY && result_handler == nullptr;
+		return state == State::READY && result_handler == nullptr &&
+			!cancelling;
 	}
 
 	/**
@@ -253,6 +256,20 @@ public:
 			result_handler = nullptr;
 			throw;
 		}
+	}
+
+	/**
+	 * Cancel the current asynchronous query submitted by
+	 * SendQuery().
+	 */
+	void RequestCancel() noexcept {
+		assert(result_handler != nullptr);
+		assert(!cancelling);
+
+		result_handler = nullptr;
+
+		if (Connection::RequestCancel())
+			cancelling = true;
 	}
 
 	void CheckNotify() noexcept {
