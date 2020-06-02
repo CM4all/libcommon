@@ -69,7 +69,8 @@ public:
 	}
 
 	~CoQuery() noexcept {
-		// TODO cancellation
+		if (!ready)
+			connection.RequestCancel();
 	}
 
 	auto operator co_await() noexcept {
@@ -102,8 +103,6 @@ private:
 	/* virtual methods from Pg::AsyncResultHandler */
 	void OnResult(Pg::Result &&_result) override {
 		result = std::move(_result);
-		ready = true;
-		// TODO: cancel, no more results
 		// TODO: yield for each row?
 	}
 
