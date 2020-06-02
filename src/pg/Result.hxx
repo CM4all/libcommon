@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PG_RESULT_HXX
-#define PG_RESULT_HXX
+#pragma once
 
 #include "BinaryValue.hxx"
 
@@ -323,5 +322,3 @@ public:
 };
 
 } /* namespace Pg */
-
-#endif

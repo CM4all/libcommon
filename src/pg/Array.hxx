@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,8 +34,7 @@
  * Small utilities for PostgreSQL clients.
  */
 
-#ifndef PG_ARRAY_HXX
-#define PG_ARRAY_HXX
+#pragma once
 
 #include <forward_list>
 #include <string>
@@ -80,5 +79,3 @@ EncodeArray(const L &src)
 }
 
 } /* namespace Pg */
-
-#endif

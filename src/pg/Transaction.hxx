@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PG_TRANSACTION_HXX
-#define PG_TRANSACTION_HXX
+#pragma once
 
 #include "Connection.hxx"
 #include "Error.hxx"
@@ -83,5 +82,3 @@ void DoRepeatableReadRepeat(Pg::Connection &connection, unsigned retries,
 }
 
 } /* namespace Pg */
-
-#endif
