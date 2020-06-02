@@ -283,7 +283,7 @@ public:
 		return child_process_registry;
 	}
 
-	bool Verify(const PreparedChildProcess &p) const noexcept {
+	bool Verify(const PreparedChildProcess &p) const {
 		return hook != nullptr && hook->Verify(p);
 	}
 
