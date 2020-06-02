@@ -38,6 +38,7 @@
 #define SSL_ERROR_HXX
 
 #include <stdexcept>
+#include <string> // TODO: migrate to std::string_view
 
 class SslError : public std::runtime_error {
 public:
