@@ -80,7 +80,7 @@ struct CoAwaitable final {
 class CoOpenOperation final : public CoOperationBase {
 public:
 	auto operator co_await() noexcept {
-		return CoAwaitable{*this};
+		return CoAwaitable<CoOpenOperation>{*this};
 	}
 
 	UniqueFileDescriptor GetValue();
@@ -96,7 +96,7 @@ CoOpenReadOnly(Queue &queue, const char *path) noexcept;
 class CoReadOperation final : public CoOperationBase {
 public:
 	auto operator co_await() noexcept {
-		return CoAwaitable{*this};
+		return CoAwaitable<CoReadOperation>{*this};
 	}
 
 	size_t GetValue() const;
@@ -109,7 +109,7 @@ CoRead(Queue &queue, FileDescriptor fd, void *buffer, size_t size,
 class CoWriteOperation final : public CoOperationBase {
 public:
 	auto operator co_await() noexcept {
-		return CoAwaitable{*this};
+		return CoAwaitable<CoWriteOperation>{*this};
 	}
 
 	size_t GetValue() const;
