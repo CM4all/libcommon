@@ -73,8 +73,8 @@ public:
 				return get.item != nullptr || get.error;
 			}
 
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) const noexcept {
-				get.continuation = continuation;
+			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) const noexcept {
+				get.continuation = _continuation;
 				return std::noop_coroutine();
 			}
 
