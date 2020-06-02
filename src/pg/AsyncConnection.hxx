@@ -43,22 +43,33 @@ namespace Pg {
 class AsyncConnectionHandler {
 public:
 	/**
+	 * A connection has been established successfully, and the
+	 * connection is ready for queries.
+	 *
 	 * Exceptions thrown by this method will be reported to
 	 * OnError(), and the connection will be closed.
 	 */
 	virtual void OnConnect() = 0;
 
 	/**
-	 * Called when the connection becomes idle, i.e. ready for a query
-	 * after the previous query result was finished.  It is not called
-	 * when the connection becomes idle for the first time after the
-	 * connection has been established.
+	 * Called when the connection becomes idle, i.e. ready for a
+	 * query after the previous query result was finished.  It is
+	 * not called when the connection becomes idle for the first
+	 * time after the connection has been established; in that
+	 * case, only OnConnect() is called.
 	 *
 	 * Exceptions thrown by this method will be reported to
 	 * OnError(), and the connection will be closed.
 	 */
 	virtual void OnIdle() {}
 
+	/**
+         * The database connection was closed due to a fatal error.
+         * This method does not get called when
+         * AsyncConnectionHandler::Disconnect() gets called, and it
+         * also doesn't get called when a (re)connection attempt
+         * fails.
+	 */
 	virtual void OnDisconnect() noexcept = 0;
 
 	/**
@@ -67,6 +78,15 @@ public:
 	 */
 	virtual void OnNotify(const char *name) = 0;
 
+	/**
+	 * An error has occurred (may be fatal or not), and the
+	 * handler can implement this method to log the error
+	 * condition.
+	 *
+	 * If this was a fatal error which closed previously
+	 * successful connection, the OnDisconnect() will be called
+	 * right after this method.
+	 */
 	virtual void OnError(std::exception_ptr e) noexcept = 0;
 };
 
