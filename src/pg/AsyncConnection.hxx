@@ -93,6 +93,10 @@ public:
 class AsyncResultHandler {
 public:
 	/**
+	 * A result is available.  This can be called multiple times
+	 * for one query until OnResultEnd() is called.  The result
+	 * may be an error.
+	 *
 	 * Exceptions thrown by this method will be reported to
 	 * AsyncConnectionHandler::OnError(), and the connection will
 	 * be closed.
@@ -100,12 +104,19 @@ public:
 	virtual void OnResult(Result &&result) = 0;
 
 	/**
+	 * No more results are available for this query.
+	 *
 	 * Exceptions thrown by this method will be reported to
 	 * AsyncConnectionHandler::OnError(), and the connection will
 	 * be closed.
 	 */
 	virtual void OnResultEnd() = 0;
 
+	/**
+	 * Processing the query has failed due to a fatal connection
+	 * error (the details have already been posted to
+	 * AsyncConnectionHandler::OnError()).
+	 */
 	virtual void OnResultError() noexcept {
 		OnResultEnd();
 	}
