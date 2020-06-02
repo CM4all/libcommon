@@ -46,10 +46,12 @@ namespace Co {
  * A helper task which invokes a coroutine from synchronous code.
  */
 struct InvokeTask {
-	using Callback = BoundMethod<void() noexcept>;
+	using Callback = BoundMethod<void(std::exception_ptr error) noexcept>;
 
 	struct promise_type {
 		Callback callback;
+
+		std::exception_ptr error;
 
 		auto initial_suspend() noexcept {
 			return std::suspend_never{};
@@ -62,8 +64,9 @@ struct InvokeTask {
 
 			template<typename PROMISE>
 			void await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
-				if (coro.promise().callback)
-					coro.promise().callback();
+				auto &p = coro.promise();
+				if (p.callback)
+					p.callback(std::move(p.error));
 			}
 
 			void await_resume() const noexcept {
@@ -82,7 +85,7 @@ struct InvokeTask {
 		}
 
 		void unhandled_exception() noexcept {
-			std::terminate();
+			error = std::current_exception();
 		}
 	};
 
@@ -114,7 +117,7 @@ struct InvokeTask {
 
 	void OnCompletion(Callback callback) noexcept {
 		if (coroutine.done())
-			callback();
+			callback(std::move(coroutine.promise().error));
 		else
 			coroutine.promise().callback = callback;
 	}

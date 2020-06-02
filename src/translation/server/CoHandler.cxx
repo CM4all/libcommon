@@ -69,7 +69,7 @@ public:
 	}
 
 private:
-	void OnCompletion() noexcept {
+	void OnCompletion(std::exception_ptr) noexcept {
 		delete this;
 	}
 
