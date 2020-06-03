@@ -68,6 +68,14 @@ CoReadTextFile(Queue &queue, FileDescriptor directory_fd, const char *path,
 	if (nbytes != size)
 		throw std::runtime_error("Short read");
 
+	try {
+		co_await CoClose(queue, fd);
+		fd.Steal();
+	} catch (...) {
+		/* if CoClose() fails, ~UniqueFileDescriptor() fall
+		   back to regular close() */
+	}
+
 	co_return value;
 }
 

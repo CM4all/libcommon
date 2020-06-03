@@ -115,6 +115,18 @@ CoOpenReadOnly(Queue &queue,
 CoOpenOperation
 CoOpenReadOnly(Queue &queue, const char *path) noexcept;
 
+class CoCloseOperation final : public CoOperationBase {
+public:
+	auto operator co_await() noexcept {
+		return CoAwaitable<CoCloseOperation>{*this};
+	}
+
+	void GetValue();
+};
+
+CoCloseOperation
+CoClose(Queue &queue, FileDescriptor fd) noexcept;
+
 class CoReadOperation final : public CoOperationBase {
 public:
 	auto operator co_await() noexcept {

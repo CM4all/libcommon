@@ -55,6 +55,26 @@ CoOpenOperation::GetValue()
 	return UniqueFileDescriptor(std::exchange(value, -1));
 }
 
+void
+CoCloseOperation::GetValue()
+{
+	if (value < 0)
+		throw MakeErrno(-value, "Failed to close file");
+}
+
+CoCloseOperation
+CoClose(Queue &queue, FileDescriptor fd) noexcept
+{
+	auto *s = queue.GetSubmitEntry();
+	assert(s != nullptr); // TODO: what if the submit queue is full?
+
+	io_uring_prep_close(s, fd.Get());
+
+	CoCloseOperation op;
+	queue.Push(*s, op);
+	return op;
+}
+
 const struct statx &
 CoStatxOperation::GetValue()
 {
