@@ -59,7 +59,7 @@ class CoQuery final : public AsyncResultHandler {
 
 public:
 	template<typename... Params>
-	CoQuery(AsyncConnection &_connection, Params... params) noexcept
+	CoQuery(AsyncConnection &_connection, Params... params)
 		:connection(_connection),
 		 defer_resume(connection.GetEventLoop(),
 			      BIND_THIS_METHOD(OnDeferredResume))
