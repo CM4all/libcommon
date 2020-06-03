@@ -80,6 +80,10 @@ if get_option('coroutines')
   endif
 endif
 
+if compiler.get_id() == 'clang'
+  gtest_sub = subproject('gtest')
+endif
+
 inc = include_directories('src', 'fake', '.')
 
 subdir('src/util')

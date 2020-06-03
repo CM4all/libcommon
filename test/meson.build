@@ -14,8 +14,14 @@ if compiler.get_id() == 'clang' and compiler.version().version_compare('>=10')
   ]
 endif
 
+if compiler.get_id() == 'clang'
+  gtest_main_dep = gtest_sub.get_variable('gtest_main_dep')
+else
+  gtest_main_dep = dependency('gtest', main: true)
+endif
+
 gtest = declare_dependency(
-  dependencies: [dependency('gtest', main: true)],
+  dependencies: [gtest_main_dep],
   compile_args: gtest_warning_flags + [
     '-Wno-undef',
     '-Wno-missing-declarations',
