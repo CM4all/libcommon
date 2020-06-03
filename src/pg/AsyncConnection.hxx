@@ -272,6 +272,19 @@ public:
 			cancelling = true;
 	}
 
+	/**
+	 * Discard results from the query submitted by SendQuery().
+	 * Unlike RequestCancel(), this does not ask the server to
+	 * cancel the query.
+	 */
+	void DiscardRequest() noexcept {
+		assert(result_handler != nullptr);
+		assert(!cancelling);
+
+		result_handler = nullptr;
+		cancelling = true;
+	}
+
 	void CheckNotify() noexcept {
 		if (IsReady())
 			PollNotify();
