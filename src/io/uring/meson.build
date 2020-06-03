@@ -7,7 +7,7 @@ endif
 uring_sources = []
 
 if get_option('coroutines')
-  uring_sources += 'CoOperation.cxx'
+  uring_sources += ['CoOperation.cxx', 'CoTextFile.cxx']
 endif
 
 uring = static_library(
