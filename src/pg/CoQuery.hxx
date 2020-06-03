@@ -36,6 +36,8 @@
 #include "event/DeferEvent.hxx"
 #include "co/Compat.hxx"
 
+#include <cstdint>
+
 namespace Pg {
 
 /**
@@ -58,19 +60,44 @@ class CoQuery final : public AsyncResultHandler {
 	bool ready = false, failed = false;
 
 public:
+	enum class CancelType : uint8_t {
+		/**
+		 * Using AsyncConnection::DiscardRequest().
+		 */
+		DISCARD,
+
+		/**
+		 * Using AsyncConnection::RequestCancel().
+		 */
+		CANCEL,
+	};
+
+private:
+	const CancelType cancel_type;
+
+public:
 	template<typename... Params>
-	CoQuery(AsyncConnection &_connection, Params... params)
+	CoQuery(AsyncConnection &_connection, CancelType _cancel_type,
+		Params... params)
 		:connection(_connection),
 		 defer_resume(connection.GetEventLoop(),
-			      BIND_THIS_METHOD(OnDeferredResume))
+			      BIND_THIS_METHOD(OnDeferredResume)),
+		 cancel_type(_cancel_type)
 	{
 		// TODO are we connected?
 		connection.SendQuery(*this, params...);
 	}
 
+	template<typename... Params>
+	CoQuery(AsyncConnection &_connection, Params... params)
+		:CoQuery(_connection, CancelType::DISCARD,
+			 params...)
+	{
+	}
+
 	~CoQuery() noexcept {
 		if (!ready)
-			connection.RequestCancel();
+			Cancel();
 	}
 
 	auto operator co_await() noexcept {
@@ -101,6 +128,18 @@ public:
 	}
 
 private:
+	void Cancel() noexcept {
+		switch (cancel_type) {
+		case CancelType::DISCARD:
+			connection.DiscardRequest();
+			break;
+
+		case CancelType::CANCEL:
+			connection.RequestCancel();
+			break;
+		}
+	}
+
 	void OnDeferredResume() noexcept {
 		continuation.resume();
 	}
