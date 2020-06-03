@@ -55,7 +55,7 @@ class CoQuery final : public AsyncResultHandler {
 
 	std::coroutine_handle<> continuation;
 
-	bool ready = false;
+	bool ready = false, failed = false;
 
 public:
 	template<typename... Params>
@@ -86,8 +86,13 @@ public:
 				return std::noop_coroutine();
 			}
 
-			Result await_resume() const noexcept {
-				// TODO rethrow exception?
+			Result await_resume() const {
+				if (query.failed)
+					throw std::runtime_error("Database connection failed");
+
+				if (query.result.IsError())
+					throw Error(std::move(query.result));
+
 				return std::move(query.result);
 			}
 		};
@@ -112,8 +117,8 @@ private:
 	}
 
 	void OnResultError() noexcept override {
-		// TODO capture and rethrow exception?
 		ready = true;
+		failed = true;
 		defer_resume.Schedule();
 	}
 };

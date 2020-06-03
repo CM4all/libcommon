@@ -58,9 +58,6 @@ static Co::InvokeTask
 Run(Pg::Stock &db, const char *sql)
 {
 	auto result = co_await Pg::CoStockQuery(db, sql);
-	if (result.IsError())
-		throw Pg::Error(std::move(result));
-
 	PrintResult(result);
 }
 
