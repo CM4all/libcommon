@@ -35,8 +35,10 @@
 #include "Operation.hxx"
 #include "co/Compat.hxx"
 
+#include <sys/stat.h>
 #include <sys/types.h>
 
+struct io_uring_sqe;
 class FileDescriptor;
 class UniqueFileDescriptor;
 
@@ -76,6 +78,26 @@ struct CoAwaitable final {
 		return op.GetValue();
 	}
 };
+
+class CoStatxOperation final : public CoOperationBase {
+	struct statx stx;
+
+public:
+	CoStatxOperation(struct io_uring_sqe *s,
+			 FileDescriptor directory_fd, const char *path,
+			 int flags, unsigned mask) noexcept;
+
+	auto operator co_await() noexcept {
+		return CoAwaitable<CoStatxOperation>{*this};
+	}
+
+	const struct statx &GetValue();
+};
+
+CoStatxOperation
+CoStatx(Queue &queue,
+	FileDescriptor directory_fd, const char *path,
+	int flags, unsigned mask) noexcept;
 
 class CoOpenOperation final : public CoOperationBase {
 public:

@@ -55,6 +55,38 @@ CoOpenOperation::GetValue()
 	return UniqueFileDescriptor(std::exchange(value, -1));
 }
 
+const struct statx &
+CoStatxOperation::GetValue()
+{
+	if (value < 0)
+		throw MakeErrno(-value, "Failed to stat file");
+
+	return stx;
+}
+
+inline
+CoStatxOperation::CoStatxOperation(struct io_uring_sqe *s,
+				   FileDescriptor directory_fd,
+				   const char *path,
+				   int flags, unsigned mask) noexcept
+{
+	io_uring_prep_statx(s, directory_fd.Get(), path,
+			    flags, mask, &stx);
+}
+
+CoStatxOperation
+CoStatx(Queue &queue,
+	FileDescriptor directory_fd, const char *path,
+	int flags, unsigned mask) noexcept
+{
+	auto *s = queue.GetSubmitEntry();
+	assert(s != nullptr); // TODO: what if the submit queue is full?
+
+	CoStatxOperation op(s, directory_fd, path, flags, mask);
+	queue.Push(*s, op);
+	return op;
+}
+
 static CoOpenOperation
 CoOpen(Queue &queue, FileDescriptor directory_fd, const char *path,
        int flags, mode_t mode) noexcept
