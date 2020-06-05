@@ -75,8 +75,9 @@ public:
 			return final_awaitable{};
 		}
 
-		void return_value(T &&t) noexcept {
-			value = std::move(t);
+		template<typename U>
+		void return_value(U &&_value) noexcept {
+			value = std::forward<U>(_value);
 		}
 
 		Task<T> get_return_object() noexcept {
