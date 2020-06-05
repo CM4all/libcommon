@@ -38,10 +38,6 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/djbhash.h"
 
-#if TRANSLATION_ENABLE_JAILCGI
-#include "JailParams.hxx"
-#endif
-
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
 #endif
@@ -63,11 +59,6 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 		 : nullptr),
 	 refence(alloc, src.refence),
 	 ns(alloc, src.ns),
-#if TRANSLATION_ENABLE_JAILCGI
-	 jail(src.jail != nullptr
-	      ? alloc.New<JailParams>(*src.jail)
-	      : nullptr),
-#endif
 	 uid_gid(src.uid_gid),
 	 umask(src.umask),
 	 stderr_null(src.stderr_null),
@@ -82,10 +73,6 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 void
 ChildOptions::Check() const
 {
-#if TRANSLATION_ENABLE_JAILCGI
-	if (jail != nullptr)
-		jail->Check();
-#endif
 }
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -95,8 +82,7 @@ ChildOptions::IsExpandable() const
 {
 	return expand_stderr_path != nullptr ||
 		env.IsExpandable() ||
-		ns.IsExpandable() ||
-		(jail != nullptr && jail->IsExpandable());
+		ns.IsExpandable();
 }
 
 void
@@ -108,9 +94,6 @@ ChildOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 
 	env.Expand(alloc, match_info);
 	ns.Expand(alloc, match_info);
-
-	if (jail != nullptr)
-		jail->Expand(alloc, match_info);
 }
 
 #endif
@@ -137,10 +120,6 @@ ChildOptions::MakeId(char *p) const
 		p = rlimits->MakeId(p);
 	p = refence.MakeId(p);
 	p = ns.MakeId(p);
-#if TRANSLATION_ENABLE_JAILCGI
-	if (jail != nullptr)
-		p = jail->MakeId(p);
-#endif
 	p = uid_gid.MakeId(p);
 
 	if (stderr_null) {
@@ -188,17 +167,8 @@ ChildOptions::OpenStderrPath() const
 }
 
 void
-ChildOptions::CopyTo(PreparedChildProcess &dest
-#if TRANSLATION_ENABLE_JAILCGI
-		     , bool use_jail, const char *document_root
-#endif
-		     ) const
+ChildOptions::CopyTo(PreparedChildProcess &dest) const
 {
-#if TRANSLATION_ENABLE_JAILCGI
-	if (use_jail && jail != nullptr)
-		jail->InsertWrapper(dest, document_root);
-#endif
-
 	dest.umask = umask;
 
 	if (stderr_jailed) {

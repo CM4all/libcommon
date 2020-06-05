@@ -42,7 +42,6 @@
 #include "util/ShallowCopy.hxx"
 
 struct ResourceLimits;
-struct JailParams;
 struct PreparedChildProcess;
 class MatchInfo;
 class UniqueFileDescriptor;
@@ -75,10 +74,6 @@ struct ChildOptions {
 	RefenceOptions refence;
 
 	NamespaceOptions ns;
-
-#if TRANSLATION_ENABLE_JAILCGI
-	JailParams *jail = nullptr;
-#endif
 
 	UidGid uid_gid;
 
@@ -119,9 +114,6 @@ struct ChildOptions {
 		rlimits(src.rlimits),
 		refence(src.refence),
 		ns(src.ns),
-#if TRANSLATION_ENABLE_JAILCGI
-		jail(src.jail),
-#endif
 		uid_gid(src.uid_gid),
 		umask(src.umask),
 		stderr_null(src.stderr_null),
@@ -155,16 +147,8 @@ struct ChildOptions {
 
 	/**
 	 * Throws std::runtime_error on error.
-	 *
-	 * @param use_jail shall #jail be used?  Pass false for protocols
-	 * which have a non-standard way of calling the JailCGI wrapper,
-	 * e.g. basic CGI
 	 */
-	void CopyTo(PreparedChildProcess &dest
-#if TRANSLATION_ENABLE_JAILCGI
-		    , bool use_jail, const char *document_root
-#endif
-		    ) const;
+	void CopyTo(PreparedChildProcess &dest) const;
 };
 
 #endif

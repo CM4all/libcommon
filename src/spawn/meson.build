@@ -40,8 +40,6 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
     'MountNamespaceOptions.cxx',
     'MountList.cxx',
     'NamespaceOptions.cxx',
-    'JailConfig.cxx',
-    'JailParams.cxx',
     'ChildOptions.cxx',
     'CgroupOptions.cxx',
     'CgroupKill.cxx',

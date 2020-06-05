@@ -52,7 +52,6 @@ struct CgiAddress;
 struct HttpAddress;
 struct LhttpAddress;
 struct NfsAddress;
-struct JailParams;
 struct ChildOptions;
 struct NamespaceOptions;
 struct MountList;
@@ -118,9 +117,6 @@ class TranslateParser {
 	/** the current resource address being edited */
 	ResourceAddress *resource_address;
 #endif
-
-	/** the current JailCGI parameters being edited */
-	JailParams *jail;
 
 	/** the current child process options being edited */
 	ChildOptions *child_options;

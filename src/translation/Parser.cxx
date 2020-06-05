@@ -52,9 +52,6 @@
 #include "spawn/ChildOptions.hxx"
 #include "spawn/MountList.hxx"
 #include "spawn/ResourceLimits.hxx"
-#if TRANSLATION_ENABLE_JAILCGI
-#include "spawn/JailParams.hxx"
-#endif
 #if TRANSLATION_ENABLE_HTTP
 #include "net/AllocatedSocketAddress.hxx"
 #include "net/AddressInfo.hxx"
@@ -93,7 +90,6 @@ TranslateParser::SetChildOptions(ChildOptions &_child_options)
 	child_options = &_child_options;
 	ns_options = &child_options->ns;
 	mount_list = &ns_options->mount.mounts;
-	jail = nullptr;
 	env_builder = child_options->env;
 }
 
@@ -285,7 +281,6 @@ TranslateParser::AddView(const char *name)
 	*widget_view_tail = new_view;
 	widget_view_tail = &new_view->next;
 	resource_address = &new_view->address;
-	jail = nullptr;
 	child_options = nullptr;
 	ns_options = nullptr;
 	mount_list = nullptr;
@@ -362,31 +357,6 @@ parse_header(AllocatorPtr alloc,
 
 #endif
 
-#if TRANSLATION_ENABLE_JAILCGI
-
-/**
- * Throws std::runtime_error on error.
- */
-static void
-FinishJailParams(JailParams *jail,
-		 const TranslateResponse &response,
-		 const char *document_root)
-{
-	if (jail == nullptr || !jail->enabled)
-		return;
-
-	if (jail->home_directory == nullptr)
-		jail->home_directory = document_root;
-
-	if (jail->home_directory == nullptr)
-		throw std::runtime_error("No home directory for JAIL");
-
-	if (jail->site_id == nullptr)
-		jail->site_id = response.site;
-}
-
-#endif
-
 /**
  * Final fixups for the response before it is passed to the handler.
  *
@@ -418,21 +388,10 @@ FinishTranslateResponse(AllocatorPtr alloc,
 			cgi.document_root = response.document_root;
 			cgi.expand_document_root = response.expand_document_root;
 		}
-
-		FinishJailParams(cgi.options.jail,
-				 response, cgi.document_root);
 	} else if (response.address.type == ResourceAddress::Type::LOCAL) {
 		auto &file = response.address.GetFile();
 
 		if (file.delegate != nullptr) {
-			if (file.delegate->child_options.jail != nullptr &&
-			    file.delegate->child_options.jail->enabled &&
-			    file.document_root == nullptr)
-				file.document_root = response.document_root;
-
-			FinishJailParams(file.delegate->child_options.jail,
-					 response,
-					 file.document_root);
 		} else if (response.base != nullptr) {
 			if (response.easy_base) {
 				file.base = file.path;
@@ -547,9 +506,6 @@ translate_client_mount_root_tmpfs(NamespaceOptions *ns,
 
 static void
 translate_client_home(NamespaceOptions *ns,
-#if TRANSLATION_ENABLE_JAILCGI
-		      JailParams *jail,
-#endif
 		      StringView payload)
 {
 	if (!IsValidAbsolutePath(payload))
@@ -562,13 +518,6 @@ translate_client_home(NamespaceOptions *ns,
 		ok = true;
 	}
 
-#if TRANSLATION_ENABLE_JAILCGI
-	if (jail != nullptr && jail->enabled && jail->home_directory == nullptr) {
-		jail->home_directory = payload.data;
-		ok = true;
-	}
-#endif
-
 	if (!ok)
 		throw std::runtime_error("misplaced HOME packet");
 }
@@ -577,9 +526,6 @@ translate_client_home(NamespaceOptions *ns,
 
 static void
 translate_client_expand_home(NamespaceOptions *ns,
-#if TRANSLATION_ENABLE_JAILCGI
-			     JailParams *jail,
-#endif
 			     StringView payload)
 {
 	if (!IsValidAbsolutePath(payload))
@@ -591,15 +537,6 @@ translate_client_expand_home(NamespaceOptions *ns,
 		ns->mount.expand_home = payload.data;
 		ok = true;
 	}
-
-#if TRANSLATION_ENABLE_JAILCGI
-	if (jail != nullptr && jail->enabled &&
-	    !jail->expand_home_directory) {
-		jail->home_directory = payload.data;
-		jail->expand_home_directory = true;
-		ok = true;
-	}
-#endif
 
 	if (!ok)
 		throw std::runtime_error("misplaced EXPAND_HOME packet");
@@ -1287,8 +1224,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 			response.site = (const char *)payload.data;
 #if TRANSLATION_ENABLE_RADDRESS
-		else if (jail != nullptr && jail->enabled)
-			jail->site_id = string_payload.data;
 		else
 			throw std::runtime_error("misplaced SITE packet");
 #endif
@@ -1381,7 +1316,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::FILTER:
 #if TRANSLATION_ENABLE_TRANSFORMATION
 		resource_address = AddFilter();
-		jail = nullptr;
 		child_options = nullptr;
 		ns_options = nullptr;
 		mount_list = nullptr;
@@ -1687,23 +1621,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::JAILCGI:
-#if TRANSLATION_ENABLE_JAILCGI
-		if (jail == nullptr) {
-			if (child_options == nullptr)
-				throw std::runtime_error("misplaced JAILCGI packet");
-
-			jail = child_options->jail = alloc.New<JailParams>();
-		}
-
-		jail->enabled = true;
-		return;
-#endif
+		/* obsolete */
+		break;
 
 	case TranslationCommand::HOME:
 		translate_client_home(ns_options,
-#if TRANSLATION_ENABLE_JAILCGI
-				      jail,
-#endif
 				      string_payload);
 		return;
 
@@ -3011,9 +2933,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::EXPAND_HOME:
 #if TRANSLATION_ENABLE_EXPAND
 		translate_client_expand_home(ns_options,
-#if TRANSLATION_ENABLE_JAILCGI
-					     jail,
-#endif
 					     string_payload);
 		return;
 #else
@@ -3592,9 +3511,6 @@ TranslateParser::HandlePacket(TranslationCommand command,
 		resource_address = &response.address;
 #endif
 		probe_suffixes_builder.clear();
-#if TRANSLATION_ENABLE_JAILCGI
-		jail = nullptr;
-#endif
 #if TRANSLATION_ENABLE_EXECUTE
 		SetChildOptions(response.child_options);
 #else
