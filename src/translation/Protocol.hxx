@@ -996,6 +996,12 @@ enum class TranslationCommand : uint16_t {
 	 * Defer the request to another translation server.
 	 */
 	DEFER = 213,
+
+	/**
+	 * Send the child's STDERR output to the configured Pond
+	 * server instead of to systemd-journald.
+	 */
+	STDERR_POND = 214,
 };
 
 struct TranslationHeader {

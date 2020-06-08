@@ -92,6 +92,14 @@ struct ChildOptions {
 	 */
 	bool stderr_jailed = false;
 
+	/**
+	 * Send the child's STDERR output to the configured Pond
+	 * server instead of to systemd-journald.
+	 *
+	 * @see TranslationCommand::STDERR_POND
+	 */
+	bool stderr_pond = false;
+
 	bool forbid_user_ns = false;
 
 	bool forbid_multicast = false;
@@ -114,6 +122,7 @@ struct ChildOptions {
 		umask(src.umask),
 		stderr_null(src.stderr_null),
 		stderr_jailed(src.stderr_jailed),
+		stderr_pond(src.stderr_pond),
 		forbid_user_ns(src.forbid_user_ns),
 		forbid_multicast(src.forbid_multicast),
 		forbid_bind(src.forbid_bind),

@@ -3438,6 +3438,19 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.defer = true;
 		return;
+
+	case TranslationCommand::STDERR_POND:
+		if (!payload.empty())
+			throw std::runtime_error("malformed STDERR_POND packet");
+
+		if (child_options == nullptr)
+			throw std::runtime_error("misplaced STDERR_POND packet");
+
+		if (child_options->stderr_pond)
+			throw std::runtime_error("duplicate STDERR_POND packet");
+
+		child_options->stderr_pond = true;
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
