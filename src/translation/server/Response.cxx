@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -31,7 +31,6 @@
  */
 
 #include "Response.hxx"
-#include "util/StringView.hxx"
 
 #include <algorithm>
 
@@ -84,20 +83,6 @@ Response::Packet(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 	void *p = Write(sizeof(header) + payload.size);
 	p = mempcpy(p, &header, sizeof(header));
 	memcpy(p, payload.data, payload.size);
-}
-
-void
-Response::Packet(TranslationCommand cmd, StringView payload) noexcept
-{
-	Packet(cmd, payload.ToVoid());
-}
-
-void
-Response::Packet(TranslationCommand cmd, const char *payload) noexcept
-{
-	assert(payload != nullptr);
-
-	Packet(cmd, payload, strlen(payload));
 }
 
 } // namespace Translation::Server

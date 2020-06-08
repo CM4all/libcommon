@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -38,12 +38,11 @@
 #include "util/ConstBuffer.hxx"
 #include "util/WritableBuffer.hxx"
 
+#include <string_view>
 #include <utility>
 
 #include <stdint.h>
 #include <stddef.h>
-
-struct StringView;
 
 namespace Translation::Server {
 
@@ -84,14 +83,15 @@ public:
 	void Packet(TranslationCommand cmd,
 		    ConstBuffer<void> payload) noexcept;
 
-	void Packet(TranslationCommand cmd, StringView payload) noexcept;
+	void Packet(TranslationCommand cmd,
+		    std::string_view payload) noexcept {
+		Packet(cmd, ConstBuffer<void>{payload.data(), payload.size()});
+	}
 
 	void Packet(TranslationCommand cmd,
 		    const void *payload, size_t length) noexcept {
 		Packet(cmd, {payload, length});
 	}
-
-	void Packet(TranslationCommand cmd, const char *payload) noexcept;
 
 	void Base(const char *payload) noexcept {
 		Packet(TranslationCommand::BASE, payload);
