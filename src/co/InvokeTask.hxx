@@ -45,7 +45,7 @@ struct InvokeTask {
 	using Callback = BoundMethod<void(std::exception_ptr error) noexcept>;
 
 	struct promise_type {
-		Callback callback;
+		Callback callback{nullptr};
 
 		std::exception_ptr error;
 
