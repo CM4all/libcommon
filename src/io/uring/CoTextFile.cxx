@@ -34,6 +34,8 @@
 #include "CoOperation.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
+#include <stdexcept>
+
 #include <fcntl.h>
 
 namespace Uring {
