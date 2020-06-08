@@ -110,6 +110,9 @@ ChildOptions::MakeId(char *p) const
 	if (stderr_jailed)
 		*p++ = 'j';
 
+	if (stderr_pond)
+		*p++ = 'p';
+
 	for (auto i : env) {
 		*p++ = '$';
 		p = stpcpy(p, i);
