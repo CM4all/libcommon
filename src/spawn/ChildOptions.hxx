@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,7 +36,6 @@
 #include "translation/Features.hxx"
 #include "adata/ExpandableStringList.hxx"
 #include "CgroupOptions.hxx"
-#include "RefenceOptions.hxx"
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
 #include "util/ShallowCopy.hxx"
@@ -70,8 +69,6 @@ struct ChildOptions {
 	CgroupOptions cgroup;
 
 	ResourceLimits *rlimits = nullptr;
-
-	RefenceOptions refence;
 
 	NamespaceOptions ns;
 
@@ -112,7 +109,6 @@ struct ChildOptions {
 		env(shallow_copy, src.env),
 		cgroup(shallow_copy, src.cgroup),
 		rlimits(src.rlimits),
-		refence(src.refence),
 		ns(src.ns),
 		uid_gid(src.uid_gid),
 		umask(src.umask),

@@ -165,17 +165,6 @@ Serialize(SpawnSerializer &s, const CgroupOptions &c)
 }
 
 static void
-Serialize(SpawnSerializer &s, const RefenceOptions &_r)
-{
-	const auto r = _r.Get();
-	if (r != nullptr) {
-		s.Write(SpawnExecCommand::REFENCE);
-		s.Write(r.ToVoid());
-		s.WriteByte(0);
-	}
-}
-
-static void
 Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 {
 	s.WriteOptional(SpawnExecCommand::USER_NS, ns.enable_user);
@@ -282,7 +271,6 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 
 	if (p.cgroup != nullptr)
 		Serialize(s, *p.cgroup);
-	Serialize(s, p.refence);
 	Serialize(s, p.ns);
 	Serialize(s, p.rlimits);
 	Serialize(s, p.uid_gid);

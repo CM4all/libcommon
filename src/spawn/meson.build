@@ -44,7 +44,6 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
     'CgroupOptions.cxx',
     'CgroupKill.cxx',
     'CgroupWatch.cxx',
-    'RefenceOptions.cxx',
     'Server.cxx',
     'Launch.cxx',
     'Client.cxx',

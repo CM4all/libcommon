@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -57,7 +57,6 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 	 rlimits(src.rlimits != nullptr
 		 ? alloc.New<ResourceLimits>(*src.rlimits)
 		 : nullptr),
-	 refence(alloc, src.refence),
 	 ns(alloc, src.ns),
 	 uid_gid(src.uid_gid),
 	 umask(src.umask),
@@ -118,7 +117,6 @@ ChildOptions::MakeId(char *p) const
 	p = cgroup.MakeId(p);
 	if (rlimits != nullptr)
 		p = rlimits->MakeId(p);
-	p = refence.MakeId(p);
 	p = ns.MakeId(p);
 	p = uid_gid.MakeId(p);
 
@@ -189,7 +187,6 @@ ChildOptions::CopyTo(PreparedChildProcess &dest) const
 		dest.PutEnv(e);
 
 	dest.cgroup = &cgroup;
-	dest.refence = refence;
 	dest.ns = ns;
 	if (rlimits != nullptr)
 		dest.rlimits = *rlimits;

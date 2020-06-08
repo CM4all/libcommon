@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,7 +34,6 @@
 #define PREPARED_CHILD_PROCESS_HXX
 
 #include "ResourceLimits.hxx"
-#include "RefenceOptions.hxx"
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
 
@@ -42,6 +41,7 @@
 #include <vector>
 #include <forward_list>
 
+struct StringView;
 struct CgroupOptions;
 class UniqueFileDescriptor;
 class UniqueSocketDescriptor;
@@ -92,8 +92,6 @@ struct PreparedChildProcess {
 	int priority = 0;
 
 	const CgroupOptions *cgroup = nullptr;
-
-	RefenceOptions refence;
 
 	NamespaceOptions ns;
 

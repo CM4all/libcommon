@@ -843,37 +843,6 @@ translate_client_expand_stderr_path(ChildOptions *child_options,
 
 #endif
 
-gcc_pure
-static bool
-CheckRefence(StringView payload)
-{
-	auto p = payload.begin();
-	const auto end = payload.end();
-
-	while (true) {
-		auto n = std::find(p, end, '\0');
-		if (n == p)
-			return false;
-
-		if (n == end)
-			return true;
-
-		p = n + 1;
-	}
-}
-
-inline void
-TranslateParser::HandleRefence(StringView payload)
-{
-	if (child_options == nullptr || !child_options->refence.IsEmpty())
-		throw std::runtime_error("misplaced REFENCE packet");
-
-	if (!CheckRefence(payload))
-		throw std::runtime_error("malformed REFENCE packet");
-
-	child_options->refence.Set(payload);
-}
-
 inline void
 TranslateParser::HandleUidGid(ConstBuffer<void> _payload)
 {
@@ -2988,8 +2957,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::REFENCE:
-		HandleRefence(string_payload);
-		return;
+		/* obsolete */
+		break;
 
 	case TranslationCommand::INVERSE_REGEX_UNESCAPE:
 #if TRANSLATION_ENABLE_EXPAND

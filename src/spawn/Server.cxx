@@ -538,10 +538,6 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.tty = true;
 			break;
 
-		case SpawnExecCommand::REFENCE:
-			p.refence.Set(payload.ReadString());
-			break;
-
 		case SpawnExecCommand::USER_NS:
 			p.ns.enable_user = true;
 			break;

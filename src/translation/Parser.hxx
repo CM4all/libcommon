@@ -244,8 +244,6 @@ private:
 	void HandleBindMount(StringView payload,
 			     bool expand, bool writable, bool exec=false);
 
-	void HandleRefence(StringView payload);
-
 #if TRANSLATION_ENABLE_WANT
 	void HandleWant(const TranslationCommand *payload,
 			size_t payload_length);

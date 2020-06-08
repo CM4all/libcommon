@@ -173,8 +173,6 @@ try {
 			throw MakeErrno("Failed to unshare cgroup namespace");
 	}
 
-	p.refence.Apply();
-
 	p.ns.Setup(p.uid_gid);
 	p.rlimits.Apply(0);
 

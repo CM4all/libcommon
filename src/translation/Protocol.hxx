@@ -731,7 +731,7 @@ enum class TranslationCommand : uint16_t {
 	PASSWORD = 166,
 
 	/**
-	 * Configure a refence limit for the child process.
+	 * Obsolete.
 	 */
 	REFENCE = 167,
 
