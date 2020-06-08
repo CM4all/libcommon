@@ -1,4 +1,5 @@
-liburing = dependency('liburing', required: false)
+liburing = dependency('liburing',
+                      required: get_variable('libcommon_require_uring', false))
 if not liburing.found()
   uring_dep = dependency('', required: false)
   subdir_done()
