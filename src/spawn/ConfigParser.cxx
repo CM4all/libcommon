@@ -222,6 +222,13 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 		config.allowed_uids.insert(ParseUser(s));
 	} else if (StringIsEqual(word, "allow_group")) {
 		config.allowed_gids.insert(ParseGroup(line.ExpectValueAndEnd()));
+	} else if (StringIsEqual(word, "default_user")) {
+		const char *s = line.ExpectValueAndEnd();
+
+		if (!config.default_uid_gid.IsEmpty())
+			throw std::runtime_error("Duplicate 'default_user'");
+
+		config.default_uid_gid.Lookup(s);
 #ifdef HAVE_LIBSYSTEMD
 	} else if (StringIsEqualIgnoreCase(word, "CPUWeight")) {
 		config.systemd_scope_properties.cpu_weight =
