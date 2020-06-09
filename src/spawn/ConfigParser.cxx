@@ -202,7 +202,7 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 {
 	const char *word = line.ExpectWord();
 
-	if (strcmp(word, "allow_user") == 0) {
+	if (StringIsEqual(word, "allow_user")) {
 		const char *s = line.ExpectValueAndEnd();
 
 		if (IsDigitASCII(*s) && s[strlen(s) - 1] == '-') {
@@ -220,7 +220,7 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 		}
 
 		config.allowed_uids.insert(ParseUser(s));
-	} else if (strcmp(word, "allow_group") == 0) {
+	} else if (StringIsEqual(word, "allow_group")) {
 		config.allowed_gids.insert(ParseGroup(line.ExpectValueAndEnd()));
 #ifdef HAVE_LIBSYSTEMD
 	} else if (StringIsEqualIgnoreCase(word, "CPUWeight")) {
