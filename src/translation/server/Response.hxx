@@ -43,6 +43,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 namespace Translation::Server {
 
@@ -93,6 +94,17 @@ public:
 	void Packet(TranslationCommand cmd,
 		    const void *payload, size_t length) noexcept {
 		Packet(cmd, {payload, length});
+	}
+
+	/**
+	 * Append a packet whose payload is a concatenation of all
+	 * parameters.
+	 */
+	template<typename... Params>
+	void MultiPacket(TranslationCommand cmd, Params... params) noexcept {
+		size_t total_length = (... + GetParamLength(params));
+		void *p = WriteHeader(cmd, total_length);
+		WriteParams(p, params...);
 	}
 
 	void Base(const char *payload) noexcept {
@@ -328,6 +340,32 @@ private:
 
 	void *WriteHeader(TranslationCommand cmd,
 			  size_t payload_size) noexcept;
+
+	static constexpr size_t GetParamLength(ConstBuffer<void> b) noexcept {
+		return b.size;
+	}
+
+	static constexpr size_t GetParamLength(std::string_view sv) noexcept {
+		return sv.size();
+	}
+
+	static void *WriteParam(void *dest, ConstBuffer<void> src) noexcept {
+		return mempcpy(dest, src.data, src.size);
+	}
+
+	static void *WriteParam(void *dest, std::string_view src) noexcept {
+		return mempcpy(dest, src.data(), src.size());
+	}
+
+	template<typename P, typename... Params>
+	static void *WriteParams(void *dest, P first, Params... params) noexcept {
+		dest = WriteParam(dest, first);
+		return WriteParams(dest, params...);
+	}
+
+	static void *WriteParams(void *dest) noexcept {
+		return dest;
+	}
 };
 
 } // namespace Translation::Server
