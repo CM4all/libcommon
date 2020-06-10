@@ -34,6 +34,8 @@
 #include "CoOperation.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
+#include <liburing.h>
+
 #include <stdexcept>
 
 #include <fcntl.h>
@@ -65,10 +67,11 @@ CoReadTextFile(Queue &queue, FileDescriptor directory_fd, const char *path,
 	std::string value;
 	value.resize(size);
 
-	const auto nbytes = co_await CoRead(queue, fd,
-					    &value.front(), size, 0);
-	if (nbytes != size)
-		throw std::runtime_error("Short read");
+	/* hard-link the read() and the close() with IOSQE_IO_HARDLINK
+	   (requires Linux 5.6) */
+
+	auto read = CoRead(queue, fd, &value.front(), size, 0,
+			   IOSQE_IO_HARDLINK);
 
 	try {
 		co_await CoClose(queue, fd);
@@ -77,6 +80,10 @@ CoReadTextFile(Queue &queue, FileDescriptor directory_fd, const char *path,
 		/* if CoClose() fails, ~UniqueFileDescriptor() fall
 		   back to regular close() */
 	}
+
+	const auto nbytes = co_await read;
+	if (nbytes != size)
+		throw std::runtime_error("Short read");
 
 	co_return value;
 }
