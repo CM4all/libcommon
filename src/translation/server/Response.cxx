@@ -82,4 +82,15 @@ Response::Packet(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 	memcpy(p, payload.data, payload.size);
 }
 
+WritableBuffer<uint8_t>
+Response::Finish() noexcept
+{
+	Packet(TranslationCommand::END);
+
+	WritableBuffer<uint8_t> result(buffer, size);
+	buffer = nullptr;
+	capacity = size = 0;
+	return result;
+}
+
 } // namespace Translation::Server

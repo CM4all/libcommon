@@ -333,14 +333,7 @@ public:
 		return HttpContext(*this);
 	}
 
-	WritableBuffer<uint8_t> Finish() noexcept {
-		Packet(TranslationCommand::END);
-
-		WritableBuffer<uint8_t> result(buffer, size);
-		buffer = nullptr;
-		capacity = size = 0;
-		return result;
-	}
+	WritableBuffer<uint8_t> Finish() noexcept;
 
 private:
 	void Grow(size_t new_capacity) noexcept;
