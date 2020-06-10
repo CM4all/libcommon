@@ -66,22 +66,20 @@ Response::Write(size_t nbytes) noexcept
 	return result;
 }
 
-void
-Response::Packet(TranslationCommand cmd) noexcept
+void *
+Response::WriteHeader(TranslationCommand cmd, size_t payload_size) noexcept
 {
-	const TranslationHeader header{0, cmd};
-	void *p = Write(sizeof(header));
-	memcpy(p, &header, sizeof(header));
+	assert(payload_size <= 0xffff);
+
+	const TranslationHeader header{uint16_t(payload_size), cmd};
+	void *p = Write(sizeof(header) + payload_size);
+	return mempcpy(p, &header, sizeof(header));
 }
 
 void
 Response::Packet(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 {
-	assert(payload.size <= 0xffff);
-
-	const TranslationHeader header{uint16_t(payload.size), cmd};
-	void *p = Write(sizeof(header) + payload.size);
-	p = mempcpy(p, &header, sizeof(header));
+	void *p = WriteHeader(cmd, payload.size);
 	memcpy(p, payload.data, payload.size);
 }
 

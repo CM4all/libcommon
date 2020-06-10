@@ -78,7 +78,9 @@ public:
 	/**
 	 * Append an empty packet.
 	 */
-	void Packet(TranslationCommand cmd) noexcept;
+	void Packet(TranslationCommand cmd) noexcept {
+		WriteHeader(cmd, 0);
+	}
 
 	void Packet(TranslationCommand cmd,
 		    ConstBuffer<void> payload) noexcept;
@@ -323,6 +325,9 @@ public:
 private:
 	void Grow(size_t new_capacity) noexcept;
 	void *Write(size_t nbytes) noexcept;
+
+	void *WriteHeader(TranslationCommand cmd,
+			  size_t payload_size) noexcept;
 };
 
 } // namespace Translation::Server
