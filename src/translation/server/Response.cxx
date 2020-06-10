@@ -33,6 +33,7 @@
 #include "Response.hxx"
 
 #include <algorithm>
+#include <numeric>
 
 #include <assert.h>
 
@@ -85,6 +86,18 @@ Response::Packet(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 WritableBuffer<uint8_t>
 Response::Finish() noexcept
 {
+	/* generate a VARY packet? */
+	size_t n_vary = std::accumulate(vary.begin(), vary.end(), 0,
+					std::plus<size_t>{});
+	if (n_vary > 0) {
+		TranslationCommand *dest = (TranslationCommand *)
+			WriteHeader(TranslationCommand::VARY,
+				    n_vary * sizeof(*dest));
+		for (size_t i = 0; i < vary.size(); ++i)
+			if (vary[i])
+				*dest++ = vary_cmds[i];
+	}
+
 	Packet(TranslationCommand::END);
 
 	WritableBuffer<uint8_t> result(buffer, size);

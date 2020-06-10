@@ -38,6 +38,7 @@
 #include "util/ConstBuffer.hxx"
 #include "util/WritableBuffer.hxx"
 
+#include <array>
 #include <string_view>
 #include <utility>
 
@@ -51,6 +52,38 @@ class Response {
 	uint8_t *buffer = nullptr;
 	size_t capacity = 0, size = 0;
 
+	enum VaryIndex {
+		PARAM,
+		SESSION,
+		LISTENER_TAG,
+		LOCAL_ADDRESS,
+		REMOTE_HOST,
+		HOST,
+		LANGUAGE,
+		USER_AGENT,
+		QUERY_STRING,
+		USER,
+		INTERNAL_REDIRECT,
+		ENOTDIR_,
+	};
+
+	static inline constexpr std::array vary_cmds{
+		TranslationCommand::PARAM,
+		TranslationCommand::SESSION,
+		TranslationCommand::LISTENER_TAG,
+		TranslationCommand::LOCAL_ADDRESS,
+		TranslationCommand::REMOTE_HOST,
+		TranslationCommand::HOST,
+		TranslationCommand::LANGUAGE,
+		TranslationCommand::USER_AGENT,
+		TranslationCommand::QUERY_STRING,
+		TranslationCommand::USER,
+		TranslationCommand::INTERNAL_REDIRECT,
+		TranslationCommand::ENOTDIR_,
+	};
+
+	std::array<bool, vary_cmds.size()> vary{};
+
 public:
 	Response() noexcept
 	{
@@ -62,7 +95,8 @@ public:
 	Response(Response &&other) noexcept
 		:buffer(std::exchange(other.buffer, nullptr)),
 		 capacity(other.capacity),
-		 size(other.size) {}
+		 size(other.size),
+		 vary(other.vary) {}
 
 	~Response() noexcept {
 		delete[] buffer;
@@ -73,7 +107,56 @@ public:
 		swap(buffer, src.buffer);
 		swap(capacity, src.capacity);
 		swap(size, src.size);
+		swap(vary, src.vary);
 		return *this;
+	}
+
+	void VaryParam() noexcept {
+		vary[VaryIndex::PARAM] = true;
+	}
+
+	void VarySession() noexcept {
+		vary[VaryIndex::SESSION] = true;
+	}
+
+	void VaryListenerTag() noexcept {
+		vary[VaryIndex::LISTENER_TAG] = true;
+	}
+
+	void VaryLocalAddress() noexcept {
+		vary[VaryIndex::LOCAL_ADDRESS] = true;
+	}
+
+	void VaryRemoteHost() noexcept {
+		vary[VaryIndex::REMOTE_HOST] = true;
+	}
+
+	void VaryHost() noexcept {
+		vary[VaryIndex::HOST] = true;
+	}
+
+	void VaryLanguage() noexcept {
+		vary[VaryIndex::LANGUAGE] = true;
+	}
+
+	void VaryUserAgent() noexcept {
+		vary[VaryIndex::USER_AGENT] = true;
+	}
+
+	void VaryQueryString() noexcept {
+		vary[VaryIndex::QUERY_STRING] = true;
+	}
+
+	void VaryUSER() noexcept {
+		vary[VaryIndex::USER] = true;
+	}
+
+	void VaryInternalRedirect() noexcept {
+		vary[VaryIndex::INTERNAL_REDIRECT] = true;
+	}
+
+	void VaryEnotdir() noexcept {
+		vary[VaryIndex::ENOTDIR_] = true;
 	}
 
 	/**
