@@ -97,6 +97,14 @@ public:
 	}
 
 	/**
+	 * Append a packet by copying the raw bytes of an object.
+	 */
+	template<typename T>
+	void PacketT(TranslationCommand cmd, const T &payload) noexcept {
+		Packet(cmd, &payload, sizeof(payload));
+	}
+
+	/**
 	 * Append a packet whose payload is a concatenation of all
 	 * parameters.
 	 */
