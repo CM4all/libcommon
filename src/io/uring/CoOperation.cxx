@@ -43,7 +43,11 @@ void
 CoOperationBase::OnUringCompletion(int res) noexcept
 {
 	value = res;
-	continuation.resume();
+
+	/* resume the coroutine which is co_awaiting the result (if
+	   any) */
+	if (continuation)
+		continuation.resume();
 }
 
 UniqueFileDescriptor
