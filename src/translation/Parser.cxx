@@ -371,11 +371,6 @@ FinishTranslateResponse(AllocatorPtr alloc,
 			ConstBuffer<const char *> probe_suffixes)
 {
 #if TRANSLATION_ENABLE_RADDRESS
-	if (response.easy_base && !response.address.IsValidBase())
-		/* EASY_BASE was enabled, but the resource address does not
-		   end with a slash, thus LoadBase() cannot work */
-		throw std::runtime_error("Invalid base address");
-
 	if (response.address.IsCgiAlike()) {
 		auto &cgi = response.address.GetCgi();
 
@@ -406,6 +401,14 @@ FinishTranslateResponse(AllocatorPtr alloc,
 	}
 
 	response.address.Check();
+
+	/* the ResourceAddress::IsValidBase() check works only after
+	   the transformations above, in particular the
+	   FileAddress::SplitBase() call */
+	if (response.easy_base && !response.address.IsValidBase())
+		/* EASY_BASE was enabled, but the resource address does not
+		   end with a slash, thus LoadBase() cannot work */
+		throw std::runtime_error("Invalid base address");
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
