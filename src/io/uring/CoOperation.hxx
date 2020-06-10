@@ -138,7 +138,7 @@ public:
 
 CoReadOperation
 CoRead(Queue &queue, FileDescriptor fd, void *buffer, size_t size,
-       off_t offset) noexcept;
+       off_t offset, int flags=0) noexcept;
 
 class CoWriteOperation final : public CoOperationBase {
 public:
@@ -151,6 +151,6 @@ public:
 
 CoWriteOperation
 CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, size_t size,
-	off_t offset) noexcept;
+	off_t offset, int flags=0) noexcept;
 
 } // namespace Uring

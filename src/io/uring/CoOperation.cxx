@@ -149,12 +149,13 @@ CoReadOperation::GetValue() const
 
 CoReadOperation
 CoRead(Queue &queue, FileDescriptor fd, void *buffer, size_t size,
-       off_t offset) noexcept
+       off_t offset, int flags) noexcept
 {
 	auto *s = queue.GetSubmitEntry();
 	assert(s != nullptr); // TODO: what if the submit queue is full?
 
 	io_uring_prep_read(s, fd.Get(), buffer, size, offset);
+	s->flags = flags;
 
 	CoReadOperation op;
 	queue.Push(*s, op);
@@ -172,12 +173,13 @@ CoWriteOperation::GetValue() const
 
 CoWriteOperation
 CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, size_t size,
-	off_t offset) noexcept
+	off_t offset, int flags) noexcept
 {
 	auto *s = queue.GetSubmitEntry();
 	assert(s != nullptr); // TODO: what if the submit queue is full?
 
 	io_uring_prep_write(s, fd.Get(), buffer, size, offset);
+	s->flags = flags;
 
 	CoWriteOperation op;
 	queue.Push(*s, op);
