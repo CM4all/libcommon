@@ -35,8 +35,10 @@
 
 #include <boost/filesystem/path.hpp>
 
-#include <memory>
 #include <map>
+#include <memory>
+#include <string>
+#include <utility>
 
 class FileLineParser;
 
