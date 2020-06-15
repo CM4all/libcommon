@@ -38,6 +38,7 @@
 #include "util/StringAPI.hxx"
 #include "util/StringStrip.hxx"
 
+#include <cassert>
 #include <climits>
 
 #include <pwd.h>

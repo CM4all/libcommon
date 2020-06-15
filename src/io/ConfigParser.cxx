@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,13 +36,13 @@
 #include "util/ScopeExit.hxx"
 #include "util/Compiler.h"
 
-#include <boost/filesystem.hpp>
+#include <vector>
 
 #include <assert.h>
 #include <errno.h>
 #include <fnmatch.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 bool
 ConfigParser::PreParseLine(gcc_unused FileLineParser &line)
@@ -298,7 +298,7 @@ IncludeConfigParser::Finish()
 }
 
 inline void
-IncludeConfigParser::IncludePath(boost::filesystem::path &&p)
+IncludeConfigParser::IncludePath(std::filesystem::path &&p)
 {
 	auto directory = p.parent_path();
 	if (directory.empty())
@@ -328,7 +328,7 @@ IncludeConfigParser::IncludePath(boost::filesystem::path &&p)
 }
 
 static void
-ParseConfigFile(const boost::filesystem::path &path, FILE *file,
+ParseConfigFile(const std::filesystem::path &path, FILE *file,
 		ConfigParser &parser)
 {
 	char buffer[4096], *line;
@@ -348,7 +348,7 @@ ParseConfigFile(const boost::filesystem::path &path, FILE *file,
 }
 
 inline void
-IncludeConfigParser::IncludeOptionalPath(boost::filesystem::path &&p)
+IncludeConfigParser::IncludeOptionalPath(std::filesystem::path &&p)
 {
 	IncludeConfigParser sub(std::move(p), child, false);
 
@@ -373,7 +373,7 @@ IncludeConfigParser::IncludeOptionalPath(boost::filesystem::path &&p)
 }
 
 void
-ParseConfigFile(const boost::filesystem::path &path, ConfigParser &parser)
+ParseConfigFile(const std::filesystem::path &path, ConfigParser &parser)
 {
 	FILE *file = fopen(path.c_str(), "r");
 	if (file == nullptr)

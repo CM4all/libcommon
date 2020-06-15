@@ -32,7 +32,7 @@
 
 #include "FileLineParser.hxx"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 static fs::path
 ApplyPath(const fs::path &base, fs::path &&p)

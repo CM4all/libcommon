@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,10 +30,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_PARSER_HXX
-#define CONFIG_PARSER_HXX
+#pragma once
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <memory>
 #include <map>
@@ -124,7 +123,7 @@ private:
  * A #ConfigParser which can "include" other files.
  */
 class IncludeConfigParser final : public ConfigParser {
-	const boost::filesystem::path path;
+	const std::filesystem::path path;
 
 	ConfigParser &child;
 
@@ -136,7 +135,7 @@ class IncludeConfigParser final : public ConfigParser {
 	const bool finish_child;
 
 public:
-	IncludeConfigParser(boost::filesystem::path &&_path,
+	IncludeConfigParser(std::filesystem::path &&_path,
 			    ConfigParser &_child,
 			    bool _finish_child=true)
 		:path(std::move(_path)), child(_child),
@@ -148,11 +147,9 @@ public:
 	void Finish() override;
 
 private:
-	void IncludePath(boost::filesystem::path &&p);
-	void IncludeOptionalPath(boost::filesystem::path &&p);
+	void IncludePath(std::filesystem::path &&p);
+	void IncludeOptionalPath(std::filesystem::path &&p);
 };
 
 void
-ParseConfigFile(const boost::filesystem::path &path, ConfigParser &parser);
-
-#endif
+ParseConfigFile(const std::filesystem::path &path, ConfigParser &parser);

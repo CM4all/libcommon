@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,22 +30,19 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FILE_LINE_PARSER_HXX
-#define FILE_LINE_PARSER_HXX
+#pragma once
 
 #include "LineParser.hxx"
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 class FileLineParser : public LineParser {
-	const boost::filesystem::path &base_path;
+	const std::filesystem::path &base_path;
 
 public:
-	FileLineParser(const boost::filesystem::path &_base_path, char *_p)
+	FileLineParser(const std::filesystem::path &_base_path, char *_p)
 		:LineParser(_p), base_path(_base_path) {}
 
-	boost::filesystem::path ExpectPath();
-	boost::filesystem::path ExpectPathAndEnd();
+	std::filesystem::path ExpectPath();
+	std::filesystem::path ExpectPathAndEnd();
 };
-
-#endif
