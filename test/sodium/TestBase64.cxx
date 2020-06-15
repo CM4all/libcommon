@@ -36,7 +36,7 @@
 
 TEST(TestBase64, Empty)
 {
-	const auto b64 = FixedBase64<0, sodium_base64_VARIANT_ORIGINAL>(nullptr);
+	const auto b64 = FixedBase64<0, sodium_base64_VARIANT_ORIGINAL>("");
 	EXPECT_STREQ(b64, "");
 }
 
