@@ -36,6 +36,6 @@
 
 TEST(TestUrlSafeBase64SHA256, Empty)
 {
-	const auto b64 = UrlSafeBase64SHA256(nullptr);
+	const auto b64 = UrlSafeBase64SHA256("");
 	EXPECT_STREQ(b64, "47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU");
 }

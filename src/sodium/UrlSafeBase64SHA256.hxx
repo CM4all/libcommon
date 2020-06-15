@@ -36,6 +36,8 @@
 #include "SHA256.hxx"
 #include "util/Compiler.h"
 
+#include <string_view>
+
 gcc_pure
 inline auto
 UrlSafeBase64SHA256(ConstBuffer<void> src) noexcept
@@ -44,4 +46,11 @@ UrlSafeBase64SHA256(ConstBuffer<void> src) noexcept
 	state.Update(src);
 	const auto hash = state.Final();
 	return FixedBase64<crypto_hash_sha256_BYTES, sodium_base64_VARIANT_URLSAFE_NO_PADDING>(&hash);
+}
+
+gcc_pure
+inline auto
+UrlSafeBase64SHA256(std::string_view src) noexcept
+{
+	return UrlSafeBase64SHA256(ConstBuffer<void>{src.data(), src.size()});
 }
