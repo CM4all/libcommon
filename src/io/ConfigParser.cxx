@@ -38,6 +38,9 @@
 
 #include <boost/filesystem.hpp>
 
+#include <algorithm>
+#include <vector>
+
 #include <assert.h>
 #include <errno.h>
 #include <fnmatch.h>
