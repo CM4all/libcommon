@@ -2,6 +2,7 @@ test(
   'TestSodium',
   executable(
     'TestSodium',
+    'TestBase64.cxx',
     'TestGenericHash.cxx',
     'TestSHA256.cxx',
     include_directories: inc,
