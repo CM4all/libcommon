@@ -33,9 +33,10 @@
 #pragma once
 
 #include <filesystem>
-
-#include <memory>
 #include <map>
+#include <memory>
+#include <string>
+#include <utility>
 
 class FileLineParser;
 

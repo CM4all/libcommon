@@ -37,11 +37,14 @@
 #include "util/Compiler.h"
 
 #include <algorithm>
+#include <exception>
 #include <vector>
 
 #include <assert.h>
 #include <errno.h>
 #include <fnmatch.h>
+#include <stdio.h>
+#include <string.h>
 
 namespace fs = std::filesystem;
 
