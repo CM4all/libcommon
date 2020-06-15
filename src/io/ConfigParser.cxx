@@ -36,6 +36,7 @@
 #include "util/ScopeExit.hxx"
 #include "util/Compiler.h"
 
+#include <algorithm>
 #include <vector>
 
 #include <assert.h>
