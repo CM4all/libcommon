@@ -34,8 +34,10 @@
 
 #include "Base64.hxx"
 #include "SHA256.hxx"
+#include "util/Compiler.h"
 
-auto
+gcc_pure
+inline auto
 UrlSafeBase64SHA256(ConstBuffer<void> src) noexcept
 {
 	SHA256State state;
@@ -43,4 +45,3 @@ UrlSafeBase64SHA256(ConstBuffer<void> src) noexcept
 	const auto hash = state.Final();
 	return FixedBase64<crypto_hash_sha256_BYTES, sodium_base64_VARIANT_URLSAFE_NO_PADDING>(&hash);
 }
-
