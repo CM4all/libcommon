@@ -208,7 +208,8 @@ public:
 	auto &MultiPacket(TranslationCommand cmd, Params... params) noexcept {
 		size_t total_length = (... + GetParamLength(params));
 		void *p = WriteHeader(cmd, total_length);
-		return WriteParams(p, params...);
+		WriteParams(p, params...);
+		return *this;
 	}
 
 	auto &Base(const char *payload) noexcept {
