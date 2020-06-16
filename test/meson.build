@@ -35,7 +35,12 @@ subdir('net')
 subdir('pcre')
 subdir('pg')
 subdir('cares')
-subdir('sodium')
+
+if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
+  # this library needs std::byte
+  subdir('sodium')
+endif
+
 subdir('spawn')
 subdir('time')
 subdir('uring')

@@ -94,7 +94,12 @@ subdir('src/lua')
 subdir('src/io')
 subdir('src/io/uring')
 subdir('src/system')
-subdir('src/sodium')
+
+if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
+  # this library needs std::byte
+  subdir('src/sodium')
+endif
+
 subdir('src/ssl')
 subdir('src/net')
 subdir('src/event')
