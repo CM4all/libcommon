@@ -111,80 +111,93 @@ public:
 		return *this;
 	}
 
-	void VaryParam() noexcept {
+	auto &VaryParam() noexcept {
 		vary[VaryIndex::PARAM] = true;
+		return *this;
 	}
 
-	void VarySession() noexcept {
+	auto &VarySession() noexcept {
 		vary[VaryIndex::SESSION] = true;
+		return *this;
 	}
 
-	void VaryListenerTag() noexcept {
+	auto &VaryListenerTag() noexcept {
 		vary[VaryIndex::LISTENER_TAG] = true;
+		return *this;
 	}
 
-	void VaryLocalAddress() noexcept {
+	auto &VaryLocalAddress() noexcept {
 		vary[VaryIndex::LOCAL_ADDRESS] = true;
+		return *this;
 	}
 
-	void VaryRemoteHost() noexcept {
+	auto &VaryRemoteHost() noexcept {
 		vary[VaryIndex::REMOTE_HOST] = true;
+		return *this;
 	}
 
-	void VaryHost() noexcept {
+	auto &VaryHost() noexcept {
 		vary[VaryIndex::HOST] = true;
+		return *this;
 	}
 
-	void VaryLanguage() noexcept {
+	auto &VaryLanguage() noexcept {
 		vary[VaryIndex::LANGUAGE] = true;
+		return *this;
 	}
 
-	void VaryUserAgent() noexcept {
+	auto &VaryUserAgent() noexcept {
 		vary[VaryIndex::USER_AGENT] = true;
+		return *this;
 	}
 
-	void VaryQueryString() noexcept {
+	auto &VaryQueryString() noexcept {
 		vary[VaryIndex::QUERY_STRING] = true;
+		return *this;
 	}
 
-	void VaryUSER() noexcept {
+	auto &VaryUSER() noexcept {
 		vary[VaryIndex::USER] = true;
+		return *this;
 	}
 
-	void VaryInternalRedirect() noexcept {
+	auto &VaryInternalRedirect() noexcept {
 		vary[VaryIndex::INTERNAL_REDIRECT] = true;
+		return *this;
 	}
 
-	void VaryEnotdir() noexcept {
+	auto &VaryEnotdir() noexcept {
 		vary[VaryIndex::ENOTDIR_] = true;
+		return *this;
 	}
 
 	/**
 	 * Append an empty packet.
 	 */
-	void Packet(TranslationCommand cmd) noexcept {
+	auto &Packet(TranslationCommand cmd) noexcept {
 		WriteHeader(cmd, 0);
+		return *this;
 	}
 
-	void Packet(TranslationCommand cmd,
-		    ConstBuffer<void> payload) noexcept;
+	Response &Packet(TranslationCommand cmd,
+			 ConstBuffer<void> payload) noexcept;
 
-	void Packet(TranslationCommand cmd,
-		    std::string_view payload) noexcept {
-		Packet(cmd, ConstBuffer<void>{payload.data(), payload.size()});
+	auto &Packet(TranslationCommand cmd,
+		     std::string_view payload) noexcept {
+		return Packet(cmd, ConstBuffer<void>{payload.data(), payload.size()});
 	}
 
-	void Packet(TranslationCommand cmd,
-		    const void *payload, size_t length) noexcept {
-		Packet(cmd, {payload, length});
+	auto &Packet(TranslationCommand cmd,
+		     const void *payload, size_t length) noexcept {
+		return Packet(cmd, {payload, length});
 	}
 
 	/**
 	 * Append a packet by copying the raw bytes of an object.
 	 */
 	template<typename T>
-	void PacketT(TranslationCommand cmd, const T &payload) noexcept {
-		Packet(cmd, &payload, sizeof(payload));
+	auto &PacketT(TranslationCommand cmd, const T &payload) noexcept {
+		return Packet(cmd, &payload, sizeof(payload));
 	}
 
 	/**
@@ -192,47 +205,48 @@ public:
 	 * parameters.
 	 */
 	template<typename... Params>
-	void MultiPacket(TranslationCommand cmd, Params... params) noexcept {
+	auto &MultiPacket(TranslationCommand cmd, Params... params) noexcept {
 		size_t total_length = (... + GetParamLength(params));
 		void *p = WriteHeader(cmd, total_length);
-		WriteParams(p, params...);
+		return WriteParams(p, params...);
 	}
 
-	void Base(const char *payload) noexcept {
-		Packet(TranslationCommand::BASE, payload);
+	auto &Base(const char *payload) noexcept {
+		return Packet(TranslationCommand::BASE, payload);
 	}
 
-	void UnsafeBase() noexcept {
-		Packet(TranslationCommand::UNSAFE_BASE);
+	auto &UnsafeBase() noexcept {
+		return Packet(TranslationCommand::UNSAFE_BASE);
 	}
 
-	void EasyBase() noexcept {
-		Packet(TranslationCommand::EASY_BASE);
+	auto &EasyBase() noexcept {
+		return Packet(TranslationCommand::EASY_BASE);
 	}
 
-	void Regex(const char *payload) noexcept {
-		Packet(TranslationCommand::REGEX, payload);
+	auto &Regex(const char *payload) noexcept {
+		return Packet(TranslationCommand::REGEX, payload);
 	}
 
-	void InverseRegex(const char *payload) noexcept {
-		Packet(TranslationCommand::INVERSE_REGEX, payload);
+	auto &InverseRegex(const char *payload) noexcept {
+		return Packet(TranslationCommand::INVERSE_REGEX, payload);
 	}
 
-	void RegexTail() noexcept {
-		Packet(TranslationCommand::REGEX_TAIL);
+	auto &RegexTail() noexcept {
+		return Packet(TranslationCommand::REGEX_TAIL);
 	}
 
-	void RegexUnescape() noexcept {
-		Packet(TranslationCommand::REGEX_UNESCAPE);
+	auto &RegexUnescape() noexcept {
+		return Packet(TranslationCommand::REGEX_UNESCAPE);
 	}
 
-	void InverseRegexUnescape() noexcept {
-		Packet(TranslationCommand::INVERSE_REGEX_UNESCAPE);
+	auto &InverseRegexUnescape() noexcept {
+		return Packet(TranslationCommand::INVERSE_REGEX_UNESCAPE);
 	}
 
-	void Status(http_status_t _status) noexcept {
+	auto &Status(http_status_t _status) noexcept {
 		uint16_t status = uint16_t(_status);
-		Packet(TranslationCommand::STATUS, &status, sizeof(status));
+		return Packet(TranslationCommand::STATUS,
+			      &status, sizeof(status));
 	}
 
 	class ProcessorContext {

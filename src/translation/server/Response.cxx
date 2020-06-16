@@ -76,11 +76,12 @@ Response::WriteHeader(TranslationCommand cmd, size_t payload_size) noexcept
 	return mempcpy(p, &header, sizeof(header));
 }
 
-void
+Response &
 Response::Packet(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 {
 	void *p = WriteHeader(cmd, payload.size);
 	memcpy(p, payload.data, payload.size);
+	return *this;
 }
 
 WritableBuffer<uint8_t>
