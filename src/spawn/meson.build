@@ -24,9 +24,13 @@ spawn_sources = [
   'UidGid.cxx',
   'ResourceLimits.cxx',
   'Config.cxx',
-  'ConfigParser.cxx',
   'daemon/Client.cxx',
 ]
+
+if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
+  # the C++17 Filesystem TS is implemented in GCC>=8
+  spawn_sources += 'ConfigParser.cxx'
+endif
 
 spawn_dependencies = [
 ]

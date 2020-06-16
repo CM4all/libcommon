@@ -1,5 +1,13 @@
 io_sources = []
 
+if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
+  # the C++17 Filesystem TS is implemented in GCC>=8
+  io_sources += [
+    'FileLineParser.cxx',
+    'ConfigParser.cxx',
+  ]
+endif
+
 io = static_library(
   'io',
   'FileDescriptor.cxx',
@@ -15,8 +23,6 @@ io = static_library(
   'BufferedOutputStream.cxx',
   'BufferedReader.cxx',
   'LineParser.cxx',
-  'FileLineParser.cxx',
-  'ConfigParser.cxx',
   'Logger.cxx',
   io_sources,
   include_directories: inc,
