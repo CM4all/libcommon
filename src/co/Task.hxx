@@ -35,6 +35,7 @@
 #include "Compat.hxx"
 
 #include <exception>
+#include <optional>
 #include <utility>
 
 namespace Co {
@@ -49,7 +50,7 @@ public:
 	struct promise_type {
 		std::coroutine_handle<> continuation;
 
-		T value;
+		std::optional<T> value;
 
 		std::exception_ptr error;
 
@@ -77,7 +78,7 @@ public:
 
 		template<typename U>
 		void return_value(U &&_value) noexcept {
-			value = std::forward<U>(_value);
+			value.emplace(std::forward<U>(_value));
 		}
 
 		Task<T> get_return_object() noexcept {
@@ -135,7 +136,7 @@ public:
 				if (p.error)
 					std::rethrow_exception(std::move(p.error));
 
-				return std::move(p.value);
+				return std::move(*p.value);
 			}
 		};
 
