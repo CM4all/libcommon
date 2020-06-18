@@ -313,6 +313,14 @@ public:
 				    value...);
 	}
 
+	auto &ProbePathSuffixes(ConstBuffer<void> payload,
+				std::initializer_list<std::string_view> suffixes) noexcept {
+		Packet(TranslationCommand::PROBE_PATH_SUFFIXES, payload);
+		for (auto i : suffixes)
+			StringPacket(TranslationCommand::PROBE_SUFFIX, i);
+		return *this;
+	}
+
 	class ProcessorContext {
 		Response &response;
 
@@ -352,8 +360,9 @@ public:
 			return *this;
 		}
 
-		auto MountTmpTmpfs() noexcept {
-			response.Packet(TranslationCommand::MOUNT_TMP_TMPFS);
+		auto MountTmpTmpfs(std::string_view payload=nullptr) noexcept {
+			response.StringPacket(TranslationCommand::MOUNT_TMP_TMPFS,
+					      payload);
 			return *this;
 		}
 
@@ -373,6 +382,35 @@ public:
 		constexpr explicit
 		ChildContext(Response &_response) noexcept
 			:response(_response) {}
+
+		auto Tag(std::string_view value) noexcept {
+			response.StringPacket(TranslationCommand::CHILD_TAG, value);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto StderrPath(Types... value) noexcept {
+			static_assert(sizeof...(value) > 0);
+			response.StringPacket(TranslationCommand::STDERR_PATH,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto ExpandStderrPath(Types... value) noexcept {
+			static_assert(sizeof...(value) > 0);
+			response.StringPacket(TranslationCommand::EXPAND_STDERR_PATH,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto StderrPathJailed(Types... value) noexcept {
+			static_assert(sizeof...(value) > 0);
+			StderrPath(value...);
+			response.Packet(TranslationCommand::STDERR_PATH_JAILED);
+			return *this;
+		}
 
 		auto SetEnv(std::string_view s) noexcept {
 			response.StringPacket(TranslationCommand::SETENV, s);
@@ -422,6 +460,13 @@ public:
 			return *this;
 		}
 
+		template<typename... Types>
+		auto Rlimits(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::RLIMITS,
+					      value...);
+			return *this;
+		}
+
 		auto UserNamespace() noexcept {
 			response.Packet(TranslationCommand::USER_NAMESPACE);
 			return *this;
@@ -432,18 +477,44 @@ public:
 			return *this;
 		}
 
+		auto CgroupNamespace() noexcept {
+			response.Packet(TranslationCommand::CGROUP_NAMESPACE);
+			return *this;
+		}
+
 		auto NetworkNamespace() noexcept {
 			response.Packet(TranslationCommand::NETWORK_NAMESPACE);
 			return *this;
 		}
 
-		auto UtsNamespace() noexcept {
-			response.Packet(TranslationCommand::PID_NAMESPACE);
+		auto IpcNamespace() noexcept {
+			response.Packet(TranslationCommand::IPC_NAMESPACE);
+			return *this;
+		}
+
+		auto UtsNamespace(std::string_view hostname) noexcept {
+			response.StringPacket(TranslationCommand::PID_NAMESPACE,
+					      hostname);
 			return *this;
 		}
 
 		MountNamespaceContext MountNamespace() noexcept {
 			return MountNamespaceContext(response);
+		}
+
+		auto ForbidUserNamespace() noexcept {
+			response.Packet(TranslationCommand::FORBID_USER_NS);
+			return *this;
+		}
+
+		auto ForbidMulticast() noexcept {
+			response.Packet(TranslationCommand::FORBID_MULTICAST);
+			return *this;
+		}
+
+		auto NoNewPrivs() noexcept {
+			response.Packet(TranslationCommand::NO_NEW_PRIVS);
+			return *this;
 		}
 	};
 
@@ -512,8 +583,8 @@ public:
 
 		template<typename... Types>
 		auto QueryString(Types... value) noexcept {
-			response.Packet(TranslationCommand::QUERY_STRING,
-					value...);
+			response.StringPacket(TranslationCommand::QUERY_STRING,
+					      value...);
 			return *this;
 		}
 	};
@@ -536,7 +607,8 @@ public:
 		}
 
 		auto ExpandParameter(std::string_view s) noexcept {
-			response.Packet(TranslationCommand::EXPAND_PAIR, s);
+			response.StringPacket(TranslationCommand::EXPAND_PAIR,
+					      s);
 			return *this;
 		}
 
@@ -560,7 +632,7 @@ public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 
 		auto Parameter(std::string_view s) noexcept {
-			response.Packet(TranslationCommand::PAIR, s);
+			response.StringPacket(TranslationCommand::PAIR, s);
 			return *this;
 		}
 
@@ -573,7 +645,8 @@ public:
 		}
 
 		auto ExpandParameter(std::string_view s) noexcept {
-			response.Packet(TranslationCommand::EXPAND_PAIR, s);
+			response.StringPacket(TranslationCommand::EXPAND_PAIR,
+					      s);
 			return *this;
 		}
 
@@ -680,6 +753,20 @@ public:
 		ChildContext Delegate(std::string_view helper) noexcept {
 			response.StringPacket(TranslationCommand::DELEGATE, helper);
 			return ChildContext(response);
+		}
+
+		template<typename P>
+		auto DirectoryIndex(P payload) noexcept {
+			response.Packet(TranslationCommand::DIRECTORY_INDEX,
+					payload);
+			return *this;
+		}
+
+		template<typename P>
+		auto Enotdir(P payload) noexcept {
+			response.Packet(TranslationCommand::ENOTDIR_,
+					payload);
+			return *this;
 		}
 	};
 
