@@ -493,7 +493,7 @@ public:
 		}
 
 		auto UtsNamespace(std::string_view hostname) noexcept {
-			response.StringPacket(TranslationCommand::PID_NAMESPACE,
+			response.StringPacket(TranslationCommand::UTS_NAMESPACE,
 					      hostname);
 			return *this;
 		}
