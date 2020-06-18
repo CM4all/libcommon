@@ -377,6 +377,31 @@ public:
 		return WasChildContext(*this);
 	}
 
+	class FastCgiChildContext : public CgiAlikeChildContext {
+	public:
+		using CgiAlikeChildContext::CgiAlikeChildContext;
+
+		auto Parameter(const char *s) noexcept {
+			response.Packet(TranslationCommand::PAIR, s);
+			return *this;
+		}
+	};
+
+	FastCgiChildContext FastCGI(const char *path) noexcept {
+		Packet(TranslationCommand::FASTCGI, path);
+		return FastCgiChildContext(*this);
+	}
+
+	class CgiChildContext : public CgiAlikeChildContext {
+	public:
+		using CgiAlikeChildContext::CgiAlikeChildContext;
+	};
+
+	CgiChildContext CGI(const char *path) noexcept {
+		Packet(TranslationCommand::CGI, path);
+		return CgiChildContext(*this);
+	}
+
 	class FileContext {
 		Response &response;
 
