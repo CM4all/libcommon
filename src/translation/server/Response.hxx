@@ -258,8 +258,9 @@ public:
 		ProcessorContext(Response &_response) noexcept
 			:response(_response) {}
 
-		void Container() noexcept {
+		auto Container() noexcept {
 			response.Packet(TranslationCommand::CONTAINER);
+			return *this;
 		}
 	};
 
@@ -276,20 +277,24 @@ public:
 		MountNamespaceContext(Response &_response) noexcept
 			:response(_response) {}
 
-		void PivotRoot(const char *path) noexcept {
+		auto PivotRoot(const char *path) noexcept {
 			response.Packet(TranslationCommand::PIVOT_ROOT, path);
+			return *this;
 		}
 
-		void MountProc() noexcept {
+		auto MountProc() noexcept {
 			response.Packet(TranslationCommand::MOUNT_PROC);
+			return *this;
 		}
 
-		void MountTmpTmpfs() noexcept {
+		auto MountTmpTmpfs() noexcept {
 			response.Packet(TranslationCommand::MOUNT_TMP_TMPFS);
+			return *this;
 		}
 
-		void MountHome(const char *mnt) noexcept {
+		auto MountHome(const char *mnt) noexcept {
 			response.Packet(TranslationCommand::MOUNT_HOME, mnt);
+			return *this;
 		}
 	};
 
@@ -302,24 +307,29 @@ public:
 		ChildContext(Response &_response) noexcept
 			:response(_response) {}
 
-		void Home(const char *value) noexcept {
+		auto Home(const char *value) noexcept {
 			response.Packet(TranslationCommand::HOME, value);
+			return *this;
 		}
 
-		void UserNamespace() noexcept {
+		auto UserNamespace() noexcept {
 			response.Packet(TranslationCommand::USER_NAMESPACE);
+			return *this;
 		}
 
-		void PidNamespace() noexcept {
+		auto PidNamespace() noexcept {
 			response.Packet(TranslationCommand::PID_NAMESPACE);
+			return *this;
 		}
 
-		void NetworkNamespace() noexcept {
+		auto NetworkNamespace() noexcept {
 			response.Packet(TranslationCommand::NETWORK_NAMESPACE);
+			return *this;
 		}
 
-		void UtsNamespace() noexcept {
+		auto UtsNamespace() noexcept {
 			response.Packet(TranslationCommand::PID_NAMESPACE);
+			return *this;
 		}
 
 		MountNamespaceContext MountNamespace() noexcept {
@@ -331,20 +341,24 @@ public:
 	public:
 		using ChildContext::ChildContext;
 
-		void Uri(const char *payload) noexcept {
+		auto Uri(const char *payload) noexcept {
 			response.Packet(TranslationCommand::URI, payload);
+			return *this;
 		}
 
-		void ScriptName(const char *payload) noexcept {
+		auto ScriptName(const char *payload) noexcept {
 			response.Packet(TranslationCommand::SCRIPT_NAME, payload);
+			return *this;
 		}
 
-		void PathInfo(const char *payload) noexcept {
+		auto PathInfo(const char *payload) noexcept {
 			response.Packet(TranslationCommand::PATH_INFO, payload);
+			return *this;
 		}
 
-		void QueryString(const char *payload) noexcept {
+		auto QueryString(const char *payload) noexcept {
 			response.Packet(TranslationCommand::QUERY_STRING, payload);
+			return *this;
 		}
 	};
 
@@ -352,8 +366,9 @@ public:
 	public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 
-		void Parameter(const char *s) noexcept {
+		auto Parameter(const char *s) noexcept {
 			response.Packet(TranslationCommand::PAIR, s);
+			return *this;
 		}
 	};
 
@@ -370,24 +385,29 @@ public:
 		FileContext(Response &_response) noexcept
 			:response(_response) {}
 
-		void ExpandPath(const char *value) noexcept {
+		auto ExpandPath(const char *value) noexcept {
 			response.Packet(TranslationCommand::EXPAND_PATH, value);
+			return *this;
 		}
 
-		void ContentType(const char *value) noexcept {
+		auto ContentType(const char *value) noexcept {
 			response.Packet(TranslationCommand::CONTENT_TYPE, value);
+			return *this;
 		}
 
-		void Deflated(const char *path) noexcept {
+		auto Deflated(const char *path) noexcept {
 			response.Packet(TranslationCommand::DEFLATED, path);
+			return *this;
 		}
 
-		void Gzipped(const char *path) noexcept {
+		auto Gzipped(const char *path) noexcept {
 			response.Packet(TranslationCommand::GZIPPED, path);
+			return *this;
 		}
 
-		void DocumentRoot(const char *value) noexcept {
+		auto DocumentRoot(const char *value) noexcept {
 			response.Packet(TranslationCommand::DOCUMENT_ROOT, value);
+			return *this;
 		}
 
 		ChildContext Delegate(const char *helper) noexcept {
@@ -409,20 +429,23 @@ public:
 		HttpContext(Response &_response) noexcept
 			:response(_response) {}
 
-		void ExpandPath(const char *value) noexcept {
+		auto ExpandPath(const char *value) noexcept {
 			response.Packet(TranslationCommand::EXPAND_PATH, value);
+			return *this;
 		}
 
-		void Address(SocketAddress address) noexcept {
+		auto Address(SocketAddress address) noexcept {
 			response.Packet(TranslationCommand::ADDRESS,
 					address.GetAddress(),
 					address.GetSize());
+			return *this;
 		}
 
 		template<typename A>
-		void Addresses(const A &addresses) noexcept {
+		auto Addresses(const A &addresses) noexcept {
 			for (const auto &i : addresses)
 				Address(i);
+			return *this;
 		}
 	};
 
