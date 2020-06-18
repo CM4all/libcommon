@@ -212,7 +212,7 @@ public:
 		return *this;
 	}
 
-	auto &Base(const char *payload) noexcept {
+	auto &Base(std::string_view payload) noexcept {
 		return Packet(TranslationCommand::BASE, payload);
 	}
 
@@ -224,11 +224,11 @@ public:
 		return Packet(TranslationCommand::EASY_BASE);
 	}
 
-	auto &Regex(const char *payload) noexcept {
+	auto &Regex(std::string_view payload) noexcept {
 		return Packet(TranslationCommand::REGEX, payload);
 	}
 
-	auto &InverseRegex(const char *payload) noexcept {
+	auto &InverseRegex(std::string_view payload) noexcept {
 		return Packet(TranslationCommand::INVERSE_REGEX, payload);
 	}
 
@@ -277,7 +277,7 @@ public:
 		MountNamespaceContext(Response &_response) noexcept
 			:response(_response) {}
 
-		auto PivotRoot(const char *path) noexcept {
+		auto PivotRoot(std::string_view path) noexcept {
 			response.Packet(TranslationCommand::PIVOT_ROOT, path);
 			return *this;
 		}
@@ -292,7 +292,7 @@ public:
 			return *this;
 		}
 
-		auto MountHome(const char *mnt) noexcept {
+		auto MountHome(std::string_view mnt) noexcept {
 			response.Packet(TranslationCommand::MOUNT_HOME, mnt);
 			return *this;
 		}
@@ -307,7 +307,7 @@ public:
 		ChildContext(Response &_response) noexcept
 			:response(_response) {}
 
-		auto Home(const char *value) noexcept {
+		auto Home(std::string_view value) noexcept {
 			response.Packet(TranslationCommand::HOME, value);
 			return *this;
 		}
@@ -341,22 +341,22 @@ public:
 	public:
 		using ChildContext::ChildContext;
 
-		auto Uri(const char *payload) noexcept {
+		auto Uri(std::string_view payload) noexcept {
 			response.Packet(TranslationCommand::URI, payload);
 			return *this;
 		}
 
-		auto ScriptName(const char *payload) noexcept {
+		auto ScriptName(std::string_view payload) noexcept {
 			response.Packet(TranslationCommand::SCRIPT_NAME, payload);
 			return *this;
 		}
 
-		auto PathInfo(const char *payload) noexcept {
+		auto PathInfo(std::string_view payload) noexcept {
 			response.Packet(TranslationCommand::PATH_INFO, payload);
 			return *this;
 		}
 
-		auto QueryString(const char *payload) noexcept {
+		auto QueryString(std::string_view payload) noexcept {
 			response.Packet(TranslationCommand::QUERY_STRING, payload);
 			return *this;
 		}
@@ -366,13 +366,13 @@ public:
 	public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 
-		auto Parameter(const char *s) noexcept {
+		auto Parameter(std::string_view s) noexcept {
 			response.Packet(TranslationCommand::PAIR, s);
 			return *this;
 		}
 	};
 
-	WasChildContext Was(const char *path) noexcept {
+	WasChildContext Was(std::string_view path) noexcept {
 		Packet(TranslationCommand::WAS, path);
 		return WasChildContext(*this);
 	}
@@ -381,13 +381,13 @@ public:
 	public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 
-		auto Parameter(const char *s) noexcept {
+		auto Parameter(std::string_view s) noexcept {
 			response.Packet(TranslationCommand::PAIR, s);
 			return *this;
 		}
 	};
 
-	FastCgiChildContext FastCGI(const char *path) noexcept {
+	FastCgiChildContext FastCGI(std::string_view path) noexcept {
 		Packet(TranslationCommand::FASTCGI, path);
 		return FastCgiChildContext(*this);
 	}
@@ -397,7 +397,7 @@ public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 	};
 
-	CgiChildContext CGI(const char *path) noexcept {
+	CgiChildContext CGI(std::string_view path) noexcept {
 		Packet(TranslationCommand::CGI, path);
 		return CgiChildContext(*this);
 	}
@@ -410,38 +410,38 @@ public:
 		FileContext(Response &_response) noexcept
 			:response(_response) {}
 
-		auto ExpandPath(const char *value) noexcept {
+		auto ExpandPath(std::string_view value) noexcept {
 			response.Packet(TranslationCommand::EXPAND_PATH, value);
 			return *this;
 		}
 
-		auto ContentType(const char *value) noexcept {
+		auto ContentType(std::string_view value) noexcept {
 			response.Packet(TranslationCommand::CONTENT_TYPE, value);
 			return *this;
 		}
 
-		auto Deflated(const char *path) noexcept {
+		auto Deflated(std::string_view path) noexcept {
 			response.Packet(TranslationCommand::DEFLATED, path);
 			return *this;
 		}
 
-		auto Gzipped(const char *path) noexcept {
+		auto Gzipped(std::string_view path) noexcept {
 			response.Packet(TranslationCommand::GZIPPED, path);
 			return *this;
 		}
 
-		auto DocumentRoot(const char *value) noexcept {
+		auto DocumentRoot(std::string_view value) noexcept {
 			response.Packet(TranslationCommand::DOCUMENT_ROOT, value);
 			return *this;
 		}
 
-		ChildContext Delegate(const char *helper) noexcept {
+		ChildContext Delegate(std::string_view helper) noexcept {
 			response.Packet(TranslationCommand::DELEGATE, helper);
 			return ChildContext(response);
 		}
 	};
 
-	auto Path(const char *path) noexcept {
+	auto Path(std::string_view path) noexcept {
 		Packet(TranslationCommand::PATH, path);
 		return FileContext(*this);
 	}
@@ -454,7 +454,7 @@ public:
 		HttpContext(Response &_response) noexcept
 			:response(_response) {}
 
-		auto ExpandPath(const char *value) noexcept {
+		auto ExpandPath(std::string_view value) noexcept {
 			response.Packet(TranslationCommand::EXPAND_PATH, value);
 			return *this;
 		}
@@ -474,7 +474,7 @@ public:
 		}
 	};
 
-	HttpContext Http(const char *url) noexcept {
+	HttpContext Http(std::string_view url) noexcept {
 		Packet(TranslationCommand::HTTP, url);
 		return HttpContext(*this);
 	}
