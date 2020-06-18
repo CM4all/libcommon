@@ -212,6 +212,10 @@ public:
 		return *this;
 	}
 
+	auto &Token(std::string_view value) noexcept {
+		return Packet(TranslationCommand::TOKEN, value);
+	}
+
 	auto &Base(std::string_view payload) noexcept {
 		return Packet(TranslationCommand::BASE, payload);
 	}
@@ -248,6 +252,45 @@ public:
 		uint16_t status = uint16_t(_status);
 		return Packet(TranslationCommand::STATUS,
 			      &status, sizeof(status));
+	}
+
+	auto &Site(std::string_view value) noexcept {
+		return Packet(TranslationCommand::SITE, value);
+	}
+
+	auto &CanonicalHost(std::string_view value) noexcept {
+		return Packet(TranslationCommand::CANONICAL_HOST, value);
+	}
+
+	struct RedirectContext {
+		Response &response;
+
+		auto CopyQueryString() noexcept {
+			response.Packet(TranslationCommand::REDIRECT_QUERY_STRING);
+			return *this;
+		}
+	};
+
+	auto Redirect(std::string_view value) noexcept {
+		Packet(TranslationCommand::REDIRECT, value);
+		return RedirectContext{*this};
+	}
+
+	auto ExpandRedirect(std::string_view value) noexcept {
+		Packet(TranslationCommand::EXPAND_REDIRECT, value);
+		return RedirectContext{*this};
+	}
+
+	auto &Bounce(std::string_view value) noexcept {
+		return Packet(TranslationCommand::BOUNCE, value);
+	}
+
+	auto &TestPath(std::string_view value) noexcept {
+		return Packet(TranslationCommand::TEST_PATH, value);
+	}
+
+	auto &ExpandTestPath(std::string_view value) noexcept {
+		return Packet(TranslationCommand::EXPAND_TEST_PATH, value);
 	}
 
 	class ProcessorContext {
