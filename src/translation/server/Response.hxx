@@ -187,17 +187,12 @@ public:
 		return Packet(cmd, ConstBuffer<void>{payload.data(), payload.size()});
 	}
 
-	auto &Packet(TranslationCommand cmd,
-		     const void *payload, size_t length) noexcept {
-		return Packet(cmd, {payload, length});
-	}
-
 	/**
 	 * Append a packet by copying the raw bytes of an object.
 	 */
 	template<typename T>
 	auto &PacketT(TranslationCommand cmd, const T &payload) noexcept {
-		return Packet(cmd, &payload, sizeof(payload));
+		return Packet(cmd, ConstBuffer<void>(&payload, sizeof(payload)));
 	}
 
 	/**
@@ -249,9 +244,8 @@ public:
 	}
 
 	auto &Status(http_status_t _status) noexcept {
-		uint16_t status = uint16_t(_status);
-		return Packet(TranslationCommand::STATUS,
-			      &status, sizeof(status));
+		const uint16_t status = uint16_t(_status);
+		return PacketT(TranslationCommand::STATUS, status);
 	}
 
 	auto &Site(std::string_view value) noexcept {
@@ -630,8 +624,7 @@ public:
 
 		auto Address(SocketAddress address) noexcept {
 			response.Packet(TranslationCommand::ADDRESS,
-					address.GetAddress(),
-					address.GetSize());
+					ConstBuffer<void>{address.GetAddress(), address.GetSize()});
 			return *this;
 		}
 
