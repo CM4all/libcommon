@@ -207,12 +207,27 @@ public:
 		return *this;
 	}
 
-	auto &Token(std::string_view value) noexcept {
-		return Packet(TranslationCommand::TOKEN, value);
+	/**
+	 * Append a packet whose payload is a concatenation of all
+	 * string parameters.
+	 */
+	template<typename... Params>
+	auto &StringPacket(TranslationCommand cmd, Params... params) noexcept {
+		static_assert(sizeof...(params) > 0);
+		size_t total_length = (... + GetParamLength(params));
+		void *p = WriteHeader(cmd, total_length);
+		WriteStringParams(p, params...);
+		return *this;
 	}
 
-	auto &Base(std::string_view payload) noexcept {
-		return Packet(TranslationCommand::BASE, payload);
+	template<typename... Types>
+	auto &Token(Types... value) noexcept {
+		return StringPacket(TranslationCommand::TOKEN, value...);
+	}
+
+	template<typename... Types>
+	auto &Base(Types... value) noexcept {
+		return StringPacket(TranslationCommand::BASE, value...);
 	}
 
 	auto &UnsafeBase() noexcept {
@@ -223,12 +238,14 @@ public:
 		return Packet(TranslationCommand::EASY_BASE);
 	}
 
-	auto &Regex(std::string_view payload) noexcept {
-		return Packet(TranslationCommand::REGEX, payload);
+	template<typename... Types>
+	auto &Regex(Types... value) noexcept {
+		return StringPacket(TranslationCommand::REGEX, value...);
 	}
 
-	auto &InverseRegex(std::string_view payload) noexcept {
-		return Packet(TranslationCommand::INVERSE_REGEX, payload);
+	template<typename... Types>
+	auto &InverseRegex(Types... value) noexcept {
+		return StringPacket(TranslationCommand::INVERSE_REGEX, value...);
 	}
 
 	auto &RegexTail() noexcept {
@@ -248,12 +265,15 @@ public:
 		return PacketT(TranslationCommand::STATUS, status);
 	}
 
-	auto &Site(std::string_view value) noexcept {
-		return Packet(TranslationCommand::SITE, value);
+	template<typename... Types>
+	auto &Site(Types... value) noexcept {
+		return StringPacket(TranslationCommand::SITE, value...);
 	}
 
-	auto &CanonicalHost(std::string_view value) noexcept {
-		return Packet(TranslationCommand::CANONICAL_HOST, value);
+	template<typename... Types>
+	auto &CanonicalHost(Types... value) noexcept {
+		return StringPacket(TranslationCommand::CANONICAL_HOST,
+				    value...);
 	}
 
 	struct RedirectContext {
@@ -265,26 +285,32 @@ public:
 		}
 	};
 
-	auto Redirect(std::string_view value) noexcept {
-		Packet(TranslationCommand::REDIRECT, value);
+	template<typename... Types>
+	auto Redirect(Types... value) noexcept {
+		StringPacket(TranslationCommand::REDIRECT, value...);
 		return RedirectContext{*this};
 	}
 
-	auto ExpandRedirect(std::string_view value) noexcept {
-		Packet(TranslationCommand::EXPAND_REDIRECT, value);
+	template<typename... Types>
+	auto ExpandRedirect(Types... value) noexcept {
+		StringPacket(TranslationCommand::EXPAND_REDIRECT, value...);
 		return RedirectContext{*this};
 	}
 
-	auto &Bounce(std::string_view value) noexcept {
-		return Packet(TranslationCommand::BOUNCE, value);
+	template<typename... Types>
+	auto &Bounce(Types... value) noexcept {
+		return StringPacket(TranslationCommand::BOUNCE, value...);
 	}
 
-	auto &TestPath(std::string_view value) noexcept {
-		return Packet(TranslationCommand::TEST_PATH, value);
+	template<typename... Types>
+	auto &TestPath(Types... value) noexcept {
+		return StringPacket(TranslationCommand::TEST_PATH, value...);
 	}
 
-	auto &ExpandTestPath(std::string_view value) noexcept {
-		return Packet(TranslationCommand::EXPAND_TEST_PATH, value);
+	template<typename... Types>
+	auto &ExpandTestPath(Types... value) noexcept {
+		return StringPacket(TranslationCommand::EXPAND_TEST_PATH,
+				    value...);
 	}
 
 	class ProcessorContext {
@@ -314,8 +340,10 @@ public:
 		MountNamespaceContext(Response &_response) noexcept
 			:response(_response) {}
 
-		auto PivotRoot(std::string_view path) noexcept {
-			response.Packet(TranslationCommand::PIVOT_ROOT, path);
+		template<typename... Types>
+		auto PivotRoot(Types... path) noexcept {
+			response.StringPacket(TranslationCommand::PIVOT_ROOT,
+					      path...);
 			return *this;
 		}
 
@@ -329,8 +357,10 @@ public:
 			return *this;
 		}
 
-		auto MountHome(std::string_view mnt) noexcept {
-			response.Packet(TranslationCommand::MOUNT_HOME, mnt);
+		template<typename... Types>
+		auto MountHome(Types... mnt) noexcept {
+			response.StringPacket(TranslationCommand::MOUNT_HOME,
+					      mnt...);
 			return *this;
 		}
 	};
@@ -345,41 +375,50 @@ public:
 			:response(_response) {}
 
 		auto SetEnv(std::string_view s) noexcept {
-			response.Packet(TranslationCommand::SETENV, s);
+			response.StringPacket(TranslationCommand::SETENV, s);
 			return *this;
 		}
 
+		template<typename... Types>
 		auto SetEnv(std::string_view name,
-			    std::string_view value) noexcept {
-			response.MultiPacket(TranslationCommand::SETENV,
-					     name, "=", value);
+			    Types... value) noexcept {
+			response.StringPacket(TranslationCommand::SETENV,
+					      name, "=", value...);
 			return *this;
 		}
 
 		auto ExpandSetEnv(std::string_view s) noexcept {
-			response.Packet(TranslationCommand::EXPAND_SETENV, s);
+			response.StringPacket(TranslationCommand::EXPAND_SETENV,
+					      s);
 			return *this;
 		}
 
+		template<typename... Types>
 		auto ExpandSetEnv(std::string_view name,
-				  std::string_view value) noexcept {
-			response.MultiPacket(TranslationCommand::EXPAND_SETENV,
-					     name, "=", value);
+				  Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_SETENV,
+					      name, "=", value...);
 			return *this;
 		}
 
-		auto Append(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::APPEND, value);
+		template<typename... Types>
+		auto Append(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::APPEND,
+					      value...);
 			return *this;
 		}
 
-		auto ExpandAppend(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::EXPAND_APPEND, value);
+		template<typename... Types>
+		auto ExpandAppend(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_APPEND,
+					      value...);
 			return *this;
 		}
 
-		auto Home(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::HOME, value);
+		template<typename... Types>
+		auto Home(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::HOME,
+					      value...);
 			return *this;
 		}
 
@@ -422,44 +461,59 @@ public:
 			return *this;
 		}
 
-		auto ExpandPath(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::EXPAND_PATH, payload);
+		template<typename... Types>
+		auto ExpandPath(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_PATH,
+					      value...);
 			return *this;
 		}
 
-		auto Action(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::ACTION, payload);
+		template<typename... Types>
+		auto Action(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::ACTION,
+					      value...);
 			return *this;
 		}
 
-		auto Uri(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::URI, payload);
+		template<typename... Types>
+		auto Uri(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::URI,
+					      value...);
 			return *this;
 		}
 
-		auto ScriptName(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::SCRIPT_NAME, payload);
+		template<typename... Types>
+		auto ScriptName(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::SCRIPT_NAME,
+					      value...);
 			return *this;
 		}
 
-		auto ExpandScriptName(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::EXPAND_SCRIPT_NAME,
-					payload);
+		template<typename... Types>
+		auto ExpandScriptName(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_SCRIPT_NAME,
+					      value...);
 			return *this;
 		}
 
-		auto PathInfo(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::PATH_INFO, payload);
+		template<typename... Types>
+		auto PathInfo(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::PATH_INFO,
+					      value...);
 			return *this;
 		}
 
-		auto ExpandPathInfo(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::EXPAND_PATH_INFO, payload);
+		template<typename... Types>
+		auto ExpandPathInfo(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_PATH_INFO,
+					      value...);
 			return *this;
 		}
 
-		auto QueryString(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::QUERY_STRING, payload);
+		template<typename... Types>
+		auto QueryString(Types... value) noexcept {
+			response.Packet(TranslationCommand::QUERY_STRING,
+					value...);
 			return *this;
 		}
 	};
@@ -469,14 +523,15 @@ public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 
 		auto Parameter(std::string_view s) noexcept {
-			response.Packet(TranslationCommand::PAIR, s);
+			response.StringPacket(TranslationCommand::PAIR, s);
 			return *this;
 		}
 
+		template<typename... Types>
 		auto Parameter(std::string_view name,
-			       std::string_view value) noexcept {
-			response.MultiPacket(TranslationCommand::PAIR,
-					     name, "=", value);
+			       Types... value) noexcept {
+			response.StringPacket(TranslationCommand::PAIR,
+					      name, "=", value...);
 			return *this;
 		}
 
@@ -485,16 +540,18 @@ public:
 			return *this;
 		}
 
+		template<typename... Types>
 		auto ExpandParameter(std::string_view name,
-				     std::string_view value) noexcept {
+				     Types... value) noexcept {
 			response.MultiPacket(TranslationCommand::EXPAND_PAIR,
-					     name, "=", value);
+					     name, "=", value...);
 			return *this;
 		}
 	};
 
-	WasChildContext Was(std::string_view path) noexcept {
-		Packet(TranslationCommand::WAS, path);
+	template<typename... Types>
+	WasChildContext Was(Types... path) noexcept {
+		Packet(TranslationCommand::WAS, path...);
 		return WasChildContext(*this);
 	}
 
@@ -507,10 +564,11 @@ public:
 			return *this;
 		}
 
+		template<typename... Types>
 		auto Parameter(std::string_view name,
-			       std::string_view value) noexcept {
+			       Types... value) noexcept {
 			response.MultiPacket(TranslationCommand::PAIR,
-					     name, "=", value);
+					     name, "=", value...);
 			return *this;
 		}
 
@@ -519,19 +577,24 @@ public:
 			return *this;
 		}
 
-		auto DocumentRoot(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::DOCUMENT_ROOT, value);
+		template<typename... Types>
+		auto DocumentRoot(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::DOCUMENT_ROOT,
+					      value...);
 			return *this;
 		}
 
-		auto ExpandDocumentRoot(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::EXPAND_DOCUMENT_ROOT, value);
+		template<typename... Types>
+		auto ExpandDocumentRoot(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
+					      value...);
 			return *this;
 		}
 	};
 
-	FastCgiChildContext FastCGI(std::string_view path) noexcept {
-		Packet(TranslationCommand::FASTCGI, path);
+	template<typename... Types>
+	FastCgiChildContext FastCGI(Types... path) noexcept {
+		Packet(TranslationCommand::FASTCGI, path...);
 		return FastCgiChildContext(*this);
 	}
 
@@ -539,18 +602,24 @@ public:
 	public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 
-		auto Interpreter(std::string_view payload) noexcept {
-			response.Packet(TranslationCommand::INTERPRETER, payload);
+		template<typename... Types>
+		auto Interpreter(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::INTERPRETER,
+					      value...);
 			return *this;
 		}
 
-		auto DocumentRoot(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::DOCUMENT_ROOT, value);
+		template<typename... Types>
+		auto DocumentRoot(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::DOCUMENT_ROOT,
+					      value...);
 			return *this;
 		}
 
-		auto ExpandDocumentRoot(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::EXPAND_DOCUMENT_ROOT, value);
+		template<typename... Types>
+		auto ExpandDocumentRoot(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
+					      value...);
 			return *this;
 		}
 	};
@@ -568,44 +637,55 @@ public:
 		FileContext(Response &_response) noexcept
 			:response(_response) {}
 
-		auto ExpandPath(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::EXPAND_PATH, value);
+		template<typename... Types>
+		auto ExpandPath(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_PATH,
+					      value...);
 			return *this;
 		}
 
-		auto ContentType(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::CONTENT_TYPE, value);
+		template<typename... Types>
+		auto ContentType(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::CONTENT_TYPE,
+					      value...);
 			return *this;
 		}
 
+		template<typename... Types>
 		auto Deflated(std::string_view path) noexcept {
-			response.Packet(TranslationCommand::DEFLATED, path);
+			response.StringPacket(TranslationCommand::DEFLATED, path);
 			return *this;
 		}
 
+		template<typename... Types>
 		auto Gzipped(std::string_view path) noexcept {
-			response.Packet(TranslationCommand::GZIPPED, path);
+			response.StringPacket(TranslationCommand::GZIPPED, path);
 			return *this;
 		}
 
-		auto DocumentRoot(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::DOCUMENT_ROOT, value);
+		template<typename... Types>
+		auto DocumentRoot(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::DOCUMENT_ROOT,
+					      value...);
 			return *this;
 		}
 
-		auto ExpandDocumentRoot(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::EXPAND_DOCUMENT_ROOT, value);
+		template<typename... Types>
+		auto ExpandDocumentRoot(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
+					      value...);
 			return *this;
 		}
 
 		ChildContext Delegate(std::string_view helper) noexcept {
-			response.Packet(TranslationCommand::DELEGATE, helper);
+			response.StringPacket(TranslationCommand::DELEGATE, helper);
 			return ChildContext(response);
 		}
 	};
 
-	auto Path(std::string_view path) noexcept {
-		Packet(TranslationCommand::PATH, path);
+	template<typename... Types>
+	auto Path(Types... path) noexcept {
+		StringPacket(TranslationCommand::PATH, path...);
 		return FileContext(*this);
 	}
 
@@ -617,8 +697,10 @@ public:
 		HttpContext(Response &_response) noexcept
 			:response(_response) {}
 
-		auto ExpandPath(std::string_view value) noexcept {
-			response.Packet(TranslationCommand::EXPAND_PATH, value);
+		template<typename... Types>
+		auto ExpandPath(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_PATH,
+					      value...);
 			return *this;
 		}
 
@@ -667,12 +749,27 @@ private:
 	}
 
 	template<typename P, typename... Params>
-	static void *WriteParams(void *dest, P first, Params... params) noexcept {
+	static void *WriteParams(void *dest, P first, Params... value) noexcept {
 		dest = WriteParam(dest, first);
-		return WriteParams(dest, params...);
+		return WriteParams(dest, value...);
 	}
 
 	static void *WriteParams(void *dest) noexcept {
+		return dest;
+	}
+
+	static void *WriteStringParam(void *dest, std::string_view src) noexcept {
+		return mempcpy(dest, src.data(), src.size());
+	}
+
+	template<typename P, typename... Params>
+	static void *WriteStringParams(void *dest, P first,
+				       Params... value) noexcept {
+		dest = WriteStringParam(dest, first);
+		return WriteStringParams(dest, value...);
+	}
+
+	static void *WriteStringParams(void *dest) noexcept {
 		return dest;
 	}
 };
