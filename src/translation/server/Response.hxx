@@ -360,7 +360,7 @@ public:
 			return *this;
 		}
 
-		auto MountTmpTmpfs(std::string_view payload=nullptr) noexcept {
+		auto MountTmpTmpfs(std::string_view payload={}) noexcept {
 			response.StringPacket(TranslationCommand::MOUNT_TMP_TMPFS,
 					      payload);
 			return *this;
