@@ -407,8 +407,8 @@ public:
 		template<typename... Types>
 		auto StderrPathJailed(Types... value) noexcept {
 			static_assert(sizeof...(value) > 0);
-			StderrPath(value...);
-			response.Packet(TranslationCommand::STDERR_PATH_JAILED);
+			response.StringPacket(TranslationCommand::STDERR_PATH_JAILED,
+					      value...);
 			return *this;
 		}
 
