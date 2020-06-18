@@ -307,6 +307,40 @@ public:
 		ChildContext(Response &_response) noexcept
 			:response(_response) {}
 
+		auto SetEnv(std::string_view s) noexcept {
+			response.Packet(TranslationCommand::SETENV, s);
+			return *this;
+		}
+
+		auto SetEnv(std::string_view name,
+			    std::string_view value) noexcept {
+			response.MultiPacket(TranslationCommand::SETENV,
+					     name, "=", value);
+			return *this;
+		}
+
+		auto ExpandSetEnv(std::string_view s) noexcept {
+			response.Packet(TranslationCommand::EXPAND_SETENV, s);
+			return *this;
+		}
+
+		auto ExpandSetEnv(std::string_view name,
+				  std::string_view value) noexcept {
+			response.MultiPacket(TranslationCommand::EXPAND_SETENV,
+					     name, "=", value);
+			return *this;
+		}
+
+		auto Append(std::string_view value) noexcept {
+			response.Packet(TranslationCommand::APPEND, value);
+			return *this;
+		}
+
+		auto ExpandAppend(std::string_view value) noexcept {
+			response.Packet(TranslationCommand::EXPAND_APPEND, value);
+			return *this;
+		}
+
 		auto Home(std::string_view value) noexcept {
 			response.Packet(TranslationCommand::HOME, value);
 			return *this;
@@ -341,6 +375,26 @@ public:
 	public:
 		using ChildContext::ChildContext;
 
+		auto AutoBase() noexcept {
+			response.Packet(TranslationCommand::AUTO_BASE);
+			return *this;
+		}
+
+		auto RequestUriVerbatim() noexcept {
+			response.Packet(TranslationCommand::REQUEST_URI_VERBATIM);
+			return *this;
+		}
+
+		auto ExpandPath(std::string_view payload) noexcept {
+			response.Packet(TranslationCommand::EXPAND_PATH, payload);
+			return *this;
+		}
+
+		auto Action(std::string_view payload) noexcept {
+			response.Packet(TranslationCommand::ACTION, payload);
+			return *this;
+		}
+
 		auto Uri(std::string_view payload) noexcept {
 			response.Packet(TranslationCommand::URI, payload);
 			return *this;
@@ -351,8 +405,19 @@ public:
 			return *this;
 		}
 
+		auto ExpandScriptName(std::string_view payload) noexcept {
+			response.Packet(TranslationCommand::EXPAND_SCRIPT_NAME,
+					payload);
+			return *this;
+		}
+
 		auto PathInfo(std::string_view payload) noexcept {
 			response.Packet(TranslationCommand::PATH_INFO, payload);
+			return *this;
+		}
+
+		auto ExpandPathInfo(std::string_view payload) noexcept {
+			response.Packet(TranslationCommand::EXPAND_PATH_INFO, payload);
 			return *this;
 		}
 
@@ -370,6 +435,25 @@ public:
 			response.Packet(TranslationCommand::PAIR, s);
 			return *this;
 		}
+
+		auto Parameter(std::string_view name,
+			       std::string_view value) noexcept {
+			response.MultiPacket(TranslationCommand::PAIR,
+					     name, "=", value);
+			return *this;
+		}
+
+		auto ExpandParameter(std::string_view s) noexcept {
+			response.Packet(TranslationCommand::EXPAND_PAIR, s);
+			return *this;
+		}
+
+		auto ExpandParameter(std::string_view name,
+				     std::string_view value) noexcept {
+			response.MultiPacket(TranslationCommand::EXPAND_PAIR,
+					     name, "=", value);
+			return *this;
+		}
 	};
 
 	WasChildContext Was(std::string_view path) noexcept {
@@ -385,6 +469,28 @@ public:
 			response.Packet(TranslationCommand::PAIR, s);
 			return *this;
 		}
+
+		auto Parameter(std::string_view name,
+			       std::string_view value) noexcept {
+			response.MultiPacket(TranslationCommand::PAIR,
+					     name, "=", value);
+			return *this;
+		}
+
+		auto ExpandParameter(std::string_view s) noexcept {
+			response.Packet(TranslationCommand::EXPAND_PAIR, s);
+			return *this;
+		}
+
+		auto DocumentRoot(std::string_view value) noexcept {
+			response.Packet(TranslationCommand::DOCUMENT_ROOT, value);
+			return *this;
+		}
+
+		auto ExpandDocumentRoot(std::string_view value) noexcept {
+			response.Packet(TranslationCommand::EXPAND_DOCUMENT_ROOT, value);
+			return *this;
+		}
 	};
 
 	FastCgiChildContext FastCGI(std::string_view path) noexcept {
@@ -395,6 +501,21 @@ public:
 	class CgiChildContext : public CgiAlikeChildContext {
 	public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
+
+		auto Interpreter(std::string_view payload) noexcept {
+			response.Packet(TranslationCommand::INTERPRETER, payload);
+			return *this;
+		}
+
+		auto DocumentRoot(std::string_view value) noexcept {
+			response.Packet(TranslationCommand::DOCUMENT_ROOT, value);
+			return *this;
+		}
+
+		auto ExpandDocumentRoot(std::string_view value) noexcept {
+			response.Packet(TranslationCommand::EXPAND_DOCUMENT_ROOT, value);
+			return *this;
+		}
 	};
 
 	CgiChildContext CGI(std::string_view path) noexcept {
@@ -432,6 +553,11 @@ public:
 
 		auto DocumentRoot(std::string_view value) noexcept {
 			response.Packet(TranslationCommand::DOCUMENT_ROOT, value);
+			return *this;
+		}
+
+		auto ExpandDocumentRoot(std::string_view value) noexcept {
+			response.Packet(TranslationCommand::EXPAND_DOCUMENT_ROOT, value);
 			return *this;
 		}
 
