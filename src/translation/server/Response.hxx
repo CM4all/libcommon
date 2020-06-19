@@ -326,9 +326,9 @@ public:
 		return *this;
 	}
 
-	template<typename P>
-	auto &ReadFile(P payload) noexcept {
-		return Packet(TranslationCommand::READ_FILE, payload);
+	template<typename... Types>
+	auto &ReadFile(Types... path) noexcept {
+		return StringPacket(TranslationCommand::READ_FILE, path...);
 	}
 
 	class ProcessorContext {
