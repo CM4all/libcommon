@@ -264,6 +264,10 @@ public:
 		return Packet(TranslationCommand::INVERSE_REGEX_UNESCAPE);
 	}
 
+	auto &Defer() noexcept {
+		return Packet(TranslationCommand::DEFER);
+	}
+
 	auto &Status(http_status_t _status) noexcept {
 		const uint16_t status = uint16_t(_status);
 		return PacketT(TranslationCommand::STATUS, status);
