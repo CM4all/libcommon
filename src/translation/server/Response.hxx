@@ -247,6 +247,14 @@ public:
 		return StringPacket(TranslationCommand::REGEX, value...);
 	}
 
+	auto &RegexOnHostUri() noexcept {
+		return Packet(TranslationCommand::REGEX_ON_HOST_URI);
+	}
+
+	auto &RegexOnUserUri() noexcept {
+		return Packet(TranslationCommand::REGEX_ON_USER_URI);
+	}
+
 	template<typename... Types>
 	auto &InverseRegex(Types... value) noexcept {
 		return StringPacket(TranslationCommand::INVERSE_REGEX, value...);
@@ -319,6 +327,67 @@ public:
 	auto &ExpandTestPath(Types... value) noexcept {
 		return StringPacket(TranslationCommand::EXPAND_TEST_PATH,
 				    value...);
+	}
+
+	template<typename P>
+	auto &Session(P payload) noexcept {
+		return Packet(TranslationCommand::SESSION, payload);
+	}
+
+	auto &Pool(std::string_view name) noexcept {
+		return Packet(TranslationCommand::POOL, name);
+	}
+
+	template<typename P>
+	auto &InternalRedirect(P payload) noexcept {
+		return Packet(TranslationCommand::INTERNAL_REDIRECT, payload);
+	}
+
+	template<typename P>
+	auto &Check(P payload) noexcept {
+		return Packet(TranslationCommand::CHECK, payload);
+	}
+
+	template<typename P>
+	auto &Auth(P payload) noexcept {
+		return Packet(TranslationCommand::AUTH, payload);
+	}
+
+	template<typename P>
+	auto &WantFullUri(P payload) noexcept {
+		return Packet(TranslationCommand::WANT_FULL_URI, payload);
+	}
+
+	auto &User(std::string_view name) noexcept {
+		return Packet(TranslationCommand::USER, name);
+	}
+
+	auto &SessionSite(std::string_view value) noexcept {
+		return Packet(TranslationCommand::SESSION_SITE, value);
+	}
+
+	auto &Language(std::string_view value) noexcept {
+		return Packet(TranslationCommand::LANGUAGE, value);
+	}
+
+	auto &Realm(std::string_view value) noexcept {
+		return Packet(TranslationCommand::REALM, value);
+	}
+
+	auto &WwwAuthenticate(std::string_view value) noexcept {
+		return Packet(TranslationCommand::WWW_AUTHENTICATE, value);
+	}
+
+	auto &CookieDomain(std::string_view value) noexcept {
+		return Packet(TranslationCommand::COOKIE_DOMAIN, value);
+	}
+
+	auto &CookieHost(std::string_view value) noexcept {
+		return Packet(TranslationCommand::COOKIE_HOST, value);
+	}
+
+	auto &CookiePath(std::string_view value) noexcept {
+		return Packet(TranslationCommand::COOKIE_PATH, value);
 	}
 
 	/**
