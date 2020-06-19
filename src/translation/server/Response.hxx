@@ -182,6 +182,10 @@ public:
 	Response &Packet(TranslationCommand cmd,
 			 ConstBuffer<void> payload) noexcept;
 
+	Response &Packet(TranslationCommand cmd, std::nullptr_t n) noexcept {
+		return Packet(cmd, ConstBuffer<void>{n});
+	}
+
 	auto &Packet(TranslationCommand cmd,
 		     std::string_view payload) noexcept {
 		return Packet(cmd, ConstBuffer<void>{payload.data(), payload.size()});
