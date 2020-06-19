@@ -380,6 +380,11 @@ public:
 			return *this;
 		}
 
+		auto MountRootTmpfs() noexcept {
+			response.Packet(TranslationCommand::MOUNT_ROOT_TMPFS);
+			return *this;
+		}
+
 		auto MountProc() noexcept {
 			response.Packet(TranslationCommand::MOUNT_PROC);
 			return *this;
@@ -392,9 +397,64 @@ public:
 		}
 
 		template<typename... Types>
+		auto MountTmpfs(Types... path) noexcept {
+			response.StringPacket(TranslationCommand::MOUNT_TMPFS,
+					      path...);
+			return *this;
+		}
+
+		template<typename... Types>
 		auto MountHome(Types... mnt) noexcept {
 			response.StringPacket(TranslationCommand::MOUNT_HOME,
 					      mnt...);
+			return *this;
+		}
+
+		auto BindMount(std::string_view source,
+			       std::string_view target) noexcept {
+			response.StringPacket(TranslationCommand::BIND_MOUNT,
+					      source, std::string_view{"", 1},
+					      target);
+			return *this;
+		}
+
+		auto ExpandBindMount(std::string_view source,
+				     std::string_view target) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_BIND_MOUNT,
+					      source, std::string_view{"", 1},
+					      target);
+			return *this;
+		}
+
+		auto BindMountRw(std::string_view source,
+				 std::string_view target) noexcept {
+			response.StringPacket(TranslationCommand::BIND_MOUNT_RW,
+					      source, std::string_view{"", 1},
+					      target);
+			return *this;
+		}
+
+		auto ExpandBindMountRw(std::string_view source,
+				       std::string_view target) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_BIND_MOUNT_RW,
+					      source, std::string_view{"", 1},
+					      target);
+			return *this;
+		}
+
+		auto BindMountExec(std::string_view source,
+				 std::string_view target) noexcept {
+			response.StringPacket(TranslationCommand::BIND_MOUNT_EXEC,
+					      source, std::string_view{"", 1},
+					      target);
+			return *this;
+		}
+
+		auto ExpandBindMountExec(std::string_view source,
+					 std::string_view target) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_BIND_MOUNT_EXEC,
+					      source, std::string_view{"", 1},
+					      target);
 			return *this;
 		}
 	};
@@ -427,6 +487,16 @@ public:
 
 		auto Tag(std::string_view value) noexcept {
 			response.StringPacket(TranslationCommand::CHILD_TAG, value);
+			return *this;
+		}
+
+		auto StderrNull() noexcept {
+			response.Packet(TranslationCommand::STDERR_NULL);
+			return *this;
+		}
+
+		auto StderrPond() noexcept {
+			response.Packet(TranslationCommand::STDERR_POND);
 			return *this;
 		}
 
@@ -536,6 +606,13 @@ public:
 			return *this;
 		}
 
+		auto NetworkNamespace(std::string_view name) noexcept {
+			response.Packet(TranslationCommand::NETWORK_NAMESPACE);
+			response.StringPacket(TranslationCommand::NETWORK_NAMESPACE_NAME,
+					      name);
+			return *this;
+		}
+
 		auto IpcNamespace() noexcept {
 			response.Packet(TranslationCommand::IPC_NAMESPACE);
 			return *this;
@@ -549,6 +626,18 @@ public:
 
 		MountNamespaceContext MountNamespace() noexcept {
 			return MountNamespaceContext(response);
+		}
+
+		auto UidGid(uint32_t uid, uint32_t gid) noexcept {
+			response.MultiPacket(TranslationCommand::UID_GID,
+					     ConstBuffer<void>(&uid, sizeof(uid)),
+					     ConstBuffer<void>(&gid, sizeof(gid)));
+			return *this;
+		}
+
+		auto Umask(uint16_t mask) noexcept {
+			response.PacketT(TranslationCommand::UMASK, mask);
+			return *this;
 		}
 
 		auto ForbidUserNamespace() noexcept {
