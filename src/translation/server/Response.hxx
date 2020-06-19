@@ -399,6 +399,23 @@ public:
 		}
 	};
 
+	struct CgroupContext {
+		Response &response;
+
+		auto Set(std::string_view payload) noexcept {
+			response.StringPacket(TranslationCommand::CGROUP_SET,
+					      payload);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto Set(std::string_view name, Types... value) noexcept {
+			response.StringPacket(TranslationCommand::CGROUP_SET,
+					      name, "=", value...);
+			return *this;
+		}
+	};
+
 	class ChildContext {
 	protected:
 		Response &response;
@@ -476,6 +493,13 @@ public:
 			response.StringPacket(TranslationCommand::EXPAND_APPEND,
 					      value...);
 			return *this;
+		}
+
+		template<typename... Types>
+		CgroupContext Cgroup(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::CGROUP,
+					      value...);
+			return {response};
 		}
 
 		template<typename... Types>
