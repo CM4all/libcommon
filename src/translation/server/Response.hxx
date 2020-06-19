@@ -327,7 +327,7 @@ public:
 	 * Path().ContentType().
 	 */
 	template<typename... Types>
-	auto ContentType(Types... value) noexcept {
+	auto &ContentType(Types... value) noexcept {
 		return StringPacket(TranslationCommand::CONTENT_TYPE,
 				    value...);
 	}
