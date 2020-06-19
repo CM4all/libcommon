@@ -276,6 +276,10 @@ public:
 		return Packet(TranslationCommand::DEFER);
 	}
 
+	auto &Previous() noexcept {
+		return Packet(TranslationCommand::PREVIOUS);
+	}
+
 	auto &Status(http_status_t _status) noexcept {
 		const uint16_t status = uint16_t(_status);
 		return PacketT(TranslationCommand::STATUS, status);
@@ -284,6 +288,11 @@ public:
 	template<typename... Types>
 	auto &Site(Types... value) noexcept {
 		return StringPacket(TranslationCommand::SITE, value...);
+	}
+
+	template<typename... Types>
+	auto &ExpandSite(Types... value) noexcept {
+		return StringPacket(TranslationCommand::EXPAND_SITE, value...);
 	}
 
 	template<typename... Types>
@@ -297,6 +306,11 @@ public:
 
 		auto CopyQueryString() noexcept {
 			response.Packet(TranslationCommand::REDIRECT_QUERY_STRING);
+			return *this;
+		}
+
+		auto CopyFullUri() noexcept {
+			response.Packet(TranslationCommand::REDIRECT_FULL_URI);
 			return *this;
 		}
 	};
@@ -318,6 +332,41 @@ public:
 		return StringPacket(TranslationCommand::BOUNCE, value...);
 	}
 
+	auto &Scheme(std::string_view value) noexcept {
+		return StringPacket(TranslationCommand::SCHEME, value);
+	}
+
+	template<typename... Types>
+	auto &Host(Types... value) noexcept {
+		return StringPacket(TranslationCommand::HOST, value...);
+	}
+
+	template<typename... Types>
+	auto &LocalUri(Types... value) noexcept {
+		return StringPacket(TranslationCommand::LOCAL_URI, value...);
+	}
+
+	template<typename... Types>
+	auto &Untrusted(Types... value) noexcept {
+		return StringPacket(TranslationCommand::UNTRUSTED, value...);
+	}
+
+	template<typename... Types>
+	auto &UntrustedPrefix(Types... value) noexcept {
+		return StringPacket(TranslationCommand::UNTRUSTED_PREFIX, value...);
+	}
+
+	template<typename... Types>
+	auto &UntrustedSiteSuffix(Types... value) noexcept {
+		return StringPacket(TranslationCommand::UNTRUSTED_SITE_SUFFIX, value...);
+	}
+
+	template<typename... Types>
+	auto &UntrustedRawSiteSuffix(Types... value) noexcept {
+		return StringPacket(TranslationCommand::UNTRUSTED_RAW_SITE_SUFFIX,
+				    value...);
+	}
+
 	template<typename... Types>
 	auto &TestPath(Types... value) noexcept {
 		return StringPacket(TranslationCommand::TEST_PATH, value...);
@@ -327,6 +376,11 @@ public:
 	auto &ExpandTestPath(Types... value) noexcept {
 		return StringPacket(TranslationCommand::EXPAND_TEST_PATH,
 				    value...);
+	}
+
+	template<typename P>
+	auto &FileNotFound(P payload) noexcept {
+		return Packet(TranslationCommand::FILE_NOT_FOUND, payload);
 	}
 
 	template<typename P>
@@ -351,6 +405,29 @@ public:
 	template<typename P>
 	auto &Auth(P payload) noexcept {
 		return Packet(TranslationCommand::AUTH, payload);
+	}
+
+	template<typename... Types>
+	auto &AuthFile(Types... value) noexcept {
+		return StringPacket(TranslationCommand::AUTH_FILE,
+				    value...);
+	}
+
+	template<typename... Types>
+	auto &ExpandAuthFile(Types... value) noexcept {
+		return StringPacket(TranslationCommand::EXPAND_AUTH_FILE,
+				    value...);
+	}
+
+	template<typename P>
+	auto &AppendAuth(P payload) noexcept {
+		return Packet(TranslationCommand::APPEND_AUTH, payload);
+	}
+
+	template<typename... Types>
+	auto &ExpandAppendAuth(Types... value) noexcept {
+		return StringPacket(TranslationCommand::EXPAND_APPEND_AUTH,
+				    value...);
 	}
 
 	template<typename P>
@@ -413,6 +490,32 @@ public:
 	template<typename... Types>
 	auto &ReadFile(Types... path) noexcept {
 		return StringPacket(TranslationCommand::READ_FILE, path...);
+	}
+
+	template<typename... Types>
+	auto &ExpandReadFile(Types... path) noexcept {
+		return StringPacket(TranslationCommand::EXPAND_READ_FILE, path...);
+	}
+
+	struct FilterContext {
+		Response &response;
+
+		auto Filter4XX() noexcept {
+			response.Packet(TranslationCommand::FILTER_4XX);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto CacheTag(Types... tag) noexcept {
+			response.StringPacket(TranslationCommand::CACHE_TAG,
+					      tag...);
+			return *this;
+		}
+	};
+
+	FilterContext Filter() noexcept {
+		Packet(TranslationCommand::FILTER);
+		return {*this};
 	}
 
 	class ProcessorContext {
@@ -649,6 +752,13 @@ public:
 		}
 
 		template<typename... Types>
+		auto ExpandHome(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_HOME,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
 		auto Rlimits(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::RLIMITS,
 					      value...);
@@ -662,6 +772,13 @@ public:
 
 		auto PidNamespace() noexcept {
 			response.Packet(TranslationCommand::PID_NAMESPACE);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto PidNamespace(Types... name) noexcept {
+			response.Packet(TranslationCommand::PID_NAMESPACE_NAME,
+					name...);
 			return *this;
 		}
 
@@ -721,11 +838,22 @@ public:
 			return *this;
 		}
 
+		auto ForbidBind() noexcept {
+			response.Packet(TranslationCommand::FORBID_BIND);
+			return *this;
+		}
+
 		auto NoNewPrivs() noexcept {
 			response.Packet(TranslationCommand::NO_NEW_PRIVS);
 			return *this;
 		}
 	};
+
+	template<typename... Types>
+	auto Pipe(Types... path) noexcept {
+		StringPacket(TranslationCommand::PIPE, path...);
+		return ChildContext(*this);
+	}
 
 	class CgiAlikeChildContext : public ChildContext {
 	public:
@@ -758,6 +886,13 @@ public:
 		template<typename... Types>
 		auto Uri(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::URI,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto ExpandUri(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_URI,
 					      value...);
 			return *this;
 		}
@@ -912,6 +1047,48 @@ public:
 		return CgiChildContext(*this);
 	}
 
+	class LhttpChildContext : public ChildContext {
+	public:
+		using ChildContext::ChildContext;
+
+		template<typename... Types>
+		auto Uri(Types... uri) noexcept {
+			response.StringPacket(TranslationCommand::LHTTP_URI,
+					      uri...);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto ExpandUri(Types... uri) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_LHTTP_URI,
+					      uri...);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto Host(Types... name) noexcept {
+			response.StringPacket(TranslationCommand::LHTTP_HOST,
+					      name...);
+			return *this;
+		}
+
+		auto NonBlocking() noexcept {
+			response.Packet(TranslationCommand::NON_BLOCKING);
+			return *this;
+		}
+
+		auto Concurrency(uint16_t value) noexcept {
+			response.PacketT(TranslationCommand::CONCURRENCY,
+					 value);
+			return *this;
+		}
+	};
+
+	auto Lhttp(std::string_view path) noexcept {
+		StringPacket(TranslationCommand::LHTTP_PATH, path);
+		return LhttpChildContext(*this);
+	}
+
 	class FileContext {
 		Response &response;
 
@@ -1020,12 +1197,74 @@ public:
 				Address(i);
 			return *this;
 		}
+
+		auto Http2() noexcept {
+			response.Packet(TranslationCommand::HTTP2);
+			return *this;
+		}
+
+		auto Sticky() noexcept {
+			response.Packet(TranslationCommand::STICKY);
+			return *this;
+		}
 	};
 
 	template<typename... Types>
 	HttpContext Http(Types... url) noexcept {
 		StringPacket(TranslationCommand::HTTP, url...);
 		return HttpContext(*this);
+	}
+
+	auto &View(std::string_view name) noexcept {
+		return Packet(TranslationCommand::VIEW, name);
+	}
+
+	auto &HttpsOnly() noexcept {
+		return Packet(TranslationCommand::HTTPS_ONLY);
+	}
+
+	auto &HttpsOnly(uint16_t port) noexcept {
+		return PacketT(TranslationCommand::HTTPS_ONLY, port);
+	}
+
+	auto &Uncached() noexcept {
+		return Packet(TranslationCommand::UNCACHED);
+	}
+
+	auto &Stateful() noexcept {
+		return Packet(TranslationCommand::STATEFUL);
+	}
+
+	auto &DiscardSession() noexcept {
+		return Packet(TranslationCommand::DISCARD_SESSION);
+	}
+
+	auto &SecureCookie() noexcept {
+		return Packet(TranslationCommand::SECURE_COOKIE);
+	}
+
+	auto &RequireCsrfToken() noexcept {
+		return Packet(TranslationCommand::REQUIRE_CSRF_TOKEN);
+	}
+
+	auto &SendCsrfToken() noexcept {
+		return Packet(TranslationCommand::SEND_CSRF_TOKEN);
+	}
+
+	auto &RealmFromAuthBase() noexcept {
+		return Packet(TranslationCommand::REALM_FROM_AUTH_BASE);
+	}
+
+	auto &Transparent() noexcept {
+		return Packet(TranslationCommand::TRANSPARENT);
+	}
+
+	auto &WidgetInfo() noexcept {
+		return Packet(TranslationCommand::WIDGET_INFO);
+	}
+
+	auto &AnchorAbsolute() noexcept {
+		return Packet(TranslationCommand::ANCHOR_ABSOLUTE);
 	}
 
 	WritableBuffer<uint8_t> Finish() noexcept;
