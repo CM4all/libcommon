@@ -322,6 +322,11 @@ public:
 		return *this;
 	}
 
+	template<typename P>
+	auto &ReadFile(P payload) noexcept {
+		return Packet(TranslationCommand::READ_FILE, payload);
+	}
+
 	class ProcessorContext {
 		Response &response;
 
