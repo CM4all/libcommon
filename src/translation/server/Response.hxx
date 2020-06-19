@@ -321,6 +321,17 @@ public:
 				    value...);
 	}
 
+	/**
+	 * Only in reply to TranslationCommand::CONTENT_TYPE_LOOKUP.
+	 * For content types of regular files, use
+	 * Path().ContentType().
+	 */
+	template<typename... Types>
+	auto ContentType(Types... value) noexcept {
+		return StringPacket(TranslationCommand::CONTENT_TYPE,
+				    value...);
+	}
+
 	template<typename P>
 	auto &ProbePathSuffixes(P payload,
 				std::initializer_list<std::string_view> suffixes) noexcept {
