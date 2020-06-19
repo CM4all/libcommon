@@ -750,6 +750,13 @@ public:
 			return *this;
 		}
 
+		template<typename P>
+		auto ContentTypeLookup(P payload) noexcept {
+			response.StringPacket(TranslationCommand::CONTENT_TYPE_LOOKUP,
+					      payload);
+			return *this;
+		}
+
 		template<typename... Types>
 		auto Deflated(std::string_view path) noexcept {
 			response.StringPacket(TranslationCommand::DEFLATED, path);
