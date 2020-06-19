@@ -313,7 +313,8 @@ public:
 				    value...);
 	}
 
-	auto &ProbePathSuffixes(ConstBuffer<void> payload,
+	template<typename P>
+	auto &ProbePathSuffixes(P payload,
 				std::initializer_list<std::string_view> suffixes) noexcept {
 		Packet(TranslationCommand::PROBE_PATH_SUFFIXES, payload);
 		for (auto i : suffixes)
@@ -623,7 +624,7 @@ public:
 
 	template<typename... Types>
 	WasChildContext Was(Types... path) noexcept {
-		Packet(TranslationCommand::WAS, path...);
+		StringPacket(TranslationCommand::WAS, path...);
 		return WasChildContext(*this);
 	}
 
@@ -697,8 +698,9 @@ public:
 		}
 	};
 
-	CgiChildContext CGI(std::string_view path) noexcept {
-		Packet(TranslationCommand::CGI, path);
+	template<typename... Types>
+	CgiChildContext CGI(Types... path) noexcept {
+		StringPacket(TranslationCommand::CGI, path...);
 		return CgiChildContext(*this);
 	}
 
@@ -805,8 +807,9 @@ public:
 		}
 	};
 
-	HttpContext Http(std::string_view url) noexcept {
-		Packet(TranslationCommand::HTTP, url);
+	template<typename... Types>
+	HttpContext Http(Types... url) noexcept {
+		StringPacket(TranslationCommand::HTTP, url...);
 		return HttpContext(*this);
 	}
 
