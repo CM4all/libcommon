@@ -37,6 +37,7 @@
 #ifndef FNV_HASH_HXX
 #define FNV_HASH_HXX
 
+#include "util/ConstBuffer.hxx"
 #include "Compiler.h"
 
 #include <stddef.h>
@@ -83,6 +84,22 @@ struct FNV1aAlgorithm {
 
 		return hash;
 	}
+
+	gcc_pure gcc_hot
+	static constexpr value_type BinaryHash(ConstBuffer<uint8_t> s) noexcept {
+		using Algorithm = FNV1aAlgorithm<Traits>;
+
+		fast_type hash = Traits::OFFSET_BASIS;
+		for (auto b : s)
+			hash = Algorithm::Update(hash, b);
+
+		return hash;
+	}
+
+	gcc_pure gcc_hot
+	static constexpr value_type BinaryHash(ConstBuffer<void> s) noexcept {
+		return BinaryHash(ConstBuffer<uint8_t>::FromVoid(s));
+	}
 };
 
 gcc_pure gcc_hot
@@ -95,12 +112,30 @@ FNV1aHash32(const char *s) noexcept
 }
 
 gcc_pure gcc_hot
+constexpr uint32_t
+FNV1aHash32(ConstBuffer<void> s) noexcept
+{
+	using Traits = FNVTraits<uint32_t>;
+	using Algorithm = FNV1aAlgorithm<Traits>;
+	return Algorithm::BinaryHash(s);
+}
+
+gcc_pure gcc_hot
 inline uint64_t
 FNV1aHash64(const char *s) noexcept
 {
 	using Traits = FNVTraits<uint64_t>;
 	using Algorithm = FNV1aAlgorithm<Traits>;
 	return Algorithm::StringHash(s);
+}
+
+gcc_pure gcc_hot
+constexpr uint64_t
+FNV1aHash64(ConstBuffer<void> s) noexcept
+{
+	using Traits = FNVTraits<uint64_t>;
+	using Algorithm = FNV1aAlgorithm<Traits>;
+	return Algorithm::BinaryHash(s);
 }
 
 gcc_pure gcc_hot

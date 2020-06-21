@@ -48,6 +48,14 @@ TEST(FNVHash, u32)
 	EXPECT_EQ(FNV1aHash32("foobar"), 0xbf9cf968);
 }
 
+TEST(FNVHash, u32Binary)
+{
+	EXPECT_EQ(FNV1aHash32(ConstBuffer<void>{nullptr}), 2166136261u);
+
+	static constexpr uint8_t zero_hash_challenge1[] = {0xcc, 0x24, 0x31, 0xc4};
+	EXPECT_EQ(FNV1aHash32(ConstBuffer<uint8_t>{zero_hash_challenge1}.ToVoid()), 0u);
+}
+
 TEST(FNVHash, u64)
 {
 	EXPECT_EQ(FNV1aHash64(""), 14695981039346656037u);
@@ -59,4 +67,12 @@ TEST(FNVHash, u64)
 	/* from IETF draft-eastlake-fnv Appendix C: A Few Test Vectors */
 	EXPECT_EQ(FNV1aHash64("a"), 0xaf63dc4c8601ec8c);
 	EXPECT_EQ(FNV1aHash64("foobar"), 0x85944171f73967e8);
+}
+
+TEST(FNVHash, u64Binary)
+{
+	EXPECT_EQ(FNV1aHash64(ConstBuffer<void>{nullptr}), 14695981039346656037u);
+
+	static constexpr uint8_t zero_hash_challenge1[] = {0xd5, 0x6b, 0xb9, 0x53, 0x42, 0x87, 0x08, 0x36};
+	EXPECT_EQ(FNV1aHash64(ConstBuffer<uint8_t>{zero_hash_challenge1}.ToVoid()), 0u);
 }
