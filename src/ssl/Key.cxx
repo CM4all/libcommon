@@ -46,6 +46,23 @@
 UniqueEVP_PKEY
 GenerateRsaKey()
 {
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	const UniqueEVP_PKEY_CTX ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr));
+	if (!ctx)
+		throw SslError("EVP_PKEY_CTX_new_id() failed");
+
+	if (EVP_PKEY_keygen_init(ctx.get()) <= 0)
+		throw SslError("EVP_PKEY_keygen_init() failed");
+
+	if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx.get(), 4096) <= 0)
+		throw SslError("EVP_PKEY_CTX_set_rsa_keygen_bits() failed");
+
+	EVP_PKEY *pkey = nullptr;
+	if (EVP_PKEY_keygen(ctx.get(), &pkey) <= 0)
+		throw SslError("EVP_PKEY_keygen() failed");
+
+	return UniqueEVP_PKEY(pkey);
+#else
 	const UniqueBIGNUM e(BN_new());
 	if (!e)
 		throw SslError("BN_new() failed");
@@ -70,6 +87,7 @@ GenerateRsaKey()
 	rsa.release();
 
 	return key;
+#endif
 }
 
 UniqueEVP_PKEY
