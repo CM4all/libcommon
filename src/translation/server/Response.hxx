@@ -332,6 +332,11 @@ public:
 		return StringPacket(TranslationCommand::BOUNCE, value...);
 	}
 
+	template<typename... Types>
+	auto &Message(Types... value) noexcept {
+		return StringPacket(TranslationCommand::MESSAGE, value...);
+	}
+
 	auto &Scheme(std::string_view value) noexcept {
 		return StringPacket(TranslationCommand::SCHEME, value);
 	}
