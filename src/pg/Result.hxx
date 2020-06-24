@@ -222,6 +222,19 @@ public:
 	}
 
 	/**
+	 * Is at least one of the given values `NULL`?
+	 */
+	gcc_pure
+	bool IsAnyValueNull(unsigned row,
+			    std::initializer_list<unsigned> columns) const noexcept {
+		for (unsigned column : columns)
+			if (IsValueNull(row, column))
+				return true;
+
+		return false;
+	}
+
+	/**
 	 * Obtains the given value, but return nullptr instead of an
 	 * empty string if the value is NULL.
 	 */
@@ -307,6 +320,18 @@ public:
 			assert(column < (unsigned)::PQnfields(result));
 
 			return ::PQgetisnull(result, row, column);
+		}
+
+		/**
+		 * Is at least one of the given values `NULL`?
+		 */
+		gcc_pure
+		bool IsAnyValueNull(std::initializer_list<unsigned> columns) const noexcept {
+			for (unsigned column : columns)
+				if (IsValueNull(column))
+					return true;
+
+			return false;
 		}
 
 		gcc_pure
