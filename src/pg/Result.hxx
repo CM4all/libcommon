@@ -36,6 +36,10 @@
 
 #include "util/Compiler.h"
 
+#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
+#include <string_view>
+#endif
+
 #include <libpq-fe.h>
 
 #include <cassert>
@@ -201,6 +205,15 @@ public:
 		return ::PQgetlength(result, row, column);
 	}
 
+#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
+	gcc_pure
+	std::string_view GetValueView(unsigned row, unsigned column) const noexcept {
+		assert(IsDefined());
+
+		return {GetValue(row, column), GetValueLength(row, column)};
+	}
+#endif
+
 	gcc_pure
 	bool IsValueNull(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
@@ -279,6 +292,13 @@ public:
 
 			return ::PQgetlength(result, row, column);
 		}
+
+#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
+		gcc_pure
+		std::string_view GetValueView(unsigned column) const noexcept {
+			return {GetValue(column), GetValueLength(column)};
+		}
+#endif
 
 		gcc_pure
 		bool IsValueNull(unsigned column) const noexcept {
