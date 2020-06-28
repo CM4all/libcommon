@@ -52,6 +52,8 @@ class MatchInfo {
 public:
 	MatchInfo() = default;
 
+	static constexpr size_t npos = size_t(-1);
+
 	constexpr bool IsDefined() const noexcept {
 		return n >= 0;
 	}
@@ -71,5 +73,35 @@ public:
 		assert(end >= start);
 
 		return { s + start, size_t(end - start) };
+	}
+
+	gcc_pure
+	size_t GetCaptureStart(unsigned i) const noexcept {
+
+		assert(n >= 0);
+
+		if (i >= unsigned(n))
+			return npos;
+
+		int start = ovector[2 * i];
+		if (start < 0)
+			return npos;
+
+		return size_t(start);
+	}
+
+	gcc_pure
+	size_t GetCaptureEnd(unsigned i) const noexcept {
+
+		assert(n >= 0);
+
+		if (i >= unsigned(n))
+			return npos;
+
+		int end = ovector[2 * i + 1];
+		if (end < 0)
+			return npos;
+
+		return size_t(end);
 	}
 };
