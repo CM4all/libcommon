@@ -313,17 +313,17 @@ public:
 			response.Packet(TranslationCommand::REDIRECT_FULL_URI);
 			return *this;
 		}
+
+		template<typename... Types>
+		auto ExpandRedirect(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_REDIRECT, value...);
+			return *this;
+		}
 	};
 
 	template<typename... Types>
 	auto Redirect(Types... value) noexcept {
 		StringPacket(TranslationCommand::REDIRECT, value...);
-		return RedirectContext{*this};
-	}
-
-	template<typename... Types>
-	auto ExpandRedirect(Types... value) noexcept {
-		StringPacket(TranslationCommand::EXPAND_REDIRECT, value...);
 		return RedirectContext{*this};
 	}
 
