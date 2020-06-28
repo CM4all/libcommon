@@ -1167,6 +1167,11 @@ public:
 					payload);
 			return *this;
 		}
+
+		auto AutoGzipped() noexcept {
+			response.Packet(TranslationCommand::AUTO_GZIPPED);
+			return *this;
+		}
 	};
 
 	template<typename... Types>
