@@ -37,6 +37,10 @@
 #include "util/ConstBuffer.hxx"
 #include "util/Compiler.h"
 
+#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
+#include <string_view>
+#endif
+
 #include <string>
 #include <array>
 #include <exception>
@@ -85,6 +89,22 @@ struct ParamWrapper<std::string> {
 		return {value.data(), value.length()};
 	}
 };
+
+#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
+template<>
+struct ParamWrapper<std::string_view> {
+	std::string_view value;
+
+	template<typename S>
+	explicit ParamWrapper(S &&_value)
+		:value(std::forward<S>(_value)) {}
+
+	gcc_pure
+	StringView GetValue() const {
+		return {value.data(), value.length()};
+	}
+};
+#endif
 
 template<>
 struct ParamWrapper<std::exception_ptr> : ParamWrapper<std::string> {
