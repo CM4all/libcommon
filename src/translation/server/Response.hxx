@@ -1277,6 +1277,10 @@ public:
 		return Packet(TranslationCommand::ANCHOR_ABSOLUTE);
 	}
 
+	auto &ExpiresRelative(uint32_t seconds) noexcept {
+		return PacketT(TranslationCommand::EXPIRES_RELATIVE, seconds);
+	}
+
 	WritableBuffer<uint8_t> Finish() noexcept;
 
 private:
