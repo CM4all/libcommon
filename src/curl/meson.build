@@ -1,11 +1,23 @@
 libcurl = dependency('libcurl', version: '>= 7.38')
 
+curl_sources = [
+  'Version.cxx',
+  'Init.cxx',
+]
+
+curl_deps = []
+
+if get_variable('libcommon_enable_event', true)
+  curl_sources += [
+    'Request.cxx',
+    'Global.cxx',
+  ]
+  curl_deps += event_dep
+endif
+
 curl = static_library(
   'curl',
-  'Version.cxx',
-  'Request.cxx',
-  'Global.cxx',
-  'Init.cxx',
+  curl_sources,
   include_directories: inc,
   dependencies: [
     libcurl,
@@ -14,7 +26,5 @@ curl = static_library(
 
 curl_dep = declare_dependency(
   link_with: curl,
-  dependencies: [
-    event_dep,
-  ],
+  dependencies: curl_deps,
 )
