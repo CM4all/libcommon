@@ -36,11 +36,9 @@
 void
 CurlInit()
 {
-	CURLM *multi = curl_multi_init();
-	if (multi == nullptr) {
-		curl_global_cleanup();
-		throw std::runtime_error("curl_multi_init() failed");
-	}
+	CURLcode code = curl_global_init(CURL_GLOBAL_ALL);
+	if (code != CURLE_OK)
+		throw std::runtime_error(curl_easy_strerror(code));
 }
 
 void
