@@ -32,6 +32,7 @@
 
 #include <curl/curl.h>
 
+#include <chrono>
 #include <utility>
 #include <stdexcept>
 #include <cstddef>
@@ -103,6 +104,27 @@ public:
 	CURLMsg *InfoRead() {
 		int msgs_in_queue;
 		return curl_multi_info_read(handle, &msgs_in_queue);
+	}
+
+	unsigned Perform() {
+		int running_handles;
+		auto code = curl_multi_perform(handle, &running_handles);
+		if (code != CURLM_OK)
+			throw std::runtime_error(curl_multi_strerror(code));
+		return running_handles;
+	}
+
+	unsigned Wait(int timeout=-1) {
+		int numfds;
+		auto code = curl_multi_wait(handle, nullptr, 0, timeout,
+					    &numfds);
+		if (code != CURLM_OK)
+			throw std::runtime_error(curl_multi_strerror(code));
+		return numfds;
+	}
+
+	unsigned Wait(std::chrono::milliseconds timeout) {
+		return Wait(timeout.count());
 	}
 };
 
