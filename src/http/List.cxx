@@ -59,20 +59,15 @@ http_equals(StringView a, StringView b) noexcept
 }
 
 bool
-http_list_contains(const char *list, const char *_item) noexcept
+http_list_contains(StringView list, const StringView item) noexcept
 {
-	const StringView item(_item);
-
-	while (*list != 0) {
+	while (!list.empty()) {
 		/* XXX what if the comma is within an quoted-string? */
-		const char *comma = strchr(list, ',');
-		if (comma == nullptr)
-			return http_equals(list, item);
-
-		if (http_equals({list, comma}, item))
+		auto c = list.Split(',');
+		if (http_equals(c.first, item))
 			return true;
 
-		list = comma + 1;
+		list = c.second;
 	}
 
 	return false;
@@ -85,20 +80,15 @@ http_equals_i(StringView a, StringView b) noexcept
 }
 
 bool
-http_list_contains_i(const char *list, const char *_item) noexcept
+http_list_contains_i(StringView list, const StringView item) noexcept
 {
-	const StringView item(_item);
-
-	while (*list != 0) {
+	while (!list.empty()) {
 		/* XXX what if the comma is within an quoted-string? */
-		const char *comma = strchr(list, ',');
-		if (comma == nullptr)
-			return http_equals_i(list, item);
-
-		if (http_equals_i({list, comma}, item))
+		auto c = list.Split(',');
+		if (http_equals_i(c.first, item))
 			return true;
 
-		list = comma + 1;
+		list = c.second;
 	}
 
 	return false;

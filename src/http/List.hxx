@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 Content Management AG
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -35,15 +35,17 @@
 
 #include "util/Compiler.h"
 
+struct StringView;
+
 gcc_pure
 bool
-http_list_contains(const char *list, const char *item) noexcept;
+http_list_contains(StringView list, StringView item) noexcept;
 
 /**
  * Case-insensitive version of http_list_contains().
  */
 gcc_pure
 bool
-http_list_contains_i(const char *list, const char *item) noexcept;
+http_list_contains_i(StringView list, StringView item) noexcept;
 
 #endif
