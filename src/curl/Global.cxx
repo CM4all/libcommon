@@ -143,10 +143,7 @@ CurlSocket::OnSocketReady(unsigned flags) noexcept
 void
 CurlGlobal::Add(CurlRequest &r)
 {
-	CURLMcode mcode = curl_multi_add_handle(multi.Get(), r.Get());
-	if (mcode != CURLM_OK)
-		throw FormatRuntimeError("curl_multi_add_handle() failed: %s",
-					 curl_multi_strerror(mcode));
+	multi.Add(r.Get());
 
 	InvalidateSockets();
 }
@@ -154,7 +151,7 @@ CurlGlobal::Add(CurlRequest &r)
 void
 CurlGlobal::Remove(CurlRequest &r) noexcept
 {
-	curl_multi_remove_handle(multi.Get(), r.Get());
+	multi.Remove(r.Get());
 }
 
 /**

@@ -87,6 +87,18 @@ public:
 		if (code != CURLM_OK)
 			throw std::runtime_error(curl_multi_strerror(code));
 	}
+
+	void Add(CURL *easy_handle) {
+		auto code = curl_multi_add_handle(handle, easy_handle);
+		if (code != CURLM_OK)
+			throw std::runtime_error(curl_multi_strerror(code));
+	}
+
+	void Remove(CURL *easy_handle) {
+		auto code = curl_multi_remove_handle(handle, easy_handle);
+		if (code != CURLM_OK)
+			throw std::runtime_error(curl_multi_strerror(code));
+	}
 };
 
 #endif
