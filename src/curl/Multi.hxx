@@ -99,6 +99,11 @@ public:
 		if (code != CURLM_OK)
 			throw std::runtime_error(curl_multi_strerror(code));
 	}
+
+	CURLMsg *InfoRead() {
+		int msgs_in_queue;
+		return curl_multi_info_read(handle, &msgs_in_queue);
+	}
 };
 
 #endif

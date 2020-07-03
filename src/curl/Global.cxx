@@ -182,10 +182,8 @@ inline void
 CurlGlobal::ReadInfo() noexcept
 {
 	CURLMsg *msg;
-	int msgs_in_queue;
 
-	while ((msg = curl_multi_info_read(multi.Get(),
-					   &msgs_in_queue)) != nullptr) {
+	while ((msg = multi.InfoRead()) != nullptr) {
 		if (msg->msg == CURLMSG_DONE)
 			Done(msg->easy_handle, msg->data.result);
 	}
