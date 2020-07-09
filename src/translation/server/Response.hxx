@@ -464,8 +464,16 @@ public:
 		return Packet(TranslationCommand::COOKIE_DOMAIN, value);
 	}
 
-	auto &CookieHost(std::string_view value) noexcept {
-		return Packet(TranslationCommand::COOKIE_HOST, value);
+	template<typename... Types>
+	auto &CookieHost(Types... value) noexcept {
+		return StringPacket(TranslationCommand::COOKIE_HOST,
+				    value...);
+	}
+
+	template<typename... Types>
+	auto &ExpandCookieHost(Types... value) noexcept {
+		return StringPacket(TranslationCommand::EXPAND_COOKIE_HOST,
+				    value...);
 	}
 
 	auto &CookiePath(std::string_view value) noexcept {
