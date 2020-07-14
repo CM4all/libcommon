@@ -162,7 +162,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 	return true;
 }
 
-void
+bool
 Connection::TryWrite() noexcept
 {
 	assert(state == State::RESPONSE);
@@ -172,12 +172,12 @@ Connection::TryWrite() noexcept
 	if (nbytes < 0) {
 		if (gcc_likely(errno == EAGAIN)) {
 			event.ScheduleWrite();
-			return;
+			return true;
 		}
 
 		LogConcat(2, "ts", "Failed to write to client: ", strerror(errno));
 		listener.RemoveConnection(*this);
-		return;
+		return false;
 	}
 
 	output.data += nbytes;
@@ -188,9 +188,11 @@ Connection::TryWrite() noexcept
 		state = State::INIT;
 		event.CancelWrite();
 	}
+
+	return true;
 }
 
-void
+bool
 Connection::SendResponse(Response &&_response) noexcept
 {
 	assert(state == State::PROCESSING);
@@ -200,7 +202,7 @@ Connection::SendResponse(Response &&_response) noexcept
 	response = output.data;
 	cancel_ptr = nullptr;
 
-	TryWrite();
+	return TryWrite();
 }
 
 void

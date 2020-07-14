@@ -49,7 +49,7 @@ public:
 	virtual Co::Task<Response> OnTranslationRequest(const Request &request) noexcept = 0;
 
 	/* virtual methods from class Translation::Server::Handler */
-	void OnTranslationRequest(Connection &connection,
+	bool OnTranslationRequest(Connection &connection,
 				  const Request &request,
 				  CancellablePointer &cancel_ptr) noexcept final;
 };

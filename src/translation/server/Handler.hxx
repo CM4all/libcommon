@@ -41,7 +41,10 @@ class Connection;
 
 class Handler {
 public:
-	virtual void OnTranslationRequest(Connection &connection,
+	/**
+	 * @return false if the #Connection has been destroyed
+	 */
+	virtual bool OnTranslationRequest(Connection &connection,
 					  const Request &request,
 					  CancellablePointer &cancel_ptr) noexcept = 0;
 };

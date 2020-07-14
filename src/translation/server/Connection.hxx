@@ -83,14 +83,20 @@ public:
 		   UniqueSocketDescriptor &&_fd) noexcept;
 	~Connection() noexcept;
 
-	void SendResponse(Response &&response) noexcept;
+	/**
+	 * @return false if this object has been destroyed
+	 */
+	bool SendResponse(Response &&response) noexcept;
 
 private:
 	bool TryRead() noexcept;
 	bool OnReceived() noexcept;
 	bool OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept;
 
-	void TryWrite() noexcept;
+	/**
+	 * @return false if this object has been destroyed
+	 */
+	bool TryWrite() noexcept;
 
 	void OnSocketReady(unsigned events) noexcept;
 };

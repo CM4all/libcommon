@@ -37,6 +37,7 @@
 #include "co/InvokeTask.hxx"
 #include "util/Cancellable.hxx"
 
+#include <cassert>
 #include <memory>
 
 namespace Translation::Server {
@@ -57,48 +58,75 @@ class CoRequest final : Cancellable {
 	 */
 	Co::InvokeTask dummy_task;
 
+	bool result = true, starting = true, complete = false;
+
 public:
 	CoRequest(Connection &_connection, Co::Task<Response> &&_task) noexcept
 		:connection(_connection),
 		 task(std::move(_task)) {}
 
-	void Start(CancellablePointer &cancel_ptr) noexcept {
+	bool Start(CancellablePointer &cancel_ptr) noexcept {
+		assert(starting);
+		assert(!complete);
+
 		cancel_ptr = *this;
 		dummy_task = Handle();
 		dummy_task.OnCompletion(BIND_THIS_METHOD(OnCompletion));
+
+		assert(starting);
+
+		starting = false;
+		if (complete)
+			delete this;
+
+		return result;
 	}
 
 private:
 	void OnCompletion(std::exception_ptr) noexcept {
-		delete this;
+		assert(!complete);
+
+		if (starting)
+			/* postpone destruction to allow Start() to
+			   read the result */
+			complete = true;
+		else
+			delete this;
 	}
 
 	Co::InvokeTask Handle() noexcept {
 		try {
-			connection.SendResponse(co_await std::move(task));
+			result = connection.SendResponse(co_await std::move(task));
 		} catch (...) {
 			Response response;
 			response.Status(HTTP_STATUS_INTERNAL_SERVER_ERROR);
-			connection.SendResponse(std::move(response));
+			result = connection.SendResponse(std::move(response));
 		}
 	}
 
 	/* virtual methods from class Cancellable */
 	void Cancel() noexcept override {
-		delete this;
+		assert(!complete);
+
+		if (starting)
+			/* postpone destruction to allow Start() to
+			   read the result */
+			complete = true;
+		else
+			delete this;
 	}
 };
 
 }
 
-void
+bool
 CoHandler::OnTranslationRequest(Connection &connection,
 				const Request &request,
 				CancellablePointer &cancel_ptr) noexcept
 {
 	auto *r = new CoRequest(connection,
 				OnTranslationRequest(request));
-	r->Start(cancel_ptr);
+	return r->Start(cancel_ptr);
 }
 
 } // namespace Translation::Server
