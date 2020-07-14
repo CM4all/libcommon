@@ -76,10 +76,11 @@ public:
 		assert(starting);
 
 		starting = false;
+		const bool _result = result;
 		if (complete)
 			delete this;
 
-		return result;
+		return _result;
 	}
 
 private:
