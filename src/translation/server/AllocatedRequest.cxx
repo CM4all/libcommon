@@ -73,6 +73,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		host = host_buffer.c_str();
 		break;
 
+	case TranslationCommand::PARAM:
+		param_buffer = ToString(payload);
+		param = param_buffer.c_str();
+		break;
+
 	case TranslationCommand::USER:
 		user_buffer = ToString(payload);
 		user = user_buffer.c_str();
@@ -89,6 +94,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 						 status);
 		*/
 
+		break;
+
+	case TranslationCommand::WIDGET_TYPE:
+		widget_type_buffer = ToString(payload);
+		widget_type = widget_type_buffer.c_str();
 		break;
 
 	case TranslationCommand::ARGS:
@@ -189,6 +199,14 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 	case TranslationCommand::INTERNAL_REDIRECT:
 		internal_redirect_buffer = ToString(payload);
 		internal_redirect = {internal_redirect_buffer.data(), internal_redirect_buffer.size()};
+		break;
+
+	case TranslationCommand::LOGIN:
+		login = true;
+		break;
+
+	case TranslationCommand::CRON:
+		cron = true;
 		break;
 
 	case TranslationCommand::POOL:

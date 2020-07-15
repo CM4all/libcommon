@@ -46,9 +46,13 @@ struct Request {
 
 	const char *host = nullptr;
 
+	const char *param = nullptr;
+
 	const char *user = nullptr;
 
 	const char *args = nullptr, *query_string = nullptr;
+
+	const char *widget_type = nullptr;
 
 	const char *user_agent = nullptr;
 	const char *ua_class = nullptr;
@@ -86,6 +90,10 @@ struct Request {
 	ConstBuffer<void> internal_redirect = nullptr;
 
 	const char *pool = nullptr;
+
+	bool login = false;
+
+	bool cron = false;
 };
 
 } // namespace Translation::Server
