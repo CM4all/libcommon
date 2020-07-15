@@ -806,7 +806,6 @@ public:
 		}
 
 		auto NetworkNamespace(std::string_view name) noexcept {
-			response.Packet(TranslationCommand::NETWORK_NAMESPACE);
 			response.StringPacket(TranslationCommand::NETWORK_NAMESPACE_NAME,
 					      name);
 			return *this;
