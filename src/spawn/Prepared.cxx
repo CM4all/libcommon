@@ -39,11 +39,11 @@
 #include <string.h>
 #include <unistd.h>
 
-PreparedChildProcess::PreparedChildProcess()
+PreparedChildProcess::PreparedChildProcess() noexcept
 {
 }
 
-PreparedChildProcess::~PreparedChildProcess()
+PreparedChildProcess::~PreparedChildProcess() noexcept
 {
 	/* note: the lower boundary here is 3 because we should never
 	   close 0, 1 or 2; these are the standard file descriptors
@@ -61,13 +61,13 @@ PreparedChildProcess::~PreparedChildProcess()
 }
 
 void
-PreparedChildProcess::InsertWrapper(ConstBuffer<const char *> w)
+PreparedChildProcess::InsertWrapper(ConstBuffer<const char *> w) noexcept
 {
 	args.insert(args.begin(), w.begin(), w.end());
 }
 
 void
-PreparedChildProcess::SetEnv(const char *name, const char *value)
+PreparedChildProcess::SetEnv(const char *name, const char *value) noexcept
 {
 	assert(name != nullptr);
 	assert(value != nullptr);
@@ -95,7 +95,7 @@ PreparedChildProcess::GetEnv(StringView name) const noexcept
 }
 
 void
-PreparedChildProcess::SetStdin(int fd)
+PreparedChildProcess::SetStdin(int fd) noexcept
 {
 	assert(fd != stdin_fd);
 
@@ -105,7 +105,7 @@ PreparedChildProcess::SetStdin(int fd)
 }
 
 void
-PreparedChildProcess::SetStdout(int fd)
+PreparedChildProcess::SetStdout(int fd) noexcept
 {
 	assert(fd != stdout_fd);
 
@@ -115,7 +115,7 @@ PreparedChildProcess::SetStdout(int fd)
 }
 
 void
-PreparedChildProcess::SetStderr(int fd)
+PreparedChildProcess::SetStderr(int fd) noexcept
 {
 	assert(fd != stderr_fd);
 
@@ -125,7 +125,7 @@ PreparedChildProcess::SetStderr(int fd)
 }
 
 void
-PreparedChildProcess::SetControl(int fd)
+PreparedChildProcess::SetControl(int fd) noexcept
 {
 	assert(fd != control_fd);
 
@@ -135,55 +135,55 @@ PreparedChildProcess::SetControl(int fd)
 }
 
 void
-PreparedChildProcess::SetStdin(UniqueFileDescriptor fd)
+PreparedChildProcess::SetStdin(UniqueFileDescriptor fd) noexcept
 {
 	SetStdin(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStdout(UniqueFileDescriptor fd)
+PreparedChildProcess::SetStdout(UniqueFileDescriptor fd) noexcept
 {
 	SetStdout(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStderr(UniqueFileDescriptor fd)
+PreparedChildProcess::SetStderr(UniqueFileDescriptor fd) noexcept
 {
 	SetStderr(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetControl(UniqueFileDescriptor fd)
+PreparedChildProcess::SetControl(UniqueFileDescriptor fd) noexcept
 {
 	SetControl(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStdin(UniqueSocketDescriptor fd)
+PreparedChildProcess::SetStdin(UniqueSocketDescriptor fd) noexcept
 {
 	SetStdin(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStdout(UniqueSocketDescriptor fd)
+PreparedChildProcess::SetStdout(UniqueSocketDescriptor fd) noexcept
 {
 	SetStdout(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetStderr(UniqueSocketDescriptor fd)
+PreparedChildProcess::SetStderr(UniqueSocketDescriptor fd) noexcept
 {
 	SetStderr(fd.Steal());
 }
 
 void
-PreparedChildProcess::SetControl(UniqueSocketDescriptor fd)
+PreparedChildProcess::SetControl(UniqueSocketDescriptor fd) noexcept
 {
 	SetControl(fd.Steal());
 }
 
 const char *
-PreparedChildProcess::Finish()
+PreparedChildProcess::Finish() noexcept
 {
 	assert(!args.empty());
 

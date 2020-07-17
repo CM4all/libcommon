@@ -150,8 +150,8 @@ struct PreparedChildProcess {
 	 */
 	std::forward_list<std::string> strings;
 
-	PreparedChildProcess();
-	~PreparedChildProcess();
+	PreparedChildProcess() noexcept;
+	~PreparedChildProcess() noexcept;
 
 	PreparedChildProcess(const PreparedChildProcess &) = delete;
 	PreparedChildProcess &operator=(const PreparedChildProcess &) = delete;
@@ -160,43 +160,43 @@ struct PreparedChildProcess {
 	 * Is at least one system call filter option enabled?  If yes,
 	 * then failures to set up the filter are fatal.
 	 */
-	bool HasSyscallFilter() const {
+	bool HasSyscallFilter() const noexcept {
 		return forbid_user_ns || forbid_multicast || forbid_bind;
 	}
 
-	void InsertWrapper(ConstBuffer<const char *> w);
+	void InsertWrapper(ConstBuffer<const char *> w) noexcept;
 
-	void Append(const char *arg) {
+	void Append(const char *arg) noexcept {
 		args.push_back(arg);
 	}
 
-	void PutEnv(const char *p) {
+	void PutEnv(const char *p) noexcept {
 		env.push_back(p);
 	}
 
-	void SetEnv(const char *name, const char *value);
+	void SetEnv(const char *name, const char *value) noexcept;
 
 	const char *GetEnv(StringView name) const noexcept;
 
-	void SetStdin(int fd);
-	void SetStdout(int fd);
-	void SetStderr(int fd);
-	void SetControl(int fd);
+	void SetStdin(int fd) noexcept;
+	void SetStdout(int fd) noexcept;
+	void SetStderr(int fd) noexcept;
+	void SetControl(int fd) noexcept;
 
-	void SetStdin(UniqueFileDescriptor fd);
-	void SetStdout(UniqueFileDescriptor fd);
-	void SetStderr(UniqueFileDescriptor fd);
-	void SetControl(UniqueFileDescriptor fd);
+	void SetStdin(UniqueFileDescriptor fd) noexcept;
+	void SetStdout(UniqueFileDescriptor fd) noexcept;
+	void SetStderr(UniqueFileDescriptor fd) noexcept;
+	void SetControl(UniqueFileDescriptor fd) noexcept;
 
-	void SetStdin(UniqueSocketDescriptor fd);
-	void SetStdout(UniqueSocketDescriptor fd);
-	void SetStderr(UniqueSocketDescriptor fd);
-	void SetControl(UniqueSocketDescriptor fd);
+	void SetStdin(UniqueSocketDescriptor fd) noexcept;
+	void SetStdout(UniqueSocketDescriptor fd) noexcept;
+	void SetStderr(UniqueSocketDescriptor fd) noexcept;
+	void SetControl(UniqueSocketDescriptor fd) noexcept;
 
 	/**
 	 * Finish this object and return the executable path.
 	 */
-	const char *Finish();
+	const char *Finish() noexcept;
 };
 
 #endif
