@@ -41,6 +41,7 @@
 #endif
 
 #include <set>
+#include <string>
 
 /**
  * Configuration for the spawner.
