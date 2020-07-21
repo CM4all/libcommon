@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -42,7 +42,7 @@
 #include <string.h>
 
 inline
-MountList::MountList(AllocatorPtr alloc, const MountList &src)
+MountList::MountList(AllocatorPtr alloc, const MountList &src) noexcept
 	:source(alloc.Dup(src.source)),
 	 target(alloc.Dup(src.target)),
 #if TRANSLATION_ENABLE_EXPAND
@@ -52,7 +52,7 @@ MountList::MountList(AllocatorPtr alloc, const MountList &src)
 	 exec(src.exec) {}
 
 MountList *
-MountList::CloneAll(AllocatorPtr alloc, const MountList *src)
+MountList::CloneAll(AllocatorPtr alloc, const MountList *src) noexcept
 {
 	MountList *head = nullptr, **tail = &head;
 
@@ -107,7 +107,7 @@ MountList::ApplyAll(const MountList *m)
 }
 
 char *
-MountList::MakeId(char *p) const
+MountList::MakeId(char *p) const noexcept
 {
 	*p++ = ';';
 	*p++ = 'm';
@@ -127,7 +127,7 @@ MountList::MakeId(char *p) const
 }
 
 char *
-MountList::MakeIdAll(char *p, const MountList *m)
+MountList::MakeIdAll(char *p, const MountList *m) noexcept
 {
 	for (; m != nullptr; m = m->next)
 		p = m->MakeId(p);

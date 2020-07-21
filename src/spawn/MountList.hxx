@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -61,7 +61,7 @@ struct MountList {
 			    gcc_unused
 #endif
 			    bool _expand_source=false, bool _writable=false,
-			    bool _exec=false)
+			    bool _exec=false) noexcept
 		:source(_source), target(_target),
 #if TRANSLATION_ENABLE_EXPAND
 		expand_source(_expand_source),
@@ -69,15 +69,15 @@ struct MountList {
 		writable(_writable), exec(_exec) {
 	}
 
-	MountList(AllocatorPtr alloc, const MountList &src);
+	MountList(AllocatorPtr alloc, const MountList &src) noexcept;
 
 #if TRANSLATION_ENABLE_EXPAND
-	bool IsExpandable() const {
+	bool IsExpandable() const noexcept {
 		return expand_source;
 	}
 
 	gcc_pure
-	static bool IsAnyExpandable(MountList *m) {
+	static bool IsAnyExpandable(MountList *m) noexcept {
 		for (; m != nullptr; m = m->next)
 			if (m->IsExpandable())
 				return true;
@@ -95,13 +95,14 @@ struct MountList {
 	 */
 	void Apply() const;
 
-	static MountList *CloneAll(AllocatorPtr alloc, const MountList *src);
+	static MountList *CloneAll(AllocatorPtr alloc,
+				   const MountList *src) noexcept;
 
 	/**
 	 * Throws std::system_error on error.
 	 */
 	static void ApplyAll(const MountList *m);
 
-	char *MakeId(char *p) const;
-	static char *MakeIdAll(char *p, const MountList *m);
+	char *MakeId(char *p) const noexcept;
+	static char *MakeIdAll(char *p, const MountList *m) noexcept;
 };
