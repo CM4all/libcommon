@@ -34,6 +34,7 @@
 
 #include "translation/Features.hxx"
 #include "util/Compiler.h"
+#include "util/IntrusiveForwardList.hxx"
 #include "util/ShallowCopy.hxx"
 
 class AllocatorPtr;
@@ -93,11 +94,11 @@ struct MountNamespaceOptions {
 
 	const char *mount_tmpfs = nullptr;
 
-	MountList *mounts = nullptr;
+	IntrusiveForwardList<MountList> mounts;
 
 	MountNamespaceOptions() = default;
 
-	constexpr MountNamespaceOptions(ShallowCopy,
+	constexpr MountNamespaceOptions(ShallowCopy shallow_copy,
 					const MountNamespaceOptions &src) noexcept
 		:enable_mount(src.enable_mount),
 		 mount_root_tmpfs(src.mount_root_tmpfs),
@@ -113,7 +114,7 @@ struct MountNamespaceOptions {
 		 mount_home(src.mount_home),
 		 mount_tmp_tmpfs(src.mount_tmp_tmpfs),
 		 mount_tmpfs(src.mount_tmpfs),
-		 mounts(src.mounts) {}
+		 mounts(shallow_copy, src.mounts) {}
 
 	MountNamespaceOptions(AllocatorPtr alloc,
 			      const MountNamespaceOptions &src) noexcept;
@@ -143,6 +144,7 @@ struct MountNamespaceOptions {
 
 private:
 	constexpr bool HasBindMount() const noexcept {
-		return bind_mount_pts || mount_home != nullptr || mounts != nullptr;
+		return bind_mount_pts || mount_home != nullptr ||
+			!mounts.empty();
 	}
 };

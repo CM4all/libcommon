@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "util/IntrusiveForwardList.hxx"
 #include "util/ShallowCopy.hxx"
 
 class AllocatorPtr;
@@ -56,9 +57,7 @@ struct CgroupOptions {
 	 */
 	const char *session = nullptr;
 
-	struct SetItem {
-		SetItem *next = nullptr;
-
+	struct SetItem : IntrusiveForwardListHook {
 		/**
 		 * The filename of the controller setting,
 		 * e.g. "cpu.shares".
@@ -77,22 +76,20 @@ struct CgroupOptions {
 	/**
 	 * A list of cgroup controller settings.
 	 */
-	SetItem *set_head = nullptr;
+	IntrusiveForwardList<SetItem> set;
 
 	CgroupOptions() = default;
 	CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src) noexcept;
 
-	constexpr CgroupOptions(ShallowCopy, const CgroupOptions &src) noexcept
-		:CgroupOptions(src) {}
+	constexpr CgroupOptions(ShallowCopy shallow_copy,
+				const CgroupOptions &src) noexcept
+		:name(src.name),
+		 session(src.session),
+		 set(shallow_copy, src.set) {}
 
 	CgroupOptions(CgroupOptions &&) = default;
 	CgroupOptions &operator=(CgroupOptions &&) = default;
 
-private:
-	CgroupOptions(const CgroupOptions &) = default;
-	CgroupOptions &operator=(const CgroupOptions &) = delete;
-
-public:
 	constexpr bool IsDefined() const noexcept {
 		return name != nullptr;
 	}

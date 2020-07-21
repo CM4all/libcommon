@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -89,7 +89,7 @@ TranslateParser::SetChildOptions(ChildOptions &_child_options)
 {
 	child_options = &_child_options;
 	ns_options = &child_options->ns;
-	mount_list = &ns_options->mount.mounts;
+	mount_list = ns_options->mount.mounts.before_begin();
 	env_builder = child_options->env;
 }
 
@@ -184,8 +184,8 @@ TranslateParser::AddTransformation(Args&&... args) noexcept
 
 	filter = nullptr;
 	transformation = t;
-	*transformation_tail = t;
-	transformation_tail = &t->next;
+
+	transformation_tail = IntrusiveForwardList<Transformation>::insert_after(transformation_tail, *t);
 
 	return t;
 }
@@ -283,14 +283,14 @@ TranslateParser::AddView(const char *name)
 	resource_address = &new_view->address;
 	child_options = nullptr;
 	ns_options = nullptr;
-	mount_list = nullptr;
+	mount_list = IntrusiveForwardList<MountList>::end();
 	file_address = nullptr;
 	http_address = nullptr;
 	cgi_address = nullptr;
 	nfs_address = nullptr;
 	lhttp_address = nullptr;
 	address_list = nullptr;
-	transformation_tail = &new_view->transformation;
+	transformation_tail = new_view->transformations.before_begin();
 	transformation = nullptr;
 	filter = nullptr;
 }
@@ -618,15 +618,15 @@ TranslateParser::HandleBindMount(StringView payload,
 	if (separator == nullptr || separator[1] != '/')
 		throw std::runtime_error("malformed BIND_MOUNT packet");
 
-	if (mount_list == nullptr)
+	if (mount_list == IntrusiveForwardList<MountList>::end())
 		throw std::runtime_error("misplaced BIND_MOUNT packet");
 
 	auto *m = alloc.New<MountList>(/* skip the slash to make it relative */
 				       payload.data + 1,
 				       separator + 1,
 				       expand, writable, exec);
-	*mount_list = m;
-	mount_list = &m->next;
+	mount_list = IntrusiveForwardList<MountList>::insert_after(mount_list,
+								   *m);
 }
 
 static void
@@ -1290,7 +1290,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		resource_address = AddFilter();
 		child_options = nullptr;
 		ns_options = nullptr;
-		mount_list = nullptr;
+		mount_list = IntrusiveForwardList<MountList>::end();
 		file_address = nullptr;
 		cgi_address = nullptr;
 		nfs_address = nullptr;
@@ -3501,7 +3501,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #else
 		child_options = nullptr;
 		ns_options = nullptr;
-		mount_list = nullptr;
+		mount_list = IntrusiveForwardList<MountList>::end();
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 		file_address = nullptr;
@@ -3520,7 +3520,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
 		transformation = nullptr;
-		transformation_tail = &response.views->transformation;
+		transformation_tail = response.views->transformations.before_begin();
 		filter = nullptr;
 #endif
 

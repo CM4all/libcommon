@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,12 +30,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_TRANSLATE_PARSER_HXX
-#define BENG_PROXY_TRANSLATE_PARSER_HXX
+#pragma once
 
 #include "PReader.hxx"
 #include "adata/ExpandableStringList.hxx"
 #include "AllocatorPtr.hxx"
+#include "util/IntrusiveForwardList.hxx"
 #include "util/TrivialArray.hxx"
 
 #if TRANSLATION_ENABLE_RADDRESS
@@ -125,7 +125,7 @@ class TranslateParser {
 	NamespaceOptions *ns_options;
 
 	/** the tail of the current mount_list */
-	MountList **mount_list;
+	IntrusiveForwardList<MountList>::iterator mount_list;
 
 #if TRANSLATION_ENABLE_RADDRESS
 	/** the current local file address being edited */
@@ -171,7 +171,7 @@ class TranslateParser {
 	Transformation *transformation;
 
 	/** pointer to the tail of the transformation linked list */
-	Transformation **transformation_tail;
+	IntrusiveForwardList<Transformation>::iterator transformation_tail;
 
 	FilterTransformation *filter;
 #endif
@@ -266,5 +266,3 @@ private:
 	Result HandlePacket(TranslationCommand command,
 			    ConstBuffer<void> payload);
 };
-
-#endif

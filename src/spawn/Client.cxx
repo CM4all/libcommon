@@ -157,10 +157,10 @@ Serialize(SpawnSerializer &s, const CgroupOptions &c)
 	s.WriteOptionalString(SpawnExecCommand::CGROUP, c.name);
 	s.WriteOptionalString(SpawnExecCommand::CGROUP_SESSION, c.session);
 
-	for (const auto *set = c.set_head; set != nullptr; set = set->next) {
+	for (const auto &i : c.set) {
 		s.Write(SpawnExecCommand::CGROUP_SET);
-		s.WriteString(set->name);
-		s.WriteString(set->value);
+		s.WriteString(i.name);
+		s.WriteString(i.value);
 	}
 }
 
@@ -191,12 +191,12 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMPFS,
 			      ns.mount.mount_tmpfs);
 
-	for (auto i = ns.mount.mounts; i != nullptr; i = i->next) {
+	for (const auto &i : ns.mount.mounts) {
 		s.Write(SpawnExecCommand::BIND_MOUNT);
-		s.WriteString(i->source);
-		s.WriteString(i->target);
-		s.WriteByte(i->writable);
-		s.WriteByte(i->exec);
+		s.WriteString(i.source);
+		s.WriteString(i.target);
+		s.WriteByte(i.writable);
+		s.WriteByte(i.exec);
 	}
 
 	s.WriteOptionalString(SpawnExecCommand::HOSTNAME, ns.hostname);

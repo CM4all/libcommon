@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,6 +33,7 @@
 #pragma once
 
 #include "translation/Features.hxx"
+#include "util/IntrusiveForwardList.hxx"
 #include "util/ShallowCopy.hxx"
 
 #include "util/Compiler.h"
@@ -44,9 +45,7 @@ class MatchInfo;
 template<typename T> struct ConstBuffer;
 
 class ExpandableStringList final {
-	struct Item {
-		Item *next = nullptr;
-
+	struct Item : IntrusiveForwardListHook {
 		const char *value;
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -60,52 +59,54 @@ class ExpandableStringList final {
 #endif
 	};
 
-	Item *head = nullptr;
+	using List = IntrusiveForwardList<Item>;
+
+	List list;
 
 public:
 	ExpandableStringList() = default;
 	ExpandableStringList(ExpandableStringList &&) = default;
 	ExpandableStringList &operator=(ExpandableStringList &&src) = default;
 
-	constexpr ExpandableStringList(ShallowCopy,
+	constexpr ExpandableStringList(ShallowCopy shallow_copy,
 				       const ExpandableStringList &src)
-	:head(src.head) {}
+		:list(shallow_copy, src.list) {}
 
 	ExpandableStringList(AllocatorPtr alloc, const ExpandableStringList &src);
 
 	gcc_pure
 	bool IsEmpty() const {
-		return head == nullptr;
+		return list.empty();
 	}
 
 	class const_iterator final
 		: public std::iterator<std::forward_iterator_tag, const char *> {
 
-		const Item *cursor;
+		List::const_iterator i;
 
 	public:
-		const_iterator(const Item *_cursor):cursor(_cursor) {}
+		const_iterator(List::const_iterator _i):i(_i) {}
 
 		bool operator!=(const const_iterator &other) const {
-			return cursor != other.cursor;
+			return i != other.i;
 		}
 
 		const char *operator*() const {
-			return cursor->value;
+			return i->value;
 		}
 
 		const_iterator &operator++() {
-			cursor = cursor->next;
+			++i;
 			return *this;
 		}
 	};
 
-	const_iterator begin() const {
-		return {head};
+	auto begin() const {
+		return const_iterator{list.begin()};
 	}
 
-	const_iterator end() const {
-		return {nullptr};
+	auto end() const {
+		return const_iterator{list.end()};
 	}
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -119,7 +120,7 @@ public:
 #endif
 
 	class Builder final {
-		Item **tail_r;
+		List::iterator tail;
 
 		Item *last;
 
@@ -127,7 +128,7 @@ public:
 		Builder() = default;
 
 		Builder(ExpandableStringList &_list)
-			:tail_r(&_list.head), last(nullptr) {}
+			:tail(_list.list.before_begin()), last(nullptr) {}
 
 		/**
 		 * Add a new item to the end of the list.  The allocator is only

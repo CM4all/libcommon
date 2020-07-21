@@ -51,18 +51,16 @@ MountList::MountList(AllocatorPtr alloc, const MountList &src) noexcept
 	 writable(src.writable),
 	 exec(src.exec) {}
 
-MountList *
-MountList::CloneAll(AllocatorPtr alloc, const MountList *src) noexcept
+IntrusiveForwardList<MountList>
+MountList::CloneAll(AllocatorPtr alloc, const IntrusiveForwardList<MountList> &src) noexcept
 {
-	MountList *head = nullptr, **tail = &head;
+	IntrusiveForwardList<MountList> dest;
+	auto pos = dest.before_begin();
 
-	for (; src != nullptr; src = src->next) {
-		MountList *dest = alloc.New<MountList>(alloc, *src);
-		*tail = dest;
-		tail = &dest->next;
-	}
+	for (const auto &i : src)
+		pos = dest.insert_after(pos, *alloc.New<MountList>(alloc, i));
 
-	return head;
+	return dest;
 }
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -78,11 +76,12 @@ MountList::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 }
 
 void
-MountList::ExpandAll(AllocatorPtr alloc, MountList *m,
+MountList::ExpandAll(AllocatorPtr alloc,
+		     IntrusiveForwardList<MountList> &list,
 		     const MatchInfo &match_info)
 {
-	for (; m != nullptr; m = m->next)
-		m->Expand(alloc, match_info);
+	for (auto &i : list)
+		i.Expand(alloc, match_info);
 }
 
 #endif
@@ -100,10 +99,10 @@ MountList::Apply() const
 }
 
 void
-MountList::ApplyAll(const MountList *m)
+MountList::ApplyAll(const IntrusiveForwardList<MountList> &m)
 {
-	for (; m != nullptr; m = m->next)
-		m->Apply();
+	for (const auto &i : m)
+		i.Apply();
 }
 
 char *
@@ -127,10 +126,10 @@ MountList::MakeId(char *p) const noexcept
 }
 
 char *
-MountList::MakeIdAll(char *p, const MountList *m) noexcept
+MountList::MakeIdAll(char *p, const IntrusiveForwardList<MountList> &m) noexcept
 {
-	for (; m != nullptr; m = m->next)
-		p = m->MakeId(p);
+	for (const auto &i : m)
+		p = i.MakeId(p);
 
 	return p;
 }

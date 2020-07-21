@@ -183,8 +183,8 @@ MountNamespaceOptions::Setup() const
 		if (mount_tmp_tmpfs != nullptr)
 			mkdir("tmp", 0700);
 
-		for (const auto *i = mounts; i != nullptr; i = i->next)
-			MakeDirs(i->target);
+		for (const auto &i : mounts)
+			MakeDirs(i.target);
 
 		if (mount_tmpfs != nullptr)
 			MakeDirs(mount_tmpfs);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -55,13 +55,12 @@ CgroupOptions::CgroupOptions(AllocatorPtr alloc,
 			     const CgroupOptions &src) noexcept
 	:name(alloc.CheckDup(src.name))
 {
-	auto **set_tail = &set_head;
+	auto set_tail = set.before_begin();
 
-	for (const auto *i = src.set_head; i != nullptr; i = i->next) {
-		auto *new_set = alloc.New<SetItem>(alloc.Dup(i->name),
-						   alloc.Dup(i->value));
-		*set_tail = new_set;
-		set_tail = &new_set->next;
+	for (const auto &i : src.set) {
+		auto *new_set = alloc.New<SetItem>(alloc.Dup(i.name),
+						   alloc.Dup(i.value));
+		set_tail = set.insert_after(set_tail, *new_set);
 	}
 }
 
@@ -70,8 +69,7 @@ CgroupOptions::Set(AllocatorPtr alloc,
 		   StringView _name, StringView _value) noexcept
 {
 	auto *new_set = alloc.New<SetItem>(alloc.DupZ(_name), alloc.DupZ(_value));
-	new_set->next = set_head;
-	set_head = new_set;
+	set.push_front(*new_set);
 }
 
 static void
@@ -152,11 +150,11 @@ CgroupOptions::Apply(const CgroupState &state) const
 					state.group_path.c_str(), name,
 					session);
 
-	for (const auto *set = set_head; set != nullptr; set = set->next) {
-		const char *dot = strchr(set->name, '.');
+	for (const auto &s : set) {
+		const char *dot = strchr(s.name, '.');
 		assert(dot != nullptr);
 
-		const std::string controller(set->name, dot);
+		const std::string controller(s.name, dot);
 		auto i = state.controllers.find(controller);
 		if (i == state.controllers.end())
 			throw FormatRuntimeError("cgroup controller '%s' is unavailable",
@@ -168,7 +166,7 @@ CgroupOptions::Apply(const CgroupState &state) const
 		assert(j != fds.end());
 
 		const FileDescriptor fd = j->second;
-		WriteFile(fd, set->name, set->value);
+		WriteFile(fd, s.name, s.value);
 	}
 }
 

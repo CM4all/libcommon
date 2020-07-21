@@ -477,8 +477,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 	CgroupOptions cgroup;
 	UniqueSocketDescriptor return_stderr;
 
-	MountList **mount_tail = &p.ns.mount.mounts;
-	assert(*mount_tail == nullptr);
+	auto mount_tail = p.ns.mount.mounts.before_begin();
 
 	std::forward_list<MountList> mounts;
 	std::forward_list<std::string> strings;
@@ -597,8 +596,8 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 						     writable, exec);
 			}
 
-			*mount_tail = &mounts.front();
-			mount_tail = &mounts.front().next;
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
 			break;
 
 		case SpawnExecCommand::HOSTNAME:
@@ -663,8 +662,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 				cgroup_sets.emplace_front(set_name, set_value);
 				auto &set = cgroup_sets.front();
-				set.next = cgroup.set_head;
-				cgroup.set_head = &set;
+				cgroup.set.push_front(set);
 			} else
 				throw MalformedSpawnPayloadError();
 

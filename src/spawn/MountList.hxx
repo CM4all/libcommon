@@ -33,15 +33,13 @@
 #pragma once
 
 #include "translation/Features.hxx"
-
 #include "util/Compiler.h"
+#include "util/IntrusiveForwardList.hxx"
 
 class AllocatorPtr;
 class MatchInfo;
 
-struct MountList {
-	MountList *next = nullptr;
-
+struct MountList : IntrusiveForwardListHook {
 	const char *source;
 	const char *target;
 
@@ -77,16 +75,17 @@ struct MountList {
 	}
 
 	gcc_pure
-	static bool IsAnyExpandable(MountList *m) noexcept {
-		for (; m != nullptr; m = m->next)
-			if (m->IsExpandable())
+	static bool IsAnyExpandable(const IntrusiveForwardList<MountList> &list) noexcept {
+		for (const auto &i : list)
+			if (i.IsExpandable())
 				return true;
 
 		return false;
 	}
 
 	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
-	static void ExpandAll(AllocatorPtr alloc, MountList *m,
+	static void ExpandAll(AllocatorPtr alloc,
+			      IntrusiveForwardList<MountList> &list,
 			      const MatchInfo &match_info);
 #endif
 
@@ -95,14 +94,14 @@ struct MountList {
 	 */
 	void Apply() const;
 
-	static MountList *CloneAll(AllocatorPtr alloc,
-				   const MountList *src) noexcept;
+	static IntrusiveForwardList<MountList> CloneAll(AllocatorPtr alloc,
+							const IntrusiveForwardList<MountList> &src) noexcept;
 
 	/**
 	 * Throws std::system_error on error.
 	 */
-	static void ApplyAll(const MountList *m);
+	static void ApplyAll(const IntrusiveForwardList<MountList> &m);
 
 	char *MakeId(char *p) const noexcept;
-	static char *MakeIdAll(char *p, const MountList *m) noexcept;
+	static char *MakeIdAll(char *p, const IntrusiveForwardList<MountList> &m) noexcept;
 };

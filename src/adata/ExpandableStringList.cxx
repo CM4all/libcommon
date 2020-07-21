@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -45,10 +45,10 @@ ExpandableStringList::ExpandableStringList(AllocatorPtr alloc,
 {
 	Builder builder(*this);
 
-	for (const auto *i = src.head; i != nullptr; i = i->next)
-		builder.Add(alloc, alloc.Dup(i->value),
+	for (const auto &i : src.list)
+		builder.Add(alloc, alloc.Dup(i.value),
 #if TRANSLATION_ENABLE_EXPAND
-			    i->expandable
+			    i.expandable
 #else
 			    false
 #endif
@@ -60,8 +60,8 @@ ExpandableStringList::ExpandableStringList(AllocatorPtr alloc,
 bool
 ExpandableStringList::IsExpandable() const
 {
-	for (const auto *i = head; i != nullptr; i = i->next)
-		if (i->expandable)
+	for (const auto &i : list)
+		if (i.expandable)
 			return true;
 
 	return false;
@@ -70,11 +70,11 @@ ExpandableStringList::IsExpandable() const
 void
 ExpandableStringList::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 {
-	for (auto *i = head; i != nullptr; i = i->next) {
-		if (!i->expandable)
+	for (auto &i : list) {
+		if (!i.expandable)
 			continue;
 
-		i->value = expand_string_unescaped(alloc, i->value, match_info);
+		i.value = expand_string_unescaped(alloc, i.value, match_info);
 	}
 }
 
@@ -85,8 +85,7 @@ ExpandableStringList::Builder::Add(AllocatorPtr alloc,
 				   const char *value, bool expandable)
 {
 	auto *item = last = alloc.New<Item>(value, expandable);
-	*tail_r = item;
-	tail_r = &item->next;
+	tail = List::insert_after(tail, *item);
 }
 
 ConstBuffer<const char *>
