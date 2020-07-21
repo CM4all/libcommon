@@ -43,8 +43,7 @@
 
 inline
 MountList::MountList(AllocatorPtr alloc, const MountList &src)
-	:next(nullptr),
-	 source(alloc.Dup(src.source)),
+	:source(alloc.Dup(src.source)),
 	 target(alloc.Dup(src.target)),
 #if TRANSLATION_ENABLE_EXPAND
 	 expand_source(src.expand_source),

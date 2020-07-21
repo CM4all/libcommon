@@ -40,7 +40,7 @@ class AllocatorPtr;
 class MatchInfo;
 
 struct MountList {
-	MountList *next;
+	MountList *next = nullptr;
 
 	const char *source;
 	const char *target;
@@ -62,7 +62,7 @@ struct MountList {
 #endif
 			    bool _expand_source=false, bool _writable=false,
 			    bool _exec=false)
-		:next(nullptr), source(_source), target(_target),
+		:source(_source), target(_target),
 #if TRANSLATION_ENABLE_EXPAND
 		expand_source(_expand_source),
 #endif
