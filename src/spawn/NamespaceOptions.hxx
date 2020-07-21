@@ -88,6 +88,21 @@ struct NamespaceOptions {
 	MountNamespaceOptions mount;
 
 	NamespaceOptions() = default;
+
+	constexpr NamespaceOptions(ShallowCopy shallow_copy,
+				   const NamespaceOptions &src) noexcept
+		:enable_user(src.enable_user),
+		 enable_pid(src.enable_pid),
+		 enable_cgroup(src.enable_cgroup),
+		 enable_network(src.enable_network),
+		 enable_ipc(src.enable_ipc),
+		 pid_namespace(src.pid_namespace),
+		 network_namespace(src.network_namespace),
+		 hostname(src.hostname),
+		 mount(shallow_copy, src.mount)
+	{
+	}
+
 	NamespaceOptions(AllocatorPtr alloc, const NamespaceOptions &src);
 
 #if TRANSLATION_ENABLE_EXPAND

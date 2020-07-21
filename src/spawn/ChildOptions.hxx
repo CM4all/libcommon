@@ -117,7 +117,7 @@ struct ChildOptions {
 		env(shallow_copy, src.env),
 		cgroup(shallow_copy, src.cgroup),
 		rlimits(src.rlimits),
-		ns(src.ns),
+		 ns(shallow_copy, src.ns),
 		uid_gid(src.uid_gid),
 		umask(src.umask),
 		stderr_null(src.stderr_null),

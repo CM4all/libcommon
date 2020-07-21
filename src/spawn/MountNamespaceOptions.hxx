@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,8 +33,8 @@
 #pragma once
 
 #include "translation/Features.hxx"
-
 #include "util/Compiler.h"
+#include "util/ShallowCopy.hxx"
 
 class AllocatorPtr;
 struct MountList;
@@ -96,6 +96,25 @@ struct MountNamespaceOptions {
 	MountList *mounts = nullptr;
 
 	MountNamespaceOptions() = default;
+
+	constexpr MountNamespaceOptions(ShallowCopy,
+					const MountNamespaceOptions &src) noexcept
+		:enable_mount(src.enable_mount),
+		 mount_root_tmpfs(src.mount_root_tmpfs),
+		 mount_proc(src.mount_proc),
+		 writable_proc(src.writable_proc),
+		 mount_pts(src.mount_pts),
+		 bind_mount_pts(src.bind_mount_pts),
+		 pivot_root(src.pivot_root),
+		 home(src.home),
+#if TRANSLATION_ENABLE_EXPAND
+		 expand_home(src.expand_home),
+#endif
+		 mount_home(src.mount_home),
+		 mount_tmp_tmpfs(src.mount_tmp_tmpfs),
+		 mount_tmpfs(src.mount_tmpfs),
+		 mounts(src.mounts) {}
+
 	MountNamespaceOptions(AllocatorPtr alloc,
 			      const MountNamespaceOptions &src) noexcept;
 

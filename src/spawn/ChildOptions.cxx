@@ -191,7 +191,7 @@ ChildOptions::CopyTo(PreparedChildProcess &dest) const
 		dest.PutEnv(e);
 
 	dest.cgroup = &cgroup;
-	dest.ns = ns;
+	dest.ns = {ShallowCopy{}, ns};
 	if (rlimits != nullptr)
 		dest.rlimits = *rlimits;
 	dest.uid_gid = uid_gid;
