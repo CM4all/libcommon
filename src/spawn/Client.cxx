@@ -187,8 +187,6 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 
 	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMP_TMPFS,
 			      ns.mount.mount_tmp_tmpfs);
-	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMPFS,
-			      ns.mount.mount_tmpfs);
 
 	for (const auto &i : ns.mount.mounts) {
 		switch (i.type) {
@@ -198,6 +196,11 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			s.WriteString(i.target);
 			s.WriteByte(i.writable);
 			s.WriteByte(i.exec);
+			break;
+
+		case Mount::Type::TMPFS:
+			s.WriteString(SpawnExecCommand::MOUNT_TMPFS,
+				      i.target);
 			break;
 		}
 	}

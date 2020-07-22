@@ -32,6 +32,7 @@
 
 #include "Mount.hxx"
 #include "system/BindMount.hxx"
+#include "system/Error.hxx"
 #include "AllocatorPtr.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -86,6 +87,15 @@ Mount::ExpandAll(AllocatorPtr alloc,
 
 #endif
 
+static void
+MountOrThrow(const char *source, const char *target,
+	     const char *filesystemtype, unsigned long mountflags,
+	     const void *data)
+{
+	if (mount(source, target, filesystemtype, mountflags, data) < 0)
+		throw FormatErrno("mount('%s') failed", target);
+}
+
 inline void
 Mount::ApplyBindMount() const
 {
@@ -99,11 +109,28 @@ Mount::ApplyBindMount() const
 }
 
 inline void
+Mount::ApplyTmpfs() const
+{
+	int flags = MS_NOSUID|MS_NODEV;
+	if (!writable)
+		flags |= MS_RDONLY;
+	if (!exec)
+		flags |= MS_NOEXEC;
+
+	MountOrThrow("none", target, "tmpfs", flags,
+		     "size=16M,nr_inodes=256,mode=700");
+}
+
+inline void
 Mount::Apply() const
 {
 	switch (type) {
 	case Type::BIND:
 		ApplyBindMount();
+		break;
+
+	case Type::TMPFS:
+		ApplyTmpfs();
 		break;
 	}
 }
@@ -121,6 +148,11 @@ Mount::MakeId(char *p) const noexcept
 	switch (type) {
 	case Type::BIND:
 		break;
+
+	case Type::TMPFS:
+		p = (char *)mempcpy(p, ";t:", 3);
+		p = stpcpy(p, target);
+		return p;
 	}
 
 	*p++ = ';';

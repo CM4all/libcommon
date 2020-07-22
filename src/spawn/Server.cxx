@@ -579,7 +579,13 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::MOUNT_TMPFS:
-			p.ns.mount.mount_tmpfs = payload.ReadString();
+			{
+				const char *target = payload.ReadString();
+				mounts.emplace_front(Mount::Tmpfs{}, target);
+			}
+
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
 			break;
 
 		case SpawnExecCommand::BIND_MOUNT:

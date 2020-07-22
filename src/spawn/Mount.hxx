@@ -47,6 +47,7 @@ struct Mount : IntrusiveForwardListHook {
 
 	enum class Type : uint8_t {
 		BIND,
+		TMPFS,
 	} type = Type::BIND;
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -66,6 +67,12 @@ struct Mount : IntrusiveForwardListHook {
 		:source(_source), target(_target),
 		writable(_writable), exec(_exec) {
 	}
+
+	struct Tmpfs {};
+
+	constexpr Mount(Tmpfs, const char *_target) noexcept
+		:source(nullptr), target(_target),
+		 writable(true), exec(false) {}
 
 	Mount(AllocatorPtr alloc, const Mount &src) noexcept;
 
@@ -91,6 +98,7 @@ struct Mount : IntrusiveForwardListHook {
 
 private:
 	void ApplyBindMount() const;
+	void ApplyTmpfs() const;
 
 public:
 	/**

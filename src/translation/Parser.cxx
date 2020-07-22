@@ -595,10 +595,13 @@ TranslateParser::HandleMountTmpfs(StringView payload)
 	    payload.Equals("/tmp"))
 		throw std::runtime_error("malformed MOUNT_TMPFS packet");
 
-	if (ns_options == nullptr || ns_options->mount.mount_tmpfs != nullptr)
+	if (ns_options == nullptr)
 		throw std::runtime_error("misplaced MOUNT_TMPFS packet");
 
-	ns_options->mount.mount_tmpfs = payload.data;
+	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
+				   Mount::Tmpfs{},
+				   payload.data + 1);
+	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
 }
 
 inline void

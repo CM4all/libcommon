@@ -68,7 +68,6 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 #endif
 	 mount_home(alloc.CheckDup(src.mount_home)),
 	 mount_tmp_tmpfs(alloc.CheckDup(src.mount_tmp_tmpfs)),
-	 mount_tmpfs(alloc.CheckDup(src.mount_tmpfs)),
 	 mounts(Mount::CloneAll(alloc, src.mounts))
 {
 }
@@ -186,9 +185,6 @@ MountNamespaceOptions::Setup() const
 
 		for (const auto &i : mounts)
 			MakeDirs(i.target);
-
-		if (mount_tmpfs != nullptr)
-			MakeDirs(mount_tmpfs);
 	}
 
 	if (new_root != nullptr) {
@@ -260,11 +256,6 @@ MountNamespaceOptions::Setup() const
 			throw MakeErrno("Failed to remount read-only");
 	}
 
-	if (mount_tmpfs != nullptr)
-		MountOrThrow("none", mount_tmpfs, "tmpfs",
-			     MS_NODEV|MS_NOEXEC|MS_NOSUID,
-			     "size=16M,nr_inodes=256,mode=700");
-
 	if (mount_tmp_tmpfs != nullptr) {
 		const char *options = "size=16M,nr_inodes=256,mode=1777";
 		char buffer[256];
@@ -314,11 +305,6 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 	if (mount_tmp_tmpfs != nullptr) {
 		p = (char *)mempcpy(p, ";tt:", 3);
 		p = stpcpy(p, mount_tmp_tmpfs);
-	}
-
-	if (mount_tmpfs != nullptr) {
-		p = (char *)mempcpy(p, ";t:", 3);
-		p = stpcpy(p, mount_tmpfs);
 	}
 
 	p = Mount::MakeIdAll(p, mounts);

@@ -90,8 +90,6 @@ struct MountNamespaceOptions {
 	 */
 	const char *mount_tmp_tmpfs = nullptr;
 
-	const char *mount_tmpfs = nullptr;
-
 	IntrusiveForwardList<Mount> mounts;
 
 	MountNamespaceOptions() = default;
@@ -110,7 +108,6 @@ struct MountNamespaceOptions {
 #endif
 		 mount_home(src.mount_home),
 		 mount_tmp_tmpfs(src.mount_tmp_tmpfs),
-		 mount_tmpfs(src.mount_tmpfs),
 		 mounts(shallow_copy, src.mounts) {}
 
 	MountNamespaceOptions(AllocatorPtr alloc,
@@ -122,7 +119,6 @@ struct MountNamespaceOptions {
 			pivot_root != nullptr ||
 			mount_home != nullptr ||
 			mount_tmp_tmpfs != nullptr ||
-			mount_tmpfs != nullptr ||
 			!mounts.empty();
 	}
 
