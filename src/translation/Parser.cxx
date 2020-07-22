@@ -488,7 +488,6 @@ translate_client_pivot_root(NamespaceOptions *ns, StringView payload)
 	    ns->mount.mount_root_tmpfs)
 		throw std::runtime_error("misplaced PIVOT_ROOT packet");
 
-	ns->mount.enable_mount = true;
 	ns->mount.pivot_root = payload.data;
 }
 
@@ -503,7 +502,6 @@ translate_client_mount_root_tmpfs(NamespaceOptions *ns,
 	    ns->mount.mount_root_tmpfs)
 		throw std::runtime_error("misplaced MOUNT_ROOT_TMPFS packet");
 
-	ns->mount.enable_mount = true;
 	ns->mount.mount_root_tmpfs = true;
 }
 
@@ -557,7 +555,6 @@ translate_client_mount_proc(NamespaceOptions *ns,
 	if (ns == nullptr || ns->mount.mount_proc)
 		throw std::runtime_error("misplaced MOUNT_PROC packet");
 
-	ns->mount.enable_mount = true;
 	ns->mount.mount_proc = true;
 }
 
@@ -571,7 +568,6 @@ translate_client_mount_tmp_tmpfs(NamespaceOptions *ns,
 	if (ns == nullptr || ns->mount.mount_tmp_tmpfs != nullptr)
 		throw std::runtime_error("misplaced MOUNT_TMP_TMPFS packet");
 
-	ns->mount.enable_mount = true;
 	ns->mount.mount_tmp_tmpfs = payload.data != nullptr
 		? payload.data
 		: "";
@@ -587,7 +583,6 @@ translate_client_mount_home(NamespaceOptions *ns, StringView payload)
 	    ns->mount.mount_home != nullptr)
 		throw std::runtime_error("misplaced MOUNT_HOME packet");
 
-	ns->mount.enable_mount = true;
 	ns->mount.mount_home = payload.data;
 }
 
@@ -603,7 +598,6 @@ translate_client_mount_tmpfs(NamespaceOptions *ns, StringView payload)
 	if (ns == nullptr || ns->mount.mount_tmpfs != nullptr)
 		throw std::runtime_error("misplaced MOUNT_TMPFS packet");
 
-	ns->mount.enable_mount = true;
 	ns->mount.mount_tmpfs = payload.data;
 }
 

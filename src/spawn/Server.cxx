@@ -557,10 +557,6 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.ns.enable_ipc = true;
 			break;
 
-		case SpawnExecCommand::MOUNT_NS:
-			p.ns.mount.enable_mount = true;
-			break;
-
 		case SpawnExecCommand::MOUNT_PROC:
 			p.ns.mount.mount_proc = true;
 			break;

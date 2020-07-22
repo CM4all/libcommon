@@ -81,10 +81,8 @@ try {
 		} else if (const char *netns = StringAfterPrefix(arg, "--netns=")) {
 			p.ns.network_namespace = netns;
 		} else if (const char *pivot_root = StringAfterPrefix(arg, "--root=")) {
-			p.ns.mount.enable_mount = true;
 			p.ns.mount.pivot_root = pivot_root;
 		} else if (StringIsEqual(arg, "--mount-proc")) {
-			p.ns.mount.enable_mount = true;
 			p.ns.mount.mount_proc = true;
 		} else if (const char *scope = StringAfterPrefix(arg, "--scope=")) {
 			scope_name = scope;

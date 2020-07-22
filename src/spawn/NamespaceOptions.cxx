@@ -97,7 +97,7 @@ NamespaceOptions::GetCloneFlags(int flags) const
 		flags |= CLONE_NEWNET;
 	if (enable_ipc)
 		flags |= CLONE_NEWIPC;
-	if (mount.enable_mount)
+	if (mount.IsEnabled())
 		flags |= CLONE_NEWNS;
 	if (hostname != nullptr)
 		flags |= CLONE_NEWUTS;

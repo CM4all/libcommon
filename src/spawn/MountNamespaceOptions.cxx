@@ -56,8 +56,7 @@
 
 MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 					     const MountNamespaceOptions &src) noexcept
-	:enable_mount(src.enable_mount),
-	 mount_root_tmpfs(src.mount_root_tmpfs),
+	:mount_root_tmpfs(src.mount_root_tmpfs),
 	 mount_proc(src.mount_proc),
 	 writable_proc(src.writable_proc),
 	 mount_pts(src.mount_pts),
@@ -134,9 +133,11 @@ MountOrThrow(const char *source, const char *target,
 void
 MountNamespaceOptions::Setup() const
 {
-	if (enable_mount)
-		/* convert all "shared" mounts to "private" mounts */
-		mount(nullptr, "/", nullptr, MS_PRIVATE|MS_REC, nullptr);
+	if (!IsEnabled())
+		return;
+
+	/* convert all "shared" mounts to "private" mounts */
+	mount(nullptr, "/", nullptr, MS_PRIVATE|MS_REC, nullptr);
 
 	const char *const put_old = "/mnt";
 
@@ -281,10 +282,6 @@ MountNamespaceOptions::Setup() const
 char *
 MountNamespaceOptions::MakeId(char *p) const noexcept
 {
-	if (!enable_mount)
-		return p;
-
-
 	p = (char *)(char *)mempcpy(p, ";mns", 4);
 
 	if (pivot_root != nullptr) {

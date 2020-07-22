@@ -42,8 +42,6 @@ struct Mount;
 class MatchInfo;
 
 struct MountNamespaceOptions {
-	bool enable_mount = false;
-
 	/**
 	 * Mount a tmpfs to "/"?  All required mountpoints will be
 	 * created, but the filesystem will contain nothing else.
@@ -100,8 +98,7 @@ struct MountNamespaceOptions {
 
 	constexpr MountNamespaceOptions(ShallowCopy shallow_copy,
 					const MountNamespaceOptions &src) noexcept
-		:enable_mount(src.enable_mount),
-		 mount_root_tmpfs(src.mount_root_tmpfs),
+		:mount_root_tmpfs(src.mount_root_tmpfs),
 		 mount_proc(src.mount_proc),
 		 writable_proc(src.writable_proc),
 		 mount_pts(src.mount_pts),
@@ -118,6 +115,16 @@ struct MountNamespaceOptions {
 
 	MountNamespaceOptions(AllocatorPtr alloc,
 			      const MountNamespaceOptions &src) noexcept;
+
+	bool IsEnabled() const noexcept {
+		return mount_root_tmpfs || mount_proc ||
+			mount_pts || bind_mount_pts ||
+			pivot_root != nullptr ||
+			mount_home != nullptr ||
+			mount_tmp_tmpfs != nullptr ||
+			mount_tmpfs != nullptr ||
+			!mounts.empty();
+	}
 
 #if TRANSLATION_ENABLE_EXPAND
 	gcc_pure
