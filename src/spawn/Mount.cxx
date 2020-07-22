@@ -87,7 +87,7 @@ Mount::ExpandAll(AllocatorPtr alloc,
 #endif
 
 inline void
-Mount::Apply() const
+Mount::ApplyBindMount() const
 {
 	int flags = MS_NOSUID|MS_NODEV;
 	if (!writable)
@@ -96,6 +96,16 @@ Mount::Apply() const
 		flags |= MS_NOEXEC;
 
 	BindMount(source, target, flags);
+}
+
+inline void
+Mount::Apply() const
+{
+	switch (type) {
+	case Type::BIND:
+		ApplyBindMount();
+		break;
+	}
 }
 
 void
@@ -108,6 +118,11 @@ Mount::ApplyAll(const IntrusiveForwardList<Mount> &m)
 char *
 Mount::MakeId(char *p) const noexcept
 {
+	switch (type) {
+	case Type::BIND:
+		break;
+	}
+
 	*p++ = ';';
 	*p++ = 'm';
 

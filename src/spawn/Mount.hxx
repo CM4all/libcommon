@@ -36,12 +36,18 @@
 #include "util/Compiler.h"
 #include "util/IntrusiveForwardList.hxx"
 
+#include <cstdint>
+
 class AllocatorPtr;
 class MatchInfo;
 
 struct Mount : IntrusiveForwardListHook {
 	const char *source;
 	const char *target;
+
+	enum class Type : uint8_t {
+		BIND,
+	} type = Type::BIND;
 
 #if TRANSLATION_ENABLE_EXPAND
 	bool expand_source = false;
@@ -83,6 +89,10 @@ struct Mount : IntrusiveForwardListHook {
 			      const MatchInfo &match_info);
 #endif
 
+private:
+	void ApplyBindMount() const;
+
+public:
 	/**
 	 * Throws std::system_error on error.
 	 */

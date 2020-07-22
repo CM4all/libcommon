@@ -191,11 +191,15 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			      ns.mount.mount_tmpfs);
 
 	for (const auto &i : ns.mount.mounts) {
-		s.Write(SpawnExecCommand::BIND_MOUNT);
-		s.WriteString(i.source);
-		s.WriteString(i.target);
-		s.WriteByte(i.writable);
-		s.WriteByte(i.exec);
+		switch (i.type) {
+		case Mount::Type::BIND:
+			s.Write(SpawnExecCommand::BIND_MOUNT);
+			s.WriteString(i.source);
+			s.WriteString(i.target);
+			s.WriteByte(i.writable);
+			s.WriteByte(i.exec);
+			break;
+		}
 	}
 
 	s.WriteOptionalString(SpawnExecCommand::HOSTNAME, ns.hostname);
