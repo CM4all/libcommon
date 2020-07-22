@@ -37,7 +37,7 @@
 #include "Parser.hxx"
 #include "Prepared.hxx"
 #include "CgroupOptions.hxx"
-#include "MountList.hxx"
+#include "Mount.hxx"
 #include "ExitListener.hxx"
 #include "system/Error.hxx"
 #include "util/PrintException.hxx"

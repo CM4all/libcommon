@@ -31,7 +31,7 @@
  */
 
 #include "MountNamespaceOptions.hxx"
-#include "MountList.hxx"
+#include "Mount.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/pivot_root.h"
 #include "system/BindMount.hxx"
@@ -70,7 +70,7 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 	 mount_home(alloc.CheckDup(src.mount_home)),
 	 mount_tmp_tmpfs(alloc.CheckDup(src.mount_tmp_tmpfs)),
 	 mount_tmpfs(alloc.CheckDup(src.mount_tmpfs)),
-	 mounts(MountList::CloneAll(alloc, src.mounts))
+	 mounts(Mount::CloneAll(alloc, src.mounts))
 {
 }
 
@@ -79,7 +79,7 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 bool
 MountNamespaceOptions::IsExpandable() const noexcept
 {
-	return expand_home != nullptr || MountList::IsAnyExpandable(mounts);
+	return expand_home != nullptr || Mount::IsAnyExpandable(mounts);
 }
 
 void
@@ -88,7 +88,7 @@ MountNamespaceOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 	if (expand_home != nullptr)
 		home = expand_string_unescaped(alloc, expand_home, match_info);
 
-	MountList::ExpandAll(alloc, mounts, match_info);
+	Mount::ExpandAll(alloc, mounts, match_info);
 }
 
 #endif
@@ -236,7 +236,7 @@ MountNamespaceOptions::Setup() const
 			BindMount(home + 1, mount_home, MS_NOSUID|MS_NODEV);
 		}
 
-		MountList::ApplyAll(mounts);
+		Mount::ApplyAll(mounts);
 
 		if (new_root != nullptr)
 			/* back to the new root */
@@ -324,7 +324,7 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 		p = stpcpy(p, mount_tmpfs);
 	}
 
-	p = MountList::MakeIdAll(p, mounts);
+	p = Mount::MakeIdAll(p, mounts);
 
 	return p;
 }

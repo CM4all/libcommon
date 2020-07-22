@@ -54,7 +54,7 @@ struct LhttpAddress;
 struct NfsAddress;
 struct ChildOptions;
 struct NamespaceOptions;
-struct MountList;
+struct Mount;
 struct AddressList;
 struct Transformation;
 struct FilterTransformation;
@@ -125,7 +125,7 @@ class TranslateParser {
 	NamespaceOptions *ns_options;
 
 	/** the tail of the current mount_list */
-	IntrusiveForwardList<MountList>::iterator mount_list;
+	IntrusiveForwardList<Mount>::iterator mount_list;
 
 #if TRANSLATION_ENABLE_RADDRESS
 	/** the current local file address being edited */

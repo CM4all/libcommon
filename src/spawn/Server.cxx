@@ -39,7 +39,7 @@
 #include "CgroupWatch.hxx"
 #include "CgroupOptions.hxx"
 #include "Hook.hxx"
-#include "MountList.hxx"
+#include "Mount.hxx"
 #include "CgroupState.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
@@ -479,7 +479,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 	auto mount_tail = p.ns.mount.mounts.before_begin();
 
-	std::forward_list<MountList> mounts;
+	std::forward_list<Mount> mounts;
 	std::forward_list<std::string> strings;
 	std::forward_list<CgroupOptions::SetItem> cgroup_sets;
 

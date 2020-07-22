@@ -42,7 +42,7 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
     'Interface.cxx',
     'Local.cxx',
     'MountNamespaceOptions.cxx',
-    'MountList.cxx',
+    'Mount.cxx',
     'NamespaceOptions.cxx',
     'ChildOptions.cxx',
     'CgroupOptions.cxx',

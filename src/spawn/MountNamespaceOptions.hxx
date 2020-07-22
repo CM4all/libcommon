@@ -38,7 +38,7 @@
 #include "util/ShallowCopy.hxx"
 
 class AllocatorPtr;
-struct MountList;
+struct Mount;
 class MatchInfo;
 
 struct MountNamespaceOptions {
@@ -68,7 +68,7 @@ struct MountNamespaceOptions {
 	/**
 	 * Bind-mount the old /dev/pts?
 	 *
-	 * Note that #MountList cannot be used here because it enforces
+	 * Note that #Mount cannot be used here because it enforces
 	 * MS_NODEV.
 	 */
 	bool bind_mount_pts = false;
@@ -94,7 +94,7 @@ struct MountNamespaceOptions {
 
 	const char *mount_tmpfs = nullptr;
 
-	IntrusiveForwardList<MountList> mounts;
+	IntrusiveForwardList<Mount> mounts;
 
 	MountNamespaceOptions() = default;
 

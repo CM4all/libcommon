@@ -50,7 +50,7 @@
 #include "uri/Base.hxx"
 #endif
 #include "spawn/ChildOptions.hxx"
-#include "spawn/MountList.hxx"
+#include "spawn/Mount.hxx"
 #include "spawn/ResourceLimits.hxx"
 #if TRANSLATION_ENABLE_HTTP
 #include "net/AllocatedSocketAddress.hxx"
@@ -283,7 +283,7 @@ TranslateParser::AddView(const char *name)
 	resource_address = &new_view->address;
 	child_options = nullptr;
 	ns_options = nullptr;
-	mount_list = IntrusiveForwardList<MountList>::end();
+	mount_list = IntrusiveForwardList<Mount>::end();
 	file_address = nullptr;
 	http_address = nullptr;
 	cgi_address = nullptr;
@@ -618,15 +618,14 @@ TranslateParser::HandleBindMount(StringView payload,
 	if (separator == nullptr || separator[1] != '/')
 		throw std::runtime_error("malformed BIND_MOUNT packet");
 
-	if (mount_list == IntrusiveForwardList<MountList>::end())
+	if (mount_list == IntrusiveForwardList<Mount>::end())
 		throw std::runtime_error("misplaced BIND_MOUNT packet");
 
-	auto *m = alloc.New<MountList>(/* skip the slash to make it relative */
+	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
 				       payload.data + 1,
 				       separator + 1,
 				       expand, writable, exec);
-	mount_list = IntrusiveForwardList<MountList>::insert_after(mount_list,
-								   *m);
+	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
 }
 
 static void
@@ -1290,7 +1289,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		resource_address = AddFilter();
 		child_options = nullptr;
 		ns_options = nullptr;
-		mount_list = IntrusiveForwardList<MountList>::end();
+		mount_list = IntrusiveForwardList<Mount>::end();
 		file_address = nullptr;
 		cgi_address = nullptr;
 		nfs_address = nullptr;
@@ -3501,7 +3500,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #else
 		child_options = nullptr;
 		ns_options = nullptr;
-		mount_list = IntrusiveForwardList<MountList>::end();
+		mount_list = IntrusiveForwardList<Mount>::end();
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 		file_address = nullptr;

@@ -39,7 +39,7 @@
 class AllocatorPtr;
 class MatchInfo;
 
-struct MountList : IntrusiveForwardListHook {
+struct Mount : IntrusiveForwardListHook {
 	const char *source;
 	const char *target;
 
@@ -54,12 +54,12 @@ struct MountList : IntrusiveForwardListHook {
 	 */
 	bool exec;
 
-	constexpr MountList(const char *_source, const char *_target,
+	constexpr Mount(const char *_source, const char *_target,
 #if !TRANSLATION_ENABLE_EXPAND
-			    gcc_unused
+			gcc_unused
 #endif
-			    bool _expand_source=false, bool _writable=false,
-			    bool _exec=false) noexcept
+			bool _expand_source=false, bool _writable=false,
+			bool _exec=false) noexcept
 		:source(_source), target(_target),
 #if TRANSLATION_ENABLE_EXPAND
 		expand_source(_expand_source),
@@ -67,7 +67,7 @@ struct MountList : IntrusiveForwardListHook {
 		writable(_writable), exec(_exec) {
 	}
 
-	MountList(AllocatorPtr alloc, const MountList &src) noexcept;
+	Mount(AllocatorPtr alloc, const Mount &src) noexcept;
 
 #if TRANSLATION_ENABLE_EXPAND
 	bool IsExpandable() const noexcept {
@@ -75,7 +75,7 @@ struct MountList : IntrusiveForwardListHook {
 	}
 
 	gcc_pure
-	static bool IsAnyExpandable(const IntrusiveForwardList<MountList> &list) noexcept {
+	static bool IsAnyExpandable(const IntrusiveForwardList<Mount> &list) noexcept {
 		for (const auto &i : list)
 			if (i.IsExpandable())
 				return true;
@@ -85,7 +85,7 @@ struct MountList : IntrusiveForwardListHook {
 
 	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
 	static void ExpandAll(AllocatorPtr alloc,
-			      IntrusiveForwardList<MountList> &list,
+			      IntrusiveForwardList<Mount> &list,
 			      const MatchInfo &match_info);
 #endif
 
@@ -94,14 +94,14 @@ struct MountList : IntrusiveForwardListHook {
 	 */
 	void Apply() const;
 
-	static IntrusiveForwardList<MountList> CloneAll(AllocatorPtr alloc,
-							const IntrusiveForwardList<MountList> &src) noexcept;
+	static IntrusiveForwardList<Mount> CloneAll(AllocatorPtr alloc,
+						    const IntrusiveForwardList<Mount> &src) noexcept;
 
 	/**
 	 * Throws std::system_error on error.
 	 */
-	static void ApplyAll(const IntrusiveForwardList<MountList> &m);
+	static void ApplyAll(const IntrusiveForwardList<Mount> &m);
 
 	char *MakeId(char *p) const noexcept;
-	static char *MakeIdAll(char *p, const IntrusiveForwardList<MountList> &m) noexcept;
+	static char *MakeIdAll(char *p, const IntrusiveForwardList<Mount> &m) noexcept;
 };
