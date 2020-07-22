@@ -586,8 +586,8 @@ translate_client_mount_home(NamespaceOptions *ns, StringView payload)
 	ns->mount.mount_home = payload.data;
 }
 
-static void
-translate_client_mount_tmpfs(NamespaceOptions *ns, StringView payload)
+inline void
+TranslateParser::HandleMountTmpfs(StringView payload)
 {
 	if (!IsValidAbsolutePath(payload) ||
 	    /* not allowed for /tmp, use MOUNT_TMP_TMPFS
@@ -595,10 +595,10 @@ translate_client_mount_tmpfs(NamespaceOptions *ns, StringView payload)
 	    payload.Equals("/tmp"))
 		throw std::runtime_error("malformed MOUNT_TMPFS packet");
 
-	if (ns == nullptr || ns->mount.mount_tmpfs != nullptr)
+	if (ns_options == nullptr || ns_options->mount.mount_tmpfs != nullptr)
 		throw std::runtime_error("misplaced MOUNT_TMPFS packet");
 
-	ns->mount.mount_tmpfs = payload.data;
+	ns_options->mount.mount_tmpfs = payload.data;
 }
 
 inline void
@@ -3006,7 +3006,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::MOUNT_TMPFS:
-		translate_client_mount_tmpfs(ns_options, string_payload);
+		HandleMountTmpfs(string_payload);
 		return;
 
 	case TranslationCommand::REVEAL_USER:

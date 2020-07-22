@@ -241,6 +241,8 @@ private:
 			      const char *map_path) noexcept;
 #endif
 
+	void HandleMountTmpfs(StringView payload);
+
 	void HandleBindMount(StringView payload,
 			     bool expand, bool writable, bool exec=false);
 
