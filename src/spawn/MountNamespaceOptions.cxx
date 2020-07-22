@@ -246,7 +246,7 @@ MountNamespaceOptions::Setup() const
 	if (new_root != nullptr &&
 	    /* get rid of the old root */
 	    umount2(put_old, MNT_DETACH) < 0)
-		throw FormatErrno("umount('%s') failed: %s", put_old);
+		throw FormatErrno("umount('%s') failed", put_old);
 
 	if (mount_root_tmpfs) {
 		rmdir(put_old);
