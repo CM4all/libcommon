@@ -598,9 +598,7 @@ TranslateParser::HandleMountTmpfs(StringView payload)
 	if (ns_options == nullptr)
 		throw std::runtime_error("misplaced MOUNT_TMPFS packet");
 
-	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
-				   Mount::Tmpfs{},
-				   payload.data + 1);
+	auto *m = alloc.New<Mount>(Mount::Tmpfs{}, payload.data);
 	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
 }
 
