@@ -592,7 +592,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				const char *target = payload.ReadString();
 				bool writable = payload.ReadByte();
 				bool exec = payload.ReadByte();
-				mounts.emplace_front(source, target, false,
+				mounts.emplace_front(source, target,
 						     writable, exec);
 			}
 

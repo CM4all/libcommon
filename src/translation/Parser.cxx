@@ -622,9 +622,14 @@ TranslateParser::HandleBindMount(StringView payload,
 		throw std::runtime_error("misplaced BIND_MOUNT packet");
 
 	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
-				       payload.data + 1,
-				       separator + 1,
-				       expand, writable, exec);
+				   payload.data + 1,
+				   separator + 1,
+				   writable, exec);
+#if TRANSLATION_ENABLE_EXPAND
+	m->expand_source = expand;
+#else
+	(void)expand;
+#endif
 	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
 }
 

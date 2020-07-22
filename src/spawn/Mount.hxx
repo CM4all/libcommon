@@ -44,7 +44,7 @@ struct Mount : IntrusiveForwardListHook {
 	const char *target;
 
 #if TRANSLATION_ENABLE_EXPAND
-	bool expand_source;
+	bool expand_source = false;
 #endif
 
 	bool writable;
@@ -55,15 +55,9 @@ struct Mount : IntrusiveForwardListHook {
 	bool exec;
 
 	constexpr Mount(const char *_source, const char *_target,
-#if !TRANSLATION_ENABLE_EXPAND
-			gcc_unused
-#endif
-			bool _expand_source=false, bool _writable=false,
+			bool _writable=false,
 			bool _exec=false) noexcept
 		:source(_source), target(_target),
-#if TRANSLATION_ENABLE_EXPAND
-		expand_source(_expand_source),
-#endif
 		writable(_writable), exec(_exec) {
 	}
 
