@@ -34,12 +34,17 @@
 #include "spawn/Prepared.hxx"
 #include "spawn/CgroupState.hxx"
 #include "spawn/CgroupOptions.hxx"
+#include "spawn/Mount.hxx"
 #include "spawn/Systemd.hxx"
 #include "system/Error.hxx"
 #include "net/SocketDescriptor.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
+#include "util/StringView.hxx"
 #include "AllocatorPtr.hxx"
+
+#include <forward_list>
+#include <string>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -57,6 +62,11 @@ try {
 	Allocator alloc;
 	PreparedChildProcess p;
 	CgroupOptions cgroup_options;
+
+	std::forward_list<Mount> mounts;
+	std::forward_list<std::string> strings;
+
+	auto mount_tail = p.ns.mount.mounts.before_begin();
 
 	p.exec_path = "/bin/bash";
 	p.args.emplace_back("bash");
@@ -80,10 +90,35 @@ try {
 			p.ns.enable_network = true;
 		} else if (const char *netns = StringAfterPrefix(arg, "--netns=")) {
 			p.ns.network_namespace = netns;
+		} else if (StringIsEqual(arg, "--root-tmpfs")) {
+			p.ns.mount.mount_root_tmpfs = true;
 		} else if (const char *pivot_root = StringAfterPrefix(arg, "--root=")) {
 			p.ns.mount.pivot_root = pivot_root;
 		} else if (StringIsEqual(arg, "--mount-proc")) {
 			p.ns.mount.mount_proc = true;
+		} else if (StringIsEqual(arg, "--mount-pts")) {
+			p.ns.mount.mount_pts = true;
+		} else if (StringIsEqual(arg, "--bind-mount-pts")) {
+			p.ns.mount.bind_mount_pts = true;
+		} else if (const char *bind_mount = StringAfterPrefix(arg, "--bind-mount=")) {
+			auto s = StringView(bind_mount).Split('=');
+			if (s.first.empty() || s.second.empty())
+				throw "Malformed --bind-mount parameter";
+
+			strings.emplace_front(s.first.data, s.first.size);
+			const char *source = strings.front().c_str();
+
+			strings.emplace_front(s.second.data, s.second.size);
+			const char *target = strings.front().c_str();
+
+			mounts.emplace_front(source, target, false, false);
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
+
+		} else if (const char *mount_tmpfs = StringAfterPrefix(arg, "--mount-tmpfs=")) {
+			mounts.emplace_front(Mount::Tmpfs{}, mount_tmpfs);
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
 		} else if (const char *scope = StringAfterPrefix(arg, "--scope=")) {
 			scope_name = scope;
 		} else if (const char *cgroup = StringAfterPrefix(arg, "--cgroup=")) {
@@ -140,7 +175,8 @@ try {
 	fprintf(stderr, "Usage: RunSpawn"
 		" [--uid=#] [--gid=#] [--userns]"
 		" [--pidns[=NAME]] [--netns[=NAME]]"
-		" [--root=PATH] [--mount-proc]"
+		" [--root-tmpfs] [--root=PATH] [--mount-proc]"
+		" [--mount-pts] [--bind-mount-pts]"
 		" [--scope=NAME] [--cgroup=NAME] [--cgroup-session=ID] [--cgroup-set=NAME=VALUE]"
 		"\n");
 	return EXIT_FAILURE;
