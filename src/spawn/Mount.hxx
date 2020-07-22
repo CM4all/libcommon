@@ -72,6 +72,7 @@ struct Mount : IntrusiveForwardListHook {
 
 	constexpr Mount(Tmpfs, const char *_target) noexcept
 		:source(nullptr), target(_target),
+		 type(Type::TMPFS),
 		 writable(true), exec(false) {}
 
 	Mount(AllocatorPtr alloc, const Mount &src) noexcept;
