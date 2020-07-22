@@ -112,7 +112,7 @@ MakeDirs(const char *path) noexcept
 	char *p = allocated;
 	while (char *slash = strchr(p, '/')) {
 		*slash = 0;
-		mkdir(allocated, 0755);
+		mkdir(allocated, 0711);
 		*slash = '/';
 		p = slash + 1;
 	}
@@ -173,7 +173,7 @@ MountNamespaceOptions::Setup() const
 			mkdir("proc", 0700);
 
 		if (mount_pts || bind_mount_pts) {
-			mkdir("dev", 0755);
+			mkdir("dev", 0711);
 			mkdir("dev/pts", 0700);
 		}
 
