@@ -40,6 +40,7 @@
 
 class AllocatorPtr;
 class MatchInfo;
+class VfsBuilder;
 
 struct Mount : IntrusiveForwardListHook {
 	const char *source;
@@ -98,14 +99,14 @@ struct Mount : IntrusiveForwardListHook {
 #endif
 
 private:
-	void ApplyBindMount() const;
-	void ApplyTmpfs() const;
+	void ApplyBindMount(VfsBuilder &vfs_builder) const;
+	void ApplyTmpfs(VfsBuilder &vfs_builder) const;
 
 public:
 	/**
 	 * Throws std::system_error on error.
 	 */
-	void Apply() const;
+	void Apply(VfsBuilder &vfs_builder) const;
 
 	static IntrusiveForwardList<Mount> CloneAll(AllocatorPtr alloc,
 						    const IntrusiveForwardList<Mount> &src) noexcept;
@@ -113,7 +114,8 @@ public:
 	/**
 	 * Throws std::system_error on error.
 	 */
-	static void ApplyAll(const IntrusiveForwardList<Mount> &m);
+	static void ApplyAll(const IntrusiveForwardList<Mount> &m,
+			     VfsBuilder &vfs_builder);
 
 	char *MakeId(char *p) const noexcept;
 	static char *MakeIdAll(char *p, const IntrusiveForwardList<Mount> &m) noexcept;

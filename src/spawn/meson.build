@@ -41,6 +41,7 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
     'Direct.cxx',
     'Interface.cxx',
     'Local.cxx',
+    'VfsBuilder.cxx',
     'MountNamespaceOptions.cxx',
     'Mount.cxx',
     'NamespaceOptions.cxx',

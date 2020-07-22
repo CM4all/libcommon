@@ -32,6 +32,7 @@
 
 #include "MountNamespaceOptions.hxx"
 #include "Mount.hxx"
+#include "VfsBuilder.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/pivot_root.h"
 #include "system/BindMount.hxx"
@@ -99,28 +100,6 @@ ChdirOrThrow(const char *path)
 }
 
 static void
-MakeDirs(const char *path) noexcept
-{
-	assert(path != nullptr);
-	assert(*path == '/');
-
-	++path; /* skip the slash to make it relative */
-
-	char *allocated = strdup(path);
-	AtScopeExit(allocated) { free(allocated); };
-
-	char *p = allocated;
-	while (char *slash = strchr(p, '/')) {
-		*slash = 0;
-		mkdir(allocated, 0711);
-		*slash = '/';
-		p = slash + 1;
-	}
-
-	mkdir(allocated, 0700);
-}
-
-static void
 MountOrThrow(const char *source, const char *target,
 	     const char *filesystemtype, unsigned long mountflags,
 	     const void *data)
@@ -142,6 +121,8 @@ MountNamespaceOptions::Setup() const
 
 	const char *new_root = nullptr;
 
+	VfsBuilder vfs_builder;
+
 	if (pivot_root != nullptr) {
 		/* first bind-mount the new root onto itself to "unlock" the
 		   kernel's mount object (flag MNT_LOCKED) in our namespace;
@@ -162,29 +143,8 @@ MountNamespaceOptions::Setup() const
 
 		ChdirOrThrow(new_root);
 
-		/* create all mountpoints which we'll need later on */
-
-		const auto old_umask = umask(0022);
-		AtScopeExit(old_umask) { umask(old_umask); };
-
-		mkdir(put_old + 1, 0700);
-
-		if (mount_proc)
-			mkdir("proc", 0700);
-
-		if (mount_pts || bind_mount_pts) {
-			mkdir("dev", 0711);
-			mkdir("dev/pts", 0700);
-		}
-
-		if (mount_home != nullptr)
-			MakeDirs(mount_home);
-
-		if (mount_tmp_tmpfs != nullptr)
-			mkdir("tmp", 0700);
-
-		for (const auto &i : mounts)
-			MakeDirs(i.target);
+		vfs_builder.AddWritableRoot(new_root);
+		vfs_builder.Add(put_old);
 	}
 
 	if (new_root != nullptr) {
@@ -203,6 +163,8 @@ MountNamespaceOptions::Setup() const
 			   else that will fail with EBUSY */
 			umount2("/proc", MNT_DETACH);
 
+		vfs_builder.Add("/proc");
+
 		unsigned long flags = MS_NOEXEC|MS_NOSUID|MS_NODEV;
 		if (!writable_proc)
 			flags |= MS_RDONLY;
@@ -210,30 +172,36 @@ MountNamespaceOptions::Setup() const
 		MountOrThrow("proc", "/proc", "proc", flags, nullptr);
 	}
 
-	if (mount_pts)
+	if (mount_pts) {
+		vfs_builder.Add("/dev/pts");
+
 		/* the "newinstance" option is only needed with pre-4.7
 		   kernels; from v4.7 on, this is implicit for all new devpts
 		   mounts (kernel commit eedf265aa003) */
 		MountOrThrow("devpts", "/dev/pts", "devpts",
 			     MS_NOEXEC|MS_NOSUID,
 			     "newinstance");
+	}
 
 	if (HasBindMount()) {
 		/* go to /mnt so we can refer to the old directories with a
 		   relative path */
 		ChdirOrThrow(new_root != nullptr ? put_old : "/");
 
-		if (bind_mount_pts)
+		if (bind_mount_pts) {
+			vfs_builder.Add("/dev/pts");
 			BindMount("dev/pts", "/dev/pts", MS_NOSUID|MS_NOEXEC);
+		}
 
 		if (mount_home != nullptr) {
 			assert(home != nullptr);
 			assert(*home == '/');
 
+			vfs_builder.Add(mount_home);
 			BindMount(home + 1, mount_home, MS_NOSUID|MS_NODEV);
 		}
 
-		Mount::ApplyAll(mounts);
+		Mount::ApplyAll(mounts, vfs_builder);
 
 		if (new_root != nullptr)
 			/* back to the new root */
@@ -264,9 +232,13 @@ MountNamespaceOptions::Setup() const
 			options = buffer;
 		}
 
+		vfs_builder.Add("/tmp");
+
 		MountOrThrow("none", "/tmp", "tmpfs",
 			     MS_NODEV|MS_NOEXEC|MS_NOSUID,
 			     options);
+
+		vfs_builder.MakeWritable();
 	}
 }
 

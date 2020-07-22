@@ -31,6 +31,7 @@
  */
 
 #include "Mount.hxx"
+#include "VfsBuilder.hxx"
 #include "system/BindMount.hxx"
 #include "system/Error.hxx"
 #include "AllocatorPtr.hxx"
@@ -97,8 +98,10 @@ MountOrThrow(const char *source, const char *target,
 }
 
 inline void
-Mount::ApplyBindMount() const
+Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 {
+	vfs_builder.Add(target);
+
 	int flags = MS_NOSUID|MS_NODEV;
 	if (!writable)
 		flags |= MS_RDONLY;
@@ -109,8 +112,10 @@ Mount::ApplyBindMount() const
 }
 
 inline void
-Mount::ApplyTmpfs() const
+Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 {
+	vfs_builder.Add(target);
+
 	int flags = MS_NOSUID|MS_NODEV;
 	if (!writable)
 		flags |= MS_RDONLY;
@@ -119,27 +124,30 @@ Mount::ApplyTmpfs() const
 
 	MountOrThrow("none", target, "tmpfs", flags,
 		     "size=16M,nr_inodes=256,mode=700");
+
+	vfs_builder.MakeWritable();
 }
 
 inline void
-Mount::Apply() const
+Mount::Apply(VfsBuilder &vfs_builder) const
 {
 	switch (type) {
 	case Type::BIND:
-		ApplyBindMount();
+		ApplyBindMount(vfs_builder);
 		break;
 
 	case Type::TMPFS:
-		ApplyTmpfs();
+		ApplyTmpfs(vfs_builder);
 		break;
 	}
 }
 
 void
-Mount::ApplyAll(const IntrusiveForwardList<Mount> &m)
+Mount::ApplyAll(const IntrusiveForwardList<Mount> &m,
+		VfsBuilder &vfs_builder)
 {
 	for (const auto &i : m)
-		i.Apply();
+		i.Apply(vfs_builder);
 }
 
 char *
