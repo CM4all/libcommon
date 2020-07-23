@@ -38,6 +38,8 @@
 #include "UniqueSocketDescriptor.hxx"
 #include "system/Error.hxx"
 
+#include <stdexcept>
+
 static void
 ConnectWait(SocketDescriptor s, const SocketAddress address,
 	    std::chrono::duration<int, std::milli> timeout)

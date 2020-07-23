@@ -46,12 +46,8 @@
 
 #include <string>
 
-#include <stddef.h>
-
-class CancellablePointer;
 class Stock;
 class StockClass;
-struct CreateStockItem;
 class StockGetHandler;
 
 class StockHandler {

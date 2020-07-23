@@ -36,8 +36,6 @@
 
 #include <vector>
 
-struct StringView;
-
 /**
  * This class helps with building a new VFS (virtual file system).  It
  * remembers which paths have a writable "tmpfs" and creates mount

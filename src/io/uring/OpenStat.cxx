@@ -36,6 +36,11 @@
 #include "system/Error.hxx"
 #include "system/KernelVersion.hxx"
 
+#include <cassert>
+#include <cstdint>
+#include <exception>
+#include <utility>
+
 #include <fcntl.h>
 
 static constexpr auto

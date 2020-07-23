@@ -32,7 +32,8 @@
 
 #ifndef NDEBUG
 
-#include <boost/intrusive/list.hpp>
+#include <boost/intrusive/link_mode.hpp>
+#include <boost/intrusive/list_hook.hpp>
 
 /**
  * Derive from this class to verify that its destructor gets called

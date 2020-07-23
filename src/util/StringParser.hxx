@@ -30,7 +30,7 @@
 #ifndef STRING_PARSER_HXX
 #define STRING_PARSER_HXX
 
-#include <stddef.h>
+#include <cstddef>
 
 /**
  * Parse a bool represented by either "yes" or "no"; throws
@@ -53,7 +53,7 @@ ParsePositiveLong(const char *s, unsigned long max_value);
  *
  * Throws on error.
  */
-size_t
+std::size_t
 ParseSize(const char *s);
 
 #endif

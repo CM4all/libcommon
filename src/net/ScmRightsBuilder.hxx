@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,7 +32,8 @@
 
 #pragma once
 
-#include <assert.h>
+#include <cassert>
+
 #include <sys/socket.h>
 
 template<size_t MAX_FDS>

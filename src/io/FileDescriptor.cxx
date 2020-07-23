@@ -32,6 +32,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <stdexcept>
 
 #include <sys/stat.h>
 #include <fcntl.h>

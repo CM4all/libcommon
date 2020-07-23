@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2018-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,8 @@
 #include "DirectoryReader.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
+
+#include <utility>
 
 DirectoryReader::DirectoryReader(const char *path)
 	:dir(opendir(path))

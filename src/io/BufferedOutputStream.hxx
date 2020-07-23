@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2014-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,7 +33,8 @@
 #include "util/Compiler.h"
 #include "util/DynamicFifoBuffer.hxx"
 
-#include <stddef.h>
+#include <cassert>
+#include <cstddef>
 
 #ifdef _UNICODE
 #include <wchar.h>
@@ -56,7 +57,7 @@ public:
 	explicit BufferedOutputStream(OutputStream &_os) noexcept
 		:os(_os), buffer(32768) {}
 
-	void Write(const void *data, size_t size);
+	void Write(const void *data, std::size_t size);
 
 	template<typename T>
 	void WriteT(const T &value) {
@@ -86,10 +87,10 @@ public:
 	void Flush();
 
 private:
-	bool AppendToBuffer(const void *data, size_t size) noexcept;
+	bool AppendToBuffer(const void *data, std::size_t size) noexcept;
 
 #ifdef _UNICODE
-	void WriteWideToUTF8(const wchar_t *p, size_t length);
+	void WriteWideToUTF8(const wchar_t *p, std::size_t length);
 #endif
 };
 

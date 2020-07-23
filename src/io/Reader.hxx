@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2014-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
 
 #include "util/Compiler.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 /**
  * An interface that can read bytes from a stream until the stream
@@ -53,7 +53,7 @@ public:
 	 * on end-of-stream
 	 */
 	gcc_nonnull_all
-	virtual size_t Read(void *data, size_t size) = 0;
+	virtual std::size_t Read(void *data, std::size_t size) = 0;
 };
 
 #endif

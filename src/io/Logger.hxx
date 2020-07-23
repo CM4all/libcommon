@@ -41,9 +41,11 @@
 #include <string_view>
 #endif
 
-#include <string>
+#include <cstdint>
 #include <array>
 #include <exception>
+#include <string>
+#include <utility>
 
 #include <stdio.h>
 #include <inttypes.h>

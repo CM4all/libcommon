@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2014-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,13 +32,14 @@
 
 #include "util/Compiler.h"
 #include "util/DynamicFifoBuffer.hxx"
+#include "util/WritableBuffer.hxx"
 
-#include <stddef.h>
+#include <cstddef>
 
 class Reader;
 
 class BufferedReader {
-	static constexpr size_t MAX_SIZE = 512 * 1024;
+	static constexpr std::size_t MAX_SIZE = 512 * 1024;
 
 	Reader &reader;
 
@@ -74,9 +75,9 @@ public:
 	 * it).  Throws std::runtime_error if not enough data is
 	 * available.
 	 */
-	void *ReadFull(size_t size);
+	void *ReadFull(std::size_t size);
 
-	void Consume(size_t n) noexcept {
+	void Consume(std::size_t n) noexcept {
 		buffer.Consume(n);
 	}
 
@@ -84,7 +85,7 @@ public:
 	 * Read (and consume) data from the input buffer into the
 	 * given buffer.  Does not attempt to refill the buffer.
 	 */
-	size_t ReadFromBuffer(WritableBuffer<void> dest) noexcept;
+	std::size_t ReadFromBuffer(WritableBuffer<void> dest) noexcept;
 
 	/**
 	 * Read data into the given buffer and consume it from our

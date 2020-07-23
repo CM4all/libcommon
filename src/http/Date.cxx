@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -35,7 +35,9 @@
 #include "util/CharUtil.hxx"
 #include "util/DecimalFormat.h"
 
-#include <stdint.h>
+#include <cstdint>
+
+#include <string.h>
 
 static constexpr char wdays[8][5] = {
 	"Sun,",

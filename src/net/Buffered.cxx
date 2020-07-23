@@ -33,9 +33,11 @@
 #include "Buffered.hxx"
 #include "util/ForeignFifoBuffer.hxx"
 
-#include <assert.h>
+#include <cassert>
+#include <cerrno>
+#include <cstdint>
+
 #include <sys/socket.h>
-#include <errno.h>
 
 ssize_t
 ReceiveToBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer)

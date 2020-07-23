@@ -43,7 +43,7 @@ public:
 		return fd;
 	}
 
-	void Write(const void *data, size_t size) override;
+	void Write(const void *data, std::size_t size) override;
 };
 
 #endif

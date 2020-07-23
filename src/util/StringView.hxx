@@ -35,6 +35,7 @@
 #include "Compiler.h"
 
 #include <utility>
+#include <cstddef>
 
 #if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
 #include <string_view>

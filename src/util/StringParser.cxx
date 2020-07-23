@@ -31,6 +31,7 @@
 #include "StringStrip.hxx"
 
 #include <cstdint> // for SIZE_MAX
+#include <cstdlib>
 #include <stdexcept>
 
 #include <string.h>
@@ -50,7 +51,7 @@ unsigned long
 ParseUnsignedLong(const char *s)
 {
 	char *endptr;
-	auto value = strtoul(s, &endptr, 10);
+	auto value = std::strtoul(s, &endptr, 10);
 	if (endptr == s || *endptr != 0)
 		throw std::runtime_error("Failed to parse integer");
 
@@ -77,28 +78,28 @@ ParsePositiveLong(const char *s, unsigned long max_value)
 	return value;
 }
 
-template<size_t OPERAND>
-static size_t
-Multiply(size_t value)
+template<std::size_t OPERAND>
+static std::size_t
+Multiply(std::size_t value)
 {
-	static constexpr size_t MAX_INPUT = SIZE_MAX / OPERAND;
+	static constexpr std::size_t MAX_INPUT = SIZE_MAX / OPERAND;
 	if (value > MAX_INPUT)
 		throw std::runtime_error("Value too large");
 
 	return value * OPERAND;
 }
 
-size_t
+std::size_t
 ParseSize(const char *s)
 {
 	char *endptr;
-	size_t value = strtoul(s, &endptr, 10);
+	std::size_t value = std::strtoul(s, &endptr, 10);
 	if (endptr == s)
 		throw std::runtime_error("Failed to parse integer");
 
-	static constexpr size_t KILO = 1024;
-	static constexpr size_t MEGA = 1024 * KILO;
-	static constexpr size_t GIGA = 1024 * MEGA;
+	static constexpr std::size_t KILO = 1024;
+	static constexpr std::size_t MEGA = 1024 * KILO;
+	static constexpr std::size_t GIGA = 1024 * MEGA;
 
 	s = StripLeft(endptr);
 

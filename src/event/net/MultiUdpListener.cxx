@@ -35,7 +35,6 @@
 #include "system/Error.hxx"
 
 #include <assert.h>
-#include <sys/socket.h>
 
 MultiUdpListener::MultiUdpListener(EventLoop &event_loop,
 				   UniqueSocketDescriptor _socket,

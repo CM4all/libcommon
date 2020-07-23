@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_UID_GID_HXX
-#define BENG_PROXY_UID_GID_HXX
+#pragma once
 
 #include <array>
 #include <algorithm>
@@ -80,5 +79,3 @@ struct UidGid {
 	 */
 	void Apply() const;
 };
-
-#endif

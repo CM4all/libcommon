@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2014-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,8 @@
 #include "FdOutputStream.hxx"
 #include "system/Error.hxx"
 #include "util/OffsetPointer.hxx"
+
+#include <stdexcept>
 
 void
 FdOutputStream::Write(const void *data, size_t size)

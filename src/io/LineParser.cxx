@@ -32,6 +32,8 @@
 
 #include "LineParser.hxx"
 
+#include <cstdlib>
+
 #include <string.h>
 
 bool
@@ -216,7 +218,7 @@ LineParser::NextPositiveInteger()
 		throw Error("Positive integer expected");
 
 	char *endptr;
-	unsigned long l = strtoul(string, &endptr, 10);
+	unsigned long l = std::strtoul(string, &endptr, 10);
 	if (endptr == string || *endptr != 0 || l <= 0)
 		throw Error("Positive integer expected");
 

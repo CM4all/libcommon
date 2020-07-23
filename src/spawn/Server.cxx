@@ -58,14 +58,12 @@
 
 #include <forward_list>
 #include <memory>
-#include <system_error>
 
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <string.h>
-#include <errno.h>
 
 class SpawnServerProcess;
 

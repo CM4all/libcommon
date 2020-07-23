@@ -35,6 +35,8 @@
 #include "AllocatedSocketAddress.hxx"
 #include "util/Compiler.h"
 
+#include <utility>
+
 class MaskedSocketAddress {
 	AllocatedSocketAddress address;
 	unsigned prefix_length;

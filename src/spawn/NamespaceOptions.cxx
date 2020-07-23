@@ -37,7 +37,6 @@
 #include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
-#include "util/ScopeExit.hxx"
 
 #include <set>
 

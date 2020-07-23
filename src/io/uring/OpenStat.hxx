@@ -35,8 +35,6 @@
 #include "Operation.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
-#include <exception>
-
 #include <sys/stat.h>
 
 namespace Uring {

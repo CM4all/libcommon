@@ -31,6 +31,8 @@
 
 #ifndef NDEBUG
 
+#include <boost/intrusive/list.hpp>
+
 #include <mutex>
 
 #include <assert.h>

@@ -40,7 +40,7 @@ TryWrite(FileDescriptor fd, ConstBuffer<void> value) noexcept
 	ssize_t nbytes = fd.Write(value.data, value.size);
 	if (nbytes < 0)
 		return WriteFileResult::ERROR;
-	else if (size_t(nbytes) == value.size)
+	else if (ConstBuffer<void>::size_type(nbytes) == value.size)
 		return WriteFileResult::SUCCESS;
 	else
 		return WriteFileResult::SHORT;

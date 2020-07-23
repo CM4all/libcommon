@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2013-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
 
 #include "util/Compiler.h"
 
-#include <system_error>
+#include <system_error> // IWYU pragma: export
 #include <utility>
 
 #include <stdio.h>
@@ -92,7 +92,7 @@ FormatLastError(const char *fmt, Args&&... args) noexcept
 
 #endif /* _WIN32 */
 
-#include <cerrno>
+#include <cerrno> // IWYU pragma: export
 
 #include <string.h>
 

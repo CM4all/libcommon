@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,7 +36,8 @@
 #include "ToString.hxx"
 #include "system/Error.hxx"
 
-#include <assert.h>
+#include <cassert>
+
 #include <sys/stat.h>
 #include <unistd.h>
 

@@ -31,7 +31,10 @@
 #include "system/Error.hxx"
 #include "util/RuntimeError.hxx"
 
+#include <cassert>
+
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>

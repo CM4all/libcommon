@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2014-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,7 +30,7 @@
 #ifndef OUTPUT_STREAM_HXX
 #define OUTPUT_STREAM_HXX
 
-#include <stddef.h>
+#include <cstddef>
 
 class OutputStream {
 public:
@@ -40,7 +40,7 @@ public:
 	/**
 	 * Throws std::exception on error.
 	 */
-	virtual void Write(const void *data, size_t size) = 0;
+	virtual void Write(const void *data, std::size_t size) = 0;
 };
 
 #endif

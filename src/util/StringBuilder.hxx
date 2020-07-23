@@ -34,7 +34,7 @@
 #include "WritableBuffer.hxx"
 #include "Compiler.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 /**
  * Fills a string buffer incrementally by appending more data to the
@@ -45,7 +45,7 @@ class BasicStringBuilder {
 	using value_type = T;
 	using pointer = T *;
 	using const_pointer = const T *;
-	using size_type = size_t;
+	using size_type = std::size_t;
 
 	pointer p;
 	const pointer end;

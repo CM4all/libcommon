@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,8 +34,7 @@
  * Format and parse HTTP dates.
  */
 
-#ifndef HTTP_DATE_HXX
-#define HTTP_DATE_HXX
+#pragma once
 
 #include "util/Compiler.h"
 
@@ -52,5 +51,3 @@ http_date_format(std::chrono::system_clock::time_point t) noexcept;
 gcc_pure
 std::chrono::system_clock::time_point
 http_date_parse(const char *p) noexcept;
-
-#endif
