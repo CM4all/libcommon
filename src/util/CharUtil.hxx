@@ -70,6 +70,12 @@ IsWhitespaceFast(const char ch) noexcept
 	return IsWhitespaceOrNull(ch);
 }
 
+/**
+ * Is this a non-printable ASCII character?  Returns false for
+ * non-ASCII characters.
+ *
+ * Note that this is not the opposite of IsNonPrintableASCII().
+ */
 constexpr bool
 IsPrintableASCII(char ch) noexcept
 {
