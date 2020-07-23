@@ -82,6 +82,17 @@ IsPrintableASCII(char ch) noexcept
 	return (signed char)ch >= 0x20;
 }
 
+/**
+ * Is this a non-printable character?  Returns false for non-ASCII characters.
+ *
+ * Note that this is not the opposite of IsPrintableASCII()
+ */
+constexpr bool
+IsNonPrintableASCII(char ch) noexcept
+{
+	return (unsigned char)ch < 0x20;
+}
+
 constexpr bool
 IsDigitASCII(char ch) noexcept
 {
