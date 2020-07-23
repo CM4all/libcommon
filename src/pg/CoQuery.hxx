@@ -42,6 +42,11 @@ namespace Pg {
 
 /**
  * Asynchronous PostgreSQL query.
+ *
+ * Example:
+ *
+ *     Pg::Result result = co_await
+ *       Pg::CoQuery(connection, "SELECT foo FROM bar WHERE id=$1", id);
  */
 class CoQuery final : public AsyncResultHandler {
 	AsyncConnection &connection;
