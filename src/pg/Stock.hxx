@@ -39,6 +39,10 @@ namespace Pg {
 
 class AsyncConnection;
 
+/**
+ * A #::Stock implementation which manages PostgreSQL connections
+ * (#AsyncConnection instances).
+ */
 class Stock final : StockClass {
 	class Item;
 
@@ -60,10 +64,19 @@ public:
 		return stock;
 	}
 
+	/**
+	 * @see ::Stock::Shutdown()
+	 */
 	void Shutdown() noexcept {
 		stock.Shutdown();
 	}
 
+	/**
+	 * Cast a #StockItem obtained from this class to the
+	 * underlying #AsyncConnection.  Of course, this reference is
+	 * only valid until the #StockItem is returned to the
+	 * #::Stock.
+	 */
 	static AsyncConnection &GetConnection(StockItem &item) noexcept;
 
 private:
