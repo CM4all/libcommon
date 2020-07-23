@@ -40,6 +40,11 @@
 
 namespace Pg {
 
+/**
+ * Obtain a PostgreSQL connection from a #Pg::Stock, send the given
+ * query, return the connection to the stock and return the
+ * #Pg::Result.
+ */
 template<typename... Params>
 Co::Task<Result>
 CoStockQuery(Stock &stock, Params... params) noexcept
