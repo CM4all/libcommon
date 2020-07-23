@@ -86,7 +86,7 @@ public:
 			throw std::runtime_error("dbus_message_iter_append_fixed_array() failed");
 
 		return *this;
-	};
+	}
 
 	AppendMessageIter &AppendFixedArray(ConstBuffer<uint32_t> value) {
 		return AppendFixedArray(DBUS_TYPE_UINT32,
