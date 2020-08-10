@@ -119,9 +119,11 @@ struct TranslateResponse {
 
 	const char *redirect;
 	const char *bounce;
+#endif
 
 	const char *message;
 
+#if TRANSLATION_ENABLE_HTTP
 	const char *scheme;
 	const char *host;
 	const char *uri;

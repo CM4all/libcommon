@@ -3161,16 +3161,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::MESSAGE:
-#if TRANSLATION_ENABLE_HTTP
 		if (string_payload.size > 1024 ||
 		    !IsValidNonEmptyString(string_payload))
 			throw std::runtime_error("malformed MESSAGE packet");
 
 		response.message = string_payload.data;
 		return;
-#else
-		break;
-#endif
 
 	case TranslationCommand::CANONICAL_HOST:
 		if (!IsValidNonEmptyString(string_payload))

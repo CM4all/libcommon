@@ -92,9 +92,11 @@ TranslateResponse::Clear()
 
 	redirect = nullptr;
 	bounce = nullptr;
+#endif
 
 	message = nullptr;
 
+#if TRANSLATION_ENABLE_HTTP
 	scheme = nullptr;
 	host = nullptr;
 	uri = nullptr;
@@ -295,7 +297,11 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	document_root = alloc.CheckDup(src.document_root);
 	redirect = alloc.CheckDup(src.redirect);
 	bounce = alloc.CheckDup(src.bounce);
+#endif
+
 	message = alloc.CheckDup(src.message);
+
+#if TRANSLATION_ENABLE_RADDRESS
 	scheme = alloc.CheckDup(src.scheme);
 	host = alloc.CheckDup(src.host);
 	uri = alloc.CheckDup(src.uri);
