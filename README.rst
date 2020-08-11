@@ -20,7 +20,8 @@ Building libcommon
 
 You need:
 
-- a C++17 compiler (gcc 6 or clang)
+- a C++20 compiler (`GCC <https://gcc.gnu.org/>`__ or `clang
+  <https://clang.llvm.org/>`__)
 - `meson 0.37 <http://mesonbuild.com/>`__
 - `Boost <http://boost.org/>`__
 - `libcurl <https://curl.haxx.se/>`__
@@ -48,6 +49,7 @@ Contents
 Each directory below ``src`` contains a sub-library:
 
 - ``util``: generic utilities
+- ``co``: C++20 Coroutines
 - ``time``: dealing with date and time
 - ``http``: HTTP protocol definitions and helpers
 - ``adata``: data structures using our pool allocator
