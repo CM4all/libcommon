@@ -65,5 +65,11 @@ Each directory below ``src`` contains a sub-library:
 - ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers
 - ``odbus``: `libdbus
   <https://www.freedesktop.org/wiki/Software/dbus/>`__ C++ wrappers
+- ``sodium``: `libsodium <https://github.com/jedisct1/libsodium/>`__
+  C++ wrappers
+- ``ssl``: `OpenSSL <https://www.openssl.org/>`__ C++ wrappers
+- ``zlib``: `zlib <https://zlib.net//>`__ C++ wrappers
 - ``translation``: implementation of the CM4all translation protocol
 - ``spawn``: a process spawner
+- ``stock``: manage stocks of reusable objects (e.g. for connection
+  pooling)
