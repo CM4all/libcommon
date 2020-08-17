@@ -45,8 +45,9 @@
 
 inline
 Mount::Mount(AllocatorPtr alloc, const Mount &src) noexcept
-	:source(alloc.Dup(src.source)),
+	:source(alloc.CheckDup(src.source)),
 	 target(alloc.Dup(src.target)),
+	 type(src.type),
 #if TRANSLATION_ENABLE_EXPAND
 	 expand_source(src.expand_source),
 #endif
