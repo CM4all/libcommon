@@ -64,6 +64,10 @@ public:
 
 	void Load() const;
 
+	void SetAttributeNoThrow(enum scmp_filter_attr attr, uint32_t value) noexcept {
+		seccomp_attr_set(ctx, attr, value);
+	}
+
 	void AddArch(uint32_t arch_token);
 	void AddSecondaryArchs() noexcept;
 

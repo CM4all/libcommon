@@ -293,6 +293,14 @@ try {
 
 	try {
 		Seccomp::Filter sf(SCMP_ACT_ALLOW);
+
+#ifdef PR_SET_NO_NEW_PRIVS
+		/* don't enable PR_SET_NO_NEW_PRIVS unless the feature
+		   was explicitly enabled */
+		if (!p.no_new_privs)
+			sf.SetAttributeNoThrow(SCMP_FLTATR_CTL_NNP, 0);
+#endif
+
 		sf.AddSecondaryArchs();
 
 		BuildSyscallFilter(sf);
