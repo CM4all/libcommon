@@ -193,6 +193,12 @@ struct TranslateResponse {
 	 * #TranslationCommand::WANT_FULL_URI packet was received.
 	 */
 	ConstBuffer<void> want_full_uri;
+
+	/**
+	 * The payload of the #TranslationCommand::CHAIN
+	 * packet.
+	 */
+	ConstBuffer<void> chain;
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
@@ -374,6 +380,8 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
+	bool break_chain;
+
 	bool dump_headers;
 #endif
 

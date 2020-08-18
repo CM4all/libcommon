@@ -1001,6 +1001,21 @@ enum class TranslationCommand : uint16_t {
 	 * server instead of to systemd-journald.
 	 */
 	STDERR_POND = 214,
+
+	/**
+	 * Enable request chaining: after the HTTP response is
+	 * received, another translation is requested echoing this
+	 * #CHAIN packet.  The translation server provides another
+	 * HTTP request handler to which the previous response will be
+	 * sent as a POST request.
+	 */
+	CHAIN = 215,
+
+	/**
+	 * Stop the current chain and deliver the pending response to
+	 * the client of the initial HTTP request.
+	 */
+	BREAK_CHAIN = 216,
 };
 
 struct TranslationHeader {

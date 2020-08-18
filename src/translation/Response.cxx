@@ -160,6 +160,7 @@ TranslateResponse::Clear()
 	anchor_absolute = false;
 #endif
 #if TRANSLATION_ENABLE_HTTP
+	break_chain = false;
 	dump_headers = false;
 #endif
 #if TRANSLATION_ENABLE_EXPAND
@@ -187,6 +188,7 @@ TranslateResponse::Clear()
 
 #if TRANSLATION_ENABLE_HTTP
 	want_full_uri = nullptr;
+	chain = nullptr;
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
@@ -380,6 +382,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	anchor_absolute = src.anchor_absolute;
 #endif
 #if TRANSLATION_ENABLE_HTTP
+	break_chain = src.break_chain;
 	dump_headers = src.dump_headers;
 #endif
 #if TRANSLATION_ENABLE_EXPAND
@@ -402,6 +405,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	check = alloc.Dup(src.check);
 	auth = alloc.Dup(src.auth);
 	want_full_uri = alloc.Dup(src.want_full_uri);
+	chain = alloc.Dup(src.chain);
 #endif
 
 #if TRANSLATION_ENABLE_SESSION

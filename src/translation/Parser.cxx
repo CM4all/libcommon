@@ -3449,6 +3449,34 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->stderr_pond = true;
 		return;
+
+	case TranslationCommand::CHAIN:
+#if TRANSLATION_ENABLE_HTTP
+		if (!response.chain.IsNull())
+			throw std::runtime_error("duplicate CHAIN packet");
+
+		response.chain = payload;
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::BREAK_CHAIN:
+#if TRANSLATION_ENABLE_HTTP
+		if (!payload.empty())
+			throw std::runtime_error("malformed BREAK_CHAIN packet");
+
+		if (!from_request.chain)
+			throw std::runtime_error("BREAK_CHAIN without CHAIN request");
+
+		if (response.break_chain)
+			throw std::runtime_error("duplicate BREAK_CHAIN packet");
+
+		response.break_chain = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

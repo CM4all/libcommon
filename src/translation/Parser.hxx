@@ -75,6 +75,7 @@ class TranslateParser {
 
 #if TRANSLATION_ENABLE_HTTP
 		bool want_full_uri;
+		bool chain;
 #endif
 
 		bool want;
@@ -90,6 +91,7 @@ class TranslateParser {
 #endif
 #if TRANSLATION_ENABLE_HTTP
 			want_full_uri(!r.want_full_uri.IsNull()),
+			chain(!r.chain.IsNull()),
 #endif
 			want(!r.want.empty())
 #if TRANSLATION_ENABLE_RADDRESS
