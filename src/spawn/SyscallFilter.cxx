@@ -17,7 +17,16 @@
 #endif
 
 /**
- * The system calls which are forbidden unconditionally.
+ * The system calls which are disabled unconditionally and fail by
+ * returning ENOSYS.
+ */
+static constexpr int disable_syscalls[] = {
+	SCMP_SYS(get_mempolicy),
+};
+
+/**
+ * Like #disable_syscalls, but kill the process with SIGSYS instead of
+ * returning ENOSYS.
  */
 static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(acct),
@@ -36,7 +45,6 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(fanotify_mark),
 	SCMP_SYS(finit_module),
 	SCMP_SYS(get_kernel_syms),
-	SCMP_SYS(get_mempolicy),
 	SCMP_SYS(init_module),
 	SCMP_SYS(ioperm),
 	SCMP_SYS(iopl),
@@ -124,6 +132,19 @@ void
 BuildSyscallFilter(Seccomp::Filter &sf)
 {
 	/* forbid a bunch of dangerous system calls */
+
+	for (auto i : disable_syscalls) {
+		try {
+			sf.AddRule(SCMP_ACT_ERRNO(ENOSYS), i);
+		} catch (const std::system_error &e) {
+			if (IsErrno(e, EFAULT)) {
+				/* system call not supported by this kernel - ignore
+				   this problem silently, because an unsupported
+				   syscall doesn't need to be filtered */
+			} else
+				throw;
+		}
+	}
 
 	for (auto i : forbidden_syscalls) {
 		try {
