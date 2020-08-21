@@ -69,6 +69,8 @@ struct Request {
 
 	ConstBuffer<void> want_full_uri = nullptr;
 
+	ConstBuffer<void> chain = nullptr;
+
 	ConstBuffer<void> file_not_found = nullptr;
 
 	ConstBuffer<void> content_type_lookup = nullptr;

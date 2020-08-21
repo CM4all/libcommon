@@ -57,6 +57,7 @@ class AllocatedRequest : public Request {
 	std::string error_document_buffer;
 	std::string check_buffer;
 	std::string want_full_uri_buffer;
+	std::string chain_buffer;
 	std::string file_not_found_buffer, content_type_lookup_buffer;
 	std::string suffix_buffer;
 	std::string directory_index_buffer, enotdir_buffer;

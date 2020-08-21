@@ -1288,6 +1288,15 @@ public:
 		return PacketT(TranslationCommand::EXPIRES_RELATIVE, seconds);
 	}
 
+	template<typename P>
+	auto &Chain(P payload) noexcept {
+		return Packet(TranslationCommand::CHAIN, payload);
+	}
+
+	auto &BreakChain() noexcept {
+		return Packet(TranslationCommand::BREAK_CHAIN);
+	}
+
 	WritableBuffer<uint8_t> Finish() noexcept;
 
 private:
