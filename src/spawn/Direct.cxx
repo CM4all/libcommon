@@ -245,11 +245,45 @@ try {
 			_exit(SpawnInit(pid, false));
 	}
 
-	if (!p.uid_gid.IsEmpty())
-		p.uid_gid.Apply();
-
 	if (p.no_new_privs)
 		prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
+
+	try {
+		Seccomp::Filter sf(SCMP_ACT_ALLOW);
+
+#ifdef PR_SET_NO_NEW_PRIVS
+		/* don't enable PR_SET_NO_NEW_PRIVS unless the feature
+		   was explicitly enabled */
+		if (!p.no_new_privs)
+			sf.SetAttributeNoThrow(SCMP_FLTATR_CTL_NNP, 0);
+#endif
+
+		sf.AddSecondaryArchs();
+
+		BuildSyscallFilter(sf);
+
+		if (p.forbid_user_ns)
+			ForbidUserNamespace(sf);
+
+		if (p.forbid_multicast)
+			ForbidMulticast(sf);
+
+		if (p.forbid_bind)
+			ForbidBind(sf);
+
+		sf.Load();
+	} catch (const std::runtime_error &e) {
+		if (p.HasSyscallFilter())
+			/* filter options have been explicitly enabled, and thus
+			   failure to set up the filter are fatal */
+			throw;
+
+		fprintf(stderr, "Failed to setup seccomp filter for '%s': %s\n",
+			path, e.what());
+	}
+
+	if (!p.uid_gid.IsEmpty())
+		p.uid_gid.Apply();
 
 	if (stderr_fd < 0 && p.stderr_path != nullptr) {
 		stderr_fd = open(p.stderr_path,
@@ -289,40 +323,6 @@ try {
 			perror("Failed to set the controlling terminal");
 			_exit(EXIT_FAILURE);
 		}
-	}
-
-	try {
-		Seccomp::Filter sf(SCMP_ACT_ALLOW);
-
-#ifdef PR_SET_NO_NEW_PRIVS
-		/* don't enable PR_SET_NO_NEW_PRIVS unless the feature
-		   was explicitly enabled */
-		if (!p.no_new_privs)
-			sf.SetAttributeNoThrow(SCMP_FLTATR_CTL_NNP, 0);
-#endif
-
-		sf.AddSecondaryArchs();
-
-		BuildSyscallFilter(sf);
-
-		if (p.forbid_user_ns)
-			ForbidUserNamespace(sf);
-
-		if (p.forbid_multicast)
-			ForbidMulticast(sf);
-
-		if (p.forbid_bind)
-			ForbidBind(sf);
-
-		sf.Load();
-	} catch (const std::runtime_error &e) {
-		if (p.HasSyscallFilter())
-			/* filter options have been explicitly enabled, and thus
-			   failure to set up the filter are fatal */
-			throw;
-
-		fprintf(stderr, "Failed to setup seccomp filter for '%s': %s\n",
-			path, e.what());
 	}
 
 	if (p.exec_function != nullptr) {
