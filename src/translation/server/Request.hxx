@@ -71,6 +71,8 @@ struct Request {
 
 	ConstBuffer<void> chain = nullptr;
 
+	const char *chain_header = nullptr;
+
 	ConstBuffer<void> file_not_found = nullptr;
 
 	ConstBuffer<void> content_type_lookup = nullptr;

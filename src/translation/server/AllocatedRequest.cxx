@@ -219,6 +219,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		chain = {chain_buffer.data(), chain_buffer.size()};
 		break;
 
+	case TranslationCommand::CHAIN_HEADER:
+		chain_header_buffer = ToString(payload);
+		chain_header = chain_header_buffer.c_str();
+		break;
+
 	case TranslationCommand::REMOTE_HOST:
 	case TranslationCommand::LOCAL_ADDRESS:
 	case TranslationCommand::LOCAL_ADDRESS_STRING:

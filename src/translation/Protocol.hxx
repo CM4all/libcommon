@@ -1016,6 +1016,12 @@ enum class TranslationCommand : uint16_t {
 	 * the client of the initial HTTP request.
 	 */
 	BREAK_CHAIN = 216,
+
+	/**
+	 * The value of the "X-CM4all-Chain" response header in #CHAIN
+	 * requests.
+	 */
+	CHAIN_HEADER = 217,
 };
 
 struct TranslationHeader {
