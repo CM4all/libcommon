@@ -3478,6 +3478,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::FILTER_NO_BODY:
+#if TRANSLATION_ENABLE_TRANSFORMATION
+		if (!payload.empty())
+			throw std::runtime_error("malformed FILTER_NO_BODY packet");
+
+		if (filter == nullptr)
+			throw std::runtime_error("misplaced FILTER_NO_BODY");
+
+		if (filter->no_body)
+			throw std::runtime_error("duplicate FILTER_NO_BODY");
+
+		filter->no_body = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

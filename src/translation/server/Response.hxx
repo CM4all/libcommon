@@ -523,6 +523,11 @@ public:
 			return *this;
 		}
 
+		auto NoBody() noexcept {
+			response.Packet(TranslationCommand::FILTER_NO_BODY);
+			return *this;
+		}
+
 		template<typename... Types>
 		auto CacheTag(Types... tag) noexcept {
 			response.StringPacket(TranslationCommand::CACHE_TAG,

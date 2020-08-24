@@ -1022,6 +1022,12 @@ enum class TranslationCommand : uint16_t {
 	 * requests.
 	 */
 	CHAIN_HEADER = 217,
+
+	/**
+	 * Option for #FILTER: don't send a request body to the
+	 * filter, and discard successful responses from the filter.
+	 */
+	FILTER_NO_BODY = 218,
 };
 
 struct TranslationHeader {
