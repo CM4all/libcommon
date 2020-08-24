@@ -518,6 +518,11 @@ public:
 			return *this;
 		}
 
+		auto RevealUser() noexcept {
+			response.Packet(TranslationCommand::REVEAL_USER);
+			return *this;
+		}
+
 		template<typename... Types>
 		auto CacheTag(Types... tag) noexcept {
 			response.StringPacket(TranslationCommand::CACHE_TAG,
