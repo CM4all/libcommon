@@ -1307,6 +1307,10 @@ public:
 		return Packet(TranslationCommand::BREAK_CHAIN);
 	}
 
+	auto &MaxAge(uint32_t seconds) noexcept {
+		return PacketT(TranslationCommand::MAX_AGE, seconds);
+	}
+
 	WritableBuffer<uint8_t> Finish() noexcept;
 
 private:
