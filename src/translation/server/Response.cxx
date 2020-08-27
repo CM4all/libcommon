@@ -40,7 +40,7 @@
 namespace Translation::Server {
 
 inline void
-Response::Grow(size_t new_capacity) noexcept
+Response::Grow(std::size_t new_capacity) noexcept
 {
 	assert(size <= capacity);
 	assert(new_capacity > capacity);
@@ -53,11 +53,11 @@ Response::Grow(size_t new_capacity) noexcept
 }
 
 void *
-Response::Write(size_t nbytes) noexcept
+Response::Write(std::size_t nbytes) noexcept
 {
 	assert(size <= capacity);
 
-	const size_t new_size = size + nbytes;
+	const std::size_t new_size = size + nbytes;
 	if (new_size > capacity)
 		Grow(((new_size - 1) | 0x7fff) + 1);
 
@@ -67,7 +67,7 @@ Response::Write(size_t nbytes) noexcept
 }
 
 void *
-Response::WriteHeader(TranslationCommand cmd, size_t payload_size) noexcept
+Response::WriteHeader(TranslationCommand cmd, std::size_t payload_size) noexcept
 {
 	assert(payload_size <= 0xffff);
 
@@ -88,13 +88,13 @@ WritableBuffer<uint8_t>
 Response::Finish() noexcept
 {
 	/* generate a VARY packet? */
-	size_t n_vary = std::accumulate(vary.begin(), vary.end(), 0,
-					std::plus<size_t>{});
+	std::size_t n_vary = std::accumulate(vary.begin(), vary.end(), 0,
+					     std::plus<std::size_t>{});
 	if (n_vary > 0) {
 		TranslationCommand *dest = (TranslationCommand *)
 			WriteHeader(TranslationCommand::VARY,
 				    n_vary * sizeof(*dest));
-		for (size_t i = 0; i < vary.size(); ++i)
+		for (std::size_t i = 0; i < vary.size(); ++i)
 			if (vary[i])
 				*dest++ = vary_cmds[i];
 	}

@@ -39,18 +39,18 @@
 #include "util/WritableBuffer.hxx"
 
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <string_view>
 #include <utility>
 
-#include <stdint.h>
-#include <stddef.h>
 #include <string.h>
 
 namespace Translation::Server {
 
 class Response {
 	uint8_t *buffer = nullptr;
-	size_t capacity = 0, size = 0;
+	std::size_t capacity = 0, size = 0;
 
 	enum VaryIndex {
 		PARAM,
@@ -205,7 +205,7 @@ public:
 	 */
 	template<typename... Params>
 	auto &MultiPacket(TranslationCommand cmd, Params... params) noexcept {
-		size_t total_length = (... + GetParamLength(params));
+		std::size_t total_length = (... + GetParamLength(params));
 		void *p = WriteHeader(cmd, total_length);
 		WriteParams(p, params...);
 		return *this;
@@ -218,7 +218,7 @@ public:
 	template<typename... Params>
 	auto &StringPacket(TranslationCommand cmd, Params... params) noexcept {
 		static_assert(sizeof...(params) > 0);
-		size_t total_length = (... + GetParamLength(params));
+		std::size_t total_length = (... + GetParamLength(params));
 		void *p = WriteHeader(cmd, total_length);
 		WriteStringParams(p, params...);
 		return *this;
@@ -1314,17 +1314,17 @@ public:
 	WritableBuffer<uint8_t> Finish() noexcept;
 
 private:
-	void Grow(size_t new_capacity) noexcept;
-	void *Write(size_t nbytes) noexcept;
+	void Grow(std::size_t new_capacity) noexcept;
+	void *Write(std::size_t nbytes) noexcept;
 
 	void *WriteHeader(TranslationCommand cmd,
-			  size_t payload_size) noexcept;
+			  std::size_t payload_size) noexcept;
 
-	static constexpr size_t GetParamLength(ConstBuffer<void> b) noexcept {
+	static constexpr std::size_t GetParamLength(ConstBuffer<void> b) noexcept {
 		return b.size;
 	}
 
-	static constexpr size_t GetParamLength(std::string_view sv) noexcept {
+	static constexpr std::size_t GetParamLength(std::string_view sv) noexcept {
 		return sv.size();
 	}
 
