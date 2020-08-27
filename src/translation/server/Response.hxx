@@ -111,6 +111,28 @@ public:
 		return *this;
 	}
 
+	/**
+	 * An opaque type for Mark() and Revert().
+	 */
+	struct Marker {
+		std::size_t size;
+	};
+
+	/**
+	 * Returns an opaque marker for later use with Revert().
+	 */
+	Marker Mark() const noexcept {
+		return {size};
+	}
+
+	/**
+	 * Revert all packets added after the given marker (but leave
+	 * "vary" unchanged).
+	 */
+	void Revert(Marker m) noexcept {
+		size = m.size;
+	}
+
 	auto &VaryParam() noexcept {
 		vary[VaryIndex::PARAM] = true;
 		return *this;
