@@ -147,8 +147,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 
 	if (gcc_unlikely(cmd == TranslationCommand::END)) {
 		state = State::PROCESSING;
-		handler.OnTranslationRequest(*this, request, cancel_ptr);
-		return true;
+		return handler.OnTranslationRequest(*this, request, cancel_ptr);
 	}
 
 	try {
