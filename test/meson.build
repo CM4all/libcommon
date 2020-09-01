@@ -29,6 +29,7 @@ gtest = declare_dependency(
 )
 
 subdir('util')
+subdir('uri')
 subdir('http')
 subdir('io')
 subdir('net')

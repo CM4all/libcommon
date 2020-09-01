@@ -87,6 +87,7 @@ endif
 inc = include_directories('src', 'fake', '.')
 
 subdir('src/util')
+subdir('src/uri')
 subdir('src/time')
 subdir('src/http')
 subdir('src/adata')
