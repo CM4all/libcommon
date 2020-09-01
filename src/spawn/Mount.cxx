@@ -124,7 +124,7 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 		flags |= MS_NOEXEC;
 
 	MountOrThrow("none", target, "tmpfs", flags,
-		     "size=16M,nr_inodes=256,mode=700");
+		     "size=16M,nr_inodes=256,mode=711");
 
 	vfs_builder.MakeWritable();
 }
