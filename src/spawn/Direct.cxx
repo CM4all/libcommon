@@ -43,8 +43,8 @@
 #include "io/WriteFile.hxx"
 #include "system/IOPrio.hxx"
 #include "util/PrintException.hxx"
+#include "util/Sanitizer.hxx"
 #include "util/ScopeExit.hxx"
-
 #include "util/Compiler.h"
 
 #ifdef HAVE_LIBSYSTEMD
@@ -439,7 +439,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		ctx.params.ns.enable_user = false;
 	}
 
-	char stack[8192];
+	char stack[HaveAddressSanitizer() ? 32768 : 8192];
 	long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags, &ctx);
 	if (pid < 0)
 		throw MakeErrno("clone() failed");
