@@ -112,6 +112,13 @@ public:
 	 */
 	void Flush();
 
+	/**
+	 * Discard buffer contents.
+	 */
+	void Discard() noexcept {
+		buffer.Clear();
+	}
+
 private:
 	bool AppendToBuffer(const void *data, std::size_t size) noexcept;
 
