@@ -91,6 +91,14 @@ class EventLoop {
 	 */
 	bool again;
 
+	/**
+	 * This flag keeps track whether a TimerEvent or a DeferEvent
+	 * has been invoked.  This is used to implement #EVLOOP_ONCE,
+	 * to avoid calling epoll_wait() after something has been done
+	 * already.
+	 */
+	bool invoked;
+
 	StaticArray<struct epoll_event, 32> received_events;
 
 	ClockCache<std::chrono::steady_clock> steady_clock_cache;

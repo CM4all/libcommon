@@ -139,6 +139,8 @@ EventLoop::HandleTimers() noexcept
 		if (timeout > timeout.zero())
 			return timeout;
 
+		invoked = true;
+
 		timers.erase(i);
 
 		t.Run();
@@ -156,10 +158,12 @@ EventLoop::Defer(DeferEvent &e) noexcept
 bool
 EventLoop::RunDeferred() noexcept
 {
-	while (!defer.empty())
+	while (!defer.empty()) {
+		invoked = true;
 		defer.pop_front_and_dispose([](DeferEvent *e){
-				e->OnDeferred();
-			});
+			e->OnDeferred();
+		});
+	}
 
 	return true;
 }
@@ -204,6 +208,7 @@ EventLoop::Loop(int flags) noexcept
 
 	do {
 		again = false;
+		invoked = false;
 
 		/* invoke timers */
 
@@ -216,6 +221,9 @@ EventLoop::Loop(int flags) noexcept
 			/* re-evaluate timers because one of the
 			   DeferEvents may have added a new timeout */
 			continue;
+
+		if (once && invoked)
+			break;
 
 		/* wait for new event */
 
