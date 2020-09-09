@@ -389,6 +389,12 @@ FinishTranslateResponse(AllocatorPtr alloc,
 		if (file.delegate != nullptr) {
 		} else if (response.base != nullptr) {
 			if (response.easy_base) {
+				if (file.expand_path)
+					throw std::runtime_error("Cannot use EASY_BASE with EXPAND_PATH");
+
+				if (!is_base(file.path))
+					throw std::runtime_error("PATH is not a valid base for EASY_BASE");
+
 				file.base = file.path;
 				file.path = ".";
 			} else {
