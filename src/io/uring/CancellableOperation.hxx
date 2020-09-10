@@ -67,6 +67,14 @@ public:
 		// TODO: io_uring_prep_cancel()
 	}
 
+	void Replace(Operation &old_operation,
+		     Operation &new_operation) noexcept {
+		(void)old_operation;
+		assert(operation == &old_operation);
+
+		operation = &new_operation;
+	}
+
 	void OnUringCompletion(int res) noexcept {
 		if (operation == nullptr)
 			return;
