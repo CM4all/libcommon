@@ -53,6 +53,7 @@ Operation::ReplaceUring(Operation &new_operation) noexcept
 	assert(IsUringPending());
 
 	cancellable->Replace(*this, new_operation);
+	cancellable = nullptr;
 }
 
 } // namespace Uring
