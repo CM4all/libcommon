@@ -68,9 +68,12 @@ class EventLoop {
 					   boost::intrusive::constant_time_size<false>>;
 	TimerSet timers;
 
-	boost::intrusive::list<DeferEvent,
-			       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>>,
-			       boost::intrusive::constant_time_size<false>> defer;
+	using DeferList =
+		boost::intrusive::list<DeferEvent,
+				       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>>,
+				       boost::intrusive::constant_time_size<false>>;
+
+	DeferList defer;
 
 	using SocketList =
 		boost::intrusive::list<SocketEvent,
