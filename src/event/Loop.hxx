@@ -75,6 +75,11 @@ class EventLoop {
 
 	DeferList defer;
 
+	/**
+	 * This is like #defer, but gets invoked when the loop is idle.
+	 */
+	DeferList idle;
+
 	using SocketList =
 		boost::intrusive::list<SocketEvent,
 				       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>>,
@@ -151,7 +156,8 @@ public:
 	}
 
 	bool IsEmpty() const noexcept {
-		return timers.empty() && defer.empty() && sockets.empty();
+		return timers.empty() && defer.empty() && idle.empty() &&
+			sockets.empty();
 	}
 
 	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept;
@@ -162,6 +168,7 @@ public:
 	void AddTimer(TimerEvent &t, Event::Duration d) noexcept;
 
 	void Defer(DeferEvent &e) noexcept;
+	void AddIdle(DeferEvent &e) noexcept;
 
 	const auto &GetSteadyClockCache() const noexcept {
 		return steady_clock_cache;
@@ -200,6 +207,13 @@ private:
 	bool Loop(int flags) noexcept;
 
 	bool RunDeferred() noexcept;
+
+	/**
+	 * Invoke one "idle" #DeferEvent.
+	 *
+	 * @return false if there was no such event
+	 */
+	bool RunOneIdle() noexcept;
 
 	/**
 	 * Invoke all expired #TimerEvent instances and return the

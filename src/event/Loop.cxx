@@ -58,6 +58,7 @@ EventLoop::~EventLoop() noexcept
 
 	assert(timers.empty());
 	assert(defer.empty());
+	assert(idle.empty());
 	assert(sockets.empty());
 }
 
@@ -155,6 +156,12 @@ EventLoop::Defer(DeferEvent &e) noexcept
 	defer.push_front(e);
 }
 
+void
+EventLoop::AddIdle(DeferEvent &e) noexcept
+{
+	idle.push_front(e);
+}
+
 bool
 EventLoop::RunDeferred() noexcept
 {
@@ -164,6 +171,20 @@ EventLoop::RunDeferred() noexcept
 			e->OnDeferred();
 		});
 	}
+
+	return true;
+}
+
+bool
+EventLoop::RunOneIdle() noexcept
+{
+	if (idle.empty())
+		return false;
+
+	invoked = true;
+	idle.pop_front_and_dispose([](DeferEvent *e){
+		e->OnDeferred();
+	});
 
 	return true;
 }
@@ -217,6 +238,14 @@ EventLoop::Loop(int flags) noexcept
 			break;
 
 		RunDeferred();
+
+		if (RunOneIdle())
+			/* check for other new events after each
+			   "idle" invocation to ensure that the other
+			   "idle" events are really invoked at the
+			   very end */
+			continue;
+
 		if (again)
 			/* re-evaluate timers because one of the
 			   DeferEvents may have added a new timeout */

@@ -71,6 +71,12 @@ public:
 
 	void Schedule() noexcept;
 
+	/**
+	 * Schedule this event, but only after the #EventLoop is idle,
+	 * i.e. before going to sleep.
+	 */
+	void ScheduleIdle() noexcept;
+
 	void Cancel() noexcept {
 		unlink();
 	}
