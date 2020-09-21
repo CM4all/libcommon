@@ -47,7 +47,7 @@ class OpenStatHandler;
  * descriptor and file information is passed to the given
  * #OpenStatHandler on completion.
  */
-class OpenStat : Operation {
+class OpenStat final : Operation {
 	Queue &queue;
 
 	OpenStatHandler &handler;
@@ -55,6 +55,8 @@ class OpenStat : Operation {
 	UniqueFileDescriptor fd;
 
 	struct statx st;
+
+	bool canceled = false;
 
 public:
 	OpenStat(Queue &_queue, OpenStatHandler &_handler) noexcept
@@ -80,6 +82,16 @@ public:
 	 */
 	void StartOpenStatReadOnlyBeneath(FileDescriptor directory_fd,
 					  const char *path) noexcept;
+
+	/**
+	 * Cancel this operation.  This works only if this instance
+	 * was allocated on the heap using `new`.  It will be freed
+	 * using `delete` after the kernel has finished cancellation,
+	 * i.e. the caller resigns ownership.
+	 */
+	void Cancel() noexcept {
+		canceled = true;
+	}
 
 private:
 	/* virtual methods from class Operation */

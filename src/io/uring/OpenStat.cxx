@@ -111,6 +111,14 @@ OpenStat::StartOpenStatReadOnlyBeneath(FileDescriptor directory_fd,
 void
 OpenStat::OnUringCompletion(int res) noexcept
 try {
+	if (canceled) {
+		if (!fd.IsDefined() && res >= 0)
+			close(res);
+
+		delete this;
+		return;
+	}
+
 	if (res < 0) {
 		fd.Close();
 		throw MakeErrno(-res, "Failed to open file");
