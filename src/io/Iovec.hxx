@@ -33,6 +33,7 @@
 #pragma once
 
 #include "util/ConstBuffer.hxx"
+#include "util/WritableBuffer.hxx"
 
 #include <sys/uio.h>
 
@@ -42,6 +43,14 @@ MakeIovec(ConstBuffer<T> t) noexcept
 {
 	auto b = t.ToVoid();
 	return { const_cast<void *>(b.data), b.size };
+}
+
+template<typename T>
+constexpr struct iovec
+MakeIovec(WritableBuffer<T> t) noexcept
+{
+	auto b = t.ToVoid();
+	return { b.data, b.size };
 }
 
 template<typename T>
