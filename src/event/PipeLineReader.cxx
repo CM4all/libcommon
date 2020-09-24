@@ -44,6 +44,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 	auto nbytes = fd.Read(w.data, w.size);
 	if (nbytes <= 0) {
 		event.Cancel();
+		fd.Close();
 		callback(nullptr);
 		return;
 	}
