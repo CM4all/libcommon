@@ -215,7 +215,7 @@ ExportTimeoutMS(Event::Duration timeout) noexcept
 inline bool
 EventLoop::Wait(Event::Duration timeout) noexcept
 {
-	std::array<struct epoll_event, 32> received_events;
+	std::array<struct epoll_event, 256> received_events;
 	int ret = epoll.Wait(received_events.data(),
 			     received_events.size(),
 			     ExportTimeoutMS(timeout));
