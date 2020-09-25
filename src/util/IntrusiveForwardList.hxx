@@ -202,4 +202,27 @@ public:
 		pos->next = &t;
 		return &t;
 	}
+
+	void erase_after(iterator pos) noexcept {
+		pos->next = pos->next->next;
+	}
+
+	void reverse() noexcept {
+		if (empty())
+			return;
+
+		/* the first item will be the last, and will stay
+		   there; during the loop, it will divide the list
+		   between "old order" (right of it) and "new
+		   (reversed) order" (left of it) */
+		const auto middle = begin();
+
+		while (std::next(middle) != end()) {
+			/* remove the item after the "middle", and
+			   move it to the front */
+			auto i = std::next(middle);
+			erase_after(middle);
+			push_front(*i);
+		}
+	}
 };
