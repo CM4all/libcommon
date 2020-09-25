@@ -44,7 +44,7 @@ class LeakDetectorContainer {
 			       boost::intrusive::member_hook<LeakDetector,
 							     LeakDetector::LeakDetectorSiblingsHook,
 							     &LeakDetector::leak_detector_siblings>,
-			       boost::intrusive::constant_time_size<true>> list;
+			       boost::intrusive::constant_time_size<false>> list;
 
 public:
 	~LeakDetectorContainer() noexcept {
@@ -53,29 +53,12 @@ public:
 
 	void Add(LeakDetector &l) noexcept {
 		const std::unique_lock<std::mutex> lock(mutex);
-
-		assert((list.size() == 0) == list.empty());
-		const auto old_size = list.size();
-
 		list.push_back(l);
-
-		assert(!list.empty());
-		const auto new_size = list.size();
-		assert(new_size == old_size + 1);
 	}
 
 	void Remove(LeakDetector &l) noexcept {
 		const std::unique_lock<std::mutex> lock(mutex);
-
-		assert(!list.empty());
-		assert(list.size() > 0);
-		const auto old_size = list.size();
-
 		list.erase(list.iterator_to(l));
-
-		const auto new_size = list.size();
-		assert(new_size + 1 == old_size);
-		assert((new_size == 0) == list.empty());
 	}
 };
 
