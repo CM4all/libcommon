@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,11 +47,11 @@ class LeakDetectorContainer {
 			       boost::intrusive::constant_time_size<true>> list;
 
 public:
-	~LeakDetectorContainer() {
+	~LeakDetectorContainer() noexcept {
 		assert(list.empty());
 	}
 
-	void Add(LeakDetector &l) {
+	void Add(LeakDetector &l) noexcept {
 		const std::unique_lock<std::mutex> lock(mutex);
 
 		assert((list.size() == 0) == list.empty());
@@ -64,7 +64,7 @@ public:
 		assert(new_size == old_size + 1);
 	}
 
-	void Remove(LeakDetector &l) {
+	void Remove(LeakDetector &l) noexcept {
 		const std::unique_lock<std::mutex> lock(mutex);
 
 		assert(!list.empty());
@@ -81,13 +81,13 @@ public:
 
 static LeakDetectorContainer leak_detector_container;
 
-LeakDetector::LeakDetector()
+LeakDetector::LeakDetector() noexcept
 {
 	leak_detector_container.Add(*this);
 	state = State::REGISTERED;
 }
 
-LeakDetector::~LeakDetector()
+LeakDetector::~LeakDetector() noexcept
 {
 	assert(state == State::REGISTERED);
 

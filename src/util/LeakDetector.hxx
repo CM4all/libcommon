@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2020 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,15 +52,15 @@ class LeakDetector {
 	} state = State::INITIAL;
 
 protected:
-	LeakDetector();
-	LeakDetector(const LeakDetector &):LeakDetector() {}
+	LeakDetector() noexcept;
+	LeakDetector(const LeakDetector &) noexcept:LeakDetector() {}
 
 	/**
 	 * This destructor is virtual only to force RTTI on the
 	 * derived class, so we can identify the object type in a
 	 * crash dump.
 	 */
-	virtual ~LeakDetector();
+	virtual ~LeakDetector() noexcept;
 };
 
 #else
