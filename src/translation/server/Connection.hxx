@@ -38,6 +38,8 @@
 #include "util/Cancellable.hxx"
 #include "AllocatedRequest.hxx"
 
+#include <boost/intrusive/list_hook.hpp>
+
 enum class TranslationCommand : uint16_t;
 template<typename T> struct ConstBuffer;
 
