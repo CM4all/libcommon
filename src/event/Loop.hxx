@@ -37,7 +37,6 @@
 #include "system/EpollFD.hxx"
 #include "time/ClockCache.hxx"
 #include "util/IntrusiveList.hxx"
-#include "util/StaticArray.hxx"
 
 #ifndef NDEBUG
 #include "util/BindMethod.hxx"
@@ -82,7 +81,18 @@ class EventLoop {
 	DeferList idle;
 
 	using SocketList = IntrusiveList<SocketEvent>;
+
+	/**
+	 * A list of scheduled #SocketEvent instances, without those
+	 * which are ready (these are in #ready_sockets).
+	 */
 	SocketList sockets;
+
+	/**
+	 * A list of #SocketEvent instances which have non-zero
+	 * "ready" flags and need to be dispatched.
+	 */
+	SocketList ready_sockets;
 
 #ifndef NDEBUG
 	typedef BoundMethod<void() noexcept> PostCallback;
@@ -104,8 +114,6 @@ class EventLoop {
 	 * already.
 	 */
 	bool invoked;
-
-	StaticArray<struct epoll_event, 32> received_events;
 
 	ClockCache<std::chrono::steady_clock> steady_clock_cache;
 	ClockCache<std::chrono::system_clock> system_clock_cache;
@@ -155,7 +163,7 @@ public:
 
 	bool IsEmpty() const noexcept {
 		return timers.empty() && defer.empty() && idle.empty() &&
-			sockets.empty();
+			sockets.empty() && ready_sockets.empty();
 	}
 
 	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept;
@@ -219,6 +227,14 @@ private:
 	 * duration if there is no timeout.
 	 */
 	Event::Duration HandleTimers() noexcept;
+
+	/**
+	 * Call epoll_wait() and pass all returned events to
+	 * SocketEvent::SetReadyFlags().
+	 *
+	 * @return true if one or more sockets have become ready
+	 */
+	bool Wait(Event::Duration timeout) noexcept;
 
 	bool RunPost() noexcept {
 #ifndef NDEBUG

@@ -55,6 +55,13 @@ class SocketEvent : public IntrusiveListHook
 	 */
 	unsigned scheduled_flags = 0;
 
+	/**
+	 * A bit mask of events which have been reported as "ready" by
+	 * epoll_wait().  If non-zero, then the #EventLoop will call
+	 * Dispatch() soon.
+	 */
+	unsigned ready_flags = 0;
+
 public:
 	static constexpr unsigned READ = EPOLLIN;
 	static constexpr unsigned WRITE = EPOLLOUT;
@@ -109,6 +116,10 @@ public:
 		return scheduled_flags;
 	}
 
+	void SetReadyFlags(unsigned flags) noexcept {
+		ready_flags = flags;
+	}
+
 	void Schedule(unsigned flags) noexcept;
 
 	void Cancel() noexcept {
@@ -159,5 +170,8 @@ public:
 		return GetScheduledFlags() & WRITE;
 	}
 
-	void Dispatch(unsigned flags) noexcept;
+	/**
+	 * Dispatch the events that were passed to SetReadyFlags().
+	 */
+	void Dispatch() noexcept;
 };

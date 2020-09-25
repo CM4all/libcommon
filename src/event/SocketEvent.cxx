@@ -96,9 +96,10 @@ SocketEvent::Abandon() noexcept
 }
 
 void
-SocketEvent::Dispatch(unsigned flags) noexcept
+SocketEvent::Dispatch() noexcept
 {
-	flags &= GetScheduledFlags() | IMPLICIT_FLAGS;
+	const unsigned flags = std::exchange(ready_flags, 0) &
+		(GetScheduledFlags() | IMPLICIT_FLAGS);
 
 	if (flags != 0)
 		callback(flags);

@@ -35,6 +35,8 @@
 #include "DeferEvent.hxx"
 #include "SocketEvent.hxx"
 
+#include <array>
+
 #ifndef NDEBUG
 #include <stdio.h>
 #endif
@@ -60,6 +62,7 @@ EventLoop::~EventLoop() noexcept
 	assert(defer.empty());
 	assert(idle.empty());
 	assert(sockets.empty());
+	assert(ready_sockets.empty());
 }
 
 void
@@ -67,7 +70,6 @@ EventLoop::Reinit() noexcept
 {
 	steady_clock_cache.flush();
 	system_clock_cache.flush();
-	received_events.clear();
 
 	epoll = {};
 
@@ -101,10 +103,6 @@ EventLoop::ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept
 bool
 EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 {
-	for (auto &i : received_events)
-		if (i.data.ptr == &event)
-			i.events = 0;
-
 	event.unlink();
 	return epoll.Remove(fd);
 }
@@ -112,10 +110,6 @@ EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 void
 EventLoop::AbandonFD(SocketEvent &event) noexcept
 {
-	for (auto &i : received_events)
-		if (i.data.ptr == &event)
-			i.events = 0;
-
 	event.unlink();
 }
 
@@ -218,11 +212,29 @@ ExportTimeoutMS(Event::Duration timeout) noexcept
 		: -1;
 }
 
+inline bool
+EventLoop::Wait(Event::Duration timeout) noexcept
+{
+	std::array<struct epoll_event, 32> received_events;
+	int ret = epoll.Wait(received_events.data(),
+			     received_events.size(),
+			     ExportTimeoutMS(timeout));
+	for (int i = 0; i < ret; ++i) {
+		const auto &e = received_events[i];
+		auto &socket_event = *(SocketEvent *)e.data.ptr;
+		socket_event.SetReadyFlags(e.events);
+
+		/* move from "sockets" to "ready_sockets" */
+		socket_event.unlink();
+		ready_sockets.push_back(socket_event);
+	}
+
+	return ret > 0;
+}
+
 bool
 EventLoop::Loop(int flags) noexcept
 {
-	assert(received_events.empty());
-
 	steady_clock_cache.flush();
 	system_clock_cache.flush();
 
@@ -266,30 +278,23 @@ EventLoop::Loop(int flags) noexcept
 		if (IsEmpty())
 			return false;
 
-		int ret = epoll.Wait(received_events.raw(),
-				     received_events.capacity(),
-				     ExportTimeoutMS(timeout));
-		received_events.resize(std::max(0, ret));
-
-		if (received_events.empty() && nonblock)
+		const bool ready = !ready_sockets.empty() || Wait(timeout);
+		if (!ready && nonblock)
 			quit = true;
 
 		steady_clock_cache.flush();
 		system_clock_cache.flush();
 
 		/* invoke sockets */
-		for (auto &i : received_events) {
-			if (i.events == 0)
-				continue;
+		while (!ready_sockets.empty() && !quit) {
+			auto &socket_event = ready_sockets.front();
 
-			if (quit)
-				break;
+			/* move from "ready_sockets" back to "sockets" */
+			socket_event.unlink();
+			sockets.push_back(socket_event);
 
-			auto &socket_event = *(SocketEvent *)i.data.ptr;
-			socket_event.Dispatch(i.events);
+			socket_event.Dispatch();
 		}
-
-		received_events.clear();
 
 		RunPost();
 	} while (!quit && !once);
