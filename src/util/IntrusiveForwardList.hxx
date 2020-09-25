@@ -79,6 +79,15 @@ public:
 		head = {};
 	}
 
+	template<typename D>
+	void clear_and_dispose(D &&disposer) noexcept {
+		while (!empty()) {
+			auto *item = &front();
+			pop_front();
+			disposer(item);
+		}
+	}
+
 	const T &front() const noexcept {
 		return *Cast(head.next);
 	}
