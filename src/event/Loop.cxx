@@ -112,6 +112,10 @@ EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 void
 EventLoop::AbandonFD(SocketEvent &event) noexcept
 {
+	for (auto &i : received_events)
+		if (i.data.ptr == &event)
+			i.events = 0;
+
 	sockets.erase(sockets.iterator_to(event));
 }
 
