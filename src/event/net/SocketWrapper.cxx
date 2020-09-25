@@ -94,11 +94,9 @@ SocketWrapper::Close() noexcept
 	if (!IsValid())
 		return;
 
-	socket_event.Cancel();
+	socket_event.Close();
 	read_timeout_event.Cancel();
 	write_timeout_event.Cancel();
-
-	socket_event.ReleaseSocket().Close();
 }
 
 void

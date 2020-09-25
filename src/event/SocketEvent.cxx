@@ -45,6 +45,19 @@ SocketEvent::Open(SocketDescriptor _fd) noexcept
 }
 
 void
+SocketEvent::Close() noexcept
+{
+	if (!fd.IsDefined())
+		return;
+
+	/* closing the socket automatically unregisters it from epoll,
+	   so we can omit the epoll_ctl(EPOLL_CTL_DEL) call and save
+	   one system call */
+	fd.Close();
+	Abandon();
+}
+
+void
 SocketEvent::Schedule(unsigned flags) noexcept
 {
 	assert((flags & IMPLICIT_FLAGS) == 0);

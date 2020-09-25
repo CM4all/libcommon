@@ -45,8 +45,8 @@ SignalEvent::SignalEvent(EventLoop &loop, Callback _callback) noexcept
 SignalEvent::~SignalEvent() noexcept
 {
 	if (IsDefined()) {
+		event.Close();
 		Disable();
-		event.ReleaseSocket().Close();
 	}
 }
 
