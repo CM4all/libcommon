@@ -34,15 +34,13 @@
 
 #include "net/SocketDescriptor.hxx"
 #include "util/BindMethod.hxx"
-
-#include <boost/intrusive/list_hook.hpp>
+#include "util/IntrusiveList.hxx"
 
 #include <sys/epoll.h>
 
 class EventLoop;
 
-class SocketEvent
-	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>
+class SocketEvent : public IntrusiveListHook
 {
 	EventLoop &loop;
 

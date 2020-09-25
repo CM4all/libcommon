@@ -105,7 +105,7 @@ EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 		if (i.data.ptr == &event)
 			i.events = 0;
 
-	sockets.erase(sockets.iterator_to(event));
+	event.unlink();
 	return epoll.Remove(fd);
 }
 
@@ -116,7 +116,7 @@ EventLoop::AbandonFD(SocketEvent &event) noexcept
 		if (i.data.ptr == &event)
 			i.events = 0;
 
-	sockets.erase(sockets.iterator_to(event));
+	event.unlink();
 }
 
 void

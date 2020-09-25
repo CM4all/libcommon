@@ -36,6 +36,7 @@
 #include "Chrono.hxx"
 #include "system/EpollFD.hxx"
 #include "time/ClockCache.hxx"
+#include "util/IntrusiveList.hxx"
 #include "util/StaticArray.hxx"
 
 #ifndef NDEBUG
@@ -80,10 +81,7 @@ class EventLoop {
 	 */
 	DeferList idle;
 
-	using SocketList =
-		boost::intrusive::list<SocketEvent,
-				       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>>,
-				       boost::intrusive::constant_time_size<false>>;
+	using SocketList = IntrusiveList<SocketEvent>;
 	SocketList sockets;
 
 #ifndef NDEBUG
