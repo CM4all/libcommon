@@ -96,7 +96,7 @@ public:
 		return fd;
 	}
 
-	SocketDescriptor ReleaseSocket() {
+	SocketDescriptor ReleaseSocket() noexcept {
 		return std::exchange(fd, SocketDescriptor::Undefined());
 	}
 
