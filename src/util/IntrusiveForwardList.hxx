@@ -32,28 +32,51 @@
 
 #pragma once
 
+#include "Cast.hxx"
 #include "ShallowCopy.hxx"
 
 #include <iterator>
 #include <type_traits>
 #include <utility>
 
+struct IntrusiveForwardListNode {
+	IntrusiveForwardListNode *next = nullptr;
+};
+
 struct IntrusiveForwardListHook {
-	IntrusiveForwardListHook *next = nullptr;
+	IntrusiveForwardListNode siblings;
+
+	static constexpr auto &Cast(IntrusiveForwardListNode &node) noexcept {
+		return ContainerCast(node, &IntrusiveForwardListHook::siblings);
+	}
+
+	static constexpr const auto &Cast(const IntrusiveForwardListNode &node) noexcept {
+		return ContainerCast(node, &IntrusiveForwardListHook::siblings);
+	}
 };
 
 template<typename T>
 class IntrusiveForwardList {
-	IntrusiveForwardListHook head;
+	IntrusiveForwardListNode head;
 
-	static constexpr T *Cast(IntrusiveForwardListHook *hook) noexcept {
+	static constexpr T *Cast(IntrusiveForwardListNode *node) noexcept {
 		static_assert(std::is_base_of<IntrusiveForwardListHook, T>::value);
+		auto *hook = &IntrusiveForwardListHook::Cast(*node);
 		return static_cast<T *>(hook);
 	}
 
-	static constexpr const T *Cast(const IntrusiveForwardListHook *hook) noexcept {
+	static constexpr const T *Cast(const IntrusiveForwardListNode *node) noexcept {
 		static_assert(std::is_base_of<IntrusiveForwardListHook, T>::value);
+		const auto *hook = &IntrusiveForwardListHook::Cast(*node);
 		return static_cast<const T *>(hook);
+	}
+
+	static constexpr IntrusiveForwardListNode &ToNode(T &t) noexcept {
+		return t.siblings;
+	}
+
+	static constexpr const IntrusiveForwardListNode &ToNode(const T &t) noexcept {
+		return t.siblings;
 	}
 
 public:
@@ -108,9 +131,9 @@ public:
 		friend IntrusiveForwardList;
 		friend const_iterator;
 
-		IntrusiveForwardListHook *cursor;
+		IntrusiveForwardListNode *cursor;
 
-		constexpr iterator(IntrusiveForwardListHook *_cursor) noexcept
+		constexpr iterator(IntrusiveForwardListNode *_cursor) noexcept
 			:cursor(_cursor) {}
 
 	public:
@@ -155,9 +178,9 @@ public:
 
 		friend IntrusiveForwardList;
 
-		const IntrusiveForwardListHook *cursor;
+		const IntrusiveForwardListNode *cursor;
 
-		constexpr const_iterator(const IntrusiveForwardListHook *_cursor) noexcept
+		constexpr const_iterator(const IntrusiveForwardListNode *_cursor) noexcept
 			:cursor(_cursor) {}
 
 	public:
@@ -193,18 +216,21 @@ public:
 	}
 
 	void push_front(T &t) noexcept {
-		t.next = head.next;
-		head.next = &t;
+		auto &new_node = ToNode(t);
+		new_node.next = head.next;
+		head.next = &new_node;
 	}
 
 	static iterator insert_after(iterator pos, T &t) noexcept {
-		t.next = pos->next;
-		pos->next = &t;
-		return &t;
+		auto &pos_node = *pos.cursor;
+		auto &new_node = ToNode(t);
+		new_node.next = pos_node.next;
+		pos_node.next = &new_node;
+		return &new_node;
 	}
 
 	void erase_after(iterator pos) noexcept {
-		pos->next = pos->next->next;
+		pos.cursor->next = pos.cursor->next->next;
 	}
 
 	void reverse() noexcept {
