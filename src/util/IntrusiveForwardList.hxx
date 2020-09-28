@@ -71,12 +71,22 @@ class IntrusiveForwardList {
 		return static_cast<const T *>(hook);
 	}
 
+	static constexpr IntrusiveForwardListHook &ToHook(T &t) noexcept {
+		static_assert(std::is_base_of<IntrusiveForwardListHook, T>::value);
+		return t;
+	}
+
+	static constexpr const IntrusiveForwardListHook &ToHook(const T &t) noexcept {
+		static_assert(std::is_base_of<IntrusiveForwardListHook, T>::value);
+		return t;
+	}
+
 	static constexpr IntrusiveForwardListNode &ToNode(T &t) noexcept {
-		return t.siblings;
+		return ToHook(t).siblings;
 	}
 
 	static constexpr const IntrusiveForwardListNode &ToNode(const T &t) noexcept {
-		return t.siblings;
+		return ToHook(t).siblings;
 	}
 
 public:
