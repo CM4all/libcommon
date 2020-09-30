@@ -197,6 +197,13 @@ public:
 		front().unlink();
 	}
 
+	template<typename D>
+	void pop_front_and_dispose(D &&disposer) noexcept {
+		auto &i = front();
+		i.unlink();
+		disposer(&i);
+	}
+
 	T &back() noexcept {
 		return *Cast(head.prev);
 	}
