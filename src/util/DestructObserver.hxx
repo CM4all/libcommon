@@ -30,7 +30,7 @@
 #ifndef DESTRUCT_OBSERVER_HXX
 #define DESTRUCT_OBSERVER_HXX
 
-#include <boost/intrusive/list.hpp>
+#include "IntrusiveList.hxx"
 
 class DestructAnchor;
 
@@ -38,10 +38,7 @@ class DestructAnchor;
  * A class which observes the destruction of a #DestructAnchor
  * instance.
  */
-class DestructObserver
-	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>> {
-	friend class DestructAnchor;
-
+class DestructObserver : public AutoUnlinkIntrusiveListHook {
 public:
 	explicit DestructObserver(DestructAnchor &anchor) noexcept;
 
@@ -60,13 +57,14 @@ public:
 class DestructAnchor {
 	friend class DestructObserver;
 
-	boost::intrusive::list<DestructObserver,
-			       boost::intrusive::constant_time_size<false>> observers;
+	IntrusiveList<DestructObserver> observers;
 
 public:
-	~DestructAnchor() noexcept {
-		observers.clear();
-	}
+	/**
+	 * IntrusiveList's destructor will mark all observers as
+	 * "unlinked".
+	 */
+	~DestructAnchor() noexcept = default;
 };
 
 inline
