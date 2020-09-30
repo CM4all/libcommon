@@ -44,9 +44,9 @@ class DestructObserver
 	friend class DestructAnchor;
 
 public:
-	explicit DestructObserver(DestructAnchor &anchor);
+	explicit DestructObserver(DestructAnchor &anchor) noexcept;
 
-	operator bool() const {
+	operator bool() const noexcept {
 		return !is_linked();
 	}
 };
@@ -63,13 +63,13 @@ class DestructAnchor {
 			       boost::intrusive::constant_time_size<false>> observers;
 
 public:
-	~DestructAnchor() {
+	~DestructAnchor() noexcept {
 		observers.clear();
 	}
 };
 
 inline
-DestructObserver::DestructObserver(DestructAnchor &anchor)
+DestructObserver::DestructObserver(DestructAnchor &anchor) noexcept
 {
 	anchor.observers.push_front(*this);
 }
