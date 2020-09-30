@@ -35,9 +35,8 @@
 class DestructAnchor;
 
 /**
- * A debug-only class which observes the destruction of a
- * #DestructAnchor instance.  Once the #DestructAnchor gets destructed
- * and thus inaccessible, the #destructed flag gets set.
+ * A class which observes the destruction of a #DestructAnchor
+ * instance.
  */
 class DestructObserver
 	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>> {
@@ -46,15 +45,17 @@ class DestructObserver
 public:
 	explicit DestructObserver(DestructAnchor &anchor) noexcept;
 
+	/**
+	 * Was the observed object destructed?
+	 */
 	operator bool() const noexcept {
 		return !is_linked();
 	}
 };
 
 /**
- * An object which notifies all of its observes about its destruction.
- * In non-debug mode (NDEBUG), this is an empty class without
- * overhead.
+ * An object which notifies all of its observers about its
+ * destruction.
  */
 class DestructAnchor {
 	friend class DestructObserver;
@@ -74,6 +75,10 @@ DestructObserver::DestructObserver(DestructAnchor &anchor) noexcept
 	anchor.observers.push_front(*this);
 }
 
+/**
+ * An alias for #DestructAnchor which is eliminated from non-debug
+ * builds (NDEBUG).
+ */
 #ifdef NDEBUG
 class DebugDestructAnchor {};
 #else
