@@ -42,14 +42,18 @@ struct IntrusiveListNode {
 	IntrusiveListNode *next, *prev;
 };
 
-struct IntrusiveListHook {
+class IntrusiveListHook {
+	template<typename T> friend class IntrusiveList;
+
 	IntrusiveListNode siblings;
 
+public:
 	void unlink() noexcept {
 		siblings.next->prev = siblings.prev;
 		siblings.prev->next = siblings.next;
 	}
 
+private:
 	static constexpr auto &Cast(IntrusiveListNode &node) noexcept {
 		return ContainerCast(node, &IntrusiveListHook::siblings);
 	}
