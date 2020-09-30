@@ -77,7 +77,8 @@ public:
 	void ScheduleIdle() noexcept;
 
 	void Cancel() noexcept {
-		unlink();
+		if (IsPending())
+			unlink();
 	}
 
 protected:
