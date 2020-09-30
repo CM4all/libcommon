@@ -45,6 +45,7 @@ struct IntrusiveListNode {
 class IntrusiveListHook {
 	template<typename T> friend class IntrusiveList;
 
+protected:
 	IntrusiveListNode siblings;
 
 public:
@@ -60,6 +61,32 @@ private:
 
 	static constexpr const auto &Cast(const IntrusiveListNode &node) noexcept {
 		return ContainerCast(node, &IntrusiveListHook::siblings);
+	}
+};
+
+/**
+ * A variant of #IntrusiveListHook which auto-unlinks itself from the
+ * list upon destruction.  As a side effect, it has an is_linked()
+ * method.
+ */
+class AutoUnlinkIntrusiveListHook : public IntrusiveListHook {
+public:
+	constexpr AutoUnlinkIntrusiveListHook() noexcept {
+		siblings.next = nullptr;
+	}
+
+	~AutoUnlinkIntrusiveListHook() noexcept {
+		if (is_linked())
+			unlink();
+	}
+
+	void unlink() noexcept {
+		IntrusiveListHook::unlink();
+		siblings.next = nullptr;
+	}
+
+	constexpr bool is_linked() const noexcept {
+		return siblings.next != nullptr;
 	}
 };
 
@@ -112,6 +139,11 @@ public:
 		src.head.prev = &src.head;
 	}
 
+	~IntrusiveList() noexcept {
+		if (std::is_base_of<AutoUnlinkIntrusiveListHook, T>::value)
+			clear();
+	}
+
 	IntrusiveList &operator=(IntrusiveList &&) = delete;
 
 	constexpr bool empty() const noexcept {
@@ -119,7 +151,14 @@ public:
 	}
 
 	void clear() noexcept {
-		head = {&head, &head};
+		if (std::is_base_of<AutoUnlinkIntrusiveListHook, T>::value) {
+			/* for AutoUnlinkIntrusiveListHook, we need to
+			   remove each item manually, or else its
+			   is_linked() method will not work */
+			while (!empty())
+				pop_front();
+		} else
+			head = {&head, &head};
 	}
 
 	template<typename D>
