@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,8 +34,7 @@
 #define DEFER_EVENT_HXX
 
 #include "util/BindMethod.hxx"
-
-#include <boost/intrusive/list_hook.hpp>
+#include "util/IntrusiveList.hxx"
 
 class EventLoop;
 
@@ -44,10 +43,10 @@ class EventLoop;
  * move calls out of the current stack frame, to avoid surprising side
  * effects for callers up in the call chain.
  */
-class DeferEvent final
-	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>
+class DeferEvent final : AutoUnlinkIntrusiveListHook
 {
 	friend class EventLoop;
+	friend class IntrusiveList<DeferEvent>;
 
 	EventLoop &loop;
 

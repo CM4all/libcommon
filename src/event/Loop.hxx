@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -43,7 +43,6 @@
 #endif
 
 #include <boost/intrusive/set.hpp>
-#include <boost/intrusive/list.hpp>
 
 class TimerEvent;
 class DeferEvent;
@@ -68,10 +67,7 @@ class EventLoop {
 					   boost::intrusive::constant_time_size<false>>;
 	TimerSet timers;
 
-	using DeferList =
-		boost::intrusive::list<DeferEvent,
-				       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>>,
-				       boost::intrusive::constant_time_size<false>>;
+	using DeferList = IntrusiveList<DeferEvent>;
 
 	DeferList defer;
 
