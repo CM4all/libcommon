@@ -33,6 +33,8 @@
 #include "PipeLineReader.hxx"
 #include "util/ExtractLine.hxx"
 
+#include <cerrno>
+
 void
 PipeLineReader::TryRead(bool flush) noexcept
 {
@@ -43,6 +45,9 @@ PipeLineReader::TryRead(bool flush) noexcept
 
 	auto fd = event.GetSocket().ToFileDescriptor();
 	auto nbytes = fd.Read(w.data, w.size);
+	if (nbytes < 0 && errno == EAGAIN)
+		return;
+
 	if (nbytes <= 0) {
 		event.Close();
 		handler.OnPipeEnd();
