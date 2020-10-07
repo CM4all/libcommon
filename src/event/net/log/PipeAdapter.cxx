@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,11 +39,8 @@ namespace Net {
 namespace Log {
 
 bool
-PipeAdapter::OnLine(WritableBuffer<char> line) noexcept
+PipeAdapter::OnPipeLine(WritableBuffer<char> line) noexcept
 {
-	if (line.IsNull())
-		return true;
-
 	if (rate_limit > 0) {
 		const auto now = GetEventLoop().SteadyNow();
 		const auto float_now = ToFloatSeconds(now.time_since_epoch());
@@ -74,6 +71,13 @@ PipeAdapter::OnLine(WritableBuffer<char> line) noexcept
 	}
 
 	return true;
+}
+
+void
+PipeAdapter::OnPipeEnd() noexcept
+{
+	/* nothing to do here - just wait until this object gets
+	   destructed by whoever owns it */
 }
 
 }}

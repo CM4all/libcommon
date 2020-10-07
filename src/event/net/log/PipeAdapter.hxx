@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -47,7 +47,7 @@ namespace Log {
  * If the pipe ends or fails, there is no callback/notification.  This
  * class just unregisters the event and stops operating.
  */
-class PipeAdapter {
+class PipeAdapter final : PipeLineReaderHandler {
 	PipeLineReader line_reader;
 
 	SocketDescriptor socket;
@@ -66,8 +66,7 @@ public:
 	 */
 	PipeAdapter(EventLoop &event_loop, UniqueFileDescriptor _pipe,
 		    SocketDescriptor _socket) noexcept
-		:line_reader(event_loop, std::move(_pipe),
-			     BIND_THIS_METHOD(OnLine)),
+		:line_reader(event_loop, std::move(_pipe), *this),
 		 socket(_socket) {}
 
 	EventLoop &GetEventLoop() const noexcept {
@@ -94,7 +93,9 @@ public:
 	}
 
 private:
-	bool OnLine(WritableBuffer<char> line) noexcept;
+	/* virtual methods from class PipeLineReaderHandler */
+	bool OnPipeLine(WritableBuffer<char> line) noexcept override;
+	void OnPipeEnd() noexcept override;
 };
 
 }}

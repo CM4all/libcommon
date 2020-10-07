@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -45,7 +45,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 	if (nbytes <= 0) {
 		event.Cancel();
 		fd.Close();
-		callback(nullptr);
+		handler.OnPipeEnd();
 		return;
 	}
 
@@ -56,7 +56,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 		if (r.IsNull())
 			break;
 
-		if (!callback(r))
+		if (!handler.OnPipeLine(r))
 			return;
 	}
 }

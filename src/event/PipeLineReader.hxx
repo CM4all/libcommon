@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,10 +34,19 @@
 
 #include "SocketEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "util/BindMethod.hxx"
 #include "util/StaticFifoBuffer.hxx"
 
 template <typename T> struct WritableBuffer;
+
+class PipeLineReaderHandler {
+public:
+	/**
+	 * @return true to continue reading lines, false if the
+	 * #PipeLineReader has been destroyed
+	 */
+	virtual bool OnPipeLine(WritableBuffer<char> line) noexcept = 0;
+	virtual void OnPipeEnd() noexcept = 0;
+};
 
 /**
  * Read text lines from a (non-blocking) pipe.  Whenever a newline
@@ -48,10 +57,9 @@ class PipeLineReader {
 	UniqueFileDescriptor fd;
 	SocketEvent event;
 
-	StaticFifoBuffer<char, 8192> buffer;
+	PipeLineReaderHandler &handler;
 
-	typedef BoundMethod<bool(WritableBuffer<char> line) noexcept> Callback;
-	const Callback callback;
+	StaticFifoBuffer<char, 8192> buffer;
 
 public:
 	/**
@@ -62,11 +70,12 @@ public:
 	 */
 	PipeLineReader(EventLoop &event_loop,
 		       UniqueFileDescriptor _fd,
-		       Callback _callback) noexcept
+		       PipeLineReaderHandler &_handler) noexcept
 		:fd(std::move(_fd)),
 		 event(event_loop, BIND_THIS_METHOD(OnPipeReadable),
 		       SocketDescriptor::FromFileDescriptor(fd)),
-		 callback(_callback) {
+		 handler(_handler)
+	{
 		event.ScheduleRead();
 	}
 
