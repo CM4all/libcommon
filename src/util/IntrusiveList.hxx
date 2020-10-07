@@ -71,7 +71,7 @@ private:
  */
 class AutoUnlinkIntrusiveListHook : public IntrusiveListHook {
 public:
-	constexpr AutoUnlinkIntrusiveListHook() noexcept {
+	AutoUnlinkIntrusiveListHook() noexcept {
 		siblings.next = nullptr;
 	}
 
@@ -85,7 +85,7 @@ public:
 		siblings.next = nullptr;
 	}
 
-	constexpr bool is_linked() const noexcept {
+	bool is_linked() const noexcept {
 		return siblings.next != nullptr;
 	}
 };
