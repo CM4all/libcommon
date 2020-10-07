@@ -58,6 +58,14 @@ public:
 		Close();
 	}
 
+	/**
+	 * Release ownership and return the descriptor as an unmanaged
+	 * #FileDescriptor instance.
+	 */
+	FileDescriptor Release() noexcept {
+		return std::exchange(*(FileDescriptor *)this, Undefined());
+	}
+
 	UniqueFileDescriptor &operator=(UniqueFileDescriptor &&other) noexcept {
 		using std::swap;
 		swap(fd, other.fd);
