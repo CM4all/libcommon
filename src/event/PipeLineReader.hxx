@@ -54,7 +54,6 @@ public:
  * passed to the callback.
  */
 class PipeLineReader {
-	UniqueFileDescriptor fd;
 	SocketEvent event;
 
 	PipeLineReaderHandler &handler;
@@ -69,14 +68,17 @@ public:
 	 * has been destroyed inside the callback
 	 */
 	PipeLineReader(EventLoop &event_loop,
-		       UniqueFileDescriptor _fd,
+		       UniqueFileDescriptor fd,
 		       PipeLineReaderHandler &_handler) noexcept
-		:fd(std::move(_fd)),
-		 event(event_loop, BIND_THIS_METHOD(OnPipeReadable),
-		       SocketDescriptor::FromFileDescriptor(fd)),
+		:event(event_loop, BIND_THIS_METHOD(OnPipeReadable),
+		       SocketDescriptor::FromFileDescriptor(fd.Release())),
 		 handler(_handler)
 	{
 		event.ScheduleRead();
+	}
+
+	~PipeLineReader() noexcept {
+		event.Close();
 	}
 
 	EventLoop &GetEventLoop() const noexcept {
