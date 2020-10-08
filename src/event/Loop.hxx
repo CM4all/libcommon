@@ -55,9 +55,8 @@ class EventLoop {
 	EpollFD epoll;
 
 	struct TimerCompare {
-		gcc_pure
-		bool operator()(const TimerEvent &a,
-				const TimerEvent &b) const noexcept;
+		constexpr bool operator()(const TimerEvent &a,
+					  const TimerEvent &b) const noexcept;
 	};
 
 	using TimerSet =
