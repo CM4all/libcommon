@@ -41,6 +41,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <numeric>
 #include <string_view>
 #include <utility>
 
@@ -1350,12 +1351,27 @@ private:
 		return sv.size();
 	}
 
+	template<typename T>
+	static constexpr std::size_t GetParamLength(std::initializer_list<T> l) noexcept {
+		return std::accumulate(l.begin(), l.end(), size_t(0),
+				       [](std::size_t a, const T &b){
+					       return a + GetParamLength(b);
+				       });
+	}
+
 	static void *WriteParam(void *dest, ConstBuffer<void> src) noexcept {
 		return mempcpy(dest, src.data, src.size);
 	}
 
 	static void *WriteParam(void *dest, std::string_view src) noexcept {
 		return mempcpy(dest, src.data(), src.size());
+	}
+
+	template<typename T>
+	static void *WriteParam(void *dest, std::initializer_list<T> l) noexcept {
+		for (auto &i : l)
+			dest = WriteParam(i);
+		return dest;
 	}
 
 	template<typename P, typename... Params>
@@ -1370,6 +1386,12 @@ private:
 
 	static void *WriteStringParam(void *dest, std::string_view src) noexcept {
 		return mempcpy(dest, src.data(), src.size());
+	}
+
+	static void *WriteStringParam(void *dest, std::initializer_list<std::string_view> l) noexcept {
+		for (auto &i : l)
+			dest = WriteStringParam(dest, i);
+		return dest;
 	}
 
 	template<typename P, typename... Params>
