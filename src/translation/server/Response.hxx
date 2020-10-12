@@ -628,11 +628,12 @@ public:
 			return *this;
 		}
 
-		auto BindMount(std::string_view source,
-			       std::string_view target) noexcept {
+		template<typename S, typename T>
+		auto BindMount(S &&source, T &&target) noexcept {
 			response.StringPacket(TranslationCommand::BIND_MOUNT,
-					      source, std::string_view{"", 1},
-					      target);
+					      std::forward<S>(source),
+					      std::string_view{"", 1},
+					      std::forward<T>(target));
 			return *this;
 		}
 
@@ -644,11 +645,12 @@ public:
 			return *this;
 		}
 
-		auto BindMountRw(std::string_view source,
-				 std::string_view target) noexcept {
+		template<typename S, typename T>
+		auto BindMountRw(S &&source, T &&target) noexcept {
 			response.StringPacket(TranslationCommand::BIND_MOUNT_RW,
-					      source, std::string_view{"", 1},
-					      target);
+					      std::forward<S>(source),
+					      std::string_view{"", 1},
+					      std::forward<T>(target));
 			return *this;
 		}
 
@@ -660,11 +662,12 @@ public:
 			return *this;
 		}
 
-		auto BindMountExec(std::string_view source,
-				 std::string_view target) noexcept {
+		template<typename S, typename T>
+		auto BindMountExec(S &&source, T &&target) noexcept {
 			response.StringPacket(TranslationCommand::BIND_MOUNT_EXEC,
-					      source, std::string_view{"", 1},
-					      target);
+					      std::forward<S>(source),
+					      std::string_view{"", 1},
+					      std::forward<T>(target));
 			return *this;
 		}
 
