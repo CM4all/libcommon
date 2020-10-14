@@ -33,7 +33,8 @@
 #include "SocketEvent.hxx"
 #include "Loop.hxx"
 
-#include <assert.h>
+#include <cassert>
+#include <utility>
 
 void
 SocketEvent::Open(SocketDescriptor _fd) noexcept
