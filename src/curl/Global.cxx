@@ -172,23 +172,17 @@ ToRequest(CURL *easy) noexcept
 	return (CurlRequest *)p;
 }
 
-static void
-Done(CURL *handle, CURLcode result) noexcept
-{
-	auto *r = ToRequest(handle);
-	assert(r != nullptr);
-
-	r->Done(result);
-}
-
 inline void
 CurlGlobal::ReadInfo() noexcept
 {
 	CURLMsg *msg;
 
 	while ((msg = multi.InfoRead()) != nullptr) {
-		if (msg->msg == CURLMSG_DONE)
-			Done(msg->easy_handle, msg->data.result);
+		if (msg->msg == CURLMSG_DONE) {
+			auto *request = ToRequest(msg->easy_handle);
+			if (request != nullptr)
+				request->Done(msg->data.result);
+		}
 	}
 }
 
