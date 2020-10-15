@@ -36,10 +36,9 @@
 #include "net/AddressInfo.hxx"
 #include "system/Error.hxx"
 
+#include <cassert>
+#include <cerrno>
 #include <stdexcept>
-
-#include <assert.h>
-#include <errno.h>
 
 void
 ConnectSocketHandler::OnSocketConnectTimeout() noexcept
