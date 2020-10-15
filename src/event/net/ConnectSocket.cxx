@@ -141,15 +141,17 @@ ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 }
 
 void
-ConnectSocket::OnEvent(unsigned) noexcept
+ConnectSocket::OnEvent(unsigned events) noexcept
 {
 	timeout_event.Cancel();
 	UniqueSocketDescriptor fd(event.ReleaseSocket());
 
-	int s_err = fd.GetError();
-	if (s_err != 0) {
-		handler.OnSocketConnectError(std::make_exception_ptr(MakeErrno(s_err, "Failed to connect")));
-		return;
+	if (SocketEvent::ERROR == 0 || events & SocketEvent::ERROR) {
+		int s_err = fd.GetError();
+		if (s_err != 0) {
+			handler.OnSocketConnectError(std::make_exception_ptr(MakeErrno(s_err, "Failed to connect")));
+			return;
+		}
 	}
 
 	handler.OnSocketConnectSuccess(std::move(fd));
