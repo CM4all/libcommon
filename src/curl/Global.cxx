@@ -56,6 +56,10 @@ public:
 		   better solution? */
 	}
 
+	auto &GetEventLoop() const noexcept {
+		return socket_event.GetEventLoop();
+	}
+
 	/**
 	 * Callback function for CURLMOPT_SOCKETFUNCTION.
 	 */
