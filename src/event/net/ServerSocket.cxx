@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -41,16 +41,18 @@
 #include <assert.h>
 #include <errno.h>
 
-ServerSocket::~ServerSocket() noexcept = default;
+ServerSocket::~ServerSocket() noexcept
+{
+	event.Close();
+}
 
 void
 ServerSocket::Listen(UniqueSocketDescriptor _fd) noexcept
 {
-	assert(!fd.IsDefined());
+	assert(!event.IsDefined());
 	assert(_fd.IsDefined());
 
-	fd = std::move(_fd);
-	event.Open(fd);
+	event.Open(_fd.Release());
 	AddEvent();
 }
 
@@ -130,14 +132,14 @@ ServerSocket::ListenPath(const char *path)
 StaticSocketAddress
 ServerSocket::GetLocalAddress() const noexcept
 {
-	return fd.GetLocalAddress();
+	return event.GetSocket().GetLocalAddress();
 }
 
 void
 ServerSocket::EventCallback(unsigned) noexcept
 {
 	StaticSocketAddress remote_address;
-	auto remote_fd = fd.AcceptNonBlock(remote_address);
+	UniqueSocketDescriptor remote_fd(event.GetSocket().AcceptNonBlock(remote_address));
 	if (!remote_fd.IsDefined()) {
 		const int e = errno;
 		if (e != EAGAIN && e != EWOULDBLOCK)

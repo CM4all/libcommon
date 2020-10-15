@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -43,7 +43,6 @@ class SocketAddress;
  * A socket that accepts incoming connections.
  */
 class ServerSocket {
-	UniqueSocketDescriptor fd;
 	SocketEvent event;
 
 public:
@@ -81,7 +80,7 @@ public:
 	StaticSocketAddress GetLocalAddress() const noexcept;
 
 	bool SetTcpDeferAccept(const int &seconds) noexcept {
-		return fd.SetTcpDeferAccept(seconds);
+		return event.GetSocket().SetTcpDeferAccept(seconds);
 	}
 
 	void AddEvent() noexcept {
