@@ -102,6 +102,7 @@ public:
 	}
 
 	SocketDescriptor ReleaseSocket() noexcept {
+		Cancel();
 		return std::exchange(fd, SocketDescriptor::Undefined());
 	}
 
@@ -128,7 +129,6 @@ public:
 
 	void ScheduleRead() noexcept {
 		Schedule(GetScheduledFlags() | READ);
-
 	}
 
 	void ScheduleWrite() noexcept {
