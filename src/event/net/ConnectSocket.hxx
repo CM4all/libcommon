@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -55,8 +55,6 @@ public:
 class ConnectSocket final : public Cancellable {
 	ConnectSocketHandler &handler;
 
-	UniqueSocketDescriptor fd;
-
 	SocketEvent event;
 	TimerEvent timeout_event;
 
@@ -70,7 +68,7 @@ public:
 	}
 
 	bool IsPending() const noexcept {
-		return fd.IsDefined();
+		return event.IsDefined();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -58,8 +58,7 @@ ConnectSocket::ConnectSocket(EventLoop &_event_loop,
 
 ConnectSocket::~ConnectSocket() noexcept
 {
-	if (IsPending())
-		Cancel();
+	event.Close();
 }
 
 void
@@ -68,8 +67,7 @@ ConnectSocket::Cancel() noexcept
 	assert(IsPending());
 
 	timeout_event.Cancel();
-	event.Cancel();
-	fd.Close();
+	event.Close();
 }
 
 static UniqueSocketDescriptor
@@ -89,7 +87,7 @@ bool
 ConnectSocket::Connect(const SocketAddress address,
 		       Event::Duration timeout) noexcept
 {
-	assert(!fd.IsDefined());
+	assert(!event.IsDefined());
 
 	try {
 		WaitConnected(::Connect(address), timeout);
@@ -118,7 +116,7 @@ bool
 ConnectSocket::Connect(const AddressInfo &address,
 		       Event::Duration timeout) noexcept
 {
-	assert(!fd.IsDefined());
+	assert(!event.IsDefined());
 
 	try {
 		WaitConnected(::Connect(address), timeout);
@@ -133,10 +131,9 @@ void
 ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 			     Event::Duration timeout) noexcept
 {
-	assert(!fd.IsDefined());
+	assert(!event.IsDefined());
 
-	fd = std::move(_fd);
-	event.Open(fd);
+	event.Open(_fd.Release());
 	event.ScheduleWrite();
 
 	if (timeout >= Event::Duration{})
@@ -146,8 +143,8 @@ ConnectSocket::WaitConnected(UniqueSocketDescriptor _fd,
 void
 ConnectSocket::OnEvent(unsigned) noexcept
 {
-	event.Cancel();
 	timeout_event.Cancel();
+	UniqueSocketDescriptor fd(event.ReleaseSocket());
 
 	int s_err = fd.GetError();
 	if (s_err != 0) {
@@ -155,15 +152,13 @@ ConnectSocket::OnEvent(unsigned) noexcept
 		return;
 	}
 
-	handler.OnSocketConnectSuccess(std::exchange(fd,
-						     UniqueSocketDescriptor()));
+	handler.OnSocketConnectSuccess(std::move(fd));
 }
 
 void
 ConnectSocket::OnTimeout() noexcept
 {
-	event.Cancel();
-	fd.Close();
+	event.Close();
 
 	handler.OnSocketConnectTimeout();
 }
