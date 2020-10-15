@@ -75,7 +75,7 @@ private:
 	void OnSocketReady(unsigned events) noexcept;
 
 	static constexpr int FlagsToCurlCSelect(unsigned flags) noexcept {
-		return (flags & SocketEvent::READ ? CURL_CSELECT_IN : 0) |
+		return (flags & (SocketEvent::READ | SocketEvent::HANGUP) ? CURL_CSELECT_IN : 0) |
 			(flags & SocketEvent::WRITE ? CURL_CSELECT_OUT : 0) |
 			(flags & SocketEvent::ERROR ? CURL_CSELECT_ERR : 0);
 	}
