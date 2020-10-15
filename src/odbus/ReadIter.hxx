@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,6 +34,7 @@
 #define ODBUS_READ_ITER_HXX
 
 #include "Iter.hxx"
+#include "util/ConstBuffer.hxx"
 
 namespace ODBus {
 
@@ -72,6 +73,14 @@ public:
 		const char *value;
 		GetBasic(&value);
 		return value;
+	}
+
+	template<typename T>
+	ConstBuffer<T> GetFixedArray() noexcept {
+		void *value;
+		int n_elements;
+		dbus_message_iter_get_fixed_array(&iter, &value, &n_elements);
+		return {(const T *)value, size_t(n_elements)};
 	}
 
 	/**
