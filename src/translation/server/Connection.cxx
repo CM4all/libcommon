@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -49,8 +49,7 @@ Connection::Connection(EventLoop &event_loop,
 		       Handler &_handler,
 		       UniqueSocketDescriptor &&_fd) noexcept
 	:listener(_listener), handler(_handler),
-	 fd(std::move(_fd)),
-	 event(event_loop, BIND_THIS_METHOD(OnSocketReady), fd),
+	 event(event_loop, BIND_THIS_METHOD(OnSocketReady), _fd.Release()),
 	 state(State::INIT),
 	 input(8192)
 {
@@ -64,6 +63,8 @@ Connection::~Connection() noexcept
 
 	if (cancel_ptr)
 		cancel_ptr.Cancel();
+
+	event.Close();
 }
 
 inline bool
@@ -74,7 +75,8 @@ Connection::TryRead() noexcept
 	auto r = input.Write();
 	assert(!r.empty());
 
-	ssize_t nbytes = recv(fd.Get(), r.data, r.size, MSG_DONTWAIT);
+	ssize_t nbytes = recv(event.GetSocket().Get(), r.data, r.size,
+			      MSG_DONTWAIT);
 	if (gcc_likely(nbytes > 0)) {
 		input.Append(nbytes);
 		return OnReceived();
@@ -166,7 +168,8 @@ Connection::TryWrite() noexcept
 {
 	assert(state == State::RESPONSE);
 
-	ssize_t nbytes = send(fd.Get(), output.data, output.size,
+	ssize_t nbytes = send(event.GetSocket().Get(),
+			      output.data, output.size,
 			      MSG_DONTWAIT|MSG_NOSIGNAL);
 	if (nbytes < 0) {
 		if (gcc_likely(errno == EAGAIN)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -55,7 +55,6 @@ class Connection
 	Listener &listener;
 	Handler &handler;
 
-	const UniqueSocketDescriptor fd;
 	SocketEvent event;
 
 	enum class State {
