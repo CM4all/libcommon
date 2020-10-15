@@ -87,7 +87,7 @@ public:
 	SocketEvent(const SocketEvent &) = delete;
 	SocketEvent &operator=(const SocketEvent &) = delete;
 
-	EventLoop &GetEventLoop() const noexcept {
+	auto &GetEventLoop() const noexcept {
 		return loop;
 	}
 
