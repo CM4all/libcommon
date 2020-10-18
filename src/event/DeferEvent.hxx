@@ -50,7 +50,7 @@ class DeferEvent final : AutoUnlinkIntrusiveListHook
 
 	EventLoop &loop;
 
-	typedef BoundMethod<void() noexcept> Callback;
+	using Callback = BoundMethod<void() noexcept>;
 	const Callback callback;
 
 public:
