@@ -60,7 +60,7 @@ public:
 	DeferEvent(const DeferEvent &) = delete;
 	DeferEvent &operator=(const DeferEvent &) = delete;
 
-	EventLoop &GetEventLoop() const noexcept {
+	auto &GetEventLoop() const noexcept {
 		return loop;
 	}
 
