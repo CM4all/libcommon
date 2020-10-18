@@ -40,7 +40,7 @@
 
 class EventLoop;
 
-class SocketEvent : public IntrusiveListHook
+class SocketEvent final : public IntrusiveListHook
 {
 	EventLoop &loop;
 
