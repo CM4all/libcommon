@@ -164,6 +164,12 @@ public:
 	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept;
 	bool ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept;
 	bool RemoveFD(int fd, SocketEvent &event) noexcept;
+
+	/**
+	 * Remove the given #SocketEvent after the file descriptor
+	 * has been closed.  This is like RemoveFD(), but does not
+	 * attempt to use #EPOLL_CTL_DEL.
+	 */
 	void AbandonFD(SocketEvent &event) noexcept;
 
 	void AddTimer(TimerEvent &t, Event::Duration d) noexcept;
