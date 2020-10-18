@@ -51,7 +51,8 @@ class SocketEvent;
 /**
  * A non-blocking I/O event loop.
  */
-class EventLoop {
+class EventLoop final
+{
 	EpollFD epoll;
 
 	struct TimerCompare {
