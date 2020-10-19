@@ -39,6 +39,19 @@
 
 class EventLoop;
 
+/**
+ * Monitor events on a socket.  Call Schedule() to announce events
+ * you're interested in, or Cancel() to cancel your subscription.  The
+ * #EventLoop will invoke the callback as soon as any of the
+ * subscribed events are ready.
+ *
+ * This class does not feel responsible for closing the socket.  Call
+ * Close() to do it manually.
+ *
+ * This class is not thread-safe, all methods must be called from the
+ * thread that runs the #EventLoop, except where explicitly documented
+ * as thread-safe.
+ */
 class SocketEvent final
 	: public IntrusiveListHook, public EventPollBackendEvents
 {

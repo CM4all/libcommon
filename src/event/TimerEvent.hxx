@@ -40,7 +40,12 @@
 class EventLoop;
 
 /**
- * Invoke an event callback after a certain amount of time.
+ * This class invokes a callback function after a certain amount of
+ * time.  Use Schedule() to start the timer or Cancel() to cancel it.
+ *
+ * This class is not thread-safe, all methods must be called from the
+ * thread that runs the #EventLoop, except where explicitly documented
+ * as thread-safe.
  */
 class TimerEvent final
 	: public boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>
