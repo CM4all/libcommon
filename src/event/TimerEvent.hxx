@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -49,7 +49,8 @@ class TimerEvent final
 
 	EventLoop &loop;
 
-	const BoundMethod<void() noexcept> callback;
+	using Callback = BoundMethod<void() noexcept>;
+	const Callback callback;
 
 	/**
 	 * When is this timer due?  This is only valid if IsPending()
@@ -58,7 +59,7 @@ class TimerEvent final
 	Event::Clock::time_point due;
 
 public:
-	TimerEvent(EventLoop &_loop, BoundMethod<void() noexcept> _callback) noexcept
+	TimerEvent(EventLoop &_loop, Callback _callback) noexcept
 		:loop(_loop), callback(_callback) {}
 
 	auto &GetEventLoop() const noexcept {
