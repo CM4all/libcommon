@@ -32,15 +32,15 @@
 
 #pragma once
 
+#include "BackendEvents.hxx"
 #include "net/SocketDescriptor.hxx"
 #include "util/BindMethod.hxx"
 #include "util/IntrusiveList.hxx"
 
-#include <sys/epoll.h>
-
 class EventLoop;
 
-class SocketEvent final : public IntrusiveListHook
+class SocketEvent final
+	: public IntrusiveListHook, public EventPollBackendEvents
 {
 	EventLoop &loop;
 
@@ -63,11 +63,6 @@ class SocketEvent final : public IntrusiveListHook
 	unsigned ready_flags = 0;
 
 public:
-	static constexpr unsigned READ = EPOLLIN;
-	static constexpr unsigned WRITE = EPOLLOUT;
-	static constexpr unsigned ERROR = EPOLLERR;
-	static constexpr unsigned HANGUP = EPOLLHUP;
-
 	/**
 	 * These flags are always reported by epoll_wait() and don't
 	 * need to be registered with epoll_ctl().
