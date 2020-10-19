@@ -133,18 +133,21 @@ public:
 		ready_flags = flags;
 	}
 
-	void Schedule(unsigned flags) noexcept;
+	/**
+	 * @return true on success, false on error (with errno set)
+	 */
+	bool Schedule(unsigned flags) noexcept;
 
 	void Cancel() noexcept {
 		Schedule(0);
 	}
 
-	void ScheduleRead() noexcept {
-		Schedule(GetScheduledFlags() | READ);
+	bool ScheduleRead() noexcept {
+		return Schedule(GetScheduledFlags() | READ);
 	}
 
-	void ScheduleWrite() noexcept {
-		Schedule(GetScheduledFlags() | WRITE);
+	bool ScheduleWrite() noexcept {
+		return Schedule(GetScheduledFlags() | WRITE);
 	}
 
 	void CancelRead() noexcept {
