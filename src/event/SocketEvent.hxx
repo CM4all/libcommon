@@ -134,7 +134,8 @@ public:
 	}
 
 	/**
-	 * @return true on success, false on error (with errno set)
+	 * @return true on success, false on error (with errno set if
+	 * USE_EPOLL is defined)
 	 */
 	bool Schedule(unsigned flags) noexcept;
 

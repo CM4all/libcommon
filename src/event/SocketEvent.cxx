@@ -32,9 +32,14 @@
 
 #include "SocketEvent.hxx"
 #include "Loop.hxx"
+#include "event/Features.h"
 
 #include <cassert>
 #include <utility>
+
+#ifdef USE_EPOLL
+#include <cerrno>
+#endif
 
 void
 SocketEvent::Open(SocketDescriptor _fd) noexcept
