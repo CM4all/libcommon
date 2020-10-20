@@ -1,7 +1,7 @@
 io_sources = []
 io_deps = []
 
-if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
+if get_variable('libcommon_enable_filesystem', true) and (compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8'))
   # the C++17 Filesystem TS is implemented in GCC>=8
   io_sources += [
     'FileLineParser.cxx',
