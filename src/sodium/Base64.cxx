@@ -30,28 +30,25 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Base64.hxx"
+#include "util/AllocatedString.hxx"
+#include "util/ConstBuffer.hxx"
 
-#include "util/Compiler.h"
-#include "util/StringBuffer.hxx"
-
-#include <sodium/utils.h>
-
-template<typename T> struct ConstBuffer;
-template<typename T> class AllocatedString;
-
-template<std::size_t src_size, int variant>
 gcc_pure
-auto
-FixedBase64(const void *src) noexcept
+static AllocatedString<>
+SodiumBase64(ConstBuffer<void> src, int variant) noexcept
 {
-	StringBuffer<sodium_base64_ENCODED_LEN(src_size, variant)> dest;
-	sodium_bin2base64(dest.data(), dest.capacity(),
-			  (const unsigned char *)src, src_size,
+	size_t size = sodium_base64_ENCODED_LEN(src.size, variant);
+	auto buffer = new char[size];
+	sodium_bin2base64(buffer, size,
+			  (const unsigned char *)src.data, src.size,
 			  variant);
-	return dest;
+	return AllocatedString<>::Donate(buffer);
 }
 
-gcc_pure
-AllocatedString<char>
-UrlSafeBase64(ConstBuffer<void> src) noexcept;
+AllocatedString<>
+UrlSafeBase64(ConstBuffer<void> src) noexcept
+{
+	return SodiumBase64(src, sodium_base64_VARIANT_URLSAFE_NO_PADDING);
+}
+

@@ -31,6 +31,8 @@
  */
 
 #include "sodium/Base64.hxx"
+#include "util/AllocatedString.hxx"
+#include "util/StringView.hxx"
 
 #include <gtest/gtest.h>
 
@@ -52,4 +54,10 @@ TEST(TestBase64, LeviathanNoPadding)
 {
 	const auto b64 = FixedBase64<sizeof(leviathan) - 1, sodium_base64_VARIANT_ORIGINAL_NO_PADDING>(leviathan);
 	EXPECT_STREQ(b64, "TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBieSB0aGlzIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBpcyBhIGx1c3Qgb2YgdGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGVsaWdodCBpbiB0aGUgY29udGludWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb24gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRoZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4");
+}
+
+TEST(TestBase64, UrlSafeBase64)
+{
+	const auto b64 = UrlSafeBase64(StringView(leviathan).ToVoid());
+	EXPECT_STREQ(b64.c_str(), "TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBieSB0aGlzIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBpcyBhIGx1c3Qgb2YgdGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGVsaWdodCBpbiB0aGUgY29udGludWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb24gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRoZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4");
 }
