@@ -103,6 +103,7 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
 endif
 
 subdir('src/ssl')
+subdir('src/jwt')
 subdir('src/net')
 subdir('src/event')
 subdir('src/event/net')
