@@ -409,7 +409,7 @@ public:
 		}
 	};
 
-	typedef RowIterator iterator;
+	using iterator = RowIterator;
 
 	iterator begin() const noexcept {
 		return iterator{result, 0};
