@@ -1,5 +1,3 @@
-libssl = dependency('openssl', version: '>= 1.0')
-
 jwt = static_library(
   'jwt',
   'RS256.cxx',
