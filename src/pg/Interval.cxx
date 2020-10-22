@@ -34,10 +34,9 @@
 #include "util/StringCompare.hxx"
 #include "util/StringStrip.hxx"
 
+#include <cassert>
+#include <cstdlib>
 #include <stdexcept>
-
-#include <assert.h>
-#include <stdlib.h>
 
 static constexpr std::chrono::hours pg_day(24);
 
@@ -88,14 +87,14 @@ ParseTimeOfDay(long hours, const char *s)
 	std::chrono::seconds result = std::chrono::hours(labs(hours));
 
 	char *endptr;
-	const unsigned long minutes = strtoul(s, &endptr, 10);
+	const unsigned long minutes = std::strtoul(s, &endptr, 10);
 	if (endptr != s + 2 || *endptr != ':' || minutes >= 60)
 		throw std::invalid_argument("Invalid minute");
 
 	result += std::chrono::minutes(minutes);
 
 	s = endptr + 1;
-	const unsigned long seconds = strtoul(s, &endptr, 10);
+	const unsigned long seconds = std::strtoul(s, &endptr, 10);
 	if (endptr != s + 2 || seconds >= 60)
 		throw std::invalid_argument("Invalid second");
 
@@ -120,7 +119,7 @@ Pg::ParseIntervalS(const char *s)
 
 	while (*s != 0) {
 		char *endptr;
-		long l = strtol(s, &endptr, 10);
+		long l = std::strtol(s, &endptr, 10);
 		if (endptr == s)
 			throw std::invalid_argument("Failed to parse number");
 

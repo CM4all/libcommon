@@ -32,7 +32,7 @@
 
 #include "Connection.hxx"
 
-#include <string.h>
+#include <cstring>
 
 namespace Pg {
 
@@ -117,7 +117,7 @@ Connection::Escape(const char *p) const noexcept
 {
 	assert(p != nullptr);
 
-	return Escape(p, strlen(p));
+	return Escape(p, std::strlen(p));
 }
 
 } /* namespace Pg */

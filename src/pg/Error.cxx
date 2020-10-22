@@ -33,14 +33,12 @@
 #include "Error.hxx"
 #include "util/StringCompare.hxx"
 
-#include <string.h>
-
 bool
 Pg::Error::IsType(const char *expected_type) const noexcept
 {
 	const char *actual_type = GetType();
 	return actual_type != nullptr &&
-		strcmp(actual_type, expected_type) == 0;
+		StringIsEqual(actual_type, expected_type);
 }
 
 bool

@@ -34,9 +34,8 @@
 #include "time/Convert.hxx"
 #include "util/StringBuffer.hxx"
 
+#include <cassert>
 #include <stdexcept>
-
-#include <assert.h>
 
 namespace Pg {
 

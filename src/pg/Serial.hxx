@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #define PRIpgserial PRId32
 

@@ -34,7 +34,7 @@
 
 #include <stdexcept>
 
-#include <string.h>
+#include <cstring>
 
 namespace Pg {
 
@@ -87,9 +87,9 @@ DecodeArray(const char *p)
 		} else if (*p == '{') {
 			throw std::invalid_argument("unexpected '{'");
 		} else {
-			const char *end = strchr(p, ',');
+			const char *end = std::strchr(p, ',');
 			if (end == nullptr) {
-				end = strchr(p, '}');
+				end = std::strchr(p, '}');
 				if (end == nullptr)
 					throw std::invalid_argument("missing '}'");
 			}
