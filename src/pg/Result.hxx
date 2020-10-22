@@ -302,6 +302,11 @@ public:
 
 	public:
 		gcc_pure
+		unsigned GetColumnCount() const noexcept {
+			return ::PQnfields(result);
+		}
+
+		gcc_pure
 		const char *GetValue(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
