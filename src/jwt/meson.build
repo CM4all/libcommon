@@ -6,6 +6,7 @@ jwt = static_library(
   include_directories: inc,
   dependencies: [
     ssl_dep,
+    sodium_dep,
   ],
 )
 
