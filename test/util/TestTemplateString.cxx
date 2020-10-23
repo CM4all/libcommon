@@ -34,24 +34,20 @@
 TEST(TemplateString, CharAsString)
 {
 	using namespace TemplateString;
-	using T = CharAsString<'?'>;
-	static_assert(T::size == 1);
-	ASSERT_STREQ(T::value, "?");
+	static constexpr auto result = CharAsString('?');
+	static_assert(result.size == 1);
+	ASSERT_STREQ(result.value, "?");
 }
 
 TEST(TemplateString, Concat)
 {
 	using namespace TemplateString;
-	using T = Concat<CharAsString<'f'>, CharAsString<'o'>, CharAsString<'o'>>;
-	static_assert(T::size == 3);
-	ASSERT_STREQ(T::value, "foo");
-}
+	static constexpr auto foo = Concat('f', 'o', 'o');
+	static_assert(foo.size == 3);
+	ASSERT_STREQ(foo.value, "foo");
 
-TEST(TemplateString, InsertBefore)
-{
-	using namespace TemplateString;
-	using T = Concat<CharAsString<'o'>, CharAsString<'o'>>;
-	using V = InsertBefore<'f', T>;
-	static_assert(V::size == 3);
-	ASSERT_STREQ(V::value, "foo");
+	static constexpr auto bar = Concat('b', 'a', 'r');
+	static constexpr auto foobar = Concat(foo, bar);
+	static_assert(foobar.size == 6);
+	ASSERT_STREQ(foobar.value, "foobar");
 }
