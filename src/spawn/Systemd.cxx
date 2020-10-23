@@ -193,7 +193,7 @@ CreateSystemdScope(const char *name, const char *description,
 
 	const uint32_t pids_value[] = { uint32_t(pid) };
 
-	AppendMessageIter(args, DBUS_TYPE_ARRAY, PropTypeTraits::as_string.value)
+	AppendMessageIter(args, DBUS_TYPE_ARRAY, PropTypeTraits::as_string)
 		.Append(Struct(String("Description"),
 			       Variant(String(description))))
 		.Append(Struct(String("PIDs"),

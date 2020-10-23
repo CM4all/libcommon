@@ -36,7 +36,7 @@ TEST(TemplateString, CharAsString)
 	using namespace TemplateString;
 	static constexpr auto result = CharAsString('?');
 	static_assert(result.size == 1);
-	ASSERT_STREQ(result.value, "?");
+	ASSERT_STREQ(result, "?");
 }
 
 TEST(TemplateString, Concat)
@@ -44,10 +44,10 @@ TEST(TemplateString, Concat)
 	using namespace TemplateString;
 	static constexpr auto foo = Concat('f', 'o', 'o');
 	static_assert(foo.size == 3);
-	ASSERT_STREQ(foo.value, "foo");
+	ASSERT_STREQ(foo, "foo");
 
 	static constexpr auto bar = Concat('b', 'a', 'r');
 	static constexpr auto foobar = Concat(foo, bar);
 	static_assert(foobar.size == 6);
-	ASSERT_STREQ(foobar.value, "foobar");
+	ASSERT_STREQ(foobar, "foobar");
 }
