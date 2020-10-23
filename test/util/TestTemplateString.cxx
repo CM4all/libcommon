@@ -39,6 +39,14 @@ TEST(TemplateString, FromChar)
 	ASSERT_STREQ(result, "?");
 }
 
+TEST(TemplateString, FromLiteral)
+{
+	using namespace TemplateString;
+	static constexpr auto result = FromLiteral("foobar");
+	static_assert(result.size == 6);
+	ASSERT_STREQ(result, "foobar");
+}
+
 TEST(TemplateString, Concat)
 {
 	using namespace TemplateString;
