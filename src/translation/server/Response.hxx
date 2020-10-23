@@ -475,8 +475,9 @@ public:
 		return Packet(TranslationCommand::LANGUAGE, value);
 	}
 
-	auto &Realm(std::string_view value) noexcept {
-		return Packet(TranslationCommand::REALM, value);
+	template<typename... Types>
+	auto &Realm(Types... value) noexcept {
+		return StringPacket(TranslationCommand::REALM, value...);
 	}
 
 	auto &WwwAuthenticate(std::string_view value) noexcept {
