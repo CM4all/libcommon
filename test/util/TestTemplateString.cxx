@@ -31,10 +31,10 @@
 
 #include <gtest/gtest.h>
 
-TEST(TemplateString, CharAsString)
+TEST(TemplateString, FromChar)
 {
 	using namespace TemplateString;
-	static constexpr auto result = CharAsString('?');
+	static constexpr auto result = FromChar('?');
 	static_assert(result.size == 1);
 	ASSERT_STREQ(result, "?");
 }
