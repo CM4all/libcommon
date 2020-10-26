@@ -31,6 +31,7 @@ You need:
 - `libcap <https://sites.google.com/site/fullycapable/>`__
 - `libseccomp <https://github.com/seccomp/libseccomp>`__
 - `liburing <https://github.com/axboe/liburing>`__
+- `libwas <https://github.com/CM4all/libwas>`__
 - `OpenSSL <https://www.openssl.org/>`__
 - `LuaJit <http://luajit.org/>`__
 - `PCRE <https://www.pcre.org/>`__
