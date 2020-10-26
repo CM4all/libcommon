@@ -49,6 +49,7 @@ struct Request {
 	const char *param = nullptr;
 
 	const char *user = nullptr;
+	const char *password = nullptr;
 
 	const char *args = nullptr, *query_string = nullptr;
 

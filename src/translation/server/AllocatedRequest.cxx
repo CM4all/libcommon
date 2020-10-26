@@ -83,6 +83,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		user = user_buffer.c_str();
 		break;
 
+	case TranslationCommand::PASSWORD:
+		password_buffer = ToString(payload);
+		password = password_buffer.c_str();
+		break;
+
 	case TranslationCommand::STATUS:
 		if (payload.size != 2)
 			throw std::runtime_error("size mismatch in STATUS packet");
