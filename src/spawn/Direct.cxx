@@ -211,12 +211,6 @@ try {
 			_exit(EXIT_FAILURE);
 	}
 
-	if (p.chdir != nullptr && chdir(p.chdir) < 0) {
-		fprintf(stderr, "chdir('%s') failed: %s\n",
-			p.chdir, strerror(errno));
-		_exit(EXIT_FAILURE);
-	}
-
 	if (p.sched_idle) {
 		static struct sched_param sched_param;
 		sched_setscheduler(0, SCHED_IDLE, &sched_param);
@@ -284,6 +278,12 @@ try {
 
 	if (!p.uid_gid.IsEmpty())
 		p.uid_gid.Apply();
+
+	if (p.chdir != nullptr && chdir(p.chdir) < 0) {
+		fprintf(stderr, "chdir('%s') failed: %s\n",
+			p.chdir, strerror(errno));
+		_exit(EXIT_FAILURE);
+	}
 
 	if (stderr_fd < 0 && p.stderr_path != nullptr) {
 		stderr_fd = open(p.stderr_path,
