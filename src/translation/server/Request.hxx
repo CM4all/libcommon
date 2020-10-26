@@ -95,6 +95,8 @@ struct Request {
 
 	const char *pool = nullptr;
 
+	const char *service = nullptr;
+
 	bool login = false;
 
 	bool cron = false;
