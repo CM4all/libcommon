@@ -173,7 +173,11 @@ try {
 	}
 
 	p.ns.Setup(p.uid_gid);
-	p.rlimits.Apply(0);
+
+	if (!userns_setup_pipe_r.IsDefined())
+		/* if the userns_setup_pipe exists, then the parent
+		   process will apply the resource limits */
+		p.rlimits.Apply(0);
 
 	if (p.chroot != nullptr && chroot(p.chroot) < 0) {
 		fprintf(stderr, "chroot('%s') failed: %s\n",
