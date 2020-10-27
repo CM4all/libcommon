@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -45,6 +45,6 @@ class SocketAddress;
  */
 gcc_pure
 unsigned
-FindNetworkInterface(SocketAddress address);
+FindNetworkInterface(SocketAddress address) noexcept;
 
 #endif

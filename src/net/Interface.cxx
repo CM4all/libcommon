@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -42,7 +42,7 @@
 gcc_pure
 static bool
 Match(const struct sockaddr_in &a,
-      const struct sockaddr_in &b)
+      const struct sockaddr_in &b) noexcept
 {
 	return memcmp(&a.sin_addr, &b.sin_addr, sizeof(a.sin_addr)) == 0;
 }
@@ -50,7 +50,7 @@ Match(const struct sockaddr_in &a,
 gcc_pure
 static bool
 Match(const struct sockaddr_in6 &a,
-      const struct sockaddr_in6 &b)
+      const struct sockaddr_in6 &b) noexcept
 {
 	return memcmp(&a.sin6_addr, &b.sin6_addr, sizeof(a.sin6_addr)) == 0;
 }
@@ -58,7 +58,7 @@ Match(const struct sockaddr_in6 &a,
 gcc_pure
 static bool
 Match(const struct sockaddr &a,
-      SocketAddress b)
+      SocketAddress b) noexcept
 {
 	if (a.sa_family != b.GetFamily())
 		return false;
@@ -81,13 +81,13 @@ Match(const struct sockaddr &a,
 gcc_pure
 static bool
 Match(const struct ifaddrs &ifa,
-      SocketAddress address)
+      SocketAddress address) noexcept
 {
 	return ifa.ifa_addr != nullptr && Match(*ifa.ifa_addr, address);
 }
 
 unsigned
-FindNetworkInterface(SocketAddress address)
+FindNetworkInterface(SocketAddress address) noexcept
 {
 	struct ifaddrs *ifa;
 	if (getifaddrs(&ifa) != 0)
