@@ -41,7 +41,7 @@ class GenericHashState {
 	crypto_generichash_state state;
 
 public:
-	GenericHashState(size_t outlen) noexcept {
+	explicit GenericHashState(size_t outlen) noexcept {
 		crypto_generichash_init(&state, nullptr, 0, outlen);
 	}
 
