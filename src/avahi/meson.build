@@ -20,5 +20,6 @@ avahi_dep = declare_dependency(
   link_with: avahi,
   dependencies: [
     event_dep,
+    net_dep,
   ],
 )
