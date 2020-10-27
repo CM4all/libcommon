@@ -41,8 +41,10 @@ class GenericHashState {
 	crypto_generichash_state state;
 
 public:
-	explicit GenericHashState(size_t outlen) noexcept {
-		crypto_generichash_init(&state, nullptr, 0, outlen);
+	explicit GenericHashState(size_t outlen,
+				  ConstBuffer<void> key=nullptr) noexcept {
+		crypto_generichash_init(&state,
+					(const unsigned char *)key.data, key.size, outlen);
 	}
 
 	void Update(ConstBuffer<void> p) noexcept {
