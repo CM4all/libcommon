@@ -1,6 +1,7 @@
 jwt = static_library(
   'jwt',
   'RS256.cxx',
+  'EdDSA.cxx',
   include_directories: inc,
   dependencies: [
     ssl_dep,
