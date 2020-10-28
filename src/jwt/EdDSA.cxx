@@ -37,6 +37,8 @@
 
 #include <sodium/crypto_sign.h>
 
+#include <string>
+
 namespace JWT {
 
 using Ed25519Signature = std::array<std::byte, crypto_sign_BYTES>;
