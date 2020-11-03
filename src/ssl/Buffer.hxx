@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -44,23 +44,25 @@ public:
 	explicit SslBuffer(X509_NAME &cert);
 	explicit SslBuffer(EVP_PKEY &key);
 
-	SslBuffer(SslBuffer &&src):WritableBuffer<unsigned char>(src) {
+	SslBuffer(SslBuffer &&src) noexcept
+		:WritableBuffer<unsigned char>(src)
+	{
 		src.data = nullptr;
 	}
 
-	~SslBuffer() {
+	~SslBuffer() noexcept {
 		if (data != nullptr)
 			OPENSSL_free(data);
 	}
 
-	SslBuffer &operator=(SslBuffer &&src) {
+	SslBuffer &operator=(SslBuffer &&src) noexcept {
 		data = src.data;
 		size = src.size;
 		src.data = nullptr;
 		return *this;
 	}
 
-	ConstBuffer<void> get() const {
+	ConstBuffer<void> get() const noexcept {
 		return {data, size};
 	}
 };
