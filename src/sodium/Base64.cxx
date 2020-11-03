@@ -52,3 +52,8 @@ UrlSafeBase64(ConstBuffer<void> src) noexcept
 	return SodiumBase64(src, sodium_base64_VARIANT_URLSAFE_NO_PADDING);
 }
 
+AllocatedString<>
+UrlSafeBase64(std::string_view src) noexcept
+{
+	return UrlSafeBase64(ConstBuffer<void>{src.data(), src.size()});
+}

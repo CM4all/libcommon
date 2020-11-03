@@ -37,6 +37,8 @@
 
 #include <sodium/utils.h>
 
+#include <string_view>
+
 template<typename T> struct ConstBuffer;
 template<typename T> class AllocatedString;
 
@@ -55,3 +57,7 @@ FixedBase64(const void *src) noexcept
 gcc_pure
 AllocatedString<char>
 UrlSafeBase64(ConstBuffer<void> src) noexcept;
+
+gcc_pure
+AllocatedString<char>
+UrlSafeBase64(std::string_view src) noexcept;
