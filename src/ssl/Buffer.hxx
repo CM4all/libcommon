@@ -42,6 +42,7 @@ class SslBuffer : WritableBuffer<unsigned char> {
 public:
 	explicit SslBuffer(X509 &cert);
 	explicit SslBuffer(X509_NAME &cert);
+	explicit SslBuffer(X509_REQ &req);
 	explicit SslBuffer(EVP_PKEY &key);
 
 	SslBuffer(SslBuffer &&src) noexcept
