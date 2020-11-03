@@ -33,6 +33,8 @@
 #include "Buffer.hxx"
 #include "Error.hxx"
 
+#include <stdexcept>
+
 SslBuffer::SslBuffer(X509 &cert)
 {
 	data = nullptr;
@@ -71,4 +73,16 @@ SslBuffer::SslBuffer(EVP_PKEY &key)
 		throw SslError("Failed to encode key");
 
 	size = result;
+}
+
+SslBuffer::SslBuffer(const BIGNUM &bn)
+{
+	data = nullptr;
+
+	size = BN_num_bytes(&bn);
+	data = (unsigned char *)OPENSSL_malloc(size);
+	if (data == nullptr)
+		throw std::bad_alloc();
+
+	BN_bn2bin(&bn, data);
 }

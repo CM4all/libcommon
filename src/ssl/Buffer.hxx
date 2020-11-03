@@ -37,6 +37,7 @@
 #include "util/ConstBuffer.hxx"
 
 #include <openssl/ssl.h>
+#include <openssl/bn.h>
 
 class SslBuffer : WritableBuffer<unsigned char> {
 public:
@@ -44,6 +45,7 @@ public:
 	explicit SslBuffer(X509_NAME &cert);
 	explicit SslBuffer(X509_REQ &req);
 	explicit SslBuffer(EVP_PKEY &key);
+	explicit SslBuffer(const BIGNUM &bn);
 
 	SslBuffer(SslBuffer &&src) noexcept
 		:WritableBuffer<unsigned char>(src)
