@@ -73,6 +73,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		host = host_buffer.c_str();
 		break;
 
+	case TranslationCommand::SESSION:
+		session_buffer = ToString(payload);
+		session = {session_buffer.data(), session_buffer.size()};
+		break;
+
 	case TranslationCommand::PARAM:
 		param_buffer = ToString(payload);
 		param = param_buffer.c_str();

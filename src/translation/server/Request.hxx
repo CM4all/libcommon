@@ -46,6 +46,8 @@ struct Request {
 
 	const char *host = nullptr;
 
+	ConstBuffer<void> session = nullptr;
+
 	const char *param = nullptr;
 
 	const char *user = nullptr;
