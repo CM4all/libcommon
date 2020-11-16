@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -70,4 +70,29 @@ IncrementDay(struct tm &tm) noexcept
 	++tm.tm_wday;
 	if (tm.tm_wday >= 7)
 		tm.tm_wday = 0;
+}
+
+void
+DecrementDay(struct tm &tm) noexcept
+{
+	--tm.tm_mday;
+
+	if (tm.tm_mday < 1) {
+		/* roll over to previous month */
+
+		--tm.tm_mon;
+		if (tm.tm_mon < 0) {
+			/* roll over to previous eyar */
+			tm.tm_mon = 11;
+			--tm.tm_year;
+		}
+
+		const unsigned max_day = DaysInMonth(tm.tm_mon + 1,
+						     tm.tm_year + 1900);
+		tm.tm_mday = max_day;
+	}
+
+	--tm.tm_wday;
+	if (tm.tm_wday < 0)
+		tm.tm_wday = 6;
 }

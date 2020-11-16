@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -54,3 +54,12 @@ PrecedingMidnightLocal(std::chrono::system_clock::time_point t) noexcept;
  */
 void
 IncrementDay(struct tm &tm) noexcept;
+
+/**
+ * Calculate the previous day, keeping month/year wraparounds and leap
+ * days in mind.  Keeps the tm_wday attribute updated, but not other
+ * derived attributes such as tm_yday, and ignores day light saving
+ * transitions.
+ */
+void
+DecrementDay(struct tm &tm) noexcept;
