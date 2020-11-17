@@ -3,6 +3,7 @@ uri = static_library(
   'Verify.cxx',
   'Escape.cxx',
   'Unescape.cxx',
+  'MapQueryString.cxx',
   include_directories: inc,
   dependencies: util_dep,
 )
