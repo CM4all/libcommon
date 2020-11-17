@@ -524,6 +524,15 @@ public:
 		return *this;
 	}
 
+	template<typename P>
+	auto &ProbePathSuffixes(P payload,
+				ConstBuffer<std::string_view> suffixes) noexcept {
+		Packet(TranslationCommand::PROBE_PATH_SUFFIXES, payload);
+		for (auto i : suffixes)
+			StringPacket(TranslationCommand::PROBE_SUFFIX, i);
+		return *this;
+	}
+
 	template<typename... Types>
 	auto &ReadFile(Types... path) noexcept {
 		return StringPacket(TranslationCommand::READ_FILE, path...);
