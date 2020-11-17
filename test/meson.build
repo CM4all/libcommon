@@ -41,12 +41,12 @@ subdir('cares')
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   # this library needs std::byte
   subdir('sodium')
+  subdir('jwt')
 endif
 
 subdir('spawn')
 subdir('time')
 subdir('uring')
-subdir('jwt')
 
 if get_option('coroutines')
   subdir('co')
