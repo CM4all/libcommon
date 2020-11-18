@@ -36,6 +36,12 @@
 
 namespace Was {
 
+/**
+ * Indicates that was_simple_abort() shall be called.  This can also
+ * be used after an I/O or protocol error to bail out.
+ */
+struct AbortResponse {};
+
 struct NotFound {
 	std::string_view body = "Not Found\n";
 };
