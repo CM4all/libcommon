@@ -1,6 +1,7 @@
 util_sources = [
   'AllocatedString.cxx',
   'Exception.cxx',
+  'MimeType.cxx',
   'PrintException.cxx',
   'StringBuilder.cxx',
   'StringCompare.cxx',
