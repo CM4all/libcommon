@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 CM4all GmbH
+ * Copyright 2019-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,35 +32,16 @@
 
 #pragma once
 
-#include "ExceptionResponse.hxx"
-#include "SimpleResponse.hxx"
+#include <string_view>
 
-extern "C" {
-#include <was/simple.h>
-}
+namespace Was {
 
-/**
- * Create a new #was_simple object and call the given function for
- * each incoming request.
- *
- * The given function may throw #Was::NotFound, #Was::BadRequest and
- * this loop will send the according response.
- */
-template<typename F>
-void
-WasLoop(F &&f) noexcept
-{
-	auto *was = was_simple_new();
-	const char *uri;
-	while ((uri = was_simple_accept(was)) != nullptr) {
-		try {
-			f(was, uri);
-		} catch (const Was::NotFound &e) {
-			Was::SendNotFound(was, e.body);
-		} catch (const Was::BadRequest &e) {
-			Was::SendBadRequest(was, e.body);
-		}
-	}
+struct NotFound {
+	std::string_view body = "Not Found\n";
+};
 
-	was_simple_free(was);
-}
+struct BadRequest {
+	std::string_view body = "Bad Request\n";
+};
+
+} // namespace Was
