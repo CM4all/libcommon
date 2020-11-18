@@ -2,6 +2,7 @@ libwas = dependency('libcm4all-was-simple', version: '>= 1.9')
 
 was = static_library(
   'was',
+  'SimpleResponse.cxx',
   'WasOutputStream.cxx',
   'WasSplice.cxx',
   include_directories: inc,
