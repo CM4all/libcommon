@@ -68,6 +68,8 @@ struct Request {
 
 	ConstBuffer<void> error_document = nullptr;
 
+	ConstBuffer<void> http_auth = nullptr;
+
 	ConstBuffer<void> check = nullptr;
 
 	ConstBuffer<void> want_full_uri = nullptr;

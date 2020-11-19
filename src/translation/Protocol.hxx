@@ -1028,6 +1028,11 @@ enum class TranslationCommand : uint16_t {
 	 * filter, and discard successful responses from the filter.
 	 */
 	FILTER_NO_BODY = 218,
+
+	/**
+	 * Require HTTP-based authentication.
+	 */
+	HTTP_AUTH = 219,
 };
 
 struct TranslationHeader {

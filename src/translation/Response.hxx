@@ -154,6 +154,13 @@ struct TranslateResponse {
 	 * #TranslationCommand::INTERNAL_REDIRECT packet was received.
 	 */
 	ConstBuffer<void> internal_redirect;
+
+	/**
+	 * The payload of the HTTP_AUTH packet.  If
+	 * ConstBuffer::IsNull(), then no HTTP_AUTH packet was
+	 * received.
+	 */
+	ConstBuffer<void> http_auth;
 #endif
 
 #if TRANSLATION_ENABLE_SESSION

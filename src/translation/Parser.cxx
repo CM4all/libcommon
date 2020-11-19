@@ -2598,6 +2598,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.HasAuth())
 			throw std::runtime_error("duplicate AUTH packet");
 
+		if (!response.http_auth.IsNull())
+			throw std::runtime_error("cannot combine AUTH and HTTP_AUTH");
+
 		response.auth = payload;
 		return;
 #else
@@ -2960,6 +2963,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("duplicate INTERNAL_REDIRECT packet");
 
 		response.internal_redirect = payload;
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::HTTP_AUTH:
+#if TRANSLATION_ENABLE_HTTP
+		if (!response.http_auth.IsNull())
+			throw std::runtime_error("duplicate HTTP_AUTH packet");
+
+		if (!response.auth.IsNull())
+			throw std::runtime_error("cannot combine AUTH and HTTP_AUTH");
+
+		response.http_auth = payload;
 		return;
 #else
 		break;

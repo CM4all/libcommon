@@ -426,6 +426,11 @@ public:
 	}
 
 	template<typename P>
+	auto &HttpAuth(P payload) noexcept {
+		return Packet(TranslationCommand::HTTP_AUTH, payload);
+	}
+
+	template<typename P>
 	auto &Check(P payload) noexcept {
 		return Packet(TranslationCommand::CHECK, payload);
 	}
