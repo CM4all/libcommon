@@ -112,13 +112,10 @@ bool
 VerifyEdDSA(const Ed25519PublicKey &key,
 	    std::string_view header_dot_payload_dot_signature_b64) noexcept
 {
-	auto i = header_dot_payload_dot_signature_b64.find_last_of('.');
-	if (i == header_dot_payload_dot_signature_b64.npos)
-		return false;
+	const StringView hps(header_dot_payload_dot_signature_b64);
+	const auto [header_dot_payload_b64, signature_b64] = hps.SplitLast('.');
 
-	return VerifyEdDSA(key,
-			   header_dot_payload_dot_signature_b64.substr(0, i),
-			   header_dot_payload_dot_signature_b64.substr(i + 1));
+	return VerifyEdDSA(key, header_dot_payload_b64, signature_b64);
 }
 
 } // namespace JWT

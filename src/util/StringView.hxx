@@ -127,6 +127,20 @@ struct BasicStringView : ConstBuffer<T> {
 		return {{begin(), separator}, {separator + 1, end()}};
 	}
 
+	/**
+	 * Split the string at the last occurrence of the given
+	 * character.  If the character is not found, then the first
+	 * value is the whole string and the second value is nullptr.
+	 */
+	gcc_pure
+	std::pair<BasicStringView<T>, BasicStringView<T>> SplitLast(value_type ch) const noexcept {
+		const auto separator = FindLast(ch);
+		if (separator == nullptr)
+			return {*this, nullptr};
+
+		return {{begin(), separator}, {separator + 1, end()}};
+	}
+
 	gcc_pure
 	bool StartsWith(BasicStringView<T> needle) const noexcept {
 		return this->size >= needle.size &&
