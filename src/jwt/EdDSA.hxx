@@ -39,6 +39,8 @@
 #include <cstddef> // for std::byte
 #include <string_view>
 
+template<typename T> class AllocatedArray;
+
 namespace JWT {
 
 // 64 = crypto_sign_SECRETKEYBYTES
@@ -78,5 +80,20 @@ gcc_pure
 bool
 VerifyEdDSA(const Ed25519PublicKey &key,
 	    std::string_view header_dot_payload_dot_signature_b64) noexcept;
+
+/**
+ * @return the base64-decoded payload on success or nullptr on error
+ */
+AllocatedArray<std::byte>
+VerifyDecodeEdDSA(const Ed25519PublicKey &key,
+		  std::string_view header_dot_payload_b64,
+		  std::string_view signature_b64) noexcept;
+
+/**
+ * @return the base64-decoded payload on success or nullptr on error
+ */
+AllocatedArray<std::byte>
+VerifyDecodeEdDSA(const Ed25519PublicKey &key,
+		  std::string_view header_dot_payload_dot_signature_b64) noexcept;
 
 } // namespace JWT

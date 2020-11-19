@@ -32,6 +32,7 @@
 
 #include "EdDSA.hxx"
 #include "sodium/Base64.hxx"
+#include "util/AllocatedArray.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/StringView.hxx"
 
@@ -116,6 +117,29 @@ VerifyEdDSA(const Ed25519PublicKey &key,
 	const auto [header_dot_payload_b64, signature_b64] = hps.SplitLast('.');
 
 	return VerifyEdDSA(key, header_dot_payload_b64, signature_b64);
+}
+
+AllocatedArray<std::byte>
+VerifyDecodeEdDSA(const Ed25519PublicKey &key,
+		  std::string_view header_dot_payload_b64,
+		  std::string_view signature_b64) noexcept
+{
+	if (!VerifyEdDSA(key, header_dot_payload_b64, signature_b64))
+		return nullptr;
+
+	const auto payload_b64 = StringView(header_dot_payload_b64)
+		.Split('.').second;
+	return DecodeUrlSafeBase64(payload_b64);
+}
+
+AllocatedArray<std::byte>
+VerifyDecodeEdDSA(const Ed25519PublicKey &key,
+		  std::string_view header_dot_payload_dot_signature_b64) noexcept
+{
+	const StringView hps(header_dot_payload_dot_signature_b64);
+	const auto [header_dot_payload_b64, signature_b64] = hps.SplitLast('.');
+
+	return VerifyDecodeEdDSA(key, header_dot_payload_b64, signature_b64);
 }
 
 } // namespace JWT
