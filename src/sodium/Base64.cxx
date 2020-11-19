@@ -72,7 +72,7 @@ SodiumDecodeBase64(std::string_view src, int variant) noexcept
 			      nullptr, &decoded_size,
 			      nullptr,
 			      variant) != 0)
-		return {};
+		return nullptr;
 
 	buffer.SetSize(decoded_size);
 	return buffer;
