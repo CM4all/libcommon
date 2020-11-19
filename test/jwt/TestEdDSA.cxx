@@ -40,6 +40,24 @@
 
 #include <stdexcept>
 
+static JWT::Ed25519PublicKey
+ParseBase64Key(const std::string_view base64)
+{
+	JWT::Ed25519PublicKey key;
+
+	size_t length;
+	if (sodium_base642bin((unsigned char *)key.data(), key.size(),
+			      base64.data(), base64.size(),
+			      nullptr, &length,
+			      nullptr, sodium_base64_VARIANT_URLSAFE_NO_PADDING) != 0)
+		throw std::runtime_error("sodium_base642bin() failed");
+
+	if (length != key.size())
+		throw std::runtime_error("Wrong key length");
+
+	return key;
+}
+
 static JWT::Ed25519SecretKey
 ParseBase64Key(const std::string_view d_base64,
 	       const std::string_view x_base64)
@@ -81,4 +99,8 @@ TEST(JWTEdDSA, Basic)
 
 	ASSERT_STREQ(signature.c_str(),
 		     "hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg");
+
+	const auto public_key = ParseBase64Key(x_base64);
+	ASSERT_TRUE(JWT::VerifyEdDSA(public_key,
+				     "eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg"));
 }

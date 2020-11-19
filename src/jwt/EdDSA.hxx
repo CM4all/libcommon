@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "util/Compiler.h"
 #include "util/AllocatedString.hxx"
 
 #include <array>
@@ -42,6 +43,9 @@ namespace JWT {
 
 // 64 = crypto_sign_SECRETKEYBYTES
 using Ed25519SecretKey = std::array<std::byte, 64>;
+
+// 32 = crypto_sign_PUBLICKEYBYTES
+using Ed25519PublicKey = std::array<std::byte, 32>;
 
 /**
  * Create an EdDSA (kty=OKP, crv=Ed25519) signature according to
@@ -54,5 +58,25 @@ using Ed25519SecretKey = std::array<std::byte, 64>;
 AllocatedString<>
 SignEdDSA(const Ed25519SecretKey &key, std::string_view header_b64,
 	  std::string_view payload_b64) noexcept;
+
+/**
+ * Verify an EdDSA (kty=OKP, crv=Ed25519) signature according to
+ * RFC8037.
+ *
+ * @param header_dot_payload_b64 the UrlSafeBase64 of the JWT header
+ * plus a dot plus the the UrlSafeBase64 of the payload
+ * @param signature_b64 the UrlSafeBase64 of the signature
+ * @return true if the signature is valid
+ */
+gcc_pure
+bool
+VerifyEdDSA(const Ed25519PublicKey &key,
+	    std::string_view header_dot_payload_b64,
+	    std::string_view signature_b64) noexcept;
+
+gcc_pure
+bool
+VerifyEdDSA(const Ed25519PublicKey &key,
+	    std::string_view header_dot_payload_dot_signature_b64) noexcept;
 
 } // namespace JWT

@@ -73,4 +73,52 @@ SignEdDSA(const Ed25519SecretKey &key, std::string_view header_b64,
 	return SignEdDSA(key, StringView(input).ToVoid());
 }
 
+bool
+VerifyEdDSA(const Ed25519PublicKey &key,
+	    std::string_view header_dot_payload_b64,
+	    std::string_view signature_b64) noexcept
+{
+	Ed25519Signature signature;
+
+	/* subtracting 1 because the function includes space for the
+	   null terminator */
+	constexpr size_t expected_signature_b64_size =
+		sodium_base64_ENCODED_LEN(signature.size(),
+					  sodium_base64_VARIANT_URLSAFE_NO_PADDING) - 1;
+
+	if (signature_b64.size() != expected_signature_b64_size)
+		return false;
+
+	size_t signature_size;
+	if (sodium_base642bin((unsigned char *)signature.data(),
+			      signature.size(),
+			      signature_b64.data(), signature_b64.size(),
+			      nullptr, &signature_size,
+			      nullptr,
+			      sodium_base64_VARIANT_URLSAFE_NO_PADDING) != 0)
+		return false;
+
+	if (signature_size != signature.size())
+		return false;
+
+	return crypto_sign_verify_detached((const unsigned char *)signature.data(),
+					   (const unsigned char *)header_dot_payload_b64.data(),
+					   header_dot_payload_b64.size(),
+					   (const unsigned char *)key.data()) == 0;
+
+}
+
+bool
+VerifyEdDSA(const Ed25519PublicKey &key,
+	    std::string_view header_dot_payload_dot_signature_b64) noexcept
+{
+	auto i = header_dot_payload_dot_signature_b64.find_last_of('.');
+	if (i == header_dot_payload_dot_signature_b64.npos)
+		return false;
+
+	return VerifyEdDSA(key,
+			   header_dot_payload_dot_signature_b64.substr(0, i),
+			   header_dot_payload_dot_signature_b64.substr(i + 1));
+}
+
 } // namespace JWT
