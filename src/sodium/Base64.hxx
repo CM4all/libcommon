@@ -37,10 +37,12 @@
 
 #include <sodium/utils.h>
 
+#include <cstddef> // for std::byte
 #include <string_view>
 
 template<typename T> struct ConstBuffer;
 template<typename T> class AllocatedString;
+template<typename T> class AllocatedArray;
 
 template<std::size_t src_size, int variant>
 gcc_pure
@@ -61,3 +63,10 @@ UrlSafeBase64(ConstBuffer<void> src) noexcept;
 gcc_pure
 AllocatedString<char>
 UrlSafeBase64(std::string_view src) noexcept;
+
+/**
+ * @return the decoded string or a nulled instance on error
+ */
+gcc_pure
+AllocatedArray<std::byte>
+DecodeUrlSafeBase64(std::string_view src) noexcept;

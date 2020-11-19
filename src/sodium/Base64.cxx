@@ -31,6 +31,7 @@
  */
 
 #include "Base64.hxx"
+#include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 #include "util/ConstBuffer.hxx"
 
@@ -56,4 +57,30 @@ AllocatedString<>
 UrlSafeBase64(std::string_view src) noexcept
 {
 	return UrlSafeBase64(ConstBuffer<void>{src.data(), src.size()});
+}
+
+gcc_pure
+static AllocatedArray<std::byte>
+SodiumDecodeBase64(std::string_view src, int variant) noexcept
+{
+	AllocatedArray<std::byte> buffer(src.size());
+
+	size_t decoded_size;
+	if (sodium_base642bin((unsigned char *)buffer.data(),
+			      buffer.capacity(),
+			      src.data(), src.size(),
+			      nullptr, &decoded_size,
+			      nullptr,
+			      variant) != 0)
+		return {};
+
+	buffer.SetSize(decoded_size);
+	return buffer;
+}
+
+AllocatedArray<std::byte>
+DecodeUrlSafeBase64(std::string_view src) noexcept
+{
+	return SodiumDecodeBase64(src,
+				  sodium_base64_VARIANT_URLSAFE_NO_PADDING);
 }
