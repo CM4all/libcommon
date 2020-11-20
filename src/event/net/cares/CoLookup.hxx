@@ -53,8 +53,6 @@ class CoLookup final : Handler {
 
 	CancellablePointer cancel_ptr{nullptr};
 
-	bool ready = false;
-
 public:
 	CoLookup(Channel &channel, const char *name, int family) noexcept;
 	CoLookup(Channel &channel, const char *name) noexcept;
@@ -69,7 +67,7 @@ public:
 			CoLookup &lookup;
 
 			bool await_ready() const noexcept {
-				return lookup.ready;
+				return !lookup.cancel_ptr;
 			}
 
 			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
@@ -96,7 +94,6 @@ private:
 
 	void OnCaresSuccess() noexcept override {
 		cancel_ptr = nullptr;
-		ready = true;
 
 		if (continuation)
 			continuation.resume();
@@ -105,7 +102,6 @@ private:
 	void OnCaresError(std::exception_ptr e) noexcept override {
 		cancel_ptr = nullptr;
 		error = std::move(e);
-		ready = true;
 
 		if (continuation)
 			continuation.resume();
