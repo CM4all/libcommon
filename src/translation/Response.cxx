@@ -177,6 +177,7 @@ TranslateResponse::Clear()
 	pool = nullptr;
 #if TRANSLATION_ENABLE_HTTP
 	internal_redirect = nullptr;
+	http_auth = nullptr;
 #endif
 #if TRANSLATION_ENABLE_SESSION
 	check = nullptr;
@@ -400,6 +401,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 
 #if TRANSLATION_ENABLE_HTTP
 	internal_redirect = alloc.Dup(src.internal_redirect);
+	http_auth = alloc.Dup(src.http_auth);
 #endif
 #if TRANSLATION_ENABLE_SESSION
 	check = alloc.Dup(src.check);
