@@ -8,6 +8,15 @@ executable(
 )
 
 executable(
+  'RunCoLookup',
+  'RunCoLookup.cxx',
+  include_directories: inc,
+  dependencies: [
+    event_net_cares_dep,
+  ],
+)
+
+executable(
   'RunCoReadTextFile',
   'RunCoReadTextFile.cxx',
   include_directories: inc,
