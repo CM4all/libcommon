@@ -24,3 +24,13 @@ executable(
     event_uring_dep, stock_dep,
   ],
 )
+
+test(
+  'TestCo',
+  executable(
+    'TestCo',
+    'TestCoCache.cxx',
+    include_directories: inc,
+    dependencies: [gtest, event_dep],
+  ),
+)
