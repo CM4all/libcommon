@@ -32,13 +32,8 @@
 
 #pragma once
 
+#include "Compat.hxx"
 #include "event/TimerEvent.hxx"
-
-#include <coroutine>
-
-#ifndef __cpp_impl_coroutine
-#error Need -fcoroutines
-#endif
 
 namespace Co {
 
