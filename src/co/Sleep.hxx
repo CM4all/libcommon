@@ -61,8 +61,8 @@ public:
 				return !sleep.event.IsPending();
 			}
 
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) noexcept {
-				sleep.continuation = continuation;
+			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
+				sleep.continuation = _continuation;
 				return std::noop_coroutine();
 			}
 
