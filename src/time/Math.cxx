@@ -62,6 +62,16 @@ IncrementMonth(struct tm &tm) noexcept
 }
 
 void
+EndOfMonth(struct tm &tm) noexcept
+{
+	tm.tm_sec = 0;
+	tm.tm_min = 0;
+	tm.tm_hour = 0;
+	tm.tm_mday = 1;
+	IncrementMonth(tm);
+}
+
+void
 IncrementDay(struct tm &tm) noexcept
 {
 	const unsigned max_day = DaysInMonth(tm.tm_mon + 1, tm.tm_year + 1900);

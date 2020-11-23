@@ -47,6 +47,14 @@ std::chrono::system_clock::time_point
 PrecedingMidnightLocal(std::chrono::system_clock::time_point t) noexcept;
 
 /**
+ * Calculate the end of the current month (i.e. midnight on the 1st of
+ * the following month).  Does NOT keeps the tm_wday and tm_yday
+ * attributes updated, and ignores day light saving transitions.
+ */
+void
+EndOfMonth(struct tm &tm) noexcept;
+
+/**
  * Calculate the next day, keeping month/year wraparounds and leap
  * days in mind.  Keeps the tm_wday attribute updated, but not other
  * derived attributes such as tm_yday, and ignores day light saving
