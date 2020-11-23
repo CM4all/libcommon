@@ -47,6 +47,18 @@ try {
 } catch (...) {
 	/* best-effort fallback for this exotic error condition */
 	return t;
+ }
+
+static void
+IncrementMonth(struct tm &tm) noexcept
+{
+	++tm.tm_mon;
+
+	if (tm.tm_mon >= 12) {
+		/* roll over to next year */
+		tm.tm_mon = 0;
+		++tm.tm_year;
+	}
 }
 
 void
@@ -59,12 +71,7 @@ IncrementDay(struct tm &tm) noexcept
 	if ((unsigned)tm.tm_mday > max_day) {
 		/* roll over to next month */
 		tm.tm_mday = 1;
-		++tm.tm_mon;
-		if (tm.tm_mon >= 12) {
-			/* roll over to next year */
-			tm.tm_mon = 0;
-			++tm.tm_year;
-		}
+		IncrementMonth(tm);
 	}
 
 	++tm.tm_wday;
