@@ -175,6 +175,8 @@ class Cache : Factory {
 
 		bool done = false;
 
+		bool store = true;
+
 		template<typename K>
 		Request(Cache &_cache, K &&_key) noexcept
 			:cache(_cache), key(std::forward<K>(_key)) {}
@@ -204,8 +206,10 @@ class Cache : Factory {
 			auto value = co_await factory(c_key);
 			for (auto &i : handlers)
 				i.data.emplace(value);
-			cache.cache.Put(std::move(key),
-					std::move(value));
+
+			if (store)
+				cache.cache.Put(std::move(key),
+						std::move(value));
 		}
 
 		void Start(Factory &factory) noexcept {
@@ -252,6 +256,17 @@ public:
 		Task task(*request);
 		request->Start(*this);
 		return task;
+	}
+
+	/**
+	 * Delete all cache items and mark all pending requests as
+	 * "don't store".
+	 */
+	void Clear() noexcept {
+		cache.Clear();
+
+		for (auto &i : requests)
+			i.store = false;
 	}
 };
 

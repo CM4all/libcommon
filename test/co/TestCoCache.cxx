@@ -151,6 +151,47 @@ TEST(CoCache, Sleep)
 	ASSERT_EQ(w4.value, 42);
 	ASSERT_EQ(n_started, 2u);
 	ASSERT_EQ(n_finished, 2u);
+
+	// test Clear()
+
+	{
+		n_started = n_finished = 0;
+
+		Work w5(cache), w6(cache);
+		w5.Start(5);
+		w6.Start(3);
+
+		ASSERT_EQ(n_started, 1u);
+		ASSERT_EQ(n_finished, 0u);
+
+		/* this also marks the running request as "don't store" */
+		cache.Clear();
+
+		event_loop.Dispatch();
+
+		ASSERT_EQ(w5.value, 5);
+		ASSERT_EQ(w6.value, 3);
+		ASSERT_EQ(n_started, 1u);
+		ASSERT_EQ(n_finished, 1u);
+	}
+
+	{
+		n_started = n_finished = 0;
+
+		Work w5(cache), w6(cache);
+		w5.Start(5);
+		w6.Start(3);
+
+		ASSERT_EQ(n_started, 2u);
+		ASSERT_EQ(n_finished, 0u);
+
+		event_loop.Dispatch();
+
+		ASSERT_EQ(w5.value, 5);
+		ASSERT_EQ(w6.value, 3);
+		ASSERT_EQ(n_started, 2u);
+		ASSERT_EQ(n_finished, 2u);
+	}
 }
 
 TEST(CoCache, CancelSingle)
