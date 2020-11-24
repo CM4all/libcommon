@@ -52,7 +52,8 @@ template<typename Factory, typename Key, typename Data,
 	 typename Hash=std::hash<Key>,
 	 typename Equal=std::equal_to<Key>>
 class Cache : Factory {
-	::Cache<Key, Data, max_size, table_size, Hash, Equal> cache;
+	using Cache_ = ::Cache<Key, Data, max_size, table_size, Hash, Equal>;
+	Cache_ cache;
 
 	struct Request;
 
@@ -237,9 +238,20 @@ class Cache : Factory {
 	IntrusiveList<Request> requests;
 
 public:
+	using hasher = typename Cache_::hasher;
+	using key_equal = typename Cache_::key_equal;
+
 	template<typename... P>
 	explicit Cache(P&&... _params) noexcept
 		:Factory(std::forward<P>(_params)...) {}
+
+	decltype(auto) hash_function() const noexcept {
+		return cache.hash_function();
+	}
+
+	decltype(auto) key_eq() const noexcept {
+		return cache.key_eq();
+	}
 
 	template<typename K>
 	Task Get(K &&key) {
@@ -248,7 +260,7 @@ public:
 			return Task(*cached);
 
 		for (auto &i : requests)
-			if (i.store && !i.IsDone() && Equal()(i.key, key))
+			if (i.store && !i.IsDone() && key_eq()(i.key, key))
 				return Task(i);
 
 		auto *request = new Request(*this, std::forward<K>(key));
