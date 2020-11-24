@@ -225,7 +225,7 @@ class Cache : Factory {
 
 			if (error)
 				for (auto &i : handlers)
-					i.error = std::current_exception();
+					i.error = error;
 
 			done = true;
 
