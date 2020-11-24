@@ -80,12 +80,13 @@ struct Work {
 	explicit Work(TestCache<Factory> &_cache) noexcept
 		:cache(_cache) {}
 
-	Co::InvokeTask Run(int key) noexcept {
+	Co::InvokeTask Run(int key) {
 		value = co_await cache.Get(key);
 	}
 
 	void Start(int key) {
 		task = Run(key);
+		task.OnCompletion(BIND_THIS_METHOD(OnCompletion));
 	}
 
 	void OnCompletion(std::exception_ptr _error) noexcept {
