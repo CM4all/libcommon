@@ -135,6 +135,8 @@ TEST(CoCache, Cached)
 	ASSERT_EQ(w2.value, 42);
 	ASSERT_EQ(n_started, 1u);
 	ASSERT_EQ(n_finished, 1u);
+	ASSERT_NE(cache.GetIfCached(42), nullptr);
+	ASSERT_EQ(cache.GetIfCached(1), nullptr);
 }
 
 TEST(CoCache, Sleep)
@@ -154,6 +156,8 @@ TEST(CoCache, Sleep)
 
 	ASSERT_EQ(n_started, 2u);
 	ASSERT_EQ(n_finished, 0u);
+	ASSERT_EQ(cache.GetIfCached(42), nullptr);
+	ASSERT_EQ(cache.GetIfCached(3), nullptr);
 
 	event_loop.Dispatch();
 
@@ -162,6 +166,8 @@ TEST(CoCache, Sleep)
 	ASSERT_EQ(w3.value, 42);
 	ASSERT_EQ(n_started, 2u);
 	ASSERT_EQ(n_finished, 2u);
+	ASSERT_NE(cache.GetIfCached(42), nullptr);
+	ASSERT_NE(cache.GetIfCached(3), nullptr);
 
 	w4.Start(42);
 
@@ -186,12 +192,18 @@ TEST(CoCache, Sleep)
 		/* this also marks the running request as "don't store" */
 		cache.Clear();
 
+		ASSERT_EQ(cache.GetIfCached(42), nullptr);
+		ASSERT_EQ(cache.GetIfCached(5), nullptr);
+		ASSERT_EQ(cache.GetIfCached(3), nullptr);
+
 		event_loop.Dispatch();
 
 		ASSERT_EQ(w5.value, 5);
 		ASSERT_EQ(w6.value, 3);
 		ASSERT_EQ(n_started, 1u);
 		ASSERT_EQ(n_finished, 1u);
+		ASSERT_EQ(cache.GetIfCached(5), nullptr);
+		ASSERT_EQ(cache.GetIfCached(3), nullptr);
 	}
 
 	{

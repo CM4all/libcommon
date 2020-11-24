@@ -254,8 +254,14 @@ public:
 	}
 
 	template<typename K>
+	gcc_pure
+	decltype(auto) GetIfCached(K &&key) noexcept {
+		return cache.Get(std::forward<K>(key));
+	}
+
+	template<typename K>
 	Task Get(K &&key) {
-		auto *cached = cache.Get(key);
+		auto *cached = GetIfCached(key);
 		if (cached != nullptr)
 			return Task(*cached);
 
