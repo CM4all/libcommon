@@ -47,13 +47,13 @@ class Serial {
 
 public:
 	Serial() = default;
-	explicit constexpr Serial(value_type _value):value(_value) {}
+	explicit constexpr Serial(value_type _value) noexcept:value(_value) {}
 
-	constexpr value_type get() const {
+	constexpr value_type get() const noexcept {
 		return value;
 	}
 
-	constexpr operator bool() const {
+	constexpr operator bool() const noexcept {
 		return value != 0;
 	}
 
