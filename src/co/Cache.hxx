@@ -248,7 +248,7 @@ public:
 			return Task(*cached);
 
 		for (auto &i : requests)
-			if (!i.IsDone() && Equal()(i.key, key))
+			if (i.store && !i.IsDone() && Equal()(i.key, key))
 				return Task(i);
 
 		auto *request = new Request(*this, std::forward<K>(key));
