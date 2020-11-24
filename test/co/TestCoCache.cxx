@@ -120,8 +120,6 @@ struct Work {
 
 TEST(CoCache, Cached)
 {
-	EventLoop event_loop;
-
 	using Factory = ImmediateFactory;
 	using Cache = TestCache<Factory>;
 
@@ -132,8 +130,6 @@ TEST(CoCache, Cached)
 	Work w1(cache), w2(cache);
 	w1.Start(42);
 	w2.Start(42);
-
-	event_loop.Dispatch();
 
 	ASSERT_EQ(w1.value, 42);
 	ASSERT_EQ(w2.value, 42);
