@@ -42,6 +42,10 @@
 #include <cstdio>
 #include <cstddef>
 
+#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
+#include <string_view>
+#endif
+
 namespace Pg {
 
 template<typename T, typename Enable=void>
@@ -217,6 +221,32 @@ struct ParamWrapper<bool> {
 		return 0;
 	}
 };
+
+#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
+
+template<>
+struct ParamWrapper<std::string_view> {
+	std::string_view value;
+
+	constexpr ParamWrapper(std::string_view _value) noexcept
+		:value(_value) {}
+
+	static constexpr bool IsBinary() noexcept {
+		/* since std::string_view is not null-terminated, we
+		   need to pass it as a binary value */
+		return true;
+	}
+
+	constexpr const char *GetValue() const noexcept {
+		return value.data();
+	}
+
+	constexpr size_t GetSize() const noexcept {
+		return value.size();
+	}
+};
+
+#endif
 
 /**
  * Specialization for STL container types of std::string instances.
