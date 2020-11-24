@@ -321,6 +321,10 @@ public:
 	explicit ParamCollector(const T &t) noexcept
 		:wrapper(t) {}
 
+	static constexpr bool HasBinary() noexcept {
+		return decltype(wrapper)::IsBinary();
+	}
+
 	static constexpr size_t Count() noexcept {
 		return 1;
 	}
@@ -352,6 +356,11 @@ public:
 	explicit ParamCollector(const T &t, Rest... _rest) noexcept
 		:first(t), rest(_rest...) {}
 
+	static constexpr bool HasBinary() noexcept {
+		return decltype(first)::HasBinary() ||
+			decltype(rest)::HasBinary();
+	}
+
 	static constexpr size_t Count() noexcept {
 		return decltype(first)::Count() + decltype(rest)::Count();
 	}
@@ -380,6 +389,8 @@ public:
 template<typename... Params>
 class TextParamArray {
 	ParamCollector<Params...> collector;
+
+	static_assert(!decltype(collector)::HasBinary());
 
 public:
 	static constexpr size_t count = decltype(collector)::Count();
