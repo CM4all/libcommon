@@ -50,6 +50,18 @@ struct ImmediateFactory {
 	}
 };
 
+struct IsCacheableFactory {
+	Co::Task<int> operator()(int key) noexcept {
+		++n_started;
+		++n_finished;
+		co_return key;
+	}
+
+	bool IsCacheable(int value) const noexcept {
+		return value % 2 == 0;
+	}
+};
+
 struct SleepFactory {
 	EventLoop &event_loop;
 
@@ -421,4 +433,33 @@ TEST(CoCache, RemoveIf)
 	ASSERT_EQ(cache.GetIfCached(2), nullptr);
 	ASSERT_EQ(*cache.GetIfCached(3), 3);
 	ASSERT_EQ(cache.GetIfCached(4), nullptr);
+}
+
+TEST(CoCache, IsCacheable)
+{
+	EventLoop event_loop;
+
+	using Factory = IsCacheableFactory;
+	using Cache = TestCache<Factory>;
+
+	Cache cache;
+
+	n_started = n_finished = 0;
+
+	Work w1(cache), w2(cache), w3(cache), w4(cache);
+	w1.Start(1);
+	w2.Start(2);
+	w3.Start(3);
+	w4.Start(4);
+
+	ASSERT_EQ(n_started, 4u);
+	ASSERT_EQ(n_finished, 4u);
+	ASSERT_EQ(w1.value, 1);
+	ASSERT_EQ(w2.value, 2);
+	ASSERT_EQ(w3.value, 3);
+	ASSERT_EQ(w4.value, 4);
+	ASSERT_EQ(cache.GetIfCached(1), nullptr);
+	ASSERT_EQ(*cache.GetIfCached(2), 2);
+	ASSERT_EQ(cache.GetIfCached(3), nullptr);
+	ASSERT_EQ(*cache.GetIfCached(4), 4);
 }

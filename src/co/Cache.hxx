@@ -45,6 +45,10 @@ namespace Co {
  * A cache which handles multiple concurrent requests on the same key
  * and provides a coroutine interface for both the factory and the
  * getter method.
+ *
+ * @param Factory a factory class whose operator() returns a Coroutine
+ * promise; it may optionally have a method `bool IsCacheable(const
+ * Data&) const`
  */
 template<typename Factory, typename Key, typename Data,
 	 std::size_t max_size,
@@ -52,6 +56,20 @@ template<typename Factory, typename Key, typename Data,
 	 typename Hash=std::hash<Key>,
 	 typename Equal=std::equal_to<Key>>
 class Cache : Factory {
+	template<typename F, typename=void>
+	struct IsCacheable {
+		constexpr bool operator()(const F &, const Data &) noexcept {
+			return true;
+		}
+	};
+
+	template<typename F>
+	struct IsCacheable<F, std::void_t<decltype(std::declval<F>().IsCacheable(std::declval<Data>()))>> {
+		constexpr bool operator()(const F &factory, const Data &data) noexcept {
+			return factory.IsCacheable(data);
+		}
+	};
+
 	using Cache_ = ::Cache<Key, Data, max_size, table_size, Hash, Equal>;
 	Cache_ cache;
 
@@ -207,6 +225,9 @@ class Cache : Factory {
 			auto value = co_await factory(c_key);
 			for (auto &i : handlers)
 				i.data.emplace(value);
+
+			if (store && !IsCacheable<Factory>{}(factory, value))
+				store = false;
 
 			if (store)
 				cache.cache.Put(std::move(key),
