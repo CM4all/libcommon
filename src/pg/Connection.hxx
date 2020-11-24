@@ -271,30 +271,18 @@ public:
 		assert(IsDefined());
 		assert(query != nullptr);
 
-		const TextParamArray<Params...> params(_params...);
+		const AutoParamArray<Params...> params(_params...);
 
 		return CheckResult(::PQexecParams(conn, query, params.count,
 						  nullptr, params.values,
-						  nullptr, nullptr,
+						  params.GetLengths(),
+						  params.GetFormats(),
 						  result_binary));
 	}
 
 	template<typename... Params>
 	Result ExecuteParams(const char *query, Params... params) {
 		return ExecuteParams(false, query, params...);
-	}
-
-	template<typename... Params>
-	Result ExecuteBinary(const char *query, Params... _params) {
-		assert(IsDefined());
-		assert(query != nullptr);
-
-		const BinaryParamArray<Params...> params(_params...);
-
-		return CheckResult(::PQexecParams(conn, query, params.count,
-						  nullptr, params.values,
-						  params.lengths, params.formats,
-						  false));
 	}
 
 	/**
@@ -428,10 +416,11 @@ public:
 		assert(IsDefined());
 		assert(query != nullptr);
 
-		const TextParamArray<Params...> params(_params...);
+		const AutoParamArray<Params...> params(_params...);
 
 		_SendQuery(result_binary, query, params.count,
-			   params.values, nullptr, nullptr);
+			   params.values, params.GetLengths(),
+			   params.GetFormats());
 	}
 
 	template<typename... Params>
