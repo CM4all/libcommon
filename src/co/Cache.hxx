@@ -286,6 +286,24 @@ public:
 		for (auto &i : requests)
 			i.store = false;
 	}
+
+	template<typename K>
+	void Remove(K &&key) noexcept {
+		for (auto &i : requests)
+			if (key_eq()(i.key, key))
+				i.store = false;
+
+		cache.Remove(std::forward<K>(key));
+	}
+
+	template<typename P>
+	void RemoveIf(P &&p) noexcept {
+		/* note: this method is unable to check pending
+		   requests, so unfortunately, pending requests may
+		   result in stale cache items */
+
+		cache.RemoveIf(std::forward<P>(p));
+	}
 };
 
 } // namespace Co

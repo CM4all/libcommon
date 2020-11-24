@@ -223,6 +223,15 @@ TEST(CoCache, Sleep)
 		ASSERT_EQ(n_started, 2u);
 		ASSERT_EQ(n_finished, 2u);
 	}
+
+
+	// test Remove()
+
+	ASSERT_NE(cache.GetIfCached(3), nullptr);
+	ASSERT_NE(cache.GetIfCached(5), nullptr);
+	cache.Remove(3);
+	ASSERT_EQ(cache.GetIfCached(3), nullptr);
+	ASSERT_NE(cache.GetIfCached(5), nullptr);
 }
 
 TEST(CoCache, CancelSingle)
@@ -376,4 +385,40 @@ TEST(CoCache, ThrowSleep)
 	ASSERT_TRUE(w1.error);
 	ASSERT_TRUE(w2.error);
 	ASSERT_TRUE(w3.error);
+}
+
+TEST(CoCache, RemoveIf)
+{
+	using Factory = ImmediateFactory;
+	using Cache = TestCache<Factory>;
+
+	Cache cache;
+
+	n_started = n_finished = 0;
+
+	Work w1(cache), w2(cache), w3(cache), w4(cache);
+	w1.Start(1);
+	w2.Start(2);
+	w3.Start(3);
+	w4.Start(4);
+
+	ASSERT_EQ(n_started, 4u);
+	ASSERT_EQ(n_finished, 4u);
+	ASSERT_EQ(w1.value, 1);
+	ASSERT_EQ(w2.value, 2);
+	ASSERT_EQ(w3.value, 3);
+	ASSERT_EQ(w4.value, 4);
+	ASSERT_EQ(*cache.GetIfCached(1), 1);
+	ASSERT_EQ(*cache.GetIfCached(2), 2);
+	ASSERT_EQ(*cache.GetIfCached(3), 3);
+	ASSERT_EQ(*cache.GetIfCached(4), 4);
+
+	cache.RemoveIf([](int, int value){
+		return value % 2 == 0;
+	});
+
+	ASSERT_EQ(*cache.GetIfCached(1), 1);
+	ASSERT_EQ(cache.GetIfCached(2), nullptr);
+	ASSERT_EQ(*cache.GetIfCached(3), 3);
+	ASSERT_EQ(cache.GetIfCached(4), nullptr);
 }
