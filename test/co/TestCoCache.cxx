@@ -64,6 +64,28 @@ struct SleepFactory {
 	}
 };
 
+struct ThrowImmediateFactory {
+	Co::Task<int> operator()(int) {
+		++n_started;
+		++n_finished;
+		throw std::runtime_error("Error");;
+	}
+};
+
+struct ThrowSleepFactory {
+	EventLoop &event_loop;
+
+	explicit ThrowSleepFactory(EventLoop &_event_loop) noexcept
+		:event_loop(_event_loop) {}
+
+	Co::Task<int> operator()(int) {
+		++n_started;
+		co_await Co::Sleep(event_loop, std::chrono::milliseconds(1));
+		++n_finished;
+		throw std::runtime_error("Error");;
+	}
+};
+
 template<typename Factory>
 using TestCache = Co::Cache<Factory, int, int, 2048, 2021>;
 
@@ -293,4 +315,57 @@ TEST(CoCache, CancelAll)
 
 	ASSERT_EQ(n_started, 1u);
 	ASSERT_EQ(n_finished, 0u);
+}
+
+TEST(CoCache, ThrowImmediate)
+{
+	using Factory = ThrowImmediateFactory;
+	using Cache = TestCache<Factory>;
+
+	Cache cache;
+
+	n_started = n_finished = 0;
+
+	Work w1(cache), w2(cache);
+	w1.Start(42);
+	w2.Start(42);
+
+	ASSERT_EQ(n_started, 2u);
+	ASSERT_EQ(n_finished, 2u);
+	ASSERT_TRUE(w1.error);
+	ASSERT_TRUE(w2.error);
+
+	Work w3(cache);
+	w3.Start(42);
+
+	ASSERT_EQ(n_started, 3u);
+	ASSERT_EQ(n_finished, 3u);
+	ASSERT_TRUE(w3.error);
+}
+
+TEST(CoCache, ThrowSleep)
+{
+	using Factory = ThrowSleepFactory;
+	using Cache = TestCache<Factory>;
+
+	EventLoop event_loop;
+	Cache cache(event_loop);
+
+	n_started = n_finished = 0;
+
+	Work w1(cache), w2(cache), w3(cache), w4(cache);
+	w1.Start(42);
+	w2.Start(3);
+	w3.Start(42);
+
+	ASSERT_EQ(n_started, 2u);
+	ASSERT_EQ(n_finished, 0u);
+
+	event_loop.Dispatch();
+
+	ASSERT_EQ(n_started, 2u);
+	ASSERT_EQ(n_finished, 2u);
+	ASSERT_TRUE(w1.error);
+	ASSERT_TRUE(w2.error);
+	ASSERT_TRUE(w3.error);
 }
