@@ -77,7 +77,7 @@ ToString(char *buffer, size_t buffer_size,
 
 	if (address.GetFamily() == AF_LOCAL)
 		return LocalToString(buffer, buffer_size,
-				     (const struct sockaddr_un *)address.GetAddress(),
+				     &address.CastTo<struct sockaddr_un>(),
 				     address.GetSize());
 
 	IPv4Address ipv4_buffer;
@@ -136,7 +136,7 @@ HostToString(char *buffer, size_t buffer_size,
 
 	if (address.GetFamily() == AF_LOCAL)
 		return LocalToString(buffer, buffer_size,
-				     (const struct sockaddr_un *)address.GetAddress(),
+				     &address.CastTo<struct sockaddr_un>(),
 				     address.GetSize());
 
 	IPv4Address ipv4_buffer;
