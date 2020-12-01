@@ -81,8 +81,8 @@ public:
 			unlink();
 	}
 
-protected:
-	void OnDeferred() noexcept {
+private:
+	void Run() noexcept {
 		callback();
 	}
 };

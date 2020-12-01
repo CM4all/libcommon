@@ -166,7 +166,7 @@ EventLoop::RunDeferred() noexcept
 	while (!defer.empty()) {
 		invoked = true;
 		defer.pop_front_and_dispose([](DeferEvent *e){
-			e->OnDeferred();
+			e->Run();
 		});
 	}
 
@@ -181,7 +181,7 @@ EventLoop::RunOneIdle() noexcept
 
 	invoked = true;
 	idle.pop_front_and_dispose([](DeferEvent *e){
-		e->OnDeferred();
+		e->Run();
 	});
 
 	return true;
