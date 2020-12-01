@@ -149,7 +149,7 @@ EventLoop::HandleTimers() noexcept
 }
 
 void
-EventLoop::Defer(DeferEvent &e) noexcept
+EventLoop::AddDefer(DeferEvent &e) noexcept
 {
 	defer.push_front(e);
 }

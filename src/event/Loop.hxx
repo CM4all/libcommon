@@ -175,7 +175,7 @@ public:
 
 	void AddTimer(TimerEvent &t, Event::Duration d) noexcept;
 
-	void Defer(DeferEvent &e) noexcept;
+	void AddDefer(DeferEvent &e) noexcept;
 	void AddIdle(DeferEvent &e) noexcept;
 
 	const auto &GetSteadyClockCache() const noexcept {
