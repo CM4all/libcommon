@@ -37,10 +37,6 @@
 
 #include <array>
 
-#ifndef NDEBUG
-#include <stdio.h>
-#endif
-
 constexpr bool
 EventLoop::TimerCompare::operator()(const TimerEvent &a,
 				    const TimerEvent &b) const noexcept
@@ -52,12 +48,6 @@ EventLoop::EventLoop() = default;
 
 EventLoop::~EventLoop() noexcept
 {
-#ifndef NDEBUG
-	for (const auto &i : timers)
-		fprintf(stderr, "EventLoop[%p]::~EventLoop() timer=%p\n",
-			(const void *)this, (const void *)&i);
-#endif
-
 	assert(timers.empty());
 	assert(defer.empty());
 	assert(idle.empty());
