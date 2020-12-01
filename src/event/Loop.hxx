@@ -30,8 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EVENT_BASE_HXX
-#define EVENT_BASE_HXX
+#ifndef EVENT_LOOP_HXX
+#define EVENT_LOOP_HXX
 
 #include "Chrono.hxx"
 #include "system/EpollFD.hxx"
