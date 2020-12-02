@@ -43,16 +43,9 @@
 
 #include <string.h>
 
-CurlRequest::CurlRequest(CurlGlobal &_global, const char *url,
-			 CurlResponseHandler &_handler)
-	:CurlRequest(_global, CurlEasy(url), _handler)
-{
-}
-
-CurlRequest::CurlRequest(CurlGlobal &_global, CurlEasy &&_easy,
+CurlRequest::CurlRequest(CurlGlobal &_global,
 			 CurlResponseHandler &_handler)
 	:global(_global), handler(_handler),
-	 easy(std::move(_easy)),
 	 postpone_error_event(global.GetEventLoop(),
 			      BIND_THIS_METHOD(OnPostponeError))
 {
