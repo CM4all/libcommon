@@ -268,6 +268,24 @@ FileDescriptor::FullRead(void *_buffer, size_t length)
 	}
 }
 
+void
+FileDescriptor::FullWrite(const void *_buffer, std::size_t length)
+{
+	auto buffer = (const uint8_t *)_buffer;
+
+	while (length > 0) {
+		ssize_t nbytes = Write(buffer, length);
+		if (nbytes <= 0) {
+			if (nbytes < 0)
+				throw MakeErrno("Failed to write");
+			throw std::runtime_error("Failed to write");
+		}
+
+		buffer += nbytes;
+		length -= nbytes;
+	}
+}
+
 #ifndef _WIN32
 
 int
