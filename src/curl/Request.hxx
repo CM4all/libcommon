@@ -60,7 +60,7 @@ class CurlRequest final {
 	/**
 	 * An exception caught by DataReceived(), which will be
 	 * forwarded into a "safe" stack frame by
-	 * DeferredMonitor::RunDeferred().  This works around the
+	 * #postpone_error_event.  This works around the
 	 * problem that libcurl crashes if you call
 	 * curl_multi_remove_handle() from within the WRITEFUNCTION
 	 * (i.e. DataReceived()).
