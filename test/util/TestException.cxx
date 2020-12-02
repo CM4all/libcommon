@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,16 +36,16 @@
 
 TEST(ExceptionTest, RuntimeError)
 {
-    ASSERT_EQ(GetFullMessage(std::make_exception_ptr(std::runtime_error("Foo"))), "Foo");
+	ASSERT_EQ(GetFullMessage(std::make_exception_ptr(std::runtime_error("Foo"))), "Foo");
 }
 
 TEST(ExceptionTest, DerivedError)
 {
-    class DerivedError : public std::runtime_error {
-    public:
-        explicit DerivedError(const char *_msg)
-            :std::runtime_error(_msg) {}
-    };
+	class DerivedError : public std::runtime_error {
+	public:
+		explicit DerivedError(const char *_msg)
+			:std::runtime_error(_msg) {}
+	};
 
-    ASSERT_EQ(GetFullMessage(std::make_exception_ptr(DerivedError("Foo"))), "Foo");
+	ASSERT_EQ(GetFullMessage(std::make_exception_ptr(DerivedError("Foo"))), "Foo");
 }
