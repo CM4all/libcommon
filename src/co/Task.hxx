@@ -117,13 +117,13 @@ public:
 private:
 	std::coroutine_handle<promise_type> coroutine;
 
-public:
-	Task() = default;
-
 	explicit Task(std::coroutine_handle<promise_type> _coroutine) noexcept
 		:coroutine(_coroutine)
 	{
 	}
+
+public:
+	Task() = default;
 
 	Task(Task &&src) noexcept
 		:coroutine(std::exchange(src.coroutine, nullptr))
