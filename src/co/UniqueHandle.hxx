@@ -68,6 +68,10 @@ public:
 		return *this;
 	}
 
+	operator bool() const noexcept {
+		return (bool)value;
+	}
+
 	const auto &get() const noexcept {
 		return value;
 	}
