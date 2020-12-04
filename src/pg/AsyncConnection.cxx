@@ -263,7 +263,7 @@ AsyncConnection::Reconnect() noexcept
 	assert(IsDefined());
 
 	reconnect_timer.Cancel();
-	socket_event.Cancel();
+	socket_event.ReleaseSocket();
 	StartReconnect();
 	state = State::RECONNECTING;
 	PollReconnect();
@@ -277,7 +277,7 @@ AsyncConnection::Disconnect() noexcept
 	if (!IsDefined())
 		return;
 
-	socket_event.Cancel();
+	socket_event.Abandon();
 	Connection::Disconnect();
 	state = State::DISCONNECTED;
 }
@@ -300,12 +300,12 @@ AsyncConnection::OnSocketEvent(unsigned) noexcept
 		gcc_unreachable();
 
 	case State::CONNECTING:
-		socket_event.Cancel();
+		socket_event.ReleaseSocket();
 		PollConnect();
 		break;
 
 	case State::RECONNECTING:
-		socket_event.Cancel();
+		socket_event.ReleaseSocket();
 		PollReconnect();
 		break;
 
