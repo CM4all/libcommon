@@ -32,80 +32,48 @@
 
 #pragma once
 
-#include "UniqueHandle.hxx"
 #include "Compat.hxx"
-#include "util/BindMethod.hxx"
 
-#include <exception>
 #include <utility>
 
 namespace Co {
 
 /**
- * A helper task which invokes a coroutine from synchronous code.
+ * Manage a std::coroutine_handle<> which is destroyed by the
+ * destructor.
  */
-class InvokeTask {
-	using Callback = BoundMethod<void(std::exception_ptr error) noexcept>;
+template<typename Promise=void>
+class UniqueHandle {
+	std::coroutine_handle<Promise> value;
 
 public:
-	struct promise_type {
-		Callback callback{nullptr};
+	UniqueHandle() = default;
 
-		std::exception_ptr error;
+	explicit constexpr UniqueHandle(std::coroutine_handle<Promise> h) noexcept
+		:value(h) {}
 
-		auto initial_suspend() noexcept {
-			return std::suspend_never{};
-		}
-
-		struct final_awaitable {
-			bool await_ready() const noexcept {
-				return false;
-			}
-
-			template<typename PROMISE>
-			void await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
-				auto &p = coro.promise();
-				if (p.callback)
-					p.callback(std::move(p.error));
-			}
-
-			void await_resume() const noexcept {
-			}
-		};
-
-		auto final_suspend() noexcept {
-			return final_awaitable{};
-		}
-
-		void return_void() noexcept {
-		}
-
-		InvokeTask get_return_object() noexcept {
-			return InvokeTask(std::coroutine_handle<promise_type>::from_promise(*this));
-		}
-
-		void unhandled_exception() noexcept {
-			error = std::current_exception();
-		}
-	};
-
-private:
-	UniqueHandle<promise_type> coroutine;
-
-	explicit InvokeTask(std::coroutine_handle<promise_type> _coroutine) noexcept
-		:coroutine(_coroutine)
+	UniqueHandle(UniqueHandle<Promise> &&src) noexcept
+		:value(std::exchange(src.value, nullptr))
 	{
 	}
 
-public:
-	InvokeTask() noexcept {
+	~UniqueHandle() noexcept {
+		if (value)
+			value.destroy();
 	}
 
-	void OnCompletion(Callback callback) noexcept {
-		if (coroutine->done())
-			callback(std::move(coroutine->promise().error));
-		else
-			coroutine->promise().callback = callback;
+	auto &operator=(UniqueHandle<Promise> &&src) noexcept {
+		using std::swap;
+		swap(value, src.value);
+		return *this;
+	}
+
+	const auto &get() const noexcept {
+		return value;
+	}
+
+	const auto *operator->() const noexcept {
+		return &value;
 	}
 };
 

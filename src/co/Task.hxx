@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "UniqueHandle.hxx"
 #include "Compat.hxx"
 
 #include <exception>
@@ -115,7 +116,7 @@ public:
 	};
 
 private:
-	std::coroutine_handle<promise_type> coroutine;
+	UniqueHandle<promise_type> coroutine;
 
 	explicit Task(std::coroutine_handle<promise_type> _coroutine) noexcept
 		:coroutine(_coroutine)
@@ -124,22 +125,6 @@ private:
 
 public:
 	Task() = default;
-
-	Task(Task &&src) noexcept
-		:coroutine(std::exchange(src.coroutine, nullptr))
-	{
-	}
-
-	~Task() noexcept {
-		if (coroutine)
-			coroutine.destroy();
-	}
-
-	Task &operator=(Task &&src) noexcept {
-		using std::swap;
-		swap(coroutine, src.coroutine);
-		return *this;
-	}
 
 	auto operator co_await() const noexcept {
 		struct Awaitable final {
@@ -159,7 +144,7 @@ public:
 			}
 		};
 
-		return Awaitable{coroutine};
+		return Awaitable{coroutine.get()};
 	}
 };
 
