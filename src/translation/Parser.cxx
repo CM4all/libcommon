@@ -1036,6 +1036,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::SERVICE:
 	case TranslationCommand::ALT_HOST:
 	case TranslationCommand::CHAIN_HEADER:
+	case TranslationCommand::AUTH_TOKEN:
 		throw std::runtime_error("misplaced translate request packet");
 
 	case TranslationCommand::UID_GID:
@@ -2601,6 +2602,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!response.http_auth.IsNull())
 			throw std::runtime_error("cannot combine AUTH and HTTP_AUTH");
 
+		if (!response.token_auth.IsNull())
+			throw std::runtime_error("cannot combine AUTH and TOKEN_AUTH");
+
 		response.auth = payload;
 		return;
 #else
@@ -2976,7 +2980,27 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!response.auth.IsNull())
 			throw std::runtime_error("cannot combine AUTH and HTTP_AUTH");
 
+		if (!response.token_auth.IsNull())
+			throw std::runtime_error("cannot combine TOKEN_AUTH and HTTP_AUTH");
+
 		response.http_auth = payload;
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::TOKEN_AUTH:
+#if TRANSLATION_ENABLE_HTTP
+		if (!response.token_auth.IsNull())
+			throw std::runtime_error("duplicate TOKEN_AUTH packet");
+
+		if (!response.auth.IsNull())
+			throw std::runtime_error("cannot combine AUTH and TOKEN_AUTH");
+
+		if (!response.http_auth.IsNull())
+			throw std::runtime_error("cannot combine TOKEN_AUTH and HTTP_AUTH");
+
+		response.token_auth = payload;
 		return;
 #else
 		break;

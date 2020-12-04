@@ -151,6 +151,16 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		http_auth = {http_auth_buffer.data(), http_auth_buffer.size()};
 		break;
 
+	case TranslationCommand::TOKEN_AUTH:
+		token_auth_buffer = ToString(payload);
+		token_auth = {token_auth_buffer.data(), token_auth_buffer.size()};
+		break;
+
+	case TranslationCommand::AUTH_TOKEN:
+		auth_token_buffer = ToString(payload);
+		auth_token = auth_token_buffer.c_str();
+		break;
+
 	case TranslationCommand::CHECK:
 		check_buffer = ToString(payload);
 		check = {check_buffer.data(), check_buffer.size()};

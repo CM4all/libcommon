@@ -70,6 +70,9 @@ struct Request {
 
 	ConstBuffer<void> http_auth = nullptr;
 
+	ConstBuffer<void> token_auth = nullptr;
+	const char *auth_token = nullptr;
+
 	ConstBuffer<void> check = nullptr;
 
 	ConstBuffer<void> want_full_uri = nullptr;

@@ -161,6 +161,13 @@ struct TranslateResponse {
 	 * received.
 	 */
 	ConstBuffer<void> http_auth;
+
+	/**
+	 * The payload of the TOKEN_AUTH packet.  If
+	 * ConstBuffer::IsNull(), then no TOKEN_AUTH packet was
+	 * received.
+	 */
+	ConstBuffer<void> token_auth;
 #endif
 
 #if TRANSLATION_ENABLE_SESSION

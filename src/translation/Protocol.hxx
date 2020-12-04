@@ -1033,6 +1033,18 @@ enum class TranslationCommand : uint16_t {
 	 * Require HTTP-based authentication.
 	 */
 	HTTP_AUTH = 219,
+
+	/**
+	 * Enable token-based authentication (with the query string
+	 * parameter "auth_token").
+	 */
+	TOKEN_AUTH = 220,
+
+	/**
+	 * The (unescaped) value of the "auth_token" query string
+	 * parameter (with #TOKEN_AUTH).
+	 */
+	AUTH_TOKEN = 221,
 };
 
 struct TranslationHeader {
