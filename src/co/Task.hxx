@@ -40,6 +40,24 @@
 
 namespace Co {
 
+namespace detail {
+
+template<typename R>
+struct promise_result_manager {
+	std::optional<R> value;
+
+	template<typename U>
+	void return_value(U &&_value) noexcept {
+		value.emplace(std::forward<U>(_value));
+	}
+
+	decltype(auto) GetReturnValue() noexcept {
+		return std::move(*value);
+	}
+};
+
+} // namespace Co::detail
+
 /**
  * A coroutine task which is suspended initially and returns a value
  * (with support for exceptions).
@@ -47,10 +65,8 @@ namespace Co {
 template<typename T>
 class Task {
 public:
-	struct promise_type {
+	struct promise_type : detail::promise_result_manager<T> {
 		std::coroutine_handle<> continuation;
-
-		std::optional<T> value;
 
 		std::exception_ptr error;
 
@@ -76,11 +92,6 @@ public:
 			return final_awaitable{};
 		}
 
-		template<typename U>
-		void return_value(U &&_value) noexcept {
-			value.emplace(std::forward<U>(_value));
-		}
-
 		Task<T> get_return_object() noexcept {
 			return Task<T>(std::coroutine_handle<promise_type>::from_promise(*this));
 		}
@@ -93,7 +104,7 @@ public:
 			if (error)
 				std::rethrow_exception(std::move(error));
 
-			return std::move(*value);
+			return detail::promise_result_manager<T>::GetReturnValue();
 		}
 	};
 
