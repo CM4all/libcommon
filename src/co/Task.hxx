@@ -56,6 +56,12 @@ struct promise_result_manager {
 	}
 };
 
+template<>
+struct promise_result_manager<void> {
+	void return_void() noexcept {}
+	void GetReturnValue() noexcept {}
+};
+
 } // namespace Co::detail
 
 /**
