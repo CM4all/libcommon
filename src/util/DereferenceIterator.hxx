@@ -65,7 +65,7 @@ public:
 	}
 
 	auto &operator++() noexcept {
-		original = ++original;
+		++original;
 		return *this;
 	}
 
