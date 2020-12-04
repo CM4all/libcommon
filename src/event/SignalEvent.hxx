@@ -62,7 +62,9 @@ public:
 		Add(signo);
 	}
 
-	~SignalEvent() noexcept;
+	~SignalEvent() noexcept {
+		Disable();
+	}
 
 	auto &GetEventLoop() const noexcept {
 		return event.GetEventLoop();

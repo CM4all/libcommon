@@ -42,14 +42,6 @@ SignalEvent::SignalEvent(EventLoop &loop, Callback _callback) noexcept
 	sigemptyset(&mask);
 }
 
-SignalEvent::~SignalEvent() noexcept
-{
-	if (IsDefined()) {
-		event.Close();
-		Disable();
-	}
-}
-
 void
 SignalEvent::Enable()
 {
@@ -68,7 +60,8 @@ SignalEvent::Enable()
 void
 SignalEvent::Disable() noexcept
 {
-	assert(IsDefined());
+	if (!IsDefined())
+		return;
 
 	sigprocmask(SIG_UNBLOCK, &mask, nullptr);
 
