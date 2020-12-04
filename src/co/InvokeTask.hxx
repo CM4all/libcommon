@@ -36,6 +36,7 @@
 #include "Compat.hxx"
 #include "util/BindMethod.hxx"
 
+#include <cassert>
 #include <exception>
 #include <utility>
 
@@ -54,6 +55,8 @@ public:
 		std::exception_ptr error;
 
 		auto initial_suspend() noexcept {
+			assert(!error);
+
 			return std::suspend_never{};
 		}
 
@@ -78,13 +81,17 @@ public:
 		}
 
 		void return_void() noexcept {
+			assert(!error);
 		}
 
 		InvokeTask get_return_object() noexcept {
+			assert(!error);
+
 			return InvokeTask(std::coroutine_handle<promise_type>::from_promise(*this));
 		}
 
 		void unhandled_exception() noexcept {
+			assert(!error);
 			error = std::current_exception();
 		}
 	};
@@ -102,6 +109,9 @@ public:
 	}
 
 	void OnCompletion(Callback callback) noexcept {
+		assert(callback);
+		assert(coroutine);
+
 		if (coroutine->done())
 			callback(std::move(coroutine->promise().error));
 		else
