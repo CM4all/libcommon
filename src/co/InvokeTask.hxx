@@ -43,9 +43,10 @@ namespace Co {
 /**
  * A helper task which invokes a coroutine from synchronous code.
  */
-struct InvokeTask {
+class InvokeTask {
 	using Callback = BoundMethod<void(std::exception_ptr error) noexcept>;
 
+public:
 	struct promise_type {
 		Callback callback{nullptr};
 
@@ -87,14 +88,16 @@ struct InvokeTask {
 		}
 	};
 
+private:
 	std::coroutine_handle<promise_type> coroutine;
-
-	InvokeTask() noexcept {
-	}
 
 	explicit InvokeTask(std::coroutine_handle<promise_type> _coroutine) noexcept
 		:coroutine(_coroutine)
 	{
+	}
+
+public:
+	InvokeTask() noexcept {
 	}
 
 	InvokeTask(InvokeTask &&src) noexcept
