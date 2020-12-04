@@ -45,6 +45,7 @@ void
 SocketEvent::Open(SocketDescriptor _fd) noexcept
 {
 	assert(_fd.IsDefined());
+	assert(!fd.IsDefined());
 	assert(GetScheduledFlags() == 0);
 
 	fd = _fd;
