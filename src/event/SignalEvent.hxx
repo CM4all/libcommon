@@ -51,7 +51,7 @@ class SignalEvent {
 
 	sigset_t mask;
 
-	typedef BoundMethod<void(int) noexcept> Callback;
+	using Callback = BoundMethod<void(int) noexcept>;
 	const Callback callback;
 
 public:
