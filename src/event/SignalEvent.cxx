@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -53,6 +53,8 @@ SignalEvent::~SignalEvent() noexcept
 void
 SignalEvent::Enable()
 {
+	assert(!IsDefined());
+
 	int fd = signalfd(-1, &mask, SFD_NONBLOCK|SFD_CLOEXEC);
 	if (fd < 0)
 		throw MakeErrno("signalfd() failed");
@@ -66,9 +68,11 @@ SignalEvent::Enable()
 void
 SignalEvent::Disable() noexcept
 {
+	assert(IsDefined());
+
 	sigprocmask(SIG_UNBLOCK, &mask, nullptr);
 
-	event.Cancel();
+	event.Close();
 }
 
 void

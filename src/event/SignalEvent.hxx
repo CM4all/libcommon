@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SIGNAL_EVENT_HXX
-#define SIGNAL_EVENT_HXX
+#pragma once
 
 #include "SocketEvent.hxx"
 #include "util/BindMethod.hxx"
@@ -85,5 +84,3 @@ public:
 private:
 	void EventCallback(unsigned events) noexcept;
 };
-
-#endif
