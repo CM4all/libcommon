@@ -56,8 +56,8 @@ SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 				     const SpawnConfig &_config,
 				     UniqueSocketDescriptor _socket,
 				     bool _verify) noexcept
-	:config(_config), socket(std::move(_socket)),
-	 event(event_loop, BIND_THIS_METHOD(OnSocketEvent), socket),
+	:config(_config),
+	 event(event_loop, BIND_THIS_METHOD(OnSocketEvent), _socket.Release()),
 	 verify(_verify)
 {
 	event.ScheduleRead();
@@ -65,14 +65,13 @@ SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 
 SpawnServerClient::~SpawnServerClient() noexcept
 {
-	if (socket.IsDefined())
-		Close();
+	event.Close();
 }
 
 void
 SpawnServerClient::ReplaceSocket(UniqueSocketDescriptor new_socket) noexcept
 {
-	assert(socket.IsDefined());
+	assert(event.IsDefined());
 	assert(new_socket.IsDefined());
 	assert(!shutting_down);
 
@@ -80,19 +79,16 @@ SpawnServerClient::ReplaceSocket(UniqueSocketDescriptor new_socket) noexcept
 
 	Close();
 
-	socket = std::move(new_socket);
-
-	event.Open(socket);
+	event.Open(new_socket.Release());
 	event.ScheduleRead();
 }
 
 void
 SpawnServerClient::Close() noexcept
 {
-	assert(socket.IsDefined());
+	assert(event.IsDefined());
 
-	event.Cancel();
-	socket.Close();
+	event.Close();
 }
 
 void
@@ -100,14 +96,14 @@ SpawnServerClient::Shutdown() noexcept
 {
 	shutting_down = true;
 
-	if (processes.empty() && socket.IsDefined())
+	if (processes.empty() && event.IsDefined())
 		Close();
 }
 
 void
 SpawnServerClient::CheckOrAbort() noexcept
 {
-	if (!socket.IsDefined()) {
+	if (!event.IsDefined()) {
 		fprintf(stderr, "SpawnChildProcess: the spawner is gone, emergency!\n");
 		_exit(EXIT_FAILURE);
 	}
@@ -116,13 +112,13 @@ SpawnServerClient::CheckOrAbort() noexcept
 inline void
 SpawnServerClient::Send(ConstBuffer<void> payload, ConstBuffer<int> fds)
 {
-	::Send<MAX_FDS>(socket, payload, fds);
+	::Send<MAX_FDS>(event.GetSocket(), payload, fds);
 }
 
 inline void
 SpawnServerClient::Send(const SpawnSerializer &s)
 {
-	::Send<MAX_FDS>(socket, s);
+	::Send<MAX_FDS>(event.GetSocket(), s);
 }
 
 UniqueSocketDescriptor
@@ -493,7 +489,7 @@ SpawnServerClient::ReceiveAndHandle()
 		msg.msg_controllen = 0;
 	}
 
-	int n = recvmmsg(socket.Get(), &msgs.front(), msgs.size(),
+	int n = recvmmsg(event.GetSocket().Get(), &msgs.front(), msgs.size(),
 			 MSG_DONTWAIT|MSG_CMSG_CLOEXEC, nullptr);
 	if (n <= 0) {
 		if (n < 0)
@@ -521,7 +517,8 @@ inline void
 SpawnServerClient::OnSocketEvent(unsigned events) noexcept
 try {
 	if (events & event.ERROR)
-		throw MakeErrno(socket.GetError(), "Spawner socket error");
+		throw MakeErrno(event.GetSocket().GetError(),
+				"Spawner socket error");
 
 	if (events & event.HANGUP)
 		throw std::runtime_error("Spawner hung up");

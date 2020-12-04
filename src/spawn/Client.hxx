@@ -61,8 +61,6 @@ class SpawnServerClient final : public SpawnService {
 
 	const SpawnConfig config;
 
-	UniqueSocketDescriptor socket;
-
 	unsigned last_pid = 0;
 
 	std::map<int, ChildProcess> processes;
