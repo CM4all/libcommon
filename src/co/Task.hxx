@@ -88,6 +88,13 @@ public:
 		void unhandled_exception() noexcept {
 			error = std::current_exception();
 		}
+
+		decltype(auto) GetReturnValue() {
+			if (error)
+				std::rethrow_exception(std::move(error));
+
+			return std::move(*value);
+		}
 	};
 
 private:
@@ -131,12 +138,7 @@ public:
 			}
 
 			decltype(auto) await_resume() {
-				auto &p = coroutine.promise();
-
-				if (p.error)
-					std::rethrow_exception(std::move(p.error));
-
-				return std::move(*p.value);
+				return coroutine.promise().GetReturnValue();
 			}
 		};
 
