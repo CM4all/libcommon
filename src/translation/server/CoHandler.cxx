@@ -71,7 +71,7 @@ public:
 
 		cancel_ptr = *this;
 		dummy_task = Handle();
-		dummy_task.OnCompletion(BIND_THIS_METHOD(OnCompletion));
+		dummy_task.Start(BIND_THIS_METHOD(OnCompletion));
 
 		assert(starting);
 

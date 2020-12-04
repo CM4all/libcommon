@@ -239,7 +239,7 @@ class Cache : Factory {
 			assert(!handlers.empty());
 
 			task = Run(factory);
-			task.OnCompletion(BIND_THIS_METHOD(OnCompletion));
+			task.Start(BIND_THIS_METHOD(OnCompletion));
 		}
 
 		void OnCompletion(std::exception_ptr error) noexcept {

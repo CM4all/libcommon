@@ -120,7 +120,7 @@ struct Work {
 
 	void Start(int key) {
 		task = Run(key);
-		task.OnCompletion(BIND_THIS_METHOD(OnCompletion));
+		task.Start(BIND_THIS_METHOD(OnCompletion));
 	}
 
 	void OnCompletion(std::exception_ptr _error) noexcept {

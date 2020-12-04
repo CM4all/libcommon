@@ -50,14 +50,14 @@ class InvokeTask {
 
 public:
 	struct promise_type {
-		Callback callback{nullptr};
+		Callback callback;
 
 		std::exception_ptr error;
 
 		auto initial_suspend() noexcept {
 			assert(!error);
 
-			return std::suspend_never{};
+			return std::suspend_always{};
 		}
 
 		struct final_awaitable {
@@ -68,8 +68,8 @@ public:
 			template<typename PROMISE>
 			void await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
 				auto &p = coro.promise();
-				if (p.callback)
-					p.callback(std::move(p.error));
+				assert(p.callback);
+				p.callback(std::move(p.error));
 			}
 
 			void await_resume() const noexcept {
@@ -108,14 +108,15 @@ public:
 	InvokeTask() noexcept {
 	}
 
-	void OnCompletion(Callback callback) noexcept {
+	void Start(Callback callback) noexcept {
 		assert(callback);
 		assert(coroutine);
+		assert(!coroutine->done());
+		assert(!coroutine->promise().callback);
+		assert(!coroutine->promise().error);
 
-		if (coroutine->done())
-			callback(std::move(coroutine->promise().error));
-		else
-			coroutine->promise().callback = callback;
+		coroutine->promise().callback = callback;
+		coroutine->resume();
 	}
 };
 

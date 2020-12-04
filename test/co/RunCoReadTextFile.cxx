@@ -96,7 +96,7 @@ try {
 	Instance instance;
 
 	instance.task = Run(instance.uring, path);
-	instance.task.OnCompletion(BIND_METHOD(instance, &Instance::OnCompletion));
+	instance.task.Start(BIND_METHOD(instance, &Instance::OnCompletion));
 
 	instance.event_loop.Dispatch();
 
