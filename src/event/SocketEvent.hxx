@@ -101,12 +101,10 @@ public:
 		return loop;
 	}
 
-	gcc_pure
 	bool IsDefined() const noexcept {
 		return fd.IsDefined();
 	}
 
-	gcc_pure
 	SocketDescriptor GetSocket() const noexcept {
 		return fd;
 	}
