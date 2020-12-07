@@ -125,14 +125,19 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	if (!exec)
 		flags |= MS_NOEXEC;
 
-	char options[64];
-	snprintf(options, sizeof(options),
-		 "size=16M,nr_inodes=256,mode=711"
-		 ",uid=%" PRIuLEAST32 ",gid=%" PRIuLEAST32,
-		 vfs_builder.uid, vfs_builder.gid);
+	const char *options = "size=16M,nr_inodes=256,mode=711";
+	char options_buffer[64];
+	if (writable) {
+		snprintf(options_buffer, sizeof(options_buffer),
+			 "%s,uid=%" PRIuLEAST32 ",gid=%" PRIuLEAST32,
+			 options, vfs_builder.uid, vfs_builder.gid);
+		options = options_buffer;
+	}
 
 	MountOrThrow("none", target, "tmpfs", flags,
 		     options);
+
+	// TODO: remount read-only after all mount points have been created?
 
 	vfs_builder.MakeWritable();
 }
