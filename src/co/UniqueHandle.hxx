@@ -79,6 +79,14 @@ public:
 	const auto *operator->() const noexcept {
 		return &value;
 	}
+
+#ifdef __clang__
+	/* the non-const overload is only needed for clang, because in
+	   libc++11, some methods are not "const" */
+	auto *operator->() noexcept {
+		return &value;
+	}
+#endif
 };
 
 } // namespace Co
