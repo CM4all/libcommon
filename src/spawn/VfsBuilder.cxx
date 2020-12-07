@@ -55,7 +55,8 @@ struct VfsBuilder::Item {
 	}
 };
 
-VfsBuilder::VfsBuilder() noexcept {}
+VfsBuilder::VfsBuilder(uint_least32_t _uid, uint_least32_t _gid) noexcept
+	:uid(_uid), gid(_gid) {}
 
 VfsBuilder::~VfsBuilder() noexcept
 {

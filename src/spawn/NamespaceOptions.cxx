@@ -161,7 +161,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
 	if (network_namespace != nullptr)
 		ReassociateNetwork();
 
-	mount.Setup();
+	mount.Setup(uid_gid);
 
 	if (hostname != nullptr &&
 	    sethostname(hostname, strlen(hostname)) < 0)

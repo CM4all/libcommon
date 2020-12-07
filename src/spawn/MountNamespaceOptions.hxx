@@ -38,6 +38,7 @@
 #include "util/ShallowCopy.hxx"
 
 class AllocatorPtr;
+struct UidGid;
 struct Mount;
 class MatchInfo;
 
@@ -135,7 +136,7 @@ struct MountNamespaceOptions {
 	/**
 	 * Throws std::system_error on error.
 	 */
-	void Setup() const;
+	void Setup(const UidGid &uid_gid) const;
 
 	char *MakeId(char *p) const noexcept;
 

@@ -34,6 +34,7 @@
 
 #include "util/Compiler.h"
 
+#include <cstdint>
 #include <vector>
 
 /**
@@ -49,7 +50,9 @@ class VfsBuilder {
 	int old_umask = -1;
 
 public:
-	VfsBuilder() noexcept;
+	const uint_least32_t uid, gid;
+
+	VfsBuilder(uint_least32_t _uid, uint_least32_t _gid) noexcept;
 	~VfsBuilder() noexcept;
 
 	void AddWritableRoot(const char *path);

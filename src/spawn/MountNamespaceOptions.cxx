@@ -33,6 +33,7 @@
 #include "MountNamespaceOptions.hxx"
 #include "Mount.hxx"
 #include "VfsBuilder.hxx"
+#include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/pivot_root.h"
 #include "system/BindMount.hxx"
@@ -109,7 +110,7 @@ MountOrThrow(const char *source, const char *target,
 }
 
 void
-MountNamespaceOptions::Setup() const
+MountNamespaceOptions::Setup(const UidGid &uid_gid) const
 {
 	if (!IsEnabled())
 		return;
@@ -121,7 +122,7 @@ MountNamespaceOptions::Setup() const
 
 	const char *new_root = nullptr;
 
-	VfsBuilder vfs_builder;
+	VfsBuilder vfs_builder(uid_gid.uid, uid_gid.gid);
 
 	if (pivot_root != nullptr) {
 		/* first bind-mount the new root onto itself to "unlock" the
