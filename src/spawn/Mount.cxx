@@ -40,6 +40,8 @@
 #include "pexpand.hxx"
 #endif
 
+#include <cinttypes>
+
 #include <sys/mount.h>
 #include <string.h>
 
@@ -123,8 +125,14 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	if (!exec)
 		flags |= MS_NOEXEC;
 
+	char options[64];
+	snprintf(options, sizeof(options),
+		 "size=16M,nr_inodes=256,mode=711"
+		 ",uid=%" PRIuLEAST32 ",gid=%" PRIuLEAST32,
+		 vfs_builder.uid, vfs_builder.gid);
+
 	MountOrThrow("none", target, "tmpfs", flags,
-		     "size=16M,nr_inodes=256,mode=711");
+		     options);
 
 	vfs_builder.MakeWritable();
 }
