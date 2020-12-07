@@ -3058,6 +3058,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		HandleMountTmpfs(string_payload, true);
 		return;
 
+	case TranslationCommand::MOUNT_EMPTY:
+		HandleMountTmpfs(string_payload, false);
+		return;
+
 	case TranslationCommand::REVEAL_USER:
 #if TRANSLATION_ENABLE_TRANSFORMATION
 		if (!payload.empty())

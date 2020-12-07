@@ -759,7 +759,7 @@ enum class TranslationCommand : uint16_t {
 	UNTRUSTED_RAW_SITE_SUFFIX = 172,
 
 	/**
-	 * Mount a new tmpfs on the given path.
+	 * Mount a new (writable) tmpfs on the given path.
 	 */
 	MOUNT_TMPFS = 173,
 
@@ -1045,6 +1045,11 @@ enum class TranslationCommand : uint16_t {
 	 * parameter (with #TOKEN_AUTH).
 	 */
 	AUTH_TOKEN = 221,
+
+	/**
+	 * Mount a new (read-only) tmpfs on the given path.
+	 */
+	MOUNT_EMPTY = 222,
 };
 
 struct TranslationHeader {
