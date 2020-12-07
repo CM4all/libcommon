@@ -116,7 +116,6 @@ public:
 		assert(callback);
 		assert(coroutine);
 		assert(!coroutine->done());
-		assert(!coroutine->promise().callback);
 		assert(!coroutine->promise().error);
 
 		coroutine->promise().callback = callback;
