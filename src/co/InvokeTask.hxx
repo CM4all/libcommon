@@ -108,6 +108,10 @@ public:
 	InvokeTask() noexcept {
 	}
 
+	operator bool() const noexcept {
+		return coroutine;
+	}
+
 	void Start(Callback callback) noexcept {
 		assert(callback);
 		assert(coroutine);
