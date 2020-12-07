@@ -642,6 +642,13 @@ public:
 		}
 
 		template<typename... Types>
+		auto MountEmpty(Types... path) noexcept {
+			response.StringPacket(TranslationCommand::MOUNT_EMPTY,
+					      path...);
+			return *this;
+		}
+
+		template<typename... Types>
 		auto MountHome(Types... mnt) noexcept {
 			response.StringPacket(TranslationCommand::MOUNT_HOME,
 					      mnt...);
