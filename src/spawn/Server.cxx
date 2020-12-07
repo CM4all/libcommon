@@ -587,6 +587,17 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
+		case SpawnExecCommand::MOUNT_EMPTY:
+			{
+				const char *target = payload.ReadString();
+				mounts.emplace_front(Mount::Tmpfs{}, target,
+						     false);
+			}
+
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
+			break;
+
 		case SpawnExecCommand::BIND_MOUNT:
 			{
 				const char *source = payload.ReadString();
