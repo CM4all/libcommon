@@ -116,7 +116,7 @@ try {
 								    mounts.front());
 
 		} else if (const char *mount_tmpfs = StringAfterPrefix(arg, "--mount-tmpfs=")) {
-			mounts.emplace_front(Mount::Tmpfs{}, mount_tmpfs);
+			mounts.emplace_front(Mount::Tmpfs{}, mount_tmpfs, true);
 			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
 								    mounts.front());
 		} else if (const char *scope = StringAfterPrefix(arg, "--scope=")) {

@@ -593,7 +593,7 @@ translate_client_mount_home(NamespaceOptions *ns, StringView payload)
 }
 
 inline void
-TranslateParser::HandleMountTmpfs(StringView payload)
+TranslateParser::HandleMountTmpfs(StringView payload, bool writable)
 {
 	if (!IsValidAbsolutePath(payload) ||
 	    /* not allowed for /tmp, use MOUNT_TMP_TMPFS
@@ -604,7 +604,7 @@ TranslateParser::HandleMountTmpfs(StringView payload)
 	if (ns_options == nullptr)
 		throw std::runtime_error("misplaced MOUNT_TMPFS packet");
 
-	auto *m = alloc.New<Mount>(Mount::Tmpfs{}, payload.data);
+	auto *m = alloc.New<Mount>(Mount::Tmpfs{}, payload.data, writable);
 	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
 }
 
@@ -3055,7 +3055,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::MOUNT_TMPFS:
-		HandleMountTmpfs(string_payload);
+		HandleMountTmpfs(string_payload, true);
 		return;
 
 	case TranslationCommand::REVEAL_USER:
