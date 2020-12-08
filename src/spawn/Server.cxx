@@ -579,19 +579,9 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 		case SpawnExecCommand::MOUNT_TMPFS:
 			{
 				const char *target = payload.ReadString();
+				bool writable = payload.ReadByte();
 				mounts.emplace_front(Mount::Tmpfs{}, target,
-						     true);
-			}
-
-			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
-								    mounts.front());
-			break;
-
-		case SpawnExecCommand::MOUNT_EMPTY:
-			{
-				const char *target = payload.ReadString();
-				mounts.emplace_front(Mount::Tmpfs{}, target,
-						     false);
+						     writable);
 			}
 
 			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,

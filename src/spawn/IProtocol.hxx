@@ -70,7 +70,6 @@ enum class SpawnExecCommand : uint8_t {
 	MOUNT_HOME,
 	MOUNT_TMP_TMPFS,
 	MOUNT_TMPFS,
-	MOUNT_EMPTY,
 	BIND_MOUNT,
 	HOSTNAME,
 	RLIMIT,

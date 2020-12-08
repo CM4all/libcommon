@@ -193,10 +193,9 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			break;
 
 		case Mount::Type::TMPFS:
-			s.WriteString(i.writable
-				      ? SpawnExecCommand::MOUNT_TMPFS
-				      : SpawnExecCommand::MOUNT_EMPTY,
+			s.WriteString(SpawnExecCommand::MOUNT_TMPFS,
 				      i.target);
+			s.WriteByte(i.writable);
 			break;
 		}
 	}
