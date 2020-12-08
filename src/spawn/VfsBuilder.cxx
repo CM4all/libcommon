@@ -137,7 +137,7 @@ VfsBuilder::Add(const char *path)
 	assert(*path == 0 || *path == '/');
 
 	const auto fw = FindWritable(path);
-	if (fw.writable_directory.IsDefined() && fw.suffix != nullptr) {
+	if (fw.writable_directory.IsDefined()) {
 		if (old_umask == -1)
 			old_umask = umask(0022);
 
