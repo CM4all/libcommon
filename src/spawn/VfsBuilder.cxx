@@ -75,7 +75,7 @@ VfsBuilder::AddWritableRoot(const char *path)
 }
 
 struct VfsBuilder::FindWritableResult {
-	FileDescriptor writable_directory;
+	const Item *item;
 	const char *suffix;
 };
 
@@ -102,10 +102,10 @@ VfsBuilder::FindWritable(const char *path) const
 
 		++suffix;
 
-		return {i->fd, suffix};
+		return {&*i, suffix};
 	}
 
-	return {FileDescriptor::Undefined(), nullptr};
+	return {nullptr, nullptr};
 }
 
 static void
@@ -137,11 +137,11 @@ VfsBuilder::Add(const char *path)
 	assert(*path == 0 || *path == '/');
 
 	const auto fw = FindWritable(path);
-	if (fw.writable_directory.IsDefined()) {
+	if (fw.item != nullptr) {
 		if (old_umask == -1)
 			old_umask = umask(0022);
 
-		MakeDirs(fw.writable_directory, fw.suffix);
+		MakeDirs(fw.item->fd, fw.suffix);
 	}
 
 	items.emplace_back(path);
