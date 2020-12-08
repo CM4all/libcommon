@@ -70,6 +70,5 @@ public:
 private:
 	struct FindWritableResult;
 
-	gcc_pure
-	FindWritableResult FindWritable(const char *path) const noexcept;
+	FindWritableResult FindWritable(const char *path) const;
 };

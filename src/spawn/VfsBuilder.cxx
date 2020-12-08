@@ -35,6 +35,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
 #include "util/IterableSplitString.hxx"
+#include "util/RuntimeError.hxx"
 #include "util/StringCompare.hxx"
 
 #include <string>
@@ -79,21 +80,29 @@ struct VfsBuilder::FindWritableResult {
 };
 
 VfsBuilder::FindWritableResult
-VfsBuilder::FindWritable(const char *path) const noexcept
+VfsBuilder::FindWritable(const char *path) const
 {
 	for (auto i = items.rbegin(), end = items.rend(); i != end; ++i) {
 		const char *suffix = StringAfterPrefix(path, i->path);
-		if (suffix != nullptr && (*suffix == 0 || *suffix == '/')) {
-			if (!i->IsWritable())
-				break;
+		if (suffix == nullptr)
+			/* mismatch, continue searching */
+			continue;
 
-			if (*suffix == '/')
-				++suffix;
-			else
-				suffix = nullptr;
+		if (*suffix == 0)
+			throw FormatRuntimeError("Already a mount point: %s",
+						 path);
 
-			return {i->fd, suffix};
-		}
+		if (*suffix != '/')
+			/* mismatch, continue searching */
+			continue;
+
+		if (!i->IsWritable())
+			/* not writable: stop here */
+			break;
+
+		++suffix;
+
+		return {i->fd, suffix};
 	}
 
 	return {FileDescriptor::Undefined(), nullptr};
