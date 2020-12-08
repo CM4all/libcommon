@@ -135,9 +135,10 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	MountOrThrow("none", target, "tmpfs", flags,
 		     options);
 
-	// TODO: remount read-only after all mount points have been created?
-
 	vfs_builder.MakeWritable();
+
+	if (!writable)
+		vfs_builder.ScheduleRemount(flags | MS_RDONLY);
 }
 
 inline void
