@@ -241,6 +241,8 @@ MountNamespaceOptions::Setup(const UidGid &uid_gid) const
 
 		vfs_builder.MakeWritable();
 	}
+
+	vfs_builder.Finish();
 }
 
 char *

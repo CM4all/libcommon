@@ -41,12 +41,15 @@
 #include <string>
 
 #include <fcntl.h>
+#include <sys/mount.h>
 #include <sys/stat.h>
 
 struct VfsBuilder::Item {
 	const char *path;
 
 	UniqueFileDescriptor fd;
+
+	int remount_flags = 0;
 
 	explicit Item(const char *_path) noexcept
 		:path(_path) {}
@@ -156,4 +159,26 @@ VfsBuilder::MakeWritable()
 	assert(!item.fd.IsDefined());
 
 	item.fd = OpenPath(item.path, O_DIRECTORY);
+}
+
+void
+VfsBuilder::ScheduleRemount(int flags) noexcept
+{
+	assert(!items.empty());
+
+	auto &item = items.back();
+	assert(item.remount_flags == 0);
+
+	item.remount_flags = MS_REMOUNT|flags;
+}
+
+void
+VfsBuilder::Finish()
+{
+	for (const auto &i : items) {
+		if (i.remount_flags != 0 &&
+		    mount(nullptr, i.path, nullptr, i.remount_flags,
+			  nullptr) < 0)
+		    throw FormatErrno("Failed to remount %s", i.path);
+	}
 }

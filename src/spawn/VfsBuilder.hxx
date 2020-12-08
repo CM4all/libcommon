@@ -67,6 +67,13 @@ public:
 	 */
 	void MakeWritable();
 
+	/**
+	 * Schedule a remount of the most recently added mount point.
+	 */
+	void ScheduleRemount(int flags) noexcept;
+
+	void Finish();
+
 private:
 	struct FindWritableResult;
 
