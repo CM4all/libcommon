@@ -120,8 +120,6 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	vfs_builder.Add(target);
 
 	int flags = MS_NOSUID|MS_NODEV;
-	if (!writable)
-		flags |= MS_RDONLY;
 	if (!exec)
 		flags |= MS_NOEXEC;
 
