@@ -32,13 +32,13 @@
 
 #pragma once
 
-#include "Connection.hxx"
 #include "event/net/ServerSocket.hxx"
 #include "util/IntrusiveList.hxx"
 
 namespace Translation::Server {
 
 class Handler;
+class Connection;
 
 class Listener final : private ServerSocket {
 	Handler &handler;
@@ -46,10 +46,7 @@ class Listener final : private ServerSocket {
 	IntrusiveList<Connection> connections;
 
 public:
-	Listener(EventLoop &_event_loop, Handler &_handler) noexcept
-		:ServerSocket(_event_loop),
-		 handler(_handler) {}
-
+	Listener(EventLoop &_event_loop, Handler &_handler) noexcept;
 	~Listener() noexcept;
 
 	using ServerSocket::GetEventLoop;

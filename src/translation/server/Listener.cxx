@@ -31,11 +31,18 @@
  */
 
 #include "Listener.hxx"
+#include "Connection.hxx"
 #include "net/SocketAddress.hxx"
 #include "io/Logger.hxx"
 #include "util/DeleteDisposer.hxx"
 
 namespace Translation::Server {
+
+Listener::Listener(EventLoop &_event_loop, Handler &_handler) noexcept
+	:ServerSocket(_event_loop),
+	 handler(_handler)
+{
+}
 
 Listener::~Listener() noexcept
 {
