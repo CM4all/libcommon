@@ -1050,6 +1050,11 @@ enum class TranslationCommand : uint16_t {
 	 * Mount a new (read-only) tmpfs on the given path.
 	 */
 	MOUNT_EMPTY = 222,
+
+	/**
+	 * Generate a response with a tiny (one-pixel GIF) image.
+	 */
+	TINY_IMAGE = 223,
 };
 
 struct TranslationHeader {

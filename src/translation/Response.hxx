@@ -394,6 +394,8 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
+	bool tiny_image;
+
 	bool break_chain;
 
 	bool dump_headers;

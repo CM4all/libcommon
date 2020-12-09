@@ -360,6 +360,10 @@ public:
 		return StringPacket(TranslationCommand::MESSAGE, value...);
 	}
 
+	auto &TinyImage() noexcept {
+		return Packet(TranslationCommand::TINY_IMAGE);
+	}
+
 	auto &Scheme(std::string_view value) noexcept {
 		return StringPacket(TranslationCommand::SCHEME, value);
 	}

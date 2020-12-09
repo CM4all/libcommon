@@ -160,6 +160,7 @@ TranslateResponse::Clear()
 	anchor_absolute = false;
 #endif
 #if TRANSLATION_ENABLE_HTTP
+	tiny_image = false;
 	break_chain = false;
 	dump_headers = false;
 #endif
@@ -384,6 +385,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	anchor_absolute = src.anchor_absolute;
 #endif
 #if TRANSLATION_ENABLE_HTTP
+	tiny_image = src.tiny_image;
 	break_chain = src.break_chain;
 	dump_headers = src.dump_headers;
 #endif

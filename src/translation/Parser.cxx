@@ -3546,6 +3546,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::TINY_IMAGE:
+#if TRANSLATION_ENABLE_HTTP
+		if (!payload.empty())
+			throw std::runtime_error("malformed TINY_IMAGE packet");
+
+		if (response.tiny_image)
+			throw std::runtime_error("duplicate TINY_IMAGE packet");
+
+		response.tiny_image = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
