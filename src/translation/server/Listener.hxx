@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,8 +34,7 @@
 
 #include "Connection.hxx"
 #include "event/net/ServerSocket.hxx"
-
-#include <boost/intrusive/list.hpp>
+#include "util/IntrusiveList.hxx"
 
 namespace Translation::Server {
 
@@ -44,8 +43,7 @@ class Handler;
 class Listener final : private ServerSocket {
 	Handler &handler;
 
-	boost::intrusive::list<Connection,
-			       boost::intrusive::constant_time_size<false>> connections;
+	IntrusiveList<Connection> connections;
 
 public:
 	Listener(EventLoop &_event_loop, Handler &_handler) noexcept
@@ -57,8 +55,6 @@ public:
 	using ServerSocket::GetEventLoop;
 	using ServerSocket::Listen;
 	using ServerSocket::ListenPath;
-
-	void RemoveConnection(Connection &connection) noexcept;
 
 private:
 	void OnAccept(UniqueSocketDescriptor &&fd,

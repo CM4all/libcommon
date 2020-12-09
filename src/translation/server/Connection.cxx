@@ -31,7 +31,6 @@
  */
 
 #include "Connection.hxx"
-#include "Listener.hxx"
 #include "Handler.hxx"
 #include "Response.hxx"
 #include "translation/Protocol.hxx"
@@ -45,10 +44,9 @@
 namespace Translation::Server {
 
 Connection::Connection(EventLoop &event_loop,
-		       Listener &_listener,
 		       Handler &_handler,
 		       UniqueSocketDescriptor &&_fd) noexcept
-	:listener(_listener), handler(_handler),
+	:handler(_handler),
 	 event(event_loop, BIND_THIS_METHOD(OnSocketReady), _fd.Release()),
 	 state(State::INIT),
 	 input(8192)
@@ -89,7 +87,7 @@ Connection::TryRead() noexcept
 		LogConcat(2, "ts", "Failed to read from client: ", strerror(errno));
 	}
 
-	listener.RemoveConnection(*this);
+	Destroy();
 	return false;
 }
 
@@ -127,14 +125,14 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 	if (cancel_ptr) {
 		LogConcat(1, "ts",
 			  "Received more request packets while another request is still pending");
-		listener.RemoveConnection(*this);
+		Destroy();
 		return false;
 	}
 
 	if (cmd == TranslationCommand::BEGIN) {
 		if (state != State::INIT) {
 			LogConcat(1, "ts", "Misplaced INIT");
-			listener.RemoveConnection(*this);
+			Destroy();
 			return false;
 		}
 
@@ -143,7 +141,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 
 	if (state != State::REQUEST) {
 		LogConcat(1, "ts", "INIT expected");
-		listener.RemoveConnection(*this);
+		Destroy();
 		return false;
 	}
 
@@ -156,7 +154,7 @@ Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 		request.Parse(cmd, payload);
 	} catch (...) {
 		LogConcat(1, "ts", std::current_exception());
-		listener.RemoveConnection(*this);
+		Destroy();
 		return false;
 	}
 
@@ -178,7 +176,7 @@ Connection::TryWrite() noexcept
 		}
 
 		LogConcat(2, "ts", "Failed to write to client: ", strerror(errno));
-		listener.RemoveConnection(*this);
+		Destroy();
 		return false;
 	}
 
@@ -211,7 +209,7 @@ void
 Connection::OnSocketReady(unsigned events) noexcept
 {
 	if (events & SocketEvent::HANGUP) {
-		listener.RemoveConnection(*this);
+		Destroy();
 		return;
 	}
 

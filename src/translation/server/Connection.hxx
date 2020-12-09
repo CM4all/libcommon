@@ -36,9 +36,8 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/DynamicFifoBuffer.hxx"
 #include "util/Cancellable.hxx"
+#include "util/IntrusiveList.hxx"
 #include "AllocatedRequest.hxx"
-
-#include <boost/intrusive/list_hook.hpp>
 
 enum class TranslationCommand : uint16_t;
 template<typename T> struct ConstBuffer;
@@ -46,13 +45,12 @@ template<typename T> struct ConstBuffer;
 namespace Translation::Server {
 
 class Response;
-class Listener;
 class Handler;
 
-class Connection
-	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>
+class Connection : AutoUnlinkIntrusiveListHook
 {
-	Listener &listener;
+	friend class IntrusiveList<Connection>;
+
 	Handler &handler;
 
 	SocketEvent event;
@@ -80,7 +78,7 @@ class Connection
 
 public:
 	Connection(EventLoop &event_loop,
-		   Listener &_listener, Handler &_handler,
+		   Handler &_handler,
 		   UniqueSocketDescriptor &&_fd) noexcept;
 	~Connection() noexcept;
 
@@ -90,6 +88,10 @@ public:
 	bool SendResponse(Response &&response) noexcept;
 
 private:
+	void Destroy() noexcept {
+		delete this;
+	}
+
 	bool TryRead() noexcept;
 	bool OnReceived() noexcept;
 	bool OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept;

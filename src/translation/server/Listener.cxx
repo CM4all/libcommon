@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -43,17 +43,10 @@ Listener::~Listener() noexcept
 }
 
 void
-Listener::RemoveConnection(Connection &connection) noexcept
-{
-	connections.erase_and_dispose(connections.iterator_to(connection),
-				      DeleteDisposer());
-}
-
-void
 Listener::OnAccept(UniqueSocketDescriptor &&new_fd,
 		   SocketAddress) noexcept
 {
-	auto *connection = new Connection(GetEventLoop(), *this,
+	auto *connection = new Connection(GetEventLoop(),
 					  handler, std::move(new_fd));
 	connections.push_back(*connection);
 }
