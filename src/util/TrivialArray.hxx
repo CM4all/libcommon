@@ -164,10 +164,7 @@ public:
 		return data[i];
 	}
 
-#if !GCC_OLDER_THAN(5,0)
-	constexpr
-#endif
-	iterator begin() noexcept {
+	constexpr iterator begin() noexcept {
 		return data.begin();
 	}
 
@@ -175,10 +172,7 @@ public:
 		return data.begin();
 	}
 
-#if !GCC_OLDER_THAN(5,0)
-	constexpr
-#endif
-	iterator end() noexcept {
+	constexpr iterator end() noexcept {
 		return std::next(data.begin(), the_size);
 	}
 
@@ -205,10 +199,7 @@ public:
 	/**
 	 * Return address of start of data segment.
 	 */
-#if !GCC_OLDER_THAN(5,0)
-	constexpr
-#endif
-	T *raw() noexcept {
+	constexpr T *raw() noexcept {
 		return &data.front();
 	}
 
