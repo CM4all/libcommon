@@ -145,17 +145,11 @@ public:
 		list->clear_and_dispose(typename Item::Disposer());
 	}
 
-#if !GCC_OLDER_THAN(5,0)
-	constexpr
-#endif
-	reference front() noexcept {
+	constexpr reference front() noexcept {
 		return list->front().value;
 	}
 
-#if !GCC_OLDER_THAN(5,0)
-	constexpr
-#endif
-	reference back() noexcept {
+	constexpr reference back() noexcept {
 		return list->back().value;
 	}
 
@@ -227,24 +221,15 @@ public:
 					       Item, T,
 					       &Item::value>;
 
-#if !GCC_OLDER_THAN(5,0)
-	constexpr
-#endif
-	iterator begin() noexcept {
+	constexpr iterator begin() noexcept {
 		return list->begin();
 	}
 
-#if !GCC_OLDER_THAN(5,0)
-	constexpr
-#endif
-	iterator end() noexcept {
+	constexpr iterator end() noexcept {
 		return list->end();
 	}
 
-#if !GCC_OLDER_THAN(5,0)
-	constexpr
-#endif
-	iterator iterator_to(reference value) noexcept {
+	constexpr iterator iterator_to(reference value) noexcept {
 		return list->iterator_to(Item::Cast(value));
 	}
 
