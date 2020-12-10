@@ -267,6 +267,10 @@ ResourceLimits::Parse(const char *s)
 			s = endptr;
 
 			switch (*s) {
+			case 'T':
+				value <<= 10;
+				[[fallthrough]];
+
 			case 'G':
 				value <<= 10;
 				[[fallthrough]];
