@@ -269,15 +269,11 @@ ResourceLimits::Parse(const char *s)
 			switch (*s) {
 			case 'G':
 				value <<= 10;
-#if !GCC_OLDER_THAN(7,0)
 				[[fallthrough]];
-#endif
 
 			case 'M':
 				value <<= 10;
-#if !GCC_OLDER_THAN(7,0)
 				[[fallthrough]];
-#endif
 
 			case 'K':
 				value <<= 10;
