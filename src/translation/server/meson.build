@@ -25,6 +25,7 @@ translation_server = static_library(
   'Connection.cxx',
   'Listener.cxx',
   'Server.cxx',
+  'FunctionHandler.cxx',
   translation_server_sources,
   include_directories: inc,
   dependencies: [
