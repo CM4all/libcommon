@@ -136,12 +136,6 @@ public:
 		easy.SetRequestBody(data, size);
 	}
 
-	/**
-	 * CurlResponseHandler::OnData() shall throw this to pause the
-	 * stream.  Call Resume() to resume the transfer.
-	 */
-	struct Pause {};
-
 	void Resume() noexcept;
 
 	/**
