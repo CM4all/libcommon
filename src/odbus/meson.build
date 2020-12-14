@@ -3,6 +3,7 @@ libdbus = dependency('dbus-1')
 odbus = static_library(
   'odbus',
   'Error.cxx',
+  'FilterHelper.cxx',
   'Connection.cxx',
   'Message.cxx',
   'Watch.cxx',
