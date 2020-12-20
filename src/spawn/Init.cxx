@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,7 +32,9 @@
 
 #include "Init.hxx"
 #include "SeccompFilter.hxx"
+#include "system/CloseRange.hxx"
 #include "system/Error.hxx"
+#include "system/KernelVersion.hxx"
 #include "system/ProcessName.hxx"
 #include "system/CapabilityState.hxx"
 #include "system/LinuxFD.hxx"
@@ -48,14 +50,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <limits.h> // for UINT_MAX
 
 static sigset_t init_signal_mask;
 
 static void
 CloseAllFiles()
 {
+	/* use close_range() on Linux 5.8+ */
+	if (IsKernelVersionOrNewer({5,8}) &&
+	    sys_close_range(3, UINT_MAX, 0) == 0)
+		return;
+
 	auto *d = opendir("/proc/self/fd");
 	if (d != nullptr) {
+		/* we have a /proc: use that to enumerate open file
+		   descriptors and close each */
 		const int except = dirfd(d);
 		while (auto *e = readdir(d)) {
 			const char *name = e->d_name;
@@ -67,6 +77,7 @@ CloseAllFiles()
 
 		closedir(d);
 	} else {
+		/* no /proc: the brute force way */
 		for (int i = 3; i < 1024; ++i)
 			close(i);
 	}

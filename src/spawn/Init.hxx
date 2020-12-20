@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2017 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPAWN_INIT_HXX
-#define SPAWN_INIT_HXX
+#pragma once
 
 #include <sys/types.h>
 
@@ -77,5 +76,3 @@ SpawnInit(pid_t child_pid, bool remain);
  */
 pid_t
 UnshareForkSpawnInit();
-
-#endif
