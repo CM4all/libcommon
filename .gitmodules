@@ -1,0 +1,3 @@
+[submodule "boost/json"]
+	path = boost/json
+	url = git://github.com/boostorg/json

@@ -58,6 +58,7 @@ Each directory below ``src`` contains a sub-library:
 - ``io``: file I/O utilities
 - ``io/uring``: `liburing <https://github.com/axboe/liburing>`__ C++
   wrapper
+- ``json``: standalone ``boost::json``
 - ``net``: networking/socket utilities
 - ``event``: a non-blocking I/O event loop
 - ``lua``: `Lua <http://www.lua.org/>`__ C++ wrappers
