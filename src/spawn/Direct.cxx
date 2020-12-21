@@ -144,7 +144,7 @@ try {
 	if (stdout_fd < 0 || (stderr_fd < 0 && p.stderr_path == nullptr)) {
 		/* if no log destination was specified, log to the systemd
 		   journal */
-		/* note: this must be done before NamespaceOptions::Setup(),
+		/* note: this must be done before NamespaceOptions::Apply(),
 		   because inside the new root, we don't have access to
 		   /run/systemd/journal/stdout */
 		int journal_fd = sd_journal_stream_fd(p.args.front(), LOG_INFO, true);
@@ -172,7 +172,7 @@ try {
 			throw MakeErrno("Failed to unshare cgroup namespace");
 	}
 
-	p.ns.Setup(p.uid_gid);
+	p.ns.Apply(p.uid_gid);
 
 	if (!userns_setup_pipe_r.IsDefined())
 		/* if the userns_setup_pipe exists, then the parent

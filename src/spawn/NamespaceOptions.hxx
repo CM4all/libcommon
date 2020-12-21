@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2018 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -133,9 +133,12 @@ struct NamespaceOptions {
 	void ReassociateNetwork() const;
 
 	/**
+	 * Apply all options to the current process.  This assumes
+	 * that GetCloneFlags() has been applied already.
+	 *
 	 * Throws std::system_error on error.
 	 */
-	void Setup(const UidGid &uid_gid) const;
+	void Apply(const UidGid &uid_gid) const;
 
 	char *MakeId(char *p) const;
 

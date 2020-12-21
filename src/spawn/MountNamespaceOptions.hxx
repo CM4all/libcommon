@@ -134,9 +134,11 @@ struct MountNamespaceOptions {
 #endif
 
 	/**
+	 * Apply all options to the current process.
+	 *
 	 * Throws std::system_error on error.
 	 */
-	void Setup(const UidGid &uid_gid) const;
+	void Apply(const UidGid &uid_gid) const;
 
 	char *MakeId(char *p) const noexcept;
 

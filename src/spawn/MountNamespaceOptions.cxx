@@ -110,7 +110,7 @@ MountOrThrow(const char *source, const char *target,
 }
 
 void
-MountNamespaceOptions::Setup(const UidGid &uid_gid) const
+MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 {
 	if (!IsEnabled())
 		return;

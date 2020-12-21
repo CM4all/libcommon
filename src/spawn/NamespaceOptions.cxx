@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2019 Content Management AG
+ * Copyright 2007-2020 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -145,7 +145,7 @@ NamespaceOptions::ReassociateNetwork() const
 }
 
 void
-NamespaceOptions::Setup(const UidGid &uid_gid) const
+NamespaceOptions::Apply(const UidGid &uid_gid) const
 {
 	/* set up UID/GID mapping in the old /proc */
 	if (enable_user) {
@@ -161,7 +161,7 @@ NamespaceOptions::Setup(const UidGid &uid_gid) const
 	if (network_namespace != nullptr)
 		ReassociateNetwork();
 
-	mount.Setup(uid_gid);
+	mount.Apply(uid_gid);
 
 	if (hostname != nullptr &&
 	    sethostname(hostname, strlen(hostname)) < 0)
