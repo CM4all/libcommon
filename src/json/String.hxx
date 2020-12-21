@@ -38,6 +38,8 @@
 
 #include <string_view>
 
+namespace Json {
+
 gcc_pure
 static inline std::string_view
 GetString(const boost::json::value &json) noexcept
@@ -63,3 +65,5 @@ GetString(const boost::json::object &parent, std::string_view key) noexcept
 {
 	return GetString(parent.if_contains(key));
 }
+
+} // namespace Json
