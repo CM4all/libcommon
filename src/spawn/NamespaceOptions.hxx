@@ -115,6 +115,14 @@ struct NamespaceOptions {
 	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
 #endif
 
+	/**
+	 * Clear all network namespace options.
+	 */
+	void ClearNetwork() noexcept {
+		enable_network = false;
+		network_namespace = nullptr;
+	}
+
 	gcc_pure
 	int GetCloneFlags(int flags) const;
 
@@ -139,6 +147,17 @@ struct NamespaceOptions {
 	 * Throws std::system_error on error.
 	 */
 	void Apply(const UidGid &uid_gid) const;
+
+	/**
+	 * Apply only the network namespace options to the current
+	 * process.  This can be done prior to clone() and Apply() to
+	 * have those options in the parent process.  After that, you
+	 * can call ClearNetwork() to avoid doing it again in the
+	 * cloned child proces.
+	 *
+	 * Throws std::system_error on error.
+	 */
+	void ApplyNetwork() const;
 
 	char *MakeId(char *p) const;
 

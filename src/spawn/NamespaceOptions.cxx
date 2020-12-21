@@ -168,6 +168,17 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 		throw MakeErrno("sethostname() failed");
 }
 
+void
+NamespaceOptions::ApplyNetwork() const
+{
+	if (network_namespace != nullptr)
+		ReassociateNetwork();
+	else if (enable_network) {
+		if (unshare(CLONE_NEWNET) < 0)
+			throw MakeErrno("unshare(CLONE_NEWNET) failed");
+	}
+}
+
 char *
 NamespaceOptions::MakeId(char *p) const
 {
