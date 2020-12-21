@@ -78,7 +78,7 @@ Lookup(const boost::json::value &v, std::size_t i) noexcept
 template<typename J, typename K, typename... Args>
 gcc_pure
 static inline const auto *
-Lookup(const J &j, std::string_view key, Args&&... args)
+Lookup(const J &j, K &&key, Args&&... args)
 {
 	const auto *l = Lookup(j, std::forward<K>(key));
 	return l != nullptr
