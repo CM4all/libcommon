@@ -145,7 +145,6 @@ TranslateResponse::Clear()
 	subst_alt_syntax = false;
 #endif
 	defer = false;
-	previous = false;
 	transparent = false;
 #if TRANSLATION_ENABLE_HTTP
 	redirect_query_string = false;
@@ -182,7 +181,6 @@ TranslateResponse::Clear()
 	token_auth = nullptr;
 #endif
 #if TRANSLATION_ENABLE_SESSION
-	check = nullptr;
 	auth = nullptr;
 	auth_file = nullptr;
 	append_auth = nullptr;
@@ -355,7 +353,6 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	subst_alt_syntax = src.subst_alt_syntax;
 #endif
 	defer = src.defer;
-	previous = src.previous;
 	transparent = src.transparent;
 #if TRANSLATION_ENABLE_HTTP
 	redirect_query_string = src.redirect_query_string;
@@ -408,7 +405,6 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	token_auth = alloc.Dup(src.token_auth);
 #endif
 #if TRANSLATION_ENABLE_SESSION
-	check = alloc.Dup(src.check);
 	auth = alloc.Dup(src.auth);
 	want_full_uri = alloc.Dup(src.want_full_uri);
 	chain = alloc.Dup(src.chain);

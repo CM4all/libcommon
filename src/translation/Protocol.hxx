@@ -142,19 +142,12 @@ enum class TranslationCommand : uint16_t {
 	ERROR_DOCUMENT = 63,
 
 	/**
-	 * Response: causes beng-proxy to submit the same translation
-	 * request again, with this packet appended.  The current response
-	 * is remembered, to be used when the second response contains the
-	 * PREVIOUS packet.
-	 *
-	 * Request: repeated request after CHECK was received.  The server
-	 * may respond with PREVIOUS.
+	 * Obsolete.
 	 */
 	CHECK = 64,
 
 	/**
-	 * Tells beng-proxy to use the resource address of the previous
-	 * translation response.
+	 * Obsolete.
 	 */
 	PREVIOUS = 65,
 

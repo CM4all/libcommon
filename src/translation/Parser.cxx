@@ -2114,19 +2114,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::CHECK:
-#if TRANSLATION_ENABLE_SESSION
-		if (!response.check.IsNull())
-			throw std::runtime_error("duplicate CHECK packet");
-
-		response.check = payload;
-		return;
-#else
-		break;
-#endif
+		throw std::runtime_error("obsolete CHECK packet");
 
 	case TranslationCommand::PREVIOUS:
-		response.previous = true;
-		return;
+		throw std::runtime_error("obsolete PREVIOUS packet");
 
 	case TranslationCommand::WAS:
 #if TRANSLATION_ENABLE_RADDRESS
