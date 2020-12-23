@@ -145,6 +145,7 @@ TranslateResponse::Clear()
 	subst_alt_syntax = false;
 #endif
 	defer = false;
+	previous = false;
 	transparent = false;
 #if TRANSLATION_ENABLE_HTTP
 	redirect_query_string = false;
@@ -353,6 +354,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	subst_alt_syntax = src.subst_alt_syntax;
 #endif
 	defer = src.defer;
+	previous = src.previous;
 	transparent = src.transparent;
 #if TRANSLATION_ENABLE_HTTP
 	redirect_query_string = src.redirect_query_string;

@@ -368,6 +368,8 @@ struct TranslateResponse {
 
 	bool defer;
 
+	bool previous;
+
 	bool transparent;
 
 #if TRANSLATION_ENABLE_HTTP

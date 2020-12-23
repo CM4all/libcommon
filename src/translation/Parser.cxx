@@ -2117,7 +2117,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		throw std::runtime_error("obsolete CHECK packet");
 
 	case TranslationCommand::PREVIOUS:
-		throw std::runtime_error("obsolete PREVIOUS packet");
+		response.previous = true;
+		return;
 
 	case TranslationCommand::WAS:
 #if TRANSLATION_ENABLE_RADDRESS

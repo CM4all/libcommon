@@ -147,7 +147,8 @@ enum class TranslationCommand : uint16_t {
 	CHECK = 64,
 
 	/**
-	 * Obsolete.
+	 * Tells beng-proxy to use the resource address of the previous
+	 * translation response.
 	 */
 	PREVIOUS = 65,
 
