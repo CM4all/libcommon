@@ -130,12 +130,6 @@ struct ParamWrapper<const char *> {
 	}
 };
 
-/* this alias exists only to allow non-const char arrays to be used */
-template<>
-struct ParamWrapper<char *> : ParamWrapper<const char *> {
-	using ParamWrapper<const char *>::ParamWrapper;
-};
-
 template<>
 struct ParamWrapper<int> {
 	char buffer[16];
@@ -322,7 +316,7 @@ public:
 
 template<typename T>
 class ParamCollector<T> {
-	ParamWrapper<T> wrapper;
+	ParamWrapper<typename std::decay<T>::type> wrapper;
 
 public:
 	explicit ParamCollector(const T &t) noexcept
