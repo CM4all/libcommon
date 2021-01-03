@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 CM4all GmbH
+ * Copyright 2017-2021 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
