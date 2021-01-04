@@ -156,7 +156,7 @@ try {
 #endif
 
 	if (p.cgroup != nullptr)
-		p.cgroup->Apply(cgroup_state);
+		p.cgroup->Apply(cgroup_state, 0);
 
 	if (p.ns.enable_cgroup &&
 	    p.cgroup != nullptr && p.cgroup->IsDefined()) {

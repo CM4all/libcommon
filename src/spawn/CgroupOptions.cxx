@@ -107,7 +107,8 @@ MakeCgroup(const char *mount_base_path, const char *controller,
 static UniqueFileDescriptor
 MoveToNewCgroup(const char *mount_base_path, const char *controller,
 		const char *delegated_group, const char *sub_group,
-		const char *session_group)
+		const char *session_group,
+		std::string_view pid)
 {
 	auto fd = MakeCgroup(mount_base_path, controller,
 			     delegated_group, sub_group);
@@ -125,21 +126,25 @@ MoveToNewCgroup(const char *mount_base_path, const char *controller,
 		}
 
 		auto session_fd = OpenPath(fd, session_group);
-		WriteFile(session_fd, "cgroup.procs", "0");
+		WriteFile(session_fd, "cgroup.procs", pid);
 	} else
-		WriteFile(fd, "cgroup.procs", "0");
+		WriteFile(fd, "cgroup.procs", pid);
 
 	return fd;
 }
 
 void
-CgroupOptions::Apply(const CgroupState &state) const
+CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 {
 	if (name == nullptr)
 		return;
 
 	if (!state.IsEnabled())
 		throw std::runtime_error("Control groups are disabled");
+
+	char pid_buffer[32];
+	const std::string_view pid(pid_buffer,
+				   sprintf(pid_buffer, "%u", _pid));
 
 	const auto mount_base_path = "/sys/fs/cgroup";
 
@@ -148,7 +153,7 @@ CgroupOptions::Apply(const CgroupState &state) const
 		fds[mount_point] =
 			MoveToNewCgroup(mount_base_path, mount_point.c_str(),
 					state.group_path.c_str(), name,
-					session);
+					session, pid);
 
 	for (const auto &s : set) {
 		const char *dot = strchr(s.name, '.');

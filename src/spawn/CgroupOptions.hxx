@@ -100,7 +100,7 @@ struct CgroupOptions {
 	/**
 	 * Throws std::runtime_error on error.
 	 */
-	void Apply(const CgroupState &state) const;
+	void Apply(const CgroupState &state, unsigned pid) const;
 
 	char *MakeId(char *p) const noexcept;
 };
