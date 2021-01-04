@@ -73,7 +73,7 @@ CgroupOptions::Set(AllocatorPtr alloc,
 }
 
 static void
-WriteFile(FileDescriptor fd, const char *path, const char *data)
+WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 {
 	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
 		throw FormatErrno("write('%s') failed", path);

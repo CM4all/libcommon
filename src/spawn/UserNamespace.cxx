@@ -45,7 +45,7 @@ DenySetGroups()
 }
 
 static void
-WriteFileOrThrow(const char *path, const char *data)
+WriteFileOrThrow(const char *path, std::string_view data)
 {
 	if (TryWriteExistingFile(path, data) == WriteFileResult::ERROR)
 		throw FormatErrno("write('%s') failed", path);

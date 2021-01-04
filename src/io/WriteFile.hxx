@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2021 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,8 @@
 #ifndef WRITE_FILE_HXX
 #define WRITE_FILE_HXX
 
+#include <string_view>
+
 class FileDescriptor;
 
 enum class WriteFileResult {
@@ -56,7 +58,7 @@ enum class WriteFileResult {
  * useful to write "special" files like the ones in /proc.
  */
 WriteFileResult
-TryWriteExistingFile(const char *path, const char *value) noexcept;
+TryWriteExistingFile(const char *path, std::string_view value) noexcept;
 
 #ifdef __linux__
 
@@ -67,7 +69,7 @@ TryWriteExistingFile(const char *path, const char *value) noexcept;
  */
 WriteFileResult
 TryWriteExistingFile(FileDescriptor directory, const char *path,
-		     const char *value) noexcept;
+		     std::string_view value) noexcept;
 
 #endif
 
