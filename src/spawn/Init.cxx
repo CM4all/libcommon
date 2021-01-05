@@ -162,8 +162,7 @@ LimitSysCalls(FileDescriptor read_fd, pid_t kill_pid)
 int
 SpawnInit(pid_t child_pid, bool remain)
 {
-	if (geteuid() == 0)
-		DropCapabilities();
+	DropCapabilities();
 
 	auto init_signal_fd = CreateSignalFD(init_signal_mask, false);
 
