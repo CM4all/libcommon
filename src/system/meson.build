@@ -13,7 +13,10 @@ system_dependencies = [
 
 if get_variable('libcommon_enable_libcap', true)
   libcap = dependency('libcap')
-  system_sources += 'CapabilityState.cxx'
+  system_sources += [
+    'CapabilityState.cxx',
+    'CapabilityGlue.cxx',
+  ]
   system_dependencies += libcap
 endif
 

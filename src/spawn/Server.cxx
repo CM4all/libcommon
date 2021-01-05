@@ -49,6 +49,7 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "system/CapabilityGlue.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"
@@ -247,7 +248,7 @@ class SpawnServerProcess {
 						      boost::intrusive::constant_time_size<false>>;
 	ConnectionList connections;
 
-	const bool is_sys_admin = geteuid() == 0;
+	const bool is_sys_admin = ::IsSysAdmin();
 
 public:
 	SpawnServerProcess(const SpawnConfig &_config,
