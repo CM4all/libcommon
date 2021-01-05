@@ -122,7 +122,7 @@ gcc_noreturn
 static void
 Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_create_pipe_w,
-     UniqueFileDescriptor &&userns_setup_pipe_r,
+     UniqueFileDescriptor &&wait_pipe_r,
      SocketDescriptor return_stderr,
      const CgroupState &cgroup_state)
 try {
@@ -174,9 +174,9 @@ try {
 
 	p.ns.Apply(p.uid_gid);
 
-	if (!userns_setup_pipe_r.IsDefined())
-		/* if the userns_setup_pipe exists, then the parent
-		   process will apply the resource limits */
+	if (!wait_pipe_r.IsDefined())
+		/* if the wait_pipe exists, then the parent process
+		   will apply the resource limits */
 		p.rlimits.Apply(0);
 
 	if (p.chroot != nullptr && chroot(p.chroot) < 0) {
@@ -192,7 +192,7 @@ try {
 		   namespace, because the user namespace drops
 		   capabilities on the PID namespace) */
 
-		assert(userns_setup_pipe_r.IsDefined());
+		assert(wait_pipe_r.IsDefined());
 
 		if (unshare(CLONE_NEWUSER) < 0)
 			throw MakeErrno("unshare(CLONE_NEWUSER) failed");
@@ -210,8 +210,8 @@ try {
 		/* expect one byte to indicate success, and then the pipe will
 		   be closed by the parent */
 		char buffer;
-		if (userns_setup_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
-		    userns_setup_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
+		if (wait_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
+		    wait_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
 			_exit(EXIT_FAILURE);
 	}
 
