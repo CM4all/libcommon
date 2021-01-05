@@ -247,6 +247,8 @@ class SpawnServerProcess {
 						      boost::intrusive::constant_time_size<false>>;
 	ConnectionList connections;
 
+	const bool is_sys_admin = geteuid() == 0;
+
 public:
 	SpawnServerProcess(const SpawnConfig &_config,
 			   const CgroupState &_cgroup_state,
@@ -271,6 +273,10 @@ public:
 
 	const CgroupState &GetCgroupState() const noexcept {
 		return cgroup_state;
+	}
+
+	bool IsSysAdmin() const noexcept {
+		return is_sys_admin;
 	}
 
 	EventLoop &GetEventLoop() noexcept {
@@ -424,6 +430,7 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 	try {
 		pid = SpawnChildProcess(std::move(p),
 					process.GetCgroupState(),
+					process.IsSysAdmin(),
 					return_stderr);
 	} catch (...) {
 		logger(1, "Failed to spawn child process: ",

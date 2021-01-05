@@ -50,6 +50,7 @@ LocalSpawnService::SpawnChildProcess(const char *name,
 		params.uid_gid = config.default_uid_gid;
 
 	pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState(),
+					false, // TODO?
 					return_stderr);
 	if (pid < 0)
 		throw MakeErrno("clone() failed");

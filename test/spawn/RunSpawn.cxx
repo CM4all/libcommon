@@ -153,6 +153,7 @@ try {
 		: CgroupState();
 
 	const auto pid = SpawnChildProcess(std::move(p), cgroup_state,
+					   geteuid() == 0,
 					   SocketDescriptor::Undefined());
 
 	int status;

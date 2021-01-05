@@ -391,6 +391,7 @@ spawn_fn(void *_ctx)
 pid_t
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
+		  bool is_sys_admin,
 		  SocketDescriptor return_stderr)
 {
 	int clone_flags = SIGCHLD;
@@ -419,7 +420,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			throw MakeErrno("setns(CLONE_NEWPID) failed");
 	}
 
-	if (ctx.params.ns.enable_user && geteuid() == 0) {
+	if (ctx.params.ns.enable_user && is_sys_admin) {
 		/* from inside the new user namespace, we cannot
 		   reassociate with a new network namespace or mount
 		   /proc of a reassociated PID namespace, because at
