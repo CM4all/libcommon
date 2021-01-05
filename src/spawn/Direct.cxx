@@ -204,7 +204,9 @@ try {
 		static constexpr char zero = 0;
 		userns_create_pipe_w.Write(&zero, sizeof(zero));
 		userns_create_pipe_w.Close();
+	}
 
+	if (wait_pipe_r.IsDefined()) {
 		/* wait for the parent to set us up */
 
 		/* expect one byte to indicate success, and then the pipe will
