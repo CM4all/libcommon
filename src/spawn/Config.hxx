@@ -64,6 +64,11 @@ struct SpawnConfig {
 	std::string systemd_slice;
 #endif
 
+	/**
+	 * Run the spawner itself as this user.
+	 */
+	UidGid spawner_uid_gid;
+
 	UidGid default_uid_gid;
 
 	/**

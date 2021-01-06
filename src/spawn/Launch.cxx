@@ -98,6 +98,13 @@ RunSpawnServer2(void *p)
 		mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV, nullptr);
 	}
 
+	try {
+		ctx.config.spawner_uid_gid.Apply();
+	} catch (...) {
+		PrintException(std::current_exception());
+		exit(EXIT_FAILURE);
+	}
+
 	/* ignore all signals which may stop us; shut down only when all
 	   sockets are closed */
 	signal(SIGINT, SIG_IGN);
