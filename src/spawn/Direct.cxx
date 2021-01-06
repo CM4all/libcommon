@@ -446,7 +446,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		ctx.params.ns.enable_user = false;
 	}
 
-	char stack[HaveAddressSanitizer() ? 32768 : 8192];
+	char stack[HaveAddressSanitizer() ? 32768 : 16384];
 	long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags, &ctx);
 	if (pid < 0)
 		throw MakeErrno("clone() failed");
