@@ -160,7 +160,10 @@ CreateSystemdScope(const char *name, const char *description,
 
 	ODBus::Error error;
 
-	auto connection = ODBus::Connection::GetSystem();
+	/* use a private DBus connection and auto-close it, because
+	   the spawner will never again need it */
+	auto connection = ODBus::Connection::GetSystemPrivate();
+	AtScopeExit(&connection) { connection.Close(); };
 
 	const char *match = "type='signal',"
 		"sender='org.freedesktop.systemd1',"
