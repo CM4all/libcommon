@@ -1055,6 +1055,11 @@ enum class TranslationCommand : uint16_t {
 	 * Generate a response with a tiny (one-pixel GIF) image.
 	 */
 	TINY_IMAGE = 223,
+
+	/**
+	 * All sessions with the given identifier are merged.
+	 */
+	ATTACH_SESSION = 224,
 };
 
 struct TranslationHeader {

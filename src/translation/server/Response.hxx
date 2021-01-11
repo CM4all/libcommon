@@ -420,6 +420,12 @@ public:
 		return Packet(TranslationCommand::SESSION, payload);
 	}
 
+	template<typename... Types>
+	auto &AttachSession(Types... value) noexcept {
+		return StringPacket(TranslationCommand::ATTACH_SESSION,
+				    value...);
+	}
+
 	auto &Pool(std::string_view name) noexcept {
 		return Packet(TranslationCommand::POOL, name);
 	}

@@ -174,6 +174,7 @@ TranslateResponse::Clear()
 	realm_from_auth_base = false;
 
 	session = nullptr;
+	attach_session = nullptr;
 #endif
 	pool = nullptr;
 #if TRANSLATION_ENABLE_HTTP
@@ -398,6 +399,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = src.realm_from_auth_base;
 	session = nullptr;
+	attach_session = nullptr;
 #endif
 
 	pool = alloc.CheckDup(src.pool);

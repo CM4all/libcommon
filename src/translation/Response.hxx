@@ -143,6 +143,7 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_SESSION
 	ConstBuffer<void> session;
+	ConstBuffer<void> attach_session;
 #endif
 
 	const char *pool;

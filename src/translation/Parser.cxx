@@ -3560,6 +3560,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::ATTACH_SESSION:
+#if TRANSLATION_ENABLE_SESSION
+		if (payload.empty())
+			throw std::runtime_error("malformed ATTACH_SESSION packet");
+
+		if (!response.attach_session.IsNull())
+			throw std::runtime_error("duplicate ATTACH_SESSION packet");
+
+		response.attach_session = payload;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
