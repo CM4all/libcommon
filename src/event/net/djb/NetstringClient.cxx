@@ -88,7 +88,7 @@ try {
 			break;
 
 		case MultiWriteBuffer::Result::FINISHED:
-			event.Cancel();
+			event.ReleaseSocket();
 			event.Open(SocketDescriptor::FromFileDescriptor(in_fd));
 			event.ScheduleRead();
 			timeout_event.Schedule(recv_timeout);
