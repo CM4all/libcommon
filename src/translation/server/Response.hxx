@@ -440,6 +440,11 @@ public:
 	}
 
 	template<typename P>
+	auto &Check(P payload) noexcept {
+		return Packet(TranslationCommand::CHECK, payload);
+	}
+
+	template<typename P>
 	auto &Auth(P payload) noexcept {
 		return Packet(TranslationCommand::AUTH, payload);
 	}

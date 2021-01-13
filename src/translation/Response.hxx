@@ -172,6 +172,12 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_SESSION
 	/**
+	 * The payload of the CHECK packet.  If ConstBuffer::IsNull(),
+	 * then no CHECK packet was received.
+	 */
+	ConstBuffer<void> check;
+
+	/**
 	 * The payload of the AUTH packet.  If ConstBuffer::IsNull(), then
 	 * no AUTH packet was received.
 	 */
