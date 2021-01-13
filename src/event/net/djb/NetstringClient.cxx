@@ -50,10 +50,12 @@ NetstringClient::~NetstringClient() noexcept
 	if (out_fd.IsDefined() || in_fd.IsDefined())
 		event.Cancel();
 
+	const bool close_in_fd = in_fd.IsDefined() && in_fd != out_fd;
+
 	if (out_fd.IsDefined())
 		out_fd.Close();
 
-	if (in_fd.IsDefined() && in_fd != out_fd)
+	if (close_in_fd)
 		in_fd.Close();
 }
 
