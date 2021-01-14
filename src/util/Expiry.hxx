@@ -96,6 +96,10 @@ public:
 		return value == other.value;
 	}
 
+	constexpr bool operator!=(Expiry other) const noexcept {
+		return value != other.value;
+	}
+
 	constexpr bool operator<(Expiry other) const noexcept {
 		return value < other.value;
 	}
