@@ -96,6 +96,18 @@ public:
 		return *this;
 	}
 
+	BasicAllocatedString &operator=(std::string_view src) noexcept {
+		delete[] std::exchange(value, nullptr);
+		value = Duplicate(src);
+		return *this;
+	}
+
+	BasicAllocatedString &operator=(const char *src) noexcept {
+		delete[] std::exchange(value, nullptr);
+		value = src != nullptr ? Duplicate(src) : nullptr;
+		return *this;
+	}
+
 	constexpr bool operator==(std::nullptr_t) const noexcept {
 		return value == nullptr;
 	}
@@ -157,6 +169,8 @@ public:
 	AllocatedString() noexcept = default;
 	AllocatedString(BasicAllocatedString<value_type> &&src) noexcept
 		:BasicAllocatedString(std::move(src)) {}
+
+	using BasicAllocatedString::operator=;
 };
 
 #endif
