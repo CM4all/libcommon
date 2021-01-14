@@ -75,10 +75,6 @@ public:
 		return BasicAllocatedString(value);
 	}
 
-	static BasicAllocatedString Null() noexcept {
-		return nullptr;
-	}
-
 	static BasicAllocatedString Empty() {
 		auto p = new value_type[1];
 		p[0] = SENTINEL;
