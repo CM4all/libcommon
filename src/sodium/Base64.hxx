@@ -41,7 +41,7 @@
 #include <string_view>
 
 template<typename T> struct ConstBuffer;
-template<typename T> class AllocatedString;
+class AllocatedString;
 template<typename T> class AllocatedArray;
 
 template<std::size_t src_size, int variant>
@@ -57,11 +57,11 @@ FixedBase64(const void *src) noexcept
 }
 
 gcc_pure
-AllocatedString<char>
+AllocatedString
 UrlSafeBase64(ConstBuffer<void> src) noexcept;
 
 gcc_pure
-AllocatedString<char>
+AllocatedString
 UrlSafeBase64(std::string_view src) noexcept;
 
 /**

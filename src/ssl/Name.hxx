@@ -33,20 +33,20 @@
 #ifndef SSL_NAME_HXX
 #define SSL_NAME_HXX
 
-#include "util/AllocatedString.hxx"
-
 #include <openssl/ossl_typ.h>
 
-AllocatedString<>
+class AllocatedString;
+
+AllocatedString
 ToString(X509_NAME *name);
 
-AllocatedString<>
+AllocatedString
 NidToString(X509_NAME &name, int nid);
 
-AllocatedString<>
+AllocatedString
 GetCommonName(X509 &cert);
 
-AllocatedString<>
+AllocatedString
 GetIssuerCommonName(X509 &cert);
 
 #endif

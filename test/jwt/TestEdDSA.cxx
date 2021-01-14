@@ -32,6 +32,7 @@
 
 #include "jwt/EdDSA.hxx"
 #include "util/AllocatedArray.hxx"
+#include "util/AllocatedString.hxx"
 #include "util/HexFormat.h"
 #include "util/StringBuffer.hxx"
 

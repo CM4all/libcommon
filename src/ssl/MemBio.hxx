@@ -42,7 +42,7 @@
  * memory as #AllocatedString instance.
  */
 template<typename W>
-static inline AllocatedString<>
+static inline AllocatedString
 BioWriterToString(W &&writer)
 {
 	UniqueBIO bio(BIO_new(BIO_s_mem()));
@@ -53,7 +53,7 @@ BioWriterToString(W &&writer)
 
 	char *data;
 	long length = BIO_get_mem_data(bio.get(), &data);
-	return AllocatedString<>::Duplicate({data, std::size_t(length)});
+	return AllocatedString::Duplicate({data, std::size_t(length)});
 }
 
 #endif

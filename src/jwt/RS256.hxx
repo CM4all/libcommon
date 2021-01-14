@@ -32,11 +32,11 @@
 
 #pragma once
 
-#include "util/AllocatedString.hxx"
-
 #include <openssl/ossl_typ.h>
 
 #include <string_view>
+
+class AllocatedString;
 
 namespace JWT {
 
@@ -49,7 +49,7 @@ namespace JWT {
  * @param payload_b64 the UrlSafeBase64 of the payload
  * @return UrlSafeBase64 of the RSA signature
  */
-AllocatedString<>
+AllocatedString
 SignRS256(EVP_PKEY &key, std::string_view header_b64,
 	  std::string_view payload_b64);
 

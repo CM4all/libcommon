@@ -35,6 +35,7 @@
 #include "sodium/SHA256.hxx"
 #include "ssl/Error.hxx"
 #include "ssl/Unique.hxx"
+#include "util/AllocatedString.hxx"
 #include "util/StringView.hxx"
 
 namespace JWT {
@@ -48,7 +49,7 @@ namespace JWT {
  * UrlSafeBase64(header) "." UrlSafeBase64(payload)
  * @return UrlSafeBase64 of the RSA signature
  */
-static AllocatedString<>
+static AllocatedString
 SignRS256(EVP_PKEY &key, const SHA256Digest &digest)
 {
 	UniqueEVP_PKEY_CTX ctx(EVP_PKEY_CTX_new(&key, nullptr));
@@ -82,7 +83,7 @@ SignRS256(EVP_PKEY &key, const SHA256Digest &digest)
 	return UrlSafeBase64(ConstBuffer<void>(buffer.get(), length));
 }
 
-AllocatedString<>
+AllocatedString
 SignRS256(EVP_PKEY &key, std::string_view protected_header_b64,
 	  std::string_view payload_b64)
 {

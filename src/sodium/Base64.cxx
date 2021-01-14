@@ -36,7 +36,7 @@
 #include "util/ConstBuffer.hxx"
 
 gcc_pure
-static AllocatedString<>
+static AllocatedString
 SodiumBase64(ConstBuffer<void> src, int variant) noexcept
 {
 	size_t size = sodium_base64_ENCODED_LEN(src.size, variant);
@@ -44,16 +44,16 @@ SodiumBase64(ConstBuffer<void> src, int variant) noexcept
 	sodium_bin2base64(buffer, size,
 			  (const unsigned char *)src.data, src.size,
 			  variant);
-	return AllocatedString<>::Donate(buffer);
+	return AllocatedString::Donate(buffer);
 }
 
-AllocatedString<>
+AllocatedString
 UrlSafeBase64(ConstBuffer<void> src) noexcept
 {
 	return SodiumBase64(src, sodium_base64_VARIANT_URLSAFE_NO_PADDING);
 }
 
-AllocatedString<>
+AllocatedString
 UrlSafeBase64(std::string_view src) noexcept
 {
 	return UrlSafeBase64(ConstBuffer<void>{src.data(), src.size()});

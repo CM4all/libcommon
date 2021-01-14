@@ -33,7 +33,7 @@
 #include "Time.hxx"
 #include "MemBio.hxx"
 
-AllocatedString<>
+AllocatedString
 FormatTime(ASN1_TIME &t)
 {
 	return BioWriterToString([&t](BIO &bio){
@@ -41,7 +41,7 @@ FormatTime(ASN1_TIME &t)
 		});
 }
 
-AllocatedString<>
+AllocatedString
 FormatTime(ASN1_TIME *t)
 {
 	if (t == nullptr)

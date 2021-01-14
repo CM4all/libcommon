@@ -33,14 +33,14 @@
 #ifndef SSL_TIME_HXX
 #define SSL_TIME_HXX
 
-#include "util/AllocatedString.hxx"
-
 #include <openssl/ossl_typ.h>
 
-AllocatedString<>
+class AllocatedString;
+
+AllocatedString
 FormatTime(ASN1_TIME &t);
 
-AllocatedString<>
+AllocatedString
 FormatTime(ASN1_TIME *t);
 
 #endif

@@ -35,7 +35,7 @@
 
 #include <openssl/err.h>
 
-static AllocatedString<>
+static AllocatedString
 ErrToString()
 {
 	return BioWriterToString([](BIO &bio){

@@ -33,12 +33,12 @@
 #pragma once
 
 #include "util/Compiler.h"
-#include "util/AllocatedString.hxx"
 
 #include <array>
 #include <cstddef> // for std::byte
 #include <string_view>
 
+class AllocatedString;
 template<typename T> class AllocatedArray;
 
 namespace JWT {
@@ -57,7 +57,7 @@ using Ed25519PublicKey = std::array<std::byte, 32>;
  * @param payload_b64 the UrlSafeBase64 of the payload
  * @return UrlSafeBase64 of the EdDSA signature
  */
-AllocatedString<>
+AllocatedString
 SignEdDSA(const Ed25519SecretKey &key, std::string_view header_b64,
 	  std::string_view payload_b64) noexcept;
 

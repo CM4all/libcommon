@@ -34,7 +34,7 @@
 #include "MemBio.hxx"
 #include "Unique.hxx"
 
-AllocatedString<>
+AllocatedString
 ToString(X509_NAME *name)
 {
 	if (name == nullptr)
@@ -46,7 +46,7 @@ ToString(X509_NAME *name)
 		});
 }
 
-AllocatedString<>
+AllocatedString
 NidToString(X509_NAME &name, int nid)
 {
 	char buffer[1024];
@@ -54,16 +54,16 @@ NidToString(X509_NAME &name, int nid)
 	if (len < 0)
 		return nullptr;
 
-	return AllocatedString<>::Duplicate({buffer, std::size_t(len)});
+	return AllocatedString::Duplicate({buffer, std::size_t(len)});
 }
 
-static AllocatedString<>
+static AllocatedString
 GetCommonName(X509_NAME &name)
 {
 	return NidToString(name, NID_commonName);
 }
 
-AllocatedString<>
+AllocatedString
 GetCommonName(X509 &cert)
 {
 	X509_NAME *subject = X509_get_subject_name(&cert);
@@ -72,7 +72,7 @@ GetCommonName(X509 &cert)
 		: nullptr;
 }
 
-AllocatedString<>
+AllocatedString
 GetIssuerCommonName(X509 &cert)
 {
 	X509_NAME *subject = X509_get_issuer_name(&cert);

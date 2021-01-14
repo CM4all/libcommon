@@ -33,6 +33,7 @@
 #include "EdDSA.hxx"
 #include "sodium/Base64.hxx"
 #include "util/AllocatedArray.hxx"
+#include "util/AllocatedString.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/StringView.hxx"
 
@@ -44,7 +45,7 @@ namespace JWT {
 
 using Ed25519Signature = std::array<std::byte, crypto_sign_BYTES>;
 
-static AllocatedString<>
+static AllocatedString
 SignEdDSA(const Ed25519SecretKey &key, ConstBuffer<void> _input) noexcept
 {
 	const auto input = ConstBuffer<unsigned char>::FromVoid(_input);
@@ -58,7 +59,7 @@ SignEdDSA(const Ed25519SecretKey &key, ConstBuffer<void> _input) noexcept
 					       signature.size()));
 }
 
-AllocatedString<>
+AllocatedString
 SignEdDSA(const Ed25519SecretKey &key, std::string_view header_b64,
 	  std::string_view payload_b64) noexcept
 {
