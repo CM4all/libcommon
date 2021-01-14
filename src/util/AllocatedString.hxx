@@ -65,6 +65,9 @@ public:
 	BasicAllocatedString(std::nullptr_t n) noexcept
 		:value(n) {}
 
+	explicit BasicAllocatedString(string_view src) noexcept
+		:value(Duplicate(src)) {}
+
 	BasicAllocatedString(BasicAllocatedString &&src) noexcept
 		:value(src.Steal()) {}
 
@@ -79,12 +82,6 @@ public:
 	static BasicAllocatedString Empty() {
 		auto p = new value_type[1];
 		p[0] = SENTINEL;
-		return Donate(p);
-	}
-
-	static BasicAllocatedString Duplicate(string_view src) {
-		auto p = new value_type[src.size() + 1];
-		*std::copy_n(src.data(), src.size(), p) = SENTINEL;
 		return Donate(p);
 	}
 
@@ -135,6 +132,13 @@ public:
 
 	BasicAllocatedString Clone() const {
 		return Duplicate(*this);
+	}
+
+private:
+	static pointer Duplicate(string_view src) {
+		auto p = new value_type[src.size() + 1];
+		*std::copy_n(src.data(), src.size(), p) = SENTINEL;
+		return p;
 	}
 };
 

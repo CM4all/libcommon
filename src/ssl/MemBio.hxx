@@ -53,7 +53,8 @@ BioWriterToString(W &&writer)
 
 	char *data;
 	long length = BIO_get_mem_data(bio.get(), &data);
-	return AllocatedString::Duplicate({data, std::size_t(length)});
+	const std::string_view src(data, length);
+	return AllocatedString(src);
 }
 
 #endif
