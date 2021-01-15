@@ -31,9 +31,32 @@
  */
 
 #include "uri/Verify.hxx"
-#include "util/Compiler.h"
+#include "util/StringView.hxx"
 
 #include <gtest/gtest.h>
+
+TEST(UriVerifyTest, VerifyDomainName)
+{
+	ASSERT_TRUE(VerifyDomainName("a"));
+	ASSERT_TRUE(VerifyDomainName("A"));
+	ASSERT_TRUE(VerifyDomainName("a-b"));
+	ASSERT_TRUE(VerifyDomainName("a.b"));
+	ASSERT_TRUE(VerifyDomainName("a.b.c.d.efghi.jkl"));
+	ASSERT_FALSE(VerifyDomainName(""));
+	ASSERT_FALSE(VerifyDomainName("-"));
+	ASSERT_FALSE(VerifyDomainName("-b"));
+	ASSERT_FALSE(VerifyDomainName("a-"));
+	ASSERT_FALSE(VerifyDomainName("a:"));
+	ASSERT_FALSE(VerifyDomainName("a:80"));
+	ASSERT_TRUE(VerifyDomainName("a.a-b"));
+	ASSERT_FALSE(VerifyDomainName("a.-b"));
+	ASSERT_FALSE(VerifyDomainName("a..b"));
+	ASSERT_FALSE(VerifyDomainName("a."));
+	ASSERT_FALSE(VerifyDomainName(".b"));
+	ASSERT_TRUE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890"));
+	ASSERT_TRUE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890.abcdefghijklmnopqrstuvwxyz"));
+	ASSERT_FALSE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890a"));
+}
 
 TEST(UriVerifyTest, Paranoid)
 {

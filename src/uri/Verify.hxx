@@ -41,6 +41,14 @@
 struct StringView;
 
 /**
+ * Is this a valid domain name (i.e. host name) according to RFC 1034
+ * 3.5?
+ */
+gcc_pure
+bool
+VerifyDomainName(StringView name) noexcept;
+
+/**
  * Verifies one path segment of an URI according to RFC 2396.
  */
 gcc_pure

@@ -32,7 +32,59 @@
 
 #include "Verify.hxx"
 #include "Chars.hxx"
+#include "util/CharUtil.hxx"
+#include "util/IterableSplitString.hxx"
 #include "util/StringView.hxx"
+
+template <typename F>
+bool
+IsNonEmptyListOf(std::string_view s, char separator, F &&f) noexcept
+{
+	if (s.empty())
+	    return false;
+
+	for (const std::string_view i : IterableSplitString(s, separator))
+		if (!f(i))
+			return false;
+
+	return true;
+}
+
+static constexpr bool
+IsAlphaNumericDashASCII(char ch) noexcept
+{
+    return IsAlphaNumericASCII(ch) || ch == '-';
+}
+
+/**
+ * Is this a valid domain label (i.e. host name segment) according to
+ * RFC 1034 3.5?
+ */
+static constexpr bool
+VerifyDomainLabel(StringView s) noexcept
+{
+	if (s.empty() || s.size > 63)
+		return false;
+
+	if (!IsAlphaNumericASCII(s.front()))
+		return false;
+
+	s.pop_front();
+	if (s.empty())
+		return true;
+
+	if (!IsAlphaNumericASCII(s.back()))
+		return false;
+
+	s.pop_back();
+	return std::all_of(s.begin(), s.end(), IsAlphaNumericDashASCII);
+}
+
+bool
+VerifyDomainName(StringView s) noexcept
+{
+    return IsNonEmptyListOf(s, '.', VerifyDomainLabel);
+}
 
 bool
 uri_segment_verify(StringView segment) noexcept
