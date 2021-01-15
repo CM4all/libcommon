@@ -36,6 +36,8 @@
 #include "util/IterableSplitString.hxx"
 #include "util/StringView.hxx"
 
+#include <algorithm>
+
 template <typename F>
 bool
 IsNonEmptyListOf(std::string_view s, char separator, F &&f) noexcept
