@@ -62,7 +62,10 @@ IsAlphaNumericDashASCII(char ch) noexcept
  * Is this a valid domain label (i.e. host name segment) according to
  * RFC 1034 3.5?
  */
-static constexpr bool
+#if !GCC_OLDER_THAN(10,0)
+constexpr
+#endif
+static bool
 VerifyDomainLabel(StringView s) noexcept
 {
 	/* RFC 1035 2.3.4: domain labels are limited to 63 octets */
