@@ -89,6 +89,75 @@ VerifyDomainName(StringView s) noexcept
 	return s.size <= 255 && IsNonEmptyListOf(s, '.', VerifyDomainLabel);
 }
 
+gcc_pure
+static bool
+VerifyPort(StringView s) noexcept
+{
+	return !s.empty() && s.size <= 5 &&
+		std::all_of(s.begin(), s.end(), IsDigitASCII);
+}
+
+gcc_pure
+static bool
+VerifyIPv6Segment(StringView s) noexcept
+{
+	return s.size <= 4 && std::all_of(s.begin(), s.end(), IsHexDigit);
+}
+
+gcc_pure
+static bool
+VerifyIPv6(StringView host) noexcept
+{
+	return host.size < 40 &&
+		IsNonEmptyListOf(host, ':', VerifyIPv6Segment);
+}
+
+gcc_pure
+static bool
+VerifyUriHost(StringView host) noexcept
+{
+	if (host.Find(':'))
+		return VerifyIPv6(host);
+
+	return VerifyDomainName(host);
+}
+
+bool
+VerifyUriHostPort(StringView host_port) noexcept
+{
+	if (host_port.empty())
+		return false;
+
+	if (host_port.front() == '[') {
+		auto [host, port] = host_port.substr(1).Split(']');
+		if (port == nullptr)
+			/* syntax error: the closing bracket was not
+			   found */
+			return false;
+
+		if (!port.empty()) {
+			if (port.front() != ':')
+				return false;
+
+			port.pop_front();
+			if (!VerifyPort(port))
+				return false;
+		}
+
+		return VerifyUriHost(host);
+	} else {
+		auto [host, port] = host_port.SplitLast(':');
+		if (host.Find(':') != nullptr)
+			/* more than one colon: assume this is a
+			   numeric IPv6 address (without a port
+			   specification) */
+			return VerifyIPv6(host_port);
+
+		return VerifyUriHost(host) &&
+			(port == nullptr || VerifyPort(port));
+	}
+}
+
 bool
 uri_segment_verify(StringView segment) noexcept
 {

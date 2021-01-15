@@ -49,6 +49,14 @@ bool
 VerifyDomainName(StringView name) noexcept;
 
 /**
+ * Is this a valid "host:port" string (or "Host:" request header)
+ * according to RFC 2616 3.2.2 / 14.23?
+ */
+gcc_pure
+bool
+VerifyUriHostPort(StringView host_port) noexcept;
+
+/**
  * Verifies one path segment of an URI according to RFC 2396.
  */
 gcc_pure

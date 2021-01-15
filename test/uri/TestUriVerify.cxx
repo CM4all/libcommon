@@ -58,6 +58,37 @@ TEST(UriVerifyTest, VerifyDomainName)
 	ASSERT_FALSE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890a"));
 }
 
+TEST(UriVerifyTest, VerifyUriHostPort)
+{
+	ASSERT_FALSE(VerifyUriHostPort(""));
+	ASSERT_FALSE(VerifyUriHostPort(":80"));
+	ASSERT_TRUE(VerifyUriHostPort("a"));
+	ASSERT_TRUE(VerifyUriHostPort("a.b"));
+	ASSERT_TRUE(VerifyUriHostPort("a.b:8080"));
+	ASSERT_FALSE(VerifyUriHostPort("a.b:8080:1"));
+	ASSERT_TRUE(VerifyUriHostPort("localhost"));
+	ASSERT_TRUE(VerifyUriHostPort("localhost:80"));
+
+	/* IPv4 */
+	ASSERT_TRUE(VerifyUriHostPort("1.2.3.4:8080"));
+	ASSERT_TRUE(VerifyUriHostPort("1.2.3.4:65535"));
+	ASSERT_FALSE(VerifyUriHostPort("1.2.3.4:123456"));
+	ASSERT_FALSE(VerifyUriHostPort("1.2.3.4:a"));
+	ASSERT_FALSE(VerifyUriHostPort("1.2.3.4:1a2"));
+
+	/* IPv6 */
+	ASSERT_TRUE(VerifyUriHostPort("::"));
+	ASSERT_TRUE(VerifyUriHostPort("::1"));
+	ASSERT_TRUE(VerifyUriHostPort("2001::1"));
+	ASSERT_FALSE(VerifyUriHostPort("20010::1"));
+	ASSERT_TRUE(VerifyUriHostPort("abcd:ef::1"));
+	ASSERT_FALSE(VerifyUriHostPort("abcd:efg::1"));
+	ASSERT_TRUE(VerifyUriHostPort("[::1]:8080"));
+	ASSERT_TRUE(VerifyUriHostPort("[::1]:65535"));
+	ASSERT_FALSE(VerifyUriHostPort("[::1]:123456"));
+	ASSERT_FALSE(VerifyUriHostPort("[::1]:a"));
+}
+
 TEST(UriVerifyTest, Paranoid)
 {
 	ASSERT_TRUE(uri_path_verify_paranoid(""));
