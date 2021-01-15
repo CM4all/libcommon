@@ -63,6 +63,7 @@ IsAlphaNumericDashASCII(char ch) noexcept
 static constexpr bool
 VerifyDomainLabel(StringView s) noexcept
 {
+	/* RFC 1035 2.3.4: domain labels are limited to 63 octets */
 	if (s.empty() || s.size > 63)
 		return false;
 
@@ -83,7 +84,9 @@ VerifyDomainLabel(StringView s) noexcept
 bool
 VerifyDomainName(StringView s) noexcept
 {
-    return IsNonEmptyListOf(s, '.', VerifyDomainLabel);
+	/* RFC 1035 2.3.4: domain names are limited to 255 octets */
+
+	return s.size <= 255 && IsNonEmptyListOf(s, '.', VerifyDomainLabel);
 }
 
 bool
