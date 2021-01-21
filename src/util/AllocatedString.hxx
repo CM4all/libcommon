@@ -116,10 +116,6 @@ public:
 		return value != nullptr;
 	}
 
-	constexpr bool IsNull() const noexcept {
-		return value == nullptr;
-	}
-
 	operator string_view() const noexcept {
 		return value != nullptr
 			? string_view(value)
