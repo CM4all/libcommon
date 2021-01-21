@@ -1,5 +1,6 @@
 net_sources = [
   'Anonymize.cxx',
+  'SocketError.cxx',
   'SocketAddress.cxx',
   'StaticSocketAddress.cxx',
   'AllocatedSocketAddress.cxx',
