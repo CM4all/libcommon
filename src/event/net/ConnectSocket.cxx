@@ -34,10 +34,9 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/AddressInfo.hxx"
-#include "system/Error.hxx"
+#include "net/SocketError.hxx"
 
 #include <cassert>
-#include <cerrno>
 #include <stdexcept>
 
 void
@@ -74,10 +73,13 @@ Connect(const SocketAddress address)
 {
 	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(address.GetFamily(), SOCK_STREAM, 0))
-		throw MakeErrno("Failed to create socket");
+		throw MakeSocketError("Failed to create socket");
 
-	if (!fd.Connect(address) && errno != EINPROGRESS)
-		throw MakeErrno("Failed to connect");
+	if (!fd.Connect(address)) {
+		const auto e = GetSocketError();
+		if (!IsSocketErrorConnectWouldBlock(e))
+			throw MakeSocketError(e, "Failed to connect");
+	}
 
 	return fd;
 }
@@ -103,10 +105,13 @@ Connect(const AddressInfo &address)
 	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(address.GetFamily(), address.GetType(),
 			       address.GetProtocol()))
-		throw MakeErrno("Failed to create socket");
+		throw MakeSocketError("Failed to create socket");
 
-	if (!fd.Connect(address) && errno != EINPROGRESS)
-		throw MakeErrno("Failed to connect");
+	if (!fd.Connect(address)) {
+		const auto e = GetSocketError();
+		if (!IsSocketErrorConnectWouldBlock(e))
+			throw MakeSocketError(e, "Failed to connect");
+	}
 
 	return fd;
 }
@@ -148,7 +153,7 @@ ConnectSocket::OnEvent(unsigned events) noexcept
 		int s_err = event.GetSocket().GetError();
 		if (s_err != 0) {
 			event.Close();
-			handler.OnSocketConnectError(std::make_exception_ptr(MakeErrno(s_err, "Failed to connect")));
+			handler.OnSocketConnectError(std::make_exception_ptr(MakeSocketError(s_err, "Failed to connect")));
 			return;
 		}
 	}
