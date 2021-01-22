@@ -1,3 +1,5 @@
+boost = dependency('boost', version: '>= 1.54')
+
 event = static_library(
   'event',
   'Loop.cxx',
@@ -9,6 +11,9 @@ event = static_library(
   'SignalEvent.cxx',
   'PipeLineReader.cxx',
   include_directories: inc,
+  dependencies: [
+    boost,
+  ],
 )
 
 event_dep = declare_dependency(
@@ -16,5 +21,6 @@ event_dep = declare_dependency(
   dependencies: [
     system_dep,
     util_dep,
+    boost,
   ],
 )
