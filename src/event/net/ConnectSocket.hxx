@@ -32,13 +32,13 @@
 
 #pragma once
 
-#include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "util/Cancellable.hxx"
 
 #include <exception>
 
+class UniqueSocketDescriptor;
 class SocketAddress;
 class AddressInfo;
 
