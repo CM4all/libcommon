@@ -355,7 +355,7 @@ struct TranslateResponse {
 #if TRANSLATION_ENABLE_SESSION
 	bool stateful;
 
-	bool discard_session;
+	bool discard_session, discard_realm_session;
 
 	bool secure_cookie;
 

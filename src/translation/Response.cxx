@@ -136,6 +136,7 @@ TranslateResponse::Clear()
 #if TRANSLATION_ENABLE_SESSION
 	stateful = false;
 	discard_session = false;
+	discard_realm_session = false;
 	secure_cookie = false;
 	require_csrf_token = false;
 	send_csrf_token = false;
@@ -349,6 +350,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	require_csrf_token = src.require_csrf_token;
 	send_csrf_token = src.send_csrf_token;
 	discard_session = src.discard_session;
+	discard_realm_session = src.discard_realm_session;
 	secure_cookie = src.secure_cookie;
 #endif
 #if TRANSLATION_ENABLE_TRANSFORMATION

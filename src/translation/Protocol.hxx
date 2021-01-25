@@ -1060,6 +1060,12 @@ enum class TranslationCommand : uint16_t {
 	 * All sessions with the given identifier are merged.
 	 */
 	ATTACH_SESSION = 224,
+
+	/**
+	 * Like #DISCARD_SESSION, but discard only the part of the
+	 * session specific to this realm.
+	 */
+	DISCARD_REALM_SESSION = 225,
 };
 
 struct TranslationHeader {

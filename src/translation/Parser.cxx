@@ -2014,6 +2014,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		break;
 #endif
 
+	case TranslationCommand::DISCARD_REALM_SESSION:
+#if TRANSLATION_ENABLE_SESSION
+		response.discard_realm_session = true;
+		return;
+#else
+		break;
+#endif
+
 	case TranslationCommand::REQUEST_HEADER_FORWARD:
 #if TRANSLATION_ENABLE_HTTP
 		if (view != nullptr)
