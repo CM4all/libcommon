@@ -54,7 +54,7 @@ class OutputStream;
 class BufferedOutputStream {
 	OutputStream &os;
 
-	DynamicFifoBuffer<char> buffer;
+	DynamicFifoBuffer<std::byte> buffer;
 
 public:
 	explicit BufferedOutputStream(OutputStream &_os,
