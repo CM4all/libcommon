@@ -86,6 +86,7 @@ TranslateResponse::Clear()
 	regex = inverse_regex = nullptr;
 #endif
 	site = nullptr;
+	like_host = nullptr;
 	canonical_host = nullptr;
 #if TRANSLATION_ENABLE_HTTP
 	document_root = nullptr;
@@ -299,6 +300,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	inverse_regex = alloc.CheckDup(src.inverse_regex);
 #endif
 	site = alloc.CheckDup(src.site);
+	like_host = alloc.CheckDup(src.like_host);
 	canonical_host = alloc.CheckDup(src.canonical_host);
 #if TRANSLATION_ENABLE_RADDRESS
 	document_root = alloc.CheckDup(src.document_root);

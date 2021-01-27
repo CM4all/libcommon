@@ -324,6 +324,12 @@ public:
 				    value...);
 	}
 
+	template<typename... Types>
+	auto &LikeHost(Types... value) noexcept {
+		return StringPacket(TranslationCommand::LIKE_HOST,
+				    value...);
+	}
+
 	struct RedirectContext {
 		Response &response;
 

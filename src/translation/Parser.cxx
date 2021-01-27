@@ -3582,6 +3582,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::LIKE_HOST:
+		if (!IsValidNonEmptyString(string_payload))
+			throw std::runtime_error("malformed LIKE_HOST packet");
+
+		if (response.like_host != nullptr)
+			throw std::runtime_error("duplicate LIKE_HOST packet");
+
+		response.like_host = string_payload.data;
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

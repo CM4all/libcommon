@@ -1066,6 +1066,11 @@ enum class TranslationCommand : uint16_t {
 	 * session specific to this realm.
 	 */
 	DISCARD_REALM_SESSION = 225,
+
+	/**
+	 * Repeat the translation, but with the specified HOST value.
+	 */
+	LIKE_HOST = 226,
 };
 
 struct TranslationHeader {

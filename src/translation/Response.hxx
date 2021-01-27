@@ -112,6 +112,7 @@ struct TranslateResponse {
 
 	const char *site;
 
+	const char *like_host;
 	const char *canonical_host;
 
 #if TRANSLATION_ENABLE_HTTP
