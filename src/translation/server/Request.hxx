@@ -66,6 +66,8 @@ struct Request {
 	 */
 	const char *authorization = nullptr;
 
+	ConstBuffer<void> layout = nullptr;
+
 	ConstBuffer<void> error_document = nullptr;
 
 	ConstBuffer<void> http_auth = nullptr;

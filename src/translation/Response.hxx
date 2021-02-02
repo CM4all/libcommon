@@ -61,6 +61,7 @@
 
 enum class TranslationCommand : uint16_t;
 struct WidgetView;
+struct TranslationLayoutItem;
 class AllocatorPtr;
 class UniqueRegex;
 class MatchInfo;
@@ -103,6 +104,9 @@ struct TranslateResponse {
 	ResourceAddress address;
 
 	const char *base;
+
+	ConstBuffer<void> layout;
+	ConstBuffer<TranslationLayoutItem> layout_items;
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND

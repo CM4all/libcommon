@@ -366,6 +366,7 @@ static void
 FinishTranslateResponse(AllocatorPtr alloc,
 #if TRANSLATION_ENABLE_RADDRESS
 			const char *base_suffix,
+			ConstBuffer<TranslationLayoutItem> layout_items,
 #endif
 			TranslateResponse &response,
 			ConstBuffer<const char *> probe_suffixes)
@@ -407,6 +408,13 @@ FinishTranslateResponse(AllocatorPtr alloc,
 	}
 
 	response.address.Check();
+
+	if (response.layout != nullptr) {
+		if (layout_items.empty())
+		throw std::runtime_error("empty LAYOUT");
+
+		response.layout_items = alloc.CloneArray(layout_items);
+	}
 
 	/* the ResourceAddress::IsValidBase() check works only after
 	   the transformations above, in particular the
@@ -1806,6 +1814,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidAbsoluteUriPath(string_payload) ||
 		    string_payload.back() != '/')
 			throw std::runtime_error("malformed BASE packet");
+
+		if (response.layout != nullptr) {
+			if (layout_items_builder.full())
+				throw std::runtime_error("too many BASE packet");
+
+			layout_items_builder.emplace_back(string_payload.data);
+			return;
+		}
 
 		if (from_request.uri == nullptr ||
 		    response.auto_base ||
@@ -3592,6 +3608,21 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.like_host = string_payload.data;
 		return;
+
+	case TranslationCommand::LAYOUT:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (payload.empty())
+			throw std::runtime_error("malformed LAYOUT packet");
+
+		if (response.layout != nullptr)
+			throw std::runtime_error("duplicate LAYOUT packet");
+
+		response.layout = payload;
+		layout_items_builder.clear();
+#else
+		break;
+#endif
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
@@ -3616,6 +3647,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 		FinishTranslateResponse(alloc,
 #if TRANSLATION_ENABLE_RADDRESS
 					base_suffix,
+					layout_items_builder,
 #endif
 					response,
 					{probe_suffixes_builder.raw(),

@@ -40,6 +40,7 @@
 
 #if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
+#include "translation/Layout.hxx"
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
@@ -115,6 +116,8 @@ class TranslateParser {
 
 #if TRANSLATION_ENABLE_RADDRESS
 	const char *base_suffix = nullptr;
+
+	TrivialArray<TranslationLayoutItem, 32> layout_items_builder;
 
 	/** the current resource address being edited */
 	ResourceAddress *resource_address;

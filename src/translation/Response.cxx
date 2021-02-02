@@ -49,6 +49,10 @@
 #include "http/Address.hxx"
 #endif
 
+#if TRANSLATION_ENABLE_RADDRESS
+#include "translation/Layout.hxx"
+#endif
+
 void
 TranslateResponse::Clear()
 {
@@ -80,6 +84,8 @@ TranslateResponse::Clear()
 
 #if TRANSLATION_ENABLE_RADDRESS
 	base = nullptr;
+	layout = nullptr;
+	layout_items = nullptr;
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -293,6 +299,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 
 #if TRANSLATION_ENABLE_RADDRESS
 	base = alloc.CheckDup(src.base);
+	layout = alloc.Dup(src.layout);
+	layout_items = alloc.CloneArray(src.layout_items);
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -494,10 +502,13 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 
 	const bool expandable = src.IsExpandable();
 
-	address.CacheStore(alloc, src.address,
-			   request_uri, base,
-			   easy_base,
-			   expandable);
+	if (src.address.IsDefined() || layout == nullptr)
+		address.CacheStore(alloc, src.address,
+				   request_uri, base,
+				   easy_base,
+				   expandable);
+	else
+		address = nullptr;
 
 	if (base != nullptr && !expandable && !easy_base) {
 		const char *tail = base_tail(request_uri, base);

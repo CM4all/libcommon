@@ -253,6 +253,11 @@ public:
 	}
 
 	template<typename... Types>
+	auto &Layout(Types... value) noexcept {
+		return StringPacket(TranslationCommand::LAYOUT, value...);
+	}
+
+	template<typename... Types>
 	auto &Base(Types... value) noexcept {
 		return StringPacket(TranslationCommand::BASE, value...);
 	}

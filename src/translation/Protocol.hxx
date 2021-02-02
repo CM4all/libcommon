@@ -1071,6 +1071,13 @@ enum class TranslationCommand : uint16_t {
 	 * Repeat the translation, but with the specified HOST value.
 	 */
 	LIKE_HOST = 226,
+
+	/**
+	 * The translation server gives an overview of the URI layout,
+	 * responding with a list of #BASE packets.  The payload is
+	 * opaque and will be mirrored in the following request.
+	 */
+	LAYOUT = 227,
 };
 
 struct TranslationHeader {
