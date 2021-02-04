@@ -119,7 +119,7 @@ ParseIOWeight(const char *s)
 	return ParseRangeUint64(s, 1, 10000);
 }
 
-gcc_pure
+[[gnu::pure]]
 static uint64_t
 ParseByteUnit(const char *s) noexcept
 {

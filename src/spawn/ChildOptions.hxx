@@ -138,7 +138,7 @@ struct ChildOptions {
 	 */
 	void Check() const;
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsExpandable() const;
 
 	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);

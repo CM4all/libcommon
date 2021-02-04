@@ -33,7 +33,6 @@
 #pragma once
 
 #include "translation/Features.hxx"
-#include "util/Compiler.h"
 #include "util/IntrusiveForwardList.hxx"
 
 #include <cstdint>
@@ -83,7 +82,7 @@ struct Mount : IntrusiveForwardListHook {
 		return expand_source;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	static bool IsAnyExpandable(const IntrusiveForwardList<Mount> &list) noexcept {
 		for (const auto &i : list)
 			if (i.IsExpandable())

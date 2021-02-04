@@ -35,8 +35,6 @@
 #include "MountNamespaceOptions.hxx"
 #include "translation/Features.hxx"
 
-#include "util/Compiler.h"
-
 class AllocatorPtr;
 struct UidGid;
 class MatchInfo;
@@ -106,7 +104,7 @@ struct NamespaceOptions {
 	NamespaceOptions(AllocatorPtr alloc, const NamespaceOptions &src);
 
 #if TRANSLATION_ENABLE_EXPAND
-	gcc_pure
+	[[gnu::pure]]
 	bool IsExpandable() const;
 
 	/**
@@ -123,7 +121,7 @@ struct NamespaceOptions {
 		network_namespace = nullptr;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	int GetCloneFlags(int flags) const;
 
 	void SetupUidGidMap(const UidGid &uid_gid,

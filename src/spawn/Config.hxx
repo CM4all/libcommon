@@ -33,7 +33,6 @@
 #pragma once
 
 #include "UidGid.hxx"
-#include "util/Compiler.h"
 
 #ifdef HAVE_LIBSYSTEMD
 #include "Systemd.hxx"
@@ -87,14 +86,14 @@ struct SpawnConfig {
 	 */
 	bool allow_any_uid_gid = false;
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsUidAllowed(uid_t uid) const noexcept {
 		return (allow_all_uids_from > 0 &&
 			uid >= allow_all_uids_from) ||
 			allowed_uids.find(uid) != allowed_uids.end();
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsGidAllowed(gid_t gid) const noexcept {
 		return allowed_gids.find(gid) != allowed_gids.end();
 	}

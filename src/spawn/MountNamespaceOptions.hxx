@@ -33,7 +33,6 @@
 #pragma once
 
 #include "translation/Features.hxx"
-#include "util/Compiler.h"
 #include "util/IntrusiveForwardList.hxx"
 #include "util/ShallowCopy.hxx"
 
@@ -124,7 +123,7 @@ struct MountNamespaceOptions {
 	}
 
 #if TRANSLATION_ENABLE_EXPAND
-	gcc_pure
+	[[gnu::pure]]
 	bool IsExpandable() const noexcept;
 
 	/**

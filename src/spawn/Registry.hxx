@@ -36,8 +36,6 @@
 #include "event/TimerEvent.hxx"
 #include "event/SignalEvent.hxx"
 
-#include "util/Compiler.h"
-
 #include <boost/intrusive/set.hpp>
 
 #include <string>
@@ -181,13 +179,13 @@ public:
 	/**
 	 * Returns the number of registered child processes.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	unsigned GetCount() const noexcept {
 		return children.size();
 	}
 
 private:
-	gcc_pure
+	[[gnu::pure]]
 	ChildProcessSet::iterator FindByPid(pid_t pid) noexcept {
 		return children.find(pid, ChildProcess::Compare());
 	}

@@ -34,7 +34,6 @@
 #include "system/Error.hxx"
 #include "util/djbhash.h"
 #include "util/CharUtil.hxx"
-#include "util/Compiler.h"
 #include "util/Sanitizer.hxx"
 
 #include <assert.h>
@@ -83,7 +82,7 @@ ResourceLimit::CompleteFrom(int pid, int resource, const ResourceLimit &src)
 	OverrideFrom(src);
 }
 
-gcc_pure
+[[gnu::pure]]
 inline bool
 ResourceLimits::IsEmpty() const
 {
@@ -94,7 +93,7 @@ ResourceLimits::IsEmpty() const
 	return true;
 }
 
-gcc_pure
+[[gnu::pure]]
 inline unsigned
 ResourceLimits::GetHash() const
 {

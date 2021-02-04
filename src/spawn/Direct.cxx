@@ -45,7 +45,6 @@
 #include "util/PrintException.hxx"
 #include "util/Sanitizer.hxx"
 #include "util/ScopeExit.hxx"
-#include "util/Compiler.h"
 
 #ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-journal.h>
@@ -118,7 +117,7 @@ UnblockSignals()
 	sigprocmask(SIG_UNBLOCK, &mask, nullptr);
 }
 
-gcc_noreturn
+[[noreturn]]
 static void
 Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_create_pipe_w,
