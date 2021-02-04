@@ -37,18 +37,18 @@
 
 #include <boost/intrusive/set.hpp>
 
-class TimerEvent;
+class FineTimerEvent;
 
 /**
- * A list of #TimerEvent instances sorted by due time point.
+ * A list of #FineTimerEvent instances sorted by due time point.
  */
 class TimerList final {
 	struct Compare {
-		constexpr bool operator()(const TimerEvent &a,
-					  const TimerEvent &b) const noexcept;
+		constexpr bool operator()(const FineTimerEvent &a,
+					  const FineTimerEvent &b) const noexcept;
 	};
 
-	boost::intrusive::multiset<TimerEvent,
+	boost::intrusive::multiset<FineTimerEvent,
 				   boost::intrusive::base_hook<boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>>,
 				   boost::intrusive::compare<Compare>,
 				   boost::intrusive::constant_time_size<false>> timers;
@@ -64,10 +64,10 @@ public:
 		return timers.empty();
 	}
 
-	void Insert(TimerEvent &t) noexcept;
+	void Insert(FineTimerEvent &t) noexcept;
 
 	/**
-	 * Invoke all expired #TimerEvent instances and return the
+	 * Invoke all expired #FineTimerEvent instances and return the
 	 * duration until the next timer expires.  Returns a negative
 	 * duration if there is no timeout.
 	 */

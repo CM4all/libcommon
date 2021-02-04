@@ -32,67 +32,10 @@
 
 #pragma once
 
-#include "Chrono.hxx"
-#include "util/BindMethod.hxx"
-
-#include <boost/intrusive/set_hook.hpp>
-
-class EventLoop;
+#include "FineTimerEvent.hxx"
 
 /**
- * This class invokes a callback function after a certain amount of
- * time.  Use Schedule() to start the timer or Cancel() to cancel it.
- *
- * This class is not thread-safe, all methods must be called from the
- * thread that runs the #EventLoop, except where explicitly documented
- * as thread-safe.
+ * This is a transitional alias.  Use #FineTimerEvent or
+ * #CoarseTimerEvent instead.
  */
-class TimerEvent final
-	: public boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>
-{
-	friend class TimerList;
-
-	EventLoop &loop;
-
-	using Callback = BoundMethod<void() noexcept>;
-	const Callback callback;
-
-	/**
-	 * When is this timer due?  This is only valid if IsPending()
-	 * returns true.
-	 */
-	Event::Clock::time_point due;
-
-public:
-	TimerEvent(EventLoop &_loop, Callback _callback) noexcept
-		:loop(_loop), callback(_callback) {}
-
-	auto &GetEventLoop() const noexcept {
-		return loop;
-	}
-
-	constexpr auto GetDue() const noexcept {
-		return due;
-	}
-
-	bool IsPending() const noexcept {
-		return is_linked();
-	}
-
-	void Schedule(Event::Duration d) noexcept;
-
-	/**
-	 * Like Schedule(), but is a no-op if there is a due time
-	 * earlier than the given one.
-	 */
-	void ScheduleEarlier(Event::Duration d) noexcept;
-
-	void Cancel() noexcept {
-		unlink();
-	}
-
-private:
-	void Run() noexcept {
-		callback();
-	}
-};
+using TimerEvent = FineTimerEvent;

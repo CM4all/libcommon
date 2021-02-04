@@ -30,11 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TimerEvent.hxx"
+#include "FineTimerEvent.hxx"
 #include "Loop.hxx"
 
 void
-TimerEvent::Schedule(Event::Duration d) noexcept
+FineTimerEvent::Schedule(Event::Duration d) noexcept
 {
 	Cancel();
 
@@ -43,7 +43,7 @@ TimerEvent::Schedule(Event::Duration d) noexcept
 }
 
 void
-TimerEvent::ScheduleEarlier(Event::Duration d) noexcept
+FineTimerEvent::ScheduleEarlier(Event::Duration d) noexcept
 {
 	const auto new_due = loop.SteadyNow() + d;
 

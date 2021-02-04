@@ -31,7 +31,6 @@
  */
 
 #include "Loop.hxx"
-#include "TimerEvent.hxx"
 #include "DeferEvent.hxx"
 #include "SocketEvent.hxx"
 
@@ -96,7 +95,7 @@ EventLoop::AbandonFD(SocketEvent &event) noexcept
 }
 
 void
-EventLoop::Insert(TimerEvent &t) noexcept
+EventLoop::Insert(FineTimerEvent &t) noexcept
 {
 	timers.Insert(t);
 	again = true;

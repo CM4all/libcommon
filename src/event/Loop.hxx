@@ -163,7 +163,7 @@ public:
 	 */
 	void AbandonFD(SocketEvent &event) noexcept;
 
-	void Insert(TimerEvent &t) noexcept;
+	void Insert(FineTimerEvent &t) noexcept;
 
 	void AddDefer(DeferEvent &e) noexcept;
 	void AddIdle(DeferEvent &e) noexcept;

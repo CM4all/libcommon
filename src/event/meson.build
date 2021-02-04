@@ -5,7 +5,7 @@ event = static_library(
   'Loop.cxx',
   'ShutdownListener.cxx',
   'TimerList.cxx',
-  'TimerEvent.cxx',
+  'FineTimerEvent.cxx',
   'CleanupTimer.cxx',
   'DeferEvent.cxx',
   'SocketEvent.cxx',
