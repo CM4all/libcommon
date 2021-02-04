@@ -34,6 +34,7 @@
 #define EVENT_LOOP_HXX
 
 #include "Chrono.hxx"
+#include "TimerList.hxx"
 #include "system/EpollFD.hxx"
 #include "time/ClockCache.hxx"
 #include "util/IntrusiveList.hxx"
@@ -44,7 +45,6 @@
 
 #include <boost/intrusive/set.hpp>
 
-class TimerEvent;
 class DeferEvent;
 class SocketEvent;
 
@@ -55,17 +55,7 @@ class EventLoop final
 {
 	EpollFD epoll;
 
-	struct TimerCompare {
-		constexpr bool operator()(const TimerEvent &a,
-					  const TimerEvent &b) const noexcept;
-	};
-
-	using TimerSet =
-		boost::intrusive::multiset<TimerEvent,
-					   boost::intrusive::base_hook<boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>>,
-					   boost::intrusive::compare<TimerCompare>,
-					   boost::intrusive::constant_time_size<false>>;
-	TimerSet timers;
+	TimerList timers;
 
 	using DeferList = IntrusiveList<DeferEvent>;
 
@@ -158,7 +148,7 @@ public:
 	}
 
 	bool IsEmpty() const noexcept {
-		return timers.empty() && defer.empty() && idle.empty() &&
+		return timers.IsEmpty() && defer.empty() && idle.empty() &&
 			sockets.empty() && ready_sockets.empty();
 	}
 

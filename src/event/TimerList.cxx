@@ -30,69 +30,49 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Loop.hxx"
+#include "TimerEvent.hxx"
 
-#include "Chrono.hxx"
-#include "util/BindMethod.hxx"
-
-#include <boost/intrusive/set_hook.hpp>
-
-class EventLoop;
-
-/**
- * This class invokes a callback function after a certain amount of
- * time.  Use Schedule() to start the timer or Cancel() to cancel it.
- *
- * This class is not thread-safe, all methods must be called from the
- * thread that runs the #EventLoop, except where explicitly documented
- * as thread-safe.
- */
-class TimerEvent final
-	: public boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>
+constexpr bool
+TimerList::Compare::operator()(const TimerEvent &a,
+			       const TimerEvent &b) const noexcept
 {
-	friend class TimerList;
+	return a.due < b.due;
+}
 
-	EventLoop &loop;
+TimerList::TimerList() = default;
 
-	using Callback = BoundMethod<void() noexcept>;
-	const Callback callback;
+TimerList::~TimerList() noexcept
+{
+	assert(timers.empty());
+}
 
-	/**
-	 * When is this timer due?  This is only valid if IsPending()
-	 * returns true.
-	 */
-	Event::Clock::time_point due;
+void
+TimerList::Insert(TimerEvent &t) noexcept
+{
+	timers.insert(t);
+}
 
-public:
-	TimerEvent(EventLoop &_loop, Callback _callback) noexcept
-		:loop(_loop), callback(_callback) {}
+Event::Duration
+TimerList::Run(const Event::Clock::time_point now,
+	       bool &invoked) noexcept
+{
+	while (true) {
+		auto i = timers.begin();
+		if (i == timers.end())
+			break;
 
-	auto &GetEventLoop() const noexcept {
-		return loop;
+		TimerEvent &t = *i;
+		const auto timeout = t.due - now;
+		if (timeout > timeout.zero())
+			return timeout;
+
+		invoked = true;
+
+		timers.erase(i);
+
+		t.Run();
 	}
 
-	constexpr auto GetDue() const noexcept {
-		return due;
-	}
-
-	bool IsPending() const noexcept {
-		return is_linked();
-	}
-
-	void Schedule(Event::Duration d) noexcept;
-
-	/**
-	 * Like Schedule(), but is a no-op if there is a due time
-	 * earlier than the given one.
-	 */
-	void ScheduleEarlier(Event::Duration d) noexcept;
-
-	void Cancel() noexcept {
-		unlink();
-	}
-
-private:
-	void Run() noexcept {
-		callback();
-	}
-};
+	return Event::Duration(-1);
+}

@@ -37,18 +37,10 @@
 
 #include <array>
 
-constexpr bool
-EventLoop::TimerCompare::operator()(const TimerEvent &a,
-				    const TimerEvent &b) const noexcept
-{
-	return a.due < b.due;
-}
-
 EventLoop::EventLoop() = default;
 
 EventLoop::~EventLoop() noexcept
 {
-	assert(timers.empty());
 	assert(defer.empty());
 	assert(idle.empty());
 	assert(sockets.empty());
@@ -106,35 +98,14 @@ EventLoop::AbandonFD(SocketEvent &event) noexcept
 void
 EventLoop::Insert(TimerEvent &t) noexcept
 {
-	timers.insert(t);
+	timers.Insert(t);
 	again = true;
 }
 
 inline Event::Duration
 EventLoop::HandleTimers() noexcept
 {
-	const auto now = SteadyNow();
-
-	Event::Duration timeout;
-
-	while (!quit) {
-		auto i = timers.begin();
-		if (i == timers.end())
-			break;
-
-		TimerEvent &t = *i;
-		timeout = t.due - now;
-		if (timeout > timeout.zero())
-			return timeout;
-
-		invoked = true;
-
-		timers.erase(i);
-
-		t.Run();
-	}
-
-	return Event::Duration(-1);
+	return timers.Run(SteadyNow(), invoked);
 }
 
 void
