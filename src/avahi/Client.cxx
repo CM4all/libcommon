@@ -79,7 +79,7 @@ MyAvahiClient::Activate() noexcept
 {
 	assert(client == nullptr);
 
-	reconnect_timer.Schedule(std::chrono::milliseconds(1));
+	reconnect_timer.Schedule({});
 }
 
 void

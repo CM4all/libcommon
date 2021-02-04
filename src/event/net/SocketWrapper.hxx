@@ -34,7 +34,7 @@
 
 #include "io/FdType.hxx"
 #include "event/SocketEvent.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "net/SocketDescriptor.hxx"
 
 #include <sys/types.h>
@@ -78,7 +78,7 @@ class SocketWrapper {
 	FdType fd_type;
 
 	SocketEvent socket_event;
-	TimerEvent read_timeout_event, write_timeout_event;
+	CoarseTimerEvent read_timeout_event, write_timeout_event;
 
 	SocketHandler &handler;
 

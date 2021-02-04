@@ -34,7 +34,7 @@
 
 #include "Connection.hxx"
 #include "event/SocketEvent.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 
 #include <cassert>
 
@@ -180,7 +180,7 @@ class AsyncConnection : public Connection {
 	/**
 	 * A timer which reconnects during State::DISCONNECTED.
 	 */
-	TimerEvent reconnect_timer;
+	CoarseTimerEvent reconnect_timer;
 
 	AsyncResultHandler *result_handler = nullptr;
 

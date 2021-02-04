@@ -32,15 +32,18 @@
 
 #pragma once
 
-#include <chrono>
-
-namespace Event {
+#include "TimerEvent.hxx"
 
 /**
- * The clock used by classes #EventLoop, #CoarseTimerEvent and #FineTimerEvent.
+ * This class invokes a callback function after a certain amount of
+ * time.  Use Schedule() to start the timer or Cancel() to cancel it.
+ *
+ * Unlike #CoarseTimerEvent, this class uses a high-resolution timer,
+ * but at the cost of more expensive insertion and deletion.
+ *
+ * This class is not thread-safe, all methods must be called from the
+ * thread that runs the #EventLoop, except where explicitly documented
+ * as thread-safe.
  */
-using Clock = std::chrono::steady_clock;
-
-using Duration = Clock::duration;
-
-} // namespace Event
+using FineTimerEvent = TimerEvent;
+// TODO: implement

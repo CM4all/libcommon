@@ -33,16 +33,16 @@
 #pragma once
 
 #include "Compat.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/FineTimerEvent.hxx"
 
 namespace Co {
 
 /**
  * Put a coroutine to sleep by suspending it on `co_await` and
- * resuming it as soon as the #TimerEvent fires.
+ * resuming it as soon as the #FineTimerEvent fires.
  */
 class Sleep final {
-	TimerEvent event;
+	FineTimerEvent event;
 
 	std::coroutine_handle<> continuation;
 

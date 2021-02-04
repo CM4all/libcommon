@@ -37,7 +37,7 @@
 #include "net/djb/NetstringGenerator.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 
 #include <exception>
 #include <cstddef>
@@ -51,7 +51,7 @@ class NetstringServer {
 	UniqueSocketDescriptor fd;
 
 	SocketEvent event;
-	TimerEvent timeout_event;
+	CoarseTimerEvent timeout_event;
 
 	NetstringInput input;
 	NetstringGenerator generator;

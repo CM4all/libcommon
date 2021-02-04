@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <cstdint>
@@ -44,7 +44,7 @@ class CgroupMemoryWatch {
 
 	const uint64_t threshold;
 
-	TimerEvent timer;
+	CoarseTimerEvent timer;
 
 	BoundMethod<void(uint64_t value) noexcept> callback;
 

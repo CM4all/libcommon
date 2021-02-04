@@ -33,14 +33,14 @@
 #ifndef BENG_PROXY_CLEANUP_TIMER_HXX
 #define BENG_PROXY_CLEANUP_TIMER_HXX
 
-#include "TimerEvent.hxx"
+#include "CoarseTimerEvent.hxx"
 
 /**
- * Wrapper for #TimerEvent which aims to simplify installing recurring
+ * Wrapper for #CoarseTimerEvent which aims to simplify installing recurring
  * events.
  */
 class CleanupTimer {
-	TimerEvent event;
+	CoarseTimerEvent event;
 
 	const Event::Duration delay;
 

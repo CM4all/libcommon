@@ -31,7 +31,7 @@
 #define CURL_GLOBAL_HXX
 
 #include "Multi.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "event/DeferEvent.hxx"
 
 class CurlSocket;
@@ -44,7 +44,7 @@ class CurlGlobal final {
 	CurlMulti multi;
 
 	DeferEvent defer_read_info;
-	TimerEvent timeout_event;
+	CoarseTimerEvent timeout_event;
 
 public:
 	explicit CurlGlobal(EventLoop &_loop);

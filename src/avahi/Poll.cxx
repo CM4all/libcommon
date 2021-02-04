@@ -32,7 +32,7 @@
 
 #include "Poll.hxx"
 #include "event/SocketEvent.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "time/Convert.hxx"
 
 static constexpr unsigned
@@ -95,7 +95,7 @@ protected:
 
 struct AvahiTimeout final {
 private:
-	TimerEvent event;
+	CoarseTimerEvent event;
 	const AvahiTimeoutCallback callback;
 	void *const userdata;
 

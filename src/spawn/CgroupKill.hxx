@@ -35,7 +35,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/DeferEvent.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 
 #include <exception>
 #include <string>
@@ -64,8 +64,8 @@ class CgroupKill {
 	UniqueFileDescriptor cgroup_events_fd, cgroup_procs_fd;
 
 	DeferEvent send_term_event;
-	TimerEvent send_kill_event;
-	TimerEvent timeout_event;
+	CoarseTimerEvent send_kill_event;
+	CoarseTimerEvent timeout_event;
 
 	CgroupKill(EventLoop &event_loop,
 		   const std::string &cgroup_path,

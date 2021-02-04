@@ -33,7 +33,7 @@
 #include "Registry.hxx"
 #include "ExitListener.hxx"
 #include "event/Loop.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/StringFormat.hxx"
 
@@ -71,7 +71,7 @@ struct ChildProcessRegistry::ChildProcess
 	 * process hasn't exited after a certain amount of time, we send
 	 * SIGKILL.
 	 */
-	TimerEvent kill_timeout_event;
+	CoarseTimerEvent kill_timeout_event;
 
 	ChildProcess(EventLoop &event_loop,
 		     pid_t _pid, const char *_name,

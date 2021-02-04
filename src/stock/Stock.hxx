@@ -35,7 +35,7 @@
 #include "Item.hxx"
 #include "Request.hxx"
 #include "Stats.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "event/DeferEvent.hxx"
 #include "io/Logger.hxx"
 #include "util/Cancellable.hxx"
@@ -101,8 +101,8 @@ class Stock {
 	 */
 	DeferEvent empty_event;
 
-	TimerEvent cleanup_event;
-	TimerEvent clear_event;
+	CoarseTimerEvent cleanup_event;
+	CoarseTimerEvent clear_event;
 
 	typedef boost::intrusive::list<StockItem,
 				       boost::intrusive::constant_time_size<true>> ItemList;

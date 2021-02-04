@@ -33,7 +33,7 @@
 #pragma once
 
 #include "Poll.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "io/Logger.hxx"
 
 #include <avahi-client/client.h>
@@ -51,7 +51,7 @@ class MyAvahiClient final {
 
 	std::string name;
 
-	TimerEvent reconnect_timer;
+	CoarseTimerEvent reconnect_timer;
 
 	MyAvahiPoll poll;
 

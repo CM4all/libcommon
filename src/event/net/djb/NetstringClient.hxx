@@ -37,7 +37,7 @@
 #include "net/djb/NetstringGenerator.hxx"
 #include "net/djb/NetstringInput.hxx"
 #include "event/SocketEvent.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 
 #include <list>
 #include <exception>
@@ -66,7 +66,7 @@ class NetstringClient final {
 	FileDescriptor in_fd = FileDescriptor::Undefined();
 
 	SocketEvent event;
-	TimerEvent timeout_event;
+	CoarseTimerEvent timeout_event;
 
 	NetstringGenerator generator;
 	MultiWriteBuffer write;
