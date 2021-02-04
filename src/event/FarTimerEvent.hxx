@@ -32,37 +32,17 @@
 
 #pragma once
 
-#include "FarTimerEvent.hxx"
+#include "FineTimerEvent.hxx"
 
 /**
- * Wrapper for #CoarseTimerEvent which aims to simplify installing recurring
- * events.
+ * A coarse timer event which schedules far into the future.  Use this
+ * when you need a coarse resolution, but the supported time span of
+ * #CoarseTimerEvent is not enough.  For example, a good use case is
+ * timers which fire only every few minutes and do periodic cleanup.
+ *
+ * Right now, this is just an alias for #FineTimerEvent.  This class
+ * supports arbitrary time spans, but uses a high-resolution timer.
+ * Eventually, we may turn this into a timer wheel with minute
+ * resolution.
  */
-class CleanupTimer {
-	FarTimerEvent event;
-
-	const Event::Duration delay;
-
-	/**
-	 * @return true if another cleanup shall be scheduled
-	 */
-	using Callback = BoundMethod<bool() noexcept>;
-	const Callback callback;
-
-public:
-	CleanupTimer(EventLoop &loop, Event::Duration _delay,
-		     Callback _callback) noexcept
-		:event(loop, BIND_THIS_METHOD(OnTimer)),
-		 delay(_delay),
-		 callback(_callback) {}
-
-	auto &GetEventLoop() const noexcept {
-		return event.GetEventLoop();
-	}
-
-	void Enable() noexcept;
-	void Disable() noexcept;
-
-private:
-	void OnTimer() noexcept;
-};
+using FarTimerEvent = FineTimerEvent;
