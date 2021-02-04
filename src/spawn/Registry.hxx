@@ -33,15 +33,10 @@
 #pragma once
 
 #include "io/Logger.hxx"
-#include "event/TimerEvent.hxx"
 #include "event/SignalEvent.hxx"
 
 #include <boost/intrusive/set.hpp>
 
-#include <string>
-#include <chrono>
-
-#include <assert.h>
 #include <sys/types.h>
 
 class ExitListener;
@@ -50,59 +45,18 @@ class ExitListener;
  * Multiplexer for SIGCHLD.
  */
 class ChildProcessRegistry {
+	struct ChildProcess;
 
-	struct ChildProcess
-		: boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
+	struct CompareChildProcess {
+		[[gnu::pure]]
+		bool operator()(const ChildProcess &a,
+				const ChildProcess &b) const noexcept;
 
-		const Logger logger;
+		[[gnu::pure]]
+		bool operator()(const ChildProcess &a, pid_t b) const noexcept;
 
-		const pid_t pid;
-
-		const std::string name;
-
-		/**
-		 * The time when this child process was started (registered in
-		 * this library).
-		 */
-		const std::chrono::steady_clock::time_point start_time;
-
-		ExitListener *listener;
-
-		/**
-		 * This timer is set up by child_kill_signal().  If the child
-		 * process hasn't exited after a certain amount of time, we send
-		 * SIGKILL.
-		 */
-		TimerEvent kill_timeout_event;
-
-		ChildProcess(EventLoop &event_loop,
-			     pid_t _pid, const char *_name,
-			     ExitListener *_listener) noexcept;
-
-		auto &GetEventLoop() noexcept {
-			return kill_timeout_event.GetEventLoop();
-		}
-
-		void OnExit(int status, const struct rusage &rusage) noexcept;
-
-		void KillTimeoutCallback() noexcept;
-
-		struct Compare {
-			bool operator()(const ChildProcess &a,
-					const ChildProcess &b) const noexcept {
-				return a.pid < b.pid;
-			}
-
-			bool operator()(const ChildProcess &a,
-					pid_t b) const noexcept {
-				return a.pid < b;
-			}
-
-			bool operator()(pid_t a,
-					const ChildProcess &b) const noexcept {
-				return a < b.pid;
-			}
-		};
+		[[gnu::pure]]
+		bool operator()(pid_t a, const ChildProcess &b) const noexcept;
 	};
 
 	const LLogger logger;
@@ -111,7 +65,8 @@ class ChildProcessRegistry {
 
 	using ChildProcessSet =
 		boost::intrusive::set<ChildProcess,
-				      boost::intrusive::compare<ChildProcess::Compare>,
+				      boost::intrusive::base_hook<boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>>,
+				      boost::intrusive::compare<CompareChildProcess>,
 				      boost::intrusive::constant_time_size<true>>;
 
 	ChildProcessSet children;
@@ -127,6 +82,7 @@ class ChildProcessRegistry {
 
 public:
 	ChildProcessRegistry(EventLoop &loop) noexcept;
+	~ChildProcessRegistry() noexcept;
 
 	EventLoop &GetEventLoop() const noexcept {
 		return event_loop;
@@ -183,9 +139,7 @@ public:
 
 private:
 	[[gnu::pure]]
-	ChildProcessSet::iterator FindByPid(pid_t pid) noexcept {
-		return children.find(pid, ChildProcess::Compare());
-	}
+	ChildProcessSet::iterator FindByPid(pid_t pid) noexcept;
 
 	void CheckVolatileEvent() noexcept {
 		if (volatile_event && IsEmpty())

@@ -33,8 +33,13 @@
 #include "Registry.hxx"
 #include "ExitListener.hxx"
 #include "event/Loop.hxx"
+#include "event/TimerEvent.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/StringFormat.hxx"
+
+#include <cassert>
+#include <chrono>
+#include <string>
 
 #include <string.h>
 #include <errno.h>
@@ -43,6 +48,64 @@
 #include <sys/resource.h>
 
 static constexpr auto child_kill_timeout = std::chrono::minutes(1);
+
+struct ChildProcessRegistry::ChildProcess
+	: boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>
+{
+	const Logger logger;
+
+	const pid_t pid;
+
+	const std::string name;
+
+	/**
+	 * The time when this child process was started (registered in
+	 * this library).
+	 */
+	const std::chrono::steady_clock::time_point start_time;
+
+	ExitListener *listener;
+
+	/**
+	 * This timer is set up by child_kill_signal().  If the child
+	 * process hasn't exited after a certain amount of time, we send
+	 * SIGKILL.
+	 */
+	TimerEvent kill_timeout_event;
+
+	ChildProcess(EventLoop &event_loop,
+		     pid_t _pid, const char *_name,
+		     ExitListener *_listener) noexcept;
+
+	auto &GetEventLoop() noexcept {
+		return kill_timeout_event.GetEventLoop();
+	}
+
+	void OnExit(int status, const struct rusage &rusage) noexcept;
+
+	void KillTimeoutCallback() noexcept;
+};
+
+inline bool
+ChildProcessRegistry::CompareChildProcess::operator()(const ChildProcess &a,
+						      const ChildProcess &b) const noexcept
+{
+	return a.pid < b.pid;
+}
+
+inline bool
+ChildProcessRegistry::CompareChildProcess::operator()(const ChildProcess &a,
+						      pid_t b) const noexcept
+{
+	return a.pid < b;
+}
+
+inline bool
+ChildProcessRegistry::CompareChildProcess::operator()(pid_t a,
+						      const ChildProcess &b) const noexcept
+{
+	return a < b.pid;
+}
 
 static std::string
 MakeChildProcessLogDomain(unsigned pid, const char *name) noexcept
@@ -114,6 +177,14 @@ ChildProcessRegistry::ChildProcessRegistry(EventLoop &_event_loop) noexcept
 	 sigchld_event(event_loop, SIGCHLD, BIND_THIS_METHOD(OnSigChld))
 {
 	sigchld_event.Enable();
+}
+
+ChildProcessRegistry::~ChildProcessRegistry() noexcept = default;
+
+inline ChildProcessRegistry::ChildProcessSet::iterator
+ChildProcessRegistry::FindByPid(pid_t pid) noexcept
+{
+	return children.find(pid, children.key_comp());
 }
 
 void
