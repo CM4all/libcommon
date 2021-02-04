@@ -171,8 +171,7 @@ ChildProcessRegistry::Kill(pid_t pid, int signo) noexcept
 		/* if we can't kill the process, we can't do much, so let's
 		   just ignore the process from now on and don't let it delay
 		   the shutdown */
-		Remove(i);
-		delete child;
+		children.erase_and_dispose(i, DeleteDisposer{});
 		CheckVolatileEvent();
 		return;
 	}
@@ -195,7 +194,7 @@ ChildProcessRegistry::OnExit(pid_t pid, int status,
 		return;
 
 	auto *child = &*i;
-	Remove(i);
+	children.erase(i);
 	child->OnExit(status, rusage);
 	delete child;
 }

@@ -83,10 +83,6 @@ class ChildProcessRegistry {
 			return kill_timeout_event.GetEventLoop();
 		}
 
-		void Disable() noexcept {
-			kill_timeout_event.Cancel();
-		}
-
 		void OnExit(int status, const struct rusage &rusage) noexcept;
 
 		void KillTimeoutCallback() noexcept;
@@ -189,14 +185,6 @@ private:
 	[[gnu::pure]]
 	ChildProcessSet::iterator FindByPid(pid_t pid) noexcept {
 		return children.find(pid, ChildProcess::Compare());
-	}
-
-	void Remove(ChildProcessSet::iterator i) noexcept {
-		assert(!children.empty());
-
-		i->Disable();
-
-		children.erase(i);
 	}
 
 	void CheckVolatileEvent() noexcept {
