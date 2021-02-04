@@ -192,7 +192,7 @@ public:
 	 * iteration, because it is assumed that the event loop runs
 	 * for a negligible duration.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	const auto &SteadyNow() const noexcept {
 		return steady_clock_cache.now();
 	}
@@ -203,7 +203,7 @@ public:
 	 * iteration, because it is assumed that the event loop runs
 	 * for a negligible duration.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	const auto &SystemNow() const noexcept {
 		return system_clock_cache.now();
 	}

@@ -469,22 +469,22 @@ public:
 	/**
 	 * Is the input buffer empty?
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsEmpty() const noexcept;
 
 	/**
 	 * Is the input buffer full?
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsFull() const noexcept;
 
 	/**
 	 * Returns the number of bytes in the input buffer.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	size_t GetAvailable() const noexcept;
 
-	gcc_pure
+	[[gnu::pure]]
 	WritableBuffer<void> ReadBuffer() const noexcept {
 		assert(!ended);
 
@@ -551,7 +551,7 @@ public:
 	ssize_t WriteFrom(int other_fd, FdType other_fd_type,
 			  size_t length) noexcept;
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsReadyForWriting() const noexcept {
 		assert(!destroyed);
 

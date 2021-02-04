@@ -36,7 +36,6 @@
 #include "event/SocketEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "net/SocketDescriptor.hxx"
-#include "util/Compiler.h"
 
 #include <sys/types.h>
 #include <assert.h>
@@ -172,19 +171,19 @@ public:
 		write_timeout_event.Cancel();
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsReadPending() const noexcept {
 		return socket_event.IsReadPending();
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsWritePending() const noexcept {
 		return socket_event.IsWritePending();
 	}
 
 	ssize_t ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer) noexcept;
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsReadyForWriting() const noexcept;
 
 	ssize_t Write(const void *data, size_t length) noexcept;
