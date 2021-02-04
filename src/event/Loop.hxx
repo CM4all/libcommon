@@ -173,7 +173,7 @@ public:
 	 */
 	void AbandonFD(SocketEvent &event) noexcept;
 
-	void AddTimer(TimerEvent &t, Event::Duration d) noexcept;
+	void Insert(TimerEvent &t) noexcept;
 
 	void AddDefer(DeferEvent &e) noexcept;
 	void AddIdle(DeferEvent &e) noexcept;

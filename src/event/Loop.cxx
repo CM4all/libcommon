@@ -104,9 +104,8 @@ EventLoop::AbandonFD(SocketEvent &event) noexcept
 }
 
 void
-EventLoop::AddTimer(TimerEvent &t, Event::Duration d) noexcept
+EventLoop::Insert(TimerEvent &t) noexcept
 {
-	t.due = SteadyNow() + d;
 	timers.insert(t);
 	again = true;
 }
