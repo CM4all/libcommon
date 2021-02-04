@@ -75,7 +75,7 @@ class TemplateServerSocket final : public ServerSocket {
 		      C>::value,
 		      "Must use list_base_hook<auto_unlink>");
 
-	typedef std::tuple<Params...> Tuple;
+	using Tuple = std::tuple<Params...>;
 	Tuple params;
 
 	boost::intrusive::list<C,

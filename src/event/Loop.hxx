@@ -91,7 +91,7 @@ class EventLoop final
 	SocketList ready_sockets;
 
 #ifndef NDEBUG
-	typedef BoundMethod<void() noexcept> PostCallback;
+	using PostCallback = BoundMethod<void() noexcept>;
 	PostCallback post_callback = nullptr;
 #endif
 
