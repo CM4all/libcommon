@@ -134,7 +134,7 @@ public:
 	void OnChildProcessExit(int status) noexcept override;
 
 	/* boost::instrusive::set hooks */
-	typedef boost::intrusive::set_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> IdHook;
+	using IdHook = boost::intrusive::set_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>;
 	IdHook id_hook;
 
 	struct CompareId {

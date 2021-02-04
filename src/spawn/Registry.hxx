@@ -113,9 +113,10 @@ class ChildProcessRegistry {
 
 	EventLoop &event_loop;
 
-	typedef boost::intrusive::set<ChildProcess,
+	using ChildProcessSet =
+		boost::intrusive::set<ChildProcess,
 				      boost::intrusive::compare<ChildProcess::Compare>,
-				      boost::intrusive::constant_time_size<true>> ChildProcessSet;
+				      boost::intrusive::constant_time_size<true>>;
 
 	ChildProcessSet children;
 
