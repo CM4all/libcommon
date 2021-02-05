@@ -54,7 +54,7 @@ TimerList::Insert(FineTimerEvent &t) noexcept
 }
 
 Event::Duration
-TimerList::Run(const Event::Clock::time_point now,
+TimerList::Run(const Event::TimePoint now,
 	       bool &invoked) noexcept
 {
 	while (true) {
