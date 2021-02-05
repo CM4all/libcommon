@@ -34,6 +34,8 @@
 
 #include "FdType.hxx"
 
+#include <cassert>
+
 #include <fcntl.h>
 #include <sys/sendfile.h>
 
