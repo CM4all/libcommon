@@ -58,7 +58,6 @@ struct Request {
 	const char *widget_type = nullptr;
 
 	const char *user_agent = nullptr;
-	const char *ua_class = nullptr;
 	const char *accept_language = nullptr;
 
 	/**

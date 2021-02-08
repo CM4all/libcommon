@@ -283,7 +283,7 @@ enum class TranslationCommand : uint16_t {
 	AUTO_BASE = 87,
 
 	/**
-	 * A classification for the User-Agent request header.
+	 * Obsolete.
 	 */
 	UA_CLASS = 88,
 

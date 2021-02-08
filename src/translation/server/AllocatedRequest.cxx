@@ -126,11 +126,6 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		user_agent = user_agent_buffer.c_str();
 		break;
 
-	case TranslationCommand::UA_CLASS:
-		ua_class_buffer = ToString(payload);
-		ua_class = ua_class_buffer.c_str();
-		break;
-
 	case TranslationCommand::LANGUAGE:
 		accept_language_buffer = ToString(payload);
 		accept_language = accept_language_buffer.c_str();

@@ -53,7 +53,7 @@ class AllocatedRequest : public Request {
 
 	std::string widget_type_buffer;
 
-	std::string user_agent_buffer, ua_class_buffer;
+	std::string user_agent_buffer;
 	std::string accept_language_buffer;
 	std::string authorization_buffer;
 	std::string layout_buffer;
