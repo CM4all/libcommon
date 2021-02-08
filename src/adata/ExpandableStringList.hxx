@@ -49,10 +49,10 @@ class ExpandableStringList final {
 #if TRANSLATION_ENABLE_EXPAND
 		bool expandable;
 
-		Item(const char *_value, bool _expandable)
+		Item(const char *_value, bool _expandable) noexcept
 			:value(_value), expandable(_expandable) {}
 #else
-		Item(const char *_value, bool)
+		Item(const char *_value, bool) noexcept
 			:value(_value) {}
 #endif
 	};
@@ -62,18 +62,18 @@ class ExpandableStringList final {
 	List list;
 
 public:
-	ExpandableStringList() = default;
-	ExpandableStringList(ExpandableStringList &&) = default;
-	ExpandableStringList &operator=(ExpandableStringList &&src) = default;
+	ExpandableStringList() noexcept = default;
+	ExpandableStringList(ExpandableStringList &&) noexcept = default;
+	ExpandableStringList &operator=(ExpandableStringList &&src) noexcept = default;
 
 	constexpr ExpandableStringList(ShallowCopy shallow_copy,
-				       const ExpandableStringList &src)
+				       const ExpandableStringList &src) noexcept
 		:list(shallow_copy, src.list) {}
 
-	ExpandableStringList(AllocatorPtr alloc, const ExpandableStringList &src);
+	ExpandableStringList(AllocatorPtr alloc, const ExpandableStringList &src) noexcept;
 
 	[[gnu::pure]]
-	bool IsEmpty() const {
+	bool IsEmpty() const noexcept {
 		return list.empty();
 	}
 
@@ -83,38 +83,39 @@ public:
 		List::const_iterator i;
 
 	public:
-		const_iterator(List::const_iterator _i):i(_i) {}
+		const_iterator(List::const_iterator _i) noexcept
+			:i(_i) {}
 
-		bool operator!=(const const_iterator &other) const {
+		bool operator!=(const const_iterator &other) const noexcept {
 			return i != other.i;
 		}
 
-		const char *operator*() const {
+		const char *operator*() const noexcept {
 			return i->value;
 		}
 
-		const_iterator &operator++() {
+		const_iterator &operator++() noexcept {
 			++i;
 			return *this;
 		}
 	};
 
-	auto begin() const {
+	auto begin() const noexcept {
 		return const_iterator{list.begin()};
 	}
 
-	auto end() const {
+	auto end() const noexcept {
 		return const_iterator{list.end()};
 	}
 
 #if TRANSLATION_ENABLE_EXPAND
 	[[gnu::pure]]
-	bool IsExpandable() const;
+	bool IsExpandable() const noexcept;
 
 	/**
 	 * Throws std::runtime_error on error.
 	 */
-	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
+	void Expand(AllocatorPtr alloc, const MatchInfo &match_info) noexcept;
 #endif
 
 	class Builder final {
@@ -123,9 +124,9 @@ public:
 		Item *last;
 
 	public:
-		Builder() = default;
+		Builder() noexcept = default;
 
-		Builder(ExpandableStringList &_list)
+		Builder(ExpandableStringList &_list) noexcept
 			:tail(_list.list.before_begin()), last(nullptr) {}
 
 		/**
@@ -133,19 +134,20 @@ public:
 		 * used to allocate the item structure, it does not copy the
 		 * string.
 		 */
-		void Add(AllocatorPtr alloc, const char *value, bool expandable);
+		void Add(AllocatorPtr alloc, const char *value,
+			 bool expandable) noexcept;
 
 #if TRANSLATION_ENABLE_EXPAND
-		bool CanSetExpand() const {
+		bool CanSetExpand() const noexcept {
 			return last != nullptr && !last->expandable;
 		}
 
-		void SetExpand(const char *value) const {
+		void SetExpand(const char *value) const noexcept {
 			last->value = value;
 			last->expandable = true;
 		}
 #endif
 	};
 
-	ConstBuffer<const char *> ToArray(AllocatorPtr alloc) const;
+	ConstBuffer<const char *> ToArray(AllocatorPtr alloc) const noexcept;
 };

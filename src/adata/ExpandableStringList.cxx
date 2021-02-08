@@ -41,7 +41,7 @@
 #include <algorithm>
 
 ExpandableStringList::ExpandableStringList(AllocatorPtr alloc,
-					   const ExpandableStringList &src)
+					   const ExpandableStringList &src) noexcept
 {
 	Builder builder(*this);
 
@@ -58,7 +58,7 @@ ExpandableStringList::ExpandableStringList(AllocatorPtr alloc,
 #if TRANSLATION_ENABLE_EXPAND
 
 bool
-ExpandableStringList::IsExpandable() const
+ExpandableStringList::IsExpandable() const noexcept
 {
 	for (const auto &i : list)
 		if (i.expandable)
@@ -68,7 +68,7 @@ ExpandableStringList::IsExpandable() const
 }
 
 void
-ExpandableStringList::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
+ExpandableStringList::Expand(AllocatorPtr alloc, const MatchInfo &match_info) noexcept
 {
 	for (auto &i : list) {
 		if (!i.expandable)
@@ -82,14 +82,14 @@ ExpandableStringList::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 
 void
 ExpandableStringList::Builder::Add(AllocatorPtr alloc,
-				   const char *value, bool expandable)
+				   const char *value, bool expandable) noexcept
 {
 	auto *item = last = alloc.New<Item>(value, expandable);
 	tail = List::insert_after(tail, *item);
 }
 
 ConstBuffer<const char *>
-ExpandableStringList::ToArray(AllocatorPtr alloc) const
+ExpandableStringList::ToArray(AllocatorPtr alloc) const noexcept
 {
 	const size_t n = std::distance(begin(), end());
 	const char **p = alloc.NewArray<const char *>(n);
