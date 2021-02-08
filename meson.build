@@ -91,7 +91,13 @@ subdir('src/util')
 subdir('src/uri')
 subdir('src/time')
 subdir('src/http')
-subdir('src/json')
+
+if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
+  # this library checks __cpp_constinit and requires
+  # std::memory_resource, so disable it with older GCC
+  subdir('src/json')
+endif
+
 subdir('src/adata')
 subdir('src/lua')
 subdir('src/io')
