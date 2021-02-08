@@ -1,7 +1,11 @@
 boost_json_inc = include_directories('../../boost/json/include')
 
+boost_json_compile_args = [
+  '-DBOOST_JSON_STANDALONE',
+]
+
 boost_json_dep = declare_dependency(
-  compile_args: ['-DBOOST_JSON_STANDALONE'],
+  compile_args: boost_json_compile_args,
   include_directories: [boost_json_inc, inc],
 )
 
