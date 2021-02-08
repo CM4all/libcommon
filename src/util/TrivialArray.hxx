@@ -32,7 +32,6 @@
 
 #include "ConstBuffer.hxx"
 #include "WritableBuffer.hxx"
-#include "Compiler.h"
 
 #include <array>
 #include <initializer_list>
