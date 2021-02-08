@@ -39,8 +39,6 @@
 
 #include "Unique.hxx"
 
-#include "util/Compiler.h"
-
 #include <openssl/ossl_typ.h>
 
 template<typename T> struct ConstBuffer;
@@ -57,11 +55,11 @@ GenerateRsaKey();
 UniqueEVP_PKEY
 DecodeDerKey(ConstBuffer<void> der);
 
-gcc_pure
+[[gnu::pure]]
 bool
 MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2);
 
-gcc_pure
+[[gnu::pure]]
 bool
 MatchModulus(X509 &cert, EVP_PKEY &key);
 

@@ -36,7 +36,6 @@
 #include "event/Chrono.hxx"
 #include "io/Logger.hxx"
 #include "util/Cast.hxx"
-#include "util/Compiler.h"
 
 #include <boost/intrusive/unordered_set.hpp>
 
@@ -60,15 +59,15 @@ class StockMap : StockHandler {
 			return stock.GetName();
 		}
 
-		gcc_pure
+		[[gnu::pure]]
 		static size_t KeyHasher(const char *key) noexcept;
 
-		gcc_pure
+		[[gnu::pure]]
 		static size_t ValueHasher(const Item &value) noexcept {
 			return KeyHasher(value.GetKey());
 		}
 
-		gcc_pure
+		[[gnu::pure]]
 		static bool KeyValueEqual(const char *a, const Item &b) noexcept {
 			assert(a != nullptr);
 
@@ -76,14 +75,14 @@ class StockMap : StockHandler {
 		}
 
 		struct Hash {
-			gcc_pure
+			[[gnu::pure]]
 			size_t operator()(const Item &value) const noexcept {
 				return ValueHasher(value);
 			}
 		};
 
 		struct Equal {
-			gcc_pure
+			[[gnu::pure]]
 			bool operator()(const Item &a, const Item &b) const noexcept {
 				return KeyValueEqual(a.GetKey(), b);
 			}

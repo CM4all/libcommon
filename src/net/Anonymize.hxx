@@ -32,12 +32,10 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 #include <utility>
 
 struct StringView;
 
-gcc_pure
+[[gnu::pure]]
 std::pair<StringView, StringView>
 AnonymizeAddress(StringView value) noexcept;

@@ -39,7 +39,7 @@
 #include <netinet/in.h>
 #include <string.h>
 
-gcc_pure
+[[gnu::pure]]
 static bool
 Match(const struct sockaddr_in &a,
       const struct sockaddr_in &b) noexcept
@@ -47,7 +47,7 @@ Match(const struct sockaddr_in &a,
 	return memcmp(&a.sin_addr, &b.sin_addr, sizeof(a.sin_addr)) == 0;
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 Match(const struct sockaddr_in6 &a,
       const struct sockaddr_in6 &b) noexcept
@@ -55,7 +55,7 @@ Match(const struct sockaddr_in6 &a,
 	return memcmp(&a.sin6_addr, &b.sin6_addr, sizeof(a.sin6_addr)) == 0;
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 Match(const struct sockaddr &a,
       SocketAddress b) noexcept
@@ -78,7 +78,7 @@ Match(const struct sockaddr &a,
 	}
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 Match(const struct ifaddrs &ifa,
       SocketAddress address) noexcept

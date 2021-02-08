@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2021 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,8 +30,6 @@
 #ifndef MIME_TYPE_HXX
 #define MIME_TYPE_HXX
 
-#include "util/Compiler.h"
-
 #include <string>
 #include <string_view>
 #include <map>
@@ -41,7 +39,7 @@
  * part before the semicolon.  If there is no semicolon, it returns
  * the string as-is.
  */
-gcc_pure
+[[gnu::pure]]
 std::string_view
 GetMimeTypeBase(std::string_view s) noexcept;
 

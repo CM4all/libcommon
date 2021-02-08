@@ -32,15 +32,13 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 #include <boost/json.hpp>
 
 #include <string_view>
 
 namespace Json {
 
-gcc_pure
+[[gnu::pure]]
 static inline std::string_view
 GetString(const boost::json::value &json) noexcept
 {
@@ -50,7 +48,7 @@ GetString(const boost::json::value &json) noexcept
 		: std::string_view{};
 }
 
-gcc_pure
+[[gnu::pure]]
 static inline std::string_view
 GetString(const boost::json::value *json) noexcept
 {
@@ -59,7 +57,7 @@ GetString(const boost::json::value *json) noexcept
 		: std::string_view{};
 }
 
-gcc_pure
+[[gnu::pure]]
 static inline std::string_view
 GetString(const boost::json::object &parent, std::string_view key) noexcept
 {

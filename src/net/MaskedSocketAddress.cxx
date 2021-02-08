@@ -41,14 +41,14 @@
 #include <assert.h>
 #include <string.h>
 
-gcc_pure
+[[gnu::pure]]
 static bool
 operator==(const struct in6_addr &a, const struct in6_addr &b) noexcept
 {
 	return memcmp(&a, &b, sizeof(a)) == 0;
 }
 
-gcc_pure
+[[gnu::pure]]
 static unsigned
 MaximumPrefixLength(const SocketAddress address) noexcept
 {
@@ -65,7 +65,7 @@ MaximumPrefixLength(const SocketAddress address) noexcept
 	}
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidPrefixLength(const IPv4Address &address,
 		    unsigned prefix_length) noexcept
@@ -76,7 +76,7 @@ IsValidPrefixLength(const IPv4Address &address,
 		 address).GetNumericAddressBE();
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidPrefixLength(const IPv6Address &address,
 		    unsigned prefix_length) noexcept
@@ -87,7 +87,7 @@ IsValidPrefixLength(const IPv6Address &address,
 		 address).GetAddress();
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidPrefixLength(const SocketAddress address,
 		    unsigned prefix_length) noexcept

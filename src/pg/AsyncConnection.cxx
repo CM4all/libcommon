@@ -84,7 +84,7 @@ AsyncConnection::Error(std::exception_ptr e) noexcept
 		Error();
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsFatalPgError(std::exception_ptr ep) noexcept
 {

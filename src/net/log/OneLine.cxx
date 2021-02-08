@@ -54,7 +54,7 @@ AppendTimestamp(StringBuilder &b, Net::Log::TimePoint value)
 	b.Extend(n);
 }
 
-gcc_const
+[[gnu::const]]
 static const char *
 OptionalString(const char *p) noexcept
 {

@@ -32,8 +32,6 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 #include <array>
 #include <cstddef> // for std::byte
 #include <string_view>
@@ -70,13 +68,13 @@ SignEdDSA(const Ed25519SecretKey &key, std::string_view header_b64,
  * @param signature_b64 the UrlSafeBase64 of the signature
  * @return true if the signature is valid
  */
-gcc_pure
+[[gnu::pure]]
 bool
 VerifyEdDSA(const Ed25519PublicKey &key,
 	    std::string_view header_dot_payload_b64,
 	    std::string_view signature_b64) noexcept;
 
-gcc_pure
+[[gnu::pure]]
 bool
 VerifyEdDSA(const Ed25519PublicKey &key,
 	    std::string_view header_dot_payload_dot_signature_b64) noexcept;

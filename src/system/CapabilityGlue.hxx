@@ -33,12 +33,10 @@
 #ifndef CAPABILITY_GLUE_HXX
 #define CAPABILITY_GLUE_HXX
 
-#include "util/Compiler.h"
-
 /**
  * Does the current process have CAP_SYS_ADMIN?
  */
-gcc_pure
+[[gnu::pure]]
 bool
 IsSysAdmin() noexcept;
 

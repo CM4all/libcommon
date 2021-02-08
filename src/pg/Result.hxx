@@ -77,24 +77,24 @@ public:
 		return *this;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	ExecStatusType GetStatus() const noexcept {
 		assert(IsDefined());
 
 		return ::PQresultStatus(result);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsCommandSuccessful() const noexcept {
 		return GetStatus() == PGRES_COMMAND_OK;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsQuerySuccessful() const noexcept {
 		return GetStatus() == PGRES_TUPLES_OK;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsError() const noexcept {
 		const auto status = GetStatus();
 		return status == PGRES_BAD_RESPONSE ||
@@ -102,21 +102,21 @@ public:
 			status == PGRES_FATAL_ERROR;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetErrorMessage() const noexcept {
 		assert(IsDefined());
 
 		return ::PQresultErrorMessage(result);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetErrorField(int fieldcode) const noexcept {
 		assert(IsDefined());
 
 		return PQresultErrorField(result, fieldcode);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetErrorType() const noexcept {
 		assert(IsDefined());
 
@@ -127,7 +127,7 @@ public:
 	 * Returns the number of rows that were affected by the command.
 	 * The caller is responsible for checking GetStatus().
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	unsigned GetAffectedRows() const noexcept {
 		assert(IsDefined());
 		assert(IsCommandSuccessful());
@@ -138,49 +138,49 @@ public:
 	/**
 	 * Returns true if there are no rows in the result.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsEmpty() const noexcept {
 		assert(IsDefined());
 
 		return ::PQntuples(result) == 0;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	unsigned GetRowCount() const noexcept {
 		assert(IsDefined());
 
 		return ::PQntuples(result);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	unsigned GetColumnCount() const noexcept {
 		assert(IsDefined());
 
 		return ::PQnfields(result);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetColumnName(unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQfname(result, column);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsColumnBinary(unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQfformat(result, column);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	Oid GetColumnType(unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQftype(result, column);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsColumnTypeBinary(unsigned column) const noexcept {
 		/* 17 = bytea */
 		return GetColumnType(column) == 17;
@@ -191,14 +191,14 @@ public:
 	 * value is NULL.  Call IsValueNull() to find out whether the
 	 * real value was NULL or an empty string.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetValue(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return ::PQgetvalue(result, row, column);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	unsigned GetValueLength(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
@@ -206,7 +206,7 @@ public:
 	}
 
 #if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
-	gcc_pure
+	[[gnu::pure]]
 	std::string_view GetValueView(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
@@ -214,7 +214,7 @@ public:
 	}
 #endif
 
-	gcc_pure
+	[[gnu::pure]]
 	bool GetBoolValue(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 		assert(!::PQgetisnull(result, row, column));
@@ -223,7 +223,7 @@ public:
 		return ::PQgetvalue(result, row, column)[0] == 't';
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	long GetLongValue(unsigned row, unsigned column) const {
 		assert(IsDefined());
 		assert(!::PQgetisnull(result, row, column));
@@ -239,7 +239,7 @@ public:
 		return value;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsValueNull(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
@@ -249,7 +249,7 @@ public:
 	/**
 	 * Is at least one of the given values `NULL`?
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsAnyValueNull(unsigned row,
 			    std::initializer_list<unsigned> columns) const noexcept {
 		for (unsigned column : columns)
@@ -263,7 +263,7 @@ public:
 	 * Obtains the given value, but return nullptr instead of an
 	 * empty string if the value is NULL.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetValueOrNull(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
@@ -272,7 +272,7 @@ public:
 			: GetValue(row, column);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	BinaryValue GetBinaryValue(unsigned row, unsigned column) const noexcept {
 		assert(IsColumnBinary(column));
 
@@ -285,7 +285,7 @@ public:
 	 * Returns an empty string if the result is not valid or if there
 	 * is no row or if the value is nullptr.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	std::string GetOnlyStringChecked() const noexcept;
 
 	class RowIterator;
@@ -301,12 +301,12 @@ public:
 			:result(_result), row(_row) {}
 
 	public:
-		gcc_pure
+		[[gnu::pure]]
 		unsigned GetColumnCount() const noexcept {
 			return ::PQnfields(result);
 		}
 
-		gcc_pure
+		[[gnu::pure]]
 		const char *GetValue(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
@@ -315,7 +315,7 @@ public:
 			return ::PQgetvalue(result, row, column);
 		}
 
-		gcc_pure
+		[[gnu::pure]]
 		unsigned GetValueLength(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
@@ -325,13 +325,13 @@ public:
 		}
 
 #if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
-		gcc_pure
+		[[gnu::pure]]
 		std::string_view GetValueView(unsigned column) const noexcept {
 			return {GetValue(column), GetValueLength(column)};
 		}
 #endif
 
-		gcc_pure
+		[[gnu::pure]]
 		bool GetBoolValue(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
@@ -342,7 +342,7 @@ public:
 			return ::PQgetvalue(result, row, column)[0] == 't';
 		}
 
-		gcc_pure
+		[[gnu::pure]]
 		long GetLongValue(unsigned column) const {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
@@ -360,7 +360,7 @@ public:
 			return value;
 		}
 
-		gcc_pure
+		[[gnu::pure]]
 		bool IsValueNull(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
@@ -372,7 +372,7 @@ public:
 		/**
 		 * Is at least one of the given values `NULL`?
 		 */
-		gcc_pure
+		[[gnu::pure]]
 		bool IsAnyValueNull(std::initializer_list<unsigned> columns) const noexcept {
 			for (unsigned column : columns)
 				if (IsValueNull(column))
@@ -381,7 +381,7 @@ public:
 			return false;
 		}
 
-		gcc_pure
+		[[gnu::pure]]
 		const char *GetValueOrNull(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));
@@ -392,7 +392,7 @@ public:
 				: GetValue(column);
 		}
 
-		gcc_pure
+		[[gnu::pure]]
 		BinaryValue GetBinaryValue(unsigned column) const noexcept {
 			assert(result != nullptr);
 			assert(row < (unsigned)::PQntuples(result));

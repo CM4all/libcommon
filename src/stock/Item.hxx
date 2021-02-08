@@ -33,7 +33,6 @@
 #pragma once
 
 #include "util/LeakDetector.hxx"
-#include "util/Compiler.h"
 
 #include <boost/intrusive/list_hook.hpp>
 
@@ -49,7 +48,7 @@ struct CreateStockItem {
 	/**
 	 * Wrapper for Stock::GetName()
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetStockName() const noexcept;
 
 	/**
@@ -100,7 +99,7 @@ struct StockItem
 	/**
 	 * Wrapper for Stock::GetName()
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetStockName() const noexcept;
 
 	/**

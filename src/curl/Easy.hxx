@@ -31,7 +31,6 @@
 #define CURL_EASY_HXX
 
 #include "String.hxx"
-#include "util/Compiler.h"
 
 #include <curl/curl.h>
 
@@ -191,7 +190,7 @@ public:
 	/**
 	 * Returns the response body's size, or -1 if that is unknown.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	int64_t GetContentLength() const noexcept {
 		double value;
 		return GetInfo(CURLINFO_CONTENT_LENGTH_DOWNLOAD, &value)

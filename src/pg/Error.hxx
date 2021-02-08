@@ -62,40 +62,40 @@ public:
 		return *this;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	ExecStatusType GetStatus() const noexcept {
 		return result.GetStatus();
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	const char *GetType() const noexcept {
 		return result.GetErrorType();
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsType(const char *type) const noexcept;
 
-	gcc_pure
+	[[gnu::pure]]
 	bool HasTypePrefix(StringView type_prefix) const noexcept;
 
 	/**
 	 * Is this error fatal, i.e. has the connection become
 	 * unusable?
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsFatal() const noexcept;
 
 	/**
 	 * Is this a serialization failure, i.e. a problem with "BEGIN
 	 * SERIALIZABLE" or Pg::Connection::BeginSerializable().
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsSerializationFailure() const noexcept {
 		// https://www.postgresql.org/docs/current/static/errcodes-appendix.html
 		return IsType("40001");
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	const char *what() const noexcept override {
 		return result.GetErrorMessage();
 	}

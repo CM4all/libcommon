@@ -34,8 +34,6 @@
 
 #include "util/ConstBuffer.hxx"
 
-#include "util/Compiler.h"
-
 #include <cstddef>
 
 namespace Pg {
@@ -49,7 +47,7 @@ struct BinaryValue : ConstBuffer<void> {
 	constexpr BinaryValue(const void *_value, size_t _size) noexcept
 		:ConstBuffer<void>(_value, _size) {}
 
-	gcc_pure
+	[[gnu::pure]]
 	bool ToBool() const noexcept {
 		return size == 1 && data != nullptr && *(const bool *)data;
 	}

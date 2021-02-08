@@ -35,12 +35,13 @@
 #include "system/Error.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/CharUtil.hxx"
+#include "util/Compiler.h"
 
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
 
-gcc_pure
+[[gnu::pure]]
 static bool
 OnlyDigits(const char *p, size_t size) noexcept
 {

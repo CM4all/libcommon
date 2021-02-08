@@ -32,19 +32,17 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 struct StringView;
 
 /**
  * Determines if the specified name consists only of valid characters
  * (RFC 822 3.2).
  */
-gcc_pure
+[[gnu::pure]]
 bool
 http_header_name_valid(const char *name) noexcept;
 
-gcc_pure
+[[gnu::pure]]
 bool
 http_header_name_valid(StringView name) noexcept;
 
@@ -53,6 +51,6 @@ http_header_name_valid(StringView name) noexcept;
  * addition to the list in RFC 2616 13.5.1, "Content-Length" is also a
  * hop-by-hop header according to this function.
  */
-gcc_pure
+[[gnu::pure]]
 bool
 http_header_is_hop_by_hop(const char *name) noexcept;

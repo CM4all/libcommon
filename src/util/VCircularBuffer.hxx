@@ -124,7 +124,7 @@ public:
 	/**
 	 * @return the number of bytes used in the given buffer
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	size_t GetMemoryUsage() const noexcept {
 		if (empty())
 			return sizeof(*list);

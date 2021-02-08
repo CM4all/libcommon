@@ -115,14 +115,14 @@ TranslateParser::SetCgiAddress(ResourceAddress::Type type,
  *
  */
 
-gcc_pure
+[[gnu::pure]]
 static bool
 HasNullByte(ConstBuffer<void> p) noexcept
 {
 	return memchr(p.data, 0, p.size) != nullptr;
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidNonEmptyString(StringView s) noexcept
 {
@@ -135,7 +135,7 @@ IsValidNameChar(char ch)
 	return IsAlphaNumericASCII(ch) || ch == '-' || ch == '_';
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidName(StringView s)
 {
@@ -149,14 +149,14 @@ IsValidName(StringView s)
 	return true;
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidAbsolutePath(const char *p) noexcept
 {
 	return *p == '/';
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidAbsolutePath(StringView p) noexcept
 {
@@ -165,7 +165,7 @@ IsValidAbsolutePath(StringView p) noexcept
 
 #if TRANSLATION_ENABLE_HTTP
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidAbsoluteUriPath(StringView p) noexcept
 {
@@ -449,7 +449,7 @@ FinishTranslateResponse(AllocatorPtr alloc,
 #endif
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 translate_client_check_pair(StringView payload) noexcept
 {
@@ -906,7 +906,7 @@ TranslateParser::HandleUmask(ConstBuffer<void> payload)
 	child_options->umask = umask;
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidCgroupSetName(StringView name)
 {
@@ -934,14 +934,14 @@ IsValidCgroupSetName(StringView name)
 	return true;
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsValidCgroupSetValue(StringView value)
 {
 	return !value.empty() && value.Find('/') == nullptr;
 }
 
-gcc_pure
+[[gnu::pure]]
 static std::pair<StringView, StringView>
 ParseCgroupSet(StringView payload)
 {

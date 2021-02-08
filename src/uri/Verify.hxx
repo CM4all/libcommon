@@ -36,15 +36,13 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 struct StringView;
 
 /**
  * Is this a valid domain name (i.e. host name) according to RFC 1034
  * 3.5?
  */
-gcc_pure
+[[gnu::pure]]
 bool
 VerifyDomainName(StringView name) noexcept;
 
@@ -52,21 +50,21 @@ VerifyDomainName(StringView name) noexcept;
  * Is this a valid "host:port" string (or "Host:" request header)
  * according to RFC 2616 3.2.2 / 14.23?
  */
-gcc_pure
+[[gnu::pure]]
 bool
 VerifyUriHostPort(StringView host_port) noexcept;
 
 /**
  * Verifies one path segment of an URI according to RFC 2396.
  */
-gcc_pure
+[[gnu::pure]]
 bool
 uri_segment_verify(StringView segment) noexcept;
 
 /**
  * Verifies the path portion of an URI according to RFC 2396.
  */
-gcc_pure
+[[gnu::pure]]
 bool
 uri_path_verify(StringView uri) noexcept;
 
@@ -82,7 +80,7 @@ uri_path_verify(StringView uri) noexcept;
  * It is assumed that the URI was already verified with
  * uri_path_verify().
  */
-gcc_pure
+[[gnu::pure]]
 bool
 uri_path_verify_paranoid(const char *uri) noexcept;
 
@@ -91,6 +89,6 @@ uri_path_verify_paranoid(const char *uri) noexcept;
  * be used before passing it to another server, not to be parsed by
  * this process.
  */
-gcc_pure
+[[gnu::pure]]
 bool
 uri_path_verify_quick(const char *uri) noexcept;

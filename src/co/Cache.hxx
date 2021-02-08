@@ -275,7 +275,7 @@ public:
 	}
 
 	template<typename K>
-	gcc_pure
+	[[gnu::pure]]
 	decltype(auto) GetIfCached(K &&key) noexcept {
 		return cache.Get(std::forward<K>(key));
 	}

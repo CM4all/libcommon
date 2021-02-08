@@ -33,7 +33,6 @@
 #pragma once
 
 #include "util/StringView.hxx"
-#include "util/Compiler.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -58,7 +57,7 @@ public:
 		return n >= 0;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	StringView GetCapture(unsigned i) const noexcept {
 		assert(n >= 0);
 
@@ -75,7 +74,7 @@ public:
 		return { s + start, size_t(end - start) };
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	size_t GetCaptureStart(unsigned i) const noexcept {
 
 		assert(n >= 0);
@@ -90,7 +89,7 @@ public:
 		return size_t(start);
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	size_t GetCaptureEnd(unsigned i) const noexcept {
 
 		assert(n >= 0);

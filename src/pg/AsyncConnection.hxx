@@ -220,7 +220,7 @@ public:
 	 * Returns true when no asynchronous query is in progress.  In
 	 * this case, SendQuery() may be called.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsIdle() const {
 		assert(IsDefined());
 

@@ -150,7 +150,7 @@ CurlRequest::Done(CURLcode result) noexcept
 	}
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 IsResponseBoundaryHeader(StringView s) noexcept
 {

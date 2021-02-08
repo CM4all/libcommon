@@ -32,8 +32,6 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 #include <stdint.h>
 
 namespace Net {
@@ -41,7 +39,7 @@ namespace Log {
 
 enum class Type : uint8_t;
 
-gcc_const
+[[gnu::const]]
 const char *
 ToString(Type type) noexcept;
 

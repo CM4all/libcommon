@@ -33,7 +33,6 @@
 #pragma once
 
 #include "util/ConstBuffer.hxx"
-#include "util/Compiler.h"
 
 #include <sodium/crypto_generichash.h>
 
@@ -68,7 +67,7 @@ public:
 	}
 
 	template<typename T>
-	gcc_pure
+	[[gnu::pure]]
 	T GetFinalT() noexcept {
 		T result;
 		FinalT(result);

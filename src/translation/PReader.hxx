@@ -34,7 +34,6 @@
 #define BENG_PROXY_TRANSLATE_READER_HXX
 
 #include "Protocol.hxx"
-#include "util/Compiler.h"
 #include "util/ConstBuffer.hxx"
 
 #include <assert.h>
@@ -78,7 +77,7 @@ public:
 		return header.command;
 	}
 
-	gcc_pure
+	[[gnu::pure]]
 	ConstBuffer<void> GetPayload() const noexcept {
 		assert(IsComplete());
 

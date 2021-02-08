@@ -53,7 +53,7 @@ public:
 	}
 
 	template<typename KK>
-	gcc_pure
+	[[gnu::pure]]
 	bool IsExpired(KK &&key, Expiry now) noexcept {
 		auto i = map.find(std::forward<KK>(key));
 		if (i == map.end())

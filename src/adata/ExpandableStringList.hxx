@@ -36,8 +36,6 @@
 #include "util/IntrusiveForwardList.hxx"
 #include "util/ShallowCopy.hxx"
 
-#include "util/Compiler.h"
-
 #include <iterator>
 
 class AllocatorPtr;
@@ -74,7 +72,7 @@ public:
 
 	ExpandableStringList(AllocatorPtr alloc, const ExpandableStringList &src);
 
-	gcc_pure
+	[[gnu::pure]]
 	bool IsEmpty() const {
 		return list.empty();
 	}
@@ -110,7 +108,7 @@ public:
 	}
 
 #if TRANSLATION_ENABLE_EXPAND
-	gcc_pure
+	[[gnu::pure]]
 	bool IsExpandable() const;
 
 	/**

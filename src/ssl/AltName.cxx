@@ -47,7 +47,6 @@ FillNameList(std::forward_list<std::string> &list, OpenSSL::GeneralNames src)
 	}
 }
 
-gcc_pure
 std::forward_list<std::string>
 GetSubjectAltNames(X509 &cert)
 {

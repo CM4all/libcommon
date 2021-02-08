@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2017-2021 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,8 +30,6 @@
 #ifndef STRING_LESS_HXX
 #define STRING_LESS_HXX
 
-#include "Compiler.h"
-
 #include <functional>
 
 #include <string.h>
@@ -41,7 +39,7 @@
  * compare type for std::map.
  */
 struct StringLess : std::binary_function<const char *, const char *, bool> {
-	gcc_pure
+	[[gnu::pure]]
 	bool operator()(const char *a, const char *b) const noexcept {
 		return strcmp(a, b) < 0;
 	}

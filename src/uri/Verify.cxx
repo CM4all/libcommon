@@ -33,6 +33,7 @@
 #include "Verify.hxx"
 #include "Chars.hxx"
 #include "util/CharUtil.hxx"
+#include "util/Compiler.h"
 #include "util/IterableSplitString.hxx"
 #include "util/StringView.hxx"
 
@@ -94,7 +95,7 @@ VerifyDomainName(StringView s) noexcept
 	return s.size <= 255 && IsNonEmptyListOf(s, '.', VerifyDomainLabel);
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 VerifyPort(StringView s) noexcept
 {
@@ -102,14 +103,14 @@ VerifyPort(StringView s) noexcept
 		std::all_of(s.begin(), s.end(), IsDigitASCII);
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 VerifyIPv6Segment(StringView s) noexcept
 {
 	return s.size <= 4 && std::all_of(s.begin(), s.end(), IsHexDigit);
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 VerifyIPv6(StringView host) noexcept
 {
@@ -117,7 +118,7 @@ VerifyIPv6(StringView host) noexcept
 		IsNonEmptyListOf(host, ':', VerifyIPv6Segment);
 }
 
-gcc_pure
+[[gnu::pure]]
 static bool
 VerifyUriHost(StringView host) noexcept
 {

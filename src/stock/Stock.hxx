@@ -39,7 +39,6 @@
 #include "event/DeferEvent.hxx"
 #include "io/Logger.hxx"
 #include "util/Cancellable.hxx"
-#include "util/Compiler.h"
 #include "util/DeleteDisposer.hxx"
 
 #include <boost/intrusive/list.hpp>
@@ -175,7 +174,7 @@ public:
 	 * Returns true if there are no items in the stock - neither idle
 	 * nor busy.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsEmpty() const noexcept {
 		return idle.empty() && busy.empty() && num_create == 0;
 	}

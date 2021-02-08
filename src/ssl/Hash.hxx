@@ -37,8 +37,6 @@
 #ifndef SSL_HASH_HXX
 #define SSL_HASH_HXX
 
-#include "util/Compiler.h"
-
 #include <openssl/ossl_typ.h>
 #include <openssl/sha.h>
 
@@ -48,11 +46,11 @@ struct SHA1Digest {
 	unsigned char data[SHA_DIGEST_LENGTH];
 };
 
-gcc_pure
+[[gnu::pure]]
 SHA1Digest
 CalcSHA1(ConstBuffer<void> src);
 
-gcc_pure
+[[gnu::pure]]
 SHA1Digest
 CalcSHA1(X509_NAME &src);
 

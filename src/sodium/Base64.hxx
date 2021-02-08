@@ -32,7 +32,6 @@
 
 #pragma once
 
-#include "util/Compiler.h"
 #include "util/StringBuffer.hxx"
 
 #include <sodium/utils.h>
@@ -45,7 +44,7 @@ class AllocatedString;
 template<typename T> class AllocatedArray;
 
 template<std::size_t src_size, int variant>
-gcc_pure
+[[gnu::pure]]
 auto
 FixedBase64(const void *src) noexcept
 {
@@ -56,17 +55,17 @@ FixedBase64(const void *src) noexcept
 	return dest;
 }
 
-gcc_pure
+[[gnu::pure]]
 AllocatedString
 UrlSafeBase64(ConstBuffer<void> src) noexcept;
 
-gcc_pure
+[[gnu::pure]]
 AllocatedString
 UrlSafeBase64(std::string_view src) noexcept;
 
 /**
  * @return the decoded string or a nulled instance on error
  */
-gcc_pure
+[[gnu::pure]]
 AllocatedArray<std::byte>
 DecodeUrlSafeBase64(std::string_view src) noexcept;

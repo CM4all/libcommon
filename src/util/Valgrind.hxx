@@ -33,11 +33,10 @@
 #pragma once
 
 #ifdef HAVE_VALGRIND_MEMCHECK_H
-#include "Compiler.h"
 
 #include <valgrind/memcheck.h>
 
-gcc_const
+[[gnu::const]]
 static inline bool
 HaveValgrind() noexcept
 {

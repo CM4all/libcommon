@@ -35,7 +35,7 @@
 #include "util/AllocatedString.hxx"
 #include "util/ConstBuffer.hxx"
 
-gcc_pure
+[[gnu::pure]]
 static AllocatedString
 SodiumBase64(ConstBuffer<void> src, int variant) noexcept
 {
@@ -59,7 +59,7 @@ UrlSafeBase64(std::string_view src) noexcept
 	return UrlSafeBase64(ConstBuffer<void>{src.data(), src.size()});
 }
 
-gcc_pure
+[[gnu::pure]]
 static AllocatedArray<std::byte>
 SodiumDecodeBase64(std::string_view src, int variant) noexcept
 {

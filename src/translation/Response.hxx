@@ -444,14 +444,14 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
-	gcc_pure
+	[[gnu::pure]]
 	bool VaryContains(TranslationCommand cmd) const {
 		return vary.Contains(cmd);
 	}
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
-	gcc_pure
+	[[gnu::pure]]
 	bool HasAuth() const {
 		return !auth.IsNull() ||
 			auth_file != nullptr;
@@ -494,7 +494,7 @@ struct TranslateResponse {
 	 * Does any response need to be expanded with
 	 * translate_response_expand()?
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	bool IsExpandable() const;
 
 	/**

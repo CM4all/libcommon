@@ -32,8 +32,6 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 #include <boost/json.hpp>
 
 #include <cstddef>
@@ -41,14 +39,14 @@
 
 namespace Json {
 
-gcc_pure
+[[gnu::pure]]
 static inline auto &
 Make(boost::json::object &o, std::string_view key) noexcept
 {
 	return o[key];
 }
 
-gcc_pure
+[[gnu::pure]]
 static inline auto &
 Make(boost::json::value &v, std::string_view key) noexcept
 {
@@ -58,7 +56,7 @@ Make(boost::json::value &v, std::string_view key) noexcept
 	return Make(v.get_object(), key);
 }
 
-gcc_pure
+[[gnu::pure]]
 static inline auto &
 Make(boost::json::array &a, std::size_t i) noexcept
 {
@@ -68,7 +66,7 @@ Make(boost::json::array &a, std::size_t i) noexcept
 	return a[i];
 }
 
-gcc_pure
+[[gnu::pure]]
 static inline auto &
 Make(boost::json::value &v, std::size_t i) noexcept
 {
@@ -79,7 +77,7 @@ Make(boost::json::value &v, std::size_t i) noexcept
 }
 
 template<typename J, typename K, typename... Args>
-gcc_pure
+[[gnu::pure]]
 static inline auto &
 Make(J &j, K &&key, Args&&... args)
 {

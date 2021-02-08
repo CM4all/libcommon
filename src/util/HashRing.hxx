@@ -33,8 +33,6 @@
 #ifndef HASH_RING_HXX
 #define HASH_RING_HXX
 
-#include "util/Compiler.h"
-
 #include <array>
 
 #include <stddef.h>
@@ -100,7 +98,7 @@ public:
 	 *
 	 * Before calling this, Build() must have been called.
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	Node &Pick(hash_t h) const noexcept {
 		return *buckets[h % N_BUCKETS];
 	}
@@ -113,7 +111,7 @@ public:
 	 * reference (may be equal to the previous node if there is only
 	 * one node)
 	 */
-	gcc_pure
+	[[gnu::pure]]
 	std::pair<hash_t, Node &> FindNext(hash_t h) const noexcept {
 		auto &node = Pick(h++);
 

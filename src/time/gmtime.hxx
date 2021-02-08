@@ -35,10 +35,8 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 #include <time.h>
 
-gcc_const
+[[gnu::const]]
 struct tm
 sysx_time_gmtime(time_t t) noexcept;

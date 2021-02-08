@@ -33,8 +33,6 @@
 #ifndef NET_INTERFACE_HXX
 #define NET_INTERFACE_HXX
 
-#include "util/Compiler.h"
-
 class SocketAddress;
 
 /**
@@ -43,7 +41,7 @@ class SocketAddress;
  * @return the interface index or 0 if no matching network interface
  * was found
  */
-gcc_pure
+[[gnu::pure]]
 unsigned
 FindNetworkInterface(SocketAddress address) noexcept;
 

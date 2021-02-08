@@ -33,18 +33,16 @@
 #ifndef HTTP_LIST_HXX
 #define HTTP_LIST_HXX
 
-#include "util/Compiler.h"
-
 struct StringView;
 
-gcc_pure
+[[gnu::pure]]
 bool
 http_list_contains(StringView list, StringView item) noexcept;
 
 /**
  * Case-insensitive version of http_list_contains().
  */
-gcc_pure
+[[gnu::pure]]
 bool
 http_list_contains_i(StringView list, StringView item) noexcept;
 

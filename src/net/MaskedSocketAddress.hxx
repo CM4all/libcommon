@@ -33,7 +33,6 @@
 #pragma once
 
 #include "AllocatedSocketAddress.hxx"
-#include "util/Compiler.h"
 
 #include <utility>
 
@@ -54,6 +53,6 @@ public:
 	 */
 	explicit MaskedSocketAddress(const char *s);
 
-	gcc_pure
+	[[gnu::pure]]
 	bool Matches(SocketAddress other) const noexcept;
 };
