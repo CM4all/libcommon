@@ -214,7 +214,7 @@ public:
 	 * @return false if no more data shall be delivered to the
 	 * handler; the #end method will also not be invoked
 	 */
-	virtual bool OnBufferedRemaining(gcc_unused size_t remaining) noexcept {
+	virtual bool OnBufferedRemaining(gcc_unused std::size_t remaining) noexcept {
 		return true;
 	}
 
@@ -482,7 +482,7 @@ public:
 	 * Returns the number of bytes in the input buffer.
 	 */
 	[[gnu::pure]]
-	size_t GetAvailable() const noexcept;
+	std::size_t GetAvailable() const noexcept;
 
 	[[gnu::pure]]
 	WritableBuffer<void> ReadBuffer() const noexcept {
@@ -496,7 +496,7 @@ public:
 	 * buffer.  Call this after ReadBuffer().  It may be called
 	 * repeatedly.
 	 */
-	void DisposeConsumed(size_t nbytes) noexcept;
+	void DisposeConsumed(std::size_t nbytes) noexcept;
 
 	/**
 	 * Mark the specified number of bytes of the input buffer as
@@ -504,7 +504,7 @@ public:
 	 * this method does not invalidate the buffer obtained from
 	 * ReadBuffer().  It may be called repeatedly.
 	 */
-	void KeepConsumed(size_t nbytes) noexcept;
+	void KeepConsumed(std::size_t nbytes) noexcept;
 
 	/**
 	 * The caller wants to read more data from the socket.  There
@@ -528,7 +528,7 @@ public:
 	 * in special cases when you want to push data to the socket right
 	 * before closing it.
 	 */
-	ssize_t DirectWrite(const void *data, size_t length) noexcept {
+	ssize_t DirectWrite(const void *data, std::size_t length) noexcept {
 		return base.Write(data, length);
 	}
 
@@ -538,9 +538,9 @@ public:
 	 * @return the positive number of bytes written or a #write_result
 	 * code
 	 */
-	ssize_t Write(const void *data, size_t length) noexcept;
+	ssize_t Write(const void *data, std::size_t length) noexcept;
 
-	ssize_t WriteV(const struct iovec *v, size_t n) noexcept;
+	ssize_t WriteV(const struct iovec *v, std::size_t n) noexcept;
 
 	/**
 	 * Transfer data from the given file descriptor to the socket.
@@ -549,7 +549,7 @@ public:
 	 * code
 	 */
 	ssize_t WriteFrom(int other_fd, FdType other_fd_type,
-			  size_t length) noexcept;
+			  std::size_t length) noexcept;
 
 	[[gnu::pure]]
 	bool IsReadyForWriting() const noexcept {

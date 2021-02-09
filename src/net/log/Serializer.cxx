@@ -51,17 +51,17 @@ public:
 	BufferWriter(uint8_t *_begin, uint8_t *_end) noexcept
 		:begin(_begin), end(_end), p(begin) {}
 
-	BufferWriter(uint8_t *_begin, size_t size) noexcept
+	BufferWriter(uint8_t *_begin, std::size_t size) noexcept
 		:BufferWriter(_begin, _begin + size) {}
 
-	BufferWriter(void *_p, size_t size) noexcept
+	BufferWriter(void *_p, std::size_t size) noexcept
 		:BufferWriter((uint8_t *)_p, size) {}
 
-	size_t size() const noexcept {
+	std::size_t size() const noexcept {
 		return p - begin;
 	}
 
-	void *WriteN(size_t nbytes) {
+	void *WriteN(std::size_t nbytes) {
 		void *result = p;
 
 		p += nbytes;
@@ -102,7 +102,7 @@ public:
 	}
 
 	void WriteString(const char *value) {
-		size_t nbytes = strlen(value) + 1;
+		std::size_t nbytes = strlen(value) + 1;
 		memcpy(WriteN(nbytes), value, nbytes);
 	}
 
@@ -122,8 +122,8 @@ public:
 
 }
 
-size_t
-Serialize(void *buffer, size_t size, const Datagram &d)
+std::size_t
+Serialize(void *buffer, std::size_t size, const Datagram &d)
 {
 	BufferWriter w(buffer, size);
 

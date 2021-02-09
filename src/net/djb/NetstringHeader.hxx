@@ -33,7 +33,7 @@
 #ifndef NETSTRING_HEADER_HXX
 #define NETSTRING_HEADER_HXX
 
-#include <stddef.h>
+#include <cstddef>
 
 struct StringView;
 
@@ -41,7 +41,7 @@ class NetstringHeader {
 	char buffer[32];
 
 public:
-	StringView operator()(size_t size) noexcept;
+	StringView operator()(std::size_t size) noexcept;
 };
 
 #endif

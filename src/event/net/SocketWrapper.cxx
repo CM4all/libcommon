@@ -138,7 +138,7 @@ SocketWrapper::IsReadyForWriting() const noexcept
 }
 
 ssize_t
-SocketWrapper::Write(const void *data, size_t length) noexcept
+SocketWrapper::Write(const void *data, std::size_t length) noexcept
 {
 	assert(IsValid());
 
@@ -146,7 +146,7 @@ SocketWrapper::Write(const void *data, size_t length) noexcept
 }
 
 ssize_t
-SocketWrapper::WriteV(const struct iovec *v, size_t n) noexcept
+SocketWrapper::WriteV(const struct iovec *v, std::size_t n) noexcept
 {
 	assert(IsValid());
 
@@ -157,7 +157,7 @@ SocketWrapper::WriteV(const struct iovec *v, size_t n) noexcept
 
 ssize_t
 SocketWrapper::WriteFrom(int other_fd, FdType other_fd_type,
-			 size_t length) noexcept
+			 std::size_t length) noexcept
 {
 	return SpliceToSocket(other_fd_type, other_fd,
 			      GetSocket().Get(), length);

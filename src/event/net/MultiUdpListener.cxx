@@ -78,7 +78,7 @@ try {
 
 void
 MultiUdpListener::Reply(SocketAddress address,
-			const void *data, size_t data_length)
+			const void *data, std::size_t data_length)
 {
 	assert(socket.IsDefined());
 
@@ -88,6 +88,6 @@ MultiUdpListener::Reply(SocketAddress address,
 	if (gcc_unlikely(nbytes < 0))
 		throw MakeErrno("Failed to send UDP packet");
 
-	if ((size_t)nbytes != data_length)
+	if ((std::size_t)nbytes != data_length)
 		throw std::runtime_error("Short send");
 }

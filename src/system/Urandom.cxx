@@ -40,8 +40,8 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/RuntimeError.hxx"
 
-static size_t
-Read(const char *path, FileDescriptor fd, void *p, size_t size)
+static std::size_t
+Read(const char *path, FileDescriptor fd, void *p, std::size_t size)
 {
 	ssize_t nbytes = fd.Read(p, size);
 	if (nbytes < 0)
@@ -54,29 +54,29 @@ Read(const char *path, FileDescriptor fd, void *p, size_t size)
 }
 
 static void
-FullRead(const char *path, FileDescriptor fd, void *_p, size_t size)
+FullRead(const char *path, FileDescriptor fd, void *_p, std::size_t size)
 try {
 	fd.FullRead(_p, size);
 } catch (...) {
 	std::throw_with_nested(FormatRuntimeError("Error on %s", path));
 }
 
-static size_t
-Read(const char *path, void *p, size_t size)
+static std::size_t
+Read(const char *path, void *p, std::size_t size)
 {
 	return Read(path, OpenReadOnly(path), p, size);
 }
 
 static void
-FullRead(const char *path, void *p, size_t size)
+FullRead(const char *path, void *p, std::size_t size)
 {
 	FullRead(path, OpenReadOnly(path), p, size);
 }
 
 #endif /* !HAVE_SYS_RANDOM_H */
 
-size_t
-UrandomRead(void *p, size_t size)
+std::size_t
+UrandomRead(void *p, std::size_t size)
 {
 #ifdef HAVE_SYS_RANDOM_H
 	ssize_t nbytes = getrandom(p, size, 0);
@@ -90,14 +90,14 @@ UrandomRead(void *p, size_t size)
 }
 
 void
-UrandomFill(void *p, size_t size)
+UrandomFill(void *p, std::size_t size)
 {
 #ifdef HAVE_SYS_RANDOM_H
 	ssize_t nbytes = getrandom(p, size, 0);
 	if (nbytes < 0)
 		throw MakeErrno("getrandom() failed");
 
-	if (size_t(nbytes) != size)
+	if (std::size_t(nbytes) != size)
 		throw std::runtime_error("getrandom() was incomplete");
 #else
 	FullRead("/dev/urandom", p, size);

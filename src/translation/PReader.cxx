@@ -35,9 +35,9 @@
 
 #include <string.h>
 
-size_t
+std::size_t
 TranslatePacketReader::Feed(AllocatorPtr alloc,
-			    const uint8_t *data, size_t length)
+			    const uint8_t *data, std::size_t length)
 {
 	assert(state == State::HEADER ||
 	       state == State::PAYLOAD ||
@@ -48,7 +48,7 @@ TranslatePacketReader::Feed(AllocatorPtr alloc,
 	if (state == State::COMPLETE)
 		state = State::HEADER;
 
-	size_t consumed = 0;
+	std::size_t consumed = 0;
 
 	if (state == State::HEADER) {
 		if (length < sizeof(header))
@@ -81,7 +81,7 @@ TranslatePacketReader::Feed(AllocatorPtr alloc,
 
 	assert(payload_position < header.length);
 
-	size_t nbytes = header.length - payload_position;
+	std::size_t nbytes = header.length - payload_position;
 	if (nbytes > length)
 		nbytes = length;
 

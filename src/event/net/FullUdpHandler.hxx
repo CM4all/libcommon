@@ -34,8 +34,6 @@
 
 #include <exception>
 
-#include <stddef.h>
-
 template<typename T> struct ConstBuffer;
 template<typename T> struct WritableBuffer;
 class SocketAddress;

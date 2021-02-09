@@ -33,7 +33,7 @@
 #ifndef NET_TO_STRING_HXX
 #define NET_TO_STRING_HXX
 
-#include <stddef.h>
+#include <cstddef>
 
 class SocketAddress;
 
@@ -44,14 +44,14 @@ class SocketAddress;
  * @return true on success
  */
 bool
-ToString(char *buffer, size_t buffer_size, SocketAddress address) noexcept;
+ToString(char *buffer, std::size_t buffer_size, SocketAddress address) noexcept;
 
 /**
  * Like ToString() above, but return the string pointer (or on error:
  * return the given fallback pointer).
  */
 const char *
-ToString(char *buffer, size_t buffer_size, SocketAddress address,
+ToString(char *buffer, std::size_t buffer_size, SocketAddress address,
 	 const char *fallback) noexcept;
 
 /**
@@ -61,6 +61,6 @@ ToString(char *buffer, size_t buffer_size, SocketAddress address,
  * @return true on success
  */
 bool
-HostToString(char *buffer, size_t buffer_size, SocketAddress address) noexcept;
+HostToString(char *buffer, std::size_t buffer_size, SocketAddress address) noexcept;
 
 #endif

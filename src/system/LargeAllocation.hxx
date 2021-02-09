@@ -33,16 +33,15 @@
 #ifndef LARGE_ALLOCATION_HXX
 #define LARGE_ALLOCATION_HXX
 
+#include <cstddef>
 #include <utility>
-
-#include <stddef.h>
 
 /**
  * Allocates anonymous memory using mmap().
  */
 class LargeAllocation {
 	void *data = nullptr;
-	size_t the_size;
+	std::size_t the_size;
 
 public:
 	LargeAllocation() = default;
@@ -50,7 +49,7 @@ public:
 	/**
 	 * Throws std::bad_alloc on error.
 	 */
-	explicit LargeAllocation(size_t _size);
+	explicit LargeAllocation(std::size_t _size);
 
 	LargeAllocation(LargeAllocation &&src) noexcept
 		:data(std::exchange(src.data, nullptr)), the_size(src.the_size) {}
@@ -78,12 +77,12 @@ public:
 		return data;
 	}
 
-	size_t size() const noexcept {
+	std::size_t size() const noexcept {
 		return the_size;
 	}
 
 private:
-	static void Free(void *p, size_t size) noexcept;
+	static void Free(void *p, std::size_t size) noexcept;
 };
 
 #endif

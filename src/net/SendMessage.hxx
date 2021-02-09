@@ -63,5 +63,5 @@ public:
  *
  * Throws on error.
  */
-size_t
+std::size_t
 SendMessage(SocketDescriptor s, const MessageHeader &mh, int flags);

@@ -40,8 +40,7 @@
 #include "util/ConstBuffer.hxx"
 #include "Compiler.h"
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstdint>
 
 template<typename T>
 struct FNVTraits {};

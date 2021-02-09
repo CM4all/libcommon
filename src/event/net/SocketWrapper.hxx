@@ -37,9 +37,10 @@
 #include "event/CoarseTimerEvent.hxx"
 #include "net/SocketDescriptor.hxx"
 
+#include <cstddef>
+
 #include <sys/types.h>
 #include <assert.h>
-#include <stddef.h>
 #include <stdint.h>
 
 template<typename T> class ForeignFifoBuffer;
@@ -186,12 +187,12 @@ public:
 	[[gnu::pure]]
 	bool IsReadyForWriting() const noexcept;
 
-	ssize_t Write(const void *data, size_t length) noexcept;
+	ssize_t Write(const void *data, std::size_t length) noexcept;
 
-	ssize_t WriteV(const struct iovec *v, size_t n) noexcept;
+	ssize_t WriteV(const struct iovec *v, std::size_t n) noexcept;
 
 	ssize_t WriteFrom(int other_fd, FdType other_fd_type,
-			  size_t length) noexcept;
+			  std::size_t length) noexcept;
 
 private:
 	void SocketEventCallback(unsigned events) noexcept;

@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace Net { namespace Log { struct Datagram; }}
 class FileDescriptor;
@@ -47,7 +47,7 @@ class FileDescriptor;
  * @return a pointer to the end of the line
  */
 char *
-FormatOneLine(char *buffer, size_t buffer_size,
+FormatOneLine(char *buffer, std::size_t buffer_size,
 	      const Net::Log::Datagram &d, bool site,
 	      bool anonymize=false) noexcept;
 

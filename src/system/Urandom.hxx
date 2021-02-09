@@ -33,7 +33,7 @@
 #ifndef BENG_PROXY_URANDOM_HXX
 #define BENG_PROXY_URANDOM_HXX
 
-#include <stddef.h>
+#include <cstddef>
 
 /**
  * Generate some pseudo-random data, and block until at least one byte
@@ -41,13 +41,13 @@
  *
  * @return the number of bytes filled with random data
  */
-size_t
-UrandomRead(void *p, size_t size);
+std::size_t
+UrandomRead(void *p, std::size_t size);
 
 /**
  * Fill the given buffer with pseudo-random data.  May block.  Throws on error.
  */
 void
-UrandomFill(void *p, size_t size);
+UrandomFill(void *p, std::size_t size);
 
 #endif

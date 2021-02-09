@@ -35,12 +35,13 @@
 #include "FdType.hxx"
 
 #include <cassert>
+#include <cstddef>
 
 #include <fcntl.h>
 #include <sys/sendfile.h>
 
 static inline ssize_t
-Splice(int src_fd, int dest_fd, size_t max_length) noexcept
+Splice(int src_fd, int dest_fd, std::size_t max_length) noexcept
 {
 	assert(src_fd != dest_fd);
 
@@ -49,7 +50,7 @@ Splice(int src_fd, int dest_fd, size_t max_length) noexcept
 }
 
 static inline ssize_t
-SpliceToPipe(int src_fd, int dest_fd, size_t max_length) noexcept
+SpliceToPipe(int src_fd, int dest_fd, std::size_t max_length) noexcept
 {
 	assert(src_fd != dest_fd);
 
@@ -58,7 +59,7 @@ SpliceToPipe(int src_fd, int dest_fd, size_t max_length) noexcept
 
 static inline ssize_t
 SpliceToSocket(FdType src_type, int src_fd,
-	       int dest_fd, size_t max_length) noexcept
+	       int dest_fd, std::size_t max_length) noexcept
 {
 	assert(src_fd != dest_fd);
 
@@ -74,7 +75,7 @@ SpliceToSocket(FdType src_type, int src_fd,
 static inline ssize_t
 SpliceTo(int src_fd, FdType src_type,
 	 int dest_fd, FdType dest_type,
-	 size_t max_length) noexcept
+	 std::size_t max_length) noexcept
 {
 	return IsAnySocket(dest_type)
 		? SpliceToSocket(src_type, src_fd, dest_fd, max_length)

@@ -39,12 +39,12 @@
  *
  * Throws on error.
  */
-size_t
+std::size_t
 SendMessage(SocketDescriptor s, const MessageHeader &mh, int flags)
 {
 	auto nbytes = sendmsg(s.Get(), &mh, flags);
 	if (nbytes < 0)
 		throw MakeErrno("sendmsg() failed");
 
-	return (size_t)nbytes;
+	return (std::size_t)nbytes;
 }

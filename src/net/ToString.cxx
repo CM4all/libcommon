@@ -43,10 +43,10 @@
 #include <stdint.h>
 
 static bool
-LocalToString(char *buffer, size_t buffer_size,
-	      const struct sockaddr_un *sun, size_t length) noexcept
+LocalToString(char *buffer, std::size_t buffer_size,
+	      const struct sockaddr_un *sun, std::size_t length) noexcept
 {
-	const size_t prefix = (size_t)((struct sockaddr_un *)nullptr)->sun_path;
+	const auto prefix = (std::size_t)((struct sockaddr_un *)nullptr)->sun_path;
 	assert(length >= prefix);
 	length -= prefix;
 	if (length >= buffer_size)
@@ -69,7 +69,7 @@ LocalToString(char *buffer, size_t buffer_size,
 }
 
 bool
-ToString(char *buffer, size_t buffer_size,
+ToString(char *buffer, std::size_t buffer_size,
 	 SocketAddress address) noexcept
 {
 	if (address.IsNull())
@@ -96,7 +96,7 @@ ToString(char *buffer, size_t buffer_size,
 		if (address.GetFamily() == AF_INET6) {
 			/* enclose IPv6 address in square brackets */
 
-			size_t length = strlen(buffer);
+			std::size_t length = strlen(buffer);
 			if (length + 4 >= buffer_size)
 				/* no more room */
 				return false;
@@ -119,7 +119,7 @@ ToString(char *buffer, size_t buffer_size,
 }
 
 const char *
-ToString(char *buffer, size_t buffer_size, SocketAddress address,
+ToString(char *buffer, std::size_t buffer_size, SocketAddress address,
 	 const char *fallback) noexcept
 {
 	return ToString(buffer, buffer_size, address)
@@ -128,7 +128,7 @@ ToString(char *buffer, size_t buffer_size, SocketAddress address,
 }
 
 bool
-HostToString(char *buffer, size_t buffer_size,
+HostToString(char *buffer, std::size_t buffer_size,
 	     SocketAddress address) noexcept
 {
 	if (address.IsNull())

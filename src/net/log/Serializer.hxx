@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace Net {
 namespace Log {
@@ -50,7 +50,7 @@ class BufferTooSmall {};
  *
  * @return the actual size of the buffer
  */
-size_t
-Serialize(void *buffer, size_t size, const Datagram &d);
+std::size_t
+Serialize(void *buffer, std::size_t size, const Datagram &d);
 
 }}

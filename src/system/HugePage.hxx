@@ -32,20 +32,20 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 #ifndef __linux__
 #error This header is Linux-specific.
 #endif
 
 // TODO: architectures other than x86_64 may have other values
-static constexpr size_t HUGE_PAGE_SIZE = 512 * 4096;
+static constexpr std::size_t HUGE_PAGE_SIZE = 512 * 4096;
 
 /**
  * Align the given size to the next huge page size, rounding up.
  */
-constexpr size_t
-AlignHugePageUp(size_t size) noexcept
+constexpr std::size_t
+AlignHugePageUp(std::size_t size) noexcept
 {
 	return ((size - 1) | (HUGE_PAGE_SIZE - 1)) + 1;
 }
@@ -58,8 +58,8 @@ static_assert(AlignHugePageUp(HUGE_PAGE_SIZE) == HUGE_PAGE_SIZE, "Rounding bug")
 /**
  * Align the given size to the next huge page size, rounding down.
  */
-constexpr size_t
-AlignHugePageDown(size_t size) noexcept
+constexpr std::size_t
+AlignHugePageDown(std::size_t size) noexcept
 {
 	return size & ~(HUGE_PAGE_SIZE - 1);
 }

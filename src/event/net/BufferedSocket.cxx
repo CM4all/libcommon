@@ -71,7 +71,7 @@ BufferedSocket::ClosedByPeer() noexcept
 		return false;
 	}
 
-	const size_t remaining = input.GetAvailable();
+	const std::size_t remaining = input.GetAvailable();
 
 	if (!handler->OnBufferedClosed() ||
 	    !handler->OnBufferedRemaining(remaining))
@@ -99,7 +99,7 @@ BufferedSocket::AsFD() noexcept
 	return base.AsFD();
 }
 
-size_t
+std::size_t
 BufferedSocket::GetAvailable() const noexcept
 {
 	assert(!ended);
@@ -108,7 +108,7 @@ BufferedSocket::GetAvailable() const noexcept
 }
 
 void
-BufferedSocket::DisposeConsumed(size_t nbytes) noexcept
+BufferedSocket::DisposeConsumed(std::size_t nbytes) noexcept
 {
 	assert(!ended);
 
@@ -125,7 +125,7 @@ BufferedSocket::DisposeConsumed(size_t nbytes) noexcept
 }
 
 void
-BufferedSocket::KeepConsumed(size_t nbytes) noexcept
+BufferedSocket::KeepConsumed(std::size_t nbytes) noexcept
 {
 	assert(!ended);
 
@@ -632,7 +632,7 @@ BufferedSocket::Read(bool _expect_more) noexcept
 }
 
 ssize_t
-BufferedSocket::Write(const void *data, size_t length) noexcept
+BufferedSocket::Write(const void *data, std::size_t length) noexcept
 {
 	ssize_t nbytes = base.Write(data, length);
 
@@ -655,7 +655,7 @@ BufferedSocket::Write(const void *data, size_t length) noexcept
 }
 
 ssize_t
-BufferedSocket::WriteV(const struct iovec *v, size_t n) noexcept
+BufferedSocket::WriteV(const struct iovec *v, std::size_t n) noexcept
 {
 	ssize_t nbytes = base.WriteV(v, n);
 
@@ -678,7 +678,7 @@ BufferedSocket::WriteV(const struct iovec *v, size_t n) noexcept
 
 ssize_t
 BufferedSocket::WriteFrom(int other_fd, FdType other_fd_type,
-			  size_t length) noexcept
+			  std::size_t length) noexcept
 {
 	ssize_t nbytes = base.WriteFrom(other_fd, other_fd_type, length);
 	if (gcc_unlikely(nbytes < 0)) {

@@ -35,7 +35,7 @@
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
-#include <stddef.h>
+#include <cstddef>
 
 class SocketAddress;
 class FullUdpHandler;
@@ -87,7 +87,7 @@ public:
 	 * Throws std::runtime_error on error.
 	 */
 	void Reply(SocketAddress address,
-		   const void *data, size_t data_length);
+		   const void *data, std::size_t data_length);
 
 	/**
 	 * Receive all pending datagram from the stocket and pass them

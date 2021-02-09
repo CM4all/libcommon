@@ -34,13 +34,13 @@
 
 #include "util/StringView.hxx"
 
-#include <assert.h>
-#include <stddef.h>
+#include <cassert>
+#include <cstddef>
 
 class MatchInfo {
 	friend class RegexPointer;
 
-	static constexpr size_t OVECTOR_SIZE = 30;
+	static constexpr std::size_t OVECTOR_SIZE = 30;
 
 	const char *s;
 	int n;
@@ -51,7 +51,7 @@ class MatchInfo {
 public:
 	MatchInfo() = default;
 
-	static constexpr size_t npos = size_t(-1);
+	static constexpr std::size_t npos = std::size_t(-1);
 
 	constexpr bool IsDefined() const noexcept {
 		return n >= 0;
@@ -71,11 +71,11 @@ public:
 		int end = ovector[2 * i + 1];
 		assert(end >= start);
 
-		return { s + start, size_t(end - start) };
+		return { s + start, std::size_t(end - start) };
 	}
 
 	[[gnu::pure]]
-	size_t GetCaptureStart(unsigned i) const noexcept {
+	std::size_t GetCaptureStart(unsigned i) const noexcept {
 
 		assert(n >= 0);
 
@@ -86,11 +86,11 @@ public:
 		if (start < 0)
 			return npos;
 
-		return size_t(start);
+		return std::size_t(start);
 	}
 
 	[[gnu::pure]]
-	size_t GetCaptureEnd(unsigned i) const noexcept {
+	std::size_t GetCaptureEnd(unsigned i) const noexcept {
 
 		assert(n >= 0);
 
@@ -101,6 +101,6 @@ public:
 		if (end < 0)
 			return npos;
 
-		return size_t(end);
+		return std::size_t(end);
 	}
 };

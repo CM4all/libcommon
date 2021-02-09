@@ -138,7 +138,7 @@ CoOpenReadOnly(Queue &queue, const char *path) noexcept
 	return CoOpenReadOnly(queue, FileDescriptor(AT_FDCWD), path);
 }
 
-size_t
+std::size_t
 CoReadOperation::GetValue() const
 {
 	if (value < 0)
@@ -148,7 +148,7 @@ CoReadOperation::GetValue() const
 }
 
 CoReadOperation
-CoRead(Queue &queue, FileDescriptor fd, void *buffer, size_t size,
+CoRead(Queue &queue, FileDescriptor fd, void *buffer, std::size_t size,
        off_t offset, int flags) noexcept
 {
 	auto *s = queue.GetSubmitEntry();
@@ -162,7 +162,7 @@ CoRead(Queue &queue, FileDescriptor fd, void *buffer, size_t size,
 	return op;
 }
 
-size_t
+std::size_t
 CoWriteOperation::GetValue() const
 {
 	if (value < 0)
@@ -172,7 +172,7 @@ CoWriteOperation::GetValue() const
 }
 
 CoWriteOperation
-CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, size_t size,
+CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, std::size_t size,
 	off_t offset, int flags) noexcept
 {
 	auto *s = queue.GetSubmitEntry();

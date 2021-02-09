@@ -32,12 +32,12 @@
 
 #include <assert.h>
 
-size_t
-FdReader::Read(void *data, size_t size)
+std::size_t
+FdReader::Read(void *data, std::size_t size)
 {
 	assert(fd.IsDefined());
 
-	ssize_t nbytes = fd.Read(data, size);
+	const auto nbytes = fd.Read(data, size);
 	if (nbytes < 0)
 		throw MakeErrno("Failed to read");
 

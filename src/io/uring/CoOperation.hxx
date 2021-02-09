@@ -35,6 +35,8 @@
 #include "Operation.hxx"
 #include "co/Compat.hxx"
 
+#include <cstddef>
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -133,11 +135,11 @@ public:
 		return CoAwaitable<CoReadOperation>{*this};
 	}
 
-	size_t GetValue() const;
+	std::size_t GetValue() const;
 };
 
 CoReadOperation
-CoRead(Queue &queue, FileDescriptor fd, void *buffer, size_t size,
+CoRead(Queue &queue, FileDescriptor fd, void *buffer, std::size_t size,
        off_t offset, int flags=0) noexcept;
 
 class CoWriteOperation final : public CoOperationBase {
@@ -146,11 +148,11 @@ public:
 		return CoAwaitable<CoWriteOperation>{*this};
 	}
 
-	size_t GetValue() const;
+	std::size_t GetValue() const;
 };
 
 CoWriteOperation
-CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, size_t size,
+CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, std::size_t size,
 	off_t offset, int flags=0) noexcept;
 
 } // namespace Uring
