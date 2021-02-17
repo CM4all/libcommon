@@ -35,9 +35,9 @@
 
 #include "ServerSocket.hxx"
 #include "net/SocketAddress.hxx"
+#include "util/DeleteDisposer.hxx"
+#include "util/IntrusiveList.hxx"
 #include "util/PrintException.hxx"
-
-#include <boost/intrusive/list.hpp>
 
 #include <tuple>
 
@@ -71,15 +71,13 @@ struct ApplyTuple<C, 0> {
  */
 template<typename C, typename... Params>
 class TemplateServerSocket final : public ServerSocket {
-	static_assert(std::is_base_of<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>,
-		      C>::value,
-		      "Must use list_base_hook<auto_unlink>");
+	static_assert(std::is_base_of_v<AutoUnlinkIntrusiveListHook, C>,
+		      "Must use AutoUnlinkIntrusiveListHook");
 
 	using Tuple = std::tuple<Params...>;
 	Tuple params;
 
-	boost::intrusive::list<C,
-			       boost::intrusive::constant_time_size<false>> connections;
+	IntrusiveList<C> connections;
 
 public:
 	template<typename... P>
@@ -91,8 +89,7 @@ public:
 	}
 
 	void CloseAllConnections() noexcept {
-		while (!connections.empty())
-			delete &connections.front();
+		connections.clear_and_dispose(DeleteDisposer{});
 	}
 
 protected:
