@@ -1,4 +1,8 @@
-boost = dependency('boost', version: '>= 1.54')
+if get_variable('libcommon_enable_boost', true)
+  event_boost_dep = dependency('boost', version: '>= 1.54')
+else
+  event_boost_dep = dependency('', required: false)
+endif
 
 event = static_library(
   'event',
@@ -15,7 +19,7 @@ event = static_library(
   'PipeLineReader.cxx',
   include_directories: inc,
   dependencies: [
-    boost,
+    event_boost_dep,
   ],
 )
 
@@ -24,6 +28,6 @@ event_dep = declare_dependency(
   dependencies: [
     system_dep,
     util_dep,
-    boost,
+    event_boost_dep,
   ],
 )
