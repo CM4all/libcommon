@@ -44,8 +44,6 @@
 #include "util/BindMethod.hxx"
 #endif
 
-#include <boost/intrusive/set.hpp>
-
 class DeferEvent;
 class SocketEvent;
 
