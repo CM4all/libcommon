@@ -1817,7 +1817,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		if (response.layout != nullptr) {
 			if (layout_items_builder.full())
-				throw std::runtime_error("too many BASE packet");
+				throw std::runtime_error("too many BASE packets");
 
 			layout_items_builder.emplace_back(TranslationLayoutItem::Type::BASE,
 							  string_payload.data);
@@ -1875,14 +1875,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::REGEX:
 #if TRANSLATION_ENABLE_EXPAND
+		if (!IsValidNonEmptyString(string_payload))
+			throw std::runtime_error("malformed REGEX packet");
+
+		if (response.layout != nullptr) {
+			if (layout_items_builder.full())
+				throw std::runtime_error("too many REGEX packets");
+
+			layout_items_builder.emplace_back(TranslationLayoutItem::Type::REGEX,
+							  string_payload.data);
+			return;
+		}
+
 		if (response.base == nullptr)
 			throw std::runtime_error("REGEX without BASE");
 
 		if (response.regex != nullptr)
 			throw std::runtime_error("duplicate REGEX");
-
-		if (!IsValidNonEmptyString(string_payload))
-			throw std::runtime_error("malformed REGEX packet");
 
 		response.regex = string_payload.data;
 		return;
