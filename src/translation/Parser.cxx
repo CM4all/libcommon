@@ -1819,7 +1819,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			if (layout_items_builder.full())
 				throw std::runtime_error("too many BASE packet");
 
-			layout_items_builder.emplace_back(string_payload.data);
+			layout_items_builder.emplace_back(TranslationLayoutItem::Type::BASE,
+							  string_payload.data);
 			return;
 		}
 
