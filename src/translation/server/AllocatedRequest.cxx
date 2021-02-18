@@ -260,6 +260,16 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		layout = {layout_buffer.data(), layout_buffer.size()};
 		break;
 
+	case TranslationCommand::BASE:
+		base_buffer = ToString(payload);
+		base = base_buffer.c_str();
+		break;
+
+	case TranslationCommand::REGEX:
+		regex_buffer = ToString(payload);
+		regex = regex_buffer.c_str();
+		break;
+
 	default:
 		throw FormatRuntimeError("unknown translation packet: %u",
 					 unsigned(cmd));

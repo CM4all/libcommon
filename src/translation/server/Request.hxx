@@ -67,6 +67,12 @@ struct Request {
 
 	ConstBuffer<void> layout = nullptr;
 
+	/**
+	 * The matching BASE/REGEX response packet for the given
+	 * LAYOUT.
+	 */
+	const char *base = nullptr, *regex = nullptr;
+
 	ConstBuffer<void> error_document = nullptr;
 
 	ConstBuffer<void> http_auth = nullptr;
