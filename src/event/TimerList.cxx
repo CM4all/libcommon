@@ -81,7 +81,11 @@ TimerList::Run(const Event::TimePoint now,
 
 		invoked = true;
 
+#ifdef NO_BOOST
+		t.Cancel();
+#else
 		timers.erase(i);
+#endif
 
 		t.Run();
 	}
