@@ -61,9 +61,10 @@ private:
 	AvahiWatchEvent received = AvahiWatchEvent(0);
 
 public:
-	AvahiWatch(EventLoop &_loop, int _fd, AvahiWatchEvent _event,
+	AvahiWatch(EventLoop &_loop,
+		   SocketDescriptor _fd, AvahiWatchEvent _event,
 		   AvahiWatchCallback _callback, void *_userdata) noexcept
-		:event(_loop, BIND_THIS_METHOD(OnSocketReady), SocketDescriptor(_fd)),
+		:event(_loop, BIND_THIS_METHOD(OnSocketReady), _fd),
 		 callback(_callback), userdata(_userdata) {
 		event.Schedule(FromAvahiWatchEvent(_event));
 	}
@@ -140,7 +141,8 @@ MyAvahiPoll::WatchNew(const AvahiPoll *api, int fd, AvahiWatchEvent event,
 {
 	const MyAvahiPoll &poll = *(const MyAvahiPoll *)api;
 
-	return new AvahiWatch(poll.event_loop, fd, event, callback, userdata);
+	return new AvahiWatch(poll.event_loop, SocketDescriptor(fd), event,
+			      callback, userdata);
 }
 
 AvahiTimeout *
