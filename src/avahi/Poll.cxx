@@ -43,12 +43,12 @@ FromAvahiWatchEvent(AvahiWatchEvent e) noexcept
 }
 
 static constexpr AvahiWatchEvent
-ToAvahiWatchEvent(unsigned events) noexcept
+ToAvahiWatchEvent(unsigned e) noexcept
 {
-	return AvahiWatchEvent((events & SocketEvent::READ ? AVAHI_WATCH_IN : 0) |
-			       (events & SocketEvent::WRITE ? AVAHI_WATCH_OUT : 0) |
-			       (events & SocketEvent::HANGUP ? AVAHI_WATCH_HUP : 0) |
-			       (events & SocketEvent::ERROR ? AVAHI_WATCH_ERR : 0));
+	return AvahiWatchEvent((e & SocketEvent::READ ? AVAHI_WATCH_IN : 0) |
+			       (e & SocketEvent::WRITE ? AVAHI_WATCH_OUT : 0) |
+			       (e & SocketEvent::ERROR ? AVAHI_WATCH_ERR : 0) |
+			       (e & SocketEvent::HANGUP ? AVAHI_WATCH_HUP : 0));
 }
 
 struct AvahiWatch final {
