@@ -39,16 +39,12 @@ static constexpr unsigned
 FromAvahiWatchEvent(AvahiWatchEvent e) noexcept
 {
 	return (e & AVAHI_WATCH_IN ? SocketEvent::READ : 0) |
-		(e & AVAHI_WATCH_OUT ? SocketEvent::WRITE : 0) |
-		(e & AVAHI_WATCH_HUP ? SocketEvent::HANGUP : 0) |
-		(e & AVAHI_WATCH_ERR ? SocketEvent::ERROR : 0);
+		(e & AVAHI_WATCH_OUT ? SocketEvent::WRITE : 0);
 }
 
 static constexpr AvahiWatchEvent
 ToAvahiWatchEvent(unsigned events) noexcept
 {
-	// TODO: what about AVAHI_WATCH_ERR and AVAHI_WATCH_HUP?
-
 	return AvahiWatchEvent((events & SocketEvent::READ ? AVAHI_WATCH_IN : 0) |
 			       (events & SocketEvent::WRITE ? AVAHI_WATCH_OUT : 0) |
 			       (events & SocketEvent::HANGUP ? AVAHI_WATCH_HUP : 0) |
