@@ -121,7 +121,7 @@ public:
 	}
 
 protected:
-	virtual void OnTimeout() noexcept {
+	void OnTimeout() noexcept {
 		callback(this, userdata);
 	}
 };
