@@ -52,7 +52,6 @@ ToAvahiWatchEvent(unsigned events) noexcept
 }
 
 struct AvahiWatch final {
-private:
 	SocketEvent event;
 
 	const AvahiWatchCallback callback;
@@ -82,7 +81,7 @@ public:
 		delete w;
 	}
 
-protected:
+private:
 	void OnSocketReady(unsigned events) noexcept {
 		received = ToAvahiWatchEvent(events);
 		callback(this, event.GetSocket().Get(), received, userdata);
@@ -91,8 +90,8 @@ protected:
 };
 
 struct AvahiTimeout final {
-private:
 	CoarseTimerEvent event;
+
 	const AvahiTimeoutCallback callback;
 	void *const userdata;
 
@@ -117,7 +116,7 @@ public:
 		delete t;
 	}
 
-protected:
+private:
 	void OnTimeout() noexcept {
 		callback(this, userdata);
 	}
