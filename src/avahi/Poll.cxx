@@ -77,7 +77,7 @@ public:
 		return w->received;
 	}
 
-	static void WatchFree(AvahiWatch *w) {
+	static void WatchFree(AvahiWatch *w) noexcept {
 		delete w;
 	}
 
