@@ -34,7 +34,6 @@
 #include "ConnectionListener.hxx"
 
 #include <avahi-common/error.h>
-#include <avahi-common/malloc.h>
 
 #include <cassert>
 
