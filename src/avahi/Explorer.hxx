@@ -41,19 +41,21 @@
 #include <map>
 #include <string>
 
-class MyAvahiClient;
-class AvahiServiceExplorerListener;
+namespace Avahi {
+
+class Client;
+class ServiceExplorerListener;
 
 /**
  * An explorer for services discovered by Avahi.  It creates a service
  * browser and resolves all objects.  A listener gets notified on each
  * change.
  */
-class AvahiServiceExplorer final : AvahiConnectionListener {
+class ServiceExplorer final : ConnectionListener {
 	const LLogger logger;
 
-	MyAvahiClient &avahi_client;
-	AvahiServiceExplorerListener &listener;
+	Client &avahi_client;
+	ServiceExplorerListener &listener;
 
 	const AvahiIfIndex query_interface;
 	const AvahiProtocol query_protocol;
@@ -63,14 +65,14 @@ class AvahiServiceExplorer final : AvahiConnectionListener {
 	AvahiServiceBrowser *avahi_browser = nullptr;
 
 	class Object {
-		AvahiServiceExplorer &explorer;
+		ServiceExplorer &explorer;
 
 		AvahiServiceResolver *resolver = nullptr;
 
 		AllocatedSocketAddress address;
 
 	public:
-		explicit Object(AvahiServiceExplorer &_explorer) noexcept
+		explicit Object(ServiceExplorer &_explorer) noexcept
 			:explorer(_explorer) {}
 		~Object() noexcept;
 
@@ -118,13 +120,13 @@ class AvahiServiceExplorer final : AvahiConnectionListener {
 	Map objects;
 
 public:
-	AvahiServiceExplorer(MyAvahiClient &_avahi_client,
-			     AvahiServiceExplorerListener &_listener,
-			     AvahiIfIndex _interface,
-			     AvahiProtocol _protocol,
-			     const char *_type,
-			     const char *_domain) noexcept;
-	~AvahiServiceExplorer() noexcept;
+	ServiceExplorer(Client &_avahi_client,
+			ServiceExplorerListener &_listener,
+			AvahiIfIndex _interface,
+			AvahiProtocol _protocol,
+			const char *_type,
+			const char *_domain) noexcept;
+	~ServiceExplorer() noexcept;
 
 private:
 	void ServiceBrowserCallback(AvahiServiceBrowser *b,
@@ -149,3 +151,5 @@ private:
 	void OnAvahiConnect(AvahiClient *client) noexcept override;
 	void OnAvahiDisconnect() noexcept override;
 };
+
+} // namespace Avahi

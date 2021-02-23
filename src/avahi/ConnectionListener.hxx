@@ -34,8 +34,12 @@
 
 #include <avahi-client/client.h>
 
-class AvahiConnectionListener {
+namespace Avahi {
+
+class ConnectionListener {
 public:
 	virtual void OnAvahiConnect(AvahiClient *client) noexcept = 0;
 	virtual void OnAvahiDisconnect() noexcept = 0;
 };
+
+} // namespace Avahi

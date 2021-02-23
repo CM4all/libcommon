@@ -52,6 +52,7 @@ ToAvahiWatchEvent(unsigned e) noexcept
 }
 
 struct AvahiWatch final {
+private:
 	SocketEvent event;
 
 	const AvahiWatchCallback callback;
@@ -61,8 +62,8 @@ struct AvahiWatch final {
 
 public:
 	AvahiWatch(EventLoop &_loop,
-		   SocketDescriptor _fd, AvahiWatchEvent _event,
-		   AvahiWatchCallback _callback, void *_userdata) noexcept
+	      SocketDescriptor _fd, AvahiWatchEvent _event,
+	      AvahiWatchCallback _callback, void *_userdata) noexcept
 		:event(_loop, BIND_THIS_METHOD(OnSocketReady), _fd),
 		 callback(_callback), userdata(_userdata) {
 		event.Schedule(FromAvahiWatchEvent(_event));
@@ -122,7 +123,9 @@ private:
 	}
 };
 
-MyAvahiPoll::MyAvahiPoll(EventLoop &_loop) noexcept
+namespace Avahi {
+
+Poll::Poll(EventLoop &_loop) noexcept
 	:event_loop(_loop)
 {
 	watch_new = WatchNew;
@@ -135,20 +138,22 @@ MyAvahiPoll::MyAvahiPoll(EventLoop &_loop) noexcept
 }
 
 AvahiWatch *
-MyAvahiPoll::WatchNew(const AvahiPoll *api, int fd, AvahiWatchEvent event,
+Poll::WatchNew(const AvahiPoll *api, int fd, AvahiWatchEvent event,
 		      AvahiWatchCallback callback, void *userdata) noexcept
 {
-	const MyAvahiPoll &poll = *(const MyAvahiPoll *)api;
+	const Poll &poll = *(const Poll *)api;
 
 	return new AvahiWatch(poll.event_loop, SocketDescriptor(fd), event,
 			      callback, userdata);
 }
 
 AvahiTimeout *
-MyAvahiPoll::TimeoutNew(const AvahiPoll *api, const struct timeval *tv,
+Poll::TimeoutNew(const AvahiPoll *api, const struct timeval *tv,
 			AvahiTimeoutCallback callback, void *userdata) noexcept
 {
-	const MyAvahiPoll &poll = *(const MyAvahiPoll *)api;
+	const Poll &poll = *(const Poll *)api;
 
 	return new AvahiTimeout(poll.event_loop, tv, callback, userdata);
 }
+
+} // namespace Avahi

@@ -44,16 +44,19 @@
 
 class EventLoop;
 class SocketAddress;
-class AvahiConnectionListener;
 
-class MyAvahiClient final {
+namespace Avahi {
+
+class ConnectionListener;
+
+class Client final {
 	const LLogger logger;
 
 	std::string name;
 
 	CoarseTimerEvent reconnect_timer;
 
-	MyAvahiPoll poll;
+	Poll poll;
 
 	AvahiClient *client = nullptr;
 	AvahiEntryGroup *group = nullptr;
@@ -72,7 +75,7 @@ class MyAvahiClient final {
 
 	std::forward_list<Service> services;
 
-	std::forward_list<AvahiConnectionListener *> listeners;
+	std::forward_list<ConnectionListener *> listeners;
 
 	/**
 	 * Shall the published services be visible?  This is controlled by
@@ -81,11 +84,11 @@ class MyAvahiClient final {
 	bool visible_services = true;
 
 public:
-	MyAvahiClient(EventLoop &event_loop, const char *_name) noexcept;
-	~MyAvahiClient() noexcept;
+	Client(EventLoop &event_loop, const char *_name) noexcept;
+	~Client() noexcept;
 
-	MyAvahiClient(const MyAvahiClient &) = delete;
-	MyAvahiClient &operator=(const MyAvahiClient &) = delete;
+	Client(const Client &) = delete;
+	Client &operator=(const Client &) = delete;
 
 	EventLoop &GetEventLoop() const noexcept {
 		return poll.GetEventLoop();
@@ -95,11 +98,11 @@ public:
 
 	void Activate() noexcept;
 
-	void AddListener(AvahiConnectionListener &listener) noexcept {
+	void AddListener(ConnectionListener &listener) noexcept {
 		listeners.push_front(&listener);
 	}
 
-	void RemoveListener(AvahiConnectionListener &listener) noexcept {
+	void RemoveListener(ConnectionListener &listener) noexcept {
 		listeners.remove(&listener);
 	}
 
@@ -139,3 +142,5 @@ private:
 
 	void OnReconnectTimer() noexcept;
 };
+
+} // namespace Avahi
