@@ -59,7 +59,7 @@ CheckZeroconfServiceType(const char *type);
  * Throws exception on error.
  *
  * @param value the configured value
-
+ *
  * @param default_suffix the suffix to be appended to the service name
  * (without the leading dot); valid values are "_tcp" and "_udp"
  */
