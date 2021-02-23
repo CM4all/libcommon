@@ -270,6 +270,9 @@ Client::ClientCallback(AvahiClient *c, AvahiClientState state) noexcept
 		if (group != nullptr)
 			avahi_entry_group_reset(group);
 
+		for (auto *l : listeners)
+			l->OnAvahiChanged();
+
 		break;
 
 	case AVAHI_CLIENT_CONNECTING:
