@@ -86,8 +86,6 @@ public:
 	Publisher(const Publisher &) = delete;
 	Publisher &operator=(const Publisher &) = delete;
 
-	void Activate() noexcept;
-
 	void AddService(AvahiIfIndex interface, AvahiProtocol protocol,
 			const char *type, uint16_t port) noexcept;
 
