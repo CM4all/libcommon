@@ -33,6 +33,7 @@
 #include "Publisher.hxx"
 #include "Service.hxx"
 #include "Client.hxx"
+#include "Error.hxx"
 #include "net/SocketAddress.hxx"
 
 #include <avahi-common/error.h>
@@ -128,38 +129,57 @@ Publisher::GroupCallback(AvahiEntryGroup *g,
 	publisher.GroupCallback(g, state);
 }
 
+static void
+AddService(AvahiEntryGroup &group, const Service &service,
+	   const char *name)
+{
+	int error = avahi_entry_group_add_service(&group,
+						  service.interface,
+						  service.protocol,
+						  AvahiPublishFlags(0),
+						  name, service.type.c_str(),
+						  nullptr, nullptr,
+						  service.port, nullptr);
+	if (error != AVAHI_OK)
+		throw MakeError(error, "Failed to add Avahi service");
+}
+
+static void
+AddServices(AvahiEntryGroup &group,
+	    const std::forward_list<Service> &services, const char *name)
+{
+	for (const auto &i : services)
+		AddService(group, i, name);
+}
+
+static EntryGroupPtr
+MakeEntryGroup(AvahiClient &c,
+	       const std::forward_list<Service> &services, const char *name,
+	       AvahiEntryGroupCallback callback, void *userdata)
+{
+	EntryGroupPtr group(avahi_entry_group_new(&c, callback, userdata));
+	if (!group)
+		throw MakeError(c, "Failed to create Avahi service group");
+
+	AddServices(*group, services, name);
+
+	int error = avahi_entry_group_commit(group.get());
+	if (error != AVAHI_OK)
+		throw MakeError(error, "Failed to commit Avahi service group");
+
+	return group;
+}
+
 void
 Publisher::RegisterServices(AvahiClient *c) noexcept
 {
 	assert(visible);
 
-	group.reset(avahi_entry_group_new(c, GroupCallback, this));
-	if (group == nullptr) {
-		logger(3, "Failed to create Avahi service group: ",
-		       avahi_strerror(avahi_client_errno(c)));
-		return;
-	}
-
-	for (const auto &i : services) {
-		int error = avahi_entry_group_add_service(group.get(),
-							  i.interface,
-							  i.protocol,
-							  AvahiPublishFlags(0),
-							  name.c_str(), i.type.c_str(),
-							  nullptr, nullptr,
-							  i.port, nullptr);
-		if (error < 0) {
-			logger(3, "Failed to add Avahi service ", i.type.c_str(),
-			       ": ", avahi_strerror(error));
-			return;
-		}
-	}
-
-	int result = avahi_entry_group_commit(group.get());
-	if (result < 0) {
-		logger(3, "Failed to commit Avahi service group: ",
-		       avahi_strerror(result));
-		return;
+	try {
+		group = MakeEntryGroup(*c, services, name.c_str(),
+				       GroupCallback, this);
+	} catch (...) {
+		logger(3, std::current_exception());
 	}
 }
 
