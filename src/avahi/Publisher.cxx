@@ -70,6 +70,10 @@ Publisher::Publisher(Client &_client, const char *_name,
 	 client(_client), services(std::move(_services))
 {
 	client.AddListener(*this);
+
+	auto *c = client.GetClient();
+	if (c != nullptr)
+		RegisterServices(c);
 }
 
 Publisher::~Publisher() noexcept
