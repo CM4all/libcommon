@@ -44,6 +44,7 @@ class SocketAddress;
 
 namespace Avahi {
 
+struct Service;
 class Client;
 
 /**
@@ -58,18 +59,6 @@ class Publisher final : ConnectionListener {
 	Client &client;
 
 	AvahiEntryGroup *group = nullptr;
-
-	struct Service {
-		AvahiIfIndex interface;
-		AvahiProtocol protocol;
-		std::string type;
-		uint16_t port;
-
-		Service(AvahiIfIndex _interface, AvahiProtocol _protocol,
-			const char *_type, uint16_t _port)
-			:interface(_interface), protocol(_protocol),
-			 type(_type), port(_port) {}
-	};
 
 	std::forward_list<Service> services;
 

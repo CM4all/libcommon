@@ -31,6 +31,7 @@
  */
 
 #include "Publisher.hxx"
+#include "Service.hxx"
 #include "Client.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/IPv6Address.hxx"
