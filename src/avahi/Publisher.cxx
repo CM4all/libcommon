@@ -69,6 +69,8 @@ Publisher::Publisher(Client &_client, const char *_name,
 	:logger("avahi"), name(MakePidName(_name)),
 	 client(_client), services(std::move(_services))
 {
+	assert(!services.empty());
+
 	client.AddListener(*this);
 
 	auto *c = client.GetClient();
@@ -190,7 +192,7 @@ Publisher::ShowServices() noexcept
 
 	visible = true;
 
-	if (services.empty() || group != nullptr)
+	if (group != nullptr)
 		return;
 
 	auto *c = client.GetClient();
@@ -201,7 +203,7 @@ Publisher::ShowServices() noexcept
 void
 Publisher::OnAvahiConnect(AvahiClient *c) noexcept
 {
-	if (!services.empty() && group == nullptr && visible)
+	if (group == nullptr && visible)
 		RegisterServices(c);
 }
 
