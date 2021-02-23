@@ -52,6 +52,10 @@ struct Service {
 		:interface(_interface), protocol(_protocol),
 		 type(_type), port(_port) {}
 
+	/**
+	 * @param v6only the value of IPV6_V6ONLY (if this describes
+	 * an IPv6 address)
+	 */
 	Service(const char *_type, const char *_interface,
 		SocketAddress address, bool v6only) noexcept;
 };

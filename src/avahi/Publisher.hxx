@@ -60,7 +60,7 @@ class Publisher final : ConnectionListener {
 
 	AvahiEntryGroup *group = nullptr;
 
-	std::forward_list<Service> services;
+	const std::forward_list<Service> services;
 
 	/**
 	 * Shall the published services be visible?  This is controlled by
@@ -69,21 +69,12 @@ class Publisher final : ConnectionListener {
 	bool visible_services = true;
 
 public:
-	Publisher(Client &client, const char *_name) noexcept;
+	Publisher(Client &client, const char *_name,
+		  std::forward_list<Service> _services) noexcept;
 	~Publisher() noexcept;
 
 	Publisher(const Publisher &) = delete;
 	Publisher &operator=(const Publisher &) = delete;
-
-	void AddService(AvahiIfIndex interface, AvahiProtocol protocol,
-			const char *type, uint16_t port) noexcept;
-
-	/**
-	 * @param v6only the value of IPV6_V6ONLY (if this describes
-	 * an IPv6 address)
-	 */
-	void AddService(const char *type, const char *interface,
-			SocketAddress address, bool v6only) noexcept;
 
 	/**
 	 * Temporarily hide all registered services.  You can undo this

@@ -64,9 +64,10 @@ MakePidName(const char *prefix)
 	return buffer;
 }
 
-Publisher::Publisher(Client &_client, const char *_name) noexcept
+Publisher::Publisher(Client &_client, const char *_name,
+		     std::forward_list<Service> _services) noexcept
 	:logger("avahi"), name(MakePidName(_name)),
-	 client(_client)
+	 client(_client), services(std::move(_services))
 {
 	client.AddListener(*this);
 }
@@ -79,26 +80,6 @@ Publisher::~Publisher() noexcept
 		avahi_entry_group_free(group);
 		group = nullptr;
 	}
-}
-
-void
-Publisher::AddService(AvahiIfIndex interface, AvahiProtocol protocol,
-		      const char *type, uint16_t port) noexcept
-{
-	/* cannot register any more services after initial connect */
-	assert(group == nullptr);
-
-	services.emplace_front(interface, protocol, type, port);
-}
-
-void
-Publisher::AddService(const char *type, const char *interface,
-		      SocketAddress address, bool v6only) noexcept
-{
-	/* cannot register any more services after initial connect */
-	assert(group == nullptr);
-
-	services.emplace_front(type, interface, address, v6only);
 }
 
 inline void
