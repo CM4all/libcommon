@@ -37,13 +37,10 @@
 #include "io/Logger.hxx"
 
 #include <avahi-client/client.h>
-#include <avahi-client/publish.h>
 
-#include <string>
 #include <forward_list>
 
 class EventLoop;
-class SocketAddress;
 
 namespace Avahi {
 
@@ -52,39 +49,16 @@ class ConnectionListener;
 class Client final {
 	const LLogger logger;
 
-	std::string name;
-
 	CoarseTimerEvent reconnect_timer;
 
 	Poll poll;
 
 	AvahiClient *client = nullptr;
-	AvahiEntryGroup *group = nullptr;
-
-	struct Service {
-		AvahiIfIndex interface;
-		AvahiProtocol protocol;
-		std::string type;
-		uint16_t port;
-
-		Service(AvahiIfIndex _interface, AvahiProtocol _protocol,
-			const char *_type, uint16_t _port)
-			:interface(_interface), protocol(_protocol),
-			 type(_type), port(_port) {}
-	};
-
-	std::forward_list<Service> services;
 
 	std::forward_list<ConnectionListener *> listeners;
 
-	/**
-	 * Shall the published services be visible?  This is controlled by
-	 * HideServices() and ShowServices().
-	 */
-	bool visible_services = true;
-
 public:
-	Client(EventLoop &event_loop, const char *_name) noexcept;
+	explicit Client(EventLoop &event_loop) noexcept;
 	~Client() noexcept;
 
 	Client(const Client &) = delete;
@@ -98,6 +72,10 @@ public:
 
 	void Activate() noexcept;
 
+	AvahiClient *GetClient() noexcept {
+		return client;
+	}
+
 	void AddListener(ConnectionListener &listener) noexcept {
 		listeners.push_front(&listener);
 	}
@@ -106,36 +84,7 @@ public:
 		listeners.remove(&listener);
 	}
 
-	void AddService(AvahiIfIndex interface, AvahiProtocol protocol,
-			const char *type, uint16_t port) noexcept;
-
-	/**
-	 * @param v6only the value of IPV6_V6ONLY (if this describes
-	 * an IPv6 address)
-	 */
-	void AddService(const char *type, const char *interface,
-			SocketAddress address, bool v6only) noexcept;
-
-	/**
-	 * Temporarily hide all registered services.  You can undo this
-	 * with ShowServices().
-	 */
-	void HideServices() noexcept;
-
-	/**
-	 * Undo HideServices().
-	 */
-	void ShowServices() noexcept;
-
 private:
-	void GroupCallback(AvahiEntryGroup *g,
-			   AvahiEntryGroupState state) noexcept;
-	static void GroupCallback(AvahiEntryGroup *g,
-				  AvahiEntryGroupState state,
-				  void *userdata) noexcept;
-
-	void RegisterServices(AvahiClient *c) noexcept;
-
 	void ClientCallback(AvahiClient *c, AvahiClientState state) noexcept;
 	static void ClientCallback(AvahiClient *c, AvahiClientState state,
 				   void *userdata) noexcept;

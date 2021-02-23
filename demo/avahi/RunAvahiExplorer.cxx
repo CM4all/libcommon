@@ -42,13 +42,12 @@
 class Instance final : Avahi::ServiceExplorerListener {
 	EventLoop event_loop;
 	ShutdownListener shutdown_listener;
-	Avahi::Client client;
+	Avahi::Client client{event_loop};
 	Avahi::ServiceExplorer explorer;
 
 public:
 	explicit Instance(const char *service)
 		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown)),
-		 client(event_loop, "RunAvahiExplorer"),
 		 explorer(client, *this,
 			  AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
 			  service, nullptr) {

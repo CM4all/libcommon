@@ -32,40 +32,16 @@
 
 #include "Client.hxx"
 #include "ConnectionListener.hxx"
-#include "net/SocketAddress.hxx"
-#include "net/IPv6Address.hxx"
-#include "net/Interface.hxx"
 
 #include <avahi-common/error.h>
 #include <avahi-common/malloc.h>
-#include <avahi-common/alternative.h>
 
-#include <stdio.h>
-#include <unistd.h>
-#include <net/if.h>
+#include <cassert>
 
 namespace Avahi {
 
-/**
- * Append the process id to the given prefix string.  This is used as
- * a workaround for an avahi-daemon bug/problem: when a service gets
- * restarted, and then binds to a new port number (e.g. beng-proxy
- * with automatic port assignment), we don't get notified, and so we
- * never query the new port.  By appending the process id to the
- * client name, we ensure that the exiting old process broadcasts
- * AVAHI_BROWSER_REMOVE, and hte new process broadcasts
- * AVAHI_BROWSER_NEW.
- */
-static std::string
-MakePidName(const char *prefix)
-{
-	char buffer[256];
-	snprintf(buffer, sizeof(buffer), "%s[%u]", prefix, (unsigned)getpid());
-	return buffer;
-}
-
-Client::Client(EventLoop &event_loop, const char *_name) noexcept
-	:logger("avahi"), name(MakePidName(_name)),
+Client::Client(EventLoop &event_loop) noexcept
+	:logger("avahi"),
 	 reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer)),
 	 poll(event_loop)
 {
@@ -85,62 +61,8 @@ Client::Activate() noexcept
 }
 
 void
-Client::AddService(AvahiIfIndex interface, AvahiProtocol protocol,
-		   const char *type, uint16_t port) noexcept
-{
-	/* cannot register any more services after initial connect */
-	assert(client == nullptr);
-
-	services.emplace_front(interface, protocol, type, port);
-
-	Activate();
-}
-
-void
-Client::AddService(const char *type, const char *interface,
-		   SocketAddress address, bool v6only) noexcept
-{
-	unsigned port = address.GetPort();
-	if (port == 0)
-		return;
-
-	unsigned i = 0;
-	if (interface != nullptr)
-		i = if_nametoindex(interface);
-
-	if (i == 0)
-		i = FindNetworkInterface(address);
-
-	AvahiIfIndex ii = i > 0
-		? AvahiIfIndex(i)
-		: AVAHI_IF_UNSPEC;
-
-	AvahiProtocol protocol = AVAHI_PROTO_UNSPEC;
-	switch (address.GetFamily()) {
-	case AF_INET:
-		protocol = AVAHI_PROTO_INET;
-		break;
-
-	case AF_INET6:
-		/* don't restrict to AVAHI_PROTO_INET6 if IPv4
-		   connections are possible (i.e. this is a wildcard
-		   listener and v6only disabled) */
-		if (v6only || !IPv6Address::Cast(address).IsAny())
-			protocol = AVAHI_PROTO_INET6;
-		break;
-	}
-
-	AddService(ii, protocol, type, port);
-}
-
-void
 Client::Close() noexcept
 {
-	if (group != nullptr) {
-		avahi_entry_group_free(group);
-		group = nullptr;
-	}
-
 	if (client != nullptr) {
 		for (auto *l : listeners)
 			l->OnAvahiDisconnect();
@@ -153,97 +75,12 @@ Client::Close() noexcept
 }
 
 void
-Client::GroupCallback(AvahiEntryGroup *g,
-			     AvahiEntryGroupState state) noexcept
-{
-	switch (state) {
-	case AVAHI_ENTRY_GROUP_ESTABLISHED:
-		break;
-
-	case AVAHI_ENTRY_GROUP_COLLISION:
-		if (!visible_services)
-			/* meanwhile, HideServices() has been called */
-			return;
-
-		/* pick a new name */
-
-		{
-			char *new_name = avahi_alternative_service_name(name.c_str());
-			name = new_name;
-			avahi_free(new_name);
-		}
-
-		/* And recreate the services */
-		RegisterServices(avahi_entry_group_get_client(g));
-		break;
-
-	case AVAHI_ENTRY_GROUP_FAILURE:
-		logger(3, "Avahi service group failure: ",
-		       avahi_strerror(avahi_client_errno(avahi_entry_group_get_client(g))));
-		break;
-
-	case AVAHI_ENTRY_GROUP_UNCOMMITED:
-	case AVAHI_ENTRY_GROUP_REGISTERING:
-		break;
-	}
-}
-
-void
-Client::GroupCallback(AvahiEntryGroup *g,
-		      AvahiEntryGroupState state,
-		      void *userdata) noexcept
-{
-	auto &client = *(Client *)userdata;
-	client.GroupCallback(g, state);
-}
-
-void
-Client::RegisterServices(AvahiClient *c) noexcept
-{
-	assert(visible_services);
-
-	if (group == nullptr) {
-		group = avahi_entry_group_new(c, GroupCallback, this);
-		if (group == nullptr) {
-			logger(3, "Failed to create Avahi service group: ",
-			       avahi_strerror(avahi_client_errno(c)));
-			return;
-		}
-	}
-
-	for (const auto &i : services) {
-		int error = avahi_entry_group_add_service(group,
-							  i.interface,
-							  i.protocol,
-							  AvahiPublishFlags(0),
-							  name.c_str(), i.type.c_str(),
-							  nullptr, nullptr,
-							  i.port, nullptr);
-		if (error < 0) {
-			logger(3, "Failed to add Avahi service ", i.type.c_str(),
-			       ": ", avahi_strerror(error));
-			return;
-		}
-	}
-
-	int result = avahi_entry_group_commit(group);
-	if (result < 0) {
-		logger(3, "Failed to commit Avahi service group: ",
-		       avahi_strerror(result));
-		return;
-	}
-}
-
-void
 Client::ClientCallback(AvahiClient *c, AvahiClientState state) noexcept
 {
 	int error;
 
 	switch (state) {
 	case AVAHI_CLIENT_S_RUNNING:
-		if (!services.empty() && group == nullptr && visible_services)
-			RegisterServices(c);
-
 		for (auto *l : listeners)
 			l->OnAvahiConnect(c);
 
@@ -267,9 +104,6 @@ Client::ClientCallback(AvahiClient *c, AvahiClientState state) noexcept
 
 	case AVAHI_CLIENT_S_COLLISION:
 	case AVAHI_CLIENT_S_REGISTERING:
-		if (group != nullptr)
-			avahi_entry_group_reset(group);
-
 		for (auto *l : listeners)
 			l->OnAvahiChanged();
 
@@ -301,34 +135,6 @@ Client::OnReconnectTimer() noexcept
 		reconnect_timer.Schedule(std::chrono::minutes(1));
 		return;
 	}
-}
-
-void
-Client::HideServices() noexcept
-{
-	if (!visible_services)
-		return;
-
-	visible_services = false;
-
-	if (group != nullptr) {
-		avahi_entry_group_free(group);
-		group = nullptr;
-	}
-}
-
-void
-Client::ShowServices() noexcept
-{
-	if (visible_services)
-		return;
-
-	visible_services = true;
-
-	if (services.empty() || client == nullptr || group != nullptr)
-		return;
-
-	RegisterServices(client);
 }
 
 } // namespace Avahi

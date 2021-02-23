@@ -9,6 +9,7 @@ avahi = static_library(
   'Check.cxx',
   'Client.cxx',
   'Poll.cxx',
+  'Publisher.cxx',
   'Explorer.cxx',
   include_directories: inc,
   dependencies: [
