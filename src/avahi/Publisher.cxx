@@ -95,7 +95,7 @@ Publisher::GroupCallback(AvahiEntryGroup *g,
 		break;
 
 	case AVAHI_ENTRY_GROUP_COLLISION:
-		if (!visible_services)
+		if (!visible)
 			/* meanwhile, HideServices() has been called */
 			return;
 
@@ -134,7 +134,7 @@ Publisher::GroupCallback(AvahiEntryGroup *g,
 void
 Publisher::RegisterServices(AvahiClient *c) noexcept
 {
-	assert(visible_services);
+	assert(visible);
 
 	if (group == nullptr) {
 		group = avahi_entry_group_new(c, GroupCallback, this);
@@ -171,10 +171,10 @@ Publisher::RegisterServices(AvahiClient *c) noexcept
 void
 Publisher::HideServices() noexcept
 {
-	if (!visible_services)
+	if (!visible)
 		return;
 
-	visible_services = false;
+	visible = false;
 
 	if (group != nullptr) {
 		avahi_entry_group_free(group);
@@ -185,10 +185,10 @@ Publisher::HideServices() noexcept
 void
 Publisher::ShowServices() noexcept
 {
-	if (visible_services)
+	if (visible)
 		return;
 
-	visible_services = true;
+	visible = true;
 
 	if (services.empty() || group != nullptr)
 		return;
@@ -201,7 +201,7 @@ Publisher::ShowServices() noexcept
 void
 Publisher::OnAvahiConnect(AvahiClient *c) noexcept
 {
-	if (!services.empty() && group == nullptr && visible_services)
+	if (!services.empty() && group == nullptr && visible)
 		RegisterServices(c);
 }
 

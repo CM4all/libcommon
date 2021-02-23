@@ -66,7 +66,7 @@ class Publisher final : ConnectionListener {
 	 * Shall the published services be visible?  This is controlled by
 	 * HideServices() and ShowServices().
 	 */
-	bool visible_services = true;
+	bool visible = true;
 
 public:
 	Publisher(Client &client, const char *_name,
