@@ -81,11 +81,6 @@ Publisher::Publisher(Client &_client, const char *_name,
 Publisher::~Publisher() noexcept
 {
 	client.RemoveListener(*this);
-
-	if (group != nullptr) {
-		avahi_entry_group_free(group);
-		group = nullptr;
-	}
 }
 
 inline void
@@ -138,17 +133,15 @@ Publisher::RegisterServices(AvahiClient *c) noexcept
 {
 	assert(visible);
 
+	group.reset(avahi_entry_group_new(c, GroupCallback, this));
 	if (group == nullptr) {
-		group = avahi_entry_group_new(c, GroupCallback, this);
-		if (group == nullptr) {
-			logger(3, "Failed to create Avahi service group: ",
-			       avahi_strerror(avahi_client_errno(c)));
-			return;
-		}
+		logger(3, "Failed to create Avahi service group: ",
+		       avahi_strerror(avahi_client_errno(c)));
+		return;
 	}
 
 	for (const auto &i : services) {
-		int error = avahi_entry_group_add_service(group,
+		int error = avahi_entry_group_add_service(group.get(),
 							  i.interface,
 							  i.protocol,
 							  AvahiPublishFlags(0),
@@ -162,7 +155,7 @@ Publisher::RegisterServices(AvahiClient *c) noexcept
 		}
 	}
 
-	int result = avahi_entry_group_commit(group);
+	int result = avahi_entry_group_commit(group.get());
 	if (result < 0) {
 		logger(3, "Failed to commit Avahi service group: ",
 		       avahi_strerror(result));
@@ -177,11 +170,7 @@ Publisher::HideServices() noexcept
 		return;
 
 	visible = false;
-
-	if (group != nullptr) {
-		avahi_entry_group_free(group);
-		group = nullptr;
-	}
+	group.reset();
 }
 
 void
@@ -210,17 +199,14 @@ Publisher::OnAvahiConnect(AvahiClient *c) noexcept
 void
 Publisher::OnAvahiDisconnect() noexcept
 {
-	if (group != nullptr) {
-		avahi_entry_group_free(group);
-		group = nullptr;
-	}
+	group.reset();
 }
 
 void
 Publisher::OnAvahiChanged() noexcept
 {
 	if (group != nullptr)
-		avahi_entry_group_reset(group);
+		avahi_entry_group_reset(group.get());
 }
 
 } // namespace Avahi
