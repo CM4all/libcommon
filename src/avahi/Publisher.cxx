@@ -205,8 +205,7 @@ Publisher::OnAvahiDisconnect() noexcept
 void
 Publisher::OnAvahiChanged() noexcept
 {
-	if (group != nullptr)
-		avahi_entry_group_reset(group.get());
+	group.reset();
 }
 
 } // namespace Avahi
