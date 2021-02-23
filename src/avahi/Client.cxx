@@ -44,19 +44,12 @@ Client::Client(EventLoop &event_loop) noexcept
 	 reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer)),
 	 poll(event_loop)
 {
+	reconnect_timer.Schedule({});
 }
 
 Client::~Client() noexcept
 {
 	Close();
-}
-
-void
-Client::Activate() noexcept
-{
-	assert(client == nullptr);
-
-	reconnect_timer.Schedule({});
 }
 
 void

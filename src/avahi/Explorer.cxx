@@ -179,7 +179,6 @@ ServiceExplorer::ServiceExplorer(Client &_avahi_client,
 	 query_domain(_domain == nullptr ? "" : _domain)
 {
 	avahi_client.AddListener(*this);
-	avahi_client.Activate();
 }
 
 ServiceExplorer::~ServiceExplorer() noexcept

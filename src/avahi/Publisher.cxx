@@ -89,8 +89,6 @@ Publisher::AddService(AvahiIfIndex interface, AvahiProtocol protocol,
 	assert(group == nullptr);
 
 	services.emplace_front(interface, protocol, type, port);
-
-	client.Activate();
 }
 
 void
@@ -101,8 +99,6 @@ Publisher::AddService(const char *type, const char *interface,
 	assert(group == nullptr);
 
 	services.emplace_front(type, interface, address, v6only);
-
-	client.Activate();
 }
 
 inline void

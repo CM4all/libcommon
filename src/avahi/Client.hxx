@@ -70,8 +70,6 @@ public:
 
 	void Close() noexcept;
 
-	void Activate() noexcept;
-
 	AvahiClient *GetClient() noexcept {
 		return client;
 	}
