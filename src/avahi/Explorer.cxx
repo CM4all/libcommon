@@ -43,12 +43,6 @@
 
 namespace Avahi {
 
-ServiceExplorer::Object::~Object() noexcept
-{
-	if (resolver != nullptr)
-		avahi_service_resolver_free(resolver);
-}
-
 inline const std::string &
 ServiceExplorer::Object::GetKey() const noexcept
 {
@@ -67,22 +61,22 @@ ServiceExplorer::Object::Resolve(AvahiClient *client, AvahiIfIndex interface,
 {
 	assert(resolver == nullptr);
 
-	resolver = avahi_service_resolver_new(client, interface, protocol,
-					      name, type, domain,
-					      /* workaround: the following
-						 should be
-						 AVAHI_PROTO_UNSPEC
-						 (because we can deal with
-						 either protocol), but
-						 then avahi-daemon
-						 sometimes returns IPv6
-						 addresses from the cache,
-						 even though the service
-						 was registered as IPv4
-						 only */
-					      protocol,
-					      AvahiLookupFlags(0),
-					      ServiceResolverCallback, this);
+	resolver.reset(avahi_service_resolver_new(client, interface, protocol,
+						  name, type, domain,
+						  /* workaround: the following
+						     should be
+						     AVAHI_PROTO_UNSPEC
+						     (because we can deal with
+						     either protocol), but
+						     then avahi-daemon
+						     sometimes returns IPv6
+						     addresses from the cache,
+						     even though the service
+						     was registered as IPv4
+						     only */
+						  protocol,
+						  AvahiLookupFlags(0),
+						  ServiceResolverCallback, this));
 	if (resolver == nullptr)
 		explorer.logger(2, "Failed to create Avahi service resolver: ",
 				avahi_strerror(avahi_client_errno(client)));
@@ -91,10 +85,7 @@ ServiceExplorer::Object::Resolve(AvahiClient *client, AvahiIfIndex interface,
 void
 ServiceExplorer::Object::CancelResolve() noexcept
 {
-	if (resolver != nullptr) {
-		avahi_service_resolver_free(resolver);
-		resolver = nullptr;
-	}
+	resolver.reset();
 }
 
 static AllocatedSocketAddress

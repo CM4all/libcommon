@@ -33,6 +33,7 @@
 #pragma once
 
 #include "Browser.hxx"
+#include "Resolver.hxx"
 #include "ConnectionListener.hxx"
 #include "io/Logger.hxx"
 #include "net/AllocatedSocketAddress.hxx"
@@ -68,14 +69,13 @@ class ServiceExplorer final : ConnectionListener {
 	class Object {
 		ServiceExplorer &explorer;
 
-		AvahiServiceResolver *resolver = nullptr;
+		ServiceResolverPtr resolver;
 
 		AllocatedSocketAddress address;
 
 	public:
 		explicit Object(ServiceExplorer &_explorer) noexcept
 			:explorer(_explorer) {}
-		~Object() noexcept;
 
 		Object(const Object &) = delete;
 		Object &operator=(const Object &) = delete;
