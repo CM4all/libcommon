@@ -118,7 +118,7 @@ Import(AvahiIfIndex interface, const AvahiAddress &src, unsigned port) noexcept
 	return AllocatedSocketAddress();
 }
 
-void
+inline void
 ServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 						 AvahiResolverEvent event,
 						 const AvahiAddress *a,
@@ -190,7 +190,7 @@ MakeKey(AvahiIfIndex interface,
 	return buffer;
 }
 
-void
+inline void
 ServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 					AvahiIfIndex interface,
 					AvahiProtocol protocol,
