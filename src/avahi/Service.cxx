@@ -30,30 +30,42 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Service.hxx"
+#include "net/SocketAddress.hxx"
+#include "net/IPv6Address.hxx"
+#include "net/Interface.hxx"
 
-#include <avahi-common/address.h>
-
-#include <cstdint>
-#include <string>
-
-class SocketAddress;
+#include <net/if.h>
 
 namespace Avahi {
 
-struct Service {
-	AvahiIfIndex interface = AVAHI_IF_UNSPEC;
-	AvahiProtocol protocol = AVAHI_PROTO_UNSPEC;
-	std::string type;
-	uint16_t port;
+Service::Service(const char *_type, const char *_interface,
+		 SocketAddress address, bool v6only) noexcept
+	:type(_type), port(address.GetPort())
+{
+	unsigned i = 0;
+	if (_interface != nullptr)
+		i = if_nametoindex(_interface);
 
-	Service(AvahiIfIndex _interface, AvahiProtocol _protocol,
-		const char *_type, uint16_t _port) noexcept
-		:interface(_interface), protocol(_protocol),
-		 type(_type), port(_port) {}
+	if (i == 0)
+		i = FindNetworkInterface(address);
 
-	Service(const char *_type, const char *_interface,
-		SocketAddress address, bool v6only) noexcept;
-};
+	if (i > 0)
+		interface = AvahiIfIndex(i);
+
+	switch (address.GetFamily()) {
+	case AF_INET:
+		protocol = AVAHI_PROTO_INET;
+		break;
+
+	case AF_INET6:
+		/* don't restrict to AVAHI_PROTO_INET6 if IPv4
+		   connections are possible (i.e. this is a wildcard
+		   listener and v6only disabled) */
+		if (v6only || !IPv6Address::Cast(address).IsAny())
+			protocol = AVAHI_PROTO_INET6;
+		break;
+	}
+}
 
 } // namespace Avahi

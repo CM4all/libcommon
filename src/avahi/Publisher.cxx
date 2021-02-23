@@ -34,8 +34,6 @@
 #include "Service.hxx"
 #include "Client.hxx"
 #include "net/SocketAddress.hxx"
-#include "net/IPv6Address.hxx"
-#include "net/Interface.hxx"
 
 #include <avahi-common/error.h>
 #include <avahi-common/malloc.h>
@@ -45,7 +43,6 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <net/if.h>
 
 namespace Avahi {
 
@@ -100,37 +97,12 @@ void
 Publisher::AddService(const char *type, const char *interface,
 		      SocketAddress address, bool v6only) noexcept
 {
-	unsigned port = address.GetPort();
-	if (port == 0)
-		return;
+	/* cannot register any more services after initial connect */
+	assert(group == nullptr);
 
-	unsigned i = 0;
-	if (interface != nullptr)
-		i = if_nametoindex(interface);
+	services.emplace_front(type, interface, address, v6only);
 
-	if (i == 0)
-		i = FindNetworkInterface(address);
-
-	AvahiIfIndex ii = i > 0
-		? AvahiIfIndex(i)
-		: AVAHI_IF_UNSPEC;
-
-	AvahiProtocol protocol = AVAHI_PROTO_UNSPEC;
-	switch (address.GetFamily()) {
-	case AF_INET:
-		protocol = AVAHI_PROTO_INET;
-		break;
-
-	case AF_INET6:
-		/* don't restrict to AVAHI_PROTO_INET6 if IPv4
-		   connections are possible (i.e. this is a wildcard
-		   listener and v6only disabled) */
-		if (v6only || !IPv6Address::Cast(address).IsAny())
-			protocol = AVAHI_PROTO_INET6;
-		break;
-	}
-
-	AddService(ii, protocol, type, port);
+	client.Activate();
 }
 
 inline void
