@@ -38,6 +38,13 @@ namespace Avahi {
 
 class ConnectionListener {
 public:
+	/**
+	 * The connection to the Avahi daemon has been established.
+	 *
+	 * Note that this may be called again after a collision
+	 * (AVAHI_CLIENT_S_COLLISION) or a host name change
+	 * (AVAHI_CLIENT_S_REGISTERING).
+	 */
 	virtual void OnAvahiConnect(AvahiClient *client) noexcept = 0;
 	virtual void OnAvahiDisconnect() noexcept = 0;
 };

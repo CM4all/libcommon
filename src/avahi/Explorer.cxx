@@ -254,6 +254,9 @@ ServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 void
 ServiceExplorer::OnAvahiConnect(AvahiClient *client) noexcept
 {
+	if (avahi_browser != nullptr)
+		return;
+
 	avahi_browser = avahi_service_browser_new(client,
 						  query_interface, query_protocol,
 						  query_type.c_str(),
