@@ -183,9 +183,6 @@ ServiceExplorer::ServiceExplorer(Client &_avahi_client,
 
 ServiceExplorer::~ServiceExplorer() noexcept
 {
-	if (avahi_browser != nullptr)
-		avahi_service_browser_free(avahi_browser);
-
 	avahi_client.RemoveListener(*this);
 }
 
@@ -256,12 +253,12 @@ ServiceExplorer::OnAvahiConnect(AvahiClient *client) noexcept
 	if (avahi_browser != nullptr)
 		return;
 
-	avahi_browser = avahi_service_browser_new(client,
-						  query_interface, query_protocol,
-						  query_type.c_str(),
-						  query_domain.empty() ? nullptr : query_domain.c_str(),
-						  AvahiLookupFlags(0),
-						  ServiceBrowserCallback, this);
+	avahi_browser.reset(avahi_service_browser_new(client,
+						      query_interface, query_protocol,
+						      query_type.c_str(),
+						      query_domain.empty() ? nullptr : query_domain.c_str(),
+						      AvahiLookupFlags(0),
+						      ServiceBrowserCallback, this));
 	if (avahi_browser == nullptr)
 		logger(2, "Failed to create Avahi service browser: ",
 		       avahi_strerror(avahi_client_errno(client)));
@@ -273,10 +270,7 @@ ServiceExplorer::OnAvahiDisconnect() noexcept
 	for (auto &i : objects)
 		i.second.CancelResolve();
 
-	if (avahi_browser != nullptr) {
-		avahi_service_browser_free(avahi_browser);
-		avahi_browser = nullptr;
-	}
+	avahi_browser.reset();
 }
 
 } // namespace Avahi

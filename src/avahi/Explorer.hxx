@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "Browser.hxx"
 #include "ConnectionListener.hxx"
 #include "io/Logger.hxx"
 #include "net/AllocatedSocketAddress.hxx"
@@ -62,7 +63,7 @@ class ServiceExplorer final : ConnectionListener {
 	const std::string query_type;
 	const std::string query_domain;
 
-	AvahiServiceBrowser *avahi_browser = nullptr;
+	ServiceBrowserPtr avahi_browser;
 
 	class Object {
 		ServiceExplorer &explorer;
