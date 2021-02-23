@@ -181,9 +181,6 @@ Publisher::ShowServices() noexcept
 
 	visible = true;
 
-	if (group != nullptr)
-		return;
-
 	auto *c = client.GetClient();
 	if (c != nullptr)
 		RegisterServices(c);
