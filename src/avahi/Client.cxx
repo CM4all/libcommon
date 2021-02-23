@@ -116,7 +116,7 @@ Client::ClientCallback(AvahiClient *c, AvahiClientState state) noexcept
 
 void
 Client::ClientCallback(AvahiClient *c, AvahiClientState state,
-			      void *userdata) noexcept
+		       void *userdata) noexcept
 {
 	auto &client = *(Client *)userdata;
 	client.ClientCallback(c, state);
