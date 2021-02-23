@@ -8,6 +8,7 @@ avahi = static_library(
   'avahi',
   'Check.cxx',
   'Client.cxx',
+  'Error.cxx',
   'Poll.cxx',
   'Publisher.cxx',
   'Service.cxx',
