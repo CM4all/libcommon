@@ -35,7 +35,6 @@
 #include "Browser.hxx"
 #include "Resolver.hxx"
 #include "ConnectionListener.hxx"
-#include "io/Logger.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 
 #include <avahi-client/lookup.h>
@@ -45,6 +44,7 @@
 
 namespace Avahi {
 
+class ErrorHandler;
 class Client;
 class ServiceExplorerListener;
 
@@ -54,7 +54,7 @@ class ServiceExplorerListener;
  * change.
  */
 class ServiceExplorer final : ConnectionListener {
-	const LLogger logger;
+	ErrorHandler &error_handler;
 
 	Client &avahi_client;
 	ServiceExplorerListener &listener;
@@ -126,7 +126,8 @@ public:
 			AvahiIfIndex _interface,
 			AvahiProtocol _protocol,
 			const char *_type,
-			const char *_domain) noexcept;
+			const char *_domain,
+			ErrorHandler &_error_handler) noexcept;
 	~ServiceExplorer() noexcept;
 
 private:

@@ -32,62 +32,19 @@
 
 #pragma once
 
-#include "Poll.hxx"
-#include "event/CoarseTimerEvent.hxx"
+#include <exception>
 
-#include <avahi-client/client.h>
-
-#include <forward_list>
-
-class EventLoop;
+struct AvahiClient;
 
 namespace Avahi {
 
-class ErrorHandler;
-class ConnectionListener;
-
-class Client final {
-	ErrorHandler &error_handler;
-
-	CoarseTimerEvent reconnect_timer;
-
-	Poll poll;
-
-	AvahiClient *client = nullptr;
-
-	std::forward_list<ConnectionListener *> listeners;
-
+class ErrorHandler {
 public:
-	Client(EventLoop &event_loop, ErrorHandler &_error_handler) noexcept;
-	~Client() noexcept;
-
-	Client(const Client &) = delete;
-	Client &operator=(const Client &) = delete;
-
-	EventLoop &GetEventLoop() const noexcept {
-		return poll.GetEventLoop();
-	}
-
-	void Close() noexcept;
-
-	AvahiClient *GetClient() noexcept {
-		return client;
-	}
-
-	void AddListener(ConnectionListener &listener) noexcept {
-		listeners.push_front(&listener);
-	}
-
-	void RemoveListener(ConnectionListener &listener) noexcept {
-		listeners.remove(&listener);
-	}
-
-private:
-	void ClientCallback(AvahiClient *c, AvahiClientState state) noexcept;
-	static void ClientCallback(AvahiClient *c, AvahiClientState state,
-				   void *userdata) noexcept;
-
-	void OnReconnectTimer() noexcept;
+	/**
+	 * @return true to keep retrying, false if the failed object
+	 * has been disposed
+	 */
+	virtual bool OnAvahiError(std::exception_ptr e) noexcept = 0;
 };
 
 } // namespace Avahi

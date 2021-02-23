@@ -32,6 +32,7 @@
 
 #include "avahi/Check.hxx"
 #include "avahi/Client.hxx"
+#include "avahi/ErrorHandler.hxx"
 #include "avahi/Explorer.hxx"
 #include "avahi/ExplorerListener.hxx"
 #include "event/Loop.hxx"
@@ -39,10 +40,10 @@
 #include "net/ToString.hxx"
 #include "util/PrintException.hxx"
 
-class Instance final : Avahi::ServiceExplorerListener {
+class Instance final : Avahi::ServiceExplorerListener, Avahi::ErrorHandler {
 	EventLoop event_loop;
 	ShutdownListener shutdown_listener;
-	Avahi::Client client{event_loop};
+	Avahi::Client client{event_loop, *this};
 	Avahi::ServiceExplorer explorer;
 
 public:
@@ -50,7 +51,8 @@ public:
 		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown)),
 		 explorer(client, *this,
 			  AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
-			  service, nullptr) {
+			  service, nullptr,
+			  *this) {
 		shutdown_listener.Enable();
 	}
 
@@ -63,7 +65,7 @@ private:
 		event_loop.Break();
 	}
 
-	/* virtual methods from class AvahiServiceExplorerListener */
+	/* virtual methods from class Avahi::ServiceExplorerListener */
 	void OnAvahiNewObject(const std::string &key,
 			      SocketAddress address) noexcept override {
 		char buffer[1024];
@@ -74,6 +76,12 @@ private:
 
 	void OnAvahiRemoveObject(const std::string &key) noexcept override {
 		printf("remove '%s'\n", key.c_str());
+	}
+
+	/* virtual methods from class Avahi::ErrorHandler */
+	bool OnAvahiError(std::exception_ptr e) noexcept override {
+		PrintException(e);
+		return true;
 	}
 };
 

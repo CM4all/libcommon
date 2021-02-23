@@ -34,6 +34,7 @@
 #include "Service.hxx"
 #include "Client.hxx"
 #include "Error.hxx"
+#include "ErrorHandler.hxx"
 #include "net/SocketAddress.hxx"
 
 #include <avahi-common/error.h>
@@ -66,8 +67,10 @@ MakePidName(const char *prefix)
 }
 
 Publisher::Publisher(Client &_client, const char *_name,
-		     std::forward_list<Service> _services) noexcept
-	:logger("avahi"), name(MakePidName(_name)),
+		     std::forward_list<Service> _services,
+		     ErrorHandler &_error_handler) noexcept
+	:error_handler(_error_handler),
+	 name(MakePidName(_name)),
 	 client(_client), services(std::move(_services))
 {
 	assert(!services.empty());
@@ -110,8 +113,8 @@ Publisher::GroupCallback(AvahiEntryGroup *g,
 		break;
 
 	case AVAHI_ENTRY_GROUP_FAILURE:
-		logger(3, "Avahi service group failure: ",
-		       avahi_strerror(avahi_client_errno(avahi_entry_group_get_client(g))));
+		error_handler.OnAvahiError(std::make_exception_ptr(MakeError(*avahi_entry_group_get_client(g),
+									     "Avahi service group failure")));
 		break;
 
 	case AVAHI_ENTRY_GROUP_UNCOMMITED:
@@ -179,7 +182,7 @@ Publisher::RegisterServices(AvahiClient *c) noexcept
 		group = MakeEntryGroup(*c, services, name.c_str(),
 				       GroupCallback, this);
 	} catch (...) {
-		logger(3, std::current_exception());
+		error_handler.OnAvahiError(std::current_exception());
 	}
 }
 

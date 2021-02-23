@@ -32,6 +32,8 @@
 
 #include "Explorer.hxx"
 #include "ExplorerListener.hxx"
+#include "Error.hxx"
+#include "ErrorHandler.hxx"
 #include "Client.hxx"
 #include "net/IPv4Address.hxx"
 #include "net/IPv6Address.hxx"
@@ -40,6 +42,7 @@
 #include <avahi-common/error.h>
 
 #include <algorithm>
+#include <cassert>
 
 namespace Avahi {
 
@@ -78,8 +81,8 @@ ServiceExplorer::Object::Resolve(AvahiClient *client, AvahiIfIndex interface,
 						  AvahiLookupFlags(0),
 						  ServiceResolverCallback, this));
 	if (resolver == nullptr)
-		explorer.logger(2, "Failed to create Avahi service resolver: ",
-				avahi_strerror(avahi_client_errno(client)));
+		explorer.error_handler.OnAvahiError(std::make_exception_ptr(MakeError(*client,
+										      "Failed to create Avahi service resolver")));
 }
 
 void
@@ -161,8 +164,9 @@ ServiceExplorer::ServiceExplorer(Client &_avahi_client,
 				 AvahiIfIndex _interface,
 				 AvahiProtocol _protocol,
 				 const char *_type,
-				 const char *_domain) noexcept
-	:logger("avahi"),
+				 const char *_domain,
+				 ErrorHandler &_error_handler) noexcept
+	:error_handler(_error_handler),
 	 avahi_client(_avahi_client),
 	 listener(_listener),
 	 query_interface(_interface), query_protocol(_protocol),
@@ -251,8 +255,8 @@ ServiceExplorer::OnAvahiConnect(AvahiClient *client) noexcept
 						      AvahiLookupFlags(0),
 						      ServiceBrowserCallback, this));
 	if (avahi_browser == nullptr)
-		logger(2, "Failed to create Avahi service browser: ",
-		       avahi_strerror(avahi_client_errno(client)));
+		error_handler.OnAvahiError(std::make_exception_ptr(MakeError(*client,
+									     "Failed to create Avahi service browser")));
 }
 
 void

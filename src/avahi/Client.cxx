@@ -32,6 +32,8 @@
 
 #include "Client.hxx"
 #include "ConnectionListener.hxx"
+#include "ErrorHandler.hxx"
+#include "Error.hxx"
 
 #include <avahi-common/error.h>
 
@@ -39,8 +41,8 @@
 
 namespace Avahi {
 
-Client::Client(EventLoop &event_loop) noexcept
-	:logger("avahi"),
+Client::Client(EventLoop &event_loop, ErrorHandler &_error_handler) noexcept
+	:error_handler(_error_handler),
 	 reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer)),
 	 poll(event_loop)
 {
@@ -85,7 +87,10 @@ Client::ClientCallback(AvahiClient *c, AvahiClientState state) noexcept
 
 			reconnect_timer.Schedule(std::chrono::seconds(10));
 		} else {
-			logger(3, "Avahi client failed: ", avahi_strerror(error));
+			if (!error_handler.OnAvahiError(std::make_exception_ptr(MakeError(error,
+											  "Avahi connection error"))))
+				return;
+
 			reconnect_timer.Schedule(std::chrono::minutes(1));
 		}
 
@@ -122,8 +127,10 @@ Client::OnReconnectTimer() noexcept
 				  ClientCallback, this,
 				  &error);
 	if (client == nullptr) {
-		logger(3, "Failed to create avahi client: ",
-		       avahi_strerror(error));
+		if (!error_handler.OnAvahiError(std::make_exception_ptr(MakeError(error,
+										  "Failed to create Avahi client"))))
+			return;
+
 		reconnect_timer.Schedule(std::chrono::minutes(1));
 		return;
 	}

@@ -34,7 +34,6 @@
 
 #include "EntryGroup.hxx"
 #include "ConnectionListener.hxx"
-#include "io/Logger.hxx"
 
 #include <avahi-client/publish.h>
 
@@ -46,6 +45,7 @@ class SocketAddress;
 namespace Avahi {
 
 struct Service;
+class ErrorHandler;
 class Client;
 
 /**
@@ -53,7 +53,7 @@ class Client;
  * Avahi/Zeroconf.
  */
 class Publisher final : ConnectionListener {
-	const LLogger logger;
+	ErrorHandler &error_handler;
 
 	std::string name;
 
@@ -71,7 +71,8 @@ class Publisher final : ConnectionListener {
 
 public:
 	Publisher(Client &client, const char *_name,
-		  std::forward_list<Service> _services) noexcept;
+		  std::forward_list<Service> _services,
+		  ErrorHandler &_error_handler) noexcept;
 	~Publisher() noexcept;
 
 	Publisher(const Publisher &) = delete;
