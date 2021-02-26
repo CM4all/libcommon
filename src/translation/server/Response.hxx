@@ -1340,6 +1340,10 @@ public:
 		return Packet(TranslationCommand::DISCARD_SESSION);
 	}
 
+	auto &DiscardRealmSession() noexcept {
+		return Packet(TranslationCommand::DISCARD_REALM_SESSION);
+	}
+
 	auto &SecureCookie() noexcept {
 		return Packet(TranslationCommand::SECURE_COOKIE);
 	}
