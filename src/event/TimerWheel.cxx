@@ -54,7 +54,7 @@ TimerWheel::Insert(CoarseTimerEvent &t,
 	auto &list = t.GetDue() > now
 		? buckets[BucketIndexAt(t.GetDue())]
 		/* if this timer is already due, insert it into the
-		   "ready" list to be invoked without delayx*/
+		   "ready" list to be invoked without delay */
 		: ready;
 
 	list.push_back(t);
