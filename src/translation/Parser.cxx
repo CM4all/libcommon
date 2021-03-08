@@ -124,9 +124,16 @@ HasNullByte(ConstBuffer<void> p) noexcept
 
 [[gnu::pure]]
 static bool
+IsValidString(StringView s) noexcept
+{
+	return !HasNullByte(s.ToVoid());
+}
+
+[[gnu::pure]]
+static bool
 IsValidNonEmptyString(StringView s) noexcept
 {
-	return !s.empty() > 0 && !HasNullByte(s.ToVoid());
+	return !s.empty() > 0 && IsValidString(s);
 }
 
 static constexpr bool
@@ -341,7 +348,7 @@ parse_header(AllocatorPtr alloc,
 {
 	const char *value = payload.Find(':');
 	if (value == nullptr || value == payload.data ||
-	    HasNullByte(payload.ToVoid()))
+	    IsValidString(payload))
 		throw FormatRuntimeError("malformed %s packet", packet_name);
 
 	const char *name = alloc.DupToLower(StringView(payload.data, value));
@@ -454,7 +461,7 @@ static bool
 translate_client_check_pair(StringView payload) noexcept
 {
 	return !payload.empty() && payload.front() != '=' &&
-		!HasNullByte(payload.ToVoid()) &&
+		!IsValidString(payload) &&
 		strchr(payload.data + 1, '=') != nullptr;
 }
 
@@ -576,7 +583,7 @@ static void
 translate_client_mount_tmp_tmpfs(NamespaceOptions *ns,
 				 StringView payload)
 {
-	if (HasNullByte(payload.ToVoid()))
+	if (IsValidString(payload))
 		throw std::runtime_error("malformed MOUNT_TMP_TMPFS packet");
 
 	if (ns == nullptr || ns->mount.mount_tmp_tmpfs != nullptr)
@@ -945,7 +952,7 @@ IsValidCgroupSetValue(StringView value)
 static std::pair<StringView, StringView>
 ParseCgroupSet(StringView payload)
 {
-	if (HasNullByte(payload.ToVoid()))
+	if (IsValidString(payload))
 		return std::make_pair(nullptr, nullptr);
 
 	const char *eq = payload.Find('=');
@@ -976,7 +983,7 @@ static bool
 CheckProbeSuffix(StringView payload) noexcept
 {
 	return payload.Find('/') == nullptr &&
-		!HasNullByte(payload.ToVoid());
+		!IsValidString(payload);
 }
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
@@ -1089,7 +1096,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::PATH_INFO:
 #if TRANSLATION_ENABLE_RADDRESS
-		if (HasNullByte(payload))
+		if (IsValidString(string_payload))
 			throw std::runtime_error("malformed PATH_INFO packet");
 
 		if (cgi_address != nullptr &&
@@ -1109,7 +1116,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::EXPAND_PATH:
 #if TRANSLATION_ENABLE_RADDRESS && TRANSLATION_ENABLE_EXPAND
-		if (HasNullByte(payload))
+		if (IsValidString(string_payload))
 			throw std::runtime_error("malformed EXPAND_PATH packet");
 
 		if (response.regex == nullptr) {
@@ -1138,7 +1145,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::EXPAND_PATH_INFO:
 #if TRANSLATION_ENABLE_RADDRESS && TRANSLATION_ENABLE_EXPAND
-		if (HasNullByte(payload))
+		if (IsValidString(string_payload))
 			throw std::runtime_error("malformed EXPAND_PATH_INFO packet");
 
 		if (response.regex == nullptr) {
@@ -3276,7 +3283,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::TOKEN:
-		if (HasNullByte(payload))
+		if (IsValidString(string_payload))
 			throw std::runtime_error("malformed TOKEN packet");
 		response.token = string_payload.data;
 		return;
@@ -3386,7 +3393,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::CHILD_TAG:
-		if (HasNullByte(payload))
+		if (IsValidString(string_payload))
 			throw std::runtime_error("malformed CHILD_TAG packet");
 
 		if (child_options == nullptr)
