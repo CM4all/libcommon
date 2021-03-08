@@ -156,6 +156,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		auth_token = auth_token_buffer.c_str();
 		break;
 
+	case TranslationCommand::RECOVER_SESSION:
+		recover_session_buffer = ToString(payload);
+		recover_session = recover_session_buffer.c_str();
+		break;
+
 	case TranslationCommand::CHECK:
 		check_buffer = ToString(payload);
 		check = {check_buffer.data(), check_buffer.size()};

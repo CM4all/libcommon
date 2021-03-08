@@ -245,6 +245,8 @@ struct TranslateResponse {
 	const char *cookie_domain;
 	const char *cookie_host;
 	const char *cookie_path;
+
+	const char *recover_session;
 #endif
 
 #if TRANSLATION_ENABLE_HTTP

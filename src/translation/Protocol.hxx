@@ -1078,6 +1078,13 @@ enum class TranslationCommand : uint16_t {
 	 * opaque and will be mirrored in the following request.
 	 */
 	LAYOUT = 227,
+
+	/**
+	 * A cookie value which allows the translation to recover
+	 * (part of) the session if beng-proxy has lost the session
+	 * (or the request arrives at a different worker).
+	 */
+	RECOVER_SESSION = 228,
 };
 
 struct TranslationHeader {

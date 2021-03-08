@@ -457,6 +457,11 @@ public:
 	}
 
 	template<typename P>
+	auto &RecoverSession(P payload) noexcept {
+		return Packet(TranslationCommand::RECOVER_SESSION, payload);
+	}
+
+	template<typename P>
 	auto &Check(P payload) noexcept {
 		return Packet(TranslationCommand::CHECK, payload);
 	}

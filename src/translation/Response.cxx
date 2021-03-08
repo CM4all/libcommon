@@ -217,6 +217,7 @@ TranslateResponse::Clear()
 	authentication_info = nullptr;
 
 	cookie_domain = cookie_host = cookie_path = nullptr;
+	recover_session = nullptr;
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
@@ -448,6 +449,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	cookie_domain = alloc.CheckDup(src.cookie_domain);
 	cookie_host = alloc.CheckDup(src.cookie_host);
 	cookie_path = alloc.CheckDup(src.cookie_path);
+	recover_session = alloc.CheckDup(src.recover_session);
 #endif
 
 #if TRANSLATION_ENABLE_HTTP

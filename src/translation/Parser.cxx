@@ -176,6 +176,26 @@ IsValidAbsoluteUriPath(StringView p) noexcept
 
 #endif
 
+#if TRANSLATION_ENABLE_SESSION
+
+/**
+ * Is this a valid cookie value character according to RFC 6265 4.1.1?
+ */
+static constexpr bool
+IsValidCookieValueChar(char ch) noexcept
+{
+	return IsASCII(ch) && !IsWhitespaceFast(ch) && ch != 0x7f &&
+		ch != '"' && ch != ',' && ch != ';' && ch != '\\';
+}
+
+static constexpr bool
+IsValidCookieValue(StringView s) noexcept
+{
+	return std::all_of(s.begin(), s.end(), IsValidCookieValueChar);
+}
+
+#endif
+
 #if TRANSLATION_ENABLE_TRANSFORMATION
 
 template<typename... Args>
@@ -3656,6 +3676,21 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		break;
 #endif
 		return;
+
+	case TranslationCommand::RECOVER_SESSION:
+#if TRANSLATION_ENABLE_SESSION
+		if (response.recover_session != nullptr)
+			throw std::runtime_error("duplicate RECOVER_SESSION packet");
+
+		if (string_payload.empty() ||
+		    !IsValidCookieValue(string_payload))
+			throw std::runtime_error("malformed RECOVER_SESSION packet");
+
+		response.recover_session = string_payload.data;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

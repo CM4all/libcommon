@@ -80,6 +80,8 @@ struct Request {
 	ConstBuffer<void> token_auth = nullptr;
 	const char *auth_token = nullptr;
 
+	const char *recover_session = nullptr;
+
 	ConstBuffer<void> check = nullptr;
 
 	ConstBuffer<void> want_full_uri = nullptr;
