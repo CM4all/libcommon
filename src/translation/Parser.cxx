@@ -133,7 +133,7 @@ IsValidString(StringView s) noexcept
 static bool
 IsValidNonEmptyString(StringView s) noexcept
 {
-	return !s.empty() > 0 && IsValidString(s);
+	return !s.empty() && IsValidString(s);
 }
 
 static constexpr bool
