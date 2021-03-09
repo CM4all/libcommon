@@ -65,6 +65,8 @@
 #include "http/HeaderName.hxx"
 #endif
 
+#include <algorithm>
+
 #include <assert.h>
 #include <string.h>
 
@@ -146,14 +148,7 @@ IsValidNameChar(char ch)
 static bool
 IsValidName(StringView s)
 {
-	if (s.empty())
-		return false;
-
-	for (char i : s)
-		if (!IsValidNameChar(i))
-			return false;
-
-	return true;
+	return !s.empty() && std::all_of(s.begin(), s.end(), IsValidNameChar);
 }
 
 [[gnu::pure]]
@@ -913,6 +908,31 @@ TranslateParser::HandleUmask(ConstBuffer<void> payload)
 	child_options->umask = umask;
 }
 
+static constexpr bool
+IsValidCgroupNameChar(char ch) noexcept
+{
+	return IsLowerAlphaASCII(ch) || ch == '_';
+}
+
+static constexpr bool
+IsValidCgroupName(StringView s) noexcept
+{
+	return std::all_of(s.begin(), s.end(), IsValidCgroupNameChar);
+}
+
+static constexpr bool
+IsValidCgroupAttributeNameChar(char ch) noexcept
+{
+	return IsLowerAlphaASCII(ch) || ch == '_';
+}
+
+static constexpr bool
+IsValidCgroupAttributeName(StringView s) noexcept
+{
+	return std::all_of(s.begin(), s.end(),
+			   IsValidCgroupAttributeNameChar);
+}
+
 [[gnu::pure]]
 static bool
 IsValidCgroupSetName(StringView name)
@@ -922,10 +942,8 @@ IsValidCgroupSetName(StringView name)
 		return false;
 
 	const StringView controller(name.data, dot);
-
-	for (char ch : controller)
-		if (!IsLowerAlphaASCII(ch) && ch != '_')
-			return false;
+	if (!IsValidCgroupName(controller))
+		return false;
 
 	if (controller.Equals("cgroup"))
 		/* this is not a controller, this is a core cgroup
@@ -933,10 +951,8 @@ IsValidCgroupSetName(StringView name)
 		return false;
 
 	const StringView attribute(dot + 1, name.end());
-
-	for (char ch : attribute)
-		if (!IsLowerAlphaASCII(ch) && ch != '.' && ch != '_')
-			return false;
+	if (!IsValidCgroupAttributeName(attribute))
+		return false;
 
 	return true;
 }
