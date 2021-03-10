@@ -1131,7 +1131,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::PATH_INFO:
 #if TRANSLATION_ENABLE_RADDRESS
-		if (IsValidString(string_payload))
+		if (!IsValidString(string_payload))
 			throw std::runtime_error("malformed PATH_INFO packet");
 
 		if (cgi_address != nullptr &&
@@ -1151,7 +1151,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::EXPAND_PATH:
 #if TRANSLATION_ENABLE_RADDRESS && TRANSLATION_ENABLE_EXPAND
-		if (IsValidString(string_payload))
+		if (!IsValidString(string_payload))
 			throw std::runtime_error("malformed EXPAND_PATH packet");
 
 		if (response.regex == nullptr) {
@@ -1180,7 +1180,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::EXPAND_PATH_INFO:
 #if TRANSLATION_ENABLE_RADDRESS && TRANSLATION_ENABLE_EXPAND
-		if (IsValidString(string_payload))
+		if (!IsValidString(string_payload))
 			throw std::runtime_error("malformed EXPAND_PATH_INFO packet");
 
 		if (response.regex == nullptr) {
@@ -3318,7 +3318,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::TOKEN:
-		if (IsValidString(string_payload))
+		if (!IsValidString(string_payload))
 			throw std::runtime_error("malformed TOKEN packet");
 		response.token = string_payload.data;
 		return;
@@ -3428,7 +3428,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::CHILD_TAG:
-		if (IsValidString(string_payload))
+		if (!IsValidString(string_payload))
 			throw std::runtime_error("malformed CHILD_TAG packet");
 
 		if (child_options == nullptr)
