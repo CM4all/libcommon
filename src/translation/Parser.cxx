@@ -363,7 +363,7 @@ parse_header(AllocatorPtr alloc,
 {
 	const char *value = payload.Find(':');
 	if (value == nullptr || value == payload.data ||
-	    IsValidString(payload))
+	    !IsValidString(payload))
 		throw FormatRuntimeError("malformed %s packet", packet_name);
 
 	const char *name = alloc.DupToLower(StringView(payload.data, value));
@@ -476,7 +476,7 @@ static bool
 translate_client_check_pair(StringView payload) noexcept
 {
 	return !payload.empty() && payload.front() != '=' &&
-		!IsValidString(payload) &&
+		IsValidString(payload) &&
 		strchr(payload.data + 1, '=') != nullptr;
 }
 
@@ -598,7 +598,7 @@ static void
 translate_client_mount_tmp_tmpfs(NamespaceOptions *ns,
 				 StringView payload)
 {
-	if (IsValidString(payload))
+	if (!IsValidString(payload))
 		throw std::runtime_error("malformed MOUNT_TMP_TMPFS packet");
 
 	if (ns == nullptr || ns->mount.mount_tmp_tmpfs != nullptr)
@@ -988,7 +988,7 @@ IsValidCgroupSetValue(StringView value)
 static std::pair<StringView, StringView>
 ParseCgroupSet(StringView payload)
 {
-	if (IsValidString(payload))
+	if (!IsValidString(payload))
 		return std::make_pair(nullptr, nullptr);
 
 	const char *eq = payload.Find('=');
@@ -1018,8 +1018,7 @@ TranslateParser::HandleCgroupSet(StringView payload)
 static bool
 CheckProbeSuffix(StringView payload) noexcept
 {
-	return payload.Find('/') == nullptr &&
-		!IsValidString(payload);
+	return payload.Find('/') == nullptr && IsValidString(payload);
 }
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
