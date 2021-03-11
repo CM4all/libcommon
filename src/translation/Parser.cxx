@@ -58,6 +58,7 @@
 #include "net/Parser.hxx"
 #endif
 #include "util/CharUtil.hxx"
+#include "util/Compiler.h"
 #include "util/RuntimeError.hxx"
 #include "util/StringCompare.hxx"
 
@@ -934,7 +935,10 @@ IsValidCgroupNameChar(char ch) noexcept
 	return IsLowerAlphaASCII(ch) || ch == '_';
 }
 
-static constexpr bool
+#if !GCC_OLDER_THAN(10,0)
+constexpr
+#endif
+static bool
 IsValidCgroupName(StringView s) noexcept
 {
 	return std::all_of(s.begin(), s.end(), IsValidCgroupNameChar);
@@ -946,7 +950,10 @@ IsValidCgroupAttributeNameChar(char ch) noexcept
 	return IsLowerAlphaASCII(ch) || ch == '_';
 }
 
-static constexpr bool
+#if !GCC_OLDER_THAN(10,0)
+constexpr
+#endif
+static bool
 IsValidCgroupAttributeName(StringView s) noexcept
 {
 	return std::all_of(s.begin(), s.end(),
