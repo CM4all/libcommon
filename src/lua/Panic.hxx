@@ -32,8 +32,6 @@
 
 #include "Error.hxx"
 
-#include "util/Compiler.h"
-
 extern "C" {
 #include <lua.h>
 }
@@ -64,7 +62,7 @@ public:
 	ScopePanicHandler &operator=(const ScopePanicHandler &) = delete;
 
 private:
-	gcc_noreturn
+	[[noreturn]]
 	static int PanicHandler(lua_State *L);
 };
 

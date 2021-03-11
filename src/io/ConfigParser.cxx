@@ -34,7 +34,6 @@
 #include "FileLineParser.hxx"
 #include "system/Error.hxx"
 #include "util/ScopeExit.hxx"
-#include "util/Compiler.h"
 
 #include <algorithm>
 #include <exception>
@@ -49,7 +48,7 @@
 namespace fs = std::filesystem;
 
 bool
-ConfigParser::PreParseLine(gcc_unused FileLineParser &line)
+ConfigParser::PreParseLine(FileLineParser &)
 {
 	return false;
 }

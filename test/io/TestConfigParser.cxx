@@ -34,8 +34,6 @@
 #include "io/FileLineParser.hxx"
 #include "util/ScopeExit.hxx"
 
-#include "util/Compiler.h"
-
 #include <gtest/gtest.h>
 
 #include <string.h>
