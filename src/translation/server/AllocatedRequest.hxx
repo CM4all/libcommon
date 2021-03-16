@@ -33,6 +33,7 @@
 #pragma once
 
 #include "Request.hxx"
+#include "util/AllocatedArray.hxx"
 
 #include <string>
 
@@ -64,6 +65,7 @@ class AllocatedRequest : public Request {
 	std::string auth_token_buffer;
 	std::string recover_session_buffer;
 	std::string check_buffer;
+	AllocatedArray<TranslationCommand> want_buffer;
 	std::string want_full_uri_buffer;
 	std::string chain_buffer, chain_header_buffer;
 	std::string file_not_found_buffer, content_type_lookup_buffer;

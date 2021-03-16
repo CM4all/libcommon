@@ -166,6 +166,10 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		check = {check_buffer.data(), check_buffer.size()};
 		break;
 
+	case TranslationCommand::WANT:
+		want = want_buffer = ConstBuffer<TranslationCommand>::FromVoid(payload);
+		break;
+
 	case TranslationCommand::WANT_FULL_URI:
 		want_full_uri_buffer = ToString(payload);
 		want_full_uri = {want_full_uri_buffer.data(), want_full_uri_buffer.size()};

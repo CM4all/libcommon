@@ -35,6 +35,10 @@
 #include "http/Status.h"
 #include "util/ConstBuffer.hxx"
 
+#include <cstdint>
+
+enum class TranslationCommand : uint16_t;
+
 namespace Translation::Server {
 
 struct Request {
@@ -84,6 +88,7 @@ struct Request {
 
 	ConstBuffer<void> check = nullptr;
 
+	ConstBuffer<TranslationCommand> want = nullptr;
 	ConstBuffer<void> want_full_uri = nullptr;
 
 	ConstBuffer<void> chain = nullptr;
