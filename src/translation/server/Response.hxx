@@ -494,6 +494,16 @@ public:
 				    value...);
 	}
 
+	auto &Want(std::initializer_list<TranslationCommand> cmds) noexcept {
+		ConstBuffer<TranslationCommand> payload(&*cmds.begin(),
+							cmds.size());
+		return Packet(TranslationCommand::WANT, payload.ToVoid());
+	}
+
+	auto &Want(const TranslationCommand &cmd) noexcept {
+		return PacketT(TranslationCommand::WANT, cmd);
+	}
+
 	template<typename P>
 	auto &WantFullUri(P payload) noexcept {
 		return Packet(TranslationCommand::WANT_FULL_URI, payload);
