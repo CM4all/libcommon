@@ -85,7 +85,7 @@ MakeCgroup(const char *mount_base_path, const char *controller,
 {
 	char path[PATH_MAX];
 
-	constexpr int max_path = sizeof(path) - 16;
+	constexpr int max_path = sizeof(path);
 	if (snprintf(path, max_path, "%s/%s%s/%s",
 		     mount_base_path, controller,
 		     delegated_group, sub_group) >= max_path)
