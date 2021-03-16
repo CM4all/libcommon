@@ -76,11 +76,6 @@ CgroupState::FromProcess(unsigned pid) noexcept
 
 	char line[256];
 	while (fgets(line, sizeof(line), file) != nullptr) {
-		if (StringStartsWith(line, "0::/")) {
-			have_unified = true;
-			continue;
-		}
-
 		char *p = line, *endptr;
 
 		strtoul(p, &endptr, 10);
@@ -89,8 +84,7 @@ CgroupState::FromProcess(unsigned pid) noexcept
 
 		char *const _name = endptr + 1;
 		char *const colon = strchr(_name, ':');
-		if (colon == nullptr || colon == _name ||
-		    colon[1] != '/' || colon[2] == '/')
+		if (colon == nullptr || colon[1] != '/' || colon[2] == '/')
 			continue;
 
 		StringView name(_name, colon);
@@ -101,7 +95,9 @@ CgroupState::FromProcess(unsigned pid) noexcept
 
 		if (name.Equals("name=systemd"))
 			systemd_path = path;
-		else {
+		else if (name.empty()) {
+			have_unified = true;
+		} else {
 			assignments.emplace_front(name, path);
 
 			auto &controllers = assignments.front().controllers;
