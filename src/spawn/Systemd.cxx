@@ -41,6 +41,7 @@
 #include "odbus/ScopeMatch.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
+#include "util/StringCompare.hxx"
 #include "util/PrintException.hxx"
 
 #include <systemd/sd-daemon.h>
@@ -89,7 +90,7 @@ LoadSystemdCgroupState(unsigned pid) noexcept
 
 	char line[256];
 	while (fgets(line, sizeof(line), file) != nullptr) {
-		if (strncmp(line, "0::/", 4) == 0) {
+		if (StringStartsWith(line, "0::/")) {
 			have_unified = true;
 			continue;
 		}
@@ -250,8 +251,8 @@ CreateSystemdScope(const char *name, const char *description,
 	   by systemd; try to recover by waiting for the UnitRemoved
 	   signal, and then try again to create the scope */
 	if (reply.GetType() == DBUS_MESSAGE_TYPE_ERROR &&
-	    strcmp(reply.GetErrorName(),
-		   "org.freedesktop.systemd1.UnitExists") == 0) {
+	    StringIsEqual(reply.GetErrorName(),
+			  "org.freedesktop.systemd1.UnitExists")) {
 
 		if (!Systemd::WaitUnitRemoved(connection, name, 2000)) {
 			/* if the old scope is still alive, stop it
