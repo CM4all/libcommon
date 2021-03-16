@@ -51,7 +51,11 @@ OpenCgroupController(const CgroupState &state, const char *controller)
 	if (c == state.controllers.end())
 		return {};
 
-	return OpenPath(OpenCgroupBase(), c->second.c_str());
+	auto base = OpenCgroupBase();
+	if (c->second.empty())
+		return base;
+
+	return OpenPath(base, c->second.c_str());
 }
 
 static UniqueFileDescriptor
