@@ -71,8 +71,8 @@ CgroupState::FromProcess(unsigned pid) noexcept
 
 	std::forward_list<ControllerAssignment> assignments;
 
-	std::string systemd_path;
-	bool have_unified = false;
+	std::string group_path;
+	bool have_unified = false, have_systemd = false;
 
 	char line[256];
 	while (fgets(line, sizeof(line), file) != nullptr) {
@@ -93,9 +93,11 @@ CgroupState::FromProcess(unsigned pid) noexcept
 		if (path.back() == '\n')
 			path.remove_suffix(1);
 
-		if (name.Equals("name=systemd"))
-			systemd_path = path;
-		else if (name.empty()) {
+		if (name.Equals("name=systemd")) {
+			group_path = path;
+			have_systemd = true;
+		} else if (name.empty()) {
+			group_path = path;
 			have_unified = true;
 		} else {
 			assignments.emplace_front(name, path);
@@ -106,14 +108,14 @@ CgroupState::FromProcess(unsigned pid) noexcept
 		}
 	}
 
-	if (systemd_path.empty())
+	if (group_path.empty())
 		/* no "systemd" controller found - disable the feature */
 		return CgroupState();
 
 	CgroupState state;
 
 	for (auto &i : assignments) {
-		if (i.path == systemd_path) {
+		if (i.path == group_path) {
 			for (auto &controller : i.controllers)
 				state.controllers.emplace(std::move(controller), i.name);
 
@@ -121,14 +123,15 @@ CgroupState::FromProcess(unsigned pid) noexcept
 		}
 	}
 
-	state.mounts.emplace_front("systemd");
+	if (have_systemd)
+		state.mounts.emplace_front("systemd");
 
 	if (have_unified)
 		state.mounts.emplace_front("unified");
 
-	// TODO: support pure unified hierarchy (no hybrid)
+	// TODO: support cgroup2 mount on /sys/fs/cgroup
 
-	state.group_path = std::move(systemd_path);
+	state.group_path = std::move(group_path);
 
 	return state;
 }
