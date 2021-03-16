@@ -31,6 +31,7 @@
  */
 
 #include "CgroupState.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringCompare.hxx"
@@ -126,10 +127,31 @@ CgroupState::FromProcess(unsigned pid) noexcept
 	if (have_systemd)
 		state.mounts.emplace_front("systemd");
 
-	if (have_unified)
-		state.mounts.emplace_front("unified");
+	if (have_unified) {
+		std::string_view unified_mount = "unified";
+		if (state.mounts.empty()) {
+			UniqueFileDescriptor fd;
+			if (!fd.OpenReadOnly("/sys/fs/cgroup/unified/cgroup.controllers")) {
+				unified_mount = {};
+				fd.OpenReadOnly("/sys/fs/cgroup/cgroup.controllers");
+			}
 
-	// TODO: support cgroup2 mount on /sys/fs/cgroup
+			if (fd.IsDefined()) {
+				ssize_t nbytes = fd.Read(line, sizeof(line));
+				if (nbytes > 0) {
+					if (line[nbytes - 1] == '\n')
+						--nbytes;
+
+					const StringView contents(line, nbytes);
+					for (std::string_view name : IterableSplitString(contents, ' '))
+						if (!name.empty())
+							state.controllers.emplace(name, unified_mount);
+				}
+			}
+		}
+
+		state.mounts.emplace_front(unified_mount);
+	}
 
 	state.group_path = std::move(group_path);
 
