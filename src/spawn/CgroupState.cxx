@@ -64,9 +64,9 @@ CgroupState::FromProcess(unsigned pid) noexcept
 
 		std::forward_list<std::string> controllers;
 
-		ControllerAssignment(StringView _name, StringView _path)
-			:name(_name.data, _name.size),
-			 path(_path.data, _path.size) {}
+		ControllerAssignment(std::string_view _name,
+				     std::string_view _path) noexcept
+			:name(_name), path(_path) {}
 	};
 
 	std::forward_list<ControllerAssignment> assignments;
@@ -95,18 +95,18 @@ CgroupState::FromProcess(unsigned pid) noexcept
 
 		StringView name(_name, colon);
 
-		StringView path(colon + 1);
+		std::string_view path(colon + 1);
 		if (path.back() == '\n')
-			--path.size;
+			path.remove_suffix(1);
 
 		if (name.Equals("name=systemd"))
-			systemd_path = std::string(path.data, path.size);
+			systemd_path = path;
 		else {
 			assignments.emplace_front(name, path);
 
 			auto &controllers = assignments.front().controllers;
-			for (StringView i : IterableSplitString(name, ','))
-				controllers.emplace_front(i.data, i.size);
+			for (std::string_view i : IterableSplitString(name, ','))
+				controllers.emplace_front(i);
 		}
 	}
 
