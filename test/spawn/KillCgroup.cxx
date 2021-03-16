@@ -32,7 +32,6 @@
 
 #include "spawn/Direct.hxx"
 #include "spawn/Prepared.hxx"
-#include "spawn/Systemd.hxx"
 #include "spawn/CgroupState.hxx"
 #include "spawn/CgroupKill.hxx"
 #include "event/Loop.hxx"
@@ -76,7 +75,7 @@ try {
 	if (!args.empty())
 		throw Usage{};
 
-	auto cgroup_state = LoadSystemdCgroupState(0);
+	auto cgroup_state = CgroupState::FromProcess();
 	cgroup_state.group_path = scope;
 
 	EventLoop event_loop;
