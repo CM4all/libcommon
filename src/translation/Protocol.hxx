@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 enum class TranslationCommand : uint16_t {
 	/**
