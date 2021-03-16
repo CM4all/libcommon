@@ -41,7 +41,10 @@ namespace Was {
 struct RequestBodyTooLarge {};
 
 /**
- * Throws #RequestBodyTooLarge if the given limit is exceeded.
+ * Read the request body into a std::string.
+ *
+ * Throws #BadRequest if there is no request body, #RequestBodyTooLarge if the
+ * given limit is exceeded.
  */
 std::string
 RequestBodyToString(was_simple *w, std::string::size_type limit);
