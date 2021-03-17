@@ -13,6 +13,10 @@ if get_variable('libcommon_enable_event', true)
     'Global.cxx',
   ]
   curl_deps += event_dep
+
+  if get_option('coroutines')
+    curl_sources += 'CoRequest.cxx'
+  endif
 endif
 
 curl = static_library(
