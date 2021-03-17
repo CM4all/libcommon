@@ -35,8 +35,7 @@
 #include "util/AllocatedString.hxx"
 #include "util/ConstBuffer.hxx"
 
-[[gnu::pure]]
-static AllocatedString
+AllocatedString
 SodiumBase64(ConstBuffer<void> src, int variant) noexcept
 {
 	size_t size = sodium_base64_ENCODED_LEN(src.size, variant);

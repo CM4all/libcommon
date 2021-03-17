@@ -57,6 +57,11 @@ FixedBase64(const void *src) noexcept
 
 [[gnu::pure]]
 AllocatedString
+SodiumBase64(ConstBuffer<void> src,
+	     int variant=sodium_base64_VARIANT_ORIGINAL) noexcept;
+
+[[gnu::pure]]
+AllocatedString
 UrlSafeBase64(ConstBuffer<void> src) noexcept;
 
 [[gnu::pure]]
