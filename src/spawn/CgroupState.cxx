@@ -84,7 +84,9 @@ CgroupState::FromProcess(unsigned pid) noexcept
 		line = line.Split(':').second;
 
 		const auto [name, path] = line.Split(':');
-		if (path.empty() || path.front() != '/')
+		if (path.size < 2 || path.front() != '/')
+			/* ignore malformed lines and lines in the
+			   root cgroup */
 			continue;
 
 		if (name.Equals("name=systemd")) {
