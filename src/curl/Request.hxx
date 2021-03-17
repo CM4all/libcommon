@@ -40,6 +40,9 @@ struct StringView;
 class CurlGlobal;
 class CurlResponseHandler;
 
+/**
+ * To start sending the request, call Start().
+ */
 class CurlRequest final {
 	CurlGlobal &global;
 
@@ -62,9 +65,6 @@ class CurlRequest final {
 	bool registered = false;
 
 public:
-	/**
-	 * To start sending the request, call Start().
-	 */
 	CurlRequest(CurlGlobal &_global,
 		    CurlResponseHandler &_handler);
 
