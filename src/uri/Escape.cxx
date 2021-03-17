@@ -34,7 +34,7 @@
 #include "uri/Chars.hxx"
 #include "util/AllocatedString.hxx"
 #include "util/StringView.hxx"
-#include "util/HexFormat.h"
+#include "util/HexFormat.hxx"
 
 std::size_t
 UriEscape(char *dest, StringView src,

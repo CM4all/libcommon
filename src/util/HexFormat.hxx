@@ -38,16 +38,18 @@
 #include <stdint.h>
 #include <string.h>
 
-extern const char hex_digits[0x10];
+extern const char hex_digits[];
 
 static gcc_always_inline void
-format_uint8_hex_fixed(char dest[2], uint8_t number) {
+format_uint8_hex_fixed(char dest[2], uint8_t number) noexcept
+{
 	dest[0] = hex_digits[(number >> 4) & 0xf];
 	dest[1] = hex_digits[number & 0xf];
 }
 
 static gcc_always_inline void
-format_uint16_hex_fixed(char dest[4], uint16_t number) {
+format_uint16_hex_fixed(char dest[4], uint16_t number) noexcept
+{
 	dest[0] = hex_digits[(number >> 12) & 0xf];
 	dest[1] = hex_digits[(number >> 8) & 0xf];
 	dest[2] = hex_digits[(number >> 4) & 0xf];
@@ -55,7 +57,8 @@ format_uint16_hex_fixed(char dest[4], uint16_t number) {
 }
 
 static gcc_always_inline void
-format_uint32_hex_fixed(char dest[8], uint32_t number) {
+format_uint32_hex_fixed(char dest[8], uint32_t number) noexcept
+{
 	dest[0] = hex_digits[(number >> 28) & 0xf];
 	dest[1] = hex_digits[(number >> 24) & 0xf];
 	dest[2] = hex_digits[(number >> 20) & 0xf];
@@ -67,7 +70,8 @@ format_uint32_hex_fixed(char dest[8], uint32_t number) {
 }
 
 static gcc_always_inline void
-format_uint64_hex_fixed(char dest[16], uint64_t number) {
+format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
+{
 	format_uint32_hex_fixed(dest, number >> 32);
 	format_uint32_hex_fixed(dest + 8, number);
 }
@@ -76,7 +80,7 @@ format_uint64_hex_fixed(char dest[16], uint64_t number) {
  * Format a 32 bit unsigned integer into a hex string.
  */
 static gcc_always_inline size_t
-format_uint32_hex(char dest[9], uint32_t number)
+format_uint32_hex(char dest[9], uint32_t number) noexcept
 {
 	char *p = dest + 9 - 1;
 

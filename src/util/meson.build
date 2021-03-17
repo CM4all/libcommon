@@ -1,6 +1,7 @@
 util_sources = [
   'AllocatedString.cxx',
   'Exception.cxx',
+  'HexFormat.cxx',
   'MimeType.cxx',
   'PrintException.cxx',
   'StringBuilder.cxx',
@@ -19,7 +20,6 @@ endif
 
 if get_variable('libcommon_enable_c', true)
   util_sources += [
-    'HexFormat.c',
     'djbhash.c',
   ]
 endif

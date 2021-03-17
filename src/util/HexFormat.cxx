@@ -30,6 +30,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "HexFormat.h"
+#include "HexFormat.hxx"
 
-const char hex_digits[0x10] = "0123456789abcdef";
+const char hex_digits[] = "0123456789abcdef";

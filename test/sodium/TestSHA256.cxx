@@ -31,7 +31,7 @@
  */
 
 #include "sodium/SHA256.hxx"
-#include "util/HexFormat.h"
+#include "util/HexFormat.hxx"
 #include "util/StringBuffer.hxx"
 
 #include <gtest/gtest.h>

@@ -31,7 +31,7 @@
  */
 
 #include "sodium/GenericHash.hxx"
-#include "util/HexFormat.h"
+#include "util/HexFormat.hxx"
 #include "util/StringBuffer.hxx"
 
 #include <gtest/gtest.h>
