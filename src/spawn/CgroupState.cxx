@@ -75,24 +75,17 @@ CgroupState::FromProcess(unsigned pid) noexcept
 	std::string group_path;
 	bool have_unified = false, have_systemd = false;
 
-	char line[256];
-	while (fgets(line, sizeof(line), file) != nullptr) {
-		char *p = line, *endptr;
+	char buffer[256];
+	while (fgets(buffer, sizeof(buffer), file) != nullptr) {
+		StringView line(buffer);
+		line.StripRight();
 
-		strtoul(p, &endptr, 10);
-		if (endptr == p || *endptr != ':')
+		/* skip the hierarchy id */
+		line = line.Split(':').second;
+
+		const auto [name, path] = line.Split(':');
+		if (path.empty() || path.front() != '/')
 			continue;
-
-		char *const _name = endptr + 1;
-		char *const colon = strchr(_name, ':');
-		if (colon == nullptr || colon[1] != '/' || colon[2] == '/')
-			continue;
-
-		StringView name(_name, colon);
-
-		std::string_view path(colon + 1);
-		if (path.back() == '\n')
-			path.remove_suffix(1);
 
 		if (name.Equals("name=systemd")) {
 			group_path = path;
@@ -137,12 +130,12 @@ CgroupState::FromProcess(unsigned pid) noexcept
 			}
 
 			if (fd.IsDefined()) {
-				ssize_t nbytes = fd.Read(line, sizeof(line));
+				ssize_t nbytes = fd.Read(buffer, sizeof(buffer));
 				if (nbytes > 0) {
-					if (line[nbytes - 1] == '\n')
+					if (buffer[nbytes - 1] == '\n')
 						--nbytes;
 
-					const StringView contents(line, nbytes);
+					const StringView contents(buffer, nbytes);
 					for (std::string_view name : IterableSplitString(contents, ' '))
 						if (!name.empty())
 							state.controllers.emplace(name, unified_mount);
