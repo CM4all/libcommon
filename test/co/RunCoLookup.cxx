@@ -43,7 +43,7 @@
 
 struct Instance final {
 	EventLoop event_loop;
-	ShutdownListener shutdown_listener;
+	ShutdownListener shutdown_listener{event_loop, BIND_THIS_METHOD(OnShutdown)};
 
 	Cares::Channel channel{event_loop};
 
@@ -52,7 +52,6 @@ struct Instance final {
 	std::exception_ptr error;
 
 	Instance()
-		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown))
 	{
 		shutdown_listener.Enable();
 	}
