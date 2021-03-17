@@ -36,6 +36,7 @@
 
 template<typename T> struct ConstBuffer;
 struct StringView;
+class AllocatedString;
 
 /**
  * @param escape_char the character that is used to escape; use '%'
@@ -48,3 +49,9 @@ UriEscape(char *dest, StringView src,
 std::size_t
 UriEscape(char *dest, ConstBuffer<void> src,
 	  char escape_char='%') noexcept;
+
+AllocatedString
+UriEscape(StringView src, char escape_char='%') noexcept;
+
+AllocatedString
+UriEscape(ConstBuffer<void> src, char escape_char='%') noexcept;

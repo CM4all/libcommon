@@ -32,6 +32,7 @@
 
 #include "Escape.hxx"
 #include "uri/Chars.hxx"
+#include "util/AllocatedString.hxx"
 #include "util/StringView.hxx"
 #include "util/HexFormat.h"
 
@@ -59,5 +60,24 @@ UriEscape(char *dest, ConstBuffer<void> src,
 	  char escape_char) noexcept
 {
 	return UriEscape(dest, StringView((const char *)src.data, src.size),
+			 escape_char);
+}
+
+AllocatedString
+UriEscape(StringView src, char escape_char) noexcept
+{
+	/* worst-case allocation - this is a tradeoff; we could count
+	   the number of characters to escape first, but that would
+	   require iterating the input twice */
+	auto buffer = new char[src.size * 3 + 1];
+	size_t length = UriEscape(buffer, src, escape_char);
+	buffer[length] = 0;
+	return AllocatedString::Donate(buffer);
+}
+
+AllocatedString
+UriEscape(ConstBuffer<void> src, char escape_char) noexcept
+{
+	return UriEscape(StringView{ConstBuffer<char>::FromVoid(src)},
 			 escape_char);
 }
