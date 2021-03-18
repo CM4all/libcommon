@@ -21,6 +21,7 @@ io = static_library(
   'Open.cxx',
   'MakeDirectory.cxx',
   'DirectoryReader.cxx',
+  'SmallFile.cxx',
   'WriteFile.cxx',
   'WriteBuffer.cxx',
   'MultiWriteBuffer.cxx',
