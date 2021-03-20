@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2010-2021 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,16 +42,7 @@ public:
 	constexpr
 	StaticArray() noexcept:TrivialArray<T, max>(0) {}
 
-	StaticArray(typename TrivialArray<T, max>::size_type _size, const T &value)
-		:TrivialArray<T, max>(_size, value) {}
-
-	template<typename I>
-	StaticArray(I _begin, I _end)
-		:TrivialArray<T, max>(_begin, _end) {}
-
-	template<typename U>
-	StaticArray(std::initializer_list<U> init) noexcept
-		:TrivialArray<T, max>(init) {}
+	using TrivialArray<T, max>::TrivialArray;
 };
 
 #endif
