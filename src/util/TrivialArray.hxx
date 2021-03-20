@@ -59,7 +59,7 @@ protected:
 	Array data;
 
 	constexpr
-	TrivialArray(size_type _size):the_size(_size) {}
+	TrivialArray(size_type _size) noexcept:the_size(_size) {}
 
 public:
 	/**
