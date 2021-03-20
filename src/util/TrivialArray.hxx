@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2017 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2010-2021 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,7 +44,7 @@
  * of the actual length at runtime. The clear() function needs to be
  * called to initialize the class properly.
  */
-template<class T, size_t max>
+template<class T, std::size_t max>
 class TrivialArray {
 	typedef std::array<T, max> Array;
 
