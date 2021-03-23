@@ -73,7 +73,7 @@ LoggerDetail::WriteV(StringView domain,
 	v.push_back(MakeIovec("\n"));
 
 	ssize_t nbytes =
-		writev(STDERR_FILENO, v.raw(), v.size());
+		writev(STDERR_FILENO, v.data(), v.size());
 	(void)nbytes;
 }
 

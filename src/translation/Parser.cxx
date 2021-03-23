@@ -3766,7 +3766,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 					layout_items_builder,
 #endif
 					response,
-					{probe_suffixes_builder.raw(),
+					{probe_suffixes_builder.data(),
 					 probe_suffixes_builder.size()});
 
 #if TRANSLATION_ENABLE_WIDGET

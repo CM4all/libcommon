@@ -89,11 +89,11 @@ public:
 	}
 
 	constexpr operator ConstBuffer<T>() const noexcept {
-		return {raw(), size()};
+		return {data(), size()};
 	}
 
 	operator WritableBuffer<T>() noexcept {
-		return {raw(), size()};
+		return {data(), size()};
 	}
 
 	static constexpr size_type capacity() noexcept { return max; }
@@ -197,12 +197,12 @@ public:
 	/**
 	 * Return address of start of data segment.
 	 */
-	constexpr T *raw() noexcept {
-		return &array.front();
+	constexpr T *data() noexcept {
+		return array.data();
 	}
 
-	constexpr const T *raw() const noexcept {
-		return &array.front();
+	constexpr const T *data() const noexcept {
+		return array.data();
 	}
 
 	/**
