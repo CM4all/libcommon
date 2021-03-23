@@ -53,6 +53,10 @@ public:
 	using value_type = T;
 	using iterator = typename Array::iterator;
 	using const_iterator = typename Array::const_iterator;
+	using reference =  typename Array::reference;
+	using const_reference =  typename Array::const_reference;
+	using pointer =  typename Array::pointer;
+	using const_pointer =  typename Array::const_pointer;
 
 protected:
 	size_type the_size;
@@ -67,7 +71,7 @@ public:
 	 */
 	TrivialArray() = default;
 
-	TrivialArray(size_type _size, const T &value):the_size(_size) {
+	TrivialArray(size_type _size, const_reference value):the_size(_size) {
 		std::fill(begin(), end(), value);
 	}
 
@@ -147,7 +151,7 @@ public:
 	/**
 	 * Returns one element.  No bounds checking.
 	 */
-	T &operator[](size_type i) noexcept {
+	reference operator[](size_type i) noexcept {
 		assert(i < size());
 
 		return array[i];
@@ -156,7 +160,7 @@ public:
 	/**
 	 * Returns one constant element.  No bounds checking.
 	 */
-	const T &operator[](size_type i) const noexcept {
+	const_reference operator[](size_type i) const noexcept {
 		assert(i < size());
 
 		return array[i];
@@ -178,30 +182,30 @@ public:
 		return std::next(array.begin(), the_size);
 	}
 
-	T &back() noexcept {
+	reference back() noexcept {
 		assert(the_size > 0);
 
 		return array[the_size - 1];
 	}
 
-	const T &back() const noexcept {
+	const_reference back() const noexcept {
 		assert(the_size > 0);
 
 		return array[the_size - 1];
 	}
 
-	bool contains(const T &value) const noexcept {
+	bool contains(const_reference value) const noexcept {
 		return std::find(begin(), end(), value) != end();
 	}
 
 	/**
 	 * Return address of start of data segment.
 	 */
-	constexpr T *data() noexcept {
+	constexpr pointer data() noexcept {
 		return array.data();
 	}
 
-	constexpr const T *data() const noexcept {
+	constexpr const_pointer data() const noexcept {
 		return array.data();
 	}
 
@@ -209,7 +213,7 @@ public:
 	 * Append an element at the end of the array, increasing the
 	 * length by one.  No bounds checking.
 	 */
-	void append(const T &value) {
+	void append(const_reference value) {
 		assert(!full());
 
 		array[the_size++] = value;
@@ -219,7 +223,7 @@ public:
 	 * Increase the length by one and return a pointer to the new
 	 * element, to be modified by the caller.  No bounds checking.
 	 */
-	T &append() noexcept {
+	reference append() noexcept {
 		assert(!full());
 
 		return array[the_size++];
@@ -229,7 +233,7 @@ public:
 	 * Like append(), but checks if the array is already full
 	 * (returns false in this case).
 	 */
-	bool checked_append(const T &value) {
+	bool checked_append(const_reference value) {
 		if (full())
 			return false;
 
@@ -277,7 +281,7 @@ public:
 
 	/* STL API emulation */
 
-	void push_back(const T &value) {
+	void push_back(const_reference value) {
 		append(value);
 	}
 
@@ -286,13 +290,13 @@ public:
 		append() = T(std::forward<Args>(args)...);
 	}
 
-	T &front() noexcept {
+	reference front() noexcept {
 		assert(the_size > 0);
 
 		return array.front();
 	}
 
-	const T &front() const noexcept {
+	const_reference front() const noexcept {
 		assert(the_size > 0);
 
 		return array.front();
