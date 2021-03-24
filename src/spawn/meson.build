@@ -14,8 +14,13 @@ endif
 libseccomp = dependency('libseccomp')
 
 spawn_sources = [
+  'CgroupKill.cxx',
+  'CgroupState.cxx',
+  'CgroupWatch.cxx',
+  'Client.cxx',
   'Config.cxx',
   'Init.cxx',
+  'Interface.cxx',
   'NetworkNamespace.cxx',
   'PidNamespace.cxx',
   'Registry.cxx',
@@ -24,6 +29,7 @@ spawn_sources = [
   'SyscallFilter.cxx',
   'UidGid.cxx',
   'UserNamespace.cxx',
+  'VfsBuilder.cxx',
   'daemon/Client.cxx',
 ]
 
@@ -38,14 +44,9 @@ spawn_dependencies = [
 if get_variable('libcommon_enable_AllocatorPtr', true)
   spawn_sources += [
     'CgroupOptions.cxx',
-    'CgroupKill.cxx',
-    'CgroupState.cxx',
-    'CgroupWatch.cxx',
     'ChildOptions.cxx',
-    'Client.cxx',
     'Direct.cxx',
     'Glue.cxx',
-    'Interface.cxx',
     'Launch.cxx',
     'Local.cxx',
     'Mount.cxx',
@@ -53,7 +54,6 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
     'NamespaceOptions.cxx',
     'Prepared.cxx',
     'Server.cxx',
-    'VfsBuilder.cxx',
   ]
 
   spawn_dependencies += [
