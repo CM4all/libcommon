@@ -17,7 +17,6 @@ spawn_sources = [
   'CgroupKill.cxx',
   'CgroupState.cxx',
   'CgroupWatch.cxx',
-  'Client.cxx',
   'Config.cxx',
   'Init.cxx',
   'Interface.cxx',
@@ -45,6 +44,7 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
   spawn_sources += [
     'CgroupOptions.cxx',
     'ChildOptions.cxx',
+    'Client.cxx',
     'Direct.cxx',
     'Glue.cxx',
     'Launch.cxx',
