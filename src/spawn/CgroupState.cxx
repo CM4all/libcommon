@@ -38,6 +38,22 @@
 
 #include <cstdio>
 
+std::string
+CgroupState::GetUnifiedMount() const noexcept
+{
+	if (mounts.empty())
+		return {};
+
+	const auto &i = mounts.front();
+	if (i.empty())
+		return "/sys/fs/cgroup";
+
+	if (i == "unified")
+		return "/sys/fs/cgroup/unified";
+
+	return {};
+}
+
 static FILE *
 OpenProcCgroup(unsigned pid) noexcept
 {

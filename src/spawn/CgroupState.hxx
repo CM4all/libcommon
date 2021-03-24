@@ -60,6 +60,12 @@ struct CgroupState {
 		return !group_path.empty();
 	}
 
+	/**
+	 * Returns the absolute path where the cgroup2 is mounted or
+	 * an empty string if none was mounted.
+	 */
+	[[gnu::pure]]
+	std::string GetUnifiedMount() const noexcept;
 
 	/**
 	 * Obtain cgroup membership information from the cgroups
