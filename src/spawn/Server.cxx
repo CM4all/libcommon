@@ -571,8 +571,20 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.ns.mount.writable_proc = true;
 			break;
 
+		case SpawnExecCommand::MOUNT_PTS:
+			p.ns.mount.mount_pts = true;
+			break;
+
+		case SpawnExecCommand::BIND_MOUNT_PTS:
+			p.ns.mount.bind_mount_pts = true;
+			break;
+
 		case SpawnExecCommand::PIVOT_ROOT:
 			p.ns.mount.pivot_root = payload.ReadString();
+			break;
+
+		case SpawnExecCommand::MOUNT_ROOT_TMPFS:
+			p.ns.mount.mount_root_tmpfs = true;
 			break;
 
 		case SpawnExecCommand::MOUNT_HOME:

@@ -168,10 +168,15 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			      ns.network_namespace);
 	s.WriteOptional(SpawnExecCommand::IPC_NS, ns.enable_ipc);
 	s.WriteOptional(SpawnExecCommand::MOUNT_PROC, ns.mount.mount_proc);
+	s.WriteOptional(SpawnExecCommand::MOUNT_PTS, ns.mount.mount_pts);
+	s.WriteOptional(SpawnExecCommand::BIND_MOUNT_PTS,
+			ns.mount.bind_mount_pts);
 	s.WriteOptional(SpawnExecCommand::WRITABLE_PROC,
 			ns.mount.writable_proc);
 	s.WriteOptionalString(SpawnExecCommand::PIVOT_ROOT,
 			      ns.mount.pivot_root);
+	s.WriteOptional(SpawnExecCommand::MOUNT_ROOT_TMPFS,
+			ns.mount.mount_root_tmpfs);
 
 	if (ns.mount.mount_home != nullptr) {
 		s.Write(SpawnExecCommand::MOUNT_HOME);
