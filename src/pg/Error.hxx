@@ -85,6 +85,27 @@ public:
 	[[gnu::pure]]
 	bool IsFatal() const noexcept;
 
+	bool IsNotNullViolation() const noexcept {
+		return IsType("23502");
+	}
+
+	bool IsForeignKeyViolation() const noexcept {
+		return IsType("23503");
+	}
+
+	/**
+	 * "duplicate key value violates unique constraint"
+	 */
+	[[gnu::pure]]
+	bool IsUniqueViolation() const noexcept {
+		// https://www.postgresql.org/docs/current/static/errcodes-appendix.html
+		return IsType("23505");
+	}
+
+	bool IsCheckViolation() const noexcept {
+		return IsType("23514");
+	}
+
 	/**
 	 * Is this a serialization failure, i.e. a problem with "BEGIN
 	 * SERIALIZABLE" or Pg::Connection::BeginSerializable().
