@@ -154,9 +154,13 @@ CgroupState::FromProcess(unsigned pid) noexcept
 						--nbytes;
 
 					const StringView contents(buffer, nbytes);
-					for (std::string_view name : IterableSplitString(contents, ' '))
+					for (std::string_view name : IterableSplitString(contents, ' ')) {
 						if (!name.empty())
 							state.controllers.emplace(name, unified_mount);
+
+						if (name == "memory")
+							state.memory_v2 = true;
+					}
 				}
 			}
 		}

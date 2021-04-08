@@ -56,6 +56,11 @@ struct CgroupState {
 	 */
 	std::map<std::string, std::string> controllers;
 
+	/**
+	 * Is the "memory" cgroup controller using the cgroup2 interface?
+	 */
+	bool memory_v2 = false;
+
 	bool IsEnabled() const {
 		return !group_path.empty();
 	}
