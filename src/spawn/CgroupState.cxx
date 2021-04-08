@@ -142,9 +142,9 @@ CgroupState::FromProcess(unsigned pid) noexcept
 		std::string_view unified_mount = "unified";
 		if (state.mounts.empty()) {
 			UniqueFileDescriptor fd;
-			if (!fd.OpenReadOnly("/sys/fs/cgroup/unified/cgroup.controllers")) {
+			if (!fd.OpenReadOnly("/sys/fs/cgroup/unified/cgroup.subtree_control")) {
 				unified_mount = {};
-				fd.OpenReadOnly("/sys/fs/cgroup/cgroup.controllers");
+				fd.OpenReadOnly("/sys/fs/cgroup/cgroup.subtree_control");
 			}
 
 			if (fd.IsDefined()) {
