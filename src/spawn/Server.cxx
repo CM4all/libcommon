@@ -253,7 +253,7 @@ class SpawnServerProcess {
 public:
 	SpawnServerProcess(const SpawnConfig &_config,
 			   const CgroupState &_cgroup_state,
-			   SpawnHook *_hook) noexcept
+			   SpawnHook *_hook)
 		:config(_config), cgroup_state(_cgroup_state), hook(_hook),
 		 logger("spawn"),
 		 child_process_registry(loop)
@@ -838,7 +838,7 @@ SpawnServerProcess::Run() noexcept
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 	       SpawnHook *hook,
-	       UniqueSocketDescriptor socket) noexcept
+	       UniqueSocketDescriptor socket)
 {
 	if (cgroup_state.IsEnabled()) {
 		/* tell the client that the cgroups feature is available;

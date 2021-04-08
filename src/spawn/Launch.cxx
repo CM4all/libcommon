@@ -132,8 +132,13 @@ RunSpawnServer2(void *p)
 	}
 #endif
 
-	RunSpawnServer(ctx.config, cgroup_state, ctx.hook, std::move(ctx.socket));
-	return 0;
+	try {
+		RunSpawnServer(ctx.config, cgroup_state, ctx.hook, std::move(ctx.socket));
+		return EXIT_SUCCESS;
+	} catch (...) {
+		PrintException(std::current_exception());
+		return EXIT_FAILURE;
+	}
 }
 
 pid_t

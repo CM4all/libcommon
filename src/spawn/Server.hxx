@@ -37,7 +37,10 @@ struct CgroupState;
 class SpawnHook;
 class UniqueSocketDescriptor;
 
+/**
+ * Throws on initialization error.
+ */
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 	       SpawnHook *hook,
-	       UniqueSocketDescriptor fd) noexcept;
+	       UniqueSocketDescriptor fd);
