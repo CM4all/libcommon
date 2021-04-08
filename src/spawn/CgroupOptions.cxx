@@ -37,6 +37,7 @@
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
+#include "util/StringAPI.hxx"
 #include "util/StringView.hxx"
 #include "util/RuntimeError.hxx"
 
@@ -156,10 +157,12 @@ CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 					session, pid);
 
 	for (const auto &s : set) {
-		const char *dot = strchr(s.name, '.');
+		const char *filename = s.name;
+
+		const char *dot = strchr(filename, '.');
 		assert(dot != nullptr);
 
-		const std::string controller(s.name, dot);
+		const std::string controller(filename, dot);
 		auto i = state.controllers.find(controller);
 		if (i == state.controllers.end())
 			throw FormatRuntimeError("cgroup controller '%s' is unavailable",
@@ -170,8 +173,13 @@ CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 		const auto j = fds.find(mount_point);
 		assert(j != fds.end());
 
+		/* emulate cgroup1 for old translation servers */
+		if (state.memory_v2 &&
+		    StringIsEqual(filename, "memory.limit_in_bytes"))
+			filename = "memory.max";
+
 		const FileDescriptor fd = j->second;
-		WriteFile(fd, s.name, s.value);
+		WriteFile(fd, filename, s.value);
 	}
 }
 
