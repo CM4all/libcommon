@@ -102,7 +102,7 @@ RunSpawnServer2(void *p)
 		ctx.config.spawner_uid_gid.Apply();
 	} catch (...) {
 		PrintException(std::current_exception());
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 
 	/* ignore all signals which may stop us; shut down only when all
