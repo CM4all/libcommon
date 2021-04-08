@@ -49,6 +49,9 @@ class CgroupMemoryWatch {
 	BoundMethod<void(uint64_t value) noexcept> callback;
 
 public:
+	/**
+	 * Throws if the group memory usage file could not be opened.
+	 */
 	CgroupMemoryWatch(EventLoop &event_loop,
 			  const CgroupState &state,
 			  uint64_t _threshold,
