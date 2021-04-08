@@ -125,9 +125,9 @@ RunSpawnServer2(void *p)
 						   ctx.config.systemd_scope_properties,
 						   real_pid, true,
 						   ctx.config.systemd_slice.empty() ? nullptr : ctx.config.systemd_slice.c_str());
-		} catch (const std::runtime_error &e) {
+		} catch (...) {
 			fprintf(stderr, "Failed to create systemd scope: ");
-			PrintException(e);
+			PrintException(std::current_exception());
 		}
 	}
 #endif
