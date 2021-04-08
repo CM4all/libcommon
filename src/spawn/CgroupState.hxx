@@ -65,6 +65,10 @@ struct CgroupState {
 		return !group_path.empty();
 	}
 
+	bool IsV2() const noexcept {
+		return !mounts.empty() && mounts.front().empty();
+	}
+
 	/**
 	 * Returns the absolute path where the cgroup2 is mounted or
 	 * an empty string if none was mounted.
