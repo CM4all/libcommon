@@ -78,10 +78,12 @@ OpenMemoryUsage(const CgroupState &state)
 {
 	auto group = OpenCgroupControllerGroup(state, "memory");
 	if (!group.IsDefined())
-		// TODO: support cgroup2
 		throw std::runtime_error("Cgroup controller 'memory' not found");
 
-	return OpenReadOnly(group, "memory.usage_in_bytes");
+	return OpenReadOnly(group,
+			    state.memory_v2
+			    ? "memory.current"
+			    : "memory.usage_in_bytes");
 }
 
 static uint64_t
