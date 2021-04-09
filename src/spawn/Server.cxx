@@ -551,6 +551,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.ns.enable_pid = true;
 			break;
 
+		case SpawnExecCommand::PID_NS_NAME:
+			p.ns.pid_namespace = payload.ReadString();
+			break;
+
 		case SpawnExecCommand::CGROUP_NS:
 			p.ns.enable_cgroup = true;
 			break;

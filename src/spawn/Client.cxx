@@ -163,6 +163,7 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 {
 	s.WriteOptional(SpawnExecCommand::USER_NS, ns.enable_user);
 	s.WriteOptional(SpawnExecCommand::PID_NS, ns.enable_pid);
+	s.WriteOptionalString(SpawnExecCommand::PID_NS_NAME, ns.pid_namespace);
 	s.WriteOptional(SpawnExecCommand::CGROUP_NS, ns.enable_cgroup);
 	s.WriteOptional(SpawnExecCommand::NETWORK_NS, ns.enable_network);
 	s.WriteOptionalString(SpawnExecCommand::NETWORK_NS_NAME,
