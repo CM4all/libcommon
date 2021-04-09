@@ -163,10 +163,6 @@ try {
 		   unshare the cgroup namespace again to hide our new cgroup
 		   membership */
 
-#ifndef CLONE_NEWCGROUP
-		constexpr int CLONE_NEWCGROUP = 0x02000000;
-#endif
-
 		if (unshare(CLONE_NEWCGROUP) < 0)
 			throw MakeErrno("Failed to unshare cgroup namespace");
 	}
