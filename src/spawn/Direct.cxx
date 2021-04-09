@@ -160,7 +160,7 @@ try {
 	if (p.ns.enable_cgroup &&
 	    p.cgroup != nullptr && p.cgroup->IsDefined()) {
 		/* if the process was just moved to another cgroup, we need to
-		   unshare the cgroup namespace again to hide our new cgroup
+		   unshare the cgroup namespace to hide our new cgroup
 		   membership */
 
 		if (unshare(CLONE_NEWCGROUP) < 0)
@@ -391,6 +391,14 @@ SpawnChildProcess(PreparedChildProcess &&params,
 {
 	int clone_flags = SIGCHLD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
+
+	if (params.cgroup != nullptr && params.cgroup->IsDefined())
+		/* postpone creating the new cgroup namespace until
+		   after this process has been moved to the new
+		   cgroup, or else it won't have the required
+		   permissions to do so, because the destination
+		   cgroup won't be visible from his namespace */
+		clone_flags &= ~CLONE_NEWCGROUP;
 
 	SpawnChildProcessContext ctx(std::move(params), cgroup_state,
 				     return_stderr);
