@@ -551,6 +551,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.ns.enable_pid = true;
 			break;
 
+		case SpawnExecCommand::CGROUP_NS:
+			p.ns.enable_cgroup = true;
+			break;
+
 		case SpawnExecCommand::NETWORK_NS:
 			p.ns.enable_network = true;
 			break;
