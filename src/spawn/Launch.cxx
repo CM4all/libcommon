@@ -40,14 +40,11 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "io/WriteFile.hxx"
 #include "util/PrintException.hxx"
 
 #include <sched.h>
 #include <unistd.h>
 #include <string.h>
-#include <errno.h>
-#include <sys/stat.h>
 #include <sys/signal.h>
 #include <sys/mount.h>
 
@@ -70,47 +67,6 @@ struct LaunchSpawnServerContext {
 
 	bool pid_namespace;
 };
-
-static void
-WriteFile(FileDescriptor fd, const char *path, std::string_view data)
-{
-	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
-		throw FormatErrno("write('%s') failed", path);
-}
-
-static void
-SetupCgroupSubtreeControl(const CgroupState &state)
-{
-	auto spawn_group = OpenPath(OpenPath("/sys/fs/cgroup"),
-				    state.group_path.c_str() + 1);
-
-	/* create a leaf cgroup and move this process into it, or else
-	   we can't enable other controllers */
-
-	const char *leaf_name = "_";
-	if (mkdirat(spawn_group.Get(), leaf_name, 0700) < 0)
-		throw MakeErrno("Failed to create spawner leaf cgroup");
-
-	{
-		auto leaf_group = OpenPath(spawn_group, leaf_name);
-		WriteFile(leaf_group, "cgroup.procs", "0");
-	}
-
-	/* now enable all other controllers in subtree_control */
-
-	std::string subtree_control;
-	for (const auto &[controller, mount] : state.controllers) {
-		if (!mount.empty())
-			continue;
-
-		if (!subtree_control.empty())
-			subtree_control.push_back(' ');
-		subtree_control.push_back('+');
-		subtree_control += controller;
-	}
-
-	WriteFile(spawn_group, "cgroup.subtree_control", subtree_control);
-}
 
 static int
 RunSpawnServer2(void *p)
@@ -176,14 +132,12 @@ RunSpawnServer2(void *p)
 	}
 #endif
 
-	if (cgroup_state.IsV2()) {
-		try {
-			SetupCgroupSubtreeControl(cgroup_state);
-		} catch (...) {
-			fprintf(stderr, "Failed to setup cgroup2: ");
-			PrintException(std::current_exception());
-			return EXIT_FAILURE;
-		}
+	try {
+		cgroup_state.EnableAllControllers();
+	} catch (...) {
+		fprintf(stderr, "Failed to setup cgroup2: ");
+		PrintException(std::current_exception());
+		return EXIT_FAILURE;
 	}
 
 	try {

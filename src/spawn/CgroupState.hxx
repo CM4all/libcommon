@@ -77,6 +77,14 @@ struct CgroupState {
 	std::string GetUnifiedMount() const noexcept;
 
 	/**
+	 * Enable all controllers for newly created groups by writing
+	 * to "subtree_control".
+	 *
+	 * Throws on error.
+	 */
+	void EnableAllControllers() const;
+
+	/**
 	 * Obtain cgroup membership information from the cgroups
 	 * assigned by systemd to the specified process, and return it
 	 * as a #CgroupState instance.  Returns an empty #CgroupState

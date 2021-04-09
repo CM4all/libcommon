@@ -31,12 +31,24 @@
  */
 
 #include "CgroupState.hxx"
+#include "system/Error.hxx"
+#include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "io/WriteFile.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringCompare.hxx"
 
 #include <cstdio>
+
+#include <sys/stat.h>
+
+static void
+WriteFile(FileDescriptor fd, const char *path, std::string_view data)
+{
+	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
+		throw FormatErrno("write('%s') failed", path);
+}
 
 std::string
 CgroupState::GetUnifiedMount() const noexcept
@@ -52,6 +64,45 @@ CgroupState::GetUnifiedMount() const noexcept
 		return "/sys/fs/cgroup/unified";
 
 	return {};
+}
+
+void
+CgroupState::EnableAllControllers() const
+{
+	if (!IsV2())
+		/* this is only relevant if only V2 is mounted (not
+		   cgroup1 and not hybrid) */
+		return;
+
+	auto spawn_group = OpenPath(OpenPath("/sys/fs/cgroup"),
+				    group_path.c_str() + 1);
+
+	/* create a leaf cgroup and move this process into it, or else
+	   we can't enable other controllers */
+
+	const char *leaf_name = "_";
+	if (mkdirat(spawn_group.Get(), leaf_name, 0700) < 0)
+		throw MakeErrno("Failed to create spawner leaf cgroup");
+
+	{
+		auto leaf_group = OpenPath(spawn_group, leaf_name);
+		WriteFile(leaf_group, "cgroup.procs", "0");
+	}
+
+	/* now enable all other controllers in subtree_control */
+
+	std::string subtree_control;
+	for (const auto &[controller, mount] : controllers) {
+		if (!mount.empty())
+			continue;
+
+		if (!subtree_control.empty())
+			subtree_control.push_back(' ');
+		subtree_control.push_back('+');
+		subtree_control += controller;
+	}
+
+	WriteFile(spawn_group, "cgroup.subtree_control", subtree_control);
 }
 
 static FILE *
