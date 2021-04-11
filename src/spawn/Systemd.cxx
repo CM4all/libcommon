@@ -151,6 +151,11 @@ CreateSystemdScope(const char *name, const char *description,
 	    StringIsEqual(reply.GetErrorName(),
 			  "org.freedesktop.systemd1.UnitExists")) {
 
+		/* reset the unit failure state just in case it still
+		   exists only because systemd remembers the last
+		   failure */
+		Systemd::ResetFailedUnit(connection, name);
+
 		if (!Systemd::WaitUnitRemoved(connection, name, 2000)) {
 			/* if the old scope is still alive, stop it
 			   forcefully; this works around a known

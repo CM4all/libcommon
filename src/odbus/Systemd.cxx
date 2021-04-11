@@ -142,4 +142,26 @@ StopService(ODBus::Connection &connection,
 	WaitJobRemoved(connection, object_path);
 }
 
+void
+ResetFailedUnit(ODBus::Connection &connection, const char *name)
+{
+	using namespace ODBus;
+
+	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
+					  "/org/freedesktop/systemd1",
+					  "org.freedesktop.systemd1.Manager",
+					  "ResetFailedUnit");
+
+	AppendMessageIter(*msg.Get()).Append(name);
+
+	auto pending = PendingCall::SendWithReply(connection, msg.Get());
+
+	dbus_connection_flush(connection);
+
+	pending.Block();
+
+	Message reply = Message::StealReply(*pending.Get());
+	reply.CheckThrowError();
+}
+
 } // namespace Systemd

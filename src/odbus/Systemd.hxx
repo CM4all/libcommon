@@ -60,4 +60,12 @@ void
 StopService(ODBus::Connection &connection,
 	    const char *name, const char *mode="replace");
 
+/**
+ * Resets the "failed" state of a specific unit.
+ *
+ * Throws on error.
+ */
+void
+ResetFailedUnit(ODBus::Connection &connection, const char *name);
+
 }
