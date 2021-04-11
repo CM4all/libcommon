@@ -168,7 +168,7 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	   mount a new /proc for this namespace, we need a mount namespace
 	   (CLONE_NEWNS) as well */
 	int pid = clone(RunSpawnServer2, stack + sizeof(stack),
-			CLONE_NEWPID | CLONE_NEWNS | CLONE_IO | SIGCHLD,
+			CLONE_NEWPID | CLONE_NEWNS | SIGCHLD,
 			&ctx);
 	if (pid < 0) {
 		/* try again without CLONE_NEWPID */
@@ -176,9 +176,14 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 			strerror(errno));
 		ctx.pid_namespace = false;
 		pid = clone(RunSpawnServer2, stack + sizeof(stack),
-			    CLONE_IO | SIGCHLD,
+			    SIGCHLD,
 			    &ctx);
 	}
+
+	/* note: CLONE_IO cannot be used here because it conflicts
+	   with the cgroup2 "io" controller which doesn't allow shared
+	   IO contexts in different groups; see blkcg_can_attach() in
+	   the Linux kernel sources (5.11 as of this writing) */
 
 	if (pid < 0)
 		throw MakeErrno("clone() failed");
