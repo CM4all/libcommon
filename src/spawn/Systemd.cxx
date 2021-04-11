@@ -154,7 +154,12 @@ CreateSystemdScope(const char *name, const char *description,
 		/* reset the unit failure state just in case it still
 		   exists only because systemd remembers the last
 		   failure */
-		Systemd::ResetFailedUnit(connection, name);
+		try {
+			Systemd::ResetFailedUnit(connection, name);
+		} catch (...) {
+			fprintf(stderr, "Failed to reset unit %s: ", name);
+			PrintException(std::current_exception());
+		}
 
 		if (!Systemd::WaitUnitRemoved(connection, name, 2000)) {
 			/* if the old scope is still alive, stop it
