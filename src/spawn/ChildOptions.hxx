@@ -39,6 +39,7 @@
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
 #include "util/ShallowCopy.hxx"
+#include "util/StringView.hxx"
 
 struct ResourceLimits;
 struct PreparedChildProcess;
@@ -52,8 +53,11 @@ struct ChildOptions {
 	/**
 	 * A "tag" string for the child process.  This can be used to
 	 * address groups of child processes.
+	 *
+	 * This field can contain multiple values separated by null
+	 * bytes.
 	 */
-	const char *tag = nullptr;
+	StringView tag = nullptr;
 
 	/**
 	 * An absolute path where STDERR output will be appended.

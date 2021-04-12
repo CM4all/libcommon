@@ -49,7 +49,7 @@
 
 ChildOptions::ChildOptions(AllocatorPtr alloc,
 			   const ChildOptions &src) noexcept
-	:tag(alloc.CheckDup(src.tag)),
+	:tag(alloc.Dup(src.tag)),
 	 stderr_path(alloc.CheckDup(src.stderr_path)),
 	 expand_stderr_path(alloc.CheckDup(src.expand_stderr_path)),
 	 env(alloc, src.env),
