@@ -112,21 +112,21 @@ struct ChildOptions {
 
 	constexpr ChildOptions(ShallowCopy shallow_copy, const ChildOptions &src)
 		:tag(src.tag),
-		stderr_path(src.stderr_path),
-		expand_stderr_path(src.expand_stderr_path),
-		env(shallow_copy, src.env),
-		cgroup(shallow_copy, src.cgroup),
-		rlimits(src.rlimits),
+		 stderr_path(src.stderr_path),
+		 expand_stderr_path(src.expand_stderr_path),
+		 env(shallow_copy, src.env),
+		 cgroup(shallow_copy, src.cgroup),
+		 rlimits(src.rlimits),
 		 ns(shallow_copy, src.ns),
-		uid_gid(src.uid_gid),
-		umask(src.umask),
-		stderr_null(src.stderr_null),
-		stderr_jailed(src.stderr_jailed),
-		stderr_pond(src.stderr_pond),
-		forbid_user_ns(src.forbid_user_ns),
-		forbid_multicast(src.forbid_multicast),
-		forbid_bind(src.forbid_bind),
-		no_new_privs(src.no_new_privs) {}
+		 uid_gid(src.uid_gid),
+		 umask(src.umask),
+		 stderr_null(src.stderr_null),
+		 stderr_jailed(src.stderr_jailed),
+		 stderr_pond(src.stderr_pond),
+		 forbid_user_ns(src.forbid_user_ns),
+		 forbid_multicast(src.forbid_multicast),
+		 forbid_bind(src.forbid_bind),
+		 no_new_privs(src.no_new_privs) {}
 
 	ChildOptions(AllocatorPtr alloc, const ChildOptions &src);
 
