@@ -3441,10 +3441,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (child_options == nullptr)
 			throw std::runtime_error("misplaced CHILD_TAG packet");
 
-		if (child_options->tag != nullptr)
-			throw std::runtime_error("duplicate CHILD_TAG packet");
+		if (child_options->tag == nullptr)
+			child_options->tag = string_payload;
+		else
+			child_options->tag =
+				alloc.ConcatView(child_options->tag, '\0',
+						 string_payload);
 
-		child_options->tag = string_payload;
 		return;
 
 	case TranslationCommand::CERTIFICATE:
