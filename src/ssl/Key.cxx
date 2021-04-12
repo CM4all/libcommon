@@ -103,6 +103,8 @@ DecodeDerKey(ConstBuffer<void> der)
 	return key;
 }
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+
 static bool
 MatchModulus(RSA &key1, RSA &key2)
 {
@@ -135,12 +137,17 @@ MatchModulus(DSA &key1, DSA &key2)
 	return BN_cmp(n1, n2) == 0;
 }
 
+#endif
+
 /**
  * Are both public keys equal?
  */
 bool
 MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2)
 {
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	return EVP_PKEY_eq(&key1, &key2) == 1;
+#else
 	if (EVP_PKEY_base_id(&key1) != EVP_PKEY_base_id(&key2))
 		return false;
 
@@ -164,6 +171,7 @@ MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2)
 	default:
 		return false;
 	}
+#endif
 }
 
 /**
