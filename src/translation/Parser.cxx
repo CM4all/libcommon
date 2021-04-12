@@ -3444,7 +3444,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (child_options->tag != nullptr)
 			throw std::runtime_error("duplicate CHILD_TAG packet");
 
-		child_options->tag = string_payload.data;
+		child_options->tag = string_payload;
 		return;
 
 	case TranslationCommand::CERTIFICATE:
