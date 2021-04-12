@@ -48,7 +48,7 @@
 #include <fcntl.h>
 
 ChildOptions::ChildOptions(AllocatorPtr alloc,
-			   const ChildOptions &src)
+			   const ChildOptions &src) noexcept
 	:tag(alloc.CheckDup(src.tag)),
 	 stderr_path(alloc.CheckDup(src.stderr_path)),
 	 expand_stderr_path(alloc.CheckDup(src.expand_stderr_path)),
@@ -78,7 +78,7 @@ ChildOptions::Check() const
 #if TRANSLATION_ENABLE_EXPAND
 
 bool
-ChildOptions::IsExpandable() const
+ChildOptions::IsExpandable() const noexcept
 {
 	return expand_stderr_path != nullptr ||
 		env.IsExpandable() ||
@@ -99,7 +99,7 @@ ChildOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
 #endif
 
 char *
-ChildOptions::MakeId(char *p) const
+ChildOptions::MakeId(char *p) const noexcept
 {
 	if (umask >= 0)
 		p += sprintf(p, ";u%o", umask);

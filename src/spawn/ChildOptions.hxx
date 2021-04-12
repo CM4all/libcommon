@@ -108,9 +108,10 @@ struct ChildOptions {
 
 	bool no_new_privs = false;
 
-	ChildOptions() = default;
+	ChildOptions() noexcept = default;
 
-	constexpr ChildOptions(ShallowCopy shallow_copy, const ChildOptions &src)
+	constexpr ChildOptions(ShallowCopy shallow_copy,
+			       const ChildOptions &src) noexcept
 		:tag(src.tag),
 		 stderr_path(src.stderr_path),
 		 expand_stderr_path(src.expand_stderr_path),
@@ -128,22 +129,25 @@ struct ChildOptions {
 		 forbid_bind(src.forbid_bind),
 		 no_new_privs(src.no_new_privs) {}
 
-	ChildOptions(AllocatorPtr alloc, const ChildOptions &src);
+	ChildOptions(AllocatorPtr alloc, const ChildOptions &src) noexcept;
 
-	ChildOptions(ChildOptions &&) = default;
-	ChildOptions &operator=(ChildOptions &&) = default;
+	ChildOptions(ChildOptions &&) noexcept = default;
+	ChildOptions &operator=(ChildOptions &&) noexcept = default;
 
 	/**
-	 * Throws std::runtime_error on error.
+	 * Throws on error.
 	 */
 	void Check() const;
 
 	[[gnu::pure]]
-	bool IsExpandable() const;
+	bool IsExpandable() const noexcept;
 
+	/**
+	 * Throws on error.
+	 */
 	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
 
-	char *MakeId(char *p) const;
+	char *MakeId(char *p) const noexcept;
 
 	/**
 	 * Throws on error.
@@ -151,7 +155,7 @@ struct ChildOptions {
 	UniqueFileDescriptor OpenStderrPath() const;
 
 	/**
-	 * Throws std::runtime_error on error.
+	 * Throws error.
 	 */
 	void CopyTo(PreparedChildProcess &dest) const;
 };
