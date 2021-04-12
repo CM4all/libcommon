@@ -100,6 +100,18 @@ public:
 		return p;
 	}
 
+	StringView Dup(StringView src) noexcept {
+		if (src.empty()) {
+			if (src != nullptr)
+				src.data = "";
+			return src;
+		}
+
+		auto data = NewArray<char>(src.size);
+		std::copy_n(src.data, src.size, data);
+		return {data, src.size};
+	}
+
 	const char *DupZ(StringView src) {
 		char *p = strndup(src.data, src.size);
 		if (p == nullptr)
@@ -185,7 +197,7 @@ public:
 	}
 
 	StringView Dup(StringView src) const noexcept {
-		return DupZ(src);
+		return allocator.Dup(src);
 	}
 
 	const char *DupZ(StringView src) const noexcept {
