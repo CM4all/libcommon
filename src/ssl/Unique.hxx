@@ -63,6 +63,7 @@ struct OpenSslDelete {
 		sk_X509_EXTENSION_pop_free(sk, X509_EXTENSION_free);
 	}
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 	void operator()(RSA *rsa) {
 		RSA_free(rsa);
 	}
@@ -70,6 +71,7 @@ struct OpenSslDelete {
 	void operator()(EC_KEY *key) {
 		EC_KEY_free(key);
 	}
+#endif
 
 	void operator()(EVP_PKEY *key) {
 		EVP_PKEY_free(key);
@@ -94,8 +96,10 @@ using UniqueX509_REQ = std::unique_ptr<X509_REQ, OpenSslDelete>;
 using UniqueX509_NAME = std::unique_ptr<X509_NAME, OpenSslDelete>;
 using UniqueX509_EXTENSION = std::unique_ptr<X509_EXTENSION, OpenSslDelete>;
 using UniqueX509_EXTENSIONS = std::unique_ptr<X509_EXTENSIONS, OpenSslDelete>;
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 using UniqueRSA = std::unique_ptr<RSA, OpenSslDelete>;
 using UniqueEC_KEY = std::unique_ptr<EC_KEY, OpenSslDelete>;
+#endif
 using UniqueEVP_PKEY = std::unique_ptr<EVP_PKEY, OpenSslDelete>;
 using UniqueEVP_PKEY_CTX = std::unique_ptr<EVP_PKEY_CTX, OpenSslDelete>;
 using UniqueBIO = std::unique_ptr<BIO, OpenSslDelete>;
