@@ -86,6 +86,18 @@ public:
 		return result;
 	}
 
+	/**
+	 * Concatenate all parameters into a newly allocated
+	 * std::string_view.
+	 */
+	template<typename... Args>
+	std::string_view ConcatView(Args... args) noexcept {
+		const size_t length = (ConcatLength(args) + ...);
+		char *result = NewArray<char>(length);
+		ConcatCopyAll(result, args...);
+		return {result, length};
+	}
+
 	template<typename T, typename... Args>
 	T *New(Args&&... args) noexcept {
 		auto p = new T(std::forward<Args>(args)...);
@@ -181,6 +193,11 @@ public:
 	template<typename... Args>
 	char *Concat(Args&&... args) const noexcept {
 		return allocator.Concat(std::forward<Args>(args)...);
+	}
+
+	template<typename... Args>
+	std::string_view ConcatView(Args&&... args) const noexcept {
+		return allocator.ConcatView(std::forward<Args>(args)...);
 	}
 
 	template<typename T, typename... Args>
