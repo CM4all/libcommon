@@ -43,6 +43,7 @@
 #include <cstdio>
 #include <cstddef>
 #include <string>
+#include <type_traits>
 
 #if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
 #include <string_view>
@@ -403,6 +404,14 @@ public:
 	{
 		collector.Fill(values);
 	}
+
+	constexpr const int *GetLengths() const noexcept {
+		return nullptr;
+	}
+
+	constexpr const int *GetFormats() const noexcept {
+		return nullptr;
+	}
 };
 
 template<typename... Params>
@@ -419,33 +428,6 @@ public:
 	{
 		collector.Fill(values, lengths, formats);
 	}
-};
-
-template<bool binary, typename... Params>
-class SelectParamArray;
-
-template<typename... Params>
-class SelectParamArray<false, Params...>
-	: public TextParamArray<Params...>
-{
-public:
-	using TextParamArray<Params...>::TextParamArray;
-
-	constexpr const int *GetLengths() const noexcept {
-		return nullptr;
-	}
-
-	constexpr const int *GetFormats() const noexcept {
-		return nullptr;
-	}
-};
-
-template<typename... Params>
-class SelectParamArray<true, Params...>
-	: public BinaryParamArray<Params...>
-{
-public:
-	using BinaryParamArray<Params...>::BinaryParamArray;
 
 	constexpr const int *GetLengths() const noexcept {
 		return BinaryParamArray<Params...>::lengths;
@@ -457,7 +439,8 @@ public:
 };
 
 template<typename... Params>
-using AutoParamArray = SelectParamArray<ParamCollector<Params...>::HasBinary(),
-					Params...>;
+using AutoParamArray = std::conditional_t<ParamCollector<Params...>::HasBinary(),
+					  BinaryParamArray<Params...>,
+					  TextParamArray<Params...>>;
 
 } /* namespace Pg */
