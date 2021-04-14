@@ -156,6 +156,12 @@ LimitSysCalls(FileDescriptor read_fd, pid_t kill_pid)
 	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(kill), Arg(0) == kill_pid);
 	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(exit_group));
 	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(exit));
+
+	/* seccomp_load() may call free(), which may attempt to give
+	   heap memory back to the kernel using brk() - this rule
+	   ignores this (to prevent SIGKILL) */
+	sf.AddRule(SCMP_ACT_ERRNO(ENOMEM), SCMP_SYS(brk));
+
 	sf.Load();
 }
 
