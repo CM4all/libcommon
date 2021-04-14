@@ -69,7 +69,8 @@ public:
 	Notify &operator=(const Notify &other) = delete;
 
 	Notify &operator=(Notify &&other) noexcept {
-		std::swap(notify, other.notify);
+		using std::swap;
+		swap(notify, other.notify);
 		return *this;
 	}
 
