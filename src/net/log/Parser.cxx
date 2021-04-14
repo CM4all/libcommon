@@ -223,9 +223,8 @@ ParseDatagram(ConstBuffer<void> _d)
 		d.SetEnd((const uint8_t *)&expected_crc);
 
 		Crc crc;
-		crc.reset();
-		crc.process_bytes(d.data, d.size);
-		if (crc.checksum() != FromBE32(expected_crc))
+		crc.Update(d.ToVoid());
+		if (crc.Finish() != FromBE32(expected_crc))
 			throw ProtocolError();
 
 		return log_server_apply_attributes(ConstBuffer<void>(d.data, d.size));

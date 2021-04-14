@@ -2,6 +2,7 @@ test(
   'TestUtil',
   executable(
     'TestUtil',
+    'TestCRC32.cxx',
     'TestException.cxx',
     'TestHashRing.cxx',
     'TestFNVHash.cxx',

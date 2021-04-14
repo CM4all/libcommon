@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2021 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,14 +32,47 @@
 
 #pragma once
 
-#include "util/CRC32.hxx"
+#include "ConstBuffer.hxx"
 
-namespace Net {
-namespace Log {
+#include <cstdint>
 
 /**
- * The CRC algorithm.
+ * A naive (and slow) CRC-32/ISO-HDLC implementation.
  */
-using Crc = CRC32;
+class CRC32 {
+public:
+	using value_type = uint32_t;
 
-}}
+private:
+	value_type state = 0xffffffff;
+
+public:
+	constexpr const auto &Update(ConstBuffer<uint8_t> b) noexcept {
+		for (auto i : b)
+			state = Update(state, i);
+		return *this;
+	}
+
+	constexpr auto &Update(ConstBuffer<void> b) noexcept {
+		return Update(ConstBuffer<uint8_t>::FromVoid(b));
+	}
+
+	constexpr value_type Finish() const noexcept {
+		return ~state;
+	}
+
+private:
+	static constexpr value_type Update(value_type crc,
+					   uint8_t octet) noexcept {
+		for (unsigned i = 0; i < 8; i++) {
+			uint32_t bit = (octet ^ crc) & 1;
+			crc >>= 1;
+			if (bit)
+				crc ^= 0xedb88320;
+
+			octet >>= 1;
+		}
+
+		return crc;
+	}
+};

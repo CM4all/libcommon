@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2021 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,16 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
 #include "util/CRC32.hxx"
 
-namespace Net {
-namespace Log {
+#include <gtest/gtest.h>
 
-/**
- * The CRC algorithm.
- */
-using Crc = CRC32;
-
-}}
+TEST(CRC32, Basic)
+{
+	EXPECT_EQ(CRC32{}.Update({"123456789", 9}).Finish(), 0xcbf43926);
+}

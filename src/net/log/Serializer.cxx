@@ -180,10 +180,9 @@ Serialize(void *buffer, std::size_t size, const Datagram &d)
 	}
 
 	Crc crc;
-	crc.reset();
-	crc.process_bytes((const uint8_t *)buffer + 4, w.size() - 4);
+	crc.Update(ConstBuffer<void>{(const uint8_t *)buffer + 4, w.size() - 4});
 
-	w.WriteBE32(crc.checksum());
+	w.WriteBE32(crc.Finish());
 
 	return w.size();
 }
