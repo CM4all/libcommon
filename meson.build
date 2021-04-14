@@ -44,6 +44,11 @@ test_cxxflags = [
   '-Wno-format-truncation',
 ]
 
+if compiler.get_id() == 'gcc' and compiler.version().version_compare('>=11')
+  # too many bogus warnings, e.g. for std::array::size()
+  test_cxxflags += '-Wno-maybe-uninitialized'
+endif
+
 test_cflags = [
   '-Wmissing-prototypes', '-Wstrict-prototypes',
   '-Wbad-function-cast',
