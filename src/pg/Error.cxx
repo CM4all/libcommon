@@ -56,3 +56,11 @@ Pg::Error::IsFatal() const noexcept
 	   https://www.postgresql.org/docs/9.6/errcodes-appendix.html */
 	return HasTypePrefix("08");
 }
+
+bool
+Pg::Error::IsDataException() const noexcept
+{
+	/* Class 02 - Data Exception; see
+	   https://www.postgresql.org/docs/9.6/errcodes-appendix.html */
+	return HasTypePrefix("22");
+}

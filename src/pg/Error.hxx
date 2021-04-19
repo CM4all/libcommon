@@ -85,6 +85,12 @@ public:
 	[[gnu::pure]]
 	bool IsFatal() const noexcept;
 
+	/**
+	 * Is this a "data exception" (prefix "22"), i.e. was there a
+	 * problem with client-provided data?
+	 */
+	bool IsDataException() const noexcept;
+
 	bool IsNotNullViolation() const noexcept {
 		return IsType("23502");
 	}
