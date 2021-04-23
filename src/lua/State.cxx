@@ -34,7 +34,7 @@ extern "C" {
 }
 
 void
-Lua::StateDeleter::operator()(lua_State *state) const
+Lua::StateDeleter::operator()(lua_State *state) const noexcept
 {
 	lua_close(state);
 }

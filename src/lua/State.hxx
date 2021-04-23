@@ -37,7 +37,7 @@ struct lua_State;
 namespace Lua {
 
 struct StateDeleter {
-	void operator()(lua_State *state) const;
+	void operator()(lua_State *state) const noexcept;
 };
 
 typedef std::unique_ptr<lua_State, StateDeleter> State;
