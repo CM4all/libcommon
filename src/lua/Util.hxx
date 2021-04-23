@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2021 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,6 +40,7 @@ extern "C" {
 }
 
 #include <cstddef>
+#include <string_view>
 #include <tuple>
 
 namespace Lua {
@@ -103,9 +104,9 @@ Push(lua_State *L, const char *value) noexcept
 
 gcc_nonnull_all
 static inline void
-Push(lua_State *L, StringView value) noexcept
+Push(lua_State *L, std::string_view value) noexcept
 {
-	lua_pushlstring(L, value.data, value.size);
+	lua_pushlstring(L, value.data(), value.size());
 }
 
 gcc_nonnull_all
