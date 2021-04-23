@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2020 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2008-2021 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,7 @@
 #include "Global.hxx"
 #include "Request.hxx"
 #include "event/SocketEvent.hxx"
+#include "util/Compiler.h"
 
 #include <cassert>
 

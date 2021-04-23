@@ -30,6 +30,7 @@
 
 #include "UTF8.hxx"
 #include "CharUtil.hxx"
+#include "Compiler.h"
 
 #include <algorithm>
 #include <cstdint>

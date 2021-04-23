@@ -35,6 +35,7 @@
 #include "net/SocketAddress.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "system/Error.hxx"
+#include "util/Compiler.h"
 #include "util/WritableBuffer.hxx"
 
 #include <assert.h>

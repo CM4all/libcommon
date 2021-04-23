@@ -35,6 +35,7 @@
 #include "DefaultFifoBuffer.hxx"
 #include "SocketWrapper.hxx"
 #include "event/DeferEvent.hxx"
+#include "util/Compiler.h"
 #include "util/DestructObserver.hxx"
 #include "util/LeakDetector.hxx"
 

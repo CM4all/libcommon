@@ -32,6 +32,7 @@
 
 #include "NetstringServer.hxx"
 #include "system/Error.hxx"
+#include "util/Compiler.h"
 #include "util/ConstBuffer.hxx"
 
 #include <stdexcept>

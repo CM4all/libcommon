@@ -33,6 +33,7 @@
 #include "MultiUdpListener.hxx"
 #include "UdpHandler.hxx"
 #include "system/Error.hxx"
+#include "util/Compiler.h"
 
 #include <assert.h>
 
