@@ -31,8 +31,6 @@
 #define LUA_UTIL_HXX
 
 #include "Assert.hxx"
-#include "util/StringView.hxx"
-
 #include "util/Compiler.h"
 
 extern "C" {
