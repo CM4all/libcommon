@@ -184,8 +184,8 @@ public:
 	 * Exceptions thrown by this method are passed to
 	 * OnBufferedError().
 	 */
-	virtual DirectResult OnBufferedDirect(gcc_unused SocketDescriptor fd,
-					      gcc_unused FdType fd_type) {
+	virtual DirectResult OnBufferedDirect([[maybe_unused]] SocketDescriptor fd,
+					      [[maybe_unused]] FdType fd_type) {
 		gcc_unreachable();
 	}
 
@@ -214,7 +214,7 @@ public:
 	 * @return false if no more data shall be delivered to the
 	 * handler; the #end method will also not be invoked
 	 */
-	virtual bool OnBufferedRemaining(gcc_unused std::size_t remaining) noexcept {
+	virtual bool OnBufferedRemaining([[maybe_unused]] std::size_t remaining) noexcept {
 		return true;
 	}
 

@@ -39,8 +39,6 @@
 #ifndef POISON_H
 #define POISON_H
 
-#include "Compiler.h"
-
 #if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
 #include <valgrind/memcheck.h>
 #endif
@@ -56,7 +54,7 @@
  * @param length number of bytes to poison
  */
 static inline void
-PoisonInaccessible(gcc_unused void *p, gcc_unused size_t size)
+PoisonInaccessible([[maybe_unused]] void *p, [[maybe_unused]] size_t size)
 {
 #if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
 	(void)VALGRIND_MAKE_MEM_UNDEFINED(p, size);
@@ -78,7 +76,7 @@ PoisonInaccessible(gcc_unused void *p, gcc_unused size_t size)
  * @param length number of bytes to poison
  */
 static inline void
-PoisonUndefined(gcc_unused void *p, gcc_unused size_t size)
+PoisonUndefined([[maybe_unused]] void *p, [[maybe_unused]] size_t size)
 {
 #if defined(HAVE_VALGRIND_MEMCHECK_H) && !defined(NDEBUG)
 	(void)VALGRIND_MAKE_MEM_UNDEFINED(p, size);

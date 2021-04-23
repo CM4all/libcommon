@@ -143,16 +143,16 @@ ServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 void
 ServiceExplorer::Object::ServiceResolverCallback(AvahiServiceResolver *,
 						 AvahiIfIndex interface,
-						 gcc_unused AvahiProtocol protocol,
+						 [[maybe_unused]] AvahiProtocol protocol,
 						 AvahiResolverEvent event,
-						 gcc_unused const char *name,
-						 gcc_unused const char *type,
-						 gcc_unused const char *domain,
-						 gcc_unused const char *host_name,
+						 [[maybe_unused]] const char *name,
+						 [[maybe_unused]] const char *type,
+						 [[maybe_unused]] const char *domain,
+						 [[maybe_unused]] const char *host_name,
 						 const AvahiAddress *a,
 						 uint16_t port,
-						 gcc_unused AvahiStringList *txt,
-						 gcc_unused AvahiLookupResultFlags flags,
+						 [[maybe_unused]] AvahiStringList *txt,
+						 [[maybe_unused]] AvahiLookupResultFlags flags,
 						 void *userdata) noexcept
 {
 	auto &object = *(ServiceExplorer::Object *)userdata;
@@ -202,7 +202,7 @@ ServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 					const char *name,
 					const char *type,
 					const char *domain,
-					gcc_unused AvahiLookupResultFlags flags) noexcept
+					[[maybe_unused]] AvahiLookupResultFlags flags) noexcept
 {
 	if (event == AVAHI_BROWSER_NEW) {
 		auto i = objects.emplace(std::piecewise_construct,
