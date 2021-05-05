@@ -117,11 +117,7 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
 	gids.emplace(0);
 
 	SetupGidMap(pid, gids);
-
-	/* always map the "root" user or else file operations may fail
-	   with EOVERFLOW (and this method will only be called if we're
-	   root) */
-	SetupUidMap(pid, uid_gid.uid, true);
+	SetupUidMap(pid, uid_gid.uid, false);
 }
 
 void
