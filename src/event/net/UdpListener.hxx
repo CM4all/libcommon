@@ -33,10 +33,10 @@
 #pragma once
 
 #include "event/SocketEvent.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
 
 #include <cstddef>
 
+class UniqueSocketDescriptor;
 class SocketAddress;
 class UdpHandler;
 
@@ -44,7 +44,6 @@ class UdpHandler;
  * Listener on a UDP port.
  */
 class UdpListener {
-	UniqueSocketDescriptor fd;
 	SocketEvent event;
 
 	UdpHandler &handler;
@@ -78,7 +77,7 @@ public:
 	 * replies.
 	 */
 	SocketDescriptor GetSocket() noexcept {
-		return fd;
+		return event.GetSocket();
 	}
 
 	/**

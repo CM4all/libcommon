@@ -33,6 +33,7 @@
 #include "MultiUdpListener.hxx"
 #include "UdpHandler.hxx"
 #include "system/Error.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "util/Compiler.h"
 
 #include <assert.h>
@@ -41,15 +42,17 @@ MultiUdpListener::MultiUdpListener(EventLoop &event_loop,
 				   UniqueSocketDescriptor _socket,
 				   MultiReceiveMessage &&_multi,
 				   UdpHandler &_handler) noexcept
-	:socket(std::move(_socket)),
-	 event(event_loop, BIND_THIS_METHOD(EventCallback), socket),
+	:event(event_loop, BIND_THIS_METHOD(EventCallback), _socket.Release()),
 	 multi(std::move(_multi)),
 	 handler(_handler)
 {
 	event.ScheduleRead();
 }
 
-MultiUdpListener::~MultiUdpListener() noexcept = default;
+MultiUdpListener::~MultiUdpListener() noexcept
+{
+	event.Close();
+}
 
 void
 MultiUdpListener::EventCallback(unsigned events) noexcept
@@ -61,7 +64,7 @@ try {
 	if (events & event.HANGUP)
 		handler.OnUdpHangup();
 
-	if (!multi.Receive(socket)) {
+	if (!multi.Receive(GetSocket())) {
 		handler.OnUdpDatagram(nullptr, nullptr, nullptr, -1);
 		return;
 	}
@@ -88,9 +91,9 @@ void
 MultiUdpListener::Reply(SocketAddress address,
 			const void *data, std::size_t data_length)
 {
-	assert(socket.IsDefined());
+	assert(event.IsDefined());
 
-	ssize_t nbytes = sendto(socket.Get(), data, data_length,
+	ssize_t nbytes = sendto(event.GetSocket().Get(), data, data_length,
 				MSG_DONTWAIT|MSG_NOSIGNAL,
 				address.GetAddress(), address.GetSize());
 	if (gcc_unlikely(nbytes < 0))

@@ -33,11 +33,11 @@
 #pragma once
 
 #include "event/SocketEvent.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
 
 #include <cstddef>
 
+class UniqueSocketDescriptor;
 class SocketAddress;
 class UdpHandler;
 
@@ -46,7 +46,6 @@ class UdpHandler;
  * for improved efficiency.
  */
 class MultiUdpListener {
-	UniqueSocketDescriptor socket;
 	SocketEvent event;
 
 	MultiReceiveMessage multi;
@@ -83,7 +82,7 @@ public:
 	 * replies.
 	 */
 	SocketDescriptor GetSocket() noexcept {
-		return socket;
+		return event.GetSocket();
 	}
 
 	/**
