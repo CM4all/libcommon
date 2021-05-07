@@ -107,8 +107,6 @@ public:
 		handler = &_handler;
 	}
 
-	void ReplaceSocket(UniqueSocketDescriptor new_socket) noexcept;
-
 	void Shutdown() noexcept;
 
 	UniqueSocketDescriptor Connect();

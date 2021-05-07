@@ -69,21 +69,6 @@ SpawnServerClient::~SpawnServerClient() noexcept
 }
 
 void
-SpawnServerClient::ReplaceSocket(UniqueSocketDescriptor new_socket) noexcept
-{
-	assert(event.IsDefined());
-	assert(new_socket.IsDefined());
-	assert(!shutting_down);
-
-	processes.clear();
-
-	Close();
-
-	event.Open(new_socket.Release());
-	event.ScheduleRead();
-}
-
-void
 SpawnServerClient::Close() noexcept
 {
 	assert(event.IsDefined());
