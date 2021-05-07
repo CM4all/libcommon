@@ -31,7 +31,7 @@
  */
 
 #include "UdpListener.hxx"
-#include "FullUdpHandler.hxx"
+#include "UdpHandler.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "system/Error.hxx"
@@ -43,7 +43,7 @@
 #include <unistd.h>
 
 UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
-			 FullUdpHandler &_handler) noexcept
+			 UdpHandler &_handler) noexcept
 	:fd(std::move(_fd)),
 	 event(event_loop, BIND_THIS_METHOD(EventCallback), fd),
 	 handler(_handler)

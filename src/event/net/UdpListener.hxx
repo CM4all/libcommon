@@ -38,7 +38,7 @@
 #include <cstddef>
 
 class SocketAddress;
-class FullUdpHandler;
+class UdpHandler;
 
 /**
  * Listener on a UDP port.
@@ -47,11 +47,11 @@ class UdpListener {
 	UniqueSocketDescriptor fd;
 	SocketEvent event;
 
-	FullUdpHandler &handler;
+	UdpHandler &handler;
 
 public:
 	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
-		    FullUdpHandler &_handler) noexcept;
+		    UdpHandler &_handler) noexcept;
 	~UdpListener() noexcept;
 
 	auto &GetEventLoop() const noexcept {
@@ -94,7 +94,7 @@ public:
 	 * to the handler (until the handler returns false).  Throws
 	 * exception on error.
 	 *
-	 * @return false if one FullUdpHandler::OnUdpDatagram()
+	 * @return false if one UdpHandler::OnUdpDatagram()
 	 * invocation has returned false
 	 */
 	bool ReceiveAll();
@@ -104,7 +104,7 @@ private:
 	 * Receive one datagram and pass it to the handler.  Throws
 	 * exception on error.
 	 *
-	 * @return FullUdpHandler::OnUdpDatagram()
+	 * @return UdpHandler::OnUdpDatagram()
 	 */
 	bool ReceiveOne();
 

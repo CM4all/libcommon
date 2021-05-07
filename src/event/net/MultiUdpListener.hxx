@@ -39,7 +39,7 @@
 #include <cstddef>
 
 class SocketAddress;
-class FullUdpHandler;
+class UdpHandler;
 
 /**
  * Listener on a UDP port.  Unlike #UdpListener, it uses recvmmsg()
@@ -51,12 +51,12 @@ class MultiUdpListener {
 
 	MultiReceiveMessage multi;
 
-	FullUdpHandler &handler;
+	UdpHandler &handler;
 
 public:
 	MultiUdpListener(EventLoop &event_loop, UniqueSocketDescriptor _socket,
 			 MultiReceiveMessage &&_multi,
-			 FullUdpHandler &_handler) noexcept;
+			 UdpHandler &_handler) noexcept;
 	~MultiUdpListener() noexcept;
 
 	auto &GetEventLoop() const noexcept {

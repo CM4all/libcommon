@@ -32,24 +32,35 @@
 
 #pragma once
 
-#include "FullUdpHandler.hxx"
+#include <exception>
+
+template<typename T> struct ConstBuffer;
+template<typename T> struct WritableBuffer;
+class SocketAddress;
+class UniqueFileDescriptor;
 
 /**
- * Compatibility interface for those who havn't migrated to
- * #FullUdpHandler yet.
+ * Handler for a #UdpListener.
+ *
+ * This is a class for a smooth API transition away from #UdpHandler
+ * to an interface which allows receiving file descriptors.
  */
-class UdpHandler : public FullUdpHandler {
+class UdpHandler {
 public:
-	bool OnUdpDatagram(ConstBuffer<void> payload,
-			   WritableBuffer<UniqueFileDescriptor> fds,
-			   SocketAddress address, int uid) final;
-
 	/**
 	 * Exceptions thrown by this method will be passed to OnUdpError().
 	 *
 	 * @param uid the peer process uid, or -1 if unknown
 	 * @return false if the #UdpHandler was destroyed inside this method
 	 */
-	virtual bool OnUdpDatagram(const void *data, size_t length,
+	virtual bool OnUdpDatagram(ConstBuffer<void> payload,
+				   WritableBuffer<UniqueFileDescriptor> fds,
 				   SocketAddress address, int uid) = 0;
+
+	/**
+	 * An I/O error has occurred, and the socket is defunct.
+	 * After returning, it is assumed that the #UdpListener has
+	 * been destroyed.
+	 */
+	virtual void OnUdpError(std::exception_ptr ep) noexcept = 0;
 };

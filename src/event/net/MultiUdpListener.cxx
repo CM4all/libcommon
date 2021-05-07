@@ -40,7 +40,7 @@
 MultiUdpListener::MultiUdpListener(EventLoop &event_loop,
 				   UniqueSocketDescriptor _socket,
 				   MultiReceiveMessage &&_multi,
-				   FullUdpHandler &_handler) noexcept
+				   UdpHandler &_handler) noexcept
 	:socket(std::move(_socket)),
 	 event(event_loop, BIND_THIS_METHOD(EventCallback), socket),
 	 multi(std::move(_multi)),
