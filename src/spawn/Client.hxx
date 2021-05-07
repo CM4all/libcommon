@@ -36,6 +36,7 @@
 #include "Config.hxx"
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
+#include "net/MultiReceiveMessage.hxx"
 
 #include <forward_list>
 #include <map>
@@ -71,6 +72,8 @@ class SpawnServerClient final : public SpawnService {
 	std::forward_list<KillQueueItem> kill_queue;
 
 	SocketEvent event;
+
+	MultiReceiveMessage receive{64, 24};
 
 	SpawnServerClientHandler *handler = nullptr;
 

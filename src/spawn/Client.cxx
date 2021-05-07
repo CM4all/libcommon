@@ -42,13 +42,10 @@
 #include "system/Error.hxx"
 #include "util/PrintException.hxx"
 
-#include <array>
 #include <stdexcept>
 
 #include <assert.h>
-#include <unistd.h>
 #include <stdio.h>
-#include <sys/socket.h>
 
 static constexpr size_t MAX_FDS = 8;
 
@@ -463,47 +460,24 @@ SpawnServerClient::FlushKillQueue()
 inline void
 SpawnServerClient::ReceiveAndHandle()
 {
-	constexpr size_t N = 64;
-	std::array<uint8_t[24], N> payloads;
-	std::array<struct iovec, N> iovs;
-	std::array<struct mmsghdr, N> msgs;
+	if (!receive.Receive(event.GetSocket()))
+		throw std::runtime_error("spawner closed the socket");
 
-	for (size_t i = 0; i < N; ++i) {
-		auto &iov = iovs[i];
-		iov.iov_base = payloads[i];
-		iov.iov_len = sizeof(payloads[i]);
-
-		auto &msg = msgs[i].msg_hdr;
-		msg.msg_name = nullptr;
-		msg.msg_namelen = 0;
-		msg.msg_iov = &iov;
-		msg.msg_iovlen = 1;
-		msg.msg_control = nullptr;
-		msg.msg_controllen = 0;
-	}
-
-	int n = recvmmsg(event.GetSocket().Get(), &msgs.front(), msgs.size(),
-			 MSG_DONTWAIT|MSG_CMSG_CLOEXEC, nullptr);
-	if (n <= 0) {
-		if (n < 0)
-			throw MakeErrno("recvmsg() from spawner failed");
-		else
-			throw std::runtime_error("spawner closed the socket");
-	}
-
-	for (int i = 0; i < n; ++i) {
-		if (msgs[i].msg_len == 0)
+	for (const auto &i : receive) {
+		if (i.payload.empty())
 			/* when the peer closes the socket, recvmmsg() doesn't
 			   return 0; insteaed, it fills the mmsghdr array with
 			   empty packets */
 			throw std::runtime_error("spawner closed the socket");
 
 		try {
-			HandleMessage({payloads[i], msgs[i].msg_len});
+			HandleMessage(ConstBuffer<uint8_t>::FromVoid(i.payload));
 		} catch (...) {
 			PrintException(std::current_exception());
 		}
 	}
+
+	receive.Clear();
 }
 
 inline void
@@ -522,6 +496,7 @@ try {
 	if (events & event.READ)
 		ReceiveAndHandle();
 } catch (...) {
+	fprintf(stderr, "Spawner error: ");
 	PrintException(std::current_exception());
 	Close();
 }
