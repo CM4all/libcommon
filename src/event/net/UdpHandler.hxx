@@ -58,6 +58,12 @@ public:
 				   SocketAddress address, int uid) = 0;
 
 	/**
+	 * The peer has hung up the (SOCK_SEQPACKET) connection.  This
+	 * method can be used to throw an exception.
+	 */
+	virtual void OnUdpHangup() {}
+
+	/**
 	 * An I/O error has occurred, and the socket is defunct.
 	 * After returning, it is assumed that the #UdpListener has
 	 * been destroyed.

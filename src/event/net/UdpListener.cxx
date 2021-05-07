@@ -99,6 +99,9 @@ try {
 		throw MakeErrno(event.GetSocket().GetError(),
 				"Socket error");
 
+	if (events & event.HANGUP)
+		handler.OnUdpHangup();
+
 	ReceiveOne();
 } catch (...) {
 	/* unregister the SocketEvent, just in case the handler does
