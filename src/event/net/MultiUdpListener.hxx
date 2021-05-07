@@ -62,6 +62,17 @@ public:
 		return event.GetEventLoop();
 	}
 
+	bool IsDefined() const noexcept {
+		return event.IsDefined();
+	}
+
+	/**
+	 * Close the socket and disable this listener permanently.
+	 */
+	void Close() noexcept {
+		event.Close();
+	}
+
 	/**
 	 * Enable the object after it has been disabled by Disable().  A
 	 * new object is enabled by default.
