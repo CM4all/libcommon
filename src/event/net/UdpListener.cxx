@@ -93,8 +93,12 @@ UdpListener::ReceiveOne()
 }
 
 void
-UdpListener::EventCallback(unsigned) noexcept
+UdpListener::EventCallback(unsigned events) noexcept
 try {
+	if (events & event.ERROR)
+		throw MakeErrno(event.GetSocket().GetError(),
+				"Socket error");
+
 	ReceiveOne();
 } catch (...) {
 	/* unregister the SocketEvent, just in case the handler does

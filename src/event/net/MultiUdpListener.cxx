@@ -52,8 +52,12 @@ MultiUdpListener::MultiUdpListener(EventLoop &event_loop,
 MultiUdpListener::~MultiUdpListener() noexcept = default;
 
 void
-MultiUdpListener::EventCallback(unsigned) noexcept
+MultiUdpListener::EventCallback(unsigned events) noexcept
 try {
+	if (events & event.ERROR)
+		throw MakeErrno(event.GetSocket().GetError(),
+				"Socket error");
+
 	if (!multi.Receive(socket)) {
 		handler.OnUdpDatagram(nullptr, nullptr, nullptr, -1);
 		return;
