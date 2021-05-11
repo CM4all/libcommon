@@ -843,6 +843,13 @@ SpawnServerProcess::Run() noexcept
 	loop.Dispatch();
 }
 
+static void
+AnnounceCgroup(SocketDescriptor s) noexcept
+{
+	static constexpr auto cmd = SpawnResponseCommand::CGROUPS_AVAILABLE;
+	send(s.Get(), &cmd, sizeof(cmd), MSG_NOSIGNAL);
+}
+
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 	       SpawnHook *hook,
@@ -852,8 +859,7 @@ RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 		/* tell the client that the cgroups feature is available;
 		   there is no other way for the client to know if we don't
 		   tell him; see SpawnServerClient::SupportsCgroups() */
-		static constexpr auto cmd = SpawnResponseCommand::CGROUPS_AVAILABLE;
-		send(socket.Get(), &cmd, sizeof(cmd), MSG_NOSIGNAL);
+		AnnounceCgroup(socket);
 	}
 
 	SpawnServerProcess process(config, cgroup_state, hook);
