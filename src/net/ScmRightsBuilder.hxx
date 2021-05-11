@@ -56,7 +56,7 @@ class ScmRightsBuilder {
 	int *data;
 
 public:
-	explicit ScmRightsBuilder(struct msghdr &msg) {
+	explicit ScmRightsBuilder(struct msghdr &msg) noexcept {
 		msg.msg_control = buffer;
 		msg.msg_controllen = sizeof(buffer);
 
@@ -64,13 +64,13 @@ public:
 		data = (int *)(void *)CMSG_DATA(cmsg);
 	}
 
-	void push_back(int fd) {
+	void push_back(int fd) noexcept {
 		assert(n < MAX_FDS);
 
 		data[n++] = fd;
 	}
 
-	void Finish(struct msghdr &msg) {
+	void Finish(struct msghdr &msg) noexcept {
 		msg.msg_controllen = CMSG_SPACE(n * sizeof(int));
 
 		struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
