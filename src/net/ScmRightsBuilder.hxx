@@ -36,6 +36,14 @@
 
 #include <sys/socket.h>
 
+/**
+ * This class helps with sending file descriptors over a local socket.
+ * To use it, first construct a #msghdr and then an instance of this
+ * class.  Call push_back() for each file descriptor, and finally call
+ * Finish().  After that, sendmsg() can be called.
+ *
+ * @param MAX_FDS the maximum number of file descriptors
+ */
 template<size_t MAX_FDS>
 class ScmRightsBuilder {
 	static constexpr size_t size = CMSG_SPACE(MAX_FDS * sizeof(int));
