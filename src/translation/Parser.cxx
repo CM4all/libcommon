@@ -1970,7 +1970,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed REGEX_TAIL packet");
 
-		if (response.regex == nullptr && response.inverse_regex == nullptr)
+		if (response.regex == nullptr &&
+		    response.inverse_regex == nullptr &&
+		    response.layout == nullptr)
 			throw std::runtime_error("misplaced REGEX_TAIL packet");
 
 		if (response.regex_tail)
