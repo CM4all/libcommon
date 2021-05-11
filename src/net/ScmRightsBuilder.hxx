@@ -33,6 +33,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
 
 #include <sys/socket.h>
 
@@ -44,12 +45,12 @@
  *
  * @param MAX_FDS the maximum number of file descriptors
  */
-template<size_t MAX_FDS>
+template<std::size_t MAX_FDS>
 class ScmRightsBuilder {
-	static constexpr size_t size = CMSG_SPACE(MAX_FDS * sizeof(int));
-	static constexpr size_t n_longs = (size + sizeof(long) - 1) / sizeof(long);
+	static constexpr std::size_t size = CMSG_SPACE(MAX_FDS * sizeof(int));
+	static constexpr std::size_t n_longs = (size + sizeof(long) - 1) / sizeof(long);
 
-	size_t n = 0;
+	std::size_t n = 0;
 	long buffer[n_longs];
 
 	int *data;
