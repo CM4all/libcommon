@@ -88,11 +88,11 @@ VerifyDomainLabel(StringView s) noexcept
 }
 
 bool
-VerifyDomainName(StringView s) noexcept
+VerifyDomainName(std::string_view s) noexcept
 {
 	/* RFC 1035 2.3.4: domain names are limited to 255 octets */
 
-	return s.size <= 255 && IsNonEmptyListOf(s, '.', VerifyDomainLabel);
+	return s.size() <= 255 && IsNonEmptyListOf(s, '.', VerifyDomainLabel);
 }
 
 [[gnu::pure]]
@@ -129,8 +129,10 @@ VerifyUriHost(StringView host) noexcept
 }
 
 bool
-VerifyUriHostPort(StringView host_port) noexcept
+VerifyUriHostPort(std::string_view _host_port) noexcept
 {
+	const StringView host_port{_host_port};
+
 	if (host_port.empty())
 		return false;
 
@@ -165,7 +167,7 @@ VerifyUriHostPort(StringView host_port) noexcept
 }
 
 bool
-uri_segment_verify(StringView segment) noexcept
+uri_segment_verify(std::string_view segment) noexcept
 {
 	for (char ch : segment) {
 		/* XXX check for invalid escaped characters? */
@@ -178,8 +180,10 @@ uri_segment_verify(StringView segment) noexcept
 }
 
 bool
-uri_path_verify(StringView uri) noexcept
+uri_path_verify(std::string_view _uri) noexcept
 {
+	StringView uri(_uri);
+
 	if (uri.empty() || uri.front() != '/')
 		/* path must begin with slash */
 		return false;

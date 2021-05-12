@@ -36,7 +36,7 @@
 
 #pragma once
 
-struct StringView;
+#include <string_view>
 
 /**
  * Is this a valid domain name (i.e. host name) according to RFC 1034
@@ -44,7 +44,7 @@ struct StringView;
  */
 [[gnu::pure]]
 bool
-VerifyDomainName(StringView name) noexcept;
+VerifyDomainName(std::string_view name) noexcept;
 
 /**
  * Is this a valid "host:port" string (or "Host:" request header)
@@ -52,21 +52,21 @@ VerifyDomainName(StringView name) noexcept;
  */
 [[gnu::pure]]
 bool
-VerifyUriHostPort(StringView host_port) noexcept;
+VerifyUriHostPort(std::string_view host_port) noexcept;
 
 /**
  * Verifies one path segment of an URI according to RFC 2396.
  */
 [[gnu::pure]]
 bool
-uri_segment_verify(StringView segment) noexcept;
+uri_segment_verify(std::string_view segment) noexcept;
 
 /**
  * Verifies the path portion of an URI according to RFC 2396.
  */
 [[gnu::pure]]
 bool
-uri_path_verify(StringView uri) noexcept;
+uri_path_verify(std::string_view uri) noexcept;
 
 /**
  * Performs some paranoid checks on the URI; the following is not
