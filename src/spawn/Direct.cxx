@@ -378,12 +378,12 @@ spawn_fn(void *_ctx)
 	     ctx.cgroup_state);
 }
 
-pid_t
+UniqueFileDescriptor
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool is_sys_admin)
 {
-	int clone_flags = SIGCHLD;
+	int clone_flags = CLONE_PIDFD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
 	if (params.cgroup != nullptr && params.cgroup->IsDefined())
@@ -443,9 +443,13 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	}
 
 	char stack[HaveAddressSanitizer() ? 32768 : 16384];
-	long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags, &ctx);
+	int _pidfd;
+	long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags,
+			 &ctx, &_pidfd);
 	if (pid < 0)
 		throw MakeErrno("clone() failed");
+
+	UniqueFileDescriptor pidfd{_pidfd};
 
 	if (ctx.userns_create_pipe_r.IsDefined()) {
 		/* wait for the child to create the user namespace */
@@ -487,5 +491,5 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		ctx.wait_pipe_w.Close();
 	}
 
-	return pid;
+	return pidfd;
 }

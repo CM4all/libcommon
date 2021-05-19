@@ -33,7 +33,6 @@
 #include "Glue.hxx"
 #include "Client.hxx"
 #include "Launch.hxx"
-#include "Registry.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "system/Error.hxx"
 
@@ -41,7 +40,7 @@
 
 std::unique_ptr<SpawnServerClient>
 StartSpawnServer(const SpawnConfig &config,
-		 ChildProcessRegistry &child_process_registry,
+		 EventLoop &event_loop,
 		 SpawnHook *hook,
 		 std::function<void()> post_clone)
 {
@@ -50,16 +49,15 @@ StartSpawnServer(const SpawnConfig &config,
 							      s1, s2))
 		throw MakeErrno("socketpair() failed");
 
-	auto pid = LaunchSpawnServer(config, hook, std::move(s1),
-				     [&s2, post_clone](){
-					     s2.Close();
-					     post_clone();
-				     });
-
-	child_process_registry.Add(pid, "spawn", nullptr);
+	LaunchSpawnServer(config, hook, std::move(s1),
+			  [&s2, post_clone](){
+				  s2.Close();
+				  post_clone();
+			  });
+	/* not using the returned pidfd */
 
 	return std::make_unique<SpawnServerClient>
-		(child_process_registry.GetEventLoop(),
+		(event_loop,
 		 config, std::move(s2),
 		 /* don't verify if there is a hook, because the hook
 		    may have its own overriding rules */

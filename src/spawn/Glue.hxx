@@ -37,11 +37,11 @@
 
 struct SpawnConfig;
 class SpawnServerClient;
-class ChildProcessRegistry;
+class EventLoop;
 class SpawnHook;
 
 std::unique_ptr<SpawnServerClient>
 StartSpawnServer(const SpawnConfig &config,
-		 ChildProcessRegistry &child_process_registry,
+		 EventLoop &event_loop,
 		 SpawnHook *hook,
 		 std::function<void()> post_clone);

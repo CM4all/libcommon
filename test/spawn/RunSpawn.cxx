@@ -157,8 +157,10 @@ try {
 
 	siginfo_t info;
 
-	if (waitid((idtype_t)P_PID, pid,
-		   &info, WEXITED) < 0)
+	/* the __WALL is necessary because we clone() without
+	   SIGCHLD */
+	if (waitid((idtype_t)P_PIDFD, pid.Get(),
+		   &info, WEXITED|__WALL) < 0)
 		throw MakeErrno("waitid() failed");
 
 	switch (info.si_code) {

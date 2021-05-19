@@ -32,57 +32,78 @@
 
 #include "Local.hxx"
 #include "ProcessHandle.hxx"
+#include "PidfdEvent.hxx"
 #include "ExitListener.hxx"
 #include "Config.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
 #include "Prepared.hxx"
 #include "CgroupState.hxx"
+#include "event/PipeEvent.hxx"
+#include "io/Logger.hxx"
 
+#include <memory>
 #include <utility>
+
+#include <linux/wait.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 class LocalChildProcess final : public ChildProcessHandle, ExitListener {
 	ChildProcessRegistry &registry;
 
-	pid_t pid;
+	std::unique_ptr<PidfdEvent> pidfd;
 
 	ExitListener *exit_listener = nullptr;
 
 public:
-	LocalChildProcess(ChildProcessRegistry &_registry,
-			  pid_t _pid, const char *name) noexcept
-		:registry(_registry), pid(_pid)
+	LocalChildProcess(EventLoop &event_loop,
+			  ChildProcessRegistry &_registry,
+			  UniqueFileDescriptor &&_pidfd,
+			  const char *_name) noexcept
+		:registry(_registry),
+		 pidfd(std::make_unique<PidfdEvent>(event_loop,
+						    std::move(_pidfd),
+						    _name,
+						    (ExitListener &)*this))
 	{
-		registry.Add(pid, name, this);
 	}
 
 	~LocalChildProcess() noexcept override {
-		if (pid > 0)
+		if (pidfd)
 			Kill(SIGTERM);
 	}
 
+private:
+	/* virtual methods from ExitListener */
+	void OnChildProcessExit(int status) noexcept override;
+
 	/* virtual methods from class ChildProcessHandle */
 	void SetExitListener(ExitListener &listener) noexcept override {
-		assert(pid > 0);
+		assert(pidfd);
 
 		exit_listener = &listener;
 	}
 
-	void Kill(int signo) noexcept override {
-		assert(pid > 0);
-
-		registry.Kill(std::exchange(pid, 0), signo);
-	}
-
-	/* virtual methods from class ExitListener */
-	void OnChildProcessExit(int status) noexcept override {
-		assert(pid > 0);
-		pid = 0;
-
-		if (exit_listener != nullptr)
-			exit_listener->OnChildProcessExit(status);
-	}
+	void Kill(int signo) noexcept override;
 };
+
+void
+LocalChildProcess::OnChildProcessExit(int status) noexcept
+{
+	pidfd.reset();
+
+	if (exit_listener != nullptr)
+		exit_listener->OnChildProcessExit(status);
+}
+
+void
+LocalChildProcess::Kill(int signo) noexcept
+{
+	assert(pidfd);
+
+	registry.Kill(std::move(pidfd), signo);
+}
 
 std::unique_ptr<ChildProcessHandle>
 LocalSpawnService::SpawnChildProcess(const char *name,
@@ -91,7 +112,9 @@ LocalSpawnService::SpawnChildProcess(const char *name,
 	if (params.uid_gid.IsEmpty())
 		params.uid_gid = config.default_uid_gid;
 
-	pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState(),
-					false /* TODO? */);
-	return std::make_unique<LocalChildProcess>(registry, pid, name);
+	auto pidfd = ::SpawnChildProcess(std::move(params), CgroupState(),
+					 false /* TODO? */);
+	return std::make_unique<LocalChildProcess>(event_loop, registry,
+						   std::move(pidfd),
+						   name);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2021 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,17 +32,48 @@
 
 #pragma once
 
-#include <functional>
+#include "event/PipeEvent.hxx"
+#include "io/Logger.hxx"
 
-struct SpawnConfig;
-class SpawnHook;
-class UniqueSocketDescriptor;
+class ExitListener;
 class UniqueFileDescriptor;
 
-/**
- * @return a pidfd
- */
-UniqueFileDescriptor
-LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
-		  UniqueSocketDescriptor socket,
-		  std::function<void()> post_clone);
+class PidfdEvent final {
+	const Logger logger;
+
+	PipeEvent event;
+
+	ExitListener *listener;
+
+public:
+	PidfdEvent(EventLoop &event_loop,
+		   UniqueFileDescriptor &&_pidfd,
+		   const char *_name,
+		   ExitListener &_listener) noexcept;
+
+	~PidfdEvent() noexcept;
+
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
+	const auto &GetLogger() const noexcept {
+		return logger;
+	}
+
+	bool IsDefined() const noexcept {
+		return event.IsDefined();
+	}
+
+	void SetListener(ExitListener &_listener) noexcept {
+		listener = &_listener;
+	}
+
+	/**
+	 * @return true on success
+	 */
+	bool Kill(int signo) noexcept;
+
+private:
+	void OnPidfdReady(unsigned) noexcept;
+};

@@ -36,15 +36,17 @@
 
 struct PreparedChildProcess;
 struct CgroupState;
+class UniqueFileDescriptor;
 
 /**
  * Throws exception on error.
  *
  * @param is_sys_admin are we CAP_SYS_ADMIN?
  *
- * @return the process id
+ * @return a pidfd
  */
-pid_t
+[[nodiscard]]
+UniqueFileDescriptor
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool is_sys_admin);

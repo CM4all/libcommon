@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2021 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,17 +32,13 @@
 
 #pragma once
 
-#include <functional>
+#include <signal.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
-struct SpawnConfig;
-class SpawnHook;
-class UniqueSocketDescriptor;
-class UniqueFileDescriptor;
-
-/**
- * @return a pidfd
- */
-UniqueFileDescriptor
-LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
-		  UniqueSocketDescriptor socket,
-		  std::function<void()> post_clone);
+static inline int
+my_pidfd_send_signal(int pidfd, int sig, siginfo_t *info,
+		     unsigned int flags)
+{
+	return syscall(__NR_pidfd_send_signal, pidfd, sig, info, flags);
+}

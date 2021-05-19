@@ -149,7 +149,7 @@ RunSpawnServer2(void *p)
 	}
 }
 
-pid_t
+UniqueFileDescriptor
 LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 		  UniqueSocketDescriptor socket,
 		  std::function<void()> post_clone)
@@ -167,17 +167,18 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	/* try to run the spawner in a new PID namespace; to be able to
 	   mount a new /proc for this namespace, we need a mount namespace
 	   (CLONE_NEWNS) as well */
+	int _pidfd;
 	int pid = clone(RunSpawnServer2, stack + sizeof(stack),
-			CLONE_NEWPID | CLONE_NEWNS | SIGCHLD,
-			&ctx);
+			CLONE_NEWPID | CLONE_NEWNS | CLONE_PIDFD,
+			&ctx, &_pidfd);
 	if (pid < 0) {
 		/* try again without CLONE_NEWPID */
 		fprintf(stderr, "Failed to create spawner PID namespace (%s), trying without\n",
 			strerror(errno));
 		ctx.pid_namespace = false;
 		pid = clone(RunSpawnServer2, stack + sizeof(stack),
-			    SIGCHLD,
-			    &ctx);
+			    CLONE_PIDFD,
+			    &ctx, &_pidfd);
 	}
 
 	/* note: CLONE_IO cannot be used here because it conflicts
@@ -188,9 +189,11 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	if (pid < 0)
 		throw MakeErrno("clone() failed");
 
+	UniqueFileDescriptor pidfd{_pidfd};
+
 	/* send its "real" PID to the spawner */
 	read_pipe.Close();
 	write_pipe.Write(&pid, sizeof(pid));
 
-	return pid;
+	return pidfd;
 }

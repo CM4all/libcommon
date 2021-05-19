@@ -21,6 +21,7 @@ spawn_sources = [
   'Init.cxx',
   'NetworkNamespace.cxx',
   'PidNamespace.cxx',
+  'PidfdEvent.cxx',
   'Registry.cxx',
   'ResourceLimits.cxx',
   'SeccompFilter.cxx',

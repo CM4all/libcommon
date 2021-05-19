@@ -44,6 +44,7 @@
 #include "Direct.hxx"
 #include "Registry.hxx"
 #include "ExitListener.hxx"
+#include "PidfdEvent.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/Loop.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
@@ -108,15 +109,21 @@ class SpawnServerChild final : public ExitListener {
 
 	const int id;
 
-	const pid_t pid;
+	std::unique_ptr<PidfdEvent> pidfd;
 
 	const std::string name;
 
 public:
-	explicit SpawnServerChild(SpawnServerConnection &_connection,
-				  int _id, pid_t _pid,
+	explicit SpawnServerChild(EventLoop &event_loop,
+				  SpawnServerConnection &_connection,
+				  int _id, UniqueFileDescriptor _pidfd,
 				  const char *_name) noexcept
-		:connection(_connection), id(_id), pid(_pid), name(_name) {}
+		:connection(_connection), id(_id),
+		 pidfd(std::make_unique<PidfdEvent>(event_loop,
+						    std::move(_pidfd),
+						    _name,
+						    (ExitListener &)*this)),
+		 name(_name) {}
 
 	SpawnServerChild(const SpawnServerChild &) = delete;
 	SpawnServerChild &operator=(const SpawnServerChild &) = delete;
@@ -127,7 +134,7 @@ public:
 
 	void Kill(ChildProcessRegistry &child_process_registry,
 		  int signo) noexcept {
-		child_process_registry.Kill(pid, signo);
+		child_process_registry.Kill(std::move(pidfd), signo);
 	}
 
 	/* virtual methods from ExitListener */
@@ -185,6 +192,10 @@ public:
 	SpawnServerConnection(SpawnServerProcess &_process,
 			      UniqueSocketDescriptor &&_socket) noexcept;
 	~SpawnServerConnection() noexcept;
+
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
 
 	void OnChildProcessExit(int id, int status,
 				SpawnServerChild *child) noexcept;
@@ -254,8 +265,7 @@ public:
 			   const CgroupState &_cgroup_state,
 			   SpawnHook *_hook)
 		:config(_config), cgroup_state(_cgroup_state), hook(_hook),
-		 logger("spawn"),
-		 child_process_registry(loop)
+		 logger("spawn")
 	{
 #ifdef HAVE_LIBSYSTEMD
 		if (config.systemd_scope_properties.memory_max > 0 &&
@@ -314,8 +324,6 @@ private:
 #ifdef HAVE_LIBSYSTEMD
 		cgroup_memory_watch.reset();
 #endif
-
-		child_process_registry.SetVolatile();
 	}
 
 #ifdef HAVE_LIBSYSTEMD
@@ -424,7 +432,7 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 		p.uid_gid = config.default_uid_gid;
 	}
 
-	pid_t pid;
+	UniqueFileDescriptor pid;
 
 	try {
 		pid = SpawnChildProcess(std::move(p),
@@ -437,10 +445,9 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 		return;
 	}
 
-	auto *child = new SpawnServerChild(*this, id, pid, name);
+	auto *child = new SpawnServerChild(GetEventLoop(), *this, id,
+					   std::move(pid), name);
 	children.insert(*child);
-
-	process.GetChildProcessRegistry().Add(pid, name, child);
 }
 
 static void
