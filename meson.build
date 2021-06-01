@@ -28,9 +28,18 @@ common_flags = [
   '-Wvla',
 ]
 
+test_global_common_flags = [
+]
+
 if debug
   common_flags += ['-DPOISON']
 endif
+
+test_global_cxxflags = test_global_common_flags + [
+]
+
+test_global_cflags = test_global_common_flags + [
+]
 
 test_cxxflags = [
   '-Wno-non-virtual-dtor',
@@ -56,8 +65,10 @@ test_cflags = [
 add_global_arguments(common_flags, language: 'c')
 add_global_arguments(common_flags, language: 'cpp')
 
-add_global_arguments(compiler.get_supported_arguments(test_cxxflags), language: 'cpp')
-add_global_arguments(c_compiler.get_supported_arguments(test_cflags), language: 'c')
+add_global_arguments(compiler.get_supported_arguments(test_global_cxxflags), language: 'cpp')
+add_global_arguments(c_compiler.get_supported_arguments(test_global_cflags), language: 'c')
+add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language: 'cpp')
+add_project_arguments(c_compiler.get_supported_arguments(test_cflags), language: 'c')
 
 if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'cpp')
