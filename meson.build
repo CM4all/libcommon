@@ -1,4 +1,5 @@
 project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
+  meson_version: '>= 0.47',
   default_options: [
     'c_std=c11',
     'cpp_std=c++2a',
@@ -11,12 +12,7 @@ version_h.set_quoted('PACKAGE', meson.project_name())
 version_h.set_quoted('VERSION', meson.project_version())
 configure_file(output: 'version.h', configuration: version_h)
 
-# TODO: use get_option('b_ndebug'), but that doesn't work with Meson 0.37.1
-if get_option('buildtype') == 'debug'
-  debug = true
-else
-  debug = false
-endif
+debug = get_option('b_ndebug') != 'true'
 
 compiler = meson.get_compiler('cpp')
 c_compiler = meson.get_compiler('c')
@@ -60,17 +56,8 @@ test_cflags = [
 add_global_arguments(common_flags, language: 'c')
 add_global_arguments(common_flags, language: 'cpp')
 
-foreach f: test_cxxflags
-  if compiler.has_argument(f)
-    add_global_arguments(f, language: 'cpp')
-  endif
-endforeach
-
-foreach f: test_cflags
-  if c_compiler.has_argument(f)
-    add_global_arguments(f, language: 'c')
-  endif
-endforeach
+add_global_arguments(compiler.get_supported_arguments(test_cxxflags), language: 'cpp')
+add_global_arguments(c_compiler.get_supported_arguments(test_cflags), language: 'c')
 
 if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'cpp')

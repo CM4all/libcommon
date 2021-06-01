@@ -22,7 +22,7 @@ You need:
 
 - a C++20 compiler (`GCC <https://gcc.gnu.org/>`__ or `clang
   <https://clang.llvm.org/>`__)
-- `meson 0.37 <http://mesonbuild.com/>`__
+- `meson 0.47 <http://mesonbuild.com/>`__
 - `Boost <http://boost.org/>`__
 - `libcurl <https://curl.haxx.se/>`__
 - `libpq <https://www.postgresql.org/>`__
