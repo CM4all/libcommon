@@ -35,6 +35,10 @@
 #pragma GCC diagnostic ignored "-Wcast-align"
 #endif
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
+#endif
+
 /* suppress -Wundef */
 #define BOOST_VERSION 0
 
