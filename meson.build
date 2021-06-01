@@ -22,13 +22,21 @@ common_flags = [
 ]
 
 test_common_flags = [
-  '-Wwrite-strings', '-Wcast-qual', '-Wcast-align', '-Wfloat-equal',
-  '-Wshadow', '-Wsign-compare',
-  '-Wmissing-declarations', '-Wmissing-noreturn', '-Wmissing-format-attribute',
-  '-Wredundant-decls', '-Wno-long-long',
-  '-Wunused',
+  '-Wcast-qual',
+  '-Wcast-align',
+  '-Wfloat-equal',
+  '-Wmissing-declarations',
+  '-Wmissing-format-attribute',
+  '-Wmissing-noreturn',
+  '-Wredundant-decls',
+  '-Wshadow',
+  '-Wsign-compare',
   '-Wundef',
+  '-Wunused',
   '-Wvla',
+  '-Wwrite-strings',
+
+  '-Wno-long-long',
 ]
 
 test_global_common_flags = [
@@ -58,10 +66,11 @@ if compiler.get_id() == 'gcc' and compiler.version().version_compare('>=11')
 endif
 
 test_cflags = test_common_flags + [
-  '-Wmissing-prototypes', '-Wstrict-prototypes',
-  '-Wbad-function-cast',
   '-Waggregate-return',
+  '-Wbad-function-cast',
+  '-Wmissing-prototypes',
   '-Wnested-externs',
+  '-Wstrict-prototypes',
 ]
 
 add_global_arguments(common_flags, language: 'c')
