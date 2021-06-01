@@ -101,7 +101,7 @@ protected:
 		} catch (...) {
 			OnAcceptError(std::current_exception());
 		}
-	};
+	}
 
 	void OnAcceptError(std::exception_ptr ep) noexcept override {
 		PrintException(ep);
