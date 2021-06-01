@@ -1067,10 +1067,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	const StringView string_payload(payload);
 
 	switch (command) {
-#if TRANSLATION_ENABLE_TRANSFORMATION
-		Transformation *new_transformation;
-#endif
-
 	case TranslationCommand::BEGIN:
 	case TranslationCommand::END:
 		gcc_unreachable();
@@ -1243,8 +1239,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		} else {
 			throw std::runtime_error("misplaced GZIPPED packet");
 		}
-
-		return;
 #else
 		break;
 #endif
@@ -1376,14 +1370,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		break;
 #endif
 
-	case TranslationCommand::PROCESS:
+	case TranslationCommand::PROCESS: {
 #if TRANSLATION_ENABLE_TRANSFORMATION
-		new_transformation = AddTransformation(XmlProcessorTransformation{});
+		auto *new_transformation = AddTransformation(XmlProcessorTransformation{});
 		new_transformation->u.processor.options = PROCESSOR_REWRITE_URL;
 		return;
 #else
 		break;
 #endif
+	}
 
 	case TranslationCommand::DOMAIN_:
 		throw std::runtime_error("deprecated DOMAIN packet");
@@ -2282,14 +2277,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		break;
 #endif
 
-	case TranslationCommand::PROCESS_CSS:
+	case TranslationCommand::PROCESS_CSS: {
 #if TRANSLATION_ENABLE_TRANSFORMATION
-		new_transformation = AddTransformation(CssProcessorTransformation{});
+		auto *new_transformation = AddTransformation(CssProcessorTransformation{});
 		new_transformation->u.css_processor.options = CSS_PROCESSOR_REWRITE_URL;
 		return;
 #else
 		break;
 #endif
+	}
 
 	case TranslationCommand::PREFIX_CSS_CLASS:
 #if TRANSLATION_ENABLE_TRANSFORMATION
@@ -2375,7 +2371,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::PROCESS_TEXT:
 #if TRANSLATION_ENABLE_TRANSFORMATION
-		new_transformation = AddTransformation(TextProcessorTransformation{});
+		AddTransformation(TextProcessorTransformation{});
 		return;
 #else
 		break;
@@ -3683,10 +3679,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.layout = payload;
 		layout_items_builder.clear();
+		return;
 #else
 		break;
 #endif
-		return;
 
 	case TranslationCommand::RECOVER_SESSION:
 #if TRANSLATION_ENABLE_SESSION
