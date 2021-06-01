@@ -45,7 +45,7 @@ using std::experimental::coroutine_handle;
 using std::experimental::suspend_never;
 using std::experimental::suspend_always;
 using std::experimental::noop_coroutine;
-};
+}
 
 #else /* not clang */
 
