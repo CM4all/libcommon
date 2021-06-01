@@ -19,6 +19,9 @@ c_compiler = meson.get_compiler('c')
 
 common_flags = [
   '-D_REENTRANT', '-D_GNU_SOURCE',
+]
+
+test_common_flags = [
   '-Wwrite-strings', '-Wcast-qual', '-Wcast-align', '-Wfloat-equal',
   '-Wshadow', '-Wpointer-arith', '-Wsign-compare',
   '-Wmissing-declarations', '-Wmissing-noreturn', '-Wmissing-format-attribute',
@@ -41,7 +44,7 @@ test_global_cxxflags = test_global_common_flags + [
 test_global_cflags = test_global_common_flags + [
 ]
 
-test_cxxflags = [
+test_cxxflags = test_common_flags + [
   '-Wno-non-virtual-dtor',
 
   # the only warnings we got from this are from formatted error
@@ -54,7 +57,7 @@ if compiler.get_id() == 'gcc' and compiler.version().version_compare('>=11')
   test_cxxflags += '-Wno-maybe-uninitialized'
 endif
 
-test_cflags = [
+test_cflags = test_common_flags + [
   '-Wmissing-prototypes', '-Wstrict-prototypes',
   '-Wbad-function-cast',
   '-Waggregate-return',
