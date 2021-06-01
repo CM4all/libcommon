@@ -23,7 +23,7 @@ common_flags = [
 
 test_common_flags = [
   '-Wwrite-strings', '-Wcast-qual', '-Wcast-align', '-Wfloat-equal',
-  '-Wshadow', '-Wpointer-arith', '-Wsign-compare',
+  '-Wshadow', '-Wsign-compare',
   '-Wmissing-declarations', '-Wmissing-noreturn', '-Wmissing-format-attribute',
   '-Wredundant-decls', '-Wno-long-long',
   '-Wunused',
@@ -62,7 +62,6 @@ test_cflags = test_common_flags + [
   '-Wbad-function-cast',
   '-Waggregate-return',
   '-Wnested-externs',
-  '-pedantic',
 ]
 
 add_global_arguments(common_flags, language: 'c')
