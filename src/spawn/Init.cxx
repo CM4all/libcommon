@@ -222,8 +222,6 @@ SpawnInit(pid_t child_pid, bool remain)
 			break;
 		}
 	}
-
-	return last_status;
 }
 
 pid_t
