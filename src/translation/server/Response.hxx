@@ -446,14 +446,14 @@ public:
 		return Packet(TranslationCommand::INTERNAL_REDIRECT, payload);
 	}
 
-	template<typename P>
-	auto &HttpAuth(P payload) noexcept {
-		return Packet(TranslationCommand::HTTP_AUTH, payload);
+	template<typename... Params>
+	auto &HttpAuth(Params... params) noexcept {
+		return MultiPacket(TranslationCommand::HTTP_AUTH, params...);
 	}
 
-	template<typename P>
-	auto &TokenAuth(P payload) noexcept {
-		return Packet(TranslationCommand::TOKEN_AUTH, payload);
+	template<typename... Params>
+	auto &TokenAuth(Params... params) noexcept {
+		return MultiPacket(TranslationCommand::TOKEN_AUTH, params...);
 	}
 
 	template<typename P>
@@ -466,9 +466,9 @@ public:
 		return Packet(TranslationCommand::CHECK, payload);
 	}
 
-	template<typename P>
-	auto &Auth(P payload) noexcept {
-		return Packet(TranslationCommand::AUTH, payload);
+	template<typename... Params>
+	auto &Auth(Params... params) noexcept {
+		return MultiPacket(TranslationCommand::AUTH, params...);
 	}
 
 	template<typename... Types>
