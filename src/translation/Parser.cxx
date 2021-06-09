@@ -3061,9 +3061,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!response.auth.IsNull())
 			throw std::runtime_error("cannot combine AUTH and HTTP_AUTH");
 
-		if (!response.token_auth.IsNull())
-			throw std::runtime_error("cannot combine TOKEN_AUTH and HTTP_AUTH");
-
 		response.http_auth = payload;
 		return;
 #else
@@ -3077,9 +3074,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		if (!response.auth.IsNull())
 			throw std::runtime_error("cannot combine AUTH and TOKEN_AUTH");
-
-		if (!response.http_auth.IsNull())
-			throw std::runtime_error("cannot combine TOKEN_AUTH and HTTP_AUTH");
 
 		response.token_auth = payload;
 		return;
