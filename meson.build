@@ -169,6 +169,7 @@ subdir('src/spawn')
 subdir('src/stock')
 subdir('src/translation')
 subdir('src/was')
+subdir('src/was/async')
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   subdir('src/translation/server')
