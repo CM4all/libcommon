@@ -47,6 +47,7 @@ endif
 subdir('spawn')
 subdir('time')
 subdir('uring')
+subdir('was')
 
 if get_option('coroutines')
   subdir('co')
