@@ -55,7 +55,8 @@ Mount::Mount(AllocatorPtr alloc, const Mount &src) noexcept
 	 expand_source(src.expand_source),
 #endif
 	 writable(src.writable),
-	 exec(src.exec) {}
+	 exec(src.exec),
+	 optional(src.optional) {}
 
 IntrusiveForwardList<Mount>
 Mount::CloneAll(AllocatorPtr alloc, const IntrusiveForwardList<Mount> &src) noexcept
