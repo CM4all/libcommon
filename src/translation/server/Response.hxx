@@ -589,6 +589,10 @@ public:
 		return StringPacket(TranslationCommand::EXPAND_READ_FILE, path...);
 	}
 
+	auto &Optional() noexcept {
+		return Packet(TranslationCommand::OPTIONAL);
+	}
+
 	struct FilterContext {
 		Response &response;
 
@@ -739,6 +743,11 @@ public:
 			response.StringPacket(TranslationCommand::EXPAND_BIND_MOUNT_EXEC,
 					      source, std::string_view{"", 1},
 					      target);
+			return *this;
+		}
+
+		auto Optional() noexcept {
+			response.Optional();
 			return *this;
 		}
 	};

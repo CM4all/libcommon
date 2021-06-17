@@ -2566,6 +2566,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::BIND_MOUNT:
+		previous_command = command;
 		HandleBindMount(string_payload, false, false);
 		return;
 
@@ -2890,6 +2891,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::EXPAND_BIND_MOUNT:
 #if TRANSLATION_ENABLE_EXPAND
+		previous_command = command;
 		HandleBindMount(string_payload, true, false);
 		return;
 #else
@@ -3103,11 +3105,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::BIND_MOUNT_RW:
+		previous_command = command;
 		HandleBindMount(string_payload, false, true);
 		return;
 
 	case TranslationCommand::EXPAND_BIND_MOUNT_RW:
 #if TRANSLATION_ENABLE_EXPAND
+		previous_command = command;
 		HandleBindMount(string_payload, true, true);
 		return;
 #else
@@ -3241,11 +3245,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	}
 
 	case TranslationCommand::BIND_MOUNT_EXEC:
+		previous_command = command;
 		HandleBindMount(string_payload, false, false, true);
 		return;
 
 	case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
 #if TRANSLATION_ENABLE_EXPAND
+		previous_command = command;
 		HandleBindMount(string_payload, true, false, true);
 		return;
 #else
@@ -3692,6 +3698,30 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::OPTIONAL:
+		if (!payload.empty())
+			throw std::runtime_error("malformed OPTIONAL packet");
+
+		switch (previous_command) {
+		case TranslationCommand::BIND_MOUNT:
+		case TranslationCommand::EXPAND_BIND_MOUNT:
+		case TranslationCommand::BIND_MOUNT_RW:
+		case TranslationCommand::EXPAND_BIND_MOUNT_RW:
+		case TranslationCommand::BIND_MOUNT_EXEC:
+		case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
+			if (mount_list != IntrusiveForwardList<Mount>::end()) {
+				mount_list->optional = true;
+				return;
+			}
+
+			break;
+
+		default:
+			break;
+		}
+
+		throw std::runtime_error("misplaced OPTIONAL packet");
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

@@ -43,6 +43,7 @@
 #include <cinttypes>
 
 #include <sys/mount.h>
+#include <sys/stat.h>
 #include <string.h>
 
 inline
@@ -103,6 +104,12 @@ MountOrThrow(const char *source, const char *target,
 inline void
 Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 {
+	if (struct stat st;
+	    optional && lstat(source, &st) < 0 && errno == ENOENT)
+		/* the source directory doesn't exist, but this is
+		   optional, so just ignore it */
+		return;
+
 	vfs_builder.Add(target);
 
 	int flags = MS_NOSUID|MS_NODEV;

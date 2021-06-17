@@ -1085,6 +1085,12 @@ enum class TranslationCommand : uint16_t {
 	 * (or the request arrives at a different worker).
 	 */
 	RECOVER_SESSION = 228,
+
+	/**
+	 * Specifies that the previous command is optional.  Errors
+	 * because an object was not found are not fatal.
+	 */
+	OPTIONAL = 229,
 };
 
 struct TranslationHeader {

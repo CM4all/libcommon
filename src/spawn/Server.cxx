@@ -624,6 +624,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				bool exec = payload.ReadByte();
 				mounts.emplace_front(source, target,
 						     writable, exec);
+				mounts.front().optional = payload.ReadByte();
 			}
 
 			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,

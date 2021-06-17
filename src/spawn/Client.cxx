@@ -179,6 +179,7 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			s.WriteString(i.target);
 			s.WriteByte(i.writable);
 			s.WriteByte(i.exec);
+			s.WriteByte(i.optional);
 			break;
 
 		case Mount::Type::TMPFS:

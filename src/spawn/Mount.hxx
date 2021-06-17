@@ -61,6 +61,11 @@ struct Mount : IntrusiveForwardListHook {
 	 */
 	bool exec;
 
+	/**
+	 * Ignore ENOENT?
+	 */
+	bool optional = false;
+
 	constexpr Mount(const char *_source, const char *_target,
 			bool _writable=false,
 			bool _exec=false) noexcept
