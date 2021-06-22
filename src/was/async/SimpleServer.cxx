@@ -315,7 +315,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 {
 	assert(request.state == Request::State::SUBMITTED);
 	//assert(response.body == nullptr);
-	assert(http_status_is_valid(response.status));
+	//assert(http_status_is_valid(response.status));
 	assert(!http_status_is_empty(response.status) || !response.body);
 
 	control.BulkOn();
