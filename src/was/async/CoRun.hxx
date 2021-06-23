@@ -41,7 +41,7 @@ class EventLoop;
 
 namespace Was {
 
-using CoCallback = std::function<Co::Task<SimpleResponse>(SimpleRequest &&)>;
+using CoCallback = std::function<Co::Task<SimpleResponse>(SimpleRequest)>;
 
 void
 Run(EventLoop &event_loop, CoCallback handler);

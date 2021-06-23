@@ -46,7 +46,7 @@ public:
 		:handler(std::move(_handler)) {}
 
 protected:
-	Co::Task<SimpleResponse> OnCoRequest(SimpleRequest &&request) override {
+	Co::Task<SimpleResponse> OnCoRequest(SimpleRequest request) override {
 		return handler(std::move(request));
 	}
 };

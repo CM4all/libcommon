@@ -47,7 +47,7 @@ public:
 		       CancellablePointer &cancel_ptr) final;
 
 protected:
-	virtual Co::Task<SimpleResponse> OnCoRequest(SimpleRequest &&request) = 0;
+	virtual Co::Task<SimpleResponse> OnCoRequest(SimpleRequest request) = 0;
 };
 
 } // namespace Was

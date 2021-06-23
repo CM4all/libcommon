@@ -35,7 +35,7 @@
 #include "util/PrintException.hxx"
 
 static Co::Task<Was::SimpleResponse>
-MyHandler(Was::SimpleRequest &&request)
+MyHandler(Was::SimpleRequest request)
 {
 	co_return Was::SimpleResponse{
 		HTTP_STATUS_OK,
