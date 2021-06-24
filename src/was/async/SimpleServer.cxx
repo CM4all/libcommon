@@ -89,7 +89,8 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		break;
 
 	case WAS_COMMAND_REQUEST:
-		if (request.state != Request::State::NONE) {
+		if (request.state != Request::State::NONE ||
+		    output.IsActive()) {
 			AbortProtocolError("misplaced REQUEST packet");
 			return false;
 		}
@@ -314,11 +315,16 @@ bool
 SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 {
 	assert(request.state == Request::State::SUBMITTED);
+	assert(request.request);
 	//assert(response.body == nullptr);
 	//assert(http_status_is_valid(response.status));
 	assert(!http_status_is_empty(response.status) || !response.body);
 
 	control.BulkOn();
+	request.state = Request::State::NONE;
+	request.request.reset();
+
+	request.cancel_ptr = nullptr;
 
 	if (!control.Send(WAS_COMMAND_STATUS, &response.status,
 			  sizeof(response.status)))
