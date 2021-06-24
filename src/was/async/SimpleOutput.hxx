@@ -68,6 +68,26 @@ public:
 
 	void Activate(DisposableBuffer _buffer) noexcept;
 
+	/**
+	 * Set the "position" field to zero to allow calling Stop()
+	 * without Activate(), in cases where there is no request
+	 * body.
+	 */
+	void ResetPosition() noexcept {
+		position = 0;
+	}
+
+	/**
+	 * Handle a STOP command.  Returns the number of bytes already
+	 * written to the pipe.  This may be called even after writing
+	 * has completed (because the `position` field does not get
+	 * cleared).
+	 */
+	std::size_t Stop() noexcept {
+		buffer = {};
+		return position;
+	}
+
 private:
 	FileDescriptor GetPipe() const noexcept {
 		return event.GetSocket().ToFileDescriptor();

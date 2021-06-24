@@ -112,7 +112,12 @@ public:
 	bool SendResponse(SimpleResponse &&response) noexcept;
 
 private:
-	void CancelRequest() noexcept;
+	/**
+	 * @return true if a request handler was canceled, false if
+	 * there is no request currently
+	 */
+	bool CancelRequest() noexcept;
+
 	void Closed() noexcept;
 
 	/**

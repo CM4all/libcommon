@@ -47,13 +47,21 @@ SimpleServer::SimpleServer(EventLoop &event_loop, WasSocket &&socket,
 	 output(event_loop, std::move(socket.output), *this),
 	 handler(_handler), request_handler(_request_handler)
 {
+	/* avoid sending uninitialized data when STOP is received
+	   without ever receiving a request; that would be a protocol
+	   violation, but we don't care enough to check this
+	   explicitly */
+	output.ResetPosition();
 }
 
-void
+bool
 SimpleServer::CancelRequest() noexcept
 {
-	if (request.cancel_ptr)
-		request.cancel_ptr.CancelAndClear();
+	if (!request.cancel_ptr)
+		return false;
+
+	request.cancel_ptr.CancelAndClear();
+	return true;
 }
 
 void
@@ -100,6 +108,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		request.method = request.request->method = HTTP_METHOD_GET;
 		request.state = Request::State::HEADERS;
 		//response.body = nullptr;
+		output.ResetPosition();
 		break;
 
 	case WAS_COMMAND_METHOD:
@@ -228,9 +237,13 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		break;
 
 	case WAS_COMMAND_STOP:
-		// XXX
-		AbortProtocolError(StringFormat<64>("unexpected packet: %d", cmd));
-		return false;
+		if (CancelRequest())
+			/* the handler was canceled before it could
+			   produce a response */
+			return control.SendUint64(WAS_COMMAND_PREMATURE, 0);
+
+		return control.SendUint64(WAS_COMMAND_PREMATURE,
+					  output.Stop());
 
 	case WAS_COMMAND_PREMATURE:
 		{
