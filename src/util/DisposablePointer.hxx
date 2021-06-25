@@ -129,6 +129,16 @@ ToDeletePointer(T *ptr) noexcept
 
 template<typename T>
 TypedDisposablePointer<T>
+ToDeleteArray(T *ptr) noexcept
+{
+	return {ptr, [](void *p) noexcept {
+		T *t = (T *)p;
+		delete[] t;
+	}};
+}
+
+template<typename T>
+TypedDisposablePointer<T>
 ToDestructPointer(T *ptr) noexcept
 {
 	return {ptr, [](void *p) noexcept {
