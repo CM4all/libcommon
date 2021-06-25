@@ -56,6 +56,13 @@ public:
 	DisposableBuffer(DisposableBuffer &&) noexcept = default;
 	DisposableBuffer &operator=(DisposableBuffer &&) noexcept = default;
 
+	static DisposableBuffer Dup(std::string_view src) noexcept;
+	static DisposableBuffer Dup(ConstBuffer<std::byte> src) noexcept;
+
+	static DisposableBuffer Dup(ConstBuffer<void> src) noexcept {
+		return Dup(ConstBuffer<std::byte>::FromVoid(src));
+	}
+
 	operator bool() const noexcept {
 		return data_;
 	}
