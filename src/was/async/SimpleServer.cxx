@@ -153,9 +153,27 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		break;
 
 	case WAS_COMMAND_SCRIPT_NAME:
+		if (request.state != Request::State::HEADERS)
+			AbortProtocolError("misplaced SCRIPT_NAME packet");
+
+		request.request->script_name.assign((const char *)payload.data,
+						    payload.size);
+		break;
+
 	case WAS_COMMAND_PATH_INFO:
+		if (request.state != Request::State::HEADERS)
+			AbortProtocolError("misplaced PATH_INFO packet");
+
+		request.request->path_info.assign((const char *)payload.data,
+						    payload.size);
+		break;
+
 	case WAS_COMMAND_QUERY_STRING:
-		// XXX
+		if (request.state != Request::State::HEADERS)
+			AbortProtocolError("misplaced QUERY_STRING packet");
+
+		request.request->query_string.assign((const char *)payload.data,
+						     payload.size);
 		break;
 
 	case WAS_COMMAND_HEADER:

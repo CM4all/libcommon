@@ -47,6 +47,7 @@ struct SimpleRequest {
 	std::map<std::string, std::string> parameters;
 	http_method_t method;
 	std::string uri;
+	std::string script_name, path_info, query_string;
 	std::multimap<std::string, std::string> headers;
 	DisposableBuffer body;
 };
