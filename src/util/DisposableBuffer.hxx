@@ -42,7 +42,7 @@
  * be casted implicitly to various classes such as std::string_view.
  */
 class DisposableBuffer {
-	DisposablePointer data;
+	DisposablePointer data_;
 	std::size_t size_ = 0;
 
 public:
@@ -51,13 +51,13 @@ public:
 
 	template<typename D>
 	DisposableBuffer(D &&_data, std::size_t _size) noexcept
-		:data(std::forward<D>(_data)), size_(_size) {}
+		:data_(std::forward<D>(_data)), size_(_size) {}
 
 	DisposableBuffer(DisposableBuffer &&) noexcept = default;
 	DisposableBuffer &operator=(DisposableBuffer &&) noexcept = default;
 
 	operator bool() const noexcept {
-		return data;
+		return data_;
 	}
 
 	std::size_t size() const noexcept {
@@ -69,14 +69,14 @@ public:
 	}
 
 	operator std::string_view() const noexcept {
-		return {(const char *)data.get(), size()};
+		return {(const char *)data_.get(), size()};
 	}
 
 	operator ConstBuffer<void>() const noexcept {
-		return {data.get(), size()};
+		return {data_.get(), size()};
 	}
 
 	operator ConstBuffer<std::byte>() const noexcept {
-		return {(const std::byte *)data.get(), size()};
+		return {(const std::byte *)data_.get(), size()};
 	}
 };
