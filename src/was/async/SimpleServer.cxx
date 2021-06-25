@@ -148,7 +148,8 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
-		request.request->uri = {(const char *)payload.data, payload.size};
+		request.request->uri.assign((const char *)payload.data,
+					    payload.size);
 		break;
 
 	case WAS_COMMAND_SCRIPT_NAME:
