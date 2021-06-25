@@ -60,6 +60,10 @@ public:
 		return data_;
 	}
 
+	void *data() const noexcept {
+		return data_.get();
+	}
+
 	std::size_t size() const noexcept {
 		return size_;
 	}
