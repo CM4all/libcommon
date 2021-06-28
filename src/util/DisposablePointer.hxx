@@ -112,9 +112,12 @@ public:
 };
 
 inline DisposablePointer
-ToNopPointer(void *ptr) noexcept
+ToNopPointer(const void *ptr) noexcept
 {
-	return {ptr, [](void *) noexcept {}};
+	/* since the disposer is a no-op, we allow passing a const
+	   pointer here; the const_cast is necessary because
+	   DisposablePointer wants a non-const pointer */
+	return {const_cast<void *>(ptr), [](void *) noexcept {}};
 }
 
 template<typename T>
