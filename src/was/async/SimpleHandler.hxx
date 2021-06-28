@@ -68,6 +68,16 @@ struct SimpleResponse {
 		body = {ToNopPointer(_body.data()), _body.size()};
 		headers.emplace("content-type", "text/plain");
 	}
+
+	static SimpleResponse MethodNotAllowed(std::string allow) noexcept {
+		return {
+			HTTP_STATUS_METHOD_NOT_ALLOWED,
+			std::multimap<std::string, std::string, std::less<>>{
+				{"allow", std::move(allow)},
+			},
+			nullptr,
+		};
+	}
 };
 
 class SimpleServer;
