@@ -38,8 +38,9 @@
 #include <stdexcept>
 
 std::multimap<std::string, std::string>
-MapQueryString(StringView src)
+MapQueryString(std::string_view _src)
 {
+	const StringView src{_src};
 	std::multimap<std::string, std::string> m;
 
 	AllocatedArray<char> unescape_buffer(256);

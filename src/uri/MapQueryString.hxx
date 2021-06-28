@@ -35,8 +35,6 @@
 #include <map>
 #include <string>
 
-struct StringView;
-
 /**
  * Parse a query string (or "application/x-www-form-urlencoded") into
  * a multimap.
@@ -44,4 +42,4 @@ struct StringView;
  * Throws if a value has a bad escape.
  */
 std::multimap<std::string, std::string>
-MapQueryString(StringView src);
+MapQueryString(std::string_view src);

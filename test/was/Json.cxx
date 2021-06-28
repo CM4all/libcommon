@@ -47,7 +47,7 @@ MyHandler(Was::SimpleRequest request)
 	for (const auto &[name, value] : request.parameters)
 		o.emplace(name, value);
 
-	for (const auto &[name, value] : MapQueryString(std::string_view{request.query_string}))
+	for (const auto &[name, value] : MapQueryString(request.query_string))
 		o.emplace(name, value);
 
 	co_return Was::SimpleResponse{

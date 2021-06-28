@@ -35,7 +35,6 @@
 #include "ExceptionResponse.hxx"
 #include "uri/MapQueryString.hxx"
 #include "util/MimeType.hxx"
-#include "util/StringView.hxx"
 
 #include <was/simple.h>
 
@@ -60,8 +59,7 @@ FormRequestBodyToMap(was_simple *w, std::string::size_type limit)
 		throw BadRequest{"Wrong request body type\n"};
 
 	const auto raw = RequestBodyToString(w, limit);
-	const std::string_view v(raw);
-	return MapQueryString(v);
+	return MapQueryString(raw);
 }
 
 } // namespace Was
