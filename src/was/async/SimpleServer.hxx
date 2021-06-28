@@ -112,6 +112,8 @@ public:
 	bool SendResponse(SimpleResponse &&response) noexcept;
 
 private:
+	bool SubmitRequest() noexcept;
+
 	/**
 	 * @return true if a request handler was canceled, false if
 	 * there is no request currently

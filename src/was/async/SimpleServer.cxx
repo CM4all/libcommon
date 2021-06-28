@@ -54,6 +54,19 @@ SimpleServer::SimpleServer(EventLoop &event_loop, WasSocket &&socket,
 	output.ResetPosition();
 }
 
+inline bool
+SimpleServer::SubmitRequest() noexcept
+{
+	assert(request.state == Request::State::BODY ||
+	       request.state == Request::State::PENDING);
+
+	request.state = Request::State::SUBMITTED;
+
+	return request_handler.OnRequest(*this,
+					 std::move(*request.request),
+					 request.cancel_ptr);
+}
+
 bool
 SimpleServer::CancelRequest() noexcept
 {
@@ -294,11 +307,7 @@ SimpleServer::OnWasControlDrained() noexcept
 	}
 
 	if (request.state == Request::State::PENDING) {
-		request.state = Request::State::SUBMITTED;
-
-		return request_handler.OnRequest(*this,
-						 std::move(*request.request),
-						 request.cancel_ptr);
+		return SubmitRequest();
 	}
 
 	return true;
@@ -323,12 +332,8 @@ SimpleServer::OnWasInput(DisposableBuffer body) noexcept
 {
 	assert(request.state == Request::State::BODY);
 
-	request.state = Request::State::SUBMITTED;
-
 	request.request->body = std::move(body);
-	request_handler.OnRequest(*this, std::move(*request.request),
-				  request.cancel_ptr);
-
+	SubmitRequest();
 }
 
 void
