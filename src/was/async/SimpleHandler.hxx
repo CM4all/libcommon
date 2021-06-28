@@ -70,7 +70,7 @@ public:
 	 */
 	virtual bool OnRequest(SimpleServer &server,
 			       SimpleRequest &&request,
-			       CancellablePointer &cancel_ptr) = 0;
+			       CancellablePointer &cancel_ptr) noexcept = 0;
 };
 
 } // namespace Was

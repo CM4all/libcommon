@@ -39,7 +39,7 @@ class MyHandler final : public Was::SimpleRequestHandler {
 public:
 	bool OnRequest(Was::SimpleServer &server,
 			  Was::SimpleRequest &&request,
-			  CancellablePointer &) override {
+			  CancellablePointer &) noexcept override {
 		return server.SendResponse({
 				HTTP_STATUS_OK,
 				std::move(request.headers),

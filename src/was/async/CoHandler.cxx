@@ -108,7 +108,7 @@ private:
 bool
 CoSimpleRequestHandler::OnRequest(SimpleServer &server,
 				  SimpleRequest &&request,
-				  CancellablePointer &cancel_ptr)
+				  CancellablePointer &cancel_ptr) noexcept
 {
 	auto *r = new Request(server,
 			      OnCoRequest(std::move(request)));

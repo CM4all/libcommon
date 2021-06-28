@@ -44,7 +44,7 @@ class CoSimpleRequestHandler : public SimpleRequestHandler {
 public:
 	bool OnRequest(SimpleServer &server,
 		       SimpleRequest &&request,
-		       CancellablePointer &cancel_ptr) final;
+		       CancellablePointer &cancel_ptr) noexcept final;
 
 protected:
 	virtual Co::Task<SimpleResponse> OnCoRequest(SimpleRequest request) = 0;
