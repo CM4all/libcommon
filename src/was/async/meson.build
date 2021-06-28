@@ -12,6 +12,7 @@ was_async = static_library(
   'was_async',
   was_async_sources,
   'Control.cxx',
+  'SimpleHandler.cxx',
   'SimpleInput.cxx',
   'SimpleOutput.cxx',
   'SimpleRun.cxx',

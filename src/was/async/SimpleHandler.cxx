@@ -30,59 +30,19 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "SimpleHandler.hxx"
+#include "util/MimeType.hxx"
 
-#include "http/Method.h"
-#include "http/Status.h"
-#include "util/DisposableBuffer.hxx"
-
-#include <map>
-#include <string>
-
-class CancellablePointer;
+using std::string_view_literals::operator""sv;
 
 namespace Was {
 
-struct SimpleRequest {
-	std::map<std::string, std::string, std::less<>> parameters;
-	http_method_t method;
-	std::string uri;
-	std::string script_name, path_info, query_string;
-	std::multimap<std::string, std::string, std::less<>> headers;
-	DisposableBuffer body;
-
-	/**
-	 * Compare the base of the Content-Type header with the given
-	 * expected value.
-	 */
-	[[gnu::pure]]
-	bool IsContentType(const std::string_view expected) const noexcept;
-};
-
-struct SimpleResponse {
-	http_status_t status;
-	std::multimap<std::string, std::string, std::less<>> headers;
-	DisposableBuffer body;
-
-	void SetTextPlain(std::string_view _body) noexcept {
-		body = {ToNopPointer(_body.data()), _body.size()};
-		headers.emplace("content-type", "text/plain");
-	}
-};
-
-class SimpleServer;
-
-class SimpleRequestHandler {
-public:
-	/**
-	 * A request was received.  The implementation shall handle it
-	 * and call SimpleServer::SendResponse().
-	 *
-	 * @return false if the #SimpleServer was closed
-	 */
-	virtual bool OnRequest(SimpleServer &server,
-			       SimpleRequest &&request,
-			       CancellablePointer &cancel_ptr) noexcept = 0;
-};
+bool
+SimpleRequest::IsContentType(const std::string_view expected) const noexcept
+{
+	auto i = headers.find("content-type"sv);
+	return i != headers.end() &&
+		GetMimeTypeBase(i->second) == expected;
+}
 
 } // namespace Was
