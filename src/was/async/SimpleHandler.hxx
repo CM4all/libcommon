@@ -56,6 +56,11 @@ struct SimpleResponse {
 	http_status_t status;
 	std::multimap<std::string, std::string> headers;
 	DisposableBuffer body;
+
+	void SetTextPlain(std::string_view _body) noexcept {
+		body = {ToNopPointer(_body.data()), _body.size()};
+		headers.emplace("content-type", "text/plain");
+	}
 };
 
 class SimpleServer;
