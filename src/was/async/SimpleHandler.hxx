@@ -44,17 +44,17 @@ class CancellablePointer;
 namespace Was {
 
 struct SimpleRequest {
-	std::map<std::string, std::string> parameters;
+	std::map<std::string, std::string, std::less<>> parameters;
 	http_method_t method;
 	std::string uri;
 	std::string script_name, path_info, query_string;
-	std::multimap<std::string, std::string> headers;
+	std::multimap<std::string, std::string, std::less<>> headers;
 	DisposableBuffer body;
 };
 
 struct SimpleResponse {
 	http_status_t status;
-	std::multimap<std::string, std::string> headers;
+	std::multimap<std::string, std::string, std::less<>> headers;
 	DisposableBuffer body;
 
 	void SetTextPlain(std::string_view _body) noexcept {
