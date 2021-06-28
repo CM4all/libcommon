@@ -27,4 +27,15 @@ if get_option('coroutines')
       boost_json_dep,
     ],
   )
+
+  executable(
+    'BadRequest',
+    'BadRequest.cxx',
+    include_directories: inc,
+    dependencies: [
+      uri_dep,
+      was_async_dep,
+      boost_json_dep,
+    ],
+  )
 endif

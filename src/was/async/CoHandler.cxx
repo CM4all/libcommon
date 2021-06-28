@@ -32,6 +32,7 @@
 
 #include "CoHandler.hxx"
 #include "SimpleServer.hxx"
+#include "was/ExceptionResponse.hxx"
 #include "co/InvokeTask.hxx"
 #include "co/Task.hxx"
 #include "util/Cancellable.hxx"
@@ -85,6 +86,16 @@ private:
 	Co::InvokeTask Handle() noexcept {
 		try {
 			result = server.SendResponse(co_await std::move(task));
+		} catch (const Was::NotFound &e) {
+			SimpleResponse response;
+			response.status = HTTP_STATUS_NOT_FOUND;
+			response.SetTextPlain(e.body);
+			result = server.SendResponse(std::move(response));
+		} catch (const Was::BadRequest &e) {
+			SimpleResponse response;
+			response.status = HTTP_STATUS_BAD_REQUEST;
+			response.SetTextPlain(e.body);
+			result = server.SendResponse(std::move(response));
 		} catch (...) {
 			SimpleResponse response;
 			response.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -110,9 +121,21 @@ CoSimpleRequestHandler::OnRequest(SimpleServer &server,
 				  SimpleRequest &&request,
 				  CancellablePointer &cancel_ptr) noexcept
 {
-	auto *r = new Request(server,
-			      OnCoRequest(std::move(request)));
-	return r->Start(cancel_ptr);
+	try {
+		auto *r = new Request(server,
+				      OnCoRequest(std::move(request)));
+		return r->Start(cancel_ptr);
+	} catch (const Was::NotFound &e) {
+		SimpleResponse response;
+		response.status = HTTP_STATUS_NOT_FOUND;
+		response.SetTextPlain(e.body);
+		return server.SendResponse(std::move(response));
+	} catch (const Was::BadRequest &e) {
+		SimpleResponse response;
+		response.status = HTTP_STATUS_BAD_REQUEST;
+		response.SetTextPlain(e.body);
+		return server.SendResponse(std::move(response));
+	}
 }
 
 } // namespace Was
