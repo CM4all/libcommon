@@ -14,6 +14,10 @@ if compiler.get_id() == 'clang'
     # standalone, using std::experimental::memory_resource as
     # fallback"
     '-Wno-pedantic',
+
+    # suppress clang 13 warning on the defaulted
+    # boost::json::const_stream copy constructor
+    '-Wno-deprecated-copy',
   ]
 endif
 
