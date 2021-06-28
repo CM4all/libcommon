@@ -30,32 +30,46 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "was/async/CoRun.hxx"
-#include "json/Was.hxx"
-#include "json/ToDisposableBuffer.hxx"
-#include "event/Loop.hxx"
-#include "uri/MapQueryString.hxx"
-#include "util/PrintException.hxx"
-#include "util/StringView.hxx"
+#include "Was.hxx"
+#include "ToDisposableBuffer.hxx"
+#include "was/ExceptionResponse.hxx"
+#include "was/async/SimpleHandler.hxx"
 
 #include <boost/json.hpp>
 
-static Co::Task<Was::SimpleResponse>
-MyHandler(Was::SimpleRequest request)
+using std::string_view_literals::operator""sv;
+
+namespace Was {
+
+[[gnu::pure]]
+boost::json::value
+ParseJson(const SimpleRequest &request)
 {
-	const auto j = Was::ParseJson(request);
+	if (!request.IsContentType("application/json"sv))
+		throw BadRequest{"Wrong request body type\n"sv};
 
-	co_return Was::ToResponse(j);
+	const std::string_view body = request.body;
+
+	try {
+		return boost::json::parse(body);
+	} catch (...) {
+		throw BadRequest{"JSON parser error\n"sv};
+	}
 }
 
-int
-main(int, char **) noexcept
-try {
-	EventLoop event_loop;
-
-	Was::Run(event_loop, MyHandler);
-	return EXIT_SUCCESS;
-} catch (...) {
-	PrintException(std::current_exception());
-	return EXIT_FAILURE;
+void
+WriteJson(SimpleResponse &response, const boost::json::value &j) noexcept
+{
+	response.headers.emplace("content-type"sv, "application/json"sv);
+	response.body = Json::ToDisposableBuffer(j);
 }
+
+SimpleResponse
+ToResponse(const boost::json::value &j) noexcept
+{
+	SimpleResponse response;
+	WriteJson(response, j);
+	return response;
+}
+
+} // namespace Was

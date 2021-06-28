@@ -30,32 +30,32 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "was/async/CoRun.hxx"
-#include "json/Was.hxx"
-#include "json/ToDisposableBuffer.hxx"
-#include "event/Loop.hxx"
-#include "uri/MapQueryString.hxx"
-#include "util/PrintException.hxx"
-#include "util/StringView.hxx"
+#pragma once
 
-#include <boost/json.hpp>
+#include <boost/json/fwd.hpp>
 
-static Co::Task<Was::SimpleResponse>
-MyHandler(Was::SimpleRequest request)
-{
-	const auto j = Was::ParseJson(request);
+namespace Was {
 
-	co_return Was::ToResponse(j);
-}
+struct SimpleRequest;
+struct SimpleResponse;
 
-int
-main(int, char **) noexcept
-try {
-	EventLoop event_loop;
+/**
+ * Parse a JSON request body.  Throws #BadRequest if the request body
+ * is not JSON (according to the Content-Type header) and on JSON
+ * parser errors.
+ */
+boost::json::value
+ParseJson(const SimpleRequest &request);
 
-	Was::Run(event_loop, MyHandler);
-	return EXIT_SUCCESS;
-} catch (...) {
-	PrintException(std::current_exception());
-	return EXIT_FAILURE;
-}
+/**
+ * Serialize the given JSON value and place it as the response body
+ * and add header "Content-Type: application/json".
+ */
+void
+WriteJson(SimpleResponse &response, const boost::json::value &j) noexcept;
+
+[[gnu::pure]]
+SimpleResponse
+ToResponse(const boost::json::value &j) noexcept;
+
+} // namespace Was

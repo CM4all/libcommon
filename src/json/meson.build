@@ -31,6 +31,7 @@ boost_json = static_library(
   'Boost.cxx',
   'Serialize.cxx',
   'ToDisposableBuffer.cxx',
+  'Was.cxx',
   dependencies: boost_json_dep,
   include_directories: boost_json_inc,
 )
