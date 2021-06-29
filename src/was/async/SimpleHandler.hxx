@@ -60,7 +60,7 @@ struct SimpleRequest {
 };
 
 struct SimpleResponse {
-	http_status_t status;
+	http_status_t status = HTTP_STATUS_OK;
 	std::multimap<std::string, std::string, std::less<>> headers;
 	DisposableBuffer body;
 
