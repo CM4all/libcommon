@@ -39,53 +39,53 @@
 #include <memory>
 
 struct OpenSslDelete {
-	void operator()(SSL *ssl) {
+	void operator()(SSL *ssl) noexcept {
 		SSL_free(ssl);
 	}
 
-	void operator()(X509 *x509) {
+	void operator()(X509 *x509) noexcept {
 		X509_free(x509);
 	}
 
-	void operator()(X509_REQ *r) {
+	void operator()(X509_REQ *r) noexcept {
 		X509_REQ_free(r);
 	}
 
-	void operator()(X509_NAME *name) {
+	void operator()(X509_NAME *name) noexcept {
 		X509_NAME_free(name);
 	}
 
-	void operator()(X509_EXTENSION *ext) {
+	void operator()(X509_EXTENSION *ext) noexcept {
 		X509_EXTENSION_free(ext);
 	}
 
-	void operator()(X509_EXTENSIONS *sk) {
+	void operator()(X509_EXTENSIONS *sk) noexcept {
 		sk_X509_EXTENSION_pop_free(sk, X509_EXTENSION_free);
 	}
 
 #if OPENSSL_VERSION_NUMBER < 0x30000000L
-	void operator()(RSA *rsa) {
+	void operator()(RSA *rsa) noexcept {
 		RSA_free(rsa);
 	}
 
-	void operator()(EC_KEY *key) {
+	void operator()(EC_KEY *key) noexcept {
 		EC_KEY_free(key);
 	}
 #endif
 
-	void operator()(EVP_PKEY *key) {
+	void operator()(EVP_PKEY *key) noexcept {
 		EVP_PKEY_free(key);
 	}
 
-	void operator()(EVP_PKEY_CTX *key) {
+	void operator()(EVP_PKEY_CTX *key) noexcept {
 		EVP_PKEY_CTX_free(key);
 	}
 
-	void operator()(BIO *bio) {
+	void operator()(BIO *bio) noexcept {
 		BIO_free(bio);
 	}
 
-	void operator()(BIGNUM *bn) {
+	void operator()(BIGNUM *bn) noexcept {
 		BN_free(bn);
 	}
 };
