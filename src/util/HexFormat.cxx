@@ -36,7 +36,7 @@
 
 const char hex_digits[] = "0123456789abcdef";
 
-size_t
+std::size_t
 format_uint32_hex(char dest[9], uint32_t number) noexcept
 {
 	char *p = dest + 9 - 1;

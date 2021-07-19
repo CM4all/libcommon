@@ -33,8 +33,8 @@
 #ifndef HEX_FORMAT_H
 #define HEX_FORMAT_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
 extern const char hex_digits[];
 
@@ -81,7 +81,7 @@ format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
 /**
  * Format a 32 bit unsigned integer into a hex string.
  */
-size_t
+std::size_t
 format_uint32_hex(char dest[9], uint32_t number) noexcept;
 
 #endif
