@@ -1,5 +1,10 @@
 libcrypto = dependency('libcrypto', version: '>= 1.1')
-libssl = dependency('libssl', version: '>= 1.1')
+
+if get_variable('libcommon_enable_libssl', true)
+  libssl = dependency('libssl', version: '>= 1.1')
+else
+  libssl = disabler()
+endif
 
 crypto = static_library(
   'crypto',
