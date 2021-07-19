@@ -33,8 +33,8 @@
 #ifndef HEX_FORMAT_H
 #define HEX_FORMAT_H
 
+#include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 extern const char hex_digits[];
 
@@ -81,23 +81,7 @@ format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
 /**
  * Format a 32 bit unsigned integer into a hex string.
  */
-[[gnu::always_inline]]
-static inline size_t
-format_uint32_hex(char dest[9], uint32_t number) noexcept
-{
-	char *p = dest + 9 - 1;
-
-	*p = 0;
-	do {
-		--p;
-		*p = hex_digits[number % 0x10];
-		number /= 0x10;
-	} while (number != 0);
-
-	if (p > dest)
-		memmove(dest, p, dest + 9 - p);
-
-	return dest + 9 - p - 1;
-}
+size_t
+format_uint32_hex(char dest[9], uint32_t number) noexcept;
 
 #endif

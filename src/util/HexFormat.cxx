@@ -32,4 +32,24 @@
 
 #include "HexFormat.hxx"
 
+#include <string.h>
+
 const char hex_digits[] = "0123456789abcdef";
+
+size_t
+format_uint32_hex(char dest[9], uint32_t number) noexcept
+{
+	char *p = dest + 9 - 1;
+
+	*p = 0;
+	do {
+		--p;
+		*p = hex_digits[number % 0x10];
+		number /= 0x10;
+	} while (number != 0);
+
+	if (p > dest)
+		memmove(dest, p, dest + 9 - p);
+
+	return dest + 9 - p - 1;
+}
