@@ -1,7 +1,8 @@
-libssl = dependency('openssl', version: '>= 1.1')
+libcrypto = dependency('libcrypto', version: '>= 1.1')
+libssl = dependency('libssl', version: '>= 1.1')
 
-ssl = static_library(
-  'ssl',
+crypto = static_library(
+  'crypto',
   'AltName.cxx',
   'Buffer.cxx',
   'Request.cxx',
@@ -16,6 +17,22 @@ ssl = static_library(
   'Time.cxx',
   include_directories: inc,
   dependencies: [
+    libcrypto,
+  ],
+)
+
+crypto_dep = declare_dependency(
+  link_with: crypto,
+  dependencies: [
+    util_dep,
+    libcrypto,
+  ],
+)
+
+ssl = static_library(
+  'ssl',
+  include_directories: inc,
+  dependencies: [
     libssl,
   ],
 )
@@ -23,6 +40,8 @@ ssl = static_library(
 ssl_dep = declare_dependency(
   link_with: ssl,
   dependencies: [
+    crypto_dep,
     util_dep,
+    libssl,
   ],
 )

@@ -4,7 +4,7 @@ jwt = static_library(
   'EdDSA.cxx',
   include_directories: inc,
   dependencies: [
-    ssl_dep,
+    crypto_dep,
     sodium_dep,
   ],
 )
@@ -12,6 +12,6 @@ jwt = static_library(
 jwt_dep = declare_dependency(
   link_with: jwt,
   dependencies: [
-    ssl_dep,
+    crypto_dep,
   ],
 )
