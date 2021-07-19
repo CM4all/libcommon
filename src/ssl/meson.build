@@ -1,7 +1,16 @@
 libcrypto = dependency('libcrypto', version: '>= 1.1')
+libcrypto = declare_dependency(
+  compile_args: ['-DOPENSSL_API_COMPAT=0x10100000L'],
+  dependencies: libcrypto,
+)
 
 if get_variable('libcommon_enable_libssl', true)
   libssl = dependency('libssl', version: '>= 1.1')
+
+  libssl = declare_dependency(
+    compile_args: ['-DOPENSSL_API_COMPAT=0x10100000L'],
+    dependencies: libssl,
+  )
 else
   libssl = disabler()
 endif
