@@ -46,3 +46,14 @@ ParseHexDigit(char ch) noexcept
 	else
 		return -1;
 }
+
+constexpr int
+ParseLowerHexDigit(char ch) noexcept
+{
+	if (IsDigitASCII(ch))
+		return ch - '0';
+	else if (ch >= 'a' && ch <= 'f')
+		return ch - 'a' + 0xa;
+	else
+		return -1;
+}
