@@ -77,12 +77,16 @@ public:
 		return list.empty();
 	}
 
-	class const_iterator final
-		: public std::iterator<std::forward_iterator_tag, const char *> {
-
+	class const_iterator final {
 		List::const_iterator i;
 
 	public:
+		using iterator_category = std::forward_iterator_tag;
+		using value_type = const char *;
+		using difference_type = std::ptrdiff_t;
+		using pointer = value_type *;
+		using reference = value_type &;
+
 		const_iterator(List::const_iterator _i) noexcept
 			:i(_i) {}
 
