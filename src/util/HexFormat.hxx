@@ -94,6 +94,7 @@ format_uint32_hex(char dest[9], uint32_t number) noexcept;
 #endif
 
 #ifdef __cpp_lib_span
+#include <array>
 #include <span>
 
 /**
@@ -105,6 +106,19 @@ format_uint32_hex(char dest[9], uint32_t number) noexcept;
  */
 char *
 HexFormat(char *output, std::span<const std::byte> input) noexcept;
+
+/**
+ * Return a std::array<char> (not null-terminated) containing a hex
+ * dump of the given fixed-size input.
+ */
+template<std::size_t size>
+auto
+HexFormat(std::span<const std::byte, size> input) noexcept
+{
+	std::array<char, size * 2> output;
+	HexFormat(output.data(), input);
+	return output;
+}
 
 #endif
 
