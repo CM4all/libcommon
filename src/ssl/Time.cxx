@@ -33,6 +33,8 @@
 #include "Time.hxx"
 #include "MemBio.hxx"
 
+#include <openssl/asn1.h>
+
 AllocatedString
 FormatTime(ASN1_TIME &t)
 {

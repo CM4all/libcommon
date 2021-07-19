@@ -30,36 +30,32 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Edit.hxx"
-#include "UniqueX509.hxx"
-#include "GeneralName.hxx"
-#include "Error.hxx"
+#pragma once
 
-#include "openssl/x509v3.h"
+#include <openssl/evp.h>
 
-static UniqueX509_EXTENSION
-MakeExt(int nid, const char *value)
+#include <memory>
+
+struct EVPDeleter {
+	void operator()(EVP_PKEY *key) noexcept {
+		EVP_PKEY_free(key);
+	}
+
+	void operator()(EVP_PKEY_CTX *key) noexcept {
+		EVP_PKEY_CTX_free(key);
+	}
+};
+
+using UniqueEVP_PKEY = std::unique_ptr<EVP_PKEY, EVPDeleter>;
+using UniqueEVP_PKEY_CTX = std::unique_ptr<EVP_PKEY_CTX, EVPDeleter>;
+
+static inline auto
+UpRef(EVP_PKEY &key) noexcept
 {
-	UniqueX509_EXTENSION ext(X509V3_EXT_conf_nid(nullptr, nullptr, nid,
-						     const_cast<char *>(value)));
-	if (ext == nullptr)
-		throw SslError("X509V3_EXT_conf_nid() failed");
-
-	return ext;
-}
-
-void
-AddExt(X509 &cert, int nid, const char *value)
-{
-	X509_add_ext(&cert, MakeExt(nid, value).get(), -1);
-}
-
-void
-AddAltNames(X509_REQ &req, OpenSSL::GeneralNames gn)
-{
-	UniqueX509_EXTENSIONS sk(sk_X509_EXTENSION_new_null());
-	sk_X509_EXTENSION_push(sk.get(),
-			       X509V3_EXT_i2d(NID_subject_alt_name, 0, gn.get()));
-
-	X509_REQ_add_extensions(&req, sk.get());
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	CRYPTO_add(&key.references, 1, CRYPTO_LOCK_EVP_PKEY);
+#else
+	EVP_PKEY_up_ref(&key);
+#endif
+	return UniqueEVP_PKEY(&key);
 }

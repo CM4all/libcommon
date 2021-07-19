@@ -37,7 +37,7 @@
 #ifndef SSL_KEY_HXX
 #define SSL_KEY_HXX
 
-#include "Unique.hxx"
+#include "UniqueEVP.hxx"
 
 #include <openssl/ossl_typ.h>
 

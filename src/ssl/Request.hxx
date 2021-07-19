@@ -33,7 +33,7 @@
 #ifndef SSL_REQUEST_HXX
 #define SSL_REQUEST_HXX
 
-#include "Unique.hxx"
+#include "UniqueX509.hxx"
 
 template<typename T> struct ConstBuffer;
 

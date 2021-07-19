@@ -33,9 +33,11 @@
 #include "LoadFile.hxx"
 #include "Key.hxx"
 #include "Error.hxx"
+#include "UniqueBIO.hxx"
 
-#include <openssl/ts.h>
 #include <openssl/err.h>
+#include <openssl/pem.h>
+#include <openssl/ts.h>
 
 UniqueX509
 LoadCertFile(const char *path)

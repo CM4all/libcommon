@@ -30,36 +30,20 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Edit.hxx"
-#include "UniqueX509.hxx"
-#include "GeneralName.hxx"
-#include "Error.hxx"
+#pragma once
 
-#include "openssl/x509v3.h"
+#include <openssl/ec.h>
 
-static UniqueX509_EXTENSION
-MakeExt(int nid, const char *value)
-{
-	UniqueX509_EXTENSION ext(X509V3_EXT_conf_nid(nullptr, nullptr, nid,
-						     const_cast<char *>(value)));
-	if (ext == nullptr)
-		throw SslError("X509V3_EXT_conf_nid() failed");
+#include <memory>
 
-	return ext;
-}
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 
-void
-AddExt(X509 &cert, int nid, const char *value)
-{
-	X509_add_ext(&cert, MakeExt(nid, value).get(), -1);
-}
+struct ECDeleter {
+	void operator()(EC_KEY *key) noexcept {
+		EC_KEY_free(key);
+	}
+};
 
-void
-AddAltNames(X509_REQ &req, OpenSSL::GeneralNames gn)
-{
-	UniqueX509_EXTENSIONS sk(sk_X509_EXTENSION_new_null());
-	sk_X509_EXTENSION_push(sk.get(),
-			       X509V3_EXT_i2d(NID_subject_alt_name, 0, gn.get()));
+using UniqueEC_KEY = std::unique_ptr<EC_KEY, ECDeleter>;
 
-	X509_REQ_add_extensions(&req, sk.get());
-}
+#endif

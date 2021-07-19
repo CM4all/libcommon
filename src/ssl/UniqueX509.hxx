@@ -30,19 +30,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SSL_UNIQUE_HXX
-#define SSL_UNIQUE_HXX
+#pragma once
 
-#include <openssl/ssl.h>
-#include <openssl/bn.h>
+#include <openssl/x509.h>
 
 #include <memory>
 
-struct OpenSslDelete {
-	void operator()(SSL *ssl) noexcept {
-		SSL_free(ssl);
-	}
-
+struct X509Deleter {
 	void operator()(X509 *x509) noexcept {
 		X509_free(x509);
 	}
@@ -62,48 +56,13 @@ struct OpenSslDelete {
 	void operator()(X509_EXTENSIONS *sk) noexcept {
 		sk_X509_EXTENSION_pop_free(sk, X509_EXTENSION_free);
 	}
-
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-	void operator()(RSA *rsa) noexcept {
-		RSA_free(rsa);
-	}
-
-	void operator()(EC_KEY *key) noexcept {
-		EC_KEY_free(key);
-	}
-#endif
-
-	void operator()(EVP_PKEY *key) noexcept {
-		EVP_PKEY_free(key);
-	}
-
-	void operator()(EVP_PKEY_CTX *key) noexcept {
-		EVP_PKEY_CTX_free(key);
-	}
-
-	void operator()(BIO *bio) noexcept {
-		BIO_free(bio);
-	}
-
-	void operator()(BIGNUM *bn) noexcept {
-		BN_free(bn);
-	}
 };
 
-using UniqueSSL = std::unique_ptr<SSL, OpenSslDelete>;
-using UniqueX509 = std::unique_ptr<X509, OpenSslDelete>;
-using UniqueX509_REQ = std::unique_ptr<X509_REQ, OpenSslDelete>;
-using UniqueX509_NAME = std::unique_ptr<X509_NAME, OpenSslDelete>;
-using UniqueX509_EXTENSION = std::unique_ptr<X509_EXTENSION, OpenSslDelete>;
-using UniqueX509_EXTENSIONS = std::unique_ptr<X509_EXTENSIONS, OpenSslDelete>;
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-using UniqueRSA = std::unique_ptr<RSA, OpenSslDelete>;
-using UniqueEC_KEY = std::unique_ptr<EC_KEY, OpenSslDelete>;
-#endif
-using UniqueEVP_PKEY = std::unique_ptr<EVP_PKEY, OpenSslDelete>;
-using UniqueEVP_PKEY_CTX = std::unique_ptr<EVP_PKEY_CTX, OpenSslDelete>;
-using UniqueBIO = std::unique_ptr<BIO, OpenSslDelete>;
-using UniqueBIGNUM = std::unique_ptr<BIGNUM, OpenSslDelete>;
+using UniqueX509 = std::unique_ptr<X509, X509Deleter>;
+using UniqueX509_REQ = std::unique_ptr<X509_REQ, X509Deleter>;
+using UniqueX509_NAME = std::unique_ptr<X509_NAME, X509Deleter>;
+using UniqueX509_EXTENSION = std::unique_ptr<X509_EXTENSION, X509Deleter>;
+using UniqueX509_EXTENSIONS = std::unique_ptr<X509_EXTENSIONS, X509Deleter>;
 
 static inline auto
 UpRef(X509 &cert) noexcept
@@ -115,16 +74,3 @@ UpRef(X509 &cert) noexcept
 #endif
 	return UniqueX509(&cert);
 }
-
-static inline auto
-UpRef(EVP_PKEY &key) noexcept
-{
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	CRYPTO_add(&key.references, 1, CRYPTO_LOCK_EVP_PKEY);
-#else
-	EVP_PKEY_up_ref(&key);
-#endif
-	return UniqueEVP_PKEY(&key);
-}
-
-#endif

@@ -32,7 +32,8 @@
 
 #include "Name.hxx"
 #include "MemBio.hxx"
-#include "Unique.hxx"
+
+#include <openssl/x509.h>
 
 AllocatedString
 ToString(X509_NAME *name)

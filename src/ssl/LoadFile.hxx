@@ -37,7 +37,8 @@
 #ifndef SSL_LOAD_FILE_HXX
 #define SSL_LOAD_FILE_HXX
 
-#include "Unique.hxx"
+#include "UniqueEVP.hxx"
+#include "UniqueX509.hxx"
 
 #include <forward_list>
 #include <utility>

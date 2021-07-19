@@ -34,7 +34,7 @@
 #define SSL_MEM_BIO_HXX
 
 #include "Error.hxx"
-#include "Unique.hxx"
+#include "UniqueBIO.hxx"
 #include "util/AllocatedString.hxx"
 
 /**

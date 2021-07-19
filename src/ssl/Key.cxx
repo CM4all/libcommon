@@ -31,8 +31,9 @@
  */
 
 #include "Key.hxx"
-#include "Unique.hxx"
 #include "Error.hxx"
+#include "UniqueBN.hxx"
+#include "UniqueRSA.hxx"
 #include "util/ConstBuffer.hxx"
 
 #include <openssl/bn.h>

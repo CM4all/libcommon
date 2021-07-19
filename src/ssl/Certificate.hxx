@@ -37,7 +37,7 @@
 #ifndef SSL_CERTIFICATE_HXX
 #define SSL_CERTIFICATE_HXX
 
-#include "Unique.hxx"
+#include "UniqueX509.hxx"
 
 template<typename T> struct ConstBuffer;
 

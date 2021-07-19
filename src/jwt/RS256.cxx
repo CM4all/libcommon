@@ -34,9 +34,11 @@
 #include "sodium/Base64.hxx"
 #include "sodium/SHA256.hxx"
 #include "ssl/Error.hxx"
-#include "ssl/Unique.hxx"
+#include "ssl/UniqueEVP.hxx"
 #include "util/AllocatedString.hxx"
 #include "util/StringView.hxx"
+
+#include <openssl/rsa.h>
 
 namespace JWT {
 

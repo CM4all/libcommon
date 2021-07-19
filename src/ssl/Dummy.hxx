@@ -33,7 +33,7 @@
 #ifndef SSL_DUMMY_HXX
 #define SSL_DUMMY_HXX
 
-#include "Unique.hxx"
+#include "UniqueX509.hxx"
 
 UniqueX509
 MakeSelfIssuedDummyCert(const char *common_name);
