@@ -57,3 +57,16 @@ format_uint32_hex(char dest[9], uint32_t number) noexcept
 
 	return dest + size;
 }
+
+#ifdef __cpp_lib_span
+
+char *
+HexFormat(char *output, std::span<const std::byte> input) noexcept
+{
+	for (const auto &i : input)
+		output = format_uint8_hex_fixed(output, (uint8_t)i);
+
+	return output;
+}
+
+#endif
