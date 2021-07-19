@@ -1,4 +1,4 @@
-libssl = dependency('openssl', version: '>= 1.0')
+libssl = dependency('openssl', version: '>= 1.1')
 
 ssl = static_library(
   'ssl',

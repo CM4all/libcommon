@@ -86,11 +86,7 @@ public:
 		assert(value != nullptr);
 		assert(value->type == GEN_DNS);
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		const unsigned char *data = ASN1_STRING_get0_data(value->d.dNSName);
-#else
-		unsigned char *data = ASN1_STRING_data(value->d.dNSName);
-#endif
 		if (data == nullptr)
 			return nullptr;
 

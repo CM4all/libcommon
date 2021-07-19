@@ -52,10 +52,6 @@ using UniqueEVP_PKEY_CTX = std::unique_ptr<EVP_PKEY_CTX, EVPDeleter>;
 static inline auto
 UpRef(EVP_PKEY &key) noexcept
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	CRYPTO_add(&key.references, 1, CRYPTO_LOCK_EVP_PKEY);
-#else
 	EVP_PKEY_up_ref(&key);
-#endif
 	return UniqueEVP_PKEY(&key);
 }
