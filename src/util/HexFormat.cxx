@@ -32,11 +32,13 @@
 
 #include "HexFormat.hxx"
 
+#include <cstddef>
+
 #include <string.h>
 
 const char hex_digits[] = "0123456789abcdef";
 
-std::size_t
+char *
 format_uint32_hex(char dest[9], uint32_t number) noexcept
 {
 	char *p = dest + 9 - 1;
@@ -48,8 +50,10 @@ format_uint32_hex(char dest[9], uint32_t number) noexcept
 		number /= 0x10;
 	} while (number != 0);
 
-	if (p > dest)
-		memmove(dest, p, dest + 9 - p);
+	const std::size_t size = dest + 9 - p - 1;
 
-	return dest + 9 - p - 1;
+	if (p > dest)
+		memmove(dest, p, size + 1);
+
+	return dest + size;
 }

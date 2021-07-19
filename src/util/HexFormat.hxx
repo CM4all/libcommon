@@ -33,31 +33,32 @@
 #ifndef HEX_FORMAT_H
 #define HEX_FORMAT_H
 
-#include <cstddef>
 #include <cstdint>
 
 extern const char hex_digits[];
 
 [[gnu::always_inline]]
-static inline void
+static inline char *
 format_uint8_hex_fixed(char dest[2], uint8_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 4) & 0xf];
 	dest[1] = hex_digits[number & 0xf];
+	return dest + 2;
 }
 
 [[gnu::always_inline]]
-static inline void
+static inline char *
 format_uint16_hex_fixed(char dest[4], uint16_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 12) & 0xf];
 	dest[1] = hex_digits[(number >> 8) & 0xf];
 	dest[2] = hex_digits[(number >> 4) & 0xf];
 	dest[3] = hex_digits[number & 0xf];
+	return dest + 4;
 }
 
 [[gnu::always_inline]]
-static inline void
+static inline char *
 format_uint32_hex_fixed(char dest[8], uint32_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 28) & 0xf];
@@ -68,20 +69,24 @@ format_uint32_hex_fixed(char dest[8], uint32_t number) noexcept
 	dest[5] = hex_digits[(number >> 8) & 0xf];
 	dest[6] = hex_digits[(number >> 4) & 0xf];
 	dest[7] = hex_digits[number & 0xf];
+	return dest + 8;
 }
 
 [[gnu::always_inline]]
-static inline void
+static inline char *
 format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
 {
 	format_uint32_hex_fixed(dest, number >> 32);
 	format_uint32_hex_fixed(dest + 8, number);
+	return dest + 16;
 }
 
 /**
  * Format a 32 bit unsigned integer into a hex string.
+ * Null-terminates the output buffer and returns a pointer to the null
+ * terminator.
  */
-std::size_t
+char *
 format_uint32_hex(char dest[9], uint32_t number) noexcept;
 
 #endif
