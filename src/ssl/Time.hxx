@@ -38,9 +38,9 @@
 class AllocatedString;
 
 AllocatedString
-FormatTime(ASN1_TIME &t);
+FormatTime(const ASN1_TIME &t);
 
 AllocatedString
-FormatTime(ASN1_TIME *t);
+FormatTime(const ASN1_TIME *t);
 
 #endif
