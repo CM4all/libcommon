@@ -59,7 +59,7 @@ MakeCClosure(lua_CFunction fn, T&&... values)
 template<typename... T>
 gcc_nonnull_all
 void
-Push(lua_State *L, const std::tuple<T...> &t)
+PushAll(lua_State *L, const std::tuple<T...> &t)
 {
 	const ScopeCheckStack check_stack(L, sizeof...(T));
 
@@ -73,7 +73,7 @@ gcc_nonnull_all
 void
 Push(lua_State *L, const CClosure<T...> &value) noexcept
 {
-	Push(L, value.values);
+	PushAll(L, value.values);
 	lua_pushcclosure(L, value.fn, sizeof...(T));
 }
 
