@@ -28,7 +28,7 @@
  */
 
 #ifndef LUA_PUSH_LAMBDA_HXX
-#define LUA_UTIL_HXX
+#define LUA_PUSH_LAMBDA_HXX
 
 #include "Assert.hxx"
 #include "util/Compiler.h"
