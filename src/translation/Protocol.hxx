@@ -1091,6 +1091,12 @@ enum class TranslationCommand : uint16_t {
 	 * because an object was not found are not fatal.
 	 */
 	OPTIONAL = 229,
+
+	/**
+	 * Look for a brotli-compressed file by appending ".br" to the
+	 * path.
+	 */
+	AUTO_BROTLI_PATH = 230,
 };
 
 struct TranslationHeader {

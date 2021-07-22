@@ -3722,6 +3722,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		}
 
 		throw std::runtime_error("misplaced OPTIONAL packet");
+
+	case TranslationCommand::AUTO_BROTLI_PATH:
+#if TRANSLATION_ENABLE_EXPAND
+		if (!payload.empty())
+			throw std::runtime_error("malformed AUTO_BROTLI_PATH packet");
+
+		if (file_address != nullptr) {
+			if (file_address->auto_brotli_path)
+				throw std::runtime_error("misplaced AUTO_BROTLI_PATH packet");
+
+			file_address->auto_brotli_path = true;
+		} else if (nfs_address != nullptr) {
+			/* ignore for now */
+		} else
+			throw std::runtime_error("misplaced AUTO_BROTLI_PATH packet");
+#endif
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

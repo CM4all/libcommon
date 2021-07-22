@@ -1287,6 +1287,11 @@ public:
 			response.Packet(TranslationCommand::AUTO_GZIPPED);
 			return *this;
 		}
+
+		auto AutoBrotliPath() noexcept {
+			response.Packet(TranslationCommand::AUTO_BROTLI_PATH);
+			return *this;
+		}
 	};
 
 	template<typename... Types>
