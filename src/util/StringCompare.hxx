@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2013-2021 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,31 +32,30 @@
 
 #include "StringView.hxx"
 #include "StringAPI.hxx"
-#include "Compiler.h"
 
 #ifdef _UNICODE
 #include "WStringCompare.hxx"
 #endif
 
-gcc_pure gcc_nonnull_all
+[[gnu::pure]] [[gnu::nonnull]]
 static inline bool
 StringIsEmpty(const char *string) noexcept
 {
 	return *string == 0;
 }
 
-gcc_pure gcc_nonnull_all
+[[gnu::pure]] [[gnu::nonnull]]
 static inline bool
 StringStartsWith(const char *haystack, StringView needle) noexcept
 {
 	return StringIsEqual(haystack, needle.data, needle.size);
 }
 
-gcc_pure gcc_nonnull_all
+[[gnu::pure]] [[gnu::nonnull]]
 bool
 StringEndsWith(const char *haystack, const char *needle) noexcept;
 
-gcc_pure gcc_nonnull_all
+[[gnu::pure]] [[gnu::nonnull]]
 bool
 StringEndsWithIgnoreCase(const char *haystack, const char *needle) noexcept;
 
@@ -65,7 +64,7 @@ StringEndsWithIgnoreCase(const char *haystack, const char *needle) noexcept;
  * does not begin with the specified prefix, this function returns
  * nullptr.
  */
-gcc_pure gcc_nonnull_all
+[[gnu::pure]] [[gnu::nonnull]]
 static inline const char *
 StringAfterPrefix(const char *haystack, StringView needle) noexcept
 {
@@ -74,14 +73,14 @@ StringAfterPrefix(const char *haystack, StringView needle) noexcept
 		: nullptr;
 }
 
-gcc_pure gcc_nonnull_all
+[[gnu::pure]] [[gnu::nonnull]]
 static inline bool
 StringStartsWithIgnoreCase(const char *haystack, StringView needle) noexcept
 {
 	return StringIsEqualIgnoreCase(haystack, needle.data, needle.size);
 }
 
-gcc_pure
+[[gnu::pure]]
 static inline bool
 StringStartsWithIgnoreCase(StringView haystack, StringView needle) noexcept
 {
@@ -95,7 +94,7 @@ StringStartsWithIgnoreCase(StringView haystack, StringView needle) noexcept
  * nullptr.
  * This function is case-independent.
  */
-gcc_pure gcc_nonnull_all
+[[gnu::pure]] [[gnu::nonnull]]
 static inline const char *
 StringAfterPrefixIgnoreCase(const char *haystack, StringView needle) noexcept
 {
@@ -104,7 +103,7 @@ StringAfterPrefixIgnoreCase(const char *haystack, StringView needle) noexcept
 		: nullptr;
 }
 
-gcc_pure
+[[gnu::pure]]
 static inline StringView
 StringAfterPrefixIgnoreCase(StringView haystack,
 			    StringView needle) noexcept
@@ -118,7 +117,7 @@ StringAfterPrefixIgnoreCase(StringView haystack,
  * Check if the given string ends with the specified suffix.  If yes,
  * returns the position of the suffix, and nullptr otherwise.
  */
-gcc_pure gcc_nonnull_all
+[[gnu::pure]] [[gnu::nonnull]]
 const char *
 FindStringSuffix(const char *p, const char *suffix) noexcept;
 
