@@ -313,6 +313,10 @@ public:
 		return PacketT(TranslationCommand::STATUS, status);
 	}
 
+	auto &AutoGzip() noexcept {
+		return Packet(TranslationCommand::AUTO_GZIP);
+	}
+
 	template<typename... Types>
 	auto &Site(Types... value) noexcept {
 		return StringPacket(TranslationCommand::SITE, value...);
