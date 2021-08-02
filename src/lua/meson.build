@@ -4,6 +4,7 @@ lua = static_library(
   'lua',
   'Error.cxx',
   'Panic.cxx',
+  'Resume.cxx',
   'RunFile.cxx',
   'State.cxx',
   include_directories: inc,
