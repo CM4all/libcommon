@@ -52,3 +52,5 @@ subdir('was')
 if get_option('coroutines')
   subdir('co')
 endif
+
+subdir('lua')
