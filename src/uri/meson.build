@@ -2,6 +2,7 @@ uri = static_library(
   'uri',
   'Verify.cxx',
   'Extract.cxx',
+  'EmailAddress.cxx',
   'Escape.cxx',
   'Unescape.cxx',
   'MapQueryString.cxx',
