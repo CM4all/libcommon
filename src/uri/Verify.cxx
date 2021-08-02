@@ -34,24 +34,10 @@
 #include "Chars.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
-#include "util/IterableSplitString.hxx"
+#include "util/StringVerify.hxx"
 #include "util/StringView.hxx"
 
 #include <algorithm>
-
-template <typename F>
-bool
-IsNonEmptyListOf(std::string_view s, char separator, F &&f) noexcept
-{
-	if (s.empty())
-	    return false;
-
-	for (const std::string_view i : IterableSplitString(s, separator))
-		if (!f(i))
-			return false;
-
-	return true;
-}
 
 static constexpr bool
 IsAlphaNumericDashASCII(char ch) noexcept
