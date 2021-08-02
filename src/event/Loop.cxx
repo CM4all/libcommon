@@ -228,6 +228,8 @@ EventLoop::Loop(int flags) noexcept
 			break;
 
 		RunDeferred();
+		if (quit)
+			break;
 
 		if (RunOneIdle())
 			/* check for other new events after each
