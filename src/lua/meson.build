@@ -14,4 +14,5 @@ lua = static_library(
 
 lua_dep = declare_dependency(
   link_with: lua,
+  dependencies: liblua,
 )
