@@ -31,6 +31,12 @@
  */
 
 #include "lua/RunFile.hxx"
+#include "lua/Util.hxx"
+#include "lua/Error.hxx"
+#include "lua/Resume.hxx"
+#include "lua/pg/Init.hxx"
+#include "event/Loop.hxx"
+#include "event/DeferEvent.hxx"
 #include "util/PrintException.hxx"
 #include "util/ScopeExit.hxx"
 
@@ -42,17 +48,91 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 
+using namespace Lua;
+
+class Thread final : ResumeListener {
+	lua_State *const L;
+
+	DeferEvent start_event;
+
+	const char *const path;
+
+	std::exception_ptr error;
+
+public:
+	Thread(lua_State *_L, EventLoop &event_loop,
+	       const char *_path) noexcept
+		:L(lua_newthread(_L)),
+		 start_event(event_loop, BIND_THIS_METHOD(Start)),
+		 path(_path)
+	{
+		/* store thread object in registry */
+		lua_pushlightuserdata(_L, this);
+		lua_settable(_L, LUA_REGISTRYINDEX);
+
+		SetResumeListener(L, *this);
+		start_event.Schedule();
+	}
+
+	~Thread() noexcept {
+		lua_pushlightuserdata(L, this);
+		lua_pushnil(L);
+		lua_settable(L, LUA_REGISTRYINDEX);
+	}
+
+	auto &GetEventLoop() const noexcept {
+		return start_event.GetEventLoop();
+	}
+
+	void CheckRethrow() const {
+		if (error)
+			std::rethrow_exception(error);
+	}
+
+private:
+	void Start() noexcept {
+		try {
+			if (luaL_loadfile(L, path))
+				throw PopError(L);
+
+			Resume(L, 0);
+		} catch (...) {
+			OnLuaError(std::current_exception());
+		}
+	}
+
+	void OnLuaFinished() noexcept override {
+		GetEventLoop().Break();
+	}
+
+	void OnLuaError(std::exception_ptr e) noexcept override {
+		error = std::move(e);
+		GetEventLoop().Break();
+	}
+};
+
 int main(int argc, char **argv)
 try {
 	if (argc != 2)
-		throw "Usage: RunLua FILE.lua";
+		throw "Usage: CoLua FILE.lua";
 
 	const char *path = argv[1];
+
+	EventLoop event_loop;
 
 	const auto L = luaL_newstate();
 	AtScopeExit(L) { lua_close(L); };
 
-	Lua::RunFile(L, path);
+	luaL_openlibs(L);
+
+	InitPg(L, event_loop);
+
+	Thread thread(L, event_loop, path);
+
+	event_loop.Dispatch();
+
+	thread.CheckRethrow();
+
 	return EXIT_SUCCESS;
 } catch (...) {
 	PrintException(std::current_exception());
