@@ -90,6 +90,11 @@ try {
 	if (flags & SocketEvent::ERROR)
 		throw MakeErrno(fd.GetError(), "Socket error");
 
+	if (flags & SocketEvent::HANGUP) {
+		OnDisconnect();
+		return;
+	}
+
 	switch (input.Receive(fd.ToFileDescriptor())) {
 	case NetstringInput::Result::MORE:
 		timeout_event.Schedule(busy_timeout);
