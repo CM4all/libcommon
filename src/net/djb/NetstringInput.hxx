@@ -76,8 +76,12 @@ public:
 	 */
 	Result Receive(FileDescriptor fd);
 
+	bool IsFinished() const noexcept {
+		return state == State::FINISHED;
+	}
+
 	AllocatedArray<uint8_t> &GetValue() noexcept {
-		assert(state == State::FINISHED);
+		assert(IsFinished());
 
 		return value;
 	}
