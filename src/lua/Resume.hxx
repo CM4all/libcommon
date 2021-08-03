@@ -55,6 +55,13 @@ void
 SetResumeListener(lua_State *L, ResumeListener &listener) noexcept;
 
 /**
+ * Uninstalls the #ResumeListener (if one exists).  Returns a pointer
+ * or nullptr if there was no #ResumeListener.
+ */
+ResumeListener *
+UnsetResumeListener(lua_State *L) noexcept;
+
+/**
  * Call lua_resume() and invoke the #ResumeListener on completion.
  *
  * If lua_resume()==LUA_YIELD, do nothing - the entity which called

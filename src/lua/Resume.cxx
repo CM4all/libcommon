@@ -68,17 +68,29 @@ SetResumeListener(lua_State *L, ResumeListener &listener) noexcept
 	lua_pop(L, 1);
 }
 
-static ResumeListener &
+ResumeListener *
 UnsetResumeListener(lua_State *L) noexcept
 {
 	const ScopeCheckStack check_stack(L);
 
 	/* look up registry[key] */
 	lua_getfield(L, LUA_REGISTRYINDEX, resume_listener_key);
+	if (lua_isnil(L, -1)) {
+		/* pop nil */
+		lua_pop(L, 1);
+		return nullptr;
+	}
+
 	assert(lua_istable(L, -1));
 
 	/* look up registry[key][L] */
 	GetTable(L, RelativeStackIndex{-1}, CurrentThread{});
+	if (lua_isnil(L, -1)) {
+		/* pop nil and registry[key] */
+		lua_pop(L, 2);
+		return nullptr;
+	}
+
 	assert(lua_islightuserdata(L, -1));
 
 	auto *listener = (ResumeListener *) lua_touserdata(L, -1);
@@ -90,7 +102,7 @@ UnsetResumeListener(lua_State *L) noexcept
 	/* pop listener and registry[key] */
 	lua_pop(L, 2);
 
-	return *listener;
+	return listener;
 }
 
 void
@@ -98,12 +110,16 @@ Resume(lua_State *L, int narg) noexcept
 {
 	try {
 		int result = lua_resume(L, narg);
-		if (result == LUA_OK)
-			UnsetResumeListener(L).OnLuaFinished();
-		else if (result != LUA_YIELD)
+		if (result == LUA_OK) {
+			auto *listener = UnsetResumeListener(L);
+			assert(listener != nullptr);
+			listener->OnLuaFinished();
+		} else if (result != LUA_YIELD)
 			throw PopError(L);
 	} catch (...) {
-		UnsetResumeListener(L).OnLuaError(std::current_exception());
+		auto *listener = UnsetResumeListener(L);
+		assert(listener != nullptr);
+		listener->OnLuaError(std::current_exception());
 	}
 }
 
