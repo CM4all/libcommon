@@ -98,6 +98,13 @@ try {
 		return;
 	}
 
+	if (input.IsFinished()) {
+		/* TODO: was garbage received or did the peer just
+		   close the socket?  Maybe use EPOLLRDHUP? */
+		OnDisconnect();
+		return;
+	}
+
 	switch (input.Receive(GetSocket().ToFileDescriptor())) {
 	case NetstringInput::Result::MORE:
 		timeout_event.Schedule(busy_timeout);
@@ -108,7 +115,6 @@ try {
 		break;
 
 	case NetstringInput::Result::FINISHED:
-		event.Cancel();
 		timeout_event.Cancel();
 		OnRequest(std::move(input.GetValue()));
 		break;
