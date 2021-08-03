@@ -36,6 +36,10 @@
 #include "pg/Result.hxx"
 #include "util/StringAPI.hxx"
 
+extern "C" {
+#include <lauxlib.h>
+}
+
 namespace Lua {
 
 class PgResult final {
@@ -75,16 +79,11 @@ PgResult::_Fetch(lua_State *L)
 		return 0;
 
 	bool numerical = true;
-	if (lua_gettop(L) >= 3) {
-		if (!lua_isstring(L, 3))
-			luaL_argerror(L, 3, "String expected");
-
-		const char *mode = lua_tostring(L, 3);
-		if (StringIsEqual(mode, "a"))
-			numerical = false;
-		else if (!StringIsEqual(mode, "n"))
-			luaL_argerror(L, 3, "Bad mode");
-	}
+	const char *mode = luaL_optstring(L, 3, "a");
+	if (StringIsEqual(mode, "a"))
+		numerical = false;
+	else if (!StringIsEqual(mode, "n"))
+		luaL_argerror(L, 3, "Bad mode");
 
 	if (lua_gettop(L) >= 2)
 		Push(L, StackIndex{2});

@@ -72,16 +72,10 @@ Sleep(lua_State *L)
 {
 	auto &event_loop = *(EventLoop *)lua_touserdata(L, lua_upvalueindex(1));
 
-	if (lua_gettop(L) < 1)
-		return luaL_error(L, "Not enough parameters");
-
 	if (lua_gettop(L) > 1)
 		return luaL_error(L, "Too many parameters");
 
-	if (!lua_isnumber(L, 1))
-		luaL_argerror(L, 1, "Number expected");
-
-	const auto seconds = lua_tonumber(L, 1);
+	const auto seconds = luaL_checknumber(L, 1);
 	if (seconds < 0)
 		luaL_argerror(L, 1, "Positive number expected");
 

@@ -47,24 +47,11 @@ NewPg(lua_State *L)
 {
 	auto &event_loop = *(EventLoop *)lua_touserdata(L, lua_upvalueindex(1));
 
-	if (lua_gettop(L) < 2)
-		return luaL_error(L, "Not enough parameters");
-
 	if (lua_gettop(L) > 3)
 		return luaL_error(L, "Too many parameters");
 
-	if (!lua_isstring(L, 2))
-		luaL_argerror(L, 2, "String expected");
-
-	const char *conninfo = lua_tostring(L, 2);
-	const char *schema = "";
-
-	if (lua_gettop(L) >= 3) {
-		if (!lua_isstring(L, 3))
-			luaL_argerror(L, 3, "String expected");
-
-		schema = lua_tostring(L, 3);
-	}
+	const char *conninfo = luaL_checkstring(L, 2);
+	const char *schema = luaL_optstring(L, 3, "");
 
 	constexpr unsigned limit = 4;
 	constexpr unsigned max_idle = 1;

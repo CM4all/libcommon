@@ -40,6 +40,10 @@
 #include "stock/GetHandler.hxx"
 #include "event/DeferEvent.hxx"
 
+extern "C" {
+#include <lauxlib.h>
+}
+
 namespace Lua {
 
 class PgStock {
@@ -158,10 +162,7 @@ PgStock::Execute(lua_State *L)
 	if (lua_gettop(L) != 2)
 		return luaL_error(L, "Invalid parameters");
 
-	if (!lua_isstring(L, 2))
-		luaL_argerror(L, 2, "String expected");
-
-	const char *sql = lua_tostring(L, 2);
+	const char *sql = luaL_checkstring(L, 2);
 
 	auto &stock = PgStockClass::Cast(L, 1);
 	return stock.Execute(L, sql);
