@@ -34,6 +34,7 @@
 #include "lua/Util.hxx"
 #include "lua/Error.hxx"
 #include "lua/Resume.hxx"
+#include "lua/event/Init.hxx"
 #include "lua/pg/Init.hxx"
 #include "event/Loop.hxx"
 #include "event/DeferEvent.hxx"
@@ -125,6 +126,7 @@ try {
 
 	luaL_openlibs(L);
 
+	InitEvent(L, event_loop);
 	InitPg(L, event_loop);
 
 	Thread thread(L, event_loop, path);

@@ -171,6 +171,7 @@ subdir('src/translation')
 subdir('src/was')
 subdir('src/was/async')
 
+subdir('src/lua/event')
 subdir('src/lua/pg')
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')

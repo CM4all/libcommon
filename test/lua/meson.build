@@ -14,6 +14,7 @@ executable(
   include_directories: inc,
   dependencies: [
     lua_dep,
+    lua_event_dep,
     lua_pg_dep,
     event_dep,
     util_dep,
