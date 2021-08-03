@@ -32,6 +32,7 @@
 
 #include "NetstringServer.hxx"
 #include "system/Error.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "util/Compiler.h"
 #include "util/ConstBuffer.hxx"
 
@@ -42,10 +43,9 @@
 static constexpr auto busy_timeout = std::chrono::seconds(5);
 
 NetstringServer::NetstringServer(EventLoop &event_loop,
-				 UniqueSocketDescriptor _fd,
+				 UniqueSocketDescriptor fd,
 				 size_t max_size) noexcept
-	:fd(std::move(_fd)),
-	 event(event_loop, BIND_THIS_METHOD(OnEvent), fd),
+	:event(event_loop, BIND_THIS_METHOD(OnEvent), fd.Release()),
 	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout)),
 	 input(max_size)
 {
@@ -53,7 +53,10 @@ NetstringServer::NetstringServer(EventLoop &event_loop,
 	timeout_event.Schedule(busy_timeout);
 }
 
-NetstringServer::~NetstringServer() noexcept = default;
+NetstringServer::~NetstringServer() noexcept
+{
+	event.Close();
+}
 
 bool
 NetstringServer::SendResponse(const void *data, size_t size) noexcept
@@ -63,7 +66,7 @@ try {
 	for (const auto &i : list)
 		write.Push(i.data, i.size);
 
-	switch (write.Write(fd.ToFileDescriptor())) {
+	switch (write.Write(GetSocket().ToFileDescriptor())) {
 	case MultiWriteBuffer::Result::MORE:
 		throw std::runtime_error("short write");
 
@@ -88,14 +91,14 @@ void
 NetstringServer::OnEvent(unsigned flags) noexcept
 try {
 	if (flags & SocketEvent::ERROR)
-		throw MakeErrno(fd.GetError(), "Socket error");
+		throw MakeErrno(GetSocket().GetError(), "Socket error");
 
 	if (flags & SocketEvent::HANGUP) {
 		OnDisconnect();
 		return;
 	}
 
-	switch (input.Receive(fd.ToFileDescriptor())) {
+	switch (input.Receive(GetSocket().ToFileDescriptor())) {
 	case NetstringInput::Result::MORE:
 		timeout_event.Schedule(busy_timeout);
 		break;

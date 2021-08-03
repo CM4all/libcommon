@@ -35,12 +35,13 @@
 #include "io/MultiWriteBuffer.hxx"
 #include "net/djb/NetstringInput.hxx"
 #include "net/djb/NetstringGenerator.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
 
 #include <exception>
 #include <cstddef>
+
+class UniqueSocketDescriptor;
 
 /**
  * A server that receives netstrings
@@ -48,8 +49,6 @@
  * responds with another netstring.
  */
 class NetstringServer {
-	UniqueSocketDescriptor fd;
-
 	SocketEvent event;
 	CoarseTimerEvent timeout_event;
 
@@ -65,7 +64,7 @@ public:
 
 protected:
 	SocketDescriptor GetSocket() const noexcept {
-		return fd;
+		return event.GetSocket();
 	}
 
 	bool SendResponse(const void *data, size_t size) noexcept;
