@@ -95,6 +95,11 @@ Sleep(lua_State *L)
 void
 InitTimer(lua_State *L, EventLoop &event_loop) noexcept
 {
+	const ScopeCheckStack check_stack{L};
+
+	TimerClass::Register(L);
+	lua_pop(L, 1);
+
 	SetGlobal(L, "sleep",
 		  Lua::MakeCClosure(Sleep, Lua::LightUserData(&event_loop)));
 }
