@@ -94,6 +94,8 @@ public:
 		lua_pushlightuserdata(L, this);
 		lua_pushnil(L);
 		lua_settable(L, LUA_REGISTRYINDEX);
+
+		UnsetResumeListener(L);
 	}
 
 	auto &GetEventLoop() const noexcept {
