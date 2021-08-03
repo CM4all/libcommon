@@ -73,7 +73,7 @@ try {
 
 	assert(false);
 	gcc_unreachable();
-} catch (const std::runtime_error &) {
+} catch (...) {
 	OnError(std::current_exception());
 	return false;
 }
