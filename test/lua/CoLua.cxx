@@ -38,6 +38,7 @@
 #include "lua/pg/Init.hxx"
 #include "event/Loop.hxx"
 #include "event/DeferEvent.hxx"
+#include "event/ShutdownListener.hxx"
 #include "util/PrintException.hxx"
 #include "util/ScopeExit.hxx"
 
@@ -50,6 +51,20 @@ extern "C" {
 #include <stdlib.h>
 
 using namespace Lua;
+
+struct Instance final {
+	EventLoop event_loop;
+	ShutdownListener shutdown_listener{event_loop, BIND_THIS_METHOD(OnShutdown)};
+
+	Instance() noexcept
+	{
+		shutdown_listener.Enable();
+	}
+
+	void OnShutdown() noexcept {
+		event_loop.Break();
+	}
+};
 
 class Thread final : ResumeListener {
 	lua_State *const L;
@@ -119,7 +134,8 @@ try {
 
 	const char *path = argv[1];
 
-	EventLoop event_loop;
+	Instance instance;
+	auto &event_loop = instance.event_loop;
 
 	const auto L = luaL_newstate();
 	AtScopeExit(L) { lua_close(L); };
