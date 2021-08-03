@@ -82,19 +82,16 @@ public:
 		 start_event(event_loop, BIND_THIS_METHOD(Start)),
 		 path(_path)
 	{
-		/* store thread object in registry */
-		lua_pushlightuserdata(_L, this);
-		lua_settable(_L, LUA_REGISTRYINDEX);
-
 		SetResumeListener(L, *this);
+
+		/* pop the lua_newthread() (a reference to it is held
+		   by SetResumeListener()) */
+		lua_pop(L, 1);
+
 		start_event.Schedule();
 	}
 
 	~Thread() noexcept {
-		lua_pushlightuserdata(L, this);
-		lua_pushnil(L);
-		lua_settable(L, LUA_REGISTRYINDEX);
-
 		UnsetResumeListener(L);
 	}
 
