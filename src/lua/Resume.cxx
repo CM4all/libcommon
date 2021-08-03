@@ -47,7 +47,7 @@ SetResumeListener(lua_State *L, ResumeListener &listener) noexcept
 
 	/* look up registry[key] */
 	lua_getfield(L, LUA_REGISTRYINDEX, resume_listener_key);
-	if (lua_isnil(L, 1)) {
+	if (lua_isnil(L, -1)) {
 		/* pop nil */
 		lua_pop(L, 1);
 
