@@ -104,6 +104,8 @@ public:
 	}
 
 private:
+	void SendQuery(Pg::AsyncConnection &connection);
+
 	void OnDeferredResume() noexcept {
 		item->Put(true);
 		item = nullptr;
@@ -128,11 +130,7 @@ private:
 		cancel_ptr = nullptr;
 		item = &_item;
 
-		sql.Push(L);
-		AtScopeExit(L=L) { lua_pop(L, 1); };
-
-		auto &connection = Pg::Stock::GetConnection(*item);
-		connection.SendQuery(*this, lua_tostring(L, -1));
+		SendQuery(Pg::Stock::GetConnection(*item));
 	}
 
 	void OnStockItemError(std::exception_ptr error) noexcept override {
@@ -179,6 +177,15 @@ PgStock::Execute(lua_State *L, Ref &&sql)
 {
 	PgRequestClass::New(L, L, stock, std::move(sql));
 	return lua_yield(L, 1);
+}
+
+inline void
+PgRequest::SendQuery(Pg::AsyncConnection &connection)
+{
+	sql.Push(L);
+	AtScopeExit(L=L) { lua_pop(L, 1); };
+
+	connection.SendQuery(*this, lua_tostring(L, -1));
 }
 
 void
