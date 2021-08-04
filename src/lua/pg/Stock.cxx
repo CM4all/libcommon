@@ -99,7 +99,7 @@ public:
 		else if (item != nullptr) {
 			auto &connection = Pg::Stock::GetConnection(*item);
 			connection.DiscardRequest();
-			item->Put(true);
+			item->Put(false);
 		}
 	}
 
