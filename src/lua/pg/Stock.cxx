@@ -137,7 +137,14 @@ private:
 		cancel_ptr = nullptr;
 		item = &_item;
 
-		SendQuery(Pg::Stock::GetConnection(*item));
+		try {
+			SendQuery(Pg::Stock::GetConnection(*item));
+		} catch (...) {
+			item = nullptr;
+			_item.Put(true);
+
+			ResumeError(std::current_exception());
+		}
 	}
 
 	void OnStockItemError(std::exception_ptr error) noexcept override {
