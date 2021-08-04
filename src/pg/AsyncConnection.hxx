@@ -245,6 +245,20 @@ public:
 	bool CheckError(std::exception_ptr e) noexcept;
 
 	template<typename... Params>
+	void SendQueryParams(AsyncResultHandler &_handler, Params... params) {
+		assert(IsIdle());
+
+		result_handler = &_handler;
+
+		try {
+			Connection::SendQueryParams(params...);
+		} catch (...) {
+			result_handler = nullptr;
+			throw;
+		}
+	}
+
+	template<typename... Params>
 	void SendQuery(AsyncResultHandler &_handler, Params... params) {
 		assert(IsIdle());
 

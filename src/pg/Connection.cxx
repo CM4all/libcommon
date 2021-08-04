@@ -87,9 +87,9 @@ Connection::SendQuery(const char *query)
 }
 
 void
-Connection::_SendQuery(bool result_binary, const char *query,
-		       size_t n_params, const char *const*values,
-		       const int *lengths, const int *formats)
+Connection::SendQueryParams(bool result_binary, const char *query,
+			    size_t n_params, const char *const*values,
+			    const int *lengths, const int *formats)
 {
 	assert(IsDefined());
 	assert(query != nullptr);

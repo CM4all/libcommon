@@ -403,12 +403,10 @@ public:
 
 	void SendQuery(const char *query);
 
-private:
-	void _SendQuery(bool result_binary, const char *query,
-			size_t n_params, const char *const*values,
-			const int *lengths, const int *formats);
+	void SendQueryParams(bool result_binary, const char *query,
+			     size_t n_params, const char *const*values,
+			     const int *lengths, const int *formats);
 
-public:
 	template<typename... Params>
 	void SendQuery(bool result_binary,
 		       const char *query, const Params&... _params) {
@@ -417,9 +415,9 @@ public:
 
 		const AutoParamArray<Params...> params(_params...);
 
-		_SendQuery(result_binary, query, params.count,
-			   params.values, params.GetLengths(),
-			   params.GetFormats());
+		SendQueryParams(result_binary, query, params.count,
+				params.values, params.GetLengths(),
+				params.GetFormats());
 	}
 
 	template<typename... Params>
