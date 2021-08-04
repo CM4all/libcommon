@@ -104,6 +104,13 @@ public:
 	}
 
 private:
+	void ResumeError(std::exception_ptr error) noexcept {
+		/* return [nil, error_message] for assert() */
+		Push(L, nullptr);
+		Push(L, error);
+		Resume(L, 2);
+	}
+
 	void SendQuery(Pg::AsyncConnection &connection);
 
 	void OnDeferredResume() noexcept {
@@ -136,10 +143,7 @@ private:
 	void OnStockItemError(std::exception_ptr error) noexcept override {
 		cancel_ptr = nullptr;
 
-		/* return [nil, error_message] for assert() */
-		Push(L, nullptr);
-		Push(L, error);
-		Resume(L, 2);
+		ResumeError(std::move(error));
 	}
 
 	/* virtual methods from Pg::AsyncResultHandler */
