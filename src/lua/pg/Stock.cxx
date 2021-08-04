@@ -34,11 +34,13 @@
 #include "Result.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
+#include "lua/Ref.hxx"
 #include "lua/Resume.hxx"
 #include "pg/AsyncConnection.hxx"
 #include "pg/Stock.hxx"
 #include "stock/GetHandler.hxx"
 #include "event/DeferEvent.hxx"
+#include "util/ScopeExit.hxx"
 
 extern "C" {
 #include <lauxlib.h>
@@ -56,7 +58,7 @@ public:
 
 private:
 	static int Execute(lua_State *L);
-	int Execute(lua_State *L, const char *sql);
+	int Execute(lua_State *L, Ref &&sql);
 
 public:
 	static constexpr struct luaL_Reg methods [] = {
@@ -77,16 +79,16 @@ class PgRequest final : StockGetHandler, Pg::AsyncResultHandler {
 
 	StockItem *item = nullptr;
 
-	const std::string sql;
+	Ref sql;
 
 	Pg::Result result;
 
 public:
-	PgRequest(lua_State *_L, Stock &stock, const char *_sql) noexcept
+	PgRequest(lua_State *_L, Stock &stock, Ref &&_sql) noexcept
 		:L(_L),
 		 defer_resume(stock.GetEventLoop(),
 			      BIND_THIS_METHOD(OnDeferredResume)),
-		 sql(_sql)
+		 sql(std::move(_sql))
 	{
 		stock.Get({}, *this, cancel_ptr);
 	}
@@ -126,8 +128,11 @@ private:
 		cancel_ptr = nullptr;
 		item = &_item;
 
+		sql.Push(L);
+		AtScopeExit(L=L) { lua_pop(L, 1); };
+
 		auto &connection = Pg::Stock::GetConnection(*item);
-		connection.SendQuery(*this, sql.c_str());
+		connection.SendQuery(*this, lua_tostring(L, -1));
 	}
 
 	void OnStockItemError(std::exception_ptr error) noexcept override {
@@ -162,16 +167,17 @@ PgStock::Execute(lua_State *L)
 	if (lua_gettop(L) != 2)
 		return luaL_error(L, "Invalid parameters");
 
-	const char *sql = luaL_checkstring(L, 2);
+	luaL_checkstring(L, 2);
+	Ref sql{L, StackIndex{2}};
 
 	auto &stock = PgStockClass::Cast(L, 1);
-	return stock.Execute(L, sql);
+	return stock.Execute(L, std::move(sql));
 }
 
 inline int
-PgStock::Execute(lua_State *L, const char *sql)
+PgStock::Execute(lua_State *L, Ref &&sql)
 {
-	PgRequestClass::New(L, L, stock, sql);
+	PgRequestClass::New(L, L, stock, std::move(sql));
 	return lua_yield(L, 1);
 }
 
