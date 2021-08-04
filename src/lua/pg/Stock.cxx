@@ -40,11 +40,18 @@
 #include "pg/Stock.hxx"
 #include "stock/GetHandler.hxx"
 #include "event/DeferEvent.hxx"
+#include "util/AllocatedArray.hxx"
+#include "util/RuntimeError.hxx"
 #include "util/ScopeExit.hxx"
+#include "util/StringBuffer.hxx"
 
 extern "C" {
 #include <lauxlib.h>
 }
+
+#include <forward_list>
+
+#include <stdio.h>
 
 namespace Lua {
 
@@ -58,7 +65,7 @@ public:
 
 private:
 	static int Execute(lua_State *L);
-	int Execute(lua_State *L, Ref &&sql);
+	int Execute(lua_State *L, Ref &&sql, Ref &&params);
 
 public:
 	static constexpr struct luaL_Reg methods [] = {
@@ -79,16 +86,17 @@ class PgRequest final : StockGetHandler, Pg::AsyncResultHandler {
 
 	StockItem *item = nullptr;
 
-	Ref sql;
+	Ref sql, params;
 
 	Pg::Result result;
 
 public:
-	PgRequest(lua_State *_L, Stock &stock, Ref &&_sql) noexcept
+	PgRequest(lua_State *_L, Stock &stock,
+		  Ref &&_sql, Ref &&_params) noexcept
 		:L(_L),
 		 defer_resume(stock.GetEventLoop(),
 			      BIND_THIS_METHOD(OnDeferredResume)),
-		 sql(std::move(_sql))
+		 sql(std::move(_sql)), params(std::move(_params))
 	{
 		stock.Get({}, *this, cancel_ptr);
 	}
@@ -173,20 +181,28 @@ using PgRequestClass = Lua::Class<PgRequest, lua_pg_request_class>;
 int
 PgStock::Execute(lua_State *L)
 {
-	if (lua_gettop(L) != 2)
-		return luaL_error(L, "Invalid parameters");
+	if (lua_gettop(L) < 2)
+		return luaL_error(L, "Not enough parameters");
+	if (lua_gettop(L) > 3)
+		return luaL_error(L, "Too many parameters");
 
 	luaL_checkstring(L, 2);
 	Ref sql{L, StackIndex{2}};
 
+	Ref params;
+	if (lua_gettop(L) >= 3) {
+		luaL_checktype(L, 3, LUA_TTABLE);
+		params = {L, StackIndex{3}};
+	}
+
 	auto &stock = PgStockClass::Cast(L, 1);
-	return stock.Execute(L, std::move(sql));
+	return stock.Execute(L, std::move(sql), std::move(params));
 }
 
 inline int
-PgStock::Execute(lua_State *L, Ref &&sql)
+PgStock::Execute(lua_State *L, Ref &&sql, Ref &&params)
 {
-	PgRequestClass::New(L, L, stock, std::move(sql));
+	PgRequestClass::New(L, L, stock, std::move(sql), std::move(params));
 	return lua_yield(L, 1);
 }
 
@@ -196,7 +212,53 @@ PgRequest::SendQuery(Pg::AsyncConnection &connection)
 	sql.Push(L);
 	AtScopeExit(L=L) { lua_pop(L, 1); };
 
-	connection.SendQuery(*this, lua_tostring(L, -1));
+	if (params) {
+		params.Push(L);
+		AtScopeExit(L=L) { lua_pop(L, 1); };
+
+		const std::size_t n = lua_objlen(L, -1);
+		AllocatedArray<const char *> p(n);
+
+		std::forward_list<StringBuffer<64>> number_buffers;
+
+		for (std::size_t i = 0; i < n; ++i) {
+			lua_rawgeti(L, -1, i + 1);
+			AtScopeExit(L=L) { lua_pop(L, 1); };
+
+			const auto type = lua_type(L, -1);
+			switch (type) {
+			case LUA_TNIL:
+				p[i] = nullptr;
+				break;
+
+			case LUA_TBOOLEAN:
+				p[i] = lua_toboolean(L, -1) ? "1" : "0";
+				break;
+
+			case LUA_TNUMBER:
+				number_buffers.emplace_front();
+				snprintf(number_buffers.front().data(),
+					 number_buffers.front().capacity(),
+					 "%g", (double)lua_tonumber(L, -1));
+				p[i] = number_buffers.front().c_str();
+				break;
+
+			case LUA_TSTRING:
+				p[i] = lua_tostring(L, -1);
+				break;
+
+			default:
+				throw FormatRuntimeError("Unsupported query parameter type: %s",
+							 lua_typename(L, type));
+			}
+		}
+
+		connection.SendQueryParams(*this, false, lua_tostring(L, -2),
+					   n, p.data(),
+					   nullptr, nullptr);
+	} else {
+		connection.SendQuery(*this, lua_tostring(L, -1));
+	}
 }
 
 void
