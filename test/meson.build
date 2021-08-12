@@ -45,6 +45,7 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
 endif
 
 subdir('spawn')
+subdir('ssl')
 subdir('time')
 subdir('uring')
 subdir('was')
