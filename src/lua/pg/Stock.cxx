@@ -34,7 +34,6 @@
 #include "Result.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
-#include "lua/Ref.hxx"
 #include "lua/Resume.hxx"
 #include "pg/AsyncConnection.hxx"
 #include "pg/Stock.hxx"
@@ -65,7 +64,7 @@ public:
 
 private:
 	static int Execute(lua_State *L);
-	int Execute(lua_State *L, Ref &&sql, Ref &&params);
+	int Execute(lua_State *L, int sql, int params);
 
 public:
 	static constexpr struct luaL_Reg methods [] = {
@@ -86,18 +85,29 @@ class PgRequest final : StockGetHandler, Pg::AsyncResultHandler {
 
 	StockItem *item = nullptr;
 
-	Ref sql, params;
-
 	Pg::Result result;
 
 public:
 	PgRequest(lua_State *_L, Stock &stock,
-		  Ref &&_sql, Ref &&_params) noexcept
+		  int sql, int params) noexcept
 		:L(_L),
 		 defer_resume(stock.GetEventLoop(),
-			      BIND_THIS_METHOD(OnDeferredResume)),
-		 sql(std::move(_sql)), params(std::move(_params))
+			      BIND_THIS_METHOD(OnDeferredResume))
 	{
+		/* copy the parameters to fenv */
+		lua_newtable(L);
+
+		lua_pushvalue(L, sql);
+		lua_setfield(L, -2, "sql");
+
+		if (params > 0) {
+			lua_pushvalue(L, params);
+			lua_setfield(L, -2, "params");
+		}
+
+		lua_setfenv(L, -2);
+
+		/* start the operation */
 		stock.Get({}, *this, cancel_ptr);
 	}
 
@@ -187,35 +197,35 @@ PgStock::Execute(lua_State *L)
 		return luaL_error(L, "Too many parameters");
 
 	luaL_checkstring(L, 2);
-	Ref sql{L, StackIndex{2}};
+	int sql = 2;
 
-	Ref params;
+	int params = 0;
 	if (lua_gettop(L) >= 3) {
 		luaL_checktype(L, 3, LUA_TTABLE);
-		params = {L, StackIndex{3}};
+		params = 3;
 	}
 
 	auto &stock = PgStockClass::Cast(L, 1);
-	return stock.Execute(L, std::move(sql), std::move(params));
+	return stock.Execute(L, sql, params);
 }
 
 inline int
-PgStock::Execute(lua_State *L, Ref &&sql, Ref &&params)
+PgStock::Execute(lua_State *L, int sql, int params)
 {
-	PgRequestClass::New(L, L, stock, std::move(sql), std::move(params));
+	PgRequestClass::New(L, L, stock, sql, params);
 	return lua_yield(L, 1);
 }
 
 inline void
 PgRequest::SendQuery(Pg::AsyncConnection &connection)
 {
-	sql.Push(L);
-	AtScopeExit(L=L) { lua_pop(L, 1); };
+	/* stack[-2] = fenv.sql; stack[-1] = fenv.params */
+	lua_getfenv(L, -1);
+	lua_getfield(L, -1, "sql");
+	lua_getfield(L, -2, "params");
+	AtScopeExit(L=L) { lua_pop(L, 2); };
 
-	if (params) {
-		params.Push(L);
-		AtScopeExit(L=L) { lua_pop(L, 1); };
-
+	if (!lua_isnil(L, -1)) {
 		const std::size_t n = lua_objlen(L, -1);
 		AllocatedArray<const char *> p(n);
 
@@ -257,7 +267,7 @@ PgRequest::SendQuery(Pg::AsyncConnection &connection)
 					   n, p.data(),
 					   nullptr, nullptr);
 	} else {
-		connection.SendQuery(*this, lua_tostring(L, -1));
+		connection.SendQuery(*this, lua_tostring(L, -2));
 	}
 }
 
