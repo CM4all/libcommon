@@ -1,3 +1,7 @@
+if compiler.get_id() == 'gcc' and compiler.version().version_compare('<10')
+  subdir_done()
+endif
+
 test(
   'TestSsl',
   executable(
