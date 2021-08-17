@@ -86,13 +86,6 @@ public:
 			 LightUserData(const_cast<Value *>(this)));
 	}
 
-	/**
-	 * Push the value on the stack.
-	 */
-	void Push() const {
-		Push(L);
-	}
-
 	lua_State *GetState() const {
 		return L;
 	}

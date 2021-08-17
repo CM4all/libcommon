@@ -96,13 +96,6 @@ public:
 	void Push(lua_State *thread_L) const {
 		lua_rawgeti(thread_L, LUA_REGISTRYINDEX, ref);
 	}
-
-	/**
-	 * Push the value on the stack.
-	 */
-	void Push() const {
-		Push(L);
-	}
 };
 
 static inline void
