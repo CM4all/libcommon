@@ -32,6 +32,7 @@
 
 #include "Stock.hxx"
 #include "Result.hxx"
+#include "lua/Assert.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
 #include "lua/Resume.hxx"
@@ -94,6 +95,8 @@ public:
 		 defer_resume(stock.GetEventLoop(),
 			      BIND_THIS_METHOD(OnDeferredResume))
 	{
+		const ScopeCheckStack check_stack(L);
+
 		/* copy the parameters to fenv */
 		lua_newtable(L);
 
@@ -219,6 +222,8 @@ PgStock::Execute(lua_State *L, int sql, int params)
 inline void
 PgRequest::SendQuery(Pg::AsyncConnection &connection)
 {
+	const ScopeCheckStack check_stack(L);
+
 	/* stack[-2] = fenv.sql; stack[-1] = fenv.params */
 	lua_getfenv(L, -1);
 	lua_getfield(L, -1, "sql");
