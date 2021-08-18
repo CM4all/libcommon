@@ -113,13 +113,13 @@ Resume(lua_State *L, int narg) noexcept
 		if (result == LUA_OK) {
 			auto *listener = UnsetResumeListener(L);
 			assert(listener != nullptr);
-			listener->OnLuaFinished();
+			listener->OnLuaFinished(L);
 		} else if (result != LUA_YIELD)
 			throw PopError(L);
 	} catch (...) {
 		auto *listener = UnsetResumeListener(L);
 		assert(listener != nullptr);
-		listener->OnLuaError(std::current_exception());
+		listener->OnLuaError(L, std::current_exception());
 	}
 }
 

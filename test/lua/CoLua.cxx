@@ -112,15 +112,15 @@ private:
 
 			Resume(L, 0);
 		} catch (...) {
-			OnLuaError(std::current_exception());
+			OnLuaError(L, std::current_exception());
 		}
 	}
 
-	void OnLuaFinished() noexcept override {
+	void OnLuaFinished(lua_State *) noexcept override {
 		GetEventLoop().Break();
 	}
 
-	void OnLuaError(std::exception_ptr e) noexcept override {
+	void OnLuaError(lua_State *, std::exception_ptr e) noexcept override {
 		error = std::move(e);
 		GetEventLoop().Break();
 	}

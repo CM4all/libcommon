@@ -44,8 +44,9 @@ namespace Lua {
  */
 class ResumeListener {
 public:
-	virtual void OnLuaFinished() noexcept = 0;
-	virtual void OnLuaError(std::exception_ptr e) noexcept = 0;
+	virtual void OnLuaFinished(lua_State *L) noexcept = 0;
+	virtual void OnLuaError(lua_State *L,
+				std::exception_ptr e) noexcept = 0;
 };
 
 /**
