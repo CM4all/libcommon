@@ -223,7 +223,7 @@ PgRequest::SendQuery(Pg::AsyncConnection &connection)
 	lua_getfenv(L, -1);
 	lua_getfield(L, -1, "sql");
 	lua_getfield(L, -2, "params");
-	AtScopeExit(L=L) { lua_pop(L, 2); };
+	AtScopeExit(L=L) { lua_pop(L, 3); };
 
 	if (!lua_isnil(L, -1)) {
 		const std::size_t n = lua_objlen(L, -1);
