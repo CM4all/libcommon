@@ -35,6 +35,7 @@
 #include "UniqueHandle.hxx"
 #include "Compat.hxx"
 
+#include <cassert>
 #include <exception>
 #include <optional>
 #include <utility>
@@ -53,6 +54,12 @@ struct promise_result_manager {
 	}
 
 	decltype(auto) GetReturnValue() noexcept {
+		/* this assertion can fail if control flows off the
+		   end of a coroutine without co_return, which is
+		   undefined behavior according to
+		   https://timsong-cpp.github.io/cppwp/n4861/stmt.return.coroutine */
+		assert(value);
+
 		return std::move(*value);
 	}
 };
