@@ -45,9 +45,10 @@ namespace Co {
 namespace detail {
 
 template<typename R>
-struct promise_result_manager {
+class promise_result_manager {
 	std::optional<R> value;
 
+public:
 	template<typename U>
 	void return_value(U &&_value) noexcept {
 		value.emplace(std::forward<U>(_value));
@@ -65,7 +66,8 @@ struct promise_result_manager {
 };
 
 template<>
-struct promise_result_manager<void> {
+class promise_result_manager<void> {
+public:
 	void return_void() noexcept {}
 	void GetReturnValue() noexcept {}
 };
@@ -79,11 +81,12 @@ struct promise_result_manager<void> {
 template<typename T>
 class Task {
 public:
-	struct promise_type : detail::promise_result_manager<T> {
+	class promise_type : public detail::promise_result_manager<T> {
 		std::coroutine_handle<> continuation;
 
 		std::exception_ptr error;
 
+	public:
 		auto initial_suspend() noexcept {
 			return std::suspend_always{};
 		}
@@ -114,6 +117,10 @@ public:
 			error = std::current_exception();
 		}
 
+		void SetContinuation(std::coroutine_handle<> _continuation) noexcept {
+			continuation = _continuation;
+		}
+
 		decltype(auto) GetReturnValue() {
 			if (error)
 				std::rethrow_exception(std::move(error));
@@ -142,7 +149,7 @@ public:
 			}
 
 			std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) noexcept {
-				coroutine.promise().continuation = continuation;
+				coroutine.promise().SetContinuation(continuation);
 				return coroutine;
 			}
 
