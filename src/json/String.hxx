@@ -64,4 +64,30 @@ GetString(const boost::json::object &parent, std::string_view key) noexcept
 	return GetString(parent.if_contains(key));
 }
 
+[[gnu::pure]]
+static inline const char *
+GetCString(const boost::json::value &json) noexcept
+{
+	const auto *s = json.if_string();
+	return s != nullptr
+		? s->c_str()
+		: nullptr;
+}
+
+[[gnu::pure]]
+static inline const char *
+GetCString(const boost::json::value *json) noexcept
+{
+	return json != nullptr
+		? GetCString(*json)
+		: nullptr;
+}
+
+[[gnu::pure]]
+static inline const char *
+GetCString(const boost::json::object &parent, std::string_view key) noexcept
+{
+	return GetCString(parent.if_contains(key));
+}
+
 } // namespace Json
