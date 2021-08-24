@@ -119,6 +119,8 @@ public:
 			}
 
 			Result await_resume() const {
+				query.defer_resume.Cancel();
+
 				if (query.failed)
 					throw std::runtime_error("Database connection failed");
 
@@ -157,13 +159,17 @@ private:
 
 	void OnResultEnd() override {
 		ready = true;
-		defer_resume.Schedule();
+
+		if (continuation)
+			defer_resume.Schedule();
 	}
 
 	void OnResultError() noexcept override {
 		ready = true;
 		failed = true;
-		defer_resume.Schedule();
+
+		if (continuation)
+			defer_resume.Schedule();
 	}
 };
 
