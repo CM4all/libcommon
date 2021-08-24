@@ -73,7 +73,7 @@ public:
 };
 
 template<typename T, typename Task>
-class promise : public detail::promise_result_manager<T> {
+class promise final : public detail::promise_result_manager<T> {
 	std::coroutine_handle<> continuation;
 
 	std::exception_ptr error;
