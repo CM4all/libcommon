@@ -74,7 +74,7 @@ public:
 	void GetReturnValue() noexcept {}
 };
 
-template<typename T, typename Task>
+template<typename T, typename Task, bool lazy>
 class promise final : public detail::promise_result_manager<T> {
 	std::coroutine_handle<> continuation;
 
@@ -82,7 +82,10 @@ class promise final : public detail::promise_result_manager<T> {
 
 public:
 	auto initial_suspend() noexcept {
-		return std::suspend_always{};
+		if constexpr (lazy)
+			return std::suspend_always{};
+		else
+			return std::suspend_never{};
 	}
 
 	struct final_awaitable {
@@ -93,6 +96,14 @@ public:
 		template<typename PROMISE>
 		std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
 			const auto &promise = coro.promise();
+
+			if (!lazy && !promise.continuation)
+				/* if this is an "eager" task, the
+				   continuation may not yet have been
+				   set, because nobody has co_awaited
+				   the task yet */
+				return std::noop_coroutine();
+
 			assert(promise.continuation);
 
 			return promise.continuation;
@@ -139,6 +150,15 @@ public:
 
 		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
 			coroutine.promise().SetContinuation(_continuation);
+
+			if constexpr (!lazy)
+				/* if this is an "eager" task, then
+				   the coroutine has already been
+				   resumed once, and is awaiting
+				   another task right now, so do
+				   nothing now */
+				return std::noop_coroutine();
+
 			return coroutine;
 		}
 
@@ -157,7 +177,7 @@ public:
 template<typename T>
 class Task {
 public:
-	using promise_type = detail::promise<T, Task<T>>;
+	using promise_type = detail::promise<T, Task<T>, true>;
 	friend promise_type;
 
 private:
