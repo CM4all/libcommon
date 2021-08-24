@@ -72,6 +72,55 @@ public:
 	void GetReturnValue() noexcept {}
 };
 
+template<typename T, typename Task>
+class promise : public detail::promise_result_manager<T> {
+	std::coroutine_handle<> continuation;
+
+	std::exception_ptr error;
+
+public:
+	auto initial_suspend() noexcept {
+		return std::suspend_always{};
+	}
+
+	struct final_awaitable {
+		bool await_ready() const noexcept {
+			return false;
+		}
+
+		template<typename PROMISE>
+		std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
+			return coro.promise().continuation;
+		}
+
+		void await_resume() noexcept {
+		}
+	};
+
+	auto final_suspend() noexcept {
+		return final_awaitable{};
+	}
+
+	auto get_return_object() noexcept {
+		return Task(std::coroutine_handle<promise>::from_promise(*this));
+	}
+
+	void unhandled_exception() noexcept {
+		error = std::current_exception();
+	}
+
+	void SetContinuation(std::coroutine_handle<> _continuation) noexcept {
+		continuation = _continuation;
+	}
+
+	decltype(auto) GetReturnValue() {
+		if (error)
+			std::rethrow_exception(std::move(error));
+
+		return detail::promise_result_manager<T>::GetReturnValue();
+	}
+};
+
 } // namespace Co::detail
 
 /**
@@ -81,53 +130,8 @@ public:
 template<typename T>
 class Task {
 public:
-	class promise_type : public detail::promise_result_manager<T> {
-		std::coroutine_handle<> continuation;
-
-		std::exception_ptr error;
-
-	public:
-		auto initial_suspend() noexcept {
-			return std::suspend_always{};
-		}
-
-		struct final_awaitable {
-			bool await_ready() const noexcept {
-				return false;
-			}
-
-			template<typename PROMISE>
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
-				return coro.promise().continuation;
-			}
-
-			void await_resume() noexcept {
-			}
-		};
-
-		auto final_suspend() noexcept {
-			return final_awaitable{};
-		}
-
-		Task<T> get_return_object() noexcept {
-			return Task<T>(std::coroutine_handle<promise_type>::from_promise(*this));
-		}
-
-		void unhandled_exception() noexcept {
-			error = std::current_exception();
-		}
-
-		void SetContinuation(std::coroutine_handle<> _continuation) noexcept {
-			continuation = _continuation;
-		}
-
-		decltype(auto) GetReturnValue() {
-			if (error)
-				std::rethrow_exception(std::move(error));
-
-			return detail::promise_result_manager<T>::GetReturnValue();
-		}
-	};
+	using promise_type = detail::promise<T, Task<T>>;
+	friend promise_type;
 
 private:
 	UniqueHandle<promise_type> coroutine;
