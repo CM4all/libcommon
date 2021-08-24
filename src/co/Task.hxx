@@ -109,6 +109,7 @@ public:
 		error = std::current_exception();
 	}
 
+private:
 	void SetContinuation(std::coroutine_handle<> _continuation) noexcept {
 		continuation = _continuation;
 	}
@@ -119,6 +120,24 @@ public:
 
 		return detail::promise_result_manager<T>::GetReturnValue();
 	}
+
+public:
+	struct Awaitable final {
+		const std::coroutine_handle<promise> coroutine;
+
+		bool await_ready() const noexcept {
+			return coroutine.done();
+		}
+
+		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
+			coroutine.promise().SetContinuation(_continuation);
+			return coroutine;
+		}
+
+		decltype(auto) await_resume() {
+			return coroutine.promise().GetReturnValue();
+		}
+	};
 };
 
 } // namespace Co::detail
@@ -144,25 +163,8 @@ private:
 public:
 	Task() = default;
 
-	auto operator co_await() const noexcept {
-		struct Awaitable final {
-			const std::coroutine_handle<promise_type> coroutine;
-
-			bool await_ready() const noexcept {
-				return coroutine.done();
-			}
-
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) noexcept {
-				coroutine.promise().SetContinuation(continuation);
-				return coroutine;
-			}
-
-			decltype(auto) await_resume() {
-				return coroutine.promise().GetReturnValue();
-			}
-		};
-
-		return Awaitable{coroutine.get()};
+	typename promise_type::Awaitable operator co_await() const noexcept {
+		return {coroutine.get()};
 	}
 };
 
