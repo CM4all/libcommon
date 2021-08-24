@@ -171,6 +171,32 @@ public:
 } // namespace Co::detail
 
 /**
+ * A coroutine task which is not suspended initially ("eager") and
+ * returns a value (with support for exceptions).
+ */
+template<typename T>
+class EagerTask {
+public:
+	using promise_type = detail::promise<T, EagerTask<T>, false>;
+	friend promise_type;
+
+private:
+	UniqueHandle<promise_type> coroutine;
+
+	explicit EagerTask(std::coroutine_handle<promise_type> _coroutine) noexcept
+		:coroutine(_coroutine)
+	{
+	}
+
+public:
+	EagerTask() = default;
+
+	typename promise_type::Awaitable operator co_await() const noexcept {
+		return {coroutine.get()};
+	}
+};
+
+/**
  * A coroutine task which is suspended initially and returns a value
  * (with support for exceptions).
  */

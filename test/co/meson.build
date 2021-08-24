@@ -29,6 +29,7 @@ test(
   'TestCo',
   executable(
     'TestCo',
+    'TestEagerTask.cxx',
     'TestCoCache.cxx',
     include_directories: inc,
     dependencies: [gtest, event_dep],
