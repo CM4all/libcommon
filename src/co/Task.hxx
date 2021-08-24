@@ -51,6 +51,8 @@ class promise_result_manager {
 public:
 	template<typename U>
 	void return_value(U &&_value) noexcept {
+		assert(!value);
+
 		value.emplace(std::forward<U>(_value));
 	}
 
@@ -90,7 +92,10 @@ public:
 
 		template<typename PROMISE>
 		std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
-			return coro.promise().continuation;
+			const auto &promise = coro.promise();
+			assert(promise.continuation);
+
+			return promise.continuation;
 		}
 
 		void await_resume() noexcept {
@@ -111,6 +116,9 @@ public:
 
 private:
 	void SetContinuation(std::coroutine_handle<> _continuation) noexcept {
+		assert(!continuation);
+		assert(_continuation);
+
 		continuation = _continuation;
 	}
 
