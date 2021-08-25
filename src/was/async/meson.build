@@ -1,4 +1,4 @@
-libwas_protocol = dependency('libcm4all-was-protocol')
+libwas_protocol = dependency('libcm4all-was-protocol', version: '>= 2')
 
 was_async_sources = []
 if get_option('coroutines')
@@ -17,6 +17,7 @@ was_async = static_library(
   'SimpleOutput.cxx',
   'SimpleRun.cxx',
   'SimpleServer.cxx',
+  'MultiClient.cxx',
   'Socket.cxx',
   include_directories: inc,
   dependencies: [
