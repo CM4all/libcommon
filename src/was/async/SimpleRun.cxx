@@ -57,7 +57,7 @@ public:
 		event_loop.Break();
 	}
 
-	void CheckRethrowError() const noexcept {
+	void CheckRethrowError() const {
 		if (error)
 			std::rethrow_exception(error);
 	}
