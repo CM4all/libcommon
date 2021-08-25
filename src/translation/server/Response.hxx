@@ -1087,6 +1087,12 @@ public:
 					     name, "=", value...);
 			return *this;
 		}
+
+		auto Concurrency(uint16_t value) noexcept {
+			response.PacketT(TranslationCommand::CONCURRENCY,
+					 value);
+			return *this;
+		}
 	};
 
 	template<typename... Types>

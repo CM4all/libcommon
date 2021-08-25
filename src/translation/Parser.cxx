@@ -2486,13 +2486,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::CONCURRENCY:
 #if TRANSLATION_ENABLE_RADDRESS
-		if (lhttp_address == nullptr)
-			throw std::runtime_error("misplaced CONCURRENCY packet");
-
 		if (payload.size != 2)
 			throw std::runtime_error("malformed CONCURRENCY packet");
 
-		lhttp_address->concurrency = *(const uint16_t *)payload.data;
+		if (lhttp_address != nullptr)
+			lhttp_address->concurrency = *(const uint16_t *)payload.data;
+		else if (cgi_address != nullptr)
+			cgi_address->concurrency = *(const uint16_t *)payload.data;
+		else
+			throw std::runtime_error("misplaced CONCURRENCY packet");
+
 		return;
 #else
 		break;
