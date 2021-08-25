@@ -17,6 +17,7 @@ was_async = static_library(
   'SimpleOutput.cxx',
   'SimpleRun.cxx',
   'SimpleServer.cxx',
+  'SimpleMultiServer.cxx',
   'MultiClient.cxx',
   'Socket.cxx',
   include_directories: inc,
