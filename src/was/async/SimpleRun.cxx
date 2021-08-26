@@ -34,6 +34,7 @@
 #include "SimpleServer.hxx"
 #include "SimpleMultiServer.hxx"
 #include "event/Loop.hxx"
+#include "util/Cast.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveList.hxx"
 
@@ -144,12 +145,14 @@ private:
 	void OnWasError(Was::SimpleServer &_connection,
 			std::exception_ptr) noexcept override {
 		// TODO log error?
-		auto *connection = (Connection *)&_connection;
+		auto *connection = &ContainerCast(_connection,
+						  &Connection::server);
 		delete connection;
 	}
 
 	void OnWasClosed(Was::SimpleServer &_connection) noexcept override {
-		auto *connection = (Connection *)&_connection;
+		auto *connection = &ContainerCast(_connection,
+						  &Connection::server);
 		delete connection;
 	}
 };
