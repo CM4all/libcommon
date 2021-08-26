@@ -32,6 +32,7 @@
 
 #include "MultiClient.hxx"
 #include "Socket.hxx"
+#include "system/Error.hxx"
 #include "net/ScmRightsBuilder.hxx"
 #include "net/SendMessage.hxx"
 #include "net/SocketDescriptor.hxx"
@@ -50,7 +51,13 @@ MakeMultiWasHeader(enum multi_was_command cmd, std::size_t length) noexcept
 	return h;
 }
 
-void
+/**
+ * Send a #MULTI_WAS_COMMAND_NEW datagram on the given Multi-WAS
+ * client socket.
+ *
+ * Throws on error.
+ */
+static void
 SendMultiNew(SocketDescriptor s, WasSocket &&socket)
 {
 	static constexpr auto header =
@@ -66,6 +73,46 @@ SendMultiNew(SocketDescriptor s, WasSocket &&socket)
 	b.Finish(msg);
 
 	SendMessage(s, msg, MSG_NOSIGNAL);
+}
+
+MultiClient::MultiClient(EventLoop &event_loop, UniqueSocketDescriptor socket,
+			 MultiClientHandler &_handler) noexcept
+	:event(event_loop, BIND_THIS_METHOD(OnSocketReady),
+	       socket.Release()),
+	 handler(_handler)
+{
+	event.ScheduleRead();
+}
+
+inline void
+MultiClient::Connect(WasSocket &&socket)
+{
+	Was::SendMultiNew(event.GetSocket(), std::move(socket));
+}
+
+WasSocket
+MultiClient::Connect()
+{
+	auto [result, for_child] = WasSocket::CreatePair();
+	Connect(std::move(for_child));
+	return std::move(result);
+}
+
+void
+MultiClient::OnSocketReady(unsigned events) noexcept
+try {
+	if (events & SocketEvent::ERROR)
+		throw MakeErrno(event.GetSocket().GetError(),
+				"Error on MultiWAS socket");
+
+	if (events & SocketEvent::HANGUP) {
+		handler.OnMultiClientDisconnect();
+		return;
+	}
+
+	throw std::runtime_error("Unexpected data on MultiWAS socket");
+} catch (...) {
+	handler.OnMultiClientError(std::current_exception());
 }
 
 } // namespace Was

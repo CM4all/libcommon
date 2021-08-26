@@ -32,18 +32,44 @@
 
 #pragma once
 
+#include "event/SocketEvent.hxx"
+
+#include <exception>
+
 struct WasSocket;
-class SocketDescriptor;
+class UniqueSocketDescriptor;
 
 namespace Was {
 
-/**
- * Send a #MULTI_WAS_COMMAND_NEW datagram on the given Multi-WAS
- * client socket.
- *
- * Throws on error.
- */
-void
-SendMultiNew(SocketDescriptor s, WasSocket &&socket);
+class MultiClientHandler {
+public:
+	virtual void OnMultiClientDisconnect() noexcept = 0;
+	virtual void OnMultiClientError(std::exception_ptr error) noexcept = 0;
+};
+
+class MultiClient {
+	SocketEvent event;
+
+	MultiClientHandler &handler;
+
+public:
+	MultiClient(EventLoop &event_loop, UniqueSocketDescriptor socket,
+		    MultiClientHandler &_handler) noexcept;
+
+	~MultiClient() noexcept {
+		event.Close();
+	}
+
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
+	WasSocket Connect();
+
+private:
+	void OnSocketReady(unsigned events) noexcept;
+
+	void Connect(WasSocket &&socket);
+};
 
 } // namespace Was
