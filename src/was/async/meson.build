@@ -1,4 +1,4 @@
-libwas_protocol = dependency('libcm4all-was-protocol', version: '>= 2')
+libwas_protocol = dependency('libcm4all-was-protocol', version: '>= 1.21')
 
 was_async_sources = []
 if get_option('coroutines')
