@@ -46,6 +46,7 @@ endif
 
 subdir('spawn')
 subdir('ssl')
+subdir('stock')
 subdir('time')
 subdir('uring')
 subdir('was')
