@@ -70,6 +70,9 @@ SimpleServer::SubmitRequest() noexcept
 bool
 SimpleServer::CancelRequest() noexcept
 {
+	request.state = Request::State::NONE;
+	request.request.reset();
+
 	if (!request.cancel_ptr)
 		return false;
 
