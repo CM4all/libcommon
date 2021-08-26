@@ -268,9 +268,8 @@ Stock::~Stock() noexcept
 	ClearIdle();
 }
 
-bool
-Stock::GetIdle(StockRequest &request,
-	       StockGetHandler &get_handler) noexcept
+StockItem *
+Stock::GetIdle() noexcept
 {
 	unsigned retry_unclean = idle.size();
 
@@ -298,23 +297,33 @@ Stock::GetIdle(StockRequest &request,
 			item.is_idle = false;
 #endif
 
-			/* destroy the request before invoking the
-			   handler, because the handler may destroy
-			   the memory pool, which my invalidate the
-			   request's memory region */
-			request.reset();
-
 			busy.push_front(item);
-
-			get_handler.OnStockItemReady(item);
-			return true;
+			return &item;
 		}
 
 		delete &item;
 	}
 
 	ScheduleCheckEmpty();
-	return false;
+	return nullptr;
+}
+
+bool
+Stock::GetIdle(StockRequest &request,
+	       StockGetHandler &get_handler) noexcept
+{
+	auto *item = GetIdle();
+	if (item == nullptr)
+		return false;
+
+
+	/* destroy the request before invoking the handler, because
+	   the handler may destroy the memory pool, which may
+	   invalidate the request's memory region */
+	request.reset();
+
+	get_handler.OnStockItemReady(*item);
+	return true;
 }
 
 void

@@ -244,6 +244,8 @@ private:
 			UnscheduleCleanup();
 	}
 
+	StockItem *GetIdle() noexcept;
+
 	/**
 	 * @param request a request that shall be destroyed before
 	 * invoking the handler (to avoid use-after-free bugs)
