@@ -18,6 +18,15 @@ if get_option('coroutines')
   )
 
   executable(
+    'CoSleepMirror',
+    'CoSleepMirror.cxx',
+    include_directories: inc,
+    dependencies: [
+      was_async_dep,
+    ],
+  )
+
+  executable(
     'Json',
     'Json.cxx',
     include_directories: inc,
