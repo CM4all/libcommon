@@ -35,7 +35,7 @@
 #include "GetHandler.hxx"
 #include "util/Cancellable.hxx"
 
-#include <assert.h>
+#include <cassert>
 
 inline
 Stock::Waiting::Waiting(Stock &_stock, StockRequest &&_request,

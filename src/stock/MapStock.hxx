@@ -39,6 +39,7 @@
 
 #include <boost/intrusive/unordered_set.hpp>
 
+#include <cassert>
 #include <cstddef>
 
 /**

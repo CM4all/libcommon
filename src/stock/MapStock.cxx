@@ -34,8 +34,6 @@
 #include "util/djbhash.h"
 #include "util/DeleteDisposer.hxx"
 
-#include <assert.h>
-
 inline size_t
 StockMap::Item::KeyHasher(const char *key) noexcept
 {
