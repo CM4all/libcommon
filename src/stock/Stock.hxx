@@ -43,6 +43,7 @@
 
 #include <boost/intrusive/list.hpp>
 
+#include <cstddef>
 #include <string>
 
 class Stock;
@@ -73,13 +74,13 @@ class Stock {
 	 * are requested, they are put into the #waiting list, which gets
 	 * checked as soon as Put() is called.
 	 */
-	const unsigned limit;
+	const std::size_t limit;
 
 	/**
 	 * The maximum number of permanent idle items.  If there are more
 	 * than that, a timer will incrementally kill excess items.
 	 */
-	const unsigned max_idle;
+	const std::size_t max_idle;
 
 	const Event::Duration clear_interval;
 
@@ -110,7 +111,7 @@ class Stock {
 
 	ItemList busy;
 
-	unsigned num_create = 0;
+	std::size_t num_create = 0;
 
 	struct Waiting final
 		: boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
@@ -149,7 +150,7 @@ public:
 	 */
 	gcc_nonnull(4)
 	Stock(EventLoop &event_loop, StockClass &cls,
-	      const char *name, unsigned limit, unsigned max_idle,
+	      const char *name, std::size_t limit, std::size_t max_idle,
 	      Event::Duration _clear_interval,
 	      StockHandler *handler=nullptr) noexcept;
 

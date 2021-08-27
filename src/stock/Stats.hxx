@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 struct StockStats {
-	unsigned busy, idle;
+	std::size_t busy, idle;
 };

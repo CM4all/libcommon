@@ -120,7 +120,7 @@ Stock::CleanupEventCallback() noexcept
 
 	/* destroy one third of the idle items */
 
-	for (unsigned i = (idle.size() - max_idle + 2) / 3; i > 0; --i)
+	for (std::size_t i = (idle.size() - max_idle + 2) / 3; i > 0; --i)
 		idle.pop_front_and_dispose(DeleteDisposer());
 
 	/* schedule next cleanup */
@@ -175,7 +175,7 @@ Stock::RetryWaiting() noexcept
 
 	/* if we're below the limit, create a bunch of new items */
 
-	for (unsigned i = limit - busy.size() - num_create;
+	for (std::size_t i = limit - busy.size() - num_create;
 	     busy.size() + num_create < limit && i > 0 && !waiting.empty();
 	     --i) {
 		auto &w = waiting.front();
@@ -234,7 +234,7 @@ Stock::ClearEventCallback() noexcept
  */
 
 Stock::Stock(EventLoop &event_loop, StockClass &_cls,
-	     const char *_name, unsigned _limit, unsigned _max_idle,
+	     const char *_name, std::size_t _limit, std::size_t _max_idle,
 	     Event::Duration _clear_interval,
 	     StockHandler *_handler) noexcept
 	:cls(_cls),
@@ -271,7 +271,7 @@ Stock::~Stock() noexcept
 StockItem *
 Stock::GetIdle() noexcept
 {
-	unsigned retry_unclean = idle.size();
+	std::size_t retry_unclean = idle.size();
 
 	auto i = idle.begin();
 	const auto end = idle.end();

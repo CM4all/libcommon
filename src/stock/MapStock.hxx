@@ -39,6 +39,8 @@
 
 #include <boost/intrusive/unordered_set.hpp>
 
+#include <cstddef>
+
 /**
  * A hash table of any number of Stock objects, each with a different
  * URI.
@@ -103,12 +105,12 @@ class StockMap : StockHandler {
 	/**
 	 * The maximum number of items in each stock.
 	 */
-	const unsigned limit;
+	const std::size_t limit;
 
 	/**
 	 * The maximum number of permanent idle items in each stock.
 	 */
-	const unsigned max_idle;
+	const std::size_t max_idle;
 
 	const Event::Duration clear_interval;
 
@@ -119,7 +121,7 @@ class StockMap : StockHandler {
 
 public:
 	StockMap(EventLoop &_event_loop, StockClass &_cls,
-		 unsigned _limit, unsigned _max_idle,
+		 std::size_t _limit, std::size_t _max_idle,
 		 Event::Duration _clear_interval) noexcept
 		:event_loop(_event_loop), cls(_cls),
 		 limit(_limit), max_idle(_max_idle),
