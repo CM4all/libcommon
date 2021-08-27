@@ -224,6 +224,15 @@ public:
 
 private:
 	/**
+	 * Determine the number of "active" items, i.e. the busy items
+	 * and the ones being created (#num_create).  This number is
+	 * used to compare with the configured #limit.
+	 */
+	std::size_t GetActiveCount() const noexcept {
+		return busy.size() + num_create;
+	}
+
+	/**
 	 * Check if the stock has become empty, and invoke the handler.
 	 */
 	void CheckEmpty() noexcept;

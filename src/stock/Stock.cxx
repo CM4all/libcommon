@@ -175,8 +175,8 @@ Stock::RetryWaiting() noexcept
 
 	/* if we're below the limit, create a bunch of new items */
 
-	for (std::size_t i = limit - busy.size() - num_create;
-	     busy.size() + num_create < limit && i > 0 && !waiting.empty();
+	for (std::size_t i = limit - GetActiveCount();
+	     GetActiveCount() < limit && i > 0 && !waiting.empty();
 	     --i) {
 		auto &w = waiting.front();
 		waiting.pop_front();
@@ -192,7 +192,7 @@ void
 Stock::ScheduleRetryWaiting() noexcept
 {
 	if (limit > 0 && !waiting.empty() &&
-	    busy.size() - num_create < limit)
+	    GetActiveCount() < limit)
 		retry_event.Schedule();
 }
 
@@ -351,7 +351,7 @@ Stock::Get(StockRequest request,
 	if (GetIdle(request, get_handler))
 		return;
 
-	if (limit > 0 && busy.size() + num_create >= limit) {
+	if (limit > 0 && GetActiveCount() >= limit) {
 		/* item limit reached: wait for an item to return */
 		auto w = new Waiting(*this, std::move(request),
 				     get_handler, cancel_ptr);
