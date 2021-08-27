@@ -268,7 +268,7 @@ Stock::~Stock() noexcept
 	ClearIdle();
 }
 
-StockItem *
+inline StockItem *
 Stock::GetIdle() noexcept
 {
 	std::size_t retry_unclean = idle.size();
@@ -308,7 +308,7 @@ Stock::GetIdle() noexcept
 	return nullptr;
 }
 
-bool
+inline bool
 Stock::GetIdle(StockRequest &request,
 	       StockGetHandler &get_handler) noexcept
 {
