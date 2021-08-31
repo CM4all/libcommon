@@ -42,6 +42,16 @@ StockMap::Item::KeyHasher(const char *key) noexcept
 	return djb_hash_string(key);
 }
 
+StockMap::StockMap(EventLoop &_event_loop, StockClass &_cls,
+		   std::size_t _limit, std::size_t _max_idle,
+		   Event::Duration _clear_interval) noexcept
+	:event_loop(_event_loop), cls(_cls),
+	 limit(_limit), max_idle(_max_idle),
+	 clear_interval(_clear_interval),
+	 map(Map::bucket_traits(buckets, N_BUCKETS))
+{
+}
+
 StockMap::~StockMap() noexcept
 {
 	map.clear_and_dispose(DeleteDisposer());
