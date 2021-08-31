@@ -35,6 +35,7 @@
 #include "Stock.hxx"
 #include "GetHandler.hxx"
 #include "co/Compat.hxx"
+#include "util/Cancellable.hxx"
 
 /**
  * Coroutine wrapper for Stock::Get().

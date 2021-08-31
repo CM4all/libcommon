@@ -41,6 +41,7 @@
 #include "stock/GetHandler.hxx"
 #include "event/DeferEvent.hxx"
 #include "util/AllocatedArray.hxx"
+#include "util/Cancellable.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringBuffer.hxx"

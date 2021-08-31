@@ -37,6 +37,29 @@
 
 #include <cassert>
 
+struct Stock::Waiting final
+	: boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
+	     Cancellable
+{
+
+	Stock &stock;
+
+	StockRequest request;
+
+	StockGetHandler &handler;
+
+	CancellablePointer &cancel_ptr;
+
+	Waiting(Stock &_stock, StockRequest &&_request,
+		StockGetHandler &_handler,
+		CancellablePointer &_cancel_ptr) noexcept;
+
+	void Destroy() noexcept;
+
+	/* virtual methods from class Cancellable */
+	void Cancel() noexcept override;
+};
+
 inline
 Stock::Waiting::Waiting(Stock &_stock, StockRequest &&_request,
 			StockGetHandler &_handler,

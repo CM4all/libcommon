@@ -38,7 +38,6 @@
 #include "event/CoarseTimerEvent.hxx"
 #include "event/DeferEvent.hxx"
 #include "io/Logger.hxx"
-#include "util/Cancellable.hxx"
 #include "util/DeleteDisposer.hxx"
 
 #include <boost/intrusive/list.hpp>
@@ -46,6 +45,7 @@
 #include <cstddef>
 #include <string>
 
+class CancellablePointer;
 class Stock;
 class StockClass;
 class StockGetHandler;
@@ -114,30 +114,10 @@ class Stock {
 
 	std::size_t num_create = 0;
 
-	struct Waiting final
-		: boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
-		  Cancellable {
-
-		Stock &stock;
-
-		StockRequest request;
-
-		StockGetHandler &handler;
-
-		CancellablePointer &cancel_ptr;
-
-		Waiting(Stock &_stock, StockRequest &&_request,
-			StockGetHandler &_handler,
-			CancellablePointer &_cancel_ptr) noexcept;
-
-		void Destroy() noexcept;
-
-		/* virtual methods from class Cancellable */
-		void Cancel() noexcept override;
-	};
-
+	struct Waiting;
 	using WaitingList =
 		boost::intrusive::list<Waiting,
+				       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>>,
 				       boost::intrusive::constant_time_size<false>>;
 
 	WaitingList waiting;

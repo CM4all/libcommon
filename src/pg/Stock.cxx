@@ -33,6 +33,7 @@
 #include "Stock.hxx"
 #include "AsyncConnection.hxx"
 #include "stock/Item.hxx"
+#include "util/Cancellable.hxx"
 
 #include <cassert>
 
