@@ -104,8 +104,9 @@ class Stock {
 	CoarseTimerEvent cleanup_event;
 	CoarseTimerEvent clear_event;
 
-	typedef boost::intrusive::list<StockItem,
-				       boost::intrusive::constant_time_size<true>> ItemList;
+	using ItemList =
+		boost::intrusive::list<StockItem,
+				       boost::intrusive::constant_time_size<true>>;
 
 	ItemList idle;
 
@@ -135,8 +136,9 @@ class Stock {
 		void Cancel() noexcept override;
 	};
 
-	typedef boost::intrusive::list<Waiting,
-				       boost::intrusive::constant_time_size<false>> WaitingList;
+	using WaitingList =
+		boost::intrusive::list<Waiting,
+				       boost::intrusive::constant_time_size<false>>;
 
 	WaitingList waiting;
 

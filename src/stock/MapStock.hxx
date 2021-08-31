@@ -92,10 +92,11 @@ class StockMap : StockHandler {
 		};
 	};
 
-	typedef boost::intrusive::unordered_set<Item,
+	using Map =
+		boost::intrusive::unordered_set<Item,
 						boost::intrusive::hash<Item::Hash>,
 						boost::intrusive::equal<Item::Equal>,
-						boost::intrusive::constant_time_size<false>> Map;
+						boost::intrusive::constant_time_size<false>>;
 
 	const Logger logger;
 
