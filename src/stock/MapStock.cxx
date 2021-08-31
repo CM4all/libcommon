@@ -89,5 +89,4 @@ StockMap::GetStock(const char *uri, void *request) noexcept
 		return item->stock;
 	} else
 		return i.first->stock;
-
 }

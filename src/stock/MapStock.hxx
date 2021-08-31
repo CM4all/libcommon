@@ -172,6 +172,9 @@ public:
 			i.stock.AddStats(data);
 	}
 
+	[[gnu::pure]]
+	Stock &GetStock(const char *uri, void *request) noexcept;
+
 	void Get(const char *uri, StockRequest &&request,
 		 StockGetHandler &handler,
 		 CancellablePointer &cancel_ptr) noexcept {
@@ -201,8 +204,6 @@ protected:
 	}
 
 private:
-	Stock &GetStock(const char *uri, void *request) noexcept;
-
 	/* virtual methods from class StockHandler */
 	void OnStockEmpty(Stock &stock) noexcept override;
 };
