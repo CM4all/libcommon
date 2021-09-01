@@ -214,8 +214,7 @@ Stock::RetryWaiting() noexcept
 void
 Stock::ScheduleRetryWaiting() noexcept
 {
-	if (limit > 0 && !waiting.empty() &&
-	    GetActiveCount() < limit)
+	if (!waiting.empty() && !IsFull())
 		retry_event.Schedule();
 }
 
@@ -374,7 +373,7 @@ Stock::Get(StockRequest request,
 	if (GetIdle(request, get_handler))
 		return;
 
-	if (limit > 0 && GetActiveCount() >= limit) {
+	if (IsFull()) {
 		/* item limit reached: wait for an item to return */
 		auto w = new Waiting(*this, std::move(request),
 				     get_handler, cancel_ptr);

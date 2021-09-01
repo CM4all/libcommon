@@ -163,6 +163,16 @@ public:
 	}
 
 	/**
+	 * @return true if the configured stock limit has been reached
+	 * and no more items can be created, false if this stock is
+	 * unlimited
+	 */
+	[[gnu::pure]]
+	bool IsFull() const noexcept {
+		return limit > 0 && GetActiveCount() >= limit;
+	}
+
+	/**
 	 * Obtain statistics.
 	 */
 	void AddStats(StockStats &data) const noexcept {
