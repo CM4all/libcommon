@@ -246,6 +246,13 @@ private:
 			UnscheduleCleanup();
 	}
 
+public:
+	/**
+	 * Borrow an idle item.
+	 *
+	 * @return an item or nullptr if there was no (usable) idle
+	 * item
+	 */
 	StockItem *GetIdle() noexcept;
 
 	/**
@@ -259,7 +266,6 @@ private:
 		       StockGetHandler &get_handler,
 		       CancellablePointer &cancel_ptr) noexcept;
 
-public:
 	void Get(StockRequest request,
 		 StockGetHandler &get_handler,
 		 CancellablePointer &cancel_ptr) noexcept;
