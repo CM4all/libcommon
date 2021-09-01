@@ -95,6 +95,9 @@ MultiClient::Connect()
 {
 	auto [result, for_child] = WasSocket::CreatePair();
 	Connect(std::move(for_child));
+
+	result.input.SetNonBlocking();
+	result.output.SetNonBlocking();
 	return std::move(result);
 }
 

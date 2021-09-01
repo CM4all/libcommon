@@ -64,6 +64,9 @@ public:
 		return event.GetEventLoop();
 	}
 
+	/**
+	 * @return a #WasSocket with input/output in non-blocking mode
+	 */
 	WasSocket Connect();
 
 private:
