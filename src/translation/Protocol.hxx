@@ -1097,6 +1097,11 @@ enum class TranslationCommand : uint16_t {
 	 * path.
 	 */
 	AUTO_BROTLI_PATH = 230,
+
+	/**
+	 * Enable "transparent" mode for #CHAIN.
+	 */
+	TRANSPARENT_CHAIN = 231,
 };
 
 struct TranslationHeader {

@@ -169,6 +169,7 @@ TranslateResponse::Clear()
 #endif
 #if TRANSLATION_ENABLE_HTTP
 	tiny_image = false;
+	transparent_chain = false;
 	break_chain = false;
 	dump_headers = false;
 #endif
@@ -400,6 +401,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
 #if TRANSLATION_ENABLE_HTTP
 	tiny_image = src.tiny_image;
+	transparent_chain = src.transparent_chain;
 	break_chain = src.break_chain;
 	dump_headers = src.dump_headers;
 #endif

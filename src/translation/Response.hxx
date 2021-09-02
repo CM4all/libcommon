@@ -404,6 +404,7 @@ struct TranslateResponse {
 #if TRANSLATION_ENABLE_HTTP
 	bool tiny_image;
 
+	bool transparent_chain;
 	bool break_chain;
 
 	bool dump_headers;

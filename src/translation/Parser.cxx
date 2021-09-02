@@ -3742,6 +3742,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("misplaced AUTO_BROTLI_PATH packet");
 #endif
 		return;
+
+	case TranslationCommand::TRANSPARENT_CHAIN:
+#if TRANSLATION_ENABLE_HTTP
+		if (!payload.empty())
+			throw std::runtime_error("malformed TRANSPARENT_CHAIN packet");
+
+		if (response.chain == nullptr)
+			throw std::runtime_error("TRANSPARENT_CHAIN without CHAIN");
+
+		if (response.transparent_chain)
+			throw std::runtime_error("duplicate TRANSPARENT_CHAIN packet");
+
+		response.transparent_chain = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

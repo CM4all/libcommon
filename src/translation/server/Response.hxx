@@ -1421,6 +1421,10 @@ public:
 		return StringPacket(TranslationCommand::CHAIN, value...);
 	}
 
+	auto &TransparentChain() noexcept {
+		return Packet(TranslationCommand::TRANSPARENT_CHAIN);
+	}
+
 	auto &BreakChain() noexcept {
 		return Packet(TranslationCommand::BREAK_CHAIN);
 	}
