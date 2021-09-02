@@ -430,9 +430,9 @@ public:
 		return Packet(TranslationCommand::FILE_NOT_FOUND, payload);
 	}
 
-	template<typename P>
-	auto &Session(P payload) noexcept {
-		return Packet(TranslationCommand::SESSION, payload);
+	template<typename... Types>
+	auto &Session(Types... value) noexcept {
+		return StringPacket(TranslationCommand::SESSION, value...);
 	}
 
 	template<typename... Types>
@@ -460,14 +460,15 @@ public:
 		return MultiPacket(TranslationCommand::TOKEN_AUTH, params...);
 	}
 
-	template<typename P>
-	auto &RecoverSession(P payload) noexcept {
-		return Packet(TranslationCommand::RECOVER_SESSION, payload);
+	template<typename... Types>
+	auto &RecoverSession(Types... value) noexcept {
+		return StringPacket(TranslationCommand::RECOVER_SESSION,
+				    value...);
 	}
 
-	template<typename P>
-	auto &Check(P payload) noexcept {
-		return Packet(TranslationCommand::CHECK, payload);
+	template<typename... Types>
+	auto Check(Types... value) noexcept {
+		return StringPacket(TranslationCommand::CHECK, value...);
 	}
 
 	template<typename... Params>
@@ -1415,9 +1416,9 @@ public:
 		return PacketT(TranslationCommand::EXPIRES_RELATIVE, seconds);
 	}
 
-	template<typename P>
-	auto &Chain(P payload) noexcept {
-		return Packet(TranslationCommand::CHAIN, payload);
+	template<typename... Types>
+	auto &Chain(Types... value) noexcept {
+		return StringPacket(TranslationCommand::CHAIN, value...);
 	}
 
 	auto &BreakChain() noexcept {
