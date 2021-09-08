@@ -51,6 +51,8 @@ class StockMap : StockHandler {
 		: boost::intrusive::unordered_set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
 		Stock stock;
 
+		bool sticky = false;
+
 		template<typename... Args>
 		explicit Item(Args&&... args) noexcept:stock(std::forward<Args>(args)...) {}
 
@@ -174,6 +176,12 @@ public:
 
 	[[gnu::pure]]
 	Stock &GetStock(const char *uri, void *request) noexcept;
+
+	/**
+	 * Set the "sticky" flag.  Sticky stocks will not be deleted
+	 * when they become empty.
+	 */
+	void SetSticky(Stock &stock, bool sticky) noexcept;
 
 	void Get(const char *uri, StockRequest &&request,
 		 StockGetHandler &handler,

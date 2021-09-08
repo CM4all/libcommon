@@ -68,6 +68,8 @@ void
 StockMap::OnStockEmpty(Stock &stock) noexcept
 {
 	auto &item = Item::Cast(stock);
+	if (item.sticky)
+		return;
 
 	logger.Format(5, "hstock(%p) remove empty stock(%p, '%s')",
 		      (const void *)this, (const void *)&stock, stock.GetName());
@@ -89,4 +91,14 @@ StockMap::GetStock(const char *uri, void *request) noexcept
 		return item->stock;
 	} else
 		return i.first->stock;
+}
+
+void
+StockMap::SetSticky(Stock &stock, bool sticky) noexcept
+{
+	auto &item = Item::Cast(stock);
+	if (!sticky && stock.IsEmpty())
+		Erase(item);
+
+	item.sticky = sticky;
 }
