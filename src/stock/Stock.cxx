@@ -459,10 +459,10 @@ Stock::ItemCreateError(StockGetHandler &get_handler,
 	assert(num_create > 0);
 	--num_create;
 
-	get_handler.OnStockItemError(ep);
-
 	ScheduleCheckEmpty();
 	ScheduleRetryWaiting();
+
+	get_handler.OnStockItemError(ep);
 }
 
 void
