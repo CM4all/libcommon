@@ -97,8 +97,10 @@ void
 StockMap::SetSticky(Stock &stock, bool sticky) noexcept
 {
 	auto &item = Item::Cast(stock);
-	if (!sticky && stock.IsEmpty())
+	if (!sticky && stock.IsEmpty()) {
 		Erase(item);
+		return;
+	}
 
 	item.sticky = sticky;
 }
