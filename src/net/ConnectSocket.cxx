@@ -33,21 +33,21 @@
 #include "ConnectSocket.hxx"
 #include "UniqueSocketDescriptor.hxx"
 #include "SocketAddress.hxx"
+#include "SocketError.hxx"
 #include "ToString.hxx"
-#include "system/Error.hxx"
 
 UniqueSocketDescriptor
 CreateConnectDatagramSocket(const SocketAddress address)
 {
 	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(address.GetFamily(), SOCK_DGRAM, 0))
-		throw MakeErrno("Failed to create socket");
+		throw MakeSocketError("Failed to create socket");
 
 	if (!fd.Connect(address)) {
-		const int e = errno;
+		const auto code = GetSocketError();
 		char buffer[256];
 		ToString(buffer, sizeof(buffer), address);
-		throw FormatErrno(e, "Failed to connect to %s", buffer);
+		throw FormatSocketError(code, "Failed to connect to %s", buffer);
 	}
 
 	return fd;
