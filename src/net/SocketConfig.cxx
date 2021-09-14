@@ -33,6 +33,7 @@
 #include "SocketConfig.hxx"
 #include "UniqueSocketDescriptor.hxx"
 #include "IPv4Address.hxx"
+#include "SocketError.hxx"
 #include "ToString.hxx"
 #include "system/Error.hxx"
 
@@ -62,7 +63,7 @@ SocketConfig::Create(int type) const
 
 	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(family, type, 0))
-		throw MakeErrno("Failed to create socket");
+		throw MakeSocketError("Failed to create socket");
 
 	const char *local_path = bind_address.GetLocalPath();
 	if (local_path != nullptr)
@@ -81,7 +82,7 @@ SocketConfig::Create(int type) const
 		fd.SetV6Only(false);
 
 	if (!interface.empty() && !fd.SetBindToDevice(interface.c_str()))
-		throw MakeErrno("Failed to set SO_BINDTODEVICE");
+		throw MakeSocketError("Failed to set SO_BINDTODEVICE");
 
 	/* always set SO_REUSEADDR for TCP sockets to allow quick
 	   restarts */
@@ -89,13 +90,13 @@ SocketConfig::Create(int type) const
 	   multiple processes to join the same group on the same port */
 	if ((is_tcp || !multicast_group.IsNull()) &&
 	    !fd.SetReuseAddress(true))
-		throw MakeErrno("Failed to set SO_REUSEADDR");
+		throw MakeSocketError("Failed to set SO_REUSEADDR");
 
 	if (reuse_port && !fd.SetReusePort())
-		throw MakeErrno("Failed to set SO_REUSEPORT");
+		throw MakeSocketError("Failed to set SO_REUSEPORT");
 
 	if (free_bind && !fd.SetFreeBind())
-		throw MakeErrno("Failed to set SO_FREEBIND");
+		throw MakeSocketError("Failed to set SO_FREEBIND");
 
 	if (mode != 0)
 		/* use fchmod() on the unbound socket to limit the
@@ -105,7 +106,7 @@ SocketConfig::Create(int type) const
 		fchmod(fd.Get(), mode);
 
 	if (!fd.Bind(bind_address)) {
-		const int e = errno;
+		const int code = GetSocketError();
 
 		char buffer[256];
 		const char *address_string =
@@ -113,7 +114,8 @@ SocketConfig::Create(int type) const
 			? buffer
 			: "?";
 
-		throw FormatErrno(e, "Failed to bind to %s", address_string);
+		throw FormatSocketError(code, "Failed to bind to %s",
+					address_string);
 	}
 
 	if (mode != 0 && local_path != nullptr && chmod(local_path, mode) < 0)
@@ -121,7 +123,7 @@ SocketConfig::Create(int type) const
 
 	if (!multicast_group.IsNull() &&
 	    !fd.AddMembership(multicast_group)) {
-		const int e = errno;
+		const int code = GetSocketError();
 
 		char buffer[256];
 		const char *address_string =
@@ -129,8 +131,9 @@ SocketConfig::Create(int type) const
 			? buffer
 			: "?";
 
-		throw FormatErrno(e, "Failed to join multicast group %s",
-				  address_string);
+		throw FormatSocketError(code,
+					"Failed to join multicast group %s",
+					address_string);
 	}
 
 	if (is_tcp) {
@@ -147,7 +150,7 @@ SocketConfig::Create(int type) const
 		fd.SetKeepAlive();
 
 	if (listen > 0 && !fd.Listen(listen))
-		throw MakeErrno("Failed to listen");
+		throw MakeSocketError("Failed to listen");
 
 	return fd;
 }
