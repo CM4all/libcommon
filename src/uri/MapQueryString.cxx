@@ -53,7 +53,7 @@ MapQueryString(std::string_view _src)
 		unescape_buffer.GrowDiscard(escaped_value.size);
 		char *value = unescape_buffer.data();
 		const char *end_value = UriUnescape(value, escaped_value);
-		if (value == nullptr)
+		if (end_value == nullptr)
 			throw std::runtime_error("Malformed URI escape");
 
 		m.emplace(name, StringView{value, end_value});
