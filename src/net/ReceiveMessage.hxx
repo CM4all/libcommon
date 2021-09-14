@@ -35,7 +35,7 @@
 #include "SocketDescriptor.hxx"
 #include "StaticSocketAddress.hxx"
 #include "MsgHdr.hxx"
-#include "system/Error.hxx"
+#include "SocketError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/ConstBuffer.hxx"
 
@@ -84,7 +84,7 @@ ReceiveMessage(SocketDescriptor s,
 
 	auto nbytes = recvmsg(s.Get(), &msg, flags);
 	if (nbytes < 0)
-		throw MakeErrno("recvmsg() failed");
+		throw MakeSocketError("recvmsg() failed");
 
 	if (nbytes == 0)
 		return {};
