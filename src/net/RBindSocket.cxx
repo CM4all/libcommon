@@ -31,10 +31,10 @@
  */
 
 #include "RBindSocket.hxx"
-#include "net/Resolver.hxx"
-#include "net/AddressInfo.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
-#include "system/Error.hxx"
+#include "AddressInfo.hxx"
+#include "Resolver.hxx"
+#include "SocketError.hxx"
+#include "UniqueSocketDescriptor.hxx"
 
 UniqueSocketDescriptor
 ResolveBindSocket(const char *host_and_port, int default_port,
@@ -45,10 +45,10 @@ ResolveBindSocket(const char *host_and_port, int default_port,
 
 	UniqueSocketDescriptor s;
 	if (!s.CreateNonBlock(ai.GetFamily(), ai.GetType(), ai.GetProtocol()))
-		throw MakeErrno("Failed to create socket");
+		throw MakeSocketError("Failed to create socket");
 
 	if (!s.Bind(ai))
-		throw MakeErrno("Failed to bind");
+		throw MakeSocketError("Failed to bind");
 
 	return s;
 }
