@@ -35,8 +35,8 @@
 #include "AllocatedSocketAddress.hxx"
 #include "AddressInfo.hxx"
 #include "Parser.hxx"
+#include "SocketError.hxx"
 #include "UniqueSocketDescriptor.hxx"
-#include "system/Error.hxx"
 
 #include <stdexcept>
 
@@ -47,18 +47,19 @@ ConnectWait(SocketDescriptor s, const SocketAddress address,
 	if (s.Connect(address))
 		return;
 
-	if (errno != EINPROGRESS)
-		throw MakeErrno("Failed to connect");
+	const auto connect_error = GetSocketError();
+	if (!IsSocketErrorConnectWouldBlock(connect_error))
+		throw MakeSocketError(connect_error, "Failed to connect");
 
 	int w = s.WaitWritable(timeout.count());
 	if (w < 0)
-		throw MakeErrno("Connect wait error");
+		throw MakeSocketError("Connect wait error");
 	else if (w == 0)
 		throw std::runtime_error("Connect timeout");
 
 	int err = s.GetError();
 	if (err != 0)
-		throw MakeErrno(err, "Failed to connect");
+		throw MakeSocketError(err, "Failed to connect");
 }
 
 UniqueSocketDescriptor
@@ -71,7 +72,7 @@ ResolveConnectSocket(const char *host_and_port, int default_port,
 
 	UniqueSocketDescriptor s;
 	if (!s.CreateNonBlock(ai.GetFamily(), ai.GetType(), ai.GetProtocol()))
-		throw MakeErrno("Failed to create socket");
+		throw MakeSocketError("Failed to create socket");
 
 	ConnectWait(s, ai, timeout);
 	return s;
@@ -86,7 +87,7 @@ ParseConnectSocket(const char *host_and_port, int default_port,
 						default_port, false);
 	UniqueSocketDescriptor s;
 	if (!s.CreateNonBlock(address.GetFamily(), socktype, 0))
-		throw MakeErrno("Failed to create socket");
+		throw MakeSocketError("Failed to create socket");
 
 	ConnectWait(s, address, timeout);
 	return s;
