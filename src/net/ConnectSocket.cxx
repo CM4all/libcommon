@@ -37,10 +37,10 @@
 #include "ToString.hxx"
 
 UniqueSocketDescriptor
-CreateConnectDatagramSocket(const SocketAddress address)
+CreateConnectSocket(const SocketAddress address, int type)
 {
 	UniqueSocketDescriptor fd;
-	if (!fd.CreateNonBlock(address.GetFamily(), SOCK_DGRAM, 0))
+	if (!fd.CreateNonBlock(address.GetFamily(), type, 0))
 		throw MakeSocketError("Failed to create socket");
 
 	if (!fd.Connect(address)) {
@@ -51,4 +51,10 @@ CreateConnectDatagramSocket(const SocketAddress address)
 	}
 
 	return fd;
+}
+
+UniqueSocketDescriptor
+CreateConnectDatagramSocket(const SocketAddress address)
+{
+	return CreateConnectSocket(address, SOCK_DGRAM);
 }
