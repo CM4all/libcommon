@@ -2217,6 +2217,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed WAS packet");
 
 		SetCgiAddress(ResourceAddress::Type::WAS, string_payload.data);
+		address_list = &cgi_address->address_list;
+		default_port = 0;
 		return;
 #else
 		break;
