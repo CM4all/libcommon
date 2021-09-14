@@ -32,7 +32,7 @@
 
 #include "SendMessage.hxx"
 #include "SocketDescriptor.hxx"
-#include "system/Error.hxx"
+#include "SocketError.hxx"
 
 /**
  * Wrapper for sendmsg().
@@ -44,7 +44,7 @@ SendMessage(SocketDescriptor s, const MessageHeader &mh, int flags)
 {
 	auto nbytes = sendmsg(s.Get(), &mh, flags);
 	if (nbytes < 0)
-		throw MakeErrno("sendmsg() failed");
+		throw MakeSocketError("sendmsg() failed");
 
 	return (std::size_t)nbytes;
 }
