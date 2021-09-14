@@ -33,7 +33,7 @@
 #include "MultiReceiveMessage.hxx"
 #include "SocketDescriptor.hxx"
 #include "MsgHdr.hxx"
-#include "system/Error.hxx"
+#include "SocketError.hxx"
 
 #include <sys/socket.h>
 
@@ -89,10 +89,11 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 		return false;
 
 	if (result < 0) {
-		if (errno == EAGAIN)
+		const auto code = GetSocketError();
+		if (IsSocketErrorReceiveWouldBlock(code))
 			return true;
 
-		throw MakeErrno("recvmmsg() failed");
+		throw MakeSocketError(code, "recvmmsg() failed");
 	}
 
 	n_datagrams = result;
