@@ -1,5 +1,5 @@
 project('CM4all libcommon', ['c', 'cpp'], version: '0.1',
-  meson_version: '>= 0.47',
+  meson_version: '>= 0.53',
   default_options: [
     'c_std=c11',
     'cpp_std=c++2a',
