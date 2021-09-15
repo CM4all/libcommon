@@ -107,10 +107,9 @@ class MultiRunServer final
 	IntrusiveList<Connection> connections;
 
 public:
-	MultiRunServer(EventLoop &event_loop,
+	MultiRunServer(EventLoop &event_loop, UniqueSocketDescriptor &&s,
 		       SimpleRequestHandler &_request_handler) noexcept
-		:server(event_loop, UniqueSocketDescriptor{STDIN_FILENO},
-			*this),
+		:server(event_loop, std::move(s), *this),
 		 request_handler(_request_handler) {}
 
 	~MultiRunServer() {
@@ -169,7 +168,8 @@ MultiRunServer::OnMultiWasNew(SimpleMultiServer &,
 static void
 RunMulti(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 {
-	MultiRunServer server{event_loop, request_handler};
+	MultiRunServer server{event_loop, UniqueSocketDescriptor{STDIN_FILENO},
+		request_handler};
 	event_loop.Dispatch();
 	server.CheckRethrowError();
 }
