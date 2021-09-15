@@ -1,5 +1,17 @@
 libwas_protocol = dependency('libcm4all-was-protocol', version: '>= 1.21')
 
+if get_variable('libcommon_enable_libsystemd', true)
+  libsystemd = dependency('libsystemd')
+  libsystemd = declare_dependency(
+    compile_args: ['-DHAVE_LIBSYSTEMD'],
+    dependencies: [
+      libsystemd,
+    ],
+  )
+else
+  libsystemd = dependency('', required: false)
+endif
+
 was_async = static_library(
   'was_async',
   'Control.cxx',
@@ -41,6 +53,7 @@ was_server_async = static_library(
   dependencies: [
     was_async_dep,
     libwas_protocol,
+    libsystemd,
     event_net_dep,
   ],
 )

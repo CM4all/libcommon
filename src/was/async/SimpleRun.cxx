@@ -39,6 +39,13 @@
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveList.hxx"
 
+#ifdef HAVE_LIBSYSTEMD
+#include "event/net/ServerSocket.hxx"
+#include "net/SocketAddress.hxx"
+#include <systemd/sd-daemon.h>
+#include <forward_list>
+#endif
+
 #include <unistd.h>
 
 namespace Was {
@@ -136,7 +143,7 @@ private:
 };
 
 class MultiRunServer final
-	: public SimpleMultiServerHandler
+	: SimpleMultiServerHandler
 {
 	SimpleMultiServer server;
 
@@ -186,6 +193,115 @@ RunMulti(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 	server.CheckRethrowError();
 }
 
+#ifdef HAVE_LIBSYSTEMD
+
+class MultiConnection final
+	: public AutoUnlinkIntrusiveListHook, SimpleMultiServerHandler
+{
+	SimpleMultiServer server;
+
+	ConnectionList connections;
+
+public:
+	MultiConnection(EventLoop &event_loop, UniqueSocketDescriptor &&s,
+			SimpleRequestHandler &_request_handler) noexcept
+		:server(event_loop, std::move(s), *this),
+		 connections(_request_handler) {}
+
+	auto &GetEventLoop() const noexcept {
+		return server.GetEventLoop();
+	}
+
+private:
+	/* virtual methods from class SimpleMultiServerHandler */
+	void OnMultiWasNew(SimpleMultiServer &,
+			   WasSocket &&socket) noexcept override {
+		connections.Add(GetEventLoop(), std::move(socket));
+	}
+
+	void OnMultiWasError(SimpleMultiServer &,
+			     std::exception_ptr) noexcept override {
+		// TODO log error?
+		delete this;
+	}
+
+	void OnMultiWasClosed(SimpleMultiServer &) noexcept override {
+		delete this;
+	}
+};
+
+class MultiConnectionList final
+{
+	SimpleRequestHandler &request_handler;
+
+	IntrusiveList<MultiConnection> connections;
+
+public:
+	explicit MultiConnectionList(SimpleRequestHandler &_request_handler) noexcept
+		:request_handler(_request_handler) {}
+
+	~MultiConnectionList() noexcept {
+		connections.clear_and_dispose(DeleteDisposer{});
+	}
+
+	void Add(EventLoop &event_loop, UniqueSocketDescriptor &&s) noexcept {
+		auto *connection = new MultiConnection(event_loop,
+						       std::move(s),
+						       request_handler);
+		connections.push_back(*connection);
+	}
+};
+
+class MultiListener final
+	: public AutoUnlinkIntrusiveListHook, ServerSocket
+{
+	MultiConnectionList connections;
+
+	std::exception_ptr error;
+
+public:
+	MultiListener(EventLoop &event_loop,
+		      UniqueSocketDescriptor &&_fd,
+		      SimpleRequestHandler &request_handler) noexcept
+		:ServerSocket(event_loop, std::move(_fd)),
+		 connections(request_handler) {}
+
+	void CheckRethrowError() const {
+		if (error)
+			std::rethrow_exception(error);
+	}
+
+private:
+	/* virtual methods from class ServerSocket */
+	void OnAccept(UniqueSocketDescriptor &&fd,
+		      SocketAddress) noexcept {
+		connections.Add(GetEventLoop(), std::move(fd));
+	}
+
+	void OnAcceptError(std::exception_ptr _error) noexcept {
+		error = std::move(_error);
+		GetEventLoop().Break();
+	}
+};
+
+static void
+RunSystemd(EventLoop &event_loop, unsigned n,
+	   SimpleRequestHandler &request_handler)
+{
+	std::forward_list<MultiListener> listeners;
+	for (unsigned i = 0; i < n; ++i)
+		listeners.emplace_front(event_loop,
+					UniqueSocketDescriptor(3 + i),
+					request_handler);
+
+	event_loop.Dispatch();
+
+	for (auto &i : listeners)
+		i.CheckRethrowError();
+}
+
+#endif
+
 } // anonymous namespace
 
 void
@@ -196,6 +312,14 @@ Run(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 		BIND_METHOD(event_loop, &EventLoop::Break),
 	};
 	shutdown_listener.Enable();
+
+#ifdef HAVE_LIBSYSTEMD
+	if (int n = sd_listen_fds(true); n > 0) {
+		/* launched with systemd socket activation */
+		RunSystemd(event_loop, n, request_handler);
+		return;
+	}
+#endif
 
 	/* if STDIN is a pipe, then we're running in "single" mode; if
 	   not, we assume this is "multi" mode */

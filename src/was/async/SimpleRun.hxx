@@ -46,6 +46,7 @@ class SimpleRequestHandler;
  *
  * - classic WAS (single WAS connection on fds 0,1,3)
  * - Multi-WAS (socket on fd=0)
+ * - systemd socket activation (listener socket on fd 3)
  *
  * This function does not return until the client closes the initial
  * connection.  Additionally, it installs handlers for SIGTERM, SIGINT
