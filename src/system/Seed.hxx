@@ -51,3 +51,18 @@ GenerateSeedSeq()
 	std::size_t n = nbytes / sizeof(buffer[0]);
 	return std::seed_seq(buffer, buffer + n);
 }
+
+/**
+ * Construct a random number engine which is initially seeded from
+ * /dev/urandom or getrandom().
+ */
+template<typename Engine>
+Engine
+MakeSeeded()
+{
+	/* this needs to be a local variable, because the engine
+	   constructor wants a lvalue reference, so a rvalue doesn't
+	   work */
+	auto seed_seq = GenerateSeedSeq<Engine>();
+	return Engine{seed_seq};
+}
