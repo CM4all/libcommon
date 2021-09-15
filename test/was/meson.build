@@ -3,7 +3,7 @@ executable(
   'Mirror.cxx',
   include_directories: inc,
   dependencies: [
-    was_async_dep,
+    was_server_async_dep,
   ],
 )
 
@@ -13,7 +13,7 @@ if get_option('coroutines')
     'CoMirror.cxx',
     include_directories: inc,
     dependencies: [
-      was_async_dep,
+      was_server_async_dep,
     ],
   )
 
@@ -22,7 +22,7 @@ if get_option('coroutines')
     'CoSleepMirror.cxx',
     include_directories: inc,
     dependencies: [
-      was_async_dep,
+      was_server_async_dep,
     ],
   )
 
@@ -32,7 +32,7 @@ if get_option('coroutines')
     include_directories: inc,
     dependencies: [
       uri_dep,
-      was_async_dep,
+      was_server_async_dep,
       boost_json_dep,
     ],
   )
@@ -43,7 +43,7 @@ if get_option('coroutines')
     include_directories: inc,
     dependencies: [
       uri_dep,
-      was_async_dep,
+      was_server_async_dep,
       boost_json_dep,
     ],
   )
