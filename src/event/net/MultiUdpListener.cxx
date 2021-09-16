@@ -61,8 +61,9 @@ try {
 		throw MakeErrno(event.GetSocket().GetError(),
 				"Socket error");
 
-	if (events & event.HANGUP)
-		handler.OnUdpHangup();
+	if ((events & event.HANGUP) != 0 &&
+	    !handler.OnUdpHangup())
+		return;
 
 	if (!multi.Receive(GetSocket())) {
 		handler.OnUdpDatagram(nullptr, nullptr, nullptr, -1);

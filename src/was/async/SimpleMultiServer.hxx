@@ -76,8 +76,9 @@ private:
 			   WritableBuffer<UniqueFileDescriptor> fds,
 			   SocketAddress address, int uid) override;
 
-	void OnUdpHangup() override {
+	bool OnUdpHangup() override {
 		handler.OnMultiWasClosed(*this);
+		return false;
 	}
 
 	void OnUdpError(std::exception_ptr e) noexcept override {

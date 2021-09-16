@@ -60,8 +60,12 @@ public:
 	/**
 	 * The peer has hung up the (SOCK_SEQPACKET) connection.  This
 	 * method can be used to throw an exception.
+	 *
+	 * @return false if the #UdpHandler was destroyed inside this method
 	 */
-	virtual void OnUdpHangup() {}
+	virtual bool OnUdpHangup() {
+		return true;
+	}
 
 	/**
 	 * An I/O error has occurred, and the socket is defunct.
