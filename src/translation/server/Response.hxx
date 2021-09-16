@@ -1062,6 +1062,12 @@ public:
 	public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 
+		auto Address(SocketAddress address) noexcept {
+			response.Packet(TranslationCommand::ADDRESS,
+					ConstBuffer<void>{address.GetAddress(), address.GetSize()});
+			return *this;
+		}
+
 		auto Parameter(std::string_view s) noexcept {
 			response.StringPacket(TranslationCommand::PAIR, s);
 			return *this;
