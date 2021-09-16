@@ -294,6 +294,8 @@ RunSystemd(EventLoop &event_loop, unsigned n,
 					UniqueSocketDescriptor(3 + i),
 					request_handler);
 
+	sd_notify(0, "READY=1");
+
 	event_loop.Dispatch();
 
 	for (auto &i : listeners)
