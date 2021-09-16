@@ -85,15 +85,9 @@ RunSingle(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 	connection_handler.CheckRethrowError();
 }
 
-class MultiRunServer final
-	: public SimpleMultiServerHandler, SimpleServerHandler
+class ConnectionList final
+	: SimpleServerHandler
 {
-	SimpleMultiServer server;
-
-	SimpleRequestHandler &request_handler;
-
-	std::exception_ptr error;
-
 	struct Connection final : AutoUnlinkIntrusiveListHook {
 		SimpleServer server;
 
@@ -104,42 +98,26 @@ class MultiRunServer final
 				_handler, _request_handler) {}
 	};
 
+	SimpleRequestHandler &request_handler;
+
 	IntrusiveList<Connection> connections;
 
 public:
-	MultiRunServer(EventLoop &event_loop, UniqueSocketDescriptor &&s,
-		       SimpleRequestHandler &_request_handler) noexcept
-		:server(event_loop, std::move(s), *this),
-		 request_handler(_request_handler) {}
+	explicit ConnectionList(SimpleRequestHandler &_request_handler) noexcept
+		:request_handler(_request_handler) {}
 
-	~MultiRunServer() {
+	~ConnectionList() noexcept {
 		connections.clear_and_dispose(DeleteDisposer{});
 	}
 
-	auto &GetEventLoop() const noexcept {
-		return server.GetEventLoop();
-	}
-
-	void CheckRethrowError() const {
-		if (error)
-			std::rethrow_exception(error);
+	void Add(EventLoop &event_loop, WasSocket &&socket) noexcept {
+		auto *connection = new Connection(event_loop,
+						  std::move(socket),
+						  *this, request_handler);
+		connections.push_back(*connection);
 	}
 
 private:
-	/* virtual methods from class SimpleMultiServerHandler */
-	void OnMultiWasNew(SimpleMultiServer &_server,
-			   WasSocket &&socket) noexcept override;
-
-	void OnMultiWasError(SimpleMultiServer &,
-			     std::exception_ptr _error) noexcept override {
-		error = std::move(_error);
-		GetEventLoop().Break();
-	}
-
-	void OnMultiWasClosed(SimpleMultiServer &) noexcept override {
-		GetEventLoop().Break();
-	}
-
 	/* virtual methods from class SimpleServerHandler */
 	void OnWasError(Was::SimpleServer &_connection,
 			std::exception_ptr) noexcept override {
@@ -156,14 +134,47 @@ private:
 	}
 };
 
-void
-MultiRunServer::OnMultiWasNew(SimpleMultiServer &,
-			      WasSocket &&socket) noexcept
+class MultiRunServer final
+	: public SimpleMultiServerHandler
 {
-	auto *connection = new Connection(GetEventLoop(), std::move(socket),
-					  *this, request_handler);
-	connections.push_back(*connection);
-}
+	SimpleMultiServer server;
+
+	std::exception_ptr error;
+
+	ConnectionList connections;
+
+public:
+	MultiRunServer(EventLoop &event_loop, UniqueSocketDescriptor &&s,
+		       SimpleRequestHandler &_request_handler) noexcept
+		:server(event_loop, std::move(s), *this),
+		 connections(_request_handler) {}
+
+	auto &GetEventLoop() const noexcept {
+		return server.GetEventLoop();
+	}
+
+	void CheckRethrowError() const {
+		if (error)
+			std::rethrow_exception(error);
+	}
+
+private:
+	/* virtual methods from class SimpleMultiServerHandler */
+	void OnMultiWasNew(SimpleMultiServer &,
+			   WasSocket &&socket) noexcept override {
+		connections.Add(GetEventLoop(), std::move(socket));
+	}
+
+	void OnMultiWasError(SimpleMultiServer &,
+			     std::exception_ptr _error) noexcept override {
+		error = std::move(_error);
+		GetEventLoop().Break();
+	}
+
+	void OnMultiWasClosed(SimpleMultiServer &) noexcept override {
+		GetEventLoop().Break();
+	}
+};
 
 static void
 RunMulti(EventLoop &event_loop, SimpleRequestHandler &request_handler)
