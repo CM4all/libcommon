@@ -48,7 +48,8 @@ class SimpleRequestHandler;
  * - Multi-WAS (socket on fd=0)
  *
  * This function does not return until the client closes the initial
- * connection.
+ * connection.  Additionally, it installs handlers for SIGTERM, SIGINT
+ * and SIGQUIT to initiate shutdown.
  *
  * @param event_loop the #EventLoop which is used to dispatch all
  * events

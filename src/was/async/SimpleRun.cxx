@@ -34,6 +34,7 @@
 #include "SimpleServer.hxx"
 #include "SimpleMultiServer.hxx"
 #include "event/Loop.hxx"
+#include "event/ShutdownListener.hxx"
 #include "util/Cast.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveList.hxx"
@@ -190,6 +191,12 @@ RunMulti(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 void
 Run(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 {
+	ShutdownListener shutdown_listener{
+		event_loop,
+		BIND_METHOD(event_loop, &EventLoop::Break),
+	};
+	shutdown_listener.Enable();
+
 	/* if STDIN is a pipe, then we're running in "single" mode; if
 	   not, we assume this is "multi" mode */
 	if (FileDescriptor{STDIN_FILENO}.IsPipe())
