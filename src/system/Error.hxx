@@ -35,6 +35,12 @@
 
 #include <stdio.h>
 
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic push
+// TODO: fix this warning properly
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
+
 template<typename... Args>
 static inline std::system_error
 FormatSystemError(std::error_code code, const char *fmt,
@@ -201,5 +207,9 @@ IsAccessDenied(const std::system_error &e) noexcept
 	return IsErrno(e, EACCES);
 #endif
 }
+
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif
