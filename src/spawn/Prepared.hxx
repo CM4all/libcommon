@@ -36,7 +36,7 @@
 #include "ResourceLimits.hxx"
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
-#include "io/FileDescriptor.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 
 #include <string>
 #include <vector>
@@ -81,7 +81,7 @@ struct PreparedChildProcess {
 	FileDescriptor stdin_fd = FileDescriptor::Undefined();
 	FileDescriptor stdout_fd = FileDescriptor::Undefined();
 	FileDescriptor stderr_fd = FileDescriptor::Undefined();
-	FileDescriptor control_fd = FileDescriptor::Undefined();
+	UniqueFileDescriptor control_fd;
 
 	/**
 	 * The umask for the new child process.  -1 means do not change
@@ -185,12 +185,13 @@ struct PreparedChildProcess {
 	void SetStdin(int fd) noexcept;
 	void SetStdout(int fd) noexcept;
 	void SetStderr(int fd) noexcept;
-	void SetControl(int fd) noexcept;
 
 	void SetStdin(UniqueFileDescriptor fd) noexcept;
 	void SetStdout(UniqueFileDescriptor fd) noexcept;
 	void SetStderr(UniqueFileDescriptor fd) noexcept;
-	void SetControl(UniqueFileDescriptor fd) noexcept;
+	void SetControl(UniqueFileDescriptor fd) noexcept {
+		control_fd = std::move(fd);
+	}
 
 	void SetStdin(UniqueSocketDescriptor fd) noexcept;
 	void SetStdout(UniqueSocketDescriptor fd) noexcept;

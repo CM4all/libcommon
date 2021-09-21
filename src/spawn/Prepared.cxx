@@ -56,8 +56,6 @@ PreparedChildProcess::~PreparedChildProcess() noexcept
 		stdout_fd.Close();
 	if (stdin_fd.Get() >= 3)
 		stdin_fd.Close();
-	if (control_fd.Get() >= 3)
-		control_fd.Close();
 }
 
 void
@@ -125,16 +123,6 @@ PreparedChildProcess::SetStderr(int fd) noexcept
 }
 
 void
-PreparedChildProcess::SetControl(int fd) noexcept
-{
-	assert(fd != control_fd.Get());
-
-	if (control_fd.Get() >= 3)
-		control_fd.Close();
-	control_fd = FileDescriptor{fd};
-}
-
-void
 PreparedChildProcess::SetStdin(UniqueFileDescriptor fd) noexcept
 {
 	SetStdin(fd.Steal());
@@ -150,12 +138,6 @@ void
 PreparedChildProcess::SetStderr(UniqueFileDescriptor fd) noexcept
 {
 	SetStderr(fd.Steal());
-}
-
-void
-PreparedChildProcess::SetControl(UniqueFileDescriptor fd) noexcept
-{
-	SetControl(fd.Steal());
 }
 
 void
@@ -179,7 +161,7 @@ PreparedChildProcess::SetStderr(UniqueSocketDescriptor fd) noexcept
 void
 PreparedChildProcess::SetControl(UniqueSocketDescriptor fd) noexcept
 {
-	SetControl(fd.Steal());
+	SetControl(UniqueFileDescriptor{fd.Release().ToFileDescriptor()});
 }
 
 const char *

@@ -536,7 +536,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::CONTROL:
-			p.SetControl(fds.Get().Steal());
+			p.SetControl(fds.Get());
 			break;
 
 		case SpawnExecCommand::TTY:
