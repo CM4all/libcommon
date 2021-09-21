@@ -254,6 +254,9 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 	s.CheckWriteFd(SpawnExecCommand::STDERR, p.stderr_fd);
 	s.CheckWriteFd(SpawnExecCommand::CONTROL, p.control_fd);
 
+	s.CheckWriteFd(SpawnExecCommand::RETURN_STDERR,
+		       p.return_stderr.ToFileDescriptor());
+
 	s.WriteOptionalString(SpawnExecCommand::STDERR_PATH, p.stderr_path);
 
 	if (p.priority != 0) {
@@ -295,7 +298,6 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 int
 SpawnServerClient::SpawnChildProcess(const char *name,
 				     PreparedChildProcess &&p,
-				     SocketDescriptor return_stderr,
 				     ExitListener *listener)
 {
 	assert(!shutting_down);
@@ -318,10 +320,6 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 		s.WriteString(name);
 
 		Serialize(s, p);
-
-		if (return_stderr.IsDefined())
-			s.CheckWriteFd(SpawnExecCommand::RETURN_STDERR,
-				       return_stderr.ToFileDescriptor());
 	} catch (SpawnPayloadTooLargeError) {
 		throw std::runtime_error("Spawn payload is too large");
 	}

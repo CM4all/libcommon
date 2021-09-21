@@ -42,15 +42,13 @@
 int
 LocalSpawnService::SpawnChildProcess(const char *name,
 				     PreparedChildProcess &&params,
-				     SocketDescriptor return_stderr,
 				     ExitListener *listener)
 {
 	if (params.uid_gid.IsEmpty())
 		params.uid_gid = config.default_uid_gid;
 
 	pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState(),
-					false, // TODO?
-					return_stderr);
+					false /* TODO? */);
 	registry.Add(pid, name, listener);
 	return pid;
 }

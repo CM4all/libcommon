@@ -48,7 +48,6 @@ public:
 		:config(_config), registry(_registry) {}
 
 	int SpawnChildProcess(const char *name, PreparedChildProcess &&params,
-			      SocketDescriptor return_stderr,
 			      ExitListener *listener) override;
 
 	void SetExitListener(int pid,

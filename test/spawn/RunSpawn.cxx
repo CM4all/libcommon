@@ -37,7 +37,6 @@
 #include "spawn/Mount.hxx"
 #include "spawn/Systemd.hxx"
 #include "system/Error.hxx"
-#include "net/SocketDescriptor.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
 #include "util/StringView.hxx"
@@ -153,8 +152,7 @@ try {
 		: CgroupState();
 
 	const auto pid = SpawnChildProcess(std::move(p), cgroup_state,
-					   geteuid() == 0,
-					   SocketDescriptor::Undefined());
+					   geteuid() == 0);
 
 	int status;
 	if (waitpid(pid, &status, 0) < 0)

@@ -36,20 +36,15 @@
 
 struct PreparedChildProcess;
 struct CgroupState;
-class SocketDescriptor;
 
 /**
  * Throws exception on error.
  *
  * @param is_sys_admin are we CAP_SYS_ADMIN?
  *
- * @param return_stderr if defined, then this is a socket where the
- * child process shall send the newly opened stderr file descriptor
- *
  * @return the process id
  */
 pid_t
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
-		  bool is_sys_admin,
-		  SocketDescriptor return_stderr);
+		  bool is_sys_admin);

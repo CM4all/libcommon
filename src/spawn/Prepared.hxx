@@ -37,6 +37,7 @@
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 
 #include <string>
 #include <vector>
@@ -82,6 +83,12 @@ struct PreparedChildProcess {
 	FileDescriptor stdout_fd = FileDescriptor::Undefined();
 	FileDescriptor stderr_fd = FileDescriptor::Undefined();
 	UniqueFileDescriptor control_fd;
+
+	/**
+	 * If defined, then this is a socket where the child process
+	 * shall send the newly opened stderr file descriptor.
+	 */
+	UniqueSocketDescriptor return_stderr;
 
 	/**
 	 * The umask for the new child process.  -1 means do not change

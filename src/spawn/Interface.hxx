@@ -33,7 +33,6 @@
 #pragma once
 
 struct PreparedChildProcess;
-class SocketDescriptor;
 class ExitListener;
 
 /**
@@ -49,7 +48,6 @@ public:
 	 */
 	virtual int SpawnChildProcess(const char *name,
 				      PreparedChildProcess &&params,
-				      SocketDescriptor return_stderr,
 				      ExitListener *listener) = 0;
 
 	virtual void SetExitListener(int pid, ExitListener *listener) noexcept = 0;

@@ -122,7 +122,6 @@ static void
 Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
-     SocketDescriptor return_stderr,
      const CgroupState &cgroup_state)
 try {
 	UnignoreSignals();
@@ -296,11 +295,11 @@ try {
 		}
 	}
 
-	if (return_stderr.IsDefined()) {
+	if (p.return_stderr.IsDefined()) {
 		assert(stderr_fd.IsDefined());
 
-		EasySendMessage(return_stderr, stderr_fd);
-		return_stderr.Close();
+		EasySendMessage(p.return_stderr, stderr_fd);
+		p.return_stderr.Close();
 	}
 
 	constexpr int CONTROL_FILENO = 3;
@@ -342,7 +341,6 @@ try {
 struct SpawnChildProcessContext {
 	PreparedChildProcess &&params;
 	const CgroupState &cgroup_state;
-	const SocketDescriptor return_stderr;
 
 	const char *path;
 
@@ -359,11 +357,9 @@ struct SpawnChildProcessContext {
 	UniqueFileDescriptor wait_pipe_r, wait_pipe_w;
 
 	SpawnChildProcessContext(PreparedChildProcess &&_params,
-				 const CgroupState &_cgroup_state,
-				 SocketDescriptor _return_stderr) noexcept
+				 const CgroupState &_cgroup_state) noexcept
 		:params(std::move(_params)),
 		 cgroup_state(_cgroup_state),
-		 return_stderr(_return_stderr),
 		 path(_params.Finish()) {}
 };
 
@@ -378,15 +374,13 @@ spawn_fn(void *_ctx)
 	Exec(ctx.path, std::move(ctx.params),
 	     std::move(ctx.userns_create_pipe_w),
 	     std::move(ctx.wait_pipe_r),
-	     ctx.return_stderr,
 	     ctx.cgroup_state);
 }
 
 pid_t
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
-		  bool is_sys_admin,
-		  SocketDescriptor return_stderr)
+		  bool is_sys_admin)
 {
 	int clone_flags = SIGCHLD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
@@ -399,8 +393,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		   cgroup won't be visible from his namespace */
 		clone_flags &= ~CLONE_NEWCGROUP;
 
-	SpawnChildProcessContext ctx(std::move(params), cgroup_state,
-				     return_stderr);
+	SpawnChildProcessContext ctx(std::move(params), cgroup_state);
 
 	UniqueFileDescriptor old_pidns;
 
