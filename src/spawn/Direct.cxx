@@ -41,6 +41,7 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
+#include "system/CoreScheduling.hxx"
 #include "system/IOPrio.hxx"
 #include "util/PrintException.hxx"
 #include "util/Sanitizer.hxx"
@@ -468,6 +469,15 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		   the child has lost all root namespace capabilities by
 		   entering a new user namespace */
 		ctx.params.rlimits.Apply(pid);
+
+		/* if this is a jailed process, we assume it's
+		   unprivileged and should not share a HT core with a
+		   process for a different user to avoid cross-HT
+		   attacks, so create a new core scheduling cookie */
+		/* failure to do so will be ignored silently, because
+		   the Linux kernel may not have that feature yet */
+		if (ctx.params.ns.mount.pivot_root != nullptr)
+			CoreScheduling::Create(pid);
 
 		/* after success (no exception was thrown), we send one byte
 		   to the pipe and close it, so the child knows everything's
