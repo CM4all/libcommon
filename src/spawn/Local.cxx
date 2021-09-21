@@ -36,7 +36,6 @@
 #include "Registry.hxx"
 #include "Prepared.hxx"
 #include "CgroupState.hxx"
-#include "system/Error.hxx"
 
 #include <utility>
 
@@ -52,9 +51,6 @@ LocalSpawnService::SpawnChildProcess(const char *name,
 	pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState(),
 					false, // TODO?
 					return_stderr);
-	if (pid < 0)
-		throw MakeErrno("clone() failed");
-
 	registry.Add(pid, name, listener);
 	return pid;
 }
