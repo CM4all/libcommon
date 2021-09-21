@@ -36,6 +36,7 @@
 #include "ResourceLimits.hxx"
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
+#include "io/FileDescriptor.hxx"
 
 #include <string>
 #include <vector>
@@ -77,7 +78,10 @@ struct PreparedChildProcess {
 
 	std::vector<const char *> args;
 	std::vector<const char *> env;
-	int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1, control_fd = -1;
+	FileDescriptor stdin_fd = FileDescriptor::Undefined();
+	FileDescriptor stdout_fd = FileDescriptor::Undefined();
+	FileDescriptor stderr_fd = FileDescriptor::Undefined();
+	FileDescriptor control_fd = FileDescriptor::Undefined();
 
 	/**
 	 * The umask for the new child process.  -1 means do not change

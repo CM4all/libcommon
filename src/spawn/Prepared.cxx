@@ -49,15 +49,15 @@ PreparedChildProcess::~PreparedChildProcess() noexcept
 	   close 0, 1 or 2; these are the standard file descriptors
 	   and the caller still needs them */
 
-	if (stdin_fd >= 3)
-		close(stdin_fd);
-	if (stdout_fd >= 3 && stdout_fd != stdin_fd)
-		close(stdout_fd);
-	if (stderr_fd >= 3 &&
+	if (stderr_fd.Get() >= 3 &&
 	    stderr_fd != stdout_fd && stderr_fd != stdin_fd)
-		close(stderr_fd);
-	if (control_fd >= 3)
-		close(control_fd);
+		stderr_fd.Close();
+	if (stdout_fd.Get() >= 3 && stdout_fd != stdin_fd)
+		stdout_fd.Close();
+	if (stdin_fd.Get() >= 3)
+		stdin_fd.Close();
+	if (control_fd.Get() >= 3)
+		control_fd.Close();
 }
 
 void
@@ -97,41 +97,41 @@ PreparedChildProcess::GetEnv(StringView name) const noexcept
 void
 PreparedChildProcess::SetStdin(int fd) noexcept
 {
-	assert(fd != stdin_fd);
+	assert(fd != stdin_fd.Get());
 
-	if (stdin_fd >= 3)
-		close(stdin_fd);
-	stdin_fd = fd;
+	if (stdin_fd.Get() >= 3)
+		stdin_fd.Close();
+	stdin_fd = FileDescriptor{fd};
 }
 
 void
 PreparedChildProcess::SetStdout(int fd) noexcept
 {
-	assert(fd != stdout_fd);
+	assert(fd != stdout_fd.Get());
 
-	if (stdout_fd >= 3)
-		close(stdout_fd);
-	stdout_fd = fd;
+	if (stdout_fd.Get() >= 3)
+		stdout_fd.Close();
+	stdout_fd = FileDescriptor{fd};
 }
 
 void
 PreparedChildProcess::SetStderr(int fd) noexcept
 {
-	assert(fd != stderr_fd);
+	assert(fd != stderr_fd.Get());
 
-	if (stderr_fd >= 3)
-		close(stderr_fd);
-	stderr_fd = fd;
+	if (stderr_fd.Get() >= 3)
+		stderr_fd.Close();
+	stderr_fd = FileDescriptor{fd};
 }
 
 void
 PreparedChildProcess::SetControl(int fd) noexcept
 {
-	assert(fd != control_fd);
+	assert(fd != control_fd.Get());
 
-	if (control_fd >= 3)
-		close(control_fd);
-	control_fd = fd;
+	if (control_fd.Get() >= 3)
+		control_fd.Close();
+	control_fd = FileDescriptor{fd};
 }
 
 void

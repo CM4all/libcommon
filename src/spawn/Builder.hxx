@@ -38,6 +38,7 @@
 #include "net/SendMessage.hxx"
 #include "IProtocol.hxx"
 #include "system/Error.hxx"
+#include "io/FileDescriptor.hxx"
 #include "io/Iovec.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"
@@ -55,7 +56,7 @@ class SpawnSerializer {
 
 	uint8_t buffer[capacity];
 
-	StaticArray<int, 8> fds;
+	StaticArray<FileDescriptor, 8> fds;
 
 public:
 	explicit SpawnSerializer(SpawnRequestCommand cmd) {
@@ -115,8 +116,8 @@ public:
 			WriteString(cmd, value);
 	}
 
-	void WriteFd(SpawnExecCommand cmd, int fd) {
-		assert(fd >= 0);
+	void WriteFd(SpawnExecCommand cmd, FileDescriptor fd) {
+		assert(fd.IsDefined());
 
 		if (fds.full())
 			throw SpawnPayloadTooLargeError();
@@ -125,8 +126,8 @@ public:
 		fds.push_back(fd);
 	}
 
-	void CheckWriteFd(SpawnExecCommand cmd, int fd) {
-		if (fd >= 0)
+	void CheckWriteFd(SpawnExecCommand cmd, FileDescriptor fd) {
+		if (fd.IsDefined())
 			WriteFd(cmd, fd);
 	}
 
@@ -134,14 +135,15 @@ public:
 		return {buffer, size};
 	}
 
-	ConstBuffer<int> GetFds() const {
+	ConstBuffer<FileDescriptor> GetFds() const noexcept {
 		return fds;
 	}
 };
 
 template<size_t MAX_FDS>
 static void
-Send(SocketDescriptor s, ConstBuffer<void> payload, ConstBuffer<int> fds)
+Send(SocketDescriptor s, ConstBuffer<void> payload,
+     ConstBuffer<FileDescriptor> fds)
 {
 	assert(s.IsDefined());
 
@@ -150,8 +152,8 @@ Send(SocketDescriptor s, ConstBuffer<void> payload, ConstBuffer<int> fds)
 	MessageHeader msg(ConstBuffer<struct iovec>(&vec, 1));
 
 	ScmRightsBuilder<MAX_FDS> b(msg);
-	for (int i : fds)
-		b.push_back(i);
+	for (const auto &i : fds)
+		b.push_back(i.Get());
 	b.Finish(msg);
 
 	SendMessage(s, msg, MSG_NOSIGNAL);

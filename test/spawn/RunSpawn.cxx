@@ -70,9 +70,9 @@ try {
 
 	p.exec_path = "/bin/bash";
 	p.args.emplace_back("bash");
-	p.stdin_fd = dup(STDIN_FILENO);
-	p.stdout_fd = dup(STDOUT_FILENO);
-	p.stderr_fd = dup(STDERR_FILENO);
+	p.stdin_fd = FileDescriptor{dup(STDIN_FILENO)};
+	p.stdout_fd = FileDescriptor{dup(STDOUT_FILENO)};
+	p.stderr_fd = FileDescriptor{dup(STDERR_FILENO)};
 
 	while (!args.empty() && *args.front() == '-') {
 		const char *arg = args.shift();

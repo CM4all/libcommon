@@ -92,7 +92,8 @@ SpawnServerClient::CheckOrAbort() noexcept
 }
 
 inline void
-SpawnServerClient::Send(ConstBuffer<void> payload, ConstBuffer<int> fds)
+SpawnServerClient::Send(ConstBuffer<void> payload,
+			ConstBuffer<FileDescriptor> fds)
 {
 	::Send<MAX_FDS>(event.GetSocket(), payload, fds);
 }
@@ -116,7 +117,7 @@ SpawnServerClient::Connect()
 
 	static constexpr SpawnRequestCommand cmd = SpawnRequestCommand::CONNECT;
 
-	const int remote_fd = remote_socket.Get();
+	const FileDescriptor remote_fd = remote_socket.ToFileDescriptor();
 
 	try {
 		Send(ConstBuffer<void>(&cmd, sizeof(cmd)), {&remote_fd, 1});
@@ -320,7 +321,7 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 
 		if (return_stderr.IsDefined())
 			s.CheckWriteFd(SpawnExecCommand::RETURN_STDERR,
-				       return_stderr.Get());
+				       return_stderr.ToFileDescriptor());
 	} catch (SpawnPayloadTooLargeError) {
 		throw std::runtime_error("Spawn payload is too large");
 	}

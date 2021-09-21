@@ -133,7 +133,7 @@ private:
 	 */
 	void CheckOrAbort() noexcept;
 
-	void Send(ConstBuffer<void> payload, ConstBuffer<int> fds);
+	void Send(ConstBuffer<void> payload, ConstBuffer<FileDescriptor> fds);
 	void Send(const SpawnSerializer &s);
 
 	void HandleExitMessage(SpawnPayload payload);

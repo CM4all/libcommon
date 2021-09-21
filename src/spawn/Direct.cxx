@@ -75,9 +75,9 @@ CheckedDup2(FileDescriptor oldfd, FileDescriptor newfd)
 }
 
 static void
-CheckedDup2(int oldfd, int newfd)
+CheckedDup2(FileDescriptor oldfd, int newfd)
 {
-	CheckedDup2(FileDescriptor(oldfd), FileDescriptor(newfd));
+	CheckedDup2(oldfd, FileDescriptor(newfd));
 }
 
 static void
@@ -138,19 +138,20 @@ try {
 				(per-account?) processes */
 			     : "800");
 
-	int stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
+	FileDescriptor stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
 #ifdef HAVE_LIBSYSTEMD
-	if (stdout_fd < 0 || (stderr_fd < 0 && p.stderr_path == nullptr)) {
+	if (!stdout_fd.IsDefined() ||
+	    (!stderr_fd.IsDefined() && p.stderr_path == nullptr)) {
 		/* if no log destination was specified, log to the systemd
 		   journal */
 		/* note: this must be done before NamespaceOptions::Apply(),
 		   because inside the new root, we don't have access to
 		   /run/systemd/journal/stdout */
 		int journal_fd = sd_journal_stream_fd(p.args.front(), LOG_INFO, true);
-		if (stdout_fd < 0)
-			stdout_fd = journal_fd;
-		if (stderr_fd < 0 && p.stderr_path == nullptr)
-			stderr_fd = journal_fd;
+		if (!stdout_fd.IsDefined())
+			stdout_fd = FileDescriptor{journal_fd};
+		if (!stderr_fd.IsDefined() && p.stderr_path == nullptr)
+			stderr_fd = FileDescriptor{journal_fd};
 	}
 #endif
 
@@ -286,21 +287,19 @@ try {
 		_exit(EXIT_FAILURE);
 	}
 
-	if (stderr_fd < 0 && p.stderr_path != nullptr) {
-		stderr_fd = open(p.stderr_path,
-				 O_CREAT|O_WRONLY|O_APPEND|O_CLOEXEC|O_NOCTTY,
-				 0600);
-		if (stderr_fd < 0) {
+	if (!stderr_fd.IsDefined() && p.stderr_path != nullptr) {
+		if (!stderr_fd.Open(p.stderr_path,
+				    O_CREAT|O_WRONLY|O_APPEND|O_CLOEXEC|O_NOCTTY,
+				    0600)) {
 			perror("Failed to open STDERR_PATH");
 			_exit(EXIT_FAILURE);
 		}
 	}
 
 	if (return_stderr.IsDefined()) {
-		assert(stderr_fd >= 0);
+		assert(stderr_fd.IsDefined());
 
-		EasySendMessage(return_stderr,
-				FileDescriptor(stderr_fd));
+		EasySendMessage(return_stderr, stderr_fd);
 		return_stderr.Close();
 	}
 
@@ -317,10 +316,10 @@ try {
 		setsid();
 
 	if (p.tty) {
-		assert(p.stdin_fd >= 0);
+		assert(p.stdin_fd.IsDefined());
 		assert(p.stdin_fd == p.stdout_fd);
 
-		if (ioctl(p.stdin_fd, TIOCSCTTY, nullptr) < 0) {
+		if (ioctl(p.stdin_fd.Get(), TIOCSCTTY, nullptr) < 0) {
 			perror("Failed to set the controlling terminal");
 			_exit(EXIT_FAILURE);
 		}
