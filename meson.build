@@ -153,6 +153,7 @@ subdir('src/net')
 subdir('src/event')
 subdir('src/event/net')
 subdir('src/event/net/cares')
+subdir('src/event/systemd')
 subdir('src/event/uring')
 
 subdir('src/avahi')
