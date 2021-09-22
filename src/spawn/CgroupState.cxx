@@ -41,6 +41,7 @@
 
 #include <cstdio>
 
+#include <fcntl.h>
 #include <sys/stat.h>
 
 static void
@@ -115,6 +116,35 @@ OpenProcCgroup(unsigned pid) noexcept
 	} else
 		return fopen("/proc/self/cgroup", "r");
 
+}
+
+[[gnu::pure]]
+static bool
+HasCgroupKill(const std::string &unified_mount,
+	      const std::string &group_path) noexcept
+{
+	assert(!group_path.empty());
+	assert(group_path.front() == '/');
+
+	UniqueFileDescriptor fd;
+	if (!fd.Open("/sys/fs/cgroup", O_PATH))
+		return false;
+
+	if (!unified_mount.empty()) {
+		UniqueFileDescriptor fd2;
+		if (!fd2.Open(fd, unified_mount.c_str(), O_PATH))
+			return false;
+
+		fd = std::move(fd2);
+	}
+
+	UniqueFileDescriptor group_fd;
+	if (!group_fd.Open(fd, group_path.c_str() + 1, O_PATH))
+		return false;
+
+	struct stat st;
+	return fstatat(group_fd.Get(), "cgroup.kill", &st, 0) == 0 &&
+		S_ISREG(st.st_mode);
 }
 
 CgroupState
@@ -216,7 +246,11 @@ CgroupState::FromProcess(unsigned pid) noexcept
 			}
 		}
 
+
 		state.mounts.emplace_front(unified_mount);
+
+		state.cgroup_kill = HasCgroupKill(state.mounts.front(),
+						  group_path);
 	}
 
 	state.group_path = std::move(group_path);

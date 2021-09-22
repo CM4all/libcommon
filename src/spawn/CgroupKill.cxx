@@ -40,6 +40,7 @@
 #include <array>
 
 #include <assert.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/inotify.h>
 
@@ -97,7 +98,20 @@ MakeCgroupEventsPath(const std::string &cgroup_path) noexcept
 	return cgroup_path + "/cgroup.events";
 }
 
+static UniqueFileDescriptor
+OpenCgroupKill(const CgroupState &state, FileDescriptor cgroup_fd)
+{
+	UniqueFileDescriptor fd;
+
+	if (state.cgroup_kill)
+		fd.Open(cgroup_fd, "cgroup.kill", O_WRONLY);
+
+	return fd;
+}
+
+inline
 CgroupKill::CgroupKill(EventLoop &event_loop,
+		       const CgroupState &state,
 		       const std::string &cgroup_path,
 		       UniqueFileDescriptor &&cgroup_fd,
 		       CgroupKillHandler &_handler)
@@ -107,6 +121,7 @@ CgroupKill::CgroupKill(EventLoop &event_loop,
 		       SocketDescriptor::FromFileDescriptor(inotify_fd)),
 	 cgroup_events_fd(OpenReadOnly(cgroup_fd, "cgroup.events")),
 	 cgroup_procs_fd(OpenReadOnly(cgroup_fd, "cgroup.procs")),
+	 cgroup_kill_fd(OpenCgroupKill(state, cgroup_fd)),
 	 send_term_event(event_loop, BIND_THIS_METHOD(OnSendTerm)),
 	 send_kill_event(event_loop, BIND_THIS_METHOD(OnSendKill)),
 	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout))
@@ -136,7 +151,7 @@ MakeCgroupUnifiedPath(const CgroupState &state, const char *name,
 CgroupKill::CgroupKill(EventLoop &event_loop, const CgroupState &state,
 		       const char *name, const char *session,
 		       CgroupKillHandler &_handler)
-	:CgroupKill(event_loop,
+	:CgroupKill(event_loop, state,
 		    MakeCgroupUnifiedPath(state, name, session),
 		    OpenUnifiedCgroup(state, name, session),
 		    _handler)
@@ -239,6 +254,10 @@ CgroupKill::OnSendKill() noexcept
 		return;
 
 	try {
+		if (cgroup_kill_fd.IsDefined() &&
+		    cgroup_kill_fd.Write("1", 1) == 1)
+			return;
+
 		KillCgroup(cgroup_procs_fd, SIGKILL);
 	} catch (...) {
 		Disable();

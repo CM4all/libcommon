@@ -61,13 +61,13 @@ class CgroupKill {
 	UniqueFileDescriptor inotify_fd;
 	SocketEvent inotify_event;
 
-	UniqueFileDescriptor cgroup_events_fd, cgroup_procs_fd;
+	UniqueFileDescriptor cgroup_events_fd, cgroup_procs_fd, cgroup_kill_fd;
 
 	DeferEvent send_term_event;
 	CoarseTimerEvent send_kill_event;
 	CoarseTimerEvent timeout_event;
 
-	CgroupKill(EventLoop &event_loop,
+	CgroupKill(EventLoop &event_loop, const CgroupState &state,
 		   const std::string &cgroup_path,
 		   UniqueFileDescriptor &&cgroup_fd,
 		   CgroupKillHandler &_handler);

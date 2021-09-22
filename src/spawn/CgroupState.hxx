@@ -61,6 +61,11 @@ struct CgroupState {
 	 */
 	bool memory_v2 = false;
 
+	/**
+	 * Does the kernel support "cgroup.kill"?
+	 */
+	bool cgroup_kill = false;
+
 	bool IsEnabled() const {
 		return !group_path.empty();
 	}
