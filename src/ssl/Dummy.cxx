@@ -52,8 +52,8 @@ MakeSelfIssuedDummyCert(const char *common_name)
 
 	X509_set_version(cert.get(), 2);
 	ASN1_INTEGER_set(X509_get_serialNumber(cert.get()), 1);
-	X509_gmtime_adj(X509_get_notBefore(cert.get()), 0);
-	X509_gmtime_adj(X509_get_notAfter(cert.get()), 60 * 60);
+	X509_gmtime_adj(X509_getm_notBefore(cert.get()), 0);
+	X509_gmtime_adj(X509_getm_notAfter(cert.get()), 60 * 60);
 
 	AddExt(*cert, NID_basic_constraints, "critical,CA:TRUE");
 	AddExt(*cert, NID_key_usage, "critical,keyCertSign");
