@@ -85,6 +85,7 @@ public:
 	 */
 	std::size_t Stop() noexcept {
 		buffer = {};
+		event.Cancel();
 		return position;
 	}
 
