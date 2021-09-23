@@ -44,8 +44,7 @@ namespace Was {
 
 SimpleInput::SimpleInput(EventLoop &event_loop, UniqueFileDescriptor pipe,
 			 SimpleInputHandler &_handler) noexcept
-	:event(event_loop, BIND_THIS_METHOD(OnPipeReady),
-	       SocketDescriptor::FromFileDescriptor(pipe.Release())),
+	:event(event_loop, BIND_THIS_METHOD(OnPipeReady), pipe.Release()),
 	 handler(_handler)
 {
 	event.ScheduleRead();

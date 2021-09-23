@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "SocketEvent.hxx"
+#include "PipeEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/StaticFifoBuffer.hxx"
 
@@ -54,7 +54,7 @@ public:
  * passed to the callback.
  */
 class PipeLineReader {
-	SocketEvent event;
+	PipeEvent event;
 
 	PipeLineReaderHandler &handler;
 
@@ -71,7 +71,7 @@ public:
 		       UniqueFileDescriptor fd,
 		       PipeLineReaderHandler &_handler) noexcept
 		:event(event_loop, BIND_THIS_METHOD(OnPipeReadable),
-		       SocketDescriptor::FromFileDescriptor(fd.Release())),
+		       fd.Release()),
 		 handler(_handler)
 	{
 		event.ScheduleRead();

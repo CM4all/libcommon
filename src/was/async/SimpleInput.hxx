@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "event/SocketEvent.hxx"
+#include "event/PipeEvent.hxx"
 
 #include <memory>
 
@@ -50,7 +50,7 @@ public:
 };
 
 class SimpleInput final {
-	SocketEvent event;
+	PipeEvent event;
 
 	SimpleInputHandler &handler;
 
@@ -81,7 +81,7 @@ public:
 
 private:
 	FileDescriptor GetPipe() const noexcept {
-		return event.GetSocket().ToFileDescriptor();
+		return event.GetFileDescriptor();
 	}
 
 	void OnPipeReady(unsigned events) noexcept;

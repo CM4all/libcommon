@@ -44,8 +44,7 @@ namespace Was {
 
 SimpleOutput::SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor pipe,
 			 SimpleOutputHandler &_handler) noexcept
-	:event(event_loop, BIND_THIS_METHOD(OnPipeReady),
-	       SocketDescriptor::FromFileDescriptor(pipe.Release())),
+	:event(event_loop, BIND_THIS_METHOD(OnPipeReady), pipe.Release()),
 	 handler(_handler)
 {
 	event.ScheduleImplicit();

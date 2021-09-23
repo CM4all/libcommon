@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "SocketEvent.hxx"
+#include "PipeEvent.hxx"
 #include "util/BindMethod.hxx"
 
 #include <assert.h>
@@ -47,7 +47,7 @@
  * called again.
  */
 class SignalEvent {
-	SocketEvent event;
+	PipeEvent event;
 
 	sigset_t mask;
 

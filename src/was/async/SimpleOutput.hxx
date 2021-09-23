@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "event/SocketEvent.hxx"
+#include "event/PipeEvent.hxx"
 #include "util/DisposableBuffer.hxx"
 
 class UniqueFileDescriptor;
@@ -45,7 +45,7 @@ public:
 };
 
 class SimpleOutput final {
-	SocketEvent event;
+	PipeEvent event;
 
 	SimpleOutputHandler &handler;
 
@@ -91,7 +91,7 @@ public:
 
 private:
 	FileDescriptor GetPipe() const noexcept {
-		return event.GetSocket().ToFileDescriptor();
+		return event.GetFileDescriptor();
 	}
 
 	void OnPipeReady(unsigned events) noexcept;

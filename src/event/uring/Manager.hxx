@@ -34,12 +34,12 @@
 
 #include "io/uring/Queue.hxx"
 #include "event/DeferEvent.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/PipeEvent.hxx"
 
 namespace Uring {
 
 class Manager final : public Queue {
-	SocketEvent event;
+	PipeEvent event;
 
 	/**
 	 * Responsible for invoking Queue::Submit() only once per
@@ -53,7 +53,7 @@ public:
 	explicit Manager(EventLoop &event_loop)
 		:Queue(1024, 0),
 		 event(event_loop, BIND_THIS_METHOD(OnReady),
-		       SocketDescriptor::FromFileDescriptor(GetFileDescriptor())),
+		       GetFileDescriptor()),
 		 defer_submit_event(event_loop,
 				    BIND_THIS_METHOD(DeferredSubmit))
 	{

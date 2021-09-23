@@ -43,8 +43,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 	auto w = buffer.Write();
 	assert(!w.empty());
 
-	auto fd = event.GetSocket().ToFileDescriptor();
-	auto nbytes = fd.Read(w.data, w.size);
+	auto nbytes = event.GetFileDescriptor().Read(w.data, w.size);
 	if (nbytes < 0 && errno == EAGAIN)
 		return;
 

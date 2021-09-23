@@ -33,7 +33,7 @@
 #pragma once
 
 #include "io/UniqueFileDescriptor.hxx"
-#include "event/SocketEvent.hxx"
+#include "event/PipeEvent.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
 
@@ -59,7 +59,7 @@ class CgroupKill {
 	CgroupKillHandler &handler;
 
 	UniqueFileDescriptor inotify_fd;
-	SocketEvent inotify_event;
+	PipeEvent inotify_event;
 
 	UniqueFileDescriptor cgroup_events_fd, cgroup_procs_fd, cgroup_kill_fd;
 

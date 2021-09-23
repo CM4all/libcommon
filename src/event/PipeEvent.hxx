@@ -30,54 +30,70 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SignalEvent.hxx"
-#include "system/Error.hxx"
+#pragma once
 
-#include <sys/signalfd.h>
-#include <unistd.h>
+#include "SocketEvent.hxx"
+#include "io/FileDescriptor.hxx"
 
-SignalEvent::SignalEvent(EventLoop &loop, Callback _callback) noexcept
-	:event(loop, BIND_THIS_METHOD(EventCallback)), callback(_callback)
-{
-	sigemptyset(&mask);
-}
+/**
+ * A variant of #SocketEvent for pipes (and other kinds of
+ * #FileDescriptor which can be used with epoll).
+ */
+class PipeEvent final {
+	SocketEvent event;
 
-void
-SignalEvent::Enable()
-{
-	assert(!IsDefined());
+public:
+	template<typename C>
+	PipeEvent(EventLoop &event_loop, C callback,
+		  FileDescriptor fd=FileDescriptor::Undefined()) noexcept
+		:event(event_loop, callback,
+		       SocketDescriptor::FromFileDescriptor(fd)) {}
 
-	int fd = signalfd(-1, &mask, SFD_NONBLOCK|SFD_CLOEXEC);
-	if (fd < 0)
-		throw MakeErrno("signalfd() failed");
-
-	event.Open(FileDescriptor{fd});
-	event.ScheduleRead();
-
-	sigprocmask(SIG_BLOCK, &mask, nullptr);
-}
-
-void
-SignalEvent::Disable() noexcept
-{
-	if (!IsDefined())
-		return;
-
-	sigprocmask(SIG_UNBLOCK, &mask, nullptr);
-
-	event.Close();
-}
-
-void
-SignalEvent::EventCallback(unsigned) noexcept
-{
-	struct signalfd_siginfo info;
-	ssize_t nbytes = event.GetFileDescriptor().Read(&info, sizeof(info));
-	if (nbytes <= 0) {
-		// TODO: log error?
-		Disable();
-		return;
+	EventLoop &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
 	}
 
-	callback(info.ssi_signo);
-}
+	bool IsDefined() const noexcept {
+		return event.IsDefined();
+	}
+
+	FileDescriptor GetFileDescriptor() const noexcept {
+		return event.GetSocket().ToFileDescriptor();
+	}
+
+	void Open(FileDescriptor fd) noexcept {
+		event.Open(SocketDescriptor::FromFileDescriptor(fd));
+	}
+
+	void Close() noexcept {
+		event.Close();
+	}
+
+	bool Schedule(unsigned flags) noexcept {
+		return event.Schedule(flags);
+	}
+
+	void Cancel() noexcept {
+		event.Cancel();
+	}
+
+	bool ScheduleRead() noexcept {
+		return event.ScheduleRead();
+	}
+
+	bool ScheduleWrite() noexcept {
+		return event.ScheduleWrite();
+	}
+
+	void CancelRead() noexcept {
+		event.CancelRead();
+	}
+
+	void CancelWrite() noexcept {
+		event.CancelWrite();
+	}
+
+	void ScheduleImplicit() noexcept {
+		event.ScheduleImplicit();
+	}
+};
