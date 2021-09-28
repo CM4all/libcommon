@@ -69,6 +69,9 @@ public:
 
 /**
  * Web Application Socket protocol, control channel library.
+ *
+ * This class does not "own" the socket and its destructor does not
+ * close the socket.  To do that manually, call the Close() method.
  */
 class Control final : BufferedSocketHandler {
 	BufferedSocket socket;
@@ -93,6 +96,10 @@ public:
 
 	bool IsDefined() const noexcept {
 		return socket.IsValid();
+	}
+
+	void Close() noexcept {
+		socket.Close();
 	}
 
 	bool Send(enum was_command cmd,

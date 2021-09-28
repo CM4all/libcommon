@@ -105,6 +105,10 @@ public:
 		     SimpleServerHandler &_handler,
 		     SimpleRequestHandler &_request_handler) noexcept;
 
+	~SimpleServer() noexcept {
+		control.Close();
+	}
+
 	auto &GetEventLoop() const noexcept {
 		return control.GetEventLoop();
 	}
