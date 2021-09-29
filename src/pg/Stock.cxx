@@ -97,6 +97,7 @@ private:
 		assert(!idle);
 
 		idle = true;
+		unclean = connection.IsCancelling();
 		return connected;
 	}
 
@@ -116,7 +117,8 @@ private:
 	}
 
 	void OnIdle() override {
-		// TODO?
+		if (unclean)
+			ClearUncleanFlag();
 	}
 
 	void OnDisconnect() noexcept override {

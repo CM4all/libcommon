@@ -216,6 +216,10 @@ public:
 
 	void Disconnect() noexcept;
 
+	bool IsCancelling() const noexcept {
+		return cancelling;
+	}
+
 	/**
 	 * Returns true when no asynchronous query is in progress.  In
 	 * this case, SendQuery() may be called.
