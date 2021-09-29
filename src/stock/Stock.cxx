@@ -303,11 +303,17 @@ Stock::GetIdle() noexcept
 
 		i = idle.erase(i);
 
-		if (item.unclean && retry_unclean > 0) {
+		if (item.unclean) {
 			/* postpone reusal of this item until it's "clean" */
 			// TODO: replace this kludge
-			--retry_unclean;
+
 			idle.push_back(item);
+
+			if (retry_unclean == 0)
+				/* give up - we've tried all */
+				return nullptr;
+
+			--retry_unclean;
 			continue;
 		}
 
