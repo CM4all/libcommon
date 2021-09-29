@@ -293,29 +293,20 @@ Stock::~Stock() noexcept
 StockItem *
 Stock::GetIdle() noexcept
 {
-	std::size_t retry_unclean = idle.size();
-
 	auto i = idle.begin();
 	const auto end = idle.end();
 	while (i != end) {
 		StockItem &item = *i;
 		assert(item.is_idle);
 
-		i = idle.erase(i);
-
 		if (item.unclean) {
 			/* postpone reusal of this item until it's "clean" */
 			// TODO: replace this kludge
-
-			idle.push_back(item);
-
-			if (retry_unclean == 0)
-				/* give up - we've tried all */
-				return nullptr;
-
-			--retry_unclean;
+			++i;
 			continue;
 		}
+
+		i = idle.erase(i);
 
 		if (idle.size() == max_idle)
 			UnscheduleCleanup();
