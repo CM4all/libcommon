@@ -78,4 +78,11 @@ UrlSafeBase64(std::string_view src) noexcept;
  */
 [[gnu::pure]]
 AllocatedArray<std::byte>
+DecodeBase64(std::string_view src) noexcept;
+
+/**
+ * @return the decoded string or a nulled instance on error
+ */
+[[gnu::pure]]
+AllocatedArray<std::byte>
 DecodeUrlSafeBase64(std::string_view src) noexcept;

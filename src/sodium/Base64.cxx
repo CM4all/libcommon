@@ -85,6 +85,12 @@ SodiumDecodeBase64(std::string_view src, int variant) noexcept
 }
 
 AllocatedArray<std::byte>
+DecodeBase64(std::string_view src) noexcept
+{
+	return SodiumDecodeBase64(src, sodium_base64_VARIANT_ORIGINAL);
+}
+
+AllocatedArray<std::byte>
 DecodeUrlSafeBase64(std::string_view src) noexcept
 {
 	return SodiumDecodeBase64(src,
