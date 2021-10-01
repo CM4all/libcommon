@@ -6,6 +6,7 @@ test(
   'TestSsl',
   executable(
     'TestSsl',
+    'TestSHA1.cxx',
     'TestSHA3.cxx',
     include_directories: inc,
     dependencies: [gtest, ssl_dep],
