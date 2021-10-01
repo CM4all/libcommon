@@ -10,7 +10,10 @@ crypto_sources = []
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
   # std::span is implemented in GCC>=10
-  crypto_sources += 'SHA3.cxx'
+  crypto_sources += [
+    'SHA1.cxx',
+    'SHA3.cxx',
+  ]
 endif
 
 crypto = static_library(
