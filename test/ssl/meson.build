@@ -6,6 +6,7 @@ test(
   'TestSsl',
   executable(
     'TestSsl',
+    'TestEvpDigest.cxx',
     'TestSHA1.cxx',
     'TestSHA3.cxx',
     include_directories: inc,
