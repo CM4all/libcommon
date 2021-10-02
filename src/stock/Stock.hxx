@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "AbstractStock.hxx"
 #include "Item.hxx"
 #include "Request.hxx"
 #include "Stats.hxx"
@@ -64,7 +65,7 @@ public:
  *
  * A #Stock instance holds a number of idle objects.
  */
-class Stock {
+class Stock : public AbstractStock {
 	StockClass &cls;
 
 	const std::string name;
@@ -141,7 +142,7 @@ public:
 	Stock(const Stock &) = delete;
 	Stock &operator=(const Stock &) = delete;
 
-	auto &GetEventLoop() const noexcept {
+	EventLoop &GetEventLoop() const noexcept override {
 		return retry_event.GetEventLoop();
 	}
 
@@ -149,7 +150,7 @@ public:
 		return cls;
 	}
 
-	const char *GetName() const noexcept {
+	const char *GetName() const noexcept override {
 		return name.c_str();
 	}
 
@@ -279,18 +280,19 @@ public:
 	 */
 	StockItem *GetNow(StockRequest request);
 
-	void Put(StockItem &item, bool destroy) noexcept;
+	void Put(StockItem &item, bool destroy) noexcept override;
 
-	void ItemIdleDisconnect(StockItem &item) noexcept;
-
-	void ItemCreateSuccess(StockItem &item) noexcept;
-	void ItemCreateError(StockItem &item, std::exception_ptr ep) noexcept;
-	void ItemCreateAborted(StockItem &item) noexcept;
-
+	void ItemIdleDisconnect(StockItem &item) noexcept override;
+	void ItemCreateSuccess(StockItem &item) noexcept override;
 	void ItemCreateError(StockGetHandler &get_handler,
-			     std::exception_ptr ep) noexcept;
-	void ItemCreateAborted() noexcept;
+			     std::exception_ptr ep) noexcept override;
+	void ItemCreateAborted() noexcept override;
 
+	void ItemUncleanFlagCleared() noexcept override {
+		ScheduleRetryWaiting();
+	}
+
+private:
 	/**
 	 * Retry the waiting requests.  This is called after the number of
 	 * busy items was reduced.
@@ -298,7 +300,6 @@ public:
 	void RetryWaiting() noexcept;
 	void ScheduleRetryWaiting() noexcept;
 
-private:
 	void ScheduleCleanup() noexcept {
 		cleanup_event.Schedule(std::chrono::seconds(20));
 	}

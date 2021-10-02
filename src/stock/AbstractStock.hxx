@@ -30,72 +30,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Item.hxx"
-#include "Stock.hxx"
+#pragma once
 
-const char *
-CreateStockItem::GetStockName() const noexcept
-{
-	return stock.GetName();
-}
+#include <exception>
 
-void
-CreateStockItem::InvokeCreateError(std::exception_ptr ep) noexcept
-{
-	stock.ItemCreateError(handler, ep);
-}
+struct StockItem;
+class StockGetHandler;
+class EventLoop;
 
-void
-CreateStockItem::InvokeCreateAborted() noexcept
-{
-	stock.ItemCreateAborted();
-}
+/**
+ * Abstract base class for #Stock which allows other containers to
+ * manage #StockItem instances.
+ */
+class AbstractStock {
+public:
+	[[gnu::const]]
+	virtual const char *GetName() const noexcept = 0;
 
-StockItem::~StockItem() noexcept
-{
-}
+	[[gnu::const]]
+	virtual EventLoop &GetEventLoop() const noexcept = 0;
 
-const char *
-StockItem::GetStockName() const noexcept
-{
-	return stock.GetName();
-}
-
-void
-StockItem::Put(bool destroy) noexcept
-{
-	stock.Put(*this, destroy);
-}
-
-void
-StockItem::InvokeCreateSuccess() noexcept
-{
-	stock.ItemCreateSuccess(*this);
-}
-
-void
-StockItem::InvokeCreateError(std::exception_ptr ep) noexcept
-{
-	stock.ItemCreateError(*this, ep);
-}
-
-void
-StockItem::InvokeCreateAborted() noexcept
-{
-	stock.ItemCreateAborted(*this);
-}
-
-void
-StockItem::InvokeIdleDisconnect() noexcept
-{
-	stock.ItemIdleDisconnect(*this);
-}
-
-void
-StockItem::ClearUncleanFlag() noexcept
-{
-	assert(unclean);
-	unclean = false;
-
-	stock.ItemUncleanFlagCleared();
-}
+	virtual void Put(StockItem &item, bool destroy) noexcept = 0;
+	virtual void ItemIdleDisconnect(StockItem &item) noexcept = 0;
+	virtual void ItemCreateSuccess(StockItem &item) noexcept = 0;
+	void ItemCreateError(StockItem &item, std::exception_ptr ep) noexcept;
+	virtual void ItemCreateError(StockGetHandler &get_handler,
+				     std::exception_ptr ep) noexcept = 0;
+	void ItemCreateAborted(StockItem &item) noexcept;
+	virtual void ItemCreateAborted() noexcept = 0;
+	virtual void ItemUncleanFlagCleared() noexcept {}
+};

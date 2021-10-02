@@ -38,11 +38,11 @@
 
 #include <exception>
 
-class Stock;
+class AbstractStock;
 class StockGetHandler;
 
 struct CreateStockItem {
-	Stock &stock;
+	AbstractStock &stock;
 	StockGetHandler &handler;
 
 	/**
@@ -67,7 +67,7 @@ struct StockItem
 	: boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
 	  private LeakDetector {
 
-	Stock &stock;
+	AbstractStock &stock;
 
 	StockGetHandler &handler;
 

@@ -436,20 +436,6 @@ Stock::ItemCreateSuccess(StockItem &item) noexcept
 }
 
 void
-Stock::ItemCreateError(StockItem &item, std::exception_ptr ep) noexcept
-{
-	ItemCreateError(item.handler, ep);
-	delete &item;
-}
-
-void
-Stock::ItemCreateAborted(StockItem &item) noexcept
-{
-	ItemCreateAborted();
-	delete &item;
-}
-
-void
 Stock::ItemCreateError(StockGetHandler &get_handler,
 		       std::exception_ptr ep) noexcept
 {
