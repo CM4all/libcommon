@@ -1,4 +1,4 @@
-libwas = dependency('libcm4all-was-simple', version: '>= 1.9')
+libwas = dependency('libcm4all-was-simple', version: '>= 1.9', required: get_variable('libcommon_enable_was', true))
 
 was = static_library(
   'was',
