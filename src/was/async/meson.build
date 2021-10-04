@@ -1,4 +1,7 @@
 libwas_protocol = dependency('libcm4all-was-protocol', version: '>= 1.21', required: get_variable('libcommon_enable_was', true))
+if not libwas_protocol.found()
+  subdir_done()
+endif
 
 if get_variable('libcommon_enable_libsystemd', true)
   libsystemd = dependency('libsystemd')
