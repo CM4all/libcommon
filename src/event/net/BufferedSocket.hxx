@@ -317,6 +317,14 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	 */
 	DeferEvent defer_read;
 
+	/**
+	 * Postpone ScheduleWrite(), calls
+	 * BufferedSocketHandler::OnBufferedWrite(), assuming that the
+	 * socket is already writable.  This can save two epoll_ctl()
+	 * calls if the assumption is correct.
+	 */
+	DeferEvent defer_write;
+
 	BufferedSocketHandler *handler;
 
 	DefaultFifoBuffer input;
@@ -382,6 +390,7 @@ public:
 		assert(!destroyed);
 
 		defer_read.Cancel();
+		defer_write.Cancel();
 		base.Close();
 	}
 
@@ -395,6 +404,7 @@ public:
 		assert(!destroyed);
 
 		defer_read.Cancel();
+		defer_write.Cancel();
 		base.Abandon();
 	}
 
@@ -583,6 +593,13 @@ public:
 		defer_read.Cancel();
 	}
 
+	/**
+	 * Defer a call to BufferedSocketHandler::OnBufferedWrite().
+	 */
+	void DeferWrite() noexcept {
+		defer_write.Schedule();
+	}
+
 	void ScheduleWrite() noexcept {
 		assert(!ended);
 		assert(!destroyed);
@@ -595,6 +612,7 @@ public:
 		assert(!destroyed);
 
 		base.UnscheduleWrite();
+		defer_write.Cancel();
 	}
 
 private:
@@ -615,6 +633,8 @@ private:
 	void DeferReadCallback() noexcept {
 		Read(false);
 	}
+
+	void DeferWriteCallback() noexcept;
 
 	/* virtual methods from class SocketHandler */
 	bool OnSocketRead() noexcept override;

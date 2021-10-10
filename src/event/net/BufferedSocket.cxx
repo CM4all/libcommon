@@ -38,7 +38,8 @@
 
 BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
 	:base(_event_loop, *this),
-	 defer_read(_event_loop, BIND_THIS_METHOD(DeferReadCallback))
+	 defer_read(_event_loop, BIND_THIS_METHOD(DeferReadCallback)),
+	 defer_write(_event_loop, BIND_THIS_METHOD(DeferWriteCallback))
 {
 }
 
@@ -448,6 +449,16 @@ BufferedSocket::TryRead() noexcept
 	return result;
 }
 
+inline void
+BufferedSocket::DeferWriteCallback() noexcept
+{
+	try {
+		handler->OnBufferedWrite();
+	} catch (...) {
+		handler->OnBufferedError(std::current_exception());
+	}
+}
+
 /*
  * socket_wrapper handler
  *
@@ -458,6 +469,10 @@ BufferedSocket::OnSocketWrite() noexcept
 {
 	assert(!destroyed);
 	assert(!ended);
+
+	/* if this is scheduled, it's obsolete, because we handle it
+	   here */
+	defer_write.Cancel();
 
 	try {
 		return handler->OnBufferedWrite();
