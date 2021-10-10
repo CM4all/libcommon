@@ -346,9 +346,8 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 #endif
 
 public:
-	explicit BufferedSocket(EventLoop &_event_loop) noexcept
-		:base(_event_loop, *this),
-		 defer_read(_event_loop, BIND_THIS_METHOD(DeferReadCallback)) {}
+	explicit BufferedSocket(EventLoop &_event_loop) noexcept;
+	~BufferedSocket() noexcept;
 
 	EventLoop &GetEventLoop() const noexcept {
 		return defer_read.GetEventLoop();

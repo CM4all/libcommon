@@ -36,6 +36,14 @@
 
 #include <errno.h>
 
+BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
+	:base(_event_loop, *this),
+	 defer_read(_event_loop, BIND_THIS_METHOD(DeferReadCallback))
+{
+}
+
+BufferedSocket::~BufferedSocket() noexcept = default;
+
 bool
 BufferedSocketHandler::OnBufferedTimeout() noexcept
 {
