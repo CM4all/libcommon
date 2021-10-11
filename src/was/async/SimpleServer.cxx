@@ -379,7 +379,8 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 	}
 
 	for (const auto &i : response.headers)
-		control.SendPair(WAS_COMMAND_HEADER, i.first, i.second);
+		if (!control.SendPair(WAS_COMMAND_HEADER, i.first, i.second))
+			return false;
 
 	if (response.body) {
 		if (!control.SendEmpty(WAS_COMMAND_DATA) ||
