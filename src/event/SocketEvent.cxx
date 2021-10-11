@@ -61,6 +61,15 @@ SocketEvent::Close() noexcept
 	   so we can omit the epoll_ctl(EPOLL_CTL_DEL) call and save
 	   one system call */
 	if (std::exchange(scheduled_flags, 0) != 0) {
+		/* TODO: due to a Linux kernel bug which calls
+		   eventpoll_release() delayed in a workqueue (via
+		   fput()), the close() system call does not
+		   unregister the file in epoll immediately, and
+		   spurious events can still fire; this optimization
+		   needs to be disabled until the kernel bug has been
+		   fixed */
+#define HAVE_THREADED_EVENT_LOOP
+
 #ifdef HAVE_THREADED_EVENT_LOOP
 		/* can't use this optimization in multi-threaded
 		   programs, because all file descriptors get
