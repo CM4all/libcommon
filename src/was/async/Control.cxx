@@ -149,7 +149,8 @@ Control::OnBufferedWrite()
 			InvokeDone();
 			return false;
 		}
-	}
+	} else
+		ScheduleWrite();
 
 	return true;
 }
@@ -167,7 +168,7 @@ Control::OnBufferedError(std::exception_ptr e) noexcept
 }
 
 bool
-Control::TryWrite() noexcept
+Control::FlushOutput() noexcept
 {
 	if (output_buffer.empty())
 		return true;
@@ -181,7 +182,7 @@ Control::TryWrite() noexcept
 	}
 
 	if (!output_buffer.empty())
-		ScheduleWrite();
+		InvokeError("Failed to flush control channel");
 
 	return true;
 }
@@ -210,14 +211,14 @@ Control::Start(enum was_command cmd, size_t payload_length) noexcept
 	return header + 1;
 }
 
-bool
+void
 Control::Finish(size_t payload_length) noexcept
 {
 	assert(!done);
 
 	output_buffer.Append(sizeof(struct was_header) + payload_length);
 
-	return output.bulk > 0 || TryWrite();
+	socket.DeferWrite();
 }
 
 bool
@@ -231,7 +232,8 @@ Control::Send(enum was_command cmd,
 		return false;
 
 	memcpy(dest, payload, payload_length);
-	return Finish(payload_length);
+	Finish(payload_length);
+	return true;
 }
 
 bool
@@ -254,7 +256,8 @@ Control::SendPair(enum was_command cmd, std::string_view name,
 	*dest++ = '=';
 	dest = std::copy(value.begin(), value.end(), dest);
 
-	return Finish(payload_size);
+	Finish(payload_size);
+	return true;
 }
 
 bool
@@ -269,15 +272,6 @@ Control::SendArray(enum was_command cmd,
 	}
 
 	return true;
-}
-
-bool
-Control::BulkOff() noexcept
-{
-	assert(output.bulk > 0);
-
-	--output.bulk;
-	return output.bulk > 0 || TryWrite();
 }
 
 void

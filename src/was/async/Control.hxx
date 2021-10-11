@@ -80,10 +80,6 @@ class Control final : BufferedSocketHandler {
 
 	ControlHandler &handler;
 
-	struct {
-		unsigned bulk = 0;
-	} output;
-
 	DefaultFifoBuffer output_buffer;
 
 public:
@@ -101,6 +97,15 @@ public:
 	void Close() noexcept {
 		socket.Close();
 	}
+
+	/**
+	 * Flush the output buffer now.
+	 *
+	 * @return true if all data has been sent successfully and the
+	 * output buffer is empty, false if
+	 * ControlHandler::OnWasControlError() has been called
+	 */
+	bool FlushOutput() noexcept;
 
 	bool Send(enum was_command cmd,
 		  const void *payload, size_t payload_length) noexcept;
@@ -126,18 +131,6 @@ public:
 	bool SendArray(enum was_command cmd,
 		       ConstBuffer<const char *> values) noexcept;
 
-	/**
-	 * Enables bulk mode.
-	 */
-	void BulkOn() noexcept {
-		++output.bulk;
-	}
-
-	/**
-	 * Disables bulk mode and flushes the output buffer.
-	 */
-	bool BulkOff() noexcept;
-
 	void Done() noexcept;
 
 	bool empty() const {
@@ -146,7 +139,7 @@ public:
 
 private:
 	void *Start(enum was_command cmd, size_t payload_length) noexcept;
-	bool Finish(size_t payload_length) noexcept;
+	void Finish(size_t payload_length) noexcept;
 
 	void ScheduleRead() noexcept;
 	void ScheduleWrite() noexcept;
@@ -173,8 +166,6 @@ private:
 	bool InvokeDrained() noexcept {
 		return handler.OnWasControlDrained();
 	}
-
-	bool TryWrite() noexcept;
 
 	/* virtual methods from class BufferedSocketHandler */
 	BufferedResult OnBufferedData() override;

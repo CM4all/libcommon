@@ -360,7 +360,6 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 	//assert(http_status_is_valid(response.status));
 	assert(!http_status_is_empty(response.status) || !response.body);
 
-	control.BulkOn();
 	request.state = Request::State::NONE;
 	request.request.reset();
 
@@ -393,7 +392,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 			return false;
 	}
 
-	return control.BulkOff();
+	return true;
 }
 
 } // namespace Was
