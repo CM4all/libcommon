@@ -61,6 +61,10 @@ public:
 		return event.GetSocket().ToFileDescriptor();
 	}
 
+	FileDescriptor ReleaseFileDescriptor() noexcept {
+		return event.ReleaseSocket().ToFileDescriptor();
+	}
+
 	void Open(FileDescriptor fd) noexcept {
 		event.Open(SocketDescriptor::FromFileDescriptor(fd));
 	}
