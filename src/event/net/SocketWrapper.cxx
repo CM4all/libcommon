@@ -43,6 +43,11 @@ SocketWrapper::SocketEventCallback(unsigned events) noexcept
 	if (events & SocketEvent::ERROR) {
 		if (!handler.OnSocketError(GetSocket().GetError()))
 			return;
+
+		/* update the "events" bitmask, just in case
+		   OnSocketError() has unscheduled events which are
+		   still in this local variable */
+		events &= socket_event.GetScheduledFlags();
 	}
 
 	if (events & SocketEvent::READ)
