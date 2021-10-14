@@ -33,6 +33,7 @@
 #pragma once
 
 #include "event/PipeEvent.hxx"
+#include "event/DeferEvent.hxx"
 #include "util/DisposableBuffer.hxx"
 
 class UniqueFileDescriptor;
@@ -46,6 +47,7 @@ public:
 
 class SimpleOutput final {
 	PipeEvent event;
+	DeferEvent defer_write;
 
 	SimpleOutputHandler &handler;
 
@@ -94,6 +96,8 @@ private:
 		return event.GetFileDescriptor();
 	}
 
+	void TryWrite();
+	void OnDeferredWrite() noexcept;
 	void OnPipeReady(unsigned events) noexcept;
 };
 

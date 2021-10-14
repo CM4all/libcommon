@@ -45,6 +45,7 @@ namespace Was {
 SimpleOutput::SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor pipe,
 			 SimpleOutputHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(OnPipeReady), pipe.Release()),
+	 defer_write(event_loop, BIND_THIS_METHOD(OnDeferredWrite)),
 	 handler(_handler)
 {
 	event.ScheduleImplicit();
@@ -66,7 +67,7 @@ SimpleOutput::Activate(DisposableBuffer _buffer) noexcept
 	buffer = std::move(_buffer);
 	position = 0;
 
-	event.ScheduleWrite();
+	defer_write.Schedule();
 }
 
 void
@@ -75,6 +76,22 @@ try {
 	if (events & (SocketEvent::HANGUP|SocketEvent::ERROR))
 		throw std::runtime_error("Hangup on WAS pipe");
 
+	TryWrite();
+} catch (...) {
+	handler.OnWasOutputError(std::current_exception());
+}
+
+inline void
+SimpleOutput::OnDeferredWrite() noexcept
+try {
+	TryWrite();
+} catch (...) {
+	handler.OnWasOutputError(std::current_exception());
+}
+
+inline void
+SimpleOutput::TryWrite()
+{
 	assert(buffer);
 	assert(position < buffer.size());
 
@@ -84,9 +101,10 @@ try {
 
 	auto nbytes = GetPipe().Write(r.data, r.size);
 	if (nbytes <= 0) {
-		if (nbytes == 0 || errno == EAGAIN)
+		if (nbytes == 0 || errno == EAGAIN) {
+			event.ScheduleWrite();
 			return;
-		else
+		} else
 			throw MakeErrno("Write error on WAS pipe");
 	}
 
@@ -96,9 +114,8 @@ try {
 		/* done */
 		buffer = {};
 		event.ScheduleImplicit();
-	}
-} catch (...) {
-	handler.OnWasOutputError(std::current_exception());
+	} else
+		event.ScheduleWrite();
 }
 
 } // namespace Was
