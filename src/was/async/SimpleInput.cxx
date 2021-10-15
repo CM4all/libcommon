@@ -72,7 +72,7 @@ SimpleInput::Activate() noexcept
 bool
 SimpleInput::SetLength(std::size_t length) noexcept
 {
-	if (buffer || !buffer->SetLength(length))
+	if (!buffer || !buffer->SetLength(length))
 		return false;
 
 	if (buffer->IsComplete())
