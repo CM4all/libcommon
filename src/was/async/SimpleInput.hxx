@@ -56,8 +56,6 @@ class SimpleInput final {
 
 	std::unique_ptr<Buffer> buffer;
 
-	std::size_t discard = 0;
-
 public:
 	SimpleInput(EventLoop &event_loop, UniqueFileDescriptor pipe,
 		    SimpleInputHandler &_handler) noexcept;

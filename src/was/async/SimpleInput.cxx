@@ -110,30 +110,29 @@ SimpleInput::Premature(std::size_t nbytes)
 		   should not be possible */
 		throw WasProtocolError("Too much data on WAS pipe");
 
-	discard = nbytes - fill;
-	if (discard > 0)
-		event.ScheduleRead();
+	std::size_t discard = nbytes - fill;
+
+	while (discard > 0) {
+		char dummy[4096];
+		auto n = GetPipe().Read(dummy,
+					std::min(sizeof(dummy), discard));
+		if (n < 0)
+			throw MakeErrno("Read error on WAS pipe");
+
+		if (n == 0)
+			throw std::runtime_error("Hangup on WAS pipe");
+
+		discard -= n;
+	}
 }
 
 void
 SimpleInput::OnPipeReady(unsigned events) noexcept
 try {
+	assert(buffer);
+
 	if (events & (SocketEvent::HANGUP|SocketEvent::ERROR))
 		throw std::runtime_error("Hangup on WAS pipe");
-
-	if (discard > 0) {
-		char dummy[4096];
-		auto nbytes = GetPipe().Read(dummy,
-					     std::min(sizeof(dummy), discard));
-		if (nbytes < 0)
-			throw MakeErrno("Read error on WAS pipe");
-
-		discard -= nbytes;
-
-		if (discard == 0)
-			event.CancelRead();
-		return;
-	}
 
 	auto w = buffer->Write();
 	if (w.empty())
