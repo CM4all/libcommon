@@ -77,7 +77,10 @@ public:
 
 	DisposableBuffer CheckComplete() noexcept;
 
-	bool Premature(std::size_t nbytes) noexcept;
+	/**
+	 * Throws on error.
+	 */
+	void Premature(std::size_t nbytes);
 
 private:
 	FileDescriptor GetPipe() const noexcept {

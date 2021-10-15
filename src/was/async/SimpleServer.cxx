@@ -288,10 +288,12 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 				return false;
 			}
 
-			if (!input.IsActive())
-				break;
-
-			input.Premature(*length_p);
+			try {
+				input.Premature(*length_p);
+			} catch (...) {
+				AbortError(std::current_exception());
+				return false;
+			}
 		}
 
 		return false;

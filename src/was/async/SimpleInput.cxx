@@ -32,6 +32,7 @@
 
 #include "SimpleInput.hxx"
 #include "Buffer.hxx"
+#include "Error.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
 #include "util/DisposableBuffer.hxx"
@@ -90,25 +91,28 @@ SimpleInput::CheckComplete() noexcept
 		: nullptr;
 }
 
-bool
-SimpleInput::Premature(std::size_t nbytes) noexcept
+void
+SimpleInput::Premature(std::size_t nbytes)
 {
 	event.CancelRead();
 
-	if (!buffer)
-		return nbytes == 0;
+	if (!buffer) {
+		if (nbytes == 0)
+			return;
+		else
+			throw WasProtocolError("Malformed PREMATURE packet");
+	}
 
 	const std::size_t fill = buffer->GetFill();
 	buffer.reset();
 	if (fill > nbytes)
 		/* we have already received more data than that, which
 		   should not be possible */
-		return false;
+		throw WasProtocolError("Too much data on WAS pipe");
 
 	discard = nbytes - fill;
 	if (discard > 0)
 		event.ScheduleRead();
-	return true;
 }
 
 void
