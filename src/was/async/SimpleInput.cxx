@@ -46,6 +46,7 @@ namespace Was {
 SimpleInput::SimpleInput(EventLoop &event_loop, UniqueFileDescriptor pipe,
 			 SimpleInputHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(OnPipeReady), pipe.Release()),
+	 defer_read(event_loop, BIND_THIS_METHOD(OnDeferredRead)),
 	 handler(_handler)
 {
 	/* don't schedule READ (until we get an EAGAIN); that would
@@ -66,7 +67,7 @@ SimpleInput::Activate() noexcept
 
 	buffer = std::make_unique<Buffer>();
 
-	event.ScheduleRead();
+	defer_read.Schedule();
 }
 
 bool
@@ -75,8 +76,10 @@ SimpleInput::SetLength(std::size_t length) noexcept
 	if (!buffer || !buffer->SetLength(length))
 		return false;
 
-	if (buffer->IsComplete())
+	if (buffer->IsComplete()) {
 		event.CancelRead();
+		defer_read.Cancel();
+	}
 
 	return true;
 }
@@ -95,6 +98,7 @@ void
 SimpleInput::Premature(std::size_t nbytes)
 {
 	event.CancelRead();
+	defer_read.Cancel();
 
 	if (!buffer) {
 		if (nbytes == 0)
@@ -127,12 +131,9 @@ SimpleInput::Premature(std::size_t nbytes)
 }
 
 void
-SimpleInput::OnPipeReady(unsigned events) noexcept
-try {
+SimpleInput::TryRead()
+{
 	assert(buffer);
-
-	if (events & (SocketEvent::HANGUP|SocketEvent::ERROR))
-		throw std::runtime_error("Hangup on WAS pipe");
 
 	auto w = buffer->Write();
 	if (w.empty())
@@ -142,9 +143,10 @@ try {
 	if (nbytes <= 0) {
 		if (nbytes == 0)
 			throw std::runtime_error("Hangup on WAS pipe");
-		else if (errno == EAGAIN)
+		else if (errno == EAGAIN) {
+			event.ScheduleRead();
 			return;
-		else
+		} else
 			throw MakeErrno("Read error on WAS pipe");
 	}
 
@@ -152,8 +154,31 @@ try {
 
 	if (buffer->IsComplete()) {
 		event.CancelRead();
+		defer_read.Cancel();
+
 		handler.OnWasInput(buffer.release()->ToDisposableBuffer());
 	}
+}
+
+void
+SimpleInput::OnPipeReady(unsigned events) noexcept
+try {
+	assert(buffer);
+
+	if (events & (SocketEvent::HANGUP|SocketEvent::ERROR))
+		throw std::runtime_error("Hangup on WAS pipe");
+
+	TryRead();
+} catch (...) {
+	handler.OnWasInputError(std::current_exception());
+}
+
+void
+SimpleInput::OnDeferredRead() noexcept
+try {
+	assert(buffer);
+
+	TryRead();
 } catch (...) {
 	handler.OnWasInputError(std::current_exception());
 }

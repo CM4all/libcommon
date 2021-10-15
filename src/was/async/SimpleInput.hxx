@@ -33,6 +33,7 @@
 #pragma once
 
 #include "event/PipeEvent.hxx"
+#include "event/DeferEvent.hxx"
 
 #include <memory>
 
@@ -51,6 +52,7 @@ public:
 
 class SimpleInput final {
 	PipeEvent event;
+	DeferEvent defer_read;
 
 	SimpleInputHandler &handler;
 
@@ -85,7 +87,13 @@ private:
 		return event.GetFileDescriptor();
 	}
 
+	void DeferRead() noexcept {
+		defer_read.Schedule();
+	}
+
+	void TryRead();
 	void OnPipeReady(unsigned events) noexcept;
+	void OnDeferredRead() noexcept;
 };
 
 } // namespace Was
