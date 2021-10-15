@@ -47,7 +47,10 @@ SimpleInput::SimpleInput(EventLoop &event_loop, UniqueFileDescriptor pipe,
 	:event(event_loop, BIND_THIS_METHOD(OnPipeReady), pipe.Release()),
 	 handler(_handler)
 {
-	event.ScheduleRead();
+	/* don't schedule READ (until we get an EAGAIN); that would
+	   risk receiving a request body before Activate() gets
+	   called */
+	event.ScheduleImplicit();
 }
 
 SimpleInput::~SimpleInput() noexcept
@@ -61,6 +64,8 @@ SimpleInput::Activate() noexcept
 	assert(!buffer);
 
 	buffer = std::make_unique<Buffer>();
+
+	event.ScheduleRead();
 }
 
 bool
@@ -82,6 +87,8 @@ SimpleInput::CheckComplete() noexcept
 bool
 SimpleInput::Premature(std::size_t nbytes) noexcept
 {
+	event.CancelRead();
+
 	if (!buffer)
 		return nbytes == 0;
 
@@ -93,6 +100,8 @@ SimpleInput::Premature(std::size_t nbytes) noexcept
 		return false;
 
 	discard = nbytes - fill;
+	if (discard > 0)
+		event.ScheduleRead();
 	return true;
 }
 
@@ -110,6 +119,9 @@ try {
 			throw MakeErrno("Read error on WAS pipe");
 
 		discard -= nbytes;
+
+		if (discard == 0)
+			event.CancelRead();
 		return;
 	}
 
@@ -132,8 +144,10 @@ try {
 
 	buffer->Append(nbytes);
 
-	if (buffer->IsComplete())
+	if (buffer->IsComplete()) {
+		event.CancelRead();
 		handler.OnWasInput(buffer.release()->ToDisposableBuffer());
+	}
 } catch (...) {
 	handler.OnWasInputError(std::current_exception());
 }
