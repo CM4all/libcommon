@@ -71,7 +71,13 @@ SimpleInput::Activate() noexcept
 bool
 SimpleInput::SetLength(std::size_t length) noexcept
 {
-	return buffer && buffer->SetLength(length);
+	if (buffer || !buffer->SetLength(length))
+		return false;
+
+	if (buffer->IsComplete())
+		event.CancelRead();
+
+	return true;
 }
 
 DisposableBuffer
