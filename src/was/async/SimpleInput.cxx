@@ -135,9 +135,6 @@ try {
 		return;
 	}
 
-	if (!buffer)
-		throw std::runtime_error("Unexpected data on WAS pipe");
-
 	auto w = buffer->Write();
 	if (w.empty())
 		throw std::runtime_error("Unexpected data on WAS pipe");
