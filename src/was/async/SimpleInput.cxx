@@ -87,7 +87,9 @@ SimpleInput::Premature(std::size_t nbytes) noexcept
 
 	const std::size_t fill = buffer->GetFill();
 	buffer.reset();
-	if (nbytes > fill)
+	if (fill > nbytes)
+		/* we have already received more data than that, which
+		   should not be possible */
 		return false;
 
 	discard = nbytes - fill;
