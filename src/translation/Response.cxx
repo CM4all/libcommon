@@ -37,7 +37,7 @@
 #if TRANSLATION_ENABLE_CACHE
 #include "uri/Base.hxx"
 #include "uri/Compare.hxx"
-#include "puri_escape.hxx"
+#include "uri/PEscape.hxx"
 #include "HttpMessageResponse.hxx"
 #endif
 #include "AllocatorPtr.hxx"
