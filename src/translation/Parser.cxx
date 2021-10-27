@@ -41,7 +41,7 @@
 #include "widget/Class.hxx"
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
-#include "file_address.hxx"
+#include "file/Address.hxx"
 #include "delegate/Address.hxx"
 #include "http/local/Address.hxx"
 #include "http/Address.hxx"
