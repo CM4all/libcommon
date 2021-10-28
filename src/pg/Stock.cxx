@@ -42,7 +42,7 @@ namespace Pg {
 class Stock::Item final : public StockItem, Cancellable, AsyncConnectionHandler {
 	AsyncConnection connection;
 
-	bool initialized = false, idle, connected;
+	bool initialized = false, idle;
 
 	DeferEvent defer_initialized;
 
@@ -77,7 +77,6 @@ private:
 			InvokeCreateError(std::move(error));
 		} else {
 			idle = false;
-			connected = true;
 			InvokeCreateSuccess();
 		}
 	}
@@ -86,7 +85,6 @@ private:
 	bool Borrow() noexcept override {
 		assert(initialized);
 		assert(idle);
-		assert(connected);
 
 		idle = false;
 		return true;
@@ -98,7 +96,7 @@ private:
 
 		idle = true;
 		unclean = connection.IsCancelling();
-		return connected;
+		return true;
 	}
 
 	/* virtual methods from class Cancellable */
@@ -130,7 +128,7 @@ private:
 		} else if (idle)
 			InvokeIdleDisconnect();
 		else
-			connected = false;
+			fade = true;
 	}
 
 	void OnNotify(const char *) override {}
@@ -143,7 +141,7 @@ private:
 		} else if (idle)
 			InvokeIdleDisconnect();
 		else
-			connected = false;
+			fade = true;
 	}
 };
 
