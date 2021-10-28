@@ -109,12 +109,14 @@ try {
 				"Error on MultiWAS socket");
 
 	if (events & SocketEvent::HANGUP) {
+		event.Close();
 		handler.OnMultiClientDisconnect();
 		return;
 	}
 
 	throw std::runtime_error("Unexpected data on MultiWAS socket");
 } catch (...) {
+	event.Close();
 	handler.OnMultiClientError(std::current_exception());
 }
 
