@@ -128,7 +128,7 @@ private:
 		} else if (idle)
 			InvokeIdleDisconnect();
 		else
-			fade = true;
+			InvokeBusyDisconnect();
 	}
 
 	void OnNotify(const char *) override {}
@@ -141,7 +141,7 @@ private:
 		} else if (idle)
 			InvokeIdleDisconnect();
 		else
-			fade = true;
+			InvokeBusyDisconnect();
 	}
 };
 

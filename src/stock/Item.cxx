@@ -92,6 +92,12 @@ StockItem::InvokeIdleDisconnect() noexcept
 }
 
 void
+StockItem::InvokeBusyDisconnect() noexcept
+{
+	stock.ItemBusyDisconnect(*this);
+}
+
+void
 StockItem::ClearUncleanFlag() noexcept
 {
 	assert(unclean);

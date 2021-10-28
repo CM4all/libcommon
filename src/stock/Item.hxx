@@ -146,5 +146,11 @@ struct StockItem
 	 */
 	void InvokeIdleDisconnect() noexcept;
 
+	/**
+	 * Announce that the item has been disconnected by the peer while
+	 * it was busy.
+	 */
+	void InvokeBusyDisconnect() noexcept;
+
 	void ClearUncleanFlag() noexcept;
 };

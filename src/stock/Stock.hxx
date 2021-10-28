@@ -283,6 +283,7 @@ public:
 	void Put(StockItem &item, bool destroy) noexcept override;
 
 	void ItemIdleDisconnect(StockItem &item) noexcept override;
+	void ItemBusyDisconnect(StockItem &item) noexcept override;
 	void ItemCreateSuccess(StockItem &item) noexcept override;
 	void ItemCreateError(StockGetHandler &get_handler,
 			     std::exception_ptr ep) noexcept override;

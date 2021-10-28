@@ -52,6 +52,7 @@ public:
 
 	virtual void Put(StockItem &item, bool destroy) noexcept = 0;
 	virtual void ItemIdleDisconnect(StockItem &item) noexcept = 0;
+	virtual void ItemBusyDisconnect(StockItem &item) noexcept = 0;
 	virtual void ItemCreateSuccess(StockItem &item) noexcept = 0;
 	void ItemCreateError(StockItem &item, std::exception_ptr ep) noexcept;
 	virtual void ItemCreateError(StockGetHandler &get_handler,

@@ -502,3 +502,12 @@ Stock::ItemIdleDisconnect(StockItem &item) noexcept
 	delete &item;
 	ScheduleCheckEmpty();
 }
+
+void
+Stock::ItemBusyDisconnect(StockItem &item) noexcept
+{
+	assert(!item.is_idle);
+
+	/* this item will be destroyed by Put() */
+	item.fade = true;
+}
