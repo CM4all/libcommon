@@ -316,8 +316,7 @@ BufferedSocket::SubmitDirect() noexcept
 		return true;
 
 	case DirectResult::END:
-		Ended();
-		return false;
+		return ClosedByPeer();
 
 	case DirectResult::CLOSED:
 		return false;

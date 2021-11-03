@@ -110,8 +110,10 @@ enum class DirectResult {
 	EMPTY,
 
 	/**
-	 * The handler has determined that no more data can be received on
-	 * the provided socket, because the peer has closed it.
+	 * The handler has determined that no more data can be
+	 * received on the provided socket, because the peer has
+	 * closed it.  The callee however has not yet closed this side
+	 * of the socket.
 	 */
 	END,
 
