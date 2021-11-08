@@ -50,6 +50,16 @@ SocketWrapper::SocketEventCallback(unsigned events) noexcept
 		events &= socket_event.GetScheduledFlags();
 	}
 
+	if (events & SocketEvent::HANGUP) {
+		if (!handler.OnSocketHangup())
+			return;
+
+		/* update the "events" bitmask, just in case
+		   OnSocketHangup() has unscheduled events which are
+		   still in this local variable */
+		events &= socket_event.GetScheduledFlags();
+	}
+
 	if (events & SocketEvent::READ)
 		read_timeout_event.Cancel();
 

@@ -67,6 +67,17 @@ public:
 	virtual bool OnSocketTimeout() noexcept = 0;
 
 	/**
+	 * The peer has closed the socket.  There may still be data
+	 * pending in the kernel socket buffer that can be received
+	 * into userspace.
+	 *
+	 * @return false if the #SocketWrapper has been closed
+	 */
+	virtual bool OnSocketHangup() noexcept {
+		return true;
+	}
+
+	/**
 	 * An error has occurred (via EPOLLERR / SO_ERROR).
 	 *
 	 * @param error an errno value
