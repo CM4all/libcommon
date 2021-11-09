@@ -500,6 +500,15 @@ BufferedSocket::OnSocketTimeout() noexcept
 }
 
 bool
+BufferedSocket::OnSocketHangup() noexcept
+{
+	assert(!destroyed);
+	assert(!ended);
+
+	return handler->OnBufferedHangup();
+}
+
+bool
 BufferedSocket::OnSocketError(int error) noexcept
 {
 	if (error == EPIPE || error == ECONNRESET) {

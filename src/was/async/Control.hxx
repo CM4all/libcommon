@@ -169,6 +169,7 @@ private:
 
 	/* virtual methods from class BufferedSocketHandler */
 	BufferedResult OnBufferedData() override;
+	// TODO: implement OnBufferedHangup()?
 	bool OnBufferedClosed() noexcept override;
 	bool OnBufferedWrite() override;
 	bool OnBufferedDrained() noexcept override;

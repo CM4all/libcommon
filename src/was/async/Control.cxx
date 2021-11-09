@@ -122,6 +122,7 @@ Control::OnBufferedData()
 bool
 Control::OnBufferedClosed() noexcept
 {
+	// TODO: does this need to be a fatal condition?
 	InvokeError("WAS control socket closed by peer");
 	return false;
 }

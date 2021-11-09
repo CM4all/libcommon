@@ -193,6 +193,17 @@ public:
 	}
 
 	/**
+	 * The peer has closed the socket.  There may still be data
+	 * pending in the kernel socket buffer that can be received
+	 * into userspace, so don't cancel reading yet.
+	 *
+	 * @return false if the #BufferedSocket has been closed
+	 */
+	virtual bool OnBufferedHangup() noexcept {
+		return true;
+	}
+
+	/**
 	 * The peer has finished sending and has closed the socket.  The
 	 * method must close/abandon the socket.  There may still be data
 	 * in the input buffer, so don't give up on this object yet.
@@ -642,5 +653,6 @@ private:
 	bool OnSocketRead() noexcept override;
 	bool OnSocketWrite() noexcept override;
 	bool OnSocketTimeout() noexcept override;
+	bool OnSocketHangup() noexcept override;
 	bool OnSocketError(int error) noexcept override;
 };
