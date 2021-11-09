@@ -3761,6 +3761,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::STATS_TAG:
+		if (!IsValidNonEmptyString(string_payload))
+			throw std::runtime_error("malformed STATS_TAG packet");
+
+		if (response.stats_tag != nullptr)
+			throw std::runtime_error("duplicate STATS_TAG packet");
+
+		response.stats_tag = string_payload.data;
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

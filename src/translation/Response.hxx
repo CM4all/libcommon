@@ -146,6 +146,8 @@ struct TranslateResponse {
 	 */
 	const char *test_path;
 
+	const char *stats_tag;
+
 #if TRANSLATION_ENABLE_SESSION
 	ConstBuffer<void> session;
 	ConstBuffer<void> attach_session;

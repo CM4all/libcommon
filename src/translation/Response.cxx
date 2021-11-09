@@ -118,6 +118,8 @@ TranslateResponse::Clear()
 
 	test_path = nullptr;
 
+	stats_tag = nullptr;
+
 	uncached = false;
 
 #if TRANSLATION_ENABLE_RADDRESS
@@ -385,6 +387,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	widget_group = alloc.CheckDup(src.widget_group);
 #endif
 	test_path = alloc.CheckDup(src.test_path);
+	stats_tag = alloc.CheckDup(src.stats_tag);
 #if TRANSLATION_ENABLE_SESSION
 	auth_file = alloc.CheckDup(src.auth_file);
 	append_auth = alloc.Dup(src.append_auth);

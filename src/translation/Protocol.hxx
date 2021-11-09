@@ -1102,6 +1102,11 @@ enum class TranslationCommand : uint16_t {
 	 * Enable "transparent" mode for #CHAIN.
 	 */
 	TRANSPARENT_CHAIN = 231,
+
+	/**
+	 * Collect statistics for this request under the given tag.
+	 */
+	STATS_TAG = 232,
 };
 
 struct TranslationHeader {

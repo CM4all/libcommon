@@ -253,6 +253,11 @@ public:
 	}
 
 	template<typename... Types>
+	auto &StatsTag(Types... value) noexcept {
+		return StringPacket(TranslationCommand::STATS_TAG, value...);
+	}
+
+	template<typename... Types>
 	auto &Layout(Types... value) noexcept {
 		return StringPacket(TranslationCommand::LAYOUT, value...);
 	}
