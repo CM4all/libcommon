@@ -60,7 +60,7 @@ public:
 	CurlSocket(const CurlSocket &) = delete;
 	CurlSocket &operator=(const CurlSocket &) = delete;
 
-	auto &GetEventLoop() const noexcept {
+	[[nodiscard]] auto &GetEventLoop() const noexcept {
 		return socket_event.GetEventLoop();
 	}
 
@@ -72,7 +72,7 @@ public:
 				  void *userp, void *socketp) noexcept;
 
 private:
-	SocketDescriptor GetSocket() const noexcept {
+	[[nodiscard]] SocketDescriptor GetSocket() const noexcept {
 		return socket_event.GetSocket();
 	}
 
