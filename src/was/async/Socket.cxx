@@ -33,6 +33,7 @@
 #include "Socket.hxx"
 #include "system/Error.hxx"
 
+#include <fcntl.h>
 #include <sys/socket.h>
 
 std::pair<WasSocket, WasSocket>
@@ -52,6 +53,12 @@ WasSocket::CreatePair()
 	if (!UniqueFileDescriptor::CreatePipe(result.second.input,
 					      result.first.output))
 		throw MakeErrno("Failed to create second pipe");
+
+	/* allocate 256 kB for each pipe to reduce the system call and
+	   latency overhead for splicing */
+	static constexpr int PIPE_BUFFER_SIZE = 256 * 1024;
+	fcntl(result.first.input.Get(), F_SETPIPE_SZ, PIPE_BUFFER_SIZE);
+	fcntl(result.first.output.Get(), F_SETPIPE_SZ, PIPE_BUFFER_SIZE);
 
 	return result;
 }
