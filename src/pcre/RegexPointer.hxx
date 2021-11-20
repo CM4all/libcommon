@@ -33,11 +33,11 @@
 #pragma once
 
 #include "MatchInfo.hxx"
-#include "util/StringView.hxx"
 
 #include <pcre.h>
 
 #include <algorithm>
+#include <string_view>
 
 class RegexPointer {
 protected:
@@ -52,19 +52,19 @@ public:
 	}
 
 	[[gnu::pure]]
-	bool Match(StringView s) const noexcept {
+	bool Match(std::string_view s) const noexcept {
 		/* we don't need the data written to ovector, but PCRE can
 		   omit internal allocations if we pass a buffer to
 		   pcre_exec() */
 		int ovector[MatchInfo::OVECTOR_SIZE];
-		return pcre_exec(re, extra, s.data, s.size,
+		return pcre_exec(re, extra, s.data(), s.size(),
 				 0, 0, ovector, MatchInfo::OVECTOR_SIZE) >= 0;
 	}
 
 	[[gnu::pure]]
-	MatchInfo MatchCapture(StringView s) const noexcept {
-		MatchInfo mi(s.data);
-		mi.n = pcre_exec(re, extra, s.data, s.size,
+	MatchInfo MatchCapture(std::string_view s) const noexcept {
+		MatchInfo mi(s.data());
+		mi.n = pcre_exec(re, extra, s.data(), s.size(),
 				 0, 0, mi.ovector, mi.OVECTOR_SIZE);
 		if (mi.n == 0)
 			/* not enough room in the array - assume it's full */
