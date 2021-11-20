@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <utility>
 
 /**
  * A string pointer whose memory is managed by this class.
