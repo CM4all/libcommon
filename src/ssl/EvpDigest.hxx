@@ -39,6 +39,7 @@
 #include <cassert>
 #include <span>
 #include <string_view>
+#include <utility>
 
 class EvpDigestContext {
 	EVP_MD_CTX *ctx = nullptr;
