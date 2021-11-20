@@ -46,16 +46,11 @@ public:
 
 	UniqueRegex(UniqueRegex &&src) noexcept:RegexPointer(src) {
 		src.re = nullptr;
-		src.extra = nullptr;
 	}
 
 	~UniqueRegex() noexcept {
-		pcre_free(re);
-#ifdef PCRE_CONFIG_JIT
-		pcre_free_study(extra);
-#else
-		pcre_free(extra);
-#endif
+		if (re != nullptr)
+			pcre2_code_free_8(re);
 	}
 
 	UniqueRegex &operator=(UniqueRegex &&src) noexcept {
@@ -64,7 +59,7 @@ public:
 	}
 
 	/**
-	 * Throws std::runtime_error on error.
+	 * Throws Pcre::Error on error.
 	 */
 	void Compile(const char *pattern, bool anchored, bool capture);
 };

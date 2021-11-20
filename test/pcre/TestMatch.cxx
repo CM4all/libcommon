@@ -85,7 +85,7 @@ TEST(RegexTest, Capture)
 
 	{
 		static constexpr auto s = "/foo/";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m[0].data(), s);
 		ASSERT_EQ(m[0].size(), strlen(s));
@@ -95,7 +95,7 @@ TEST(RegexTest, Capture)
 
 	{
 		static constexpr auto s = "/foo/bar";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m[0].data(), s);
 		ASSERT_EQ(m[0].size(), strlen(s));
@@ -111,7 +111,7 @@ TEST(RegexTest, CaptureEmpty)
 
 	{
 		static constexpr auto s = "/foo";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m.size(), 2U);
 		ASSERT_EQ(m[0].data(), s);
@@ -122,7 +122,7 @@ TEST(RegexTest, CaptureEmpty)
 
 	{
 		static constexpr auto s = "/fo";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m.size(), 2U);
 		ASSERT_EQ(m[0].data(), s);
@@ -139,7 +139,7 @@ TEST(RegexTest, CaptureOptional)
 
 	{
 		static constexpr auto s = "/foo/";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m.size(), 2U);
 		ASSERT_EQ(m[0].data(), s);
@@ -150,7 +150,7 @@ TEST(RegexTest, CaptureOptional)
 
 	{
 		static constexpr auto s = "/foo/bar";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m.size(), 2U);
 		ASSERT_EQ(m[0].data(), s);
@@ -167,7 +167,7 @@ TEST(RegexTest, CaptureOptional2)
 
 	{
 		static constexpr auto s = "/foo/bar";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m.size(), 3U);
 		ASSERT_EQ(m[0].data(), s);
@@ -180,7 +180,7 @@ TEST(RegexTest, CaptureOptional2)
 
 	{
 		static constexpr auto s = "/fo/bar";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m.size(), 3U);
 		ASSERT_EQ(m[0].data(), s);
@@ -193,7 +193,7 @@ TEST(RegexTest, CaptureOptional2)
 
 	{
 		static constexpr auto s = "/foo/";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m.size(), 3U);
 		ASSERT_EQ(m[0].data(), s);
@@ -206,7 +206,7 @@ TEST(RegexTest, CaptureOptional2)
 
 	{
 		static constexpr auto s = "/fo/";
-		const auto m = r.MatchCapture(s);
+		const auto m = r.Match(s);
 		ASSERT_TRUE(m);
 		ASSERT_EQ(m.size(), 3U);
 		ASSERT_EQ(m[0].data(), s);

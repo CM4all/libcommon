@@ -30,74 +30,20 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Error.hxx"
 
-#include <cassert>
-#include <cstddef>
-#include <string_view>
+#include <pcre2.h>
 
-class MatchInfo {
-	friend class RegexPointer;
+namespace Pcre {
 
-	static constexpr std::size_t OVECTOR_SIZE = 30;
+ErrorCategory error_category;
 
-	const char *s;
-	int n;
-	int ovector[OVECTOR_SIZE];
+std::string
+ErrorCategory::message(int condition) const
+{
+	PCRE2_UCHAR8 buffer[256];
+	pcre2_get_error_message_8(condition, buffer, std::size(buffer));
+	return std::string{(const char *)buffer};
+}
 
-	explicit MatchInfo(const char *_s):s(_s) {}
-
-public:
-	MatchInfo() = default;
-
-	static constexpr std::size_t npos = ~std::size_t{};
-
-	constexpr operator bool() const noexcept {
-		return n >= 0;
-	}
-
-	constexpr std::size_t size() const noexcept {
-		assert(n >= 0);
-
-		return static_cast<std::size_t>(n);
-	}
-
-	[[gnu::pure]]
-	constexpr std::string_view operator[](std::size_t i) const noexcept {
-		assert(n >= 0);
-		assert(i < size());
-
-		int start = ovector[2 * i];
-		if (start < 0)
-			return {};
-
-		int end = ovector[2 * i + 1];
-		assert(end >= start);
-
-		return { s + start, std::size_t(end - start) };
-	}
-
-	[[gnu::pure]]
-	constexpr std::size_t GetCaptureStart(std::size_t i) const noexcept {
-		assert(n >= 0);
-		assert(i < size());
-
-		int start = ovector[2 * i];
-		if (start < 0)
-			return npos;
-
-		return std::size_t(start);
-	}
-
-	[[gnu::pure]]
-	constexpr std::size_t GetCaptureEnd(std::size_t i) const noexcept {
-		assert(n >= 0);
-		assert(i < size());
-
-		int end = ovector[2 * i + 1];
-		if (end < 0)
-			return npos;
-
-		return std::size_t(end);
-	}
-};
+} // namespace Pcre
