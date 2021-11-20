@@ -32,53 +32,9 @@
 
 #pragma once
 
-#include "MatchInfo.hxx"
-#include "util/StringView.hxx"
+#include "RegexPointer.hxx"
 
-#include <pcre.h>
-
-#include <algorithm>
-
-class RegexPointer {
-protected:
-	pcre *re = nullptr;
-	pcre_extra *extra = nullptr;
-
-	unsigned n_capture = 0;
-
-public:
-	constexpr bool IsDefined() const noexcept {
-		return re != nullptr;
-	}
-
-	[[gnu::pure]]
-	bool Match(StringView s) const noexcept {
-		/* we don't need the data written to ovector, but PCRE can
-		   omit internal allocations if we pass a buffer to
-		   pcre_exec() */
-		int ovector[MatchInfo::OVECTOR_SIZE];
-		return pcre_exec(re, extra, s.data, s.size,
-				 0, 0, ovector, MatchInfo::OVECTOR_SIZE) >= 0;
-	}
-
-	[[gnu::pure]]
-	MatchInfo MatchCapture(StringView s) const noexcept {
-		MatchInfo mi(s.data);
-		mi.n = pcre_exec(re, extra, s.data, s.size,
-				 0, 0, mi.ovector, mi.OVECTOR_SIZE);
-		if (mi.n == 0)
-			/* not enough room in the array - assume it's full */
-			mi.n = mi.OVECTOR_SIZE / 3;
-		else if (mi.n > 0 && n_capture >= unsigned(mi.n))
-			/* in its return value, PCRE omits mismatching
-			   optional captures if (and only if) they are
-			   the last capture; this kludge works around
-			   this */
-			mi.n = std::min<unsigned>(n_capture + 1,
-						  mi.OVECTOR_SIZE / 3);
-		return mi;
-	}
-};
+#include <utility>
 
 class UniqueRegex : public RegexPointer {
 public:

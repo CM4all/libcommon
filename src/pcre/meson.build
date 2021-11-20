@@ -2,7 +2,7 @@ libpcre = dependency('libpcre')
 
 pcre = static_library(
   'pcre',
-  'Regex.cxx',
+  'UniqueRegex.cxx',
   include_directories: inc,
   dependencies: [
     libpcre,

@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Regex.hxx"
+#include "UniqueRegex.hxx"
 #include "util/RuntimeError.hxx"
 
 void

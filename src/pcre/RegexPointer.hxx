@@ -30,48 +30,52 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "pcre/UniqueRegex.hxx"
+#pragma once
 
-#include <gtest/gtest.h>
+#include "MatchInfo.hxx"
+#include "util/StringView.hxx"
 
-TEST(RegexTest, Match1)
-{
-	UniqueRegex r;
-	ASSERT_FALSE(r.IsDefined());
-	r.Compile(".", false, false);
-	ASSERT_TRUE(r.IsDefined());
-	ASSERT_TRUE(r.Match("a"));
-	ASSERT_TRUE(r.Match("abc"));
-}
+#include <pcre.h>
 
-TEST(RegexTest, Match2)
-{
-	UniqueRegex r = UniqueRegex();
-	ASSERT_FALSE(r.IsDefined());
-	r.Compile("..", false, false);
-	ASSERT_TRUE(r.IsDefined());
-	ASSERT_FALSE(r.Match("a"));
-	ASSERT_TRUE(r.Match("abc"));
-}
+#include <algorithm>
 
-TEST(RegexTest, NotAnchored)
-{
-	UniqueRegex r = UniqueRegex();
-	ASSERT_FALSE(r.IsDefined());
-	r.Compile("/foo/", false, false);
-	ASSERT_TRUE(r.IsDefined());
-	ASSERT_TRUE(r.Match("/foo/"));
-	ASSERT_TRUE(r.Match("/foo/bar"));
-	ASSERT_TRUE(r.Match("foo/foo/"));
-}
+class RegexPointer {
+protected:
+	pcre *re = nullptr;
+	pcre_extra *extra = nullptr;
 
-TEST(RegexTest, Anchored)
-{
-	UniqueRegex r = UniqueRegex();
-	ASSERT_FALSE(r.IsDefined());
-	r.Compile("/foo/", true, false);
-	ASSERT_TRUE(r.IsDefined());
-	ASSERT_TRUE(r.Match("/foo/"));
-	ASSERT_TRUE(r.Match("/foo/bar"));
-	ASSERT_FALSE(r.Match("foo/foo/"));
-}
+	unsigned n_capture = 0;
+
+public:
+	constexpr bool IsDefined() const noexcept {
+		return re != nullptr;
+	}
+
+	[[gnu::pure]]
+	bool Match(StringView s) const noexcept {
+		/* we don't need the data written to ovector, but PCRE can
+		   omit internal allocations if we pass a buffer to
+		   pcre_exec() */
+		int ovector[MatchInfo::OVECTOR_SIZE];
+		return pcre_exec(re, extra, s.data, s.size,
+				 0, 0, ovector, MatchInfo::OVECTOR_SIZE) >= 0;
+	}
+
+	[[gnu::pure]]
+	MatchInfo MatchCapture(StringView s) const noexcept {
+		MatchInfo mi(s.data);
+		mi.n = pcre_exec(re, extra, s.data, s.size,
+				 0, 0, mi.ovector, mi.OVECTOR_SIZE);
+		if (mi.n == 0)
+			/* not enough room in the array - assume it's full */
+			mi.n = mi.OVECTOR_SIZE / 3;
+		else if (mi.n > 0 && n_capture >= unsigned(mi.n))
+			/* in its return value, PCRE omits mismatching
+			   optional captures if (and only if) they are
+			   the last capture; this kludge works around
+			   this */
+			mi.n = std::min<unsigned>(n_capture + 1,
+						  mi.OVECTOR_SIZE / 3);
+		return mi;
+	}
+};
