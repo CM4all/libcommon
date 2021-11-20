@@ -37,6 +37,7 @@
 #include <pcre.h>
 
 #include <algorithm>
+#include <array>
 #include <string_view>
 
 class RegexPointer {
@@ -56,9 +57,9 @@ public:
 		/* we don't need the data written to ovector, but PCRE can
 		   omit internal allocations if we pass a buffer to
 		   pcre_exec() */
-		int ovector[MatchInfo::OVECTOR_SIZE];
+		std::array<int, MatchInfo::OVECTOR_SIZE> ovector;
 		return pcre_exec(re, extra, s.data(), s.size(),
-				 0, 0, ovector, MatchInfo::OVECTOR_SIZE) >= 0;
+				 0, 0, &ovector.front(), ovector.size()) >= 0;
 	}
 
 	[[gnu::pure]]
