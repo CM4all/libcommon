@@ -32,10 +32,9 @@
 
 #pragma once
 
-#include "util/StringView.hxx"
-
 #include <cassert>
 #include <cstddef>
+#include <string_view>
 
 class MatchInfo {
 	friend class RegexPointer;
@@ -64,15 +63,15 @@ public:
 	}
 
 	[[gnu::pure]]
-	StringView GetCapture(unsigned i) const noexcept {
+	std::string_view GetCapture(unsigned i) const noexcept {
 		assert(n >= 0);
 
 		if (i >= unsigned(n))
-			return nullptr;
+			return {};
 
 		int start = ovector[2 * i];
 		if (start < 0)
-			return nullptr;
+			return {};
 
 		int end = ovector[2 * i + 1];
 		assert(end >= start);
