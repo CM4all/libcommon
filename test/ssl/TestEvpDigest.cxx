@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ssl/EvpDigest.hxx"
+#include "lib/openssl/EvpDigest.hxx"
 #include "util/HexFormat.hxx"
 
 #include <gtest/gtest.h>

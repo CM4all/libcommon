@@ -30,9 +30,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "curl/Global.hxx"
-#include "curl/Handler.hxx"
-#include "curl/CoRequest.hxx"
+#include "lib/curl/Global.hxx"
+#include "lib/curl/Handler.hxx"
+#include "lib/curl/CoRequest.hxx"
 #include "co/InvokeTask.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"

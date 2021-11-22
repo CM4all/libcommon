@@ -42,7 +42,7 @@
 #endif
 #include "AllocatorPtr.hxx"
 #if TRANSLATION_ENABLE_EXPAND
-#include "pcre/UniqueRegex.hxx"
+#include "lib/pcre/UniqueRegex.hxx"
 #include "pexpand.hxx"
 #endif
 #if TRANSLATION_ENABLE_SESSION

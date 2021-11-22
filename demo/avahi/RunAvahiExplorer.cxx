@@ -30,11 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "avahi/Check.hxx"
-#include "avahi/Client.hxx"
-#include "avahi/ErrorHandler.hxx"
-#include "avahi/Explorer.hxx"
-#include "avahi/ExplorerListener.hxx"
+#include "lib/avahi/Check.hxx"
+#include "lib/avahi/Client.hxx"
+#include "lib/avahi/ErrorHandler.hxx"
+#include "lib/avahi/Explorer.hxx"
+#include "lib/avahi/ExplorerListener.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
 #include "net/ToString.hxx"

@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sodium/SHA256.hxx"
+#include "lib/sodium/SHA256.hxx"
 #include "util/HexFormat.hxx"
 #include "util/StringBuffer.hxx"
 

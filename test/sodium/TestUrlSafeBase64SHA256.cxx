@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sodium/UrlSafeBase64SHA256.hxx"
+#include "lib/sodium/UrlSafeBase64SHA256.hxx"
 
 #include <gtest/gtest.h>
 

@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sodium/GenericHash.hxx"
+#include "lib/sodium/GenericHash.hxx"
 #include "util/HexFormat.hxx"
 #include "util/StringBuffer.hxx"
 

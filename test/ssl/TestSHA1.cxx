@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ssl/SHA1.hxx"
+#include "lib/openssl/SHA1.hxx"
 
 #include <gtest/gtest.h>
 

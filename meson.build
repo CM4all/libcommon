@@ -141,11 +141,11 @@ subdir('src/lua')
 subdir('src/io')
 subdir('src/io/uring')
 subdir('src/system')
-subdir('src/ssl')
+subdir('src/lib/openssl')
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   # this library needs std::byte
-  subdir('src/sodium')
+  subdir('src/lib/sodium')
   subdir('src/jwt')
 endif
 
@@ -156,16 +156,16 @@ subdir('src/event/net/cares')
 subdir('src/event/systemd')
 subdir('src/event/uring')
 
-subdir('src/avahi')
+subdir('src/lib/avahi')
 if avahi_dep.found()
   subdir('demo/avahi')
 endif
 
-subdir('src/curl')
-subdir('src/zlib')
-subdir('src/pcre')
+subdir('src/lib/curl')
+subdir('src/lib/zlib')
+subdir('src/lib/pcre')
 subdir('src/pg')
-subdir('src/odbus')
+subdir('src/lib/dbus')
 subdir('src/spawn')
 subdir('src/stock')
 subdir('src/translation')

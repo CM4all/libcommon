@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sodium/Base64.hxx"
+#include "lib/sodium/Base64.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 #include "util/StringView.hxx"

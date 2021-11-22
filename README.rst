@@ -61,17 +61,23 @@ Each directory below ``src`` contains a sub-library:
 - ``json``: standalone ``boost::json``
 - ``net``: networking/socket utilities
 - ``event``: a non-blocking I/O event loop
+- ``lib``: C++ wrappers or additional utilities for various
+  external libraries.
 - ``lua``: `Lua <http://www.lua.org/>`__ C++ wrappers
-- ``curl``: `libcurl <https://curl.haxx.se/>`__ C++ wrappers
-- ``pcre``: `PCRE <https://www.pcre.org/>`__ C++ wrappers
 - ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers
-- ``odbus``: `libdbus
-  <https://www.freedesktop.org/wiki/Software/dbus/>`__ C++ wrappers
-- ``sodium``: `libsodium <https://github.com/jedisct1/libsodium/>`__
-  C++ wrappers
-- ``ssl``: `OpenSSL <https://www.openssl.org/>`__ C++ wrappers
-- ``zlib``: `zlib <https://zlib.net//>`__ C++ wrappers
 - ``translation``: implementation of the CM4all translation protocol
 - ``spawn``: a process spawner
 - ``stock``: manage stocks of reusable objects (e.g. for connection
   pooling)
+
+These directories contain C++ wrappers or additional utilities for
+external libraries:
+
+- ``lib/curl``: `libcurl <https://curl.haxx.se/>`__ C++ wrappers
+- ``lib/dbus``: `libdbus
+  <https://www.freedesktop.org/wiki/Software/dbus/>`__ C++ wrappers
+- ``lib/openssl``: `OpenSSL <https://www.openssl.org/>`__ C++ wrappers
+- ``lib/pcre``: `PCRE <https://www.pcre.org/>`__ C++ wrappers
+- ``lib/sodium``: `libsodium <https://github.com/jedisct1/libsodium/>`__
+  C++ wrappers
+- ``lib/zlib``: `zlib <https://zlib.net//>`__ C++ wrappers
