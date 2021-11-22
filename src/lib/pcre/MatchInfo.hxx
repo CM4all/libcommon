@@ -63,7 +63,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	std::string_view GetCapture(unsigned i) const noexcept {
+	constexpr std::string_view GetCapture(std::size_t i) const noexcept {
 		assert(n >= 0);
 		assert(i < size());
 
@@ -78,7 +78,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	std::size_t GetCaptureStart(unsigned i) const noexcept {
+	constexpr std::size_t GetCaptureStart(std::size_t i) const noexcept {
 		assert(n >= 0);
 		assert(i < size());
 
@@ -90,7 +90,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	std::size_t GetCaptureEnd(unsigned i) const noexcept {
+	constexpr std::size_t GetCaptureEnd(std::size_t i) const noexcept {
 		assert(n >= 0);
 		assert(i < size());
 
