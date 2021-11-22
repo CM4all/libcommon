@@ -34,6 +34,8 @@
 
 #include <gtest/gtest.h>
 
+#include <string.h>
+
 TEST(RegexTest, Match1)
 {
 	UniqueRegex r;
@@ -74,4 +76,57 @@ TEST(RegexTest, Anchored)
 	ASSERT_TRUE(r.Match("/foo/"));
 	ASSERT_TRUE(r.Match("/foo/bar"));
 	ASSERT_FALSE(r.Match("foo/foo/"));
+}
+
+TEST(RegexTest, Capture)
+{
+	const UniqueRegex r{"/foo/(.*)", true, true};
+	ASSERT_TRUE(r.IsDefined());
+
+	{
+		static constexpr auto s = "/foo/";
+		const auto m = r.MatchCapture(s);
+		ASSERT_TRUE(m);
+		ASSERT_EQ(m[0].data(), s);
+		ASSERT_EQ(m[0].size(), strlen(s));
+		ASSERT_EQ(m[1].data(), s + 5);
+		ASSERT_EQ(m[1].size(), 0);
+	}
+
+	{
+		static constexpr auto s = "/foo/bar";
+		const auto m = r.MatchCapture(s);
+		ASSERT_TRUE(m);
+		ASSERT_EQ(m[0].data(), s);
+		ASSERT_EQ(m[0].size(), strlen(s));
+		ASSERT_EQ(m[1].data(), s + 5);
+		ASSERT_EQ(m[1].size(), strlen(s + 5));
+	}
+}
+
+TEST(RegexTest, CaptureOptional)
+{
+	const UniqueRegex r{"/foo/(.+)?", true, true};
+	ASSERT_TRUE(r.IsDefined());
+
+	{
+		static constexpr auto s = "/foo/";
+		const auto m = r.MatchCapture(s);
+		ASSERT_TRUE(m);
+		ASSERT_EQ(m.size(), 2U);
+		ASSERT_EQ(m[0].data(), s);
+		ASSERT_EQ(m[0].size(), strlen(s));
+		ASSERT_EQ(m[1].data(), nullptr);
+	}
+
+	{
+		static constexpr auto s = "/foo/bar";
+		const auto m = r.MatchCapture(s);
+		ASSERT_TRUE(m);
+		ASSERT_EQ(m.size(), 2U);
+		ASSERT_EQ(m[0].data(), s);
+		ASSERT_EQ(m[0].size(), strlen(s));
+		ASSERT_EQ(m[1].data(), s + 5);
+		ASSERT_EQ(m[1].size(), strlen(s + 5));
+	}
 }
