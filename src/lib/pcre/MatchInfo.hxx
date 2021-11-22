@@ -57,6 +57,12 @@ public:
 		return n >= 0;
 	}
 
+	constexpr std::size_t size() const noexcept {
+		assert(n >= 0);
+
+		return static_cast<std::size_t>(n);
+	}
+
 	[[gnu::pure]]
 	StringView GetCapture(unsigned i) const noexcept {
 		assert(n >= 0);
