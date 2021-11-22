@@ -50,7 +50,7 @@ class MatchInfo {
 public:
 	MatchInfo() = default;
 
-	static constexpr std::size_t npos = std::size_t(-1);
+	static constexpr std::size_t npos = ~std::size_t{};
 
 	constexpr operator bool() const noexcept {
 		return n >= 0;
