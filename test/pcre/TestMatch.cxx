@@ -104,6 +104,34 @@ TEST(RegexTest, Capture)
 	}
 }
 
+TEST(RegexTest, CaptureEmpty)
+{
+	const UniqueRegex r{"/fo(o?)", true, true};
+	ASSERT_TRUE(r.IsDefined());
+
+	{
+		static constexpr auto s = "/foo";
+		const auto m = r.MatchCapture(s);
+		ASSERT_TRUE(m);
+		ASSERT_EQ(m.size(), 2U);
+		ASSERT_EQ(m[0].data(), s);
+		ASSERT_EQ(m[0].size(), strlen(s));
+		ASSERT_EQ(m[1].data(), s + 3);
+		ASSERT_EQ(m[1].size(), 1U);
+	}
+
+	{
+		static constexpr auto s = "/fo";
+		const auto m = r.MatchCapture(s);
+		ASSERT_TRUE(m);
+		ASSERT_EQ(m.size(), 2U);
+		ASSERT_EQ(m[0].data(), s);
+		ASSERT_EQ(m[0].size(), strlen(s));
+		ASSERT_EQ(m[1].data(), s + 3);
+		ASSERT_EQ(m[1].size(), 0U);
+	}
+}
+
 TEST(RegexTest, CaptureOptional)
 {
 	const UniqueRegex r{"/foo/(.+)?", true, true};
