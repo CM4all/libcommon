@@ -63,7 +63,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	constexpr std::string_view GetCapture(std::size_t i) const noexcept {
+	constexpr std::string_view operator[](std::size_t i) const noexcept {
 		assert(n >= 0);
 		assert(i < size());
 
