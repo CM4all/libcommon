@@ -54,7 +54,8 @@ public:
 	}
 
 	UniqueRegex &operator=(UniqueRegex &&src) noexcept {
-		std::swap<RegexPointer>(*this, src);
+		using std::swap;
+		swap<RegexPointer>(*this, src);
 		return *this;
 	}
 
