@@ -53,7 +53,7 @@ public:
 
 	static constexpr std::size_t npos = std::size_t(-1);
 
-	constexpr bool IsDefined() const noexcept {
+	constexpr operator bool() const noexcept {
 		return n >= 0;
 	}
 
