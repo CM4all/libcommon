@@ -65,9 +65,7 @@ public:
 	[[gnu::pure]]
 	std::string_view GetCapture(unsigned i) const noexcept {
 		assert(n >= 0);
-
-		if (i >= unsigned(n))
-			return {};
+		assert(i < size());
 
 		int start = ovector[2 * i];
 		if (start < 0)
@@ -81,11 +79,8 @@ public:
 
 	[[gnu::pure]]
 	std::size_t GetCaptureStart(unsigned i) const noexcept {
-
 		assert(n >= 0);
-
-		if (i >= unsigned(n))
-			return npos;
+		assert(i < size());
 
 		int start = ovector[2 * i];
 		if (start < 0)
@@ -96,11 +91,8 @@ public:
 
 	[[gnu::pure]]
 	std::size_t GetCaptureEnd(unsigned i) const noexcept {
-
 		assert(n >= 0);
-
-		if (i >= unsigned(n))
-			return npos;
+		assert(i < size());
 
 		int end = ovector[2 * i + 1];
 		if (end < 0)
