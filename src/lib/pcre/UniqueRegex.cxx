@@ -32,7 +32,8 @@
 
 #include "UniqueRegex.hxx"
 #include "Error.hxx"
-#include "util/RuntimeError.hxx"
+
+#include <stdio.h>
 
 void
 UniqueRegex::Compile(const char *pattern, bool anchored, bool capture)
