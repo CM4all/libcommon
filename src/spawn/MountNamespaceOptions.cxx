@@ -83,12 +83,12 @@ MountNamespaceOptions::IsExpandable() const noexcept
 }
 
 void
-MountNamespaceOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
+MountNamespaceOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 {
 	if (expand_home != nullptr)
-		home = expand_string_unescaped(alloc, expand_home, match_info);
+		home = expand_string_unescaped(alloc, expand_home, match_data);
 
-	Mount::ExpandAll(alloc, mounts, match_info);
+	Mount::ExpandAll(alloc, mounts, match_data);
 }
 
 #endif

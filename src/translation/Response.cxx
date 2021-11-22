@@ -625,73 +625,73 @@ TranslateResponse::IsExpandable() const
 }
 
 void
-TranslateResponse::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
+TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 {
 	assert(regex != nullptr);
 
 	if (expand_redirect) {
 		expand_redirect = false;
-		redirect = expand_string_unescaped(alloc, redirect, match_info);
+		redirect = expand_string_unescaped(alloc, redirect, match_data);
 	}
 
 	if (expand_site) {
 		expand_site = false;
-		site = expand_string_unescaped(alloc, site, match_info);
+		site = expand_string_unescaped(alloc, site, match_data);
 	}
 
 	if (expand_document_root) {
 		expand_document_root = false;
 		document_root = expand_string_unescaped(alloc, document_root,
-							match_info);
+							match_data);
 	}
 
 	if (expand_uri) {
 		expand_uri = false;
-		uri = expand_string_unescaped(alloc, uri, match_info);
+		uri = expand_string_unescaped(alloc, uri, match_data);
 	}
 
 	if (expand_test_path) {
 		expand_test_path = false;
-		test_path = expand_string_unescaped(alloc, test_path, match_info);
+		test_path = expand_string_unescaped(alloc, test_path, match_data);
 	}
 
 	if (expand_auth_file) {
 		expand_auth_file = false;
-		auth_file = expand_string_unescaped(alloc, auth_file, match_info);
+		auth_file = expand_string_unescaped(alloc, auth_file, match_data);
 	}
 
 	if (expand_read_file) {
 		expand_read_file = false;
-		read_file = expand_string_unescaped(alloc, read_file, match_info);
+		read_file = expand_string_unescaped(alloc, read_file, match_data);
 	}
 
 	if (expand_append_auth != nullptr) {
 		const char *value = expand_string_unescaped(alloc, expand_append_auth,
-							    match_info);
+							    match_data);
 		append_auth = { value, strlen(value) };
 	}
 
 	if (expand_cookie_host) {
 		expand_cookie_host = false;
-		cookie_host = expand_string_unescaped(alloc, cookie_host, match_info);
+		cookie_host = expand_string_unescaped(alloc, cookie_host, match_data);
 	}
 
 	for (const auto &i : expand_request_headers) {
-		const char *value = expand_string_unescaped(alloc, i.value, match_info);
+		const char *value = expand_string_unescaped(alloc, i.value, match_data);
 		request_headers.Add(alloc, i.key, value);
 	}
 
 	for (const auto &i : expand_response_headers) {
-		const char *value = expand_string_unescaped(alloc, i.value, match_info);
+		const char *value = expand_string_unescaped(alloc, i.value, match_data);
 		response_headers.Add(alloc, i.key, value);
 	}
 
-	address.Expand(alloc, match_info);
+	address.Expand(alloc, match_data);
 
 	if (external_session_manager != nullptr)
-		external_session_manager->Expand(alloc, match_info);
+		external_session_manager->Expand(alloc, match_data);
 
-	widget_view_expand_all(alloc, views, match_info);
+	widget_view_expand_all(alloc, views, match_data);
 }
 
 #endif

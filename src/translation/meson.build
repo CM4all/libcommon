@@ -4,6 +4,12 @@ translation = static_library(
   'Parser.cxx',
   'Response.cxx',
   include_directories: inc,
+  dependencies: [
+    # using get_variable() because this library can be built without
+    # PCRE support, but Meson can't check the value of the
+    # TRANSLATION_ENABLE_EXPAND macro of translation/Features.h
+    get_variable('pcre_dep', []),
+  ],
 )
 
 translation_dep = declare_dependency(

@@ -38,7 +38,7 @@
 #include <cstdint>
 
 class AllocatorPtr;
-class MatchInfo;
+class MatchData;
 class VfsBuilder;
 
 struct Mount : IntrusiveForwardListHook {
@@ -96,10 +96,10 @@ struct Mount : IntrusiveForwardListHook {
 		return false;
 	}
 
-	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
+	void Expand(AllocatorPtr alloc, const MatchData &match_data);
 	static void ExpandAll(AllocatorPtr alloc,
 			      IntrusiveForwardList<Mount> &list,
-			      const MatchInfo &match_info);
+			      const MatchData &match_data);
 #endif
 
 private:

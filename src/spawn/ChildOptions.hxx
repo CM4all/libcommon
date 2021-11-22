@@ -43,7 +43,7 @@
 
 struct ResourceLimits;
 struct PreparedChildProcess;
-class MatchInfo;
+class MatchData;
 class UniqueFileDescriptor;
 
 /**
@@ -149,7 +149,7 @@ struct ChildOptions {
 	/**
 	 * Throws on error.
 	 */
-	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
+	void Expand(AllocatorPtr alloc, const MatchData &match_data);
 
 	char *MakeId(char *p) const noexcept;
 

@@ -86,14 +86,14 @@ ChildOptions::IsExpandable() const noexcept
 }
 
 void
-ChildOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
+ChildOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 {
 	if (expand_stderr_path != nullptr)
 		stderr_path = expand_string_unescaped(alloc, expand_stderr_path,
-						      match_info);
+						      match_data);
 
-	env.Expand(alloc, match_info);
-	ns.Expand(alloc, match_info);
+	env.Expand(alloc, match_data);
+	ns.Expand(alloc, match_data);
 }
 
 #endif

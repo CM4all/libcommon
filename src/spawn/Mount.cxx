@@ -73,22 +73,22 @@ Mount::CloneAll(AllocatorPtr alloc, const IntrusiveForwardList<Mount> &src) noex
 #if TRANSLATION_ENABLE_EXPAND
 
 void
-Mount::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
+Mount::Expand(AllocatorPtr alloc, const MatchData &match_data)
 {
 	if (expand_source) {
 		expand_source = false;
 
-		source = expand_string_unescaped(alloc, source, match_info);
+		source = expand_string_unescaped(alloc, source, match_data);
 	}
 }
 
 void
 Mount::ExpandAll(AllocatorPtr alloc,
 		 IntrusiveForwardList<Mount> &list,
-		 const MatchInfo &match_info)
+		 const MatchData &match_data)
 {
 	for (auto &i : list)
-		i.Expand(alloc, match_info);
+		i.Expand(alloc, match_data);
 }
 
 #endif

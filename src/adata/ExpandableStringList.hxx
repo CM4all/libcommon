@@ -39,7 +39,7 @@
 #include <iterator>
 
 class AllocatorPtr;
-class MatchInfo;
+class MatchData;
 template<typename T> struct ConstBuffer;
 
 class ExpandableStringList final {
@@ -119,7 +119,7 @@ public:
 	/**
 	 * Throws std::runtime_error on error.
 	 */
-	void Expand(AllocatorPtr alloc, const MatchInfo &match_info) noexcept;
+	void Expand(AllocatorPtr alloc, const MatchData &match_data) noexcept;
 #endif
 
 	class Builder final {

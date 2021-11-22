@@ -37,7 +37,7 @@
 
 class AllocatorPtr;
 struct UidGid;
-class MatchInfo;
+class MatchData;
 
 struct NamespaceOptions {
 	/**
@@ -110,7 +110,7 @@ struct NamespaceOptions {
 	/**
 	 * Throws std::runtime_error on error.
 	 */
-	void Expand(AllocatorPtr alloc, const MatchInfo &match_info);
+	void Expand(AllocatorPtr alloc, const MatchData &match_data);
 #endif
 
 	/**

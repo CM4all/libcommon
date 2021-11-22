@@ -68,13 +68,13 @@ ExpandableStringList::IsExpandable() const noexcept
 }
 
 void
-ExpandableStringList::Expand(AllocatorPtr alloc, const MatchInfo &match_info) noexcept
+ExpandableStringList::Expand(AllocatorPtr alloc, const MatchData &match_data) noexcept
 {
 	for (auto &i : list) {
 		if (!i.expandable)
 			continue;
 
-		i.value = expand_string_unescaped(alloc, i.value, match_info);
+		i.value = expand_string_unescaped(alloc, i.value, match_data);
 	}
 }
 

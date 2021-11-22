@@ -72,9 +72,9 @@ NamespaceOptions::IsExpandable() const
 }
 
 void
-NamespaceOptions::Expand(AllocatorPtr alloc, const MatchInfo &match_info)
+NamespaceOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 {
-	mount.Expand(alloc, match_info);
+	mount.Expand(alloc, match_data);
 }
 
 #endif
