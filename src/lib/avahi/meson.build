@@ -16,6 +16,7 @@ avahi = static_library(
   include_directories: inc,
   dependencies: [
     libavahi_client,
+    time_dep,
   ],
 )
 
