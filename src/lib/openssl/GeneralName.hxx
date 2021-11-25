@@ -37,10 +37,8 @@
 
 #include <openssl/x509v3.h>
 
+#include <cassert>
 #include <utility>
-#include <algorithm>
-
-#include <assert.h>
 
 namespace OpenSSL {
 
