@@ -86,7 +86,7 @@ struct ParamWrapper<std::string> {
 	explicit ParamWrapper(S &&_value)
 		:value(std::forward<S>(_value)) {}
 
-	gcc_pure
+	[[gnu::pure]]
 	StringView GetValue() const {
 		return {value.data(), value.length()};
 	}
@@ -101,7 +101,7 @@ struct ParamWrapper<std::string_view> {
 	explicit ParamWrapper(S &&_value)
 		:value(std::forward<S>(_value)) {}
 
-	gcc_pure
+	[[gnu::pure]]
 	StringView GetValue() const {
 		return {value.data(), value.length()};
 	}

@@ -38,7 +38,6 @@
 #define FNV_HASH_HXX
 
 #include "util/ConstBuffer.hxx"
-#include "Compiler.h"
 
 #include <cstdint>
 
@@ -68,12 +67,12 @@ struct FNV1aAlgorithm {
 	using value_type = typename Traits::value_type;
 	using fast_type = typename Traits::fast_type;
 
-	gcc_hot
+	[[gnu::hot]]
 	static constexpr fast_type Update(fast_type hash, uint8_t b) noexcept {
 		return (hash ^ b) * Traits::PRIME;
 	}
 
-	gcc_pure gcc_hot
+	[[gnu::pure]] [[gnu::hot]]
 	static value_type StringHash(const char *s) noexcept {
 		using Algorithm = FNV1aAlgorithm<Traits>;
 
@@ -84,7 +83,7 @@ struct FNV1aAlgorithm {
 		return hash;
 	}
 
-	gcc_pure gcc_hot
+	[[gnu::pure]] [[gnu::hot]]
 	static constexpr value_type BinaryHash(ConstBuffer<uint8_t> s) noexcept {
 		using Algorithm = FNV1aAlgorithm<Traits>;
 
@@ -95,13 +94,13 @@ struct FNV1aAlgorithm {
 		return hash;
 	}
 
-	gcc_pure gcc_hot
+	[[gnu::pure]] [[gnu::hot]]
 	static constexpr value_type BinaryHash(ConstBuffer<void> s) noexcept {
 		return BinaryHash(ConstBuffer<uint8_t>::FromVoid(s));
 	}
 };
 
-gcc_pure gcc_hot
+[[gnu::pure]] [[gnu::hot]]
 inline uint32_t
 FNV1aHash32(const char *s) noexcept
 {
@@ -110,7 +109,7 @@ FNV1aHash32(const char *s) noexcept
 	return Algorithm::StringHash(s);
 }
 
-gcc_pure gcc_hot
+[[gnu::pure]] [[gnu::hot]]
 constexpr uint32_t
 FNV1aHash32(ConstBuffer<void> s) noexcept
 {
@@ -119,7 +118,7 @@ FNV1aHash32(ConstBuffer<void> s) noexcept
 	return Algorithm::BinaryHash(s);
 }
 
-gcc_pure gcc_hot
+[[gnu::pure]] [[gnu::hot]]
 inline uint64_t
 FNV1aHash64(const char *s) noexcept
 {
@@ -128,7 +127,7 @@ FNV1aHash64(const char *s) noexcept
 	return Algorithm::StringHash(s);
 }
 
-gcc_pure gcc_hot
+[[gnu::pure]] [[gnu::hot]]
 constexpr uint64_t
 FNV1aHash64(ConstBuffer<void> s) noexcept
 {
@@ -137,7 +136,7 @@ FNV1aHash64(ConstBuffer<void> s) noexcept
 	return Algorithm::BinaryHash(s);
 }
 
-gcc_pure gcc_hot
+[[gnu::pure]] [[gnu::hot]]
 inline uint32_t
 FNV1aHashFold32(const char *s) noexcept
 {
