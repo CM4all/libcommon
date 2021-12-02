@@ -36,6 +36,7 @@
 #include "co/Compat.hxx"
 
 #include <cstddef>
+#include <type_traits>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -63,7 +64,10 @@ private:
 	void OnUringCompletion(int res) noexcept override;
 };
 
-template<typename Op>
+template<typename T>
+concept CoAwaitableOperation = std::is_base_of_v<CoOperationBase, T>;
+
+template<CoAwaitableOperation Op>
 struct CoAwaitable final {
 	Op &op;
 
