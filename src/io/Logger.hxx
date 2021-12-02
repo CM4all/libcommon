@@ -42,6 +42,7 @@
 #include <exception>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include <stdio.h>
@@ -151,70 +152,20 @@ struct ParamWrapper<uint64_t> {
 };
 
 template<typename... Params>
-class ParamCollector;
-
-template<>
-class ParamCollector<> {
-public:
-	static constexpr size_t Count() noexcept {
-		return 0;
-	}
-
-	template<typename O>
-	size_t Fill(O) const noexcept {
-		return 0;
-	}
-};
-
-template<typename T>
-class ParamCollector<T> {
-	ParamWrapper<T> wrapper;
-
-public:
-	explicit ParamCollector(const T &t) noexcept:wrapper(t) {}
-
-	static constexpr size_t Count() noexcept {
-		return 1;
-	}
-
-	template<typename O>
-	O Fill(O output) const noexcept {
-		*output++ = wrapper.GetValue();
-		return output;
-	}
-};
-
-template<typename T, typename... Rest>
-class ParamCollector<T, Rest...> {
-	ParamCollector<T> first;
-	ParamCollector<Rest...> rest;
-
-public:
-	explicit ParamCollector(const T &t, Rest... _rest) noexcept
-		:first(t), rest(_rest...) {}
-
-	static constexpr size_t Count() noexcept {
-		return decltype(first)::Count() + decltype(rest)::Count();
-	}
-
-	template<typename O>
-	O Fill(O output) const noexcept {
-		return rest.Fill(first.Fill(output));
-	}
-};
-
-template<typename... Params>
 class ParamArray {
-	ParamCollector<Params...> collector;
+	std::tuple<ParamWrapper<Params>...> wrappers;
 
 public:
-	static constexpr size_t count = decltype(collector)::Count();
-	std::array<std::string_view, decltype(collector)::Count()> values;
+	static constexpr size_t count = sizeof...(Params);
+	std::array<std::string_view, count> values;
 
 	explicit ParamArray(Params... params) noexcept
-		:collector(params...)
+		:wrappers(params...)
 	{
-		collector.Fill(&values.front());
+		std::apply([this](const auto &...w){
+			auto *i = values.data();
+			((*i++ = w.GetValue()), ...);
+		}, wrappers);
 	}
 };
 
