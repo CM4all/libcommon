@@ -41,7 +41,7 @@
 
 unsigned LoggerDetail::max_level = 1;
 
-LoggerDetail::ParamWrapper<std::exception_ptr>::ParamWrapper(std::exception_ptr ep)
+LoggerDetail::ParamWrapper<std::exception_ptr>::ParamWrapper(std::exception_ptr ep) noexcept
 	:ParamWrapper<std::string>(GetFullMessage(ep)) {}
 
 static constexpr struct iovec
@@ -94,7 +94,7 @@ LoggerDetail::Format(unsigned level, StringView domain,
 }
 
 std::string
-ChildLoggerDomain::Make(StringView parent, const char *name)
+ChildLoggerDomain::Make(StringView parent, const char *name) noexcept
 {
 	if (parent.empty())
 		return name;

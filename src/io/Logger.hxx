@@ -59,22 +59,23 @@ template<>
 struct ParamWrapper<StringView> {
 	StringView value;
 
-	constexpr explicit ParamWrapper(StringView _value):value(_value) {}
+	constexpr explicit ParamWrapper(StringView _value) noexcept
+		:value(_value) {}
 
-	constexpr StringView GetValue() const {
+	constexpr StringView GetValue() const noexcept {
 		return value;
 	}
 };
 
 template<>
 struct ParamWrapper<const char *> : ParamWrapper<StringView> {
-	explicit ParamWrapper(const char *_value)
+	explicit ParamWrapper(const char *_value) noexcept
 		:ParamWrapper<StringView>(_value) {}
 };
 
 template<>
 struct ParamWrapper<char *> : ParamWrapper<StringView> {
-	explicit ParamWrapper(char *_value)
+	explicit ParamWrapper(char *_value) noexcept
 		:ParamWrapper<StringView>(_value) {}
 };
 
@@ -83,11 +84,11 @@ struct ParamWrapper<std::string> {
 	std::string value;
 
 	template<typename S>
-	explicit ParamWrapper(S &&_value)
+	explicit ParamWrapper(S &&_value) noexcept
 		:value(std::forward<S>(_value)) {}
 
 	[[gnu::pure]]
-	StringView GetValue() const {
+	StringView GetValue() const noexcept {
 		return {value.data(), value.length()};
 	}
 };
@@ -98,11 +99,11 @@ struct ParamWrapper<std::string_view> {
 	std::string_view value;
 
 	template<typename S>
-	explicit ParamWrapper(S &&_value)
+	explicit ParamWrapper(S &&_value) noexcept
 		:value(std::forward<S>(_value)) {}
 
 	[[gnu::pure]]
-	StringView GetValue() const {
+	StringView GetValue() const noexcept {
 		return {value.data(), value.length()};
 	}
 };
@@ -110,7 +111,7 @@ struct ParamWrapper<std::string_view> {
 
 template<>
 struct ParamWrapper<std::exception_ptr> : ParamWrapper<std::string> {
-	explicit ParamWrapper(std::exception_ptr ep);
+	explicit ParamWrapper(std::exception_ptr ep) noexcept;
 };
 
 template<>
@@ -118,9 +119,10 @@ struct ParamWrapper<int> {
 	char data[16];
 	size_t size;
 
-	ParamWrapper(int _value):size(sprintf(data, "%i", _value)) {}
+	ParamWrapper(int _value) noexcept
+		:size(sprintf(data, "%i", _value)) {}
 
-	StringView GetValue() const {
+	StringView GetValue() const noexcept {
 		return {data, size};
 	}
 };
@@ -130,9 +132,10 @@ struct ParamWrapper<unsigned> {
 	char data[16];
 	size_t size;
 
-	ParamWrapper(int _value):size(sprintf(data, "%u", _value)) {}
+	ParamWrapper(int _value) noexcept
+		:size(sprintf(data, "%u", _value)) {}
 
-	StringView GetValue() const {
+	StringView GetValue() const noexcept {
 		return {data, size};
 	}
 };
@@ -142,9 +145,10 @@ struct ParamWrapper<int64_t> {
 	char data[32];
 	size_t size;
 
-	ParamWrapper(int64_t _value):size(sprintf(data, "%" PRId64, _value)) {}
+	ParamWrapper(int64_t _value) noexcept
+		:size(sprintf(data, "%" PRId64, _value)) {}
 
-	StringView GetValue() const {
+	StringView GetValue() const noexcept {
 		return {data, size};
 	}
 };
@@ -154,9 +158,10 @@ struct ParamWrapper<uint64_t> {
 	char data[32];
 	size_t size;
 
-	ParamWrapper(uint64_t _value):size(sprintf(data, "%" PRIu64, _value)) {}
+	ParamWrapper(uint64_t _value) noexcept
+		:size(sprintf(data, "%" PRIu64, _value)) {}
 
-	StringView GetValue() const {
+	StringView GetValue() const noexcept {
 		return {data, size};
 	}
 };
@@ -167,7 +172,7 @@ class ParamCollector;
 template<>
 class ParamCollector<> {
 public:
-	static constexpr size_t Count() {
+	static constexpr size_t Count() noexcept {
 		return 0;
 	}
 
@@ -182,9 +187,9 @@ class ParamCollector<T> {
 	ParamWrapper<T> wrapper;
 
 public:
-	explicit ParamCollector(const T &t):wrapper(t) {}
+	explicit ParamCollector(const T &t) noexcept:wrapper(t) {}
 
-	static constexpr size_t Count() {
+	static constexpr size_t Count() noexcept {
 		return 1;
 	}
 
@@ -201,10 +206,10 @@ class ParamCollector<T, Rest...> {
 	ParamCollector<Rest...> rest;
 
 public:
-	explicit ParamCollector(const T &t, Rest... _rest)
+	explicit ParamCollector(const T &t, Rest... _rest) noexcept
 		:first(t), rest(_rest...) {}
 
-	static constexpr size_t Count() {
+	static constexpr size_t Count() noexcept {
 		return decltype(first)::Count() + decltype(rest)::Count();
 	}
 
@@ -222,7 +227,9 @@ public:
 	static constexpr size_t count = decltype(collector)::Count();
 	std::array<StringView, decltype(collector)::Count()> values;
 
-	explicit ParamArray(Params... params):collector(params...) {
+	explicit ParamArray(Params... params) noexcept
+		:collector(params...)
+	{
 		collector.Fill(&values.front());
 	}
 };
@@ -230,7 +237,7 @@ public:
 extern unsigned max_level;
 
 inline bool
-CheckLevel(unsigned level)
+CheckLevel(unsigned level) noexcept
 {
 	return level <= max_level;
 }
@@ -257,13 +264,13 @@ Format(unsigned level, StringView domain, const char *fmt, ...) noexcept;
 } /* namespace LoggerDetail */
 
 inline void
-SetLogLevel(unsigned level)
+SetLogLevel(unsigned level) noexcept
 {
 	LoggerDetail::max_level = level;
 }
 
 inline bool
-CheckLogLevel(unsigned level)
+CheckLogLevel(unsigned level) noexcept
 {
 	return LoggerDetail::CheckLevel(level);
 }
@@ -294,7 +301,7 @@ public:
 	explicit BasicLogger(D &&_domain)
 		:Domain(std::forward<D>(_domain)) {}
 
-	static bool CheckLevel(unsigned level) {
+	static bool CheckLevel(unsigned level) noexcept {
 		return LoggerDetail::CheckLevel(level);
 	}
 
@@ -311,7 +318,7 @@ public:
 				     fmt, std::forward<Params>(params)...);
 	}
 
-	StringView GetDomain() const {
+	StringView GetDomain() const noexcept {
 		return Domain::GetDomain();
 	}
 
@@ -328,10 +335,10 @@ public:
 	StringLoggerDomain() = default;
 
 	template<typename T>
-	explicit StringLoggerDomain(T &&_name)
+	explicit StringLoggerDomain(T &&_name) noexcept
 		:name(std::forward<T>(_name)) {}
 
-	StringView GetDomain() const {
+	StringView GetDomain() const noexcept {
 		return {name.data(), name.length()};
 	}
 };
@@ -350,7 +357,7 @@ public:
  */
 class NullLoggerDomain {
 public:
-	constexpr StringView GetDomain() const {
+	constexpr StringView GetDomain() const noexcept {
 		return nullptr;
 	}
 };
@@ -366,17 +373,17 @@ class ChildLoggerDomain : public StringLoggerDomain {
 
 public:
 	template<typename P>
-	ChildLoggerDomain(P &&parent, const char *_name)
+	ChildLoggerDomain(P &&parent, const char *_name) noexcept
 		:StringLoggerDomain(Make(parent.GetDomain(), _name)) {}
 
 private:
-	static std::string Make(StringView parent, const char *name);
+	static std::string Make(StringView parent, const char *name) noexcept;
 };
 
 class ChildLogger : public BasicLogger<ChildLoggerDomain> {
 public:
 	template<typename P>
-	ChildLogger(P &&parent, const char *_name)
+	ChildLogger(P &&parent, const char *_name) noexcept
 		:BasicLogger(ChildLoggerDomain(std::forward<P>(parent),
 					       _name)) {}
 };
@@ -389,10 +396,10 @@ class LiteralLoggerDomain {
 	StringView domain;
 
 public:
-	constexpr explicit LiteralLoggerDomain(StringView _domain=nullptr)
+	constexpr explicit LiteralLoggerDomain(StringView _domain=nullptr) noexcept
 		:domain(_domain) {}
 
-	constexpr StringView GetDomain() const {
+	constexpr StringView GetDomain() const noexcept {
 		return domain;
 	}
 };
@@ -406,7 +413,7 @@ public:
 	LLogger() = default;
 
 	template<typename D>
-	explicit LLogger(D &&_domain)
+	explicit LLogger(D &&_domain) noexcept
 		:BasicLogger(std::forward<D>(_domain)) {}
 };
 
@@ -421,10 +428,10 @@ class LazyLoggerDomain {
 	mutable std::string cache;
 
 public:
-	explicit LazyLoggerDomain(LoggerDomainFactory &_factory)
+	explicit LazyLoggerDomain(LoggerDomainFactory &_factory) noexcept
 		:factory(_factory) {}
 
-	StringView GetDomain() const {
+	StringView GetDomain() const noexcept {
 		if (cache.empty())
 			cache = factory.MakeLoggerDomain();
 		return {cache.data(), cache.length()};
@@ -433,7 +440,7 @@ public:
 
 class LazyDomainLogger : public BasicLogger<LazyLoggerDomain> {
 public:
-	explicit LazyDomainLogger(LoggerDomainFactory &_factory)
+	explicit LazyDomainLogger(LoggerDomainFactory &_factory) noexcept
 		:BasicLogger(_factory) {}
 };
 
