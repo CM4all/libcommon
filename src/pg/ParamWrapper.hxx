@@ -43,6 +43,7 @@
 #include <cstdio>
 #include <cstddef>
 #include <string>
+#include <tuple>
 #include <type_traits>
 
 #if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
@@ -323,91 +324,51 @@ struct ParamWrapper<const std::list<std::string> *> {
 };
 
 template<typename... Params>
-class ParamCollector;
-
-template<>
-class ParamCollector<> {
-public:
-	static constexpr size_t Count() noexcept {
-		return 0;
-	}
-
-	template<typename O>
-	size_t Fill(O) const noexcept {
-		return 0;
-	}
-};
-
-template<typename T>
-class ParamCollector<T> {
-	ParamWrapper<typename std::decay<T>::type> wrapper;
+class ParamCollector {
+	std::tuple<ParamWrapper<Params>...> wrappers;
 
 public:
-	explicit ParamCollector(const T &t) noexcept
-		:wrapper(t) {}
+	explicit ParamCollector(const Params&... params) noexcept
+		:wrappers(params...)
+	{
+	}
 
 	static constexpr bool HasBinary() noexcept {
-		return decltype(wrapper)::IsBinary();
+		return (ParamWrapper<Params>::IsBinary() || ...);
 	}
 
 	static constexpr size_t Count() noexcept {
-		return 1;
+		return sizeof...(Params);
 	}
 
 	template<typename O, typename S, typename F>
 	size_t Fill(O output, S size, F format) const noexcept {
-		*output = wrapper.GetValue();
-		*size = wrapper.GetSize();
-		*format = wrapper.IsBinary();
-		return 1;
+		return std::apply([&](const auto &...w){
+			return (FillOne(w, output, size, format) + ...);
+		}, wrappers);
 	}
 
 	template<typename O>
 	size_t Fill(O output) const noexcept {
-		static_assert(!decltype(wrapper)::IsBinary(),
-			      "Binary values not allowed in this overload");
+		return std::apply([&](const auto &...w){
+			return (FillOne(w, output) + ...);
+		}, wrappers);
+	}
 
-		*output = wrapper.GetValue();
+private:
+	template<typename W, typename O, typename S, typename F>
+	static std::size_t FillOne(const W &wrapper, O &output,
+				   S &size, F &format) noexcept {
+		*output++ = wrapper.GetValue();
+		*size++ = wrapper.GetSize();
+		*format++ = wrapper.IsBinary();
 		return 1;
 	}
-};
 
-template<typename T, typename... Rest>
-class ParamCollector<T, Rest...> {
-	ParamCollector<T> first;
-	ParamCollector<Rest...> rest;
-
-public:
-	explicit ParamCollector(const T &t, const Rest&... _rest) noexcept
-		:first(t), rest(_rest...) {}
-
-	static constexpr bool HasBinary() noexcept {
-		return decltype(first)::HasBinary() ||
-			decltype(rest)::HasBinary();
-	}
-
-	static constexpr size_t Count() noexcept {
-		return decltype(first)::Count() + decltype(rest)::Count();
-	}
-
-	template<typename O, typename S, typename F>
-	size_t Fill(O output, S size, F format) const noexcept {
-		const size_t nf = first.Fill(output, size, format);
-		std::advance(output, nf);
-		std::advance(size, nf);
-		std::advance(format, nf);
-
-		const size_t nr = rest.Fill(output, size, format);
-		return nf + nr;
-	}
-
-	template<typename O>
-	size_t Fill(O output) const noexcept {
-		const size_t nf = first.Fill(output);
-		std::advance(output, nf);
-
-		const size_t nr = rest.Fill(output);
-		return nf + nr;
+	template<typename W, typename O>
+	static std::size_t FillOne(const W &wrapper, O &output) noexcept {
+		*output++ = wrapper.GetValue();
+		return 1;
 	}
 };
 
