@@ -86,15 +86,14 @@ private:
 	void Read() {
 		state = State::READ;
 
-		auto *s = queue.GetSubmitEntry();
-		assert(s != nullptr);
+		auto &s = queue.RequireSubmitEntry();
 
 		ConstBuffer<uint8_t> w = buffer.Write();
 		assert(!w.empty());
 		iov = MakeIovec(w);
-		io_uring_prep_readv(s, read_fd.Get(), &iov, 1, read_offset);
+		io_uring_prep_readv(&s, read_fd.Get(), &iov, 1, read_offset);
 
-		queue.Push(*s, *this);
+		queue.Push(s, *this);
 	}
 
 	void Write() {

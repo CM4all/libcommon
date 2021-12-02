@@ -68,12 +68,11 @@ OpenStat::StartOpenStat(FileDescriptor directory_fd, const char *path,
 {
 	assert(!fd.IsDefined());
 
-	auto *s = queue.GetSubmitEntry();
-	assert(s != nullptr); // TODO: what if the submit queue is full?
+	auto &s = queue.RequireSubmitEntry();
 
-	io_uring_prep_openat(s, directory_fd.Get(), path,
+	io_uring_prep_openat(&s, directory_fd.Get(), path,
 			     flags|O_NOCTTY|O_CLOEXEC, mode);
-	queue.Push(*s, *this);
+	queue.Push(s, *this);
 }
 
 void
@@ -101,13 +100,12 @@ OpenStat::StartOpenStatReadOnlyBeneath(FileDescriptor directory_fd,
 {
 	assert(!fd.IsDefined());
 
-	auto *s = queue.GetSubmitEntry();
-	assert(s != nullptr); // TODO: what if the submit queue is full?
+	auto &s = queue.RequireSubmitEntry();
 
-	io_uring_prep_openat2(s, directory_fd.Get(), path,
+	io_uring_prep_openat2(&s, directory_fd.Get(), path,
 			      /* why is this parameter not const? */
 			      const_cast<struct open_how *>(&ro_beneath));
-	queue.Push(*s, *this);
+	queue.Push(s, *this);
 }
 
 void
@@ -129,15 +127,14 @@ try {
 	if (!fd.IsDefined()) {
 		fd = UniqueFileDescriptor(res);
 
-		auto *s = queue.GetSubmitEntry();
-		assert(s != nullptr); // TODO: what if the submit queue is full?
+		auto &s = queue.RequireSubmitEntry();
 
 		constexpr unsigned statx_mask =
 			STATX_TYPE|STATX_MTIME|STATX_INO|STATX_SIZE;
 
-		io_uring_prep_statx(s, res, "", AT_EMPTY_PATH,
+		io_uring_prep_statx(&s, res, "", AT_EMPTY_PATH,
 				    statx_mask, &st);
-		queue.Push(*s, *this);
+		queue.Push(s, *this);
 	} else {
 		handler.OnOpenStat(std::move(fd), st);
 	}

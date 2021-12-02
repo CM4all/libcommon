@@ -69,13 +69,11 @@ CoCloseOperation::GetValue()
 CoCloseOperation
 CoClose(Queue &queue, FileDescriptor fd) noexcept
 {
-	auto *s = queue.GetSubmitEntry();
-	assert(s != nullptr); // TODO: what if the submit queue is full?
-
-	io_uring_prep_close(s, fd.Get());
+	auto &s = queue.RequireSubmitEntry();
+	io_uring_prep_close(&s, fd.Get());
 
 	CoCloseOperation op;
-	queue.Push(*s, op);
+	queue.Push(s, op);
 	return op;
 }
 
@@ -103,11 +101,10 @@ CoStatx(Queue &queue,
 	FileDescriptor directory_fd, const char *path,
 	int flags, unsigned mask) noexcept
 {
-	auto *s = queue.GetSubmitEntry();
-	assert(s != nullptr); // TODO: what if the submit queue is full?
+	auto &s = queue.RequireSubmitEntry();
 
-	CoStatxOperation op(s, directory_fd, path, flags, mask);
-	queue.Push(*s, op);
+	CoStatxOperation op(&s, directory_fd, path, flags, mask);
+	queue.Push(s, op);
 	return op;
 }
 
@@ -115,14 +112,13 @@ static CoOpenOperation
 CoOpen(Queue &queue, FileDescriptor directory_fd, const char *path,
        int flags, mode_t mode) noexcept
 {
-	auto *s = queue.GetSubmitEntry();
-	assert(s != nullptr); // TODO: what if the submit queue is full?
+	auto &s = queue.RequireSubmitEntry();
 
-	io_uring_prep_openat(s, directory_fd.Get(), path,
+	io_uring_prep_openat(&s, directory_fd.Get(), path,
 			     flags|O_NOCTTY|O_CLOEXEC, mode);
 
 	CoOpenOperation op;
-	queue.Push(*s, op);
+	queue.Push(s, op);
 	return op;
 }
 
@@ -151,14 +147,13 @@ CoReadOperation
 CoRead(Queue &queue, FileDescriptor fd, void *buffer, std::size_t size,
        off_t offset, int flags) noexcept
 {
-	auto *s = queue.GetSubmitEntry();
-	assert(s != nullptr); // TODO: what if the submit queue is full?
+	auto &s = queue.RequireSubmitEntry();
 
-	io_uring_prep_read(s, fd.Get(), buffer, size, offset);
-	s->flags = flags;
+	io_uring_prep_read(&s, fd.Get(), buffer, size, offset);
+	s.flags = flags;
 
 	CoReadOperation op;
-	queue.Push(*s, op);
+	queue.Push(s, op);
 	return op;
 }
 
@@ -175,14 +170,13 @@ CoWriteOperation
 CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, std::size_t size,
 	off_t offset, int flags) noexcept
 {
-	auto *s = queue.GetSubmitEntry();
-	assert(s != nullptr); // TODO: what if the submit queue is full?
+	auto &s = queue.RequireSubmitEntry();
 
-	io_uring_prep_write(s, fd.Get(), buffer, size, offset);
-	s->flags = flags;
+	io_uring_prep_write(&s, fd.Get(), buffer, size, offset);
+	s.flags = flags;
 
 	CoWriteOperation op;
-	queue.Push(*s, op);
+	queue.Push(s, op);
 	return op;
 }
 
