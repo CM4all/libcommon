@@ -51,8 +51,8 @@ MakeIovec(StringView s) noexcept
 }
 
 void
-LoggerDetail::WriteV(StringView domain,
-		     ConstBuffer<StringView> buffers) noexcept
+LoggerDetail::WriteV(std::string_view domain,
+		     ConstBuffer<std::string_view> buffers) noexcept
 {
 	StaticArray<struct iovec, 64> v;
 
@@ -77,7 +77,7 @@ LoggerDetail::WriteV(StringView domain,
 }
 
 void
-LoggerDetail::Format(unsigned level, StringView domain,
+LoggerDetail::Format(unsigned level, std::string_view domain,
 		     const char *fmt, ...) noexcept
 {
 	if (!CheckLevel(level))
@@ -87,17 +87,17 @@ LoggerDetail::Format(unsigned level, StringView domain,
 
 	va_list ap;
 	va_start(ap, fmt);
-	StringView s(buffer, vsnprintf(buffer, sizeof(buffer), fmt, ap));
+	std::string_view s(buffer, vsnprintf(buffer, sizeof(buffer), fmt, ap));
 	va_end(ap);
 
 	WriteV(domain, {&s, 1});
 }
 
 std::string
-ChildLoggerDomain::Make(StringView parent, const char *name) noexcept
+ChildLoggerDomain::Make(std::string_view parent, const char *name) noexcept
 {
 	if (parent.empty())
 		return name;
 
-	return std::string(parent.data, parent.size) + '/' + name;
+	return std::string{parent} + '/' + name;
 }

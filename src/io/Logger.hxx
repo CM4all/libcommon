@@ -37,14 +37,11 @@
 #include "util/ConstBuffer.hxx"
 #include "util/Compiler.h"
 
-#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
-#include <string_view>
-#endif
-
 #include <cstdint>
 #include <array>
 #include <exception>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <stdio.h>
@@ -56,25 +53,30 @@ template<typename T>
 struct ParamWrapper;
 
 template<>
-struct ParamWrapper<StringView> {
-	StringView value;
+struct ParamWrapper<std::string_view> {
+	std::string_view value;
 
-	constexpr explicit ParamWrapper(StringView _value) noexcept
+	constexpr explicit ParamWrapper(std::string_view _value) noexcept
 		:value(_value) {}
 
-	constexpr StringView GetValue() const noexcept {
+	constexpr std::string_view GetValue() const noexcept {
 		return value;
 	}
 };
 
 template<>
-struct ParamWrapper<const char *> : ParamWrapper<StringView> {
-	using ParamWrapper<StringView>::ParamWrapper;
+struct ParamWrapper<StringView> : ParamWrapper<std::string_view> {
+	using ParamWrapper<std::string_view>::ParamWrapper;
 };
 
 template<>
-struct ParamWrapper<char *> : ParamWrapper<StringView> {
-	using ParamWrapper<StringView>::ParamWrapper;
+struct ParamWrapper<const char *> : ParamWrapper<std::string_view> {
+	using ParamWrapper<std::string_view>::ParamWrapper;
+};
+
+template<>
+struct ParamWrapper<char *> : ParamWrapper<std::string_view> {
+	using ParamWrapper<std::string_view>::ParamWrapper;
 };
 
 template<>
@@ -86,26 +88,10 @@ struct ParamWrapper<std::string> {
 		:value(std::forward<S>(_value)) {}
 
 	[[gnu::pure]]
-	StringView GetValue() const noexcept {
-		return {value.data(), value.length()};
+	std::string_view GetValue() const noexcept {
+		return value;
 	}
 };
-
-#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
-template<>
-struct ParamWrapper<std::string_view> {
-	std::string_view value;
-
-	template<typename S>
-	explicit ParamWrapper(S &&_value) noexcept
-		:value(std::forward<S>(_value)) {}
-
-	[[gnu::pure]]
-	StringView GetValue() const noexcept {
-		return {value.data(), value.length()};
-	}
-};
-#endif
 
 template<>
 struct ParamWrapper<std::exception_ptr> : ParamWrapper<std::string> {
@@ -120,7 +106,7 @@ struct ParamWrapper<int> {
 	ParamWrapper(int _value) noexcept
 		:size(sprintf(data, "%i", _value)) {}
 
-	StringView GetValue() const noexcept {
+	std::string_view GetValue() const noexcept {
 		return {data, size};
 	}
 };
@@ -133,7 +119,7 @@ struct ParamWrapper<unsigned> {
 	ParamWrapper(int _value) noexcept
 		:size(sprintf(data, "%u", _value)) {}
 
-	StringView GetValue() const noexcept {
+	std::string_view GetValue() const noexcept {
 		return {data, size};
 	}
 };
@@ -146,7 +132,7 @@ struct ParamWrapper<int64_t> {
 	ParamWrapper(int64_t _value) noexcept
 		:size(sprintf(data, "%" PRId64, _value)) {}
 
-	StringView GetValue() const noexcept {
+	std::string_view GetValue() const noexcept {
 		return {data, size};
 	}
 };
@@ -159,7 +145,7 @@ struct ParamWrapper<uint64_t> {
 	ParamWrapper(uint64_t _value) noexcept
 		:size(sprintf(data, "%" PRIu64, _value)) {}
 
-	StringView GetValue() const noexcept {
+	std::string_view GetValue() const noexcept {
 		return {data, size};
 	}
 };
@@ -223,7 +209,7 @@ class ParamArray {
 
 public:
 	static constexpr size_t count = decltype(collector)::Count();
-	std::array<StringView, decltype(collector)::Count()> values;
+	std::array<std::string_view, decltype(collector)::Count()> values;
 
 	explicit ParamArray(Params... params) noexcept
 		:collector(params...)
@@ -241,11 +227,11 @@ CheckLevel(unsigned level) noexcept
 }
 
 void
-WriteV(StringView domain, ConstBuffer<StringView> buffers) noexcept;
+WriteV(std::string_view domain, ConstBuffer<std::string_view> buffers) noexcept;
 
 template<typename... Params>
 void
-LogConcat(unsigned level, StringView domain, Params... _params) noexcept
+LogConcat(unsigned level, std::string_view domain, Params... _params) noexcept
 {
 	if (!CheckLevel(level))
 		return;
@@ -257,7 +243,7 @@ LogConcat(unsigned level, StringView domain, Params... _params) noexcept
 
 gcc_printf(3, 4)
 void
-Format(unsigned level, StringView domain, const char *fmt, ...) noexcept;
+Format(unsigned level, std::string_view domain, const char *fmt, ...) noexcept;
 
 } /* namespace LoggerDetail */
 
@@ -316,12 +302,12 @@ public:
 				     fmt, std::forward<Params>(params)...);
 	}
 
-	StringView GetDomain() const noexcept {
+	std::string_view GetDomain() const noexcept {
 		return Domain::GetDomain();
 	}
 
 private:
-	void WriteV(ConstBuffer<StringView> buffers) const noexcept {
+	void WriteV(ConstBuffer<std::string_view> buffers) const noexcept {
 		LoggerDetail::WriteV(GetDomain(), buffers);
 	}
 };
@@ -336,7 +322,7 @@ public:
 	explicit StringLoggerDomain(T &&_name) noexcept
 		:name(std::forward<T>(_name)) {}
 
-	StringView GetDomain() const noexcept {
+	std::string_view GetDomain() const noexcept {
 		return {name.data(), name.length()};
 	}
 };
@@ -355,8 +341,8 @@ public:
  */
 class NullLoggerDomain {
 public:
-	constexpr StringView GetDomain() const noexcept {
-		return nullptr;
+	constexpr std::string_view GetDomain() const noexcept {
+		return {};
 	}
 };
 
@@ -375,7 +361,7 @@ public:
 		:StringLoggerDomain(Make(parent.GetDomain(), _name)) {}
 
 private:
-	static std::string Make(StringView parent, const char *name) noexcept;
+	static std::string Make(std::string_view parent, const char *name) noexcept;
 };
 
 class ChildLogger : public BasicLogger<ChildLoggerDomain> {
@@ -391,13 +377,13 @@ public:
  * string as its domain.
  */
 class LiteralLoggerDomain {
-	StringView domain;
+	std::string_view domain;
 
 public:
-	constexpr explicit LiteralLoggerDomain(StringView _domain=nullptr) noexcept
+	constexpr explicit LiteralLoggerDomain(std::string_view _domain={}) noexcept
 		:domain(_domain) {}
 
-	constexpr StringView GetDomain() const noexcept {
+	constexpr std::string_view GetDomain() const noexcept {
 		return domain;
 	}
 };
@@ -429,10 +415,10 @@ public:
 	explicit LazyLoggerDomain(LoggerDomainFactory &_factory) noexcept
 		:factory(_factory) {}
 
-	StringView GetDomain() const noexcept {
+	std::string_view GetDomain() const noexcept {
 		if (cache.empty())
 			cache = factory.MakeLoggerDomain();
-		return {cache.data(), cache.length()};
+		return cache;
 	}
 };
 
