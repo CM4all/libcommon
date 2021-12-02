@@ -34,7 +34,6 @@
 #include "Handler.hxx"
 #include "Queue.hxx"
 #include "system/Error.hxx"
-#include "system/KernelVersion.hxx"
 
 #include <cassert>
 #include <cstdint>
@@ -136,21 +135,9 @@ try {
 		constexpr unsigned statx_mask =
 			STATX_TYPE|STATX_MTIME|STATX_INO|STATX_SIZE;
 
-		if (IsKernelVersionOrNewer({5, 6, 11})) {
-			io_uring_prep_statx(s, res, "", AT_EMPTY_PATH,
-					    statx_mask, &st);
-			queue.Push(*s, *this);
-		} else {
-			/* fall back to plain statx() because OP_STATX
-			   is broken on kernel 5.6, fixed in 5.7 by
-			   commit
-			   5b0bbee4732cbd58aa98213d4c11a366356bba3d
-			   (backported to 5.6.11) */
-			if (statx(res, "", AT_EMPTY_PATH, statx_mask, &st) < 0)
-				throw MakeErrno("Failed to access file");
-
-			handler.OnOpenStat(std::move(fd), st);
-		}
+		io_uring_prep_statx(s, res, "", AT_EMPTY_PATH,
+				    statx_mask, &st);
+		queue.Push(*s, *this);
 	} else {
 		handler.OnOpenStat(std::move(fd), st);
 	}
