@@ -44,11 +44,10 @@ unsigned LoggerDetail::max_level = 1;
 LoggerDetail::ParamWrapper<std::exception_ptr>::ParamWrapper(std::exception_ptr ep)
 	:ParamWrapper<std::string>(GetFullMessage(ep)) {}
 
-gcc_pure
-static struct iovec
-MakeIovec(const char *s)
+static constexpr struct iovec
+MakeIovec(StringView s) noexcept
 {
-	return MakeIovec(StringView(s));
+	return MakeIovec(s.ToVoid());
 }
 
 void
