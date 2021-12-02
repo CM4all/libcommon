@@ -37,7 +37,7 @@
 #include "Array.hxx"
 #include "util/Compiler.h"
 
-#include <iterator>
+#include <array>
 #include <list>
 #include <cinttypes>
 #include <cstdio>
@@ -380,12 +380,12 @@ class TextParamArray {
 
 public:
 	static constexpr size_t count = decltype(collector)::Count();
-	const char *values[count];
+	std::array<const char *, count> values;
 
 	explicit TextParamArray(const Params&... params) noexcept
 		:collector(params...)
 	{
-		collector.Fill(values);
+		collector.Fill(values.begin());
 	}
 
 	constexpr const int *GetLengths() const noexcept {
@@ -403,21 +403,24 @@ class BinaryParamArray {
 
 public:
 	static constexpr size_t count = decltype(collector)::Count();
-	const char *values[count];
-	int lengths[count], formats[count];
+	std::array<const char *, count> values;
+	std::array<int, count> lengths;
+	std::array<int, count> formats;
 
 	explicit BinaryParamArray(const Params&... params) noexcept
 		:collector(params...)
 	{
-		collector.Fill(values, lengths, formats);
+		collector.Fill(values.begin(),
+			       lengths.begin(),
+			       formats.begin());
 	}
 
 	constexpr const int *GetLengths() const noexcept {
-		return BinaryParamArray<Params...>::lengths;
+		return lengths.data();
 	}
 
 	constexpr const int *GetFormats() const noexcept {
-		return BinaryParamArray<Params...>::formats;
+		return formats.data();
 	}
 };
 
