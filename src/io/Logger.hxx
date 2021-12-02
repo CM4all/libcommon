@@ -69,14 +69,12 @@ struct ParamWrapper<StringView> {
 
 template<>
 struct ParamWrapper<const char *> : ParamWrapper<StringView> {
-	explicit ParamWrapper(const char *_value) noexcept
-		:ParamWrapper<StringView>(_value) {}
+	using ParamWrapper<StringView>::ParamWrapper;
 };
 
 template<>
 struct ParamWrapper<char *> : ParamWrapper<StringView> {
-	explicit ParamWrapper(char *_value) noexcept
-		:ParamWrapper<StringView>(_value) {}
+	using ParamWrapper<StringView>::ParamWrapper;
 };
 
 template<>
