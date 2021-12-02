@@ -50,8 +50,9 @@ class Manager final : public Queue {
 	bool volatile_event = false;
 
 public:
-	explicit Manager(EventLoop &event_loop)
-		:Queue(1024, 0),
+	explicit Manager(EventLoop &event_loop,
+			 unsigned entries=1024)
+		:Queue(entries, 0),
 		 event(event_loop, BIND_THIS_METHOD(OnReady),
 		       GetFileDescriptor()),
 		 defer_submit_event(event_loop,
