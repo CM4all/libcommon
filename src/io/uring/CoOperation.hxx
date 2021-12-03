@@ -36,7 +36,6 @@
 #include "co/Compat.hxx"
 
 #include <cstddef>
-#include <type_traits>
 
 #include <sys/stat.h>
 #include <sys/types.h>
