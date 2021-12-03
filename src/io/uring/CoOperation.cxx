@@ -42,7 +42,7 @@ namespace Uring {
 void
 CoOperationBase::OnUringCompletion(int res) noexcept
 {
-	value = res;
+	result = res;
 
 	/* resume the coroutine which is co_awaiting the result (if
 	   any) */
@@ -50,8 +50,20 @@ CoOperationBase::OnUringCompletion(int res) noexcept
 		continuation.resume();
 }
 
+struct io_uring_sqe &
+_RequireSubmitEntry(Queue &queue)
+{
+	return queue.RequireSubmitEntry();
+}
+
+void
+_Push(Queue &queue, struct io_uring_sqe &sqe, Operation &operation) noexcept
+{
+	queue.Push(sqe, operation);
+}
+
 UniqueFileDescriptor
-CoOpenOperation::GetValue()
+CoOpenOperation::GetValue(int value)
 {
 	if (value < 0)
 		throw MakeErrno(-value, "Failed to open file");
@@ -59,26 +71,21 @@ CoOpenOperation::GetValue()
 	return UniqueFileDescriptor(std::exchange(value, -1));
 }
 
+CoCloseOperation::CoCloseOperation(struct io_uring_sqe &s,
+				   FileDescriptor fd) noexcept
+{
+	io_uring_prep_close(&s, fd.Get());
+}
+
 void
-CoCloseOperation::GetValue()
+CoCloseOperation::GetValue(int value)
 {
 	if (value < 0)
 		throw MakeErrno(-value, "Failed to close file");
 }
 
-CoCloseOperation
-CoClose(Queue &queue, FileDescriptor fd) noexcept
-{
-	auto &s = queue.RequireSubmitEntry();
-	io_uring_prep_close(&s, fd.Get());
-
-	CoCloseOperation op;
-	queue.Push(s, op);
-	return op;
-}
-
 const struct statx &
-CoStatxOperation::GetValue()
+CoStatxOperation::GetValue(int value)
 {
 	if (value < 0)
 		throw MakeErrno(-value, "Failed to stat file");
@@ -86,56 +93,46 @@ CoStatxOperation::GetValue()
 	return stx;
 }
 
-inline
-CoStatxOperation::CoStatxOperation(struct io_uring_sqe *s,
+CoStatxOperation::CoStatxOperation(struct io_uring_sqe &s,
 				   FileDescriptor directory_fd,
 				   const char *path,
 				   int flags, unsigned mask) noexcept
 {
-	io_uring_prep_statx(s, directory_fd.Get(), path,
+	io_uring_prep_statx(&s, directory_fd.Get(), path,
 			    flags, mask, &stx);
 }
 
-CoStatxOperation
-CoStatx(Queue &queue,
-	FileDescriptor directory_fd, const char *path,
-	int flags, unsigned mask) noexcept
+CoOpenOperation::CoOpenOperation(struct io_uring_sqe &s,
+				 FileDescriptor directory_fd, const char *path,
+				 int flags, mode_t mode) noexcept
 {
-	auto &s = queue.RequireSubmitEntry();
-
-	CoStatxOperation op(&s, directory_fd, path, flags, mask);
-	queue.Push(s, op);
-	return op;
-}
-
-static CoOpenOperation
-CoOpen(Queue &queue, FileDescriptor directory_fd, const char *path,
-       int flags, mode_t mode) noexcept
-{
-	auto &s = queue.RequireSubmitEntry();
-
 	io_uring_prep_openat(&s, directory_fd.Get(), path,
 			     flags|O_NOCTTY|O_CLOEXEC, mode);
-
-	CoOpenOperation op;
-	queue.Push(s, op);
-	return op;
 }
 
-CoOpenOperation
+CoOperation<CoOpenOperation>
 CoOpenReadOnly(Queue &queue, FileDescriptor directory_fd, const char *path) noexcept
 {
-	return CoOpen(queue, directory_fd, path, O_RDONLY, 0);
+	return {queue, directory_fd, path, O_RDONLY, 0};
 }
 
-CoOpenOperation
+CoOperation<CoOpenOperation>
 CoOpenReadOnly(Queue &queue, const char *path) noexcept
 {
 	return CoOpenReadOnly(queue, FileDescriptor(AT_FDCWD), path);
 }
 
+CoReadOperation::CoReadOperation(struct io_uring_sqe &s,
+				 FileDescriptor fd,
+				 void *buffer, std::size_t size,
+				 off_t offset, int flags) noexcept
+{
+	io_uring_prep_read(&s, fd.Get(), buffer, size, offset);
+	s.flags = flags;
+}
+
 std::size_t
-CoReadOperation::GetValue() const
+CoReadOperation::GetValue(int value) const
 {
 	if (value < 0)
 		throw MakeErrno(-value, "Failed to read");
@@ -143,41 +140,22 @@ CoReadOperation::GetValue() const
 	return value;
 }
 
-CoReadOperation
-CoRead(Queue &queue, FileDescriptor fd, void *buffer, std::size_t size,
-       off_t offset, int flags) noexcept
+CoWriteOperation::CoWriteOperation(struct io_uring_sqe &s,
+				   FileDescriptor fd,
+				   const void *buffer, std::size_t size,
+				   off_t offset, int flags) noexcept
 {
-	auto &s = queue.RequireSubmitEntry();
-
-	io_uring_prep_read(&s, fd.Get(), buffer, size, offset);
+	io_uring_prep_write(&s, fd.Get(), buffer, size, offset);
 	s.flags = flags;
-
-	CoReadOperation op;
-	queue.Push(s, op);
-	return op;
 }
 
 std::size_t
-CoWriteOperation::GetValue() const
+CoWriteOperation::GetValue(int value) const
 {
 	if (value < 0)
 		throw MakeErrno(-value, "Failed to write");
 
 	return value;
-}
-
-CoWriteOperation
-CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, std::size_t size,
-	off_t offset, int flags) noexcept
-{
-	auto &s = queue.RequireSubmitEntry();
-
-	io_uring_prep_write(&s, fd.Get(), buffer, size, offset);
-	s.flags = flags;
-
-	CoWriteOperation op;
-	queue.Push(s, op);
-	return op;
 }
 
 } // namespace Uring

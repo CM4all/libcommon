@@ -44,6 +44,8 @@
 
 #include <fcntl.h>
 
+using Uring::CoWrite;
+
 struct Instance final {
 	EventLoop event_loop;
 	ShutdownListener shutdown_listener;

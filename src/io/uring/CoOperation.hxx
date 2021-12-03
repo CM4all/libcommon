@@ -53,35 +53,66 @@ class Queue;
  * Coroutine integration for an io_uring #Operation.
  */
 class CoOperationBase : public Operation {
-public:
+protected:
 	std::coroutine_handle<> continuation;
 
-protected:
-	int value;
+	int result;
 
 private:
 	/* virtual methods from class Uring::Operation */
-	void OnUringCompletion(int res) noexcept override;
+	void OnUringCompletion(int res) noexcept final;
 };
 
+struct io_uring_sqe &
+_RequireSubmitEntry(Queue &queue);
+
+void
+_Push(Queue &queue, struct io_uring_sqe &sqe, Operation &operation) noexcept;
+
+/**
+ * Coroutine integration for an io_uring #Operation.
+ */
 template<typename T>
-concept CoAwaitableOperation = std::is_base_of_v<CoOperationBase, T>;
+class CoOperation final : public CoOperationBase {
+	T base;
 
-template<CoAwaitableOperation Op>
-struct CoAwaitable final {
-	Op &op;
-
-	bool await_ready() const noexcept {
-		return !op.IsUringPending();
+	template<typename... Args>
+	CoOperation(struct io_uring_sqe &sqe, Queue &queue, Args&&... args)
+		:base(sqe, std::forward<Args>(args)...)
+	{
+		_Push(queue, sqe, *this);
 	}
 
-	std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) noexcept {
-		op.continuation = continuation;
-		return std::noop_coroutine();
+public:
+	template<typename... Args>
+	CoOperation(Queue &queue, Args&&... args)
+		:CoOperation(_RequireSubmitEntry(queue), queue,
+			     std::forward<Args>(args)...) {}
+
+	struct Awaitable final {
+		CoOperation &op;
+
+		bool await_ready() const noexcept {
+			return !op.IsUringPending();
+		}
+
+		std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) noexcept {
+			op.continuation = continuation;
+			return std::noop_coroutine();
+		}
+
+		decltype(auto) await_resume() const {
+			return op.GetValue();
+		}
+	};
+
+	Awaitable operator co_await() noexcept {
+		return {*this};
 	}
 
-	decltype(auto) await_resume() const {
-		return op.GetValue();
+private:
+	decltype(auto) GetValue() noexcept {
+		return base.GetValue(result);
 	}
 };
 
@@ -89,74 +120,60 @@ class CoStatxOperation final : public CoOperationBase {
 	struct statx stx;
 
 public:
-	CoStatxOperation(struct io_uring_sqe *s,
+	CoStatxOperation(struct io_uring_sqe &sqe,
 			 FileDescriptor directory_fd, const char *path,
 			 int flags, unsigned mask) noexcept;
 
-	auto operator co_await() noexcept {
-		return CoAwaitable<CoStatxOperation>{*this};
-	}
-
-	const struct statx &GetValue();
+	const struct statx &GetValue(int value);
 };
 
-CoStatxOperation
-CoStatx(Queue &queue,
-	FileDescriptor directory_fd, const char *path,
-	int flags, unsigned mask) noexcept;
+using CoStatx = CoOperation<CoStatxOperation>;
 
 class CoOpenOperation final : public CoOperationBase {
 public:
-	auto operator co_await() noexcept {
-		return CoAwaitable<CoOpenOperation>{*this};
-	}
+	CoOpenOperation(struct io_uring_sqe &sqe,
+			FileDescriptor directory_fd, const char *path,
+			int flags, mode_t mode) noexcept;
 
-	UniqueFileDescriptor GetValue();
+	UniqueFileDescriptor GetValue(int value);
 };
 
-CoOpenOperation
+CoOperation<CoOpenOperation>
 CoOpenReadOnly(Queue &queue,
 	       FileDescriptor directory_fd, const char *path) noexcept;
 
-CoOpenOperation
+CoOperation<CoOpenOperation>
 CoOpenReadOnly(Queue &queue, const char *path) noexcept;
 
 class CoCloseOperation final : public CoOperationBase {
 public:
-	auto operator co_await() noexcept {
-		return CoAwaitable<CoCloseOperation>{*this};
-	}
+	CoCloseOperation(struct io_uring_sqe &sqe, FileDescriptor fd) noexcept;
 
-	void GetValue();
+	void GetValue(int value);
 };
 
-CoCloseOperation
-CoClose(Queue &queue, FileDescriptor fd) noexcept;
+using CoClose = CoOperation<CoCloseOperation>;
 
-class CoReadOperation final : public CoOperationBase {
+class CoReadOperation final {
 public:
-	auto operator co_await() noexcept {
-		return CoAwaitable<CoReadOperation>{*this};
-	}
+	CoReadOperation(struct io_uring_sqe &sqe, FileDescriptor fd,
+			void *buffer, std::size_t size,
+			off_t offset, int flags=0) noexcept;
 
-	std::size_t GetValue() const;
+	std::size_t GetValue(int value) const;
 };
 
-CoReadOperation
-CoRead(Queue &queue, FileDescriptor fd, void *buffer, std::size_t size,
-       off_t offset, int flags=0) noexcept;
+using CoRead = CoOperation<CoReadOperation>;
 
-class CoWriteOperation final : public CoOperationBase {
+class CoWriteOperation final {
 public:
-	auto operator co_await() noexcept {
-		return CoAwaitable<CoWriteOperation>{*this};
-	}
+	CoWriteOperation(struct io_uring_sqe &sqe, FileDescriptor fd,
+			 const void *buffer, std::size_t size,
+			 off_t offset, int flags=0) noexcept;
 
-	std::size_t GetValue() const;
+	std::size_t GetValue(int value) const;
 };
 
-CoWriteOperation
-CoWrite(Queue &queue, FileDescriptor fd, const void *buffer, std::size_t size,
-	off_t offset, int flags=0) noexcept;
+using CoWrite = CoOperation<CoWriteOperation>;
 
 } // namespace Uring
