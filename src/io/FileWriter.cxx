@@ -62,7 +62,7 @@ MakeTempFileInDirectory(const std::string &directory)
 		UniqueFileDescriptor fd;
 		if (fd.Open(path.c_str(), O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,
 			    0666))
-			return std::make_pair(std::move(path), std::move(fd));
+			return {std::move(path), std::move(fd)};
 
 		if (errno != EEXIST)
 			throw FormatErrno("Failed to create %s", path.c_str());
@@ -82,7 +82,7 @@ MakeTempFileInDirectory(FileDescriptor directory_fd)
 		if (fd.Open(directory_fd, path.c_str(),
 			    O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,
 			    0666))
-			return std::make_pair(std::move(path), std::move(fd));
+			return {std::move(path), std::move(fd)};
 
 		if (errno != EEXIST)
 			throw FormatErrno("Failed to create %s", path.c_str());

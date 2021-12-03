@@ -112,7 +112,7 @@ ReceiveDatagram(SocketDescriptor s,
 			throw std::runtime_error("Bad CRC in response datagram");
 	}
 
-	return std::make_pair(payload, std::move(response.fds));
+	return {payload, std::move(response.fds)};
 }
 
 UniqueFileDescriptor

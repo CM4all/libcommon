@@ -111,8 +111,7 @@ LoadKeyFile(const char *path)
 std::pair<UniqueX509, UniqueEVP_PKEY>
 LoadCertKeyFile(const char *cert_path, const char *key_path)
 {
-	auto pair = std::make_pair(LoadCertFile(cert_path),
-				   LoadKeyFile(key_path));
+	std::pair pair{LoadCertFile(cert_path), LoadKeyFile(key_path)};
 	if (!MatchModulus(*pair.first, *pair.second))
 		throw std::runtime_error("Key does not match certificate");
 

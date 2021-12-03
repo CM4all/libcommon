@@ -46,8 +46,7 @@ AnonymizeAddress(StringView value) noexcept
 
 		const char *q = rest.FindLast('.');
 		if (q != nullptr)
-			return std::make_pair(StringView{value.data, q + 1},
-					      "0");
+			return {StringView{value.data, q + 1}, "0"};
 	}
 
 	p = value.Find(':');
@@ -61,11 +60,10 @@ AnonymizeAddress(StringView value) noexcept
 		for (unsigned i = 1; i < 2; ++i) {
 			const char *q = rest.Find(':');
 			if (q == rest.data)
-				return std::make_pair(StringView{value.data, q + 1},
-						      nullptr);
+				return {StringView{value.data, q + 1}, nullptr};
 
 			if (q == nullptr)
-				return std::make_pair(value, nullptr);
+				return {value, nullptr};
 
 			rest = rest.substr(q + 1);
 		}
@@ -73,12 +71,10 @@ AnonymizeAddress(StringView value) noexcept
 		/* clear the low 8 bit of the third segment */
 		const auto third_segment = rest.Split(':').first;
 		if (third_segment.size > 2)
-			return std::make_pair(StringView{value.data, third_segment.end() - 2},
-					      "00::");
+			return {StringView{value.data, third_segment.end() - 2}, "00::"};
 
-		return std::make_pair(StringView{value.data, rest.data},
-				      ":");
+		return {StringView{value.data, rest.data}, ":"};
 	}
 
-	return std::make_pair(value, nullptr);
+	return {value, nullptr};
 }

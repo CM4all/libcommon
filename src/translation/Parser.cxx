@@ -996,17 +996,17 @@ static std::pair<StringView, StringView>
 ParseCgroupSet(StringView payload)
 {
 	if (!IsValidString(payload))
-		return std::make_pair(nullptr, nullptr);
+		return {nullptr, nullptr};
 
 	const char *eq = payload.Find('=');
 	if (eq == nullptr)
-		return std::make_pair(nullptr, nullptr);
+		return {nullptr, nullptr};
 
 	StringView name(payload.data, eq), value(eq + 1, payload.end());
 	if (!IsValidCgroupSetName(name) || !IsValidCgroupSetValue(value))
-		return std::make_pair(nullptr, nullptr);
+		return {nullptr, nullptr};
 
-	return std::make_pair(name, value);
+	return {name, value};
 }
 
 inline void

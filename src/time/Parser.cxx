@@ -40,12 +40,16 @@ std::pair<std::chrono::system_clock::time_point,
 ParseTimePoint(const char *s)
 {
 	if (StringIsEqual(s, "today"))
-		return std::make_pair(PrecedingMidnightLocal(std::chrono::system_clock::now()),
-				      std::chrono::hours(24));
+		return {
+			PrecedingMidnightLocal(std::chrono::system_clock::now()),
+			std::chrono::hours(24),
+		};
 
 	if (StringIsEqual(s, "now"))
-		return std::make_pair(std::chrono::system_clock::now(),
-				      std::chrono::system_clock::duration::zero());
+		return {
+			std::chrono::system_clock::now(),
+			std::chrono::system_clock::duration::zero(),
+		};
 
 	return ParseISO8601(s);
 }
