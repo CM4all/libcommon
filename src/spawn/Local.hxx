@@ -44,9 +44,10 @@ class LocalSpawnService final : public SpawnService {
 
 public:
 	explicit LocalSpawnService(const SpawnConfig &_config,
-				   ChildProcessRegistry &_registry)
+				   ChildProcessRegistry &_registry) noexcept
 		:config(_config), registry(_registry) {}
 
 	/* virtual methods from class SpawnService */
-	std::unique_ptr<ChildProcessHandle> SpawnChildProcess(const char *name, PreparedChildProcess &&params) override;
+	std::unique_ptr<ChildProcessHandle> SpawnChildProcess(const char *name,
+							      PreparedChildProcess &&params) override;
 };
