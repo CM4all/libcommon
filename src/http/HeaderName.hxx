@@ -32,7 +32,7 @@
 
 #pragma once
 
-struct StringView;
+#include <string_view>
 
 /**
  * Determines if the specified name consists only of valid characters
@@ -44,7 +44,7 @@ http_header_name_valid(const char *name) noexcept;
 
 [[gnu::pure]]
 bool
-http_header_name_valid(StringView name) noexcept;
+http_header_name_valid(std::string_view name) noexcept;
 
 /**
  * Determines if the specified name is a hop-by-hop header.  In

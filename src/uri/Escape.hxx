@@ -33,9 +33,9 @@
 #pragma once
 
 #include <cstddef>
+#include <string_view>
 
 template<typename T> struct ConstBuffer;
-struct StringView;
 class AllocatedString;
 
 /**
@@ -43,7 +43,7 @@ class AllocatedString;
  * for normal URIs
  */
 std::size_t
-UriEscape(char *dest, StringView src,
+UriEscape(char *dest, std::string_view src,
 	  char escape_char='%') noexcept;
 
 std::size_t
@@ -51,7 +51,7 @@ UriEscape(char *dest, ConstBuffer<void> src,
 	  char escape_char='%') noexcept;
 
 AllocatedString
-UriEscape(StringView src, char escape_char='%') noexcept;
+UriEscape(std::string_view src, char escape_char='%') noexcept;
 
 AllocatedString
 UriEscape(ConstBuffer<void> src, char escape_char='%') noexcept;

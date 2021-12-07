@@ -53,14 +53,17 @@ http_trim(StringView s) noexcept
 }
 
 static bool
-http_equals(StringView a, StringView b) noexcept
+http_equals(std::string_view a, std::string_view b) noexcept
 {
 	return http_trim(a).Equals(http_trim(b));
 }
 
 bool
-http_list_contains(StringView list, const StringView item) noexcept
+http_list_contains(const std::string_view _list,
+		   const std::string_view item) noexcept
 {
+	StringView list{_list};
+
 	while (!list.empty()) {
 		/* XXX what if the comma is within an quoted-string? */
 		auto c = list.Split(',');
@@ -74,14 +77,17 @@ http_list_contains(StringView list, const StringView item) noexcept
 }
 
 static bool
-http_equals_i(StringView a, StringView b) noexcept
+http_equals_i(std::string_view a, std::string_view b) noexcept
 {
 	return http_trim(a).EqualsIgnoreCase(b);
 }
 
 bool
-http_list_contains_i(StringView list, const StringView item) noexcept
+http_list_contains_i(const std::string_view _list,
+		     const std::string_view item) noexcept
 {
+	StringView list{_list};
+
 	while (!list.empty()) {
 		/* XXX what if the comma is within an quoted-string? */
 		auto c = list.Split(',');

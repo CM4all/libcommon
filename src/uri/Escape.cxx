@@ -37,12 +37,12 @@
 #include "util/HexFormat.hxx"
 
 std::size_t
-UriEscape(char *dest, StringView src,
+UriEscape(char *dest, std::string_view src,
 	  char escape_char) noexcept
 {
 	std::size_t dest_length = 0;
 
-	for (std::size_t i = 0; i < src.size; ++i) {
+	for (std::size_t i = 0; i < src.size(); ++i) {
 		if (IsUriUnreservedChar(src[i])) {
 			dest[dest_length++] = src[i];
 		} else {
@@ -59,17 +59,18 @@ std::size_t
 UriEscape(char *dest, ConstBuffer<void> src,
 	  char escape_char) noexcept
 {
-	return UriEscape(dest, StringView((const char *)src.data, src.size),
+	return UriEscape(dest,
+			 StringView{ConstBuffer<char>::FromVoid(src)},
 			 escape_char);
 }
 
 AllocatedString
-UriEscape(StringView src, char escape_char) noexcept
+UriEscape(std::string_view src, char escape_char) noexcept
 {
 	/* worst-case allocation - this is a tradeoff; we could count
 	   the number of characters to escape first, but that would
 	   require iterating the input twice */
-	auto buffer = new char[src.size * 3 + 1];
+	auto buffer = new char[src.size() * 3 + 1];
 	size_t length = UriEscape(buffer, src, escape_char);
 	buffer[length] = 0;
 	return AllocatedString::Donate(buffer);

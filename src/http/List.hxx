@@ -30,20 +30,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HTTP_LIST_HXX
-#define HTTP_LIST_HXX
+#pragma once
 
-struct StringView;
+#include <string_view>
 
 [[gnu::pure]]
 bool
-http_list_contains(StringView list, StringView item) noexcept;
+http_list_contains(std::string_view list, std::string_view item) noexcept;
 
 /**
  * Case-insensitive version of http_list_contains().
  */
 [[gnu::pure]]
 bool
-http_list_contains_i(StringView list, StringView item) noexcept;
-
-#endif
+http_list_contains_i(std::string_view list, std::string_view item) noexcept;

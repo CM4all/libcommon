@@ -31,9 +31,9 @@
  */
 
 #include "HeaderName.hxx"
-#include "util/StringView.hxx"
 
-#include <assert.h>
+#include <cassert>
+
 #include <string.h>
 
 static constexpr bool
@@ -54,7 +54,7 @@ http_header_name_valid(const char *name) noexcept
 }
 
 bool
-http_header_name_valid(StringView name) noexcept
+http_header_name_valid(std::string_view name) noexcept
 {
 	if (name.empty())
 		return false;
