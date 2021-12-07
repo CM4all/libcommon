@@ -45,6 +45,7 @@
 #include <forward_list>
 #include <string>
 
+#include <linux/wait.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -154,19 +155,31 @@ try {
 	const auto pid = SpawnChildProcess(std::move(p), cgroup_state,
 					   geteuid() == 0);
 
-	int status;
-	if (waitpid(pid, &status, 0) < 0)
-		throw MakeErrno("waitpid() failed");
+	siginfo_t info;
 
-	if (WIFSIGNALED(status)) {
-		fprintf(stderr, "Child process died from signal %d%s\n",
-			WTERMSIG(status),
-			WCOREDUMP(status) ? " (core dumped)" : "");
+	if (waitid((idtype_t)P_PID, pid,
+		   &info, WEXITED) < 0)
+		throw MakeErrno("waitid() failed");
+
+	switch (info.si_code) {
+	case CLD_EXITED:
+		return info.si_status;
+
+	case CLD_KILLED:
+		fprintf(stderr, "Child process died from signal %d\n",
+			WTERMSIG(info.si_status));
 		return EXIT_FAILURE;
-	}
 
-	if (WIFEXITED(status))
-		return WEXITSTATUS(status);
+	case CLD_DUMPED:
+		fprintf(stderr, "Child process died from signal %d (core dumped)\n",
+			WTERMSIG(info.si_status));
+		return EXIT_FAILURE;
+
+	case CLD_STOPPED:
+	case CLD_TRAPPED:
+	case CLD_CONTINUED:
+		break;
+	}
 
 	fprintf(stderr, "Unknown child status\n");
 	return EXIT_FAILURE;
