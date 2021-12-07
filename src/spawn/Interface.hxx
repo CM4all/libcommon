@@ -32,8 +32,10 @@
 
 #pragma once
 
+#include <memory>
+
 struct PreparedChildProcess;
-class ExitListener;
+class ChildProcessHandle;
 
 /**
  * A service which can spawn new child processes according to a
@@ -46,19 +48,7 @@ public:
 	 *
 	 * @return a process id
 	 */
-	virtual int SpawnChildProcess(const char *name,
-				      PreparedChildProcess &&params,
-				      ExitListener *listener) = 0;
-
-	virtual void SetExitListener(int pid, ExitListener *listener) noexcept = 0;
-
-	/**
-	 * Send a signal to a child process and unregister it.
-	 */
-	virtual void KillChildProcess(int pid, int signo) = 0;
-
-	/**
-	 * Send SIGTERM to the given child process.
-	 */
-	void KillChildProcess(int pid);
+	[[nodiscard]]
+	virtual std::unique_ptr<ChildProcessHandle> SpawnChildProcess(const char *name,
+								      PreparedChildProcess &&params) = 0;
 };

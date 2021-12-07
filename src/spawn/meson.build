@@ -19,7 +19,6 @@ spawn_sources = [
   'CgroupWatch.cxx',
   'Config.cxx',
   'Init.cxx',
-  'Interface.cxx',
   'NetworkNamespace.cxx',
   'PidNamespace.cxx',
   'Registry.cxx',

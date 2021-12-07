@@ -31,6 +31,8 @@
  */
 
 #include "Local.hxx"
+#include "ProcessHandle.hxx"
+#include "ExitListener.hxx"
 #include "Config.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
@@ -39,28 +41,57 @@
 
 #include <utility>
 
-int
+class LocalChildProcess final : public ChildProcessHandle, ExitListener {
+	ChildProcessRegistry &registry;
+
+	pid_t pid;
+
+	ExitListener *exit_listener = nullptr;
+
+public:
+	LocalChildProcess(ChildProcessRegistry &_registry,
+			  pid_t _pid, const char *name) noexcept
+		:registry(_registry), pid(_pid)
+	{
+		registry.Add(pid, name, this);
+	}
+
+	~LocalChildProcess() noexcept override {
+		if (pid > 0)
+			Kill(SIGTERM);
+	}
+
+	/* virtual methods from class ChildProcessHandle */
+	void SetExitListener(ExitListener &listener) noexcept override {
+		assert(pid > 0);
+
+		exit_listener = &listener;
+	}
+
+	void Kill(int signo) noexcept override {
+		assert(pid > 0);
+
+		registry.Kill(std::exchange(pid, 0), signo);
+	}
+
+	/* virtual methods from class ExitListener */
+	void OnChildProcessExit(int status) noexcept override {
+		assert(pid > 0);
+		pid = 0;
+
+		if (exit_listener != nullptr)
+			exit_listener->OnChildProcessExit(status);
+	}
+};
+
+std::unique_ptr<ChildProcessHandle>
 LocalSpawnService::SpawnChildProcess(const char *name,
-				     PreparedChildProcess &&params,
-				     ExitListener *listener)
+				     PreparedChildProcess &&params)
 {
 	if (params.uid_gid.IsEmpty())
 		params.uid_gid = config.default_uid_gid;
 
 	pid_t pid = ::SpawnChildProcess(std::move(params), CgroupState(),
 					false /* TODO? */);
-	registry.Add(pid, name, listener);
-	return pid;
-}
-
-void
-LocalSpawnService::SetExitListener(int pid, ExitListener *listener) noexcept
-{
-	registry.SetExitListener(pid, listener);
-}
-
-void
-LocalSpawnService::KillChildProcess(int pid, int signo) noexcept
-{
-	registry.Kill(pid, signo);
+	return std::make_unique<LocalChildProcess>(registry, pid, name);
 }

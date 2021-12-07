@@ -38,6 +38,8 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
 
+#include <boost/intrusive/set.hpp>
+
 #include <forward_list>
 #include <map>
 
@@ -48,11 +50,18 @@ class SpawnSerializer;
 class SpawnServerClientHandler;
 
 class SpawnServerClient final : public SpawnService {
-	struct ChildProcess {
-		ExitListener *listener;
+	struct ChildProcess;
 
-		explicit ChildProcess(ExitListener *_listener)
-			:listener(_listener) {}
+	struct CompareChildProcess {
+		[[gnu::pure]]
+		bool operator()(const ChildProcess &a,
+				const ChildProcess &b) const noexcept;
+
+		[[gnu::pure]]
+		bool operator()(const ChildProcess &a, int b) const noexcept;
+
+		[[gnu::pure]]
+		bool operator()(int a, const ChildProcess &b) const noexcept;
 	};
 
 	struct KillQueueItem {
@@ -64,7 +73,13 @@ class SpawnServerClient final : public SpawnService {
 
 	unsigned last_pid = 0;
 
-	std::map<int, ChildProcess> processes;
+	using ChildProcessSet =
+		boost::intrusive::set<ChildProcess,
+				      boost::intrusive::base_hook<boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>>>,
+				      boost::intrusive::compare<CompareChildProcess>,
+				      boost::intrusive::constant_time_size<false>>;
+
+	ChildProcessSet processes;
 
 	/**
 	 * Filled by KillChildProcess() if sendmsg()==EAGAIN.
@@ -151,13 +166,12 @@ private:
 
 	void OnSocketEvent(unsigned events) noexcept;
 
+	/**
+	 * Throws on error.
+	 */
+	void Kill(ChildProcess &child_process, int signo);
+
 public:
 	/* virtual methods from class SpawnService */
-	int SpawnChildProcess(const char *name, PreparedChildProcess &&params,
-			      ExitListener *listener) override;
-
-	void SetExitListener(int pid,
-			     ExitListener *listener) noexcept override;
-
-	void KillChildProcess(int pid, int signo) noexcept override;
+	std::unique_ptr<ChildProcessHandle> SpawnChildProcess(const char *name, PreparedChildProcess &&params) override;
 };

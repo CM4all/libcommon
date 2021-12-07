@@ -31,6 +31,7 @@
  */
 
 #include "Client.hxx"
+#include "ProcessHandle.hxx"
 #include "Handler.hxx"
 #include "IProtocol.hxx"
 #include "Builder.hxx"
@@ -46,8 +47,60 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <sys/signal.h>
 
 static constexpr size_t MAX_FDS = 8;
+
+struct SpawnServerClient::ChildProcess final
+	: ChildProcessHandle, boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>>
+{
+	SpawnServerClient &client;
+
+	const int pid;
+
+	ExitListener *listener = nullptr;
+
+	ChildProcess(SpawnServerClient &_client, int _pid) noexcept
+		:client(_client), pid(_pid) {}
+
+	~ChildProcess() noexcept override {
+		if (is_linked())
+			Kill(SIGTERM);
+	}
+
+	void SetExitListener(ExitListener &_listener) noexcept override {
+		assert(is_linked());
+
+		listener = &_listener;
+	}
+
+	void Kill(int signo) noexcept override {
+		assert(is_linked());
+
+		client.Kill(*this, signo);
+	}
+};
+
+inline bool
+SpawnServerClient::CompareChildProcess::operator()(const ChildProcess &a,
+						   const ChildProcess &b) const noexcept
+{
+	return a.pid < b.pid;
+}
+
+inline bool
+SpawnServerClient::CompareChildProcess::operator()(const ChildProcess &a,
+						   int b) const noexcept
+{
+	return a.pid < b;
+}
+
+inline bool
+SpawnServerClient::CompareChildProcess::operator()(int a,
+						   const ChildProcess &b) const noexcept
+{
+	return a < b.pid;
+}
 
 SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 				     const SpawnConfig &_config,
@@ -295,10 +348,9 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 		s.Write(SpawnExecCommand::TTY);
 }
 
-int
+std::unique_ptr<ChildProcessHandle>
 SpawnServerClient::SpawnChildProcess(const char *name,
-				     PreparedChildProcess &&p,
-				     ExitListener *listener)
+				     PreparedChildProcess &&p)
 {
 	assert(!shutting_down);
 
@@ -330,35 +382,23 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 		std::throw_with_nested(std::runtime_error("Spawn server failed"));
 	}
 
-	processes.emplace(std::piecewise_construct,
-			  std::forward_as_tuple(pid),
-			  std::forward_as_tuple(listener));
-	return pid;
+	auto handle = std::make_unique<ChildProcess>(*this, pid);
+	processes.insert(*handle);
+	return handle;
 }
 
 void
-SpawnServerClient::SetExitListener(int pid, ExitListener *listener) noexcept
-{
-	auto i = processes.find(pid);
-	assert(i != processes.end());
-
-	assert(i->second.listener == nullptr);
-	i->second.listener = listener;
-}
-
-void
-SpawnServerClient::KillChildProcess(int pid, int signo) noexcept
+SpawnServerClient::Kill(ChildProcess &child, int signo)
 {
 	CheckOrAbort();
 
-	auto i = processes.find(pid);
-	assert(i != processes.end());
-	assert(i->second.listener != nullptr);
-	processes.erase(i);
+	assert(child.is_linked());
+	processes.erase(processes.iterator_to(child));
 
 	try {
+
 		SpawnSerializer s(SpawnRequestCommand::KILL);
-		s.WriteInt(pid);
+		s.WriteInt(child.pid);
 		s.WriteInt(signo);
 
 		try {
@@ -370,14 +410,14 @@ SpawnServerClient::KillChildProcess(int pid, int signo) noexcept
 			   be reached; wait a little bit before giving
 			   up */
 			if (IsErrno(e, EAGAIN)) {
-				kill_queue.push_front({pid, signo});
+				kill_queue.push_front({child.pid, signo});
 				event.ScheduleWrite();
 			} else
 				throw;
 		}
 	} catch (const std::runtime_error &e) {
 		fprintf(stderr, "failed to send KILL(%d) to spawner: %s\n",
-			pid,e.what());
+			child.pid, e.what());
 	}
 
 	if (shutting_down && processes.empty())
@@ -393,15 +433,14 @@ SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 	if (!payload.IsEmpty())
 		throw MalformedSpawnPayloadError();
 
-	auto i = processes.find(pid);
+	auto i = processes.find(pid, processes.key_comp());
 	if (i == processes.end())
 		return;
 
-	auto *listener = i->second.listener;
 	processes.erase(i);
 
-	if (listener != nullptr)
-		listener->OnChildProcessExit(status);
+	if (i->listener != nullptr)
+		i->listener->OnChildProcessExit(status);
 
 	if (shutting_down && processes.empty())
 		Close();

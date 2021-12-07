@@ -47,10 +47,6 @@ public:
 				   ChildProcessRegistry &_registry)
 		:config(_config), registry(_registry) {}
 
-	int SpawnChildProcess(const char *name, PreparedChildProcess &&params,
-			      ExitListener *listener) override;
-
-	void SetExitListener(int pid,
-			     ExitListener *listener) noexcept override;
-	void KillChildProcess(int pid, int signo) noexcept override;
+	/* virtual methods from class SpawnService */
+	std::unique_ptr<ChildProcessHandle> SpawnChildProcess(const char *name, PreparedChildProcess &&params) override;
 };
