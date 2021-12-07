@@ -30,7 +30,8 @@
 #include "BufferedOutputStream.hxx"
 #include "OutputStream.hxx"
 
-#include <stdarg.h>
+#include <cstdarg>
+
 #include <string.h>
 #include <stdio.h>
 
@@ -85,7 +86,7 @@ BufferedOutputStream::Format(const char *fmt, ...)
 	}
 
 	/* format into the buffer */
-	va_list ap;
+	std::va_list ap;
 	va_start(ap, fmt);
 	std::size_t size = vsnprintf((char *)r.data, r.size, fmt, ap);
 	va_end(ap);
