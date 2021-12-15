@@ -175,11 +175,8 @@ try {
 		   will apply the resource limits */
 		p.rlimits.Apply(0);
 
-	if (p.chroot != nullptr && chroot(p.chroot) < 0) {
-		fprintf(stderr, "chroot('%s') failed: %s\n",
-			p.chroot, strerror(errno));
-		_exit(EXIT_FAILURE);
-	}
+	if (p.chroot != nullptr && chroot(p.chroot) < 0)
+		throw FormatErrno("chroot('%s') failed", p.chroot);
 
 	if (userns_create_pipe_w.IsDefined()) {
 		/* user namespace allocation was postponed to allow
@@ -219,10 +216,8 @@ try {
 	}
 
 	if (p.priority != 0 &&
-	    setpriority(PRIO_PROCESS, getpid(), p.priority) < 0) {
-		fprintf(stderr, "setpriority() failed: %s\n", strerror(errno));
-		_exit(EXIT_FAILURE);
-	}
+	    setpriority(PRIO_PROCESS, getpid(), p.priority) < 0)
+		throw MakeErrno("setpriority() failed");
 
 	if (p.ioprio_idle)
 		ioprio_set_idle();
@@ -281,20 +276,14 @@ try {
 	if (!p.uid_gid.IsEmpty())
 		p.uid_gid.Apply();
 
-	if (p.chdir != nullptr && chdir(p.chdir) < 0) {
-		fprintf(stderr, "chdir('%s') failed: %s\n",
-			p.chdir, strerror(errno));
-		_exit(EXIT_FAILURE);
-	}
+	if (p.chdir != nullptr && chdir(p.chdir) < 0)
+		throw FormatErrno("chdir('%s') failed", p.chdir);
 
-	if (!stderr_fd.IsDefined() && p.stderr_path != nullptr) {
-		if (!stderr_fd.Open(p.stderr_path,
-				    O_CREAT|O_WRONLY|O_APPEND|O_CLOEXEC|O_NOCTTY,
-				    0600)) {
-			perror("Failed to open STDERR_PATH");
-			_exit(EXIT_FAILURE);
-		}
-	}
+	if (!stderr_fd.IsDefined() && p.stderr_path != nullptr &&
+	    !stderr_fd.Open(p.stderr_path,
+			    O_CREAT|O_WRONLY|O_APPEND|O_CLOEXEC|O_NOCTTY,
+			    0600))
+		throw MakeErrno("Failed to open STDERR_PATH");
 
 	if (p.return_stderr.IsDefined()) {
 		assert(stderr_fd.IsDefined());
@@ -319,10 +308,8 @@ try {
 		assert(p.stdin_fd.IsDefined());
 		assert(p.stdin_fd == p.stdout_fd);
 
-		if (ioctl(p.stdin_fd.Get(), TIOCSCTTY, nullptr) < 0) {
-			perror("Failed to set the controlling terminal");
-			_exit(EXIT_FAILURE);
-		}
+		if (ioctl(p.stdin_fd.Get(), TIOCSCTTY, nullptr) < 0)
+			throw MakeErrno("Failed to set the controlling terminal");
 	}
 
 	if (p.exec_function != nullptr) {
@@ -331,8 +318,7 @@ try {
 		execve(path, const_cast<char *const*>(&p.args.front()),
 		       const_cast<char *const*>(&p.env.front()));
 
-		fprintf(stderr, "failed to execute %s: %s\n", path, strerror(errno));
-		_exit(EXIT_FAILURE);
+		throw FormatErrno("Failed to execute '%s'", path);
 	}
 } catch (...) {
 	PrintException(std::current_exception());
