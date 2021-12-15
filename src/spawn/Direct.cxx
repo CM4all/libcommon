@@ -43,7 +43,7 @@
 #include "io/WriteFile.hxx"
 #include "system/CoreScheduling.hxx"
 #include "system/IOPrio.hxx"
-#include "util/PrintException.hxx"
+#include "util/Exception.hxx"
 #include "util/Sanitizer.hxx"
 #include "util/ScopeExit.hxx"
 
@@ -123,8 +123,11 @@ static void
 Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
+     UniqueFileDescriptor &&error_pipe_w,
      const CgroupState &cgroup_state) noexcept
 try {
+	assert(error_pipe_w.IsDefined());
+
 	UnignoreSignals();
 	UnblockSignals();
 
@@ -321,7 +324,8 @@ try {
 		throw FormatErrno("Failed to execute '%s'", path);
 	}
 } catch (...) {
-	PrintException(std::current_exception());
+	const auto msg = GetFullMessage(std::current_exception());
+	error_pipe_w.Write(msg.data(), msg.size());
 	_exit(EXIT_FAILURE);
 }
 
@@ -343,11 +347,22 @@ struct SpawnChildProcessContext {
 	 */
 	UniqueFileDescriptor wait_pipe_r, wait_pipe_w;
 
+	/**
+	 * If an error occurs during setup, the child process will
+	 * write an error message to this pipe.
+	 */
+	UniqueFileDescriptor error_pipe_r, error_pipe_w;
+
 	SpawnChildProcessContext(PreparedChildProcess &&_params,
-				 const CgroupState &_cgroup_state) noexcept
+				 const CgroupState &_cgroup_state)
 		:params(std::move(_params)),
 		 cgroup_state(_cgroup_state),
-		 path(_params.Finish()) {}
+		 path(_params.Finish())
+	{
+		if (!UniqueFileDescriptor::CreatePipe(error_pipe_r,
+						      error_pipe_w))
+			throw MakeErrno("pipe() failed");
+	}
 };
 
 static int
@@ -357,11 +372,28 @@ spawn_fn(void *_ctx) noexcept
 
 	ctx.userns_create_pipe_r.Close();
 	ctx.wait_pipe_w.Close();
+	ctx.error_pipe_r.Close();
 
 	Exec(ctx.path, std::move(ctx.params),
 	     std::move(ctx.userns_create_pipe_w),
 	     std::move(ctx.wait_pipe_r),
+	     std::move(ctx.error_pipe_w),
 	     ctx.cgroup_state);
+}
+
+/**
+ * Read an error message from the pipe and if there is one, throw it
+ * as a C++ exception.
+ */
+static void
+ReadErrorPipe(FileDescriptor error_pipe_r)
+{
+	char buffer[1024];
+	ssize_t nbytes = error_pipe_r.Read(buffer, sizeof(buffer) - 1);
+	if (nbytes > 0) {
+		buffer[nbytes] = 0;
+		throw std::runtime_error(buffer);
+	}
 }
 
 UniqueFileDescriptor
@@ -435,6 +467,8 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	if (pid < 0)
 		throw MakeErrno("clone() failed");
 
+	ctx.error_pipe_w.Close();
+
 	UniqueFileDescriptor pidfd{_pidfd};
 
 	if (ctx.userns_create_pipe_r.IsDefined()) {
@@ -476,6 +510,8 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		ctx.wait_pipe_w.Write(&buffer, sizeof(buffer));
 		ctx.wait_pipe_w.Close();
 	}
+
+	ReadErrorPipe(ctx.error_pipe_r);
 
 	return pidfd;
 }
