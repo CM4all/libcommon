@@ -153,6 +153,7 @@ WaitForPipe(FileDescriptor r) noexcept
 [[noreturn]]
 static void
 Exec(const char *path, PreparedChildProcess &&p,
+     UniqueFileDescriptor &&userns_map_pipe_r,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
      UniqueFileDescriptor &&error_pipe_w,
@@ -202,6 +203,9 @@ try {
 		if (unshare(CLONE_NEWCGROUP) < 0)
 			throw MakeErrno("Failed to unshare cgroup namespace");
 	}
+
+	if (userns_map_pipe_r.IsDefined() && !WaitForPipe(userns_map_pipe_r))
+		_exit(EXIT_FAILURE);
 
 	p.ns.Apply(p.uid_gid);
 
@@ -357,6 +361,11 @@ struct SpawnChildProcessContext {
 	const char *path;
 
 	/**
+	 * The child waits for this pipe before it applies namespaces.
+	 */
+	UniqueFileDescriptor userns_map_pipe_r, userns_map_pipe_w;
+
+	/**
 	 * A pipe used by the parent process to wait for the child to
 	 * create the user namespace.
 	 */
@@ -391,11 +400,13 @@ spawn_fn(void *_ctx) noexcept
 {
 	auto &ctx = *(SpawnChildProcessContext *)_ctx;
 
+	ctx.userns_map_pipe_w.Close();
 	ctx.userns_create_pipe_r.Close();
 	ctx.wait_pipe_w.Close();
 	ctx.error_pipe_r.Close();
 
 	Exec(ctx.path, std::move(ctx.params),
+	     std::move(ctx.userns_map_pipe_r),
 	     std::move(ctx.userns_create_pipe_w),
 	     std::move(ctx.wait_pipe_r),
 	     std::move(ctx.error_pipe_w),
@@ -479,6 +490,28 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		/* this process will set up the uid/gid maps, so
 		   disable that part in the child process */
 		ctx.params.ns.enable_user = false;
+	} else if (ctx.params.ns.enable_user &&
+		   !ctx.params.uid_gid.IsEmpty()) {
+		/* if we have to set a user or group without being
+		   CAP_SYS_ADMIN (only CAP_SETUID/CAP_SETGID,
+		   e.g. inside a container), then the child process
+		   doesn't have those capabilities; we need to set up
+		   uid/gid mappings before it sets up its mount
+		   namespace, or else creating mount points with
+		   mkdir() in tmpfs fails with EOVERFLOW */
+		/* note that this EOVERFLOW does not occur with
+		   CAP_SYS_ADMIN, because CAP_SYS_ADMIN allows us to
+		   clone() without CLONE_NEWUSER and unshare() it
+		   later, i.e. the new user namespace does not yet
+		   exist the child calls mkdir() */
+
+		if (!UniqueFileDescriptor::CreatePipe(ctx.userns_map_pipe_r,
+						      ctx.userns_map_pipe_w))
+			throw MakeErrno("pipe() failed");
+
+		/* this process will set up the uid/gid maps, so
+		   disable that part in the child process */
+		ctx.params.ns.enable_user = false;
 	}
 
 	char stack[HaveAddressSanitizer() ? 32768 : 16384];
@@ -491,6 +524,16 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	ctx.error_pipe_w.Close();
 
 	UniqueFileDescriptor pidfd{_pidfd};
+
+	if (ctx.userns_map_pipe_w.IsDefined()) {
+		/* set up the child's uid/gid mapping and wake it
+		   up */
+		ctx.params.ns.SetupUidGidMap(ctx.params.uid_gid, pid);
+
+		/* now the right process is ready to set up its mount
+		   namespace */
+		WakeUpPipe(std::move(ctx.userns_map_pipe_w));
+	}
 
 	if (ctx.userns_create_pipe_r.IsDefined()) {
 		/* wait for the child to create the user namespace */
