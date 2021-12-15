@@ -118,6 +118,22 @@ UnblockSignals() noexcept
 	sigprocmask(SIG_UNBLOCK, &mask, nullptr);
 }
 
+/**
+ * Read one byte from the pipe.
+ *
+ * @return true if there was exactly one byte in the pipe
+ */
+static bool
+WaitForPipe(FileDescriptor r)
+{
+	/* expect one byte to indicate success, and then the pipe will
+	   be closed by the parent */
+	std::byte buffer;
+
+	return r.Read(&buffer, sizeof(buffer)) == sizeof(buffer) &&
+		r.Read(&buffer, sizeof(buffer)) == 0;
+}
+
 [[noreturn]]
 static void
 Exec(const char *path, PreparedChildProcess &&p,
@@ -202,16 +218,9 @@ try {
 		userns_create_pipe_w.Close();
 	}
 
-	if (wait_pipe_r.IsDefined()) {
-		/* wait for the parent to set us up */
-
-		/* expect one byte to indicate success, and then the pipe will
-		   be closed by the parent */
-		char buffer;
-		if (wait_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
-		    wait_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
-			_exit(EXIT_FAILURE);
-	}
+	/* wait for the parent to set us up */
+	if (wait_pipe_r.IsDefined() && !WaitForPipe(wait_pipe_r))
+		_exit(EXIT_FAILURE);
 
 	if (p.sched_idle) {
 		static struct sched_param sched_param;
@@ -478,9 +487,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 		/* expect one byte to indicate success, and then the
 		   pipe will be closed by the child */
-		char buffer;
-		if (ctx.userns_create_pipe_r.Read(&buffer, sizeof(buffer)) != 1 ||
-		    ctx.userns_create_pipe_r.Read(&buffer, sizeof(buffer)) != 0)
+		if (!WaitForPipe(ctx.userns_create_pipe_r))
 			throw std::runtime_error("User namespace setup failed");
 	}
 
