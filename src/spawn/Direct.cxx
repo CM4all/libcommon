@@ -69,20 +69,20 @@
 #endif
 
 static void
-CheckedDup2(FileDescriptor oldfd, FileDescriptor newfd)
+CheckedDup2(FileDescriptor oldfd, FileDescriptor newfd) noexcept
 {
 	if (oldfd.IsDefined())
 		oldfd.CheckDuplicate(newfd);
 }
 
 static void
-CheckedDup2(FileDescriptor oldfd, int newfd)
+CheckedDup2(FileDescriptor oldfd, int newfd) noexcept
 {
 	CheckedDup2(oldfd, FileDescriptor(newfd));
 }
 
 static void
-DisconnectTty()
+DisconnectTty() noexcept
 {
 	FileDescriptor fd;
 	if (fd.Open("/dev/tty", O_RDWR)) {
@@ -92,7 +92,7 @@ DisconnectTty()
 }
 
 static void
-UnignoreSignals()
+UnignoreSignals() noexcept
 {
 	/* restore all signals which were set to SIG_IGN by
 	   RunSpawnServer2() and others */
@@ -111,7 +111,7 @@ UnignoreSignals()
 }
 
 static void
-UnblockSignals()
+UnblockSignals() noexcept
 {
 	sigset_t mask;
 	sigfillset(&mask);
@@ -123,7 +123,7 @@ static void
 Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
-     const CgroupState &cgroup_state)
+     const CgroupState &cgroup_state) noexcept
 try {
 	UnignoreSignals();
 	UnblockSignals();
@@ -365,7 +365,7 @@ struct SpawnChildProcessContext {
 };
 
 static int
-spawn_fn(void *_ctx)
+spawn_fn(void *_ctx) noexcept
 {
 	auto &ctx = *(SpawnChildProcessContext *)_ctx;
 
