@@ -124,8 +124,10 @@ UnblockSignals() noexcept
  * @return true if there was exactly one byte in the pipe
  */
 static bool
-WaitForPipe(FileDescriptor r)
+WaitForPipe(FileDescriptor r) noexcept
 {
+	assert(r.IsDefined());
+
 	/* expect one byte to indicate success, and then the pipe will
 	   be closed by the parent */
 	std::byte buffer;
