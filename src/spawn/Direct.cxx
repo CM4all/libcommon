@@ -334,8 +334,8 @@ try {
 		fprintf(stderr, "failed to execute %s: %s\n", path, strerror(errno));
 		_exit(EXIT_FAILURE);
 	}
-} catch (const std::exception &e) {
-	PrintException(e);
+} catch (...) {
+	PrintException(std::current_exception());
 	_exit(EXIT_FAILURE);
 }
 
