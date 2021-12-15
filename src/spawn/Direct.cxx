@@ -119,6 +119,20 @@ UnblockSignals() noexcept
 }
 
 /**
+ * Send one byte to the pipe and close it.  This wakes up the peer
+ * which blocks inside WaitForPipe().
+ */
+static void
+WakeUpPipe(UniqueFileDescriptor &&w) noexcept
+{
+	assert(w.IsDefined());
+
+	static constexpr std::byte one_byte{};
+	w.Write(&one_byte, sizeof(one_byte));
+	w.Close();
+}
+
+/**
  * Read one byte from the pipe.
  *
  * @return true if there was exactly one byte in the pipe
@@ -211,13 +225,9 @@ try {
 		if (unshare(CLONE_NEWUSER) < 0)
 			throw MakeErrno("unshare(CLONE_NEWUSER) failed");
 
-		/* after success (no exception was thrown), we send
-		   one byte to the pipe and close it, so the parent
-		   knows everything's ok; without that byte, it would
-		   fail */
-		static constexpr char zero = 0;
-		userns_create_pipe_w.Write(&zero, sizeof(zero));
-		userns_create_pipe_w.Close();
+		/* after success (no exception was thrown), wake up
+		   the parent */
+		WakeUpPipe(std::move(userns_create_pipe_w));
 	}
 
 	/* wait for the parent to set us up */
@@ -512,12 +522,9 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		if (ctx.params.ns.mount.pivot_root != nullptr)
 			CoreScheduling::Create(pid);
 
-		/* after success (no exception was thrown), we send one byte
-		   to the pipe and close it, so the child knows everything's
-		   ok; without that byte, it would exit immediately */
-		static constexpr char buffer = 0;
-		ctx.wait_pipe_w.Write(&buffer, sizeof(buffer));
-		ctx.wait_pipe_w.Close();
+		/* after success (no exception was thrown), wake up
+		   the child */
+		WakeUpPipe(std::move(ctx.wait_pipe_w));
 	}
 
 	ReadErrorPipe(ctx.error_pipe_r);
