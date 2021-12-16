@@ -84,7 +84,7 @@ struct VfsBuilder::FindWritableResult {
 };
 
 VfsBuilder::FindWritableResult
-VfsBuilder::FindWritable(std::string_view path) const
+VfsBuilder::FindWritable(std::string_view path) const noexcept
 {
 	for (auto i = items.rbegin(), end = items.rend(); i != end; ++i) {
 		StringView suffix{path};
@@ -92,20 +92,17 @@ VfsBuilder::FindWritable(std::string_view path) const
 			/* mismatch, continue searching */
 			continue;
 
-		if (suffix.empty())
-			throw FormatRuntimeError("Already a mount point: %.*s",
-						 int(path.size()),
-						 path.data());
+		if (!suffix.empty()) {
+			if (suffix.front() != '/')
+				/* mismatch, continue searching */
+				continue;
 
-		if (suffix.front() != '/')
-			/* mismatch, continue searching */
-			continue;
+			suffix.pop_front();
+		}
 
 		if (!i->IsWritable())
 			/* not writable: stop here */
 			break;
-
-		suffix.pop_front();
 
 		return {&*i, suffix};
 	}
@@ -149,6 +146,11 @@ VfsBuilder::Add(std::string_view path)
 
 	const auto fw = FindWritable(path);
 	if (fw.item != nullptr) {
+		if (fw.suffix.empty())
+			throw FormatRuntimeError("Already a mount point: %.*s",
+						 int(path.size()),
+						 path.data());
+
 		if (old_umask == -1)
 			old_umask = umask(0022);
 

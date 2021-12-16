@@ -76,5 +76,6 @@ public:
 private:
 	struct FindWritableResult;
 
-	FindWritableResult FindWritable(std::string_view path) const;
+	[[gnu::pure]]
+	FindWritableResult FindWritable(std::string_view path) const noexcept;
 };
