@@ -34,6 +34,8 @@
 #include "VfsBuilder.hxx"
 #include "system/BindMount.hxx"
 #include "system/Error.hxx"
+#include "io/UniqueFileDescriptor.hxx"
+#include "util/RuntimeError.hxx"
 #include "AllocatorPtr.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -42,6 +44,7 @@
 
 #include <cinttypes>
 
+#include <fcntl.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -123,6 +126,40 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 }
 
 inline void
+Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
+{
+	if (struct stat st;
+	    optional && lstat(source, &st) < 0 && errno == ENOENT)
+		/* the source file doesn't exist, but this is
+		   optional, so just ignore it */
+		return;
+
+	if (struct stat st; lstat(target, &st) == 0) {
+		/* target exists already */
+		if (!S_ISREG(st.st_mode))
+			throw FormatRuntimeError("Not a regular file: %s",
+						 target);
+	} else if (const int e = errno; e != ENOENT) {
+		throw FormatErrno(e, "Failed to stat %s",
+				  target);
+	} else {
+		/* target does not exist: first ensure that its parent
+		   directory exists, then create an empty target */
+		const char *slash = strrchr(target, '/');
+		assert(slash != nullptr);
+		const StringView parent{target, slash};
+		vfs_builder.MakeDirectory(parent);
+
+		UniqueFileDescriptor fd;
+		if (!fd.Open(target, O_CREAT|O_WRONLY, 0666))
+			throw FormatErrno("Failed to create %s", target);
+	}
+
+	constexpr int flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
+	BindMount(source, target, flags);
+}
+
+inline void
 Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 {
 	vfs_builder.Add(target);
@@ -157,6 +194,10 @@ Mount::Apply(VfsBuilder &vfs_builder) const
 		ApplyBindMount(vfs_builder);
 		break;
 
+	case Type::BIND_FILE:
+		ApplyBindMountFile(vfs_builder);
+		break;
+
 	case Type::TMPFS:
 		ApplyTmpfs(vfs_builder);
 		break;
@@ -176,6 +217,13 @@ Mount::MakeId(char *p) const noexcept
 {
 	switch (type) {
 	case Type::BIND:
+		*p++ = ';';
+		*p++ = 'm';
+		break;
+
+	case Type::BIND_FILE:
+		*p++ = ';';
+		*p++ = 'f';
 		break;
 
 	case Type::TMPFS:
@@ -183,9 +231,6 @@ Mount::MakeId(char *p) const noexcept
 		p = stpcpy(p, target);
 		return p;
 	}
-
-	*p++ = ';';
-	*p++ = 'm';
 
 	if (writable)
 		*p++ = 'w';

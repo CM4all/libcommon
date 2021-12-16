@@ -249,7 +249,8 @@ private:
 	void HandleMountTmpfs(StringView payload, bool writable);
 
 	void HandleBindMount(StringView payload,
-			     bool expand, bool writable, bool exec=false);
+			     bool expand, bool writable, bool exec=false,
+			     bool file=false);
 
 #if TRANSLATION_ENABLE_WANT
 	void HandleWant(const TranslationCommand *payload,

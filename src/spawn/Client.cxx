@@ -237,6 +237,13 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			s.WriteByte(i.optional);
 			break;
 
+		case Mount::Type::BIND_FILE:
+			s.Write(SpawnExecCommand::BIND_MOUNT_FILE);
+			s.WriteString(i.source);
+			s.WriteString(i.target);
+			s.WriteByte(i.optional);
+			break;
+
 		case Mount::Type::TMPFS:
 			s.WriteString(SpawnExecCommand::MOUNT_TMPFS,
 				      i.target);

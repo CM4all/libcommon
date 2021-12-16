@@ -761,6 +761,15 @@ public:
 			return *this;
 		}
 
+		template<typename S, typename T>
+		auto BindMountFile(S &&source, T &&target) noexcept {
+			response.StringPacket(TranslationCommand::BIND_MOUNT_FILE,
+					      std::forward<S>(source),
+					      std::string_view{"", 1},
+					      std::forward<T>(target));
+			return *this;
+		}
+
 		auto Optional() noexcept {
 			response.Optional();
 			return *this;

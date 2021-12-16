@@ -638,6 +638,19 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
+		case SpawnExecCommand::BIND_MOUNT_FILE:
+			{
+				const char *source = payload.ReadString();
+				const char *target = payload.ReadString();
+				mounts.emplace_front(source, target);
+				mounts.front().type = Mount::Type::BIND_FILE;
+				mounts.front().optional = payload.ReadByte();
+			}
+
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
+			break;
+
 		case SpawnExecCommand::HOSTNAME:
 			p.ns.hostname = payload.ReadString();
 			break;

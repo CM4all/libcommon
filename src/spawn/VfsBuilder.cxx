@@ -183,6 +183,20 @@ VfsBuilder::ScheduleRemount(int flags) noexcept
 }
 
 void
+VfsBuilder::MakeDirectory(std::string_view path)
+{
+	assert(path.empty() || path.front() == '/');
+
+	const auto fw = FindWritable(path);
+	if (fw.item == nullptr)
+		throw FormatRuntimeError("Not writable: %.*s",
+					 int(path.size()),
+					 path.data());
+
+	MakeDirs(fw.item->fd, fw.suffix);
+}
+
+void
 VfsBuilder::Finish()
 {
 	for (const auto &i : items) {

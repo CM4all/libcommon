@@ -47,6 +47,7 @@ struct Mount : IntrusiveForwardListHook {
 
 	enum class Type : uint8_t {
 		BIND,
+		BIND_FILE,
 		TMPFS,
 	} type = Type::BIND;
 
@@ -104,6 +105,7 @@ struct Mount : IntrusiveForwardListHook {
 
 private:
 	void ApplyBindMount(VfsBuilder &vfs_builder) const;
+	void ApplyBindMountFile(VfsBuilder &vfs_builder) const;
 	void ApplyTmpfs(VfsBuilder &vfs_builder) const;
 
 public:

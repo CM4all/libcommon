@@ -1114,6 +1114,12 @@ enum class TranslationCommand : uint16_t {
 	 * is useful for #MOUNT_EMPTY.
 	 */
 	MOUNT_DEV = 233,
+
+	/**
+	 * Bind-mount a (read-only) file.  Payload is source and
+	 * target separated by a null byte.
+	 */
+	BIND_MOUNT_FILE = 234,
 };
 
 struct TranslationHeader {

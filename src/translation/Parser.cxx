@@ -640,7 +640,8 @@ TranslateParser::HandleMountTmpfs(StringView payload, bool writable)
 
 inline void
 TranslateParser::HandleBindMount(StringView payload,
-				 bool expand, bool writable, bool exec)
+				 bool expand, bool writable, bool exec,
+				 bool file)
 {
 	const auto [source, target] = payload.Split('\0');
 	if (source.empty() || source.front() != '/' ||
@@ -659,6 +660,10 @@ TranslateParser::HandleBindMount(StringView payload,
 #else
 	(void)expand;
 #endif
+
+	if (file)
+		m->type = Mount::Type::BIND_FILE;
+
 	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
 }
 
@@ -3693,6 +3698,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		case TranslationCommand::EXPAND_BIND_MOUNT_RW:
 		case TranslationCommand::BIND_MOUNT_EXEC:
 		case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
+		case TranslationCommand::BIND_MOUNT_FILE:
 			if (mount_list != IntrusiveForwardList<Mount>::end()) {
 				mount_list->optional = true;
 				return;
@@ -3763,6 +3769,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("duplicate MOUNT_DEV packet");
 
 		ns_options->mount.mount_dev = true;
+		return;
+
+	case TranslationCommand::BIND_MOUNT_FILE:
+		previous_command = command;
+		HandleBindMount(string_payload, false, false, false, true);
 		return;
 	}
 

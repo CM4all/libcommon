@@ -71,6 +71,12 @@ public:
 	 */
 	void ScheduleRemount(int flags) noexcept;
 
+	/**
+	 * Make sure the specified directory exists inside a writable
+	 * mount.  Throws if that fails.
+	 */
+	void MakeDirectory(std::string_view path);
+
 	void Finish();
 
 private:
