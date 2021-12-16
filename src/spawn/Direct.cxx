@@ -207,6 +207,19 @@ try {
 	if (userns_map_pipe_r.IsDefined() && !WaitForPipe(userns_map_pipe_r))
 		_exit(EXIT_FAILURE);
 
+	/* switch to the final UID/GID before setting up the mount
+	   namespace, because the previous UID/GID may not be mapped
+	   in the user namespace, causing mkdir() to fail with
+	   EOVERFLOW */
+	/* note: we need to do this only if we're already in a new
+	   user namespace; if CLONE_NEWUSER was postponed, the
+	   EOVERFLOW problem is not relevant, and switching UID/GID
+	   early would require the spawner to have CAP_SYS_RESOURCE
+	   for prlimit() */
+	const bool early_uid_gid = !wait_pipe_r.IsDefined();
+	if (early_uid_gid && !p.uid_gid.IsEmpty())
+		p.uid_gid.Apply();
+
 	p.ns.Apply(p.uid_gid);
 
 	if (!wait_pipe_r.IsDefined())
@@ -301,7 +314,7 @@ try {
 			path, e.what());
 	}
 
-	if (!p.uid_gid.IsEmpty())
+	if (!early_uid_gid && !p.uid_gid.IsEmpty())
 		p.uid_gid.Apply();
 
 	if (p.chdir != nullptr && chdir(p.chdir) < 0)
