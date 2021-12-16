@@ -362,20 +362,19 @@ parse_header(AllocatorPtr alloc,
 	     KeyValueList &headers, const char *packet_name,
 	     StringView payload)
 {
-	const char *value = payload.Find(':');
-	if (value == nullptr || value == payload.data ||
+	const auto [_name, value] = payload.Split(':');
+	if (_name.empty() || value == nullptr ||
 	    !IsValidString(payload))
 		throw FormatRuntimeError("malformed %s packet", packet_name);
 
-	const char *name = alloc.DupToLower(StringView(payload.data, value));
-	++value;
+	const char *name = alloc.DupToLower(_name);
 
 	if (!http_header_name_valid(name))
 		throw FormatRuntimeError("malformed name in %s packet", packet_name);
 	else if (http_header_is_hop_by_hop(name))
 		throw FormatRuntimeError("hop-by-hop %s packet", packet_name);
 
-	headers.Add(alloc, name, value);
+	headers.Add(alloc, name, value.data);
 }
 
 #endif
@@ -643,19 +642,17 @@ inline void
 TranslateParser::HandleBindMount(StringView payload,
 				 bool expand, bool writable, bool exec)
 {
-	if (payload.empty() || payload.front() != '/')
-		throw std::runtime_error("malformed BIND_MOUNT packet");
-
-	const char *separator = payload.Find('\0');
-	if (separator == nullptr || separator[1] != '/')
+	const auto [source, target] = payload.Split('\0');
+	if (source.empty() || source.front() != '/' ||
+	    target.empty() || target.front() != '/')
 		throw std::runtime_error("malformed BIND_MOUNT packet");
 
 	if (mount_list == IntrusiveForwardList<Mount>::end())
 		throw std::runtime_error("misplaced BIND_MOUNT packet");
 
 	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
-				   payload.data + 1,
-				   separator + 1,
+				   source.data + 1,
+				   target.data + 1,
 				   writable, exec);
 #if TRANSLATION_ENABLE_EXPAND
 	m->expand_source = expand;
@@ -962,13 +959,12 @@ IsValidCgroupAttributeName(StringView s) noexcept
 
 [[gnu::pure]]
 static bool
-IsValidCgroupSetName(StringView name)
+IsValidCgroupSetName(StringView name) noexcept
 {
-	const char *dot = name.Find('.');
-	if (dot == nullptr || dot == name.begin() || dot == name.end())
+	const auto [controller, attribute] = name.Split('.');
+	if (controller.empty() || attribute.empty())
 		return false;
 
-	const StringView controller(name.data, dot);
 	if (!IsValidCgroupName(controller))
 		return false;
 
@@ -977,7 +973,6 @@ IsValidCgroupSetName(StringView name)
 		   attribute */
 		return false;
 
-	const StringView attribute(dot + 1, name.end());
 	if (!IsValidCgroupAttributeName(attribute))
 		return false;
 
@@ -998,11 +993,7 @@ ParseCgroupSet(StringView payload)
 	if (!IsValidString(payload))
 		return {nullptr, nullptr};
 
-	const char *eq = payload.Find('=');
-	if (eq == nullptr)
-		return {nullptr, nullptr};
-
-	StringView name(payload.data, eq), value(eq + 1, payload.end());
+	const auto [name, value] = payload.Split('=');
 	if (!IsValidCgroupSetName(name) || !IsValidCgroupSetValue(value))
 		return {nullptr, nullptr};
 
@@ -1033,29 +1024,16 @@ CheckProbeSuffix(StringView payload) noexcept
 inline void
 TranslateParser::HandleSubstYamlFile(StringView payload)
 {
-	const auto prefix = payload.data;
-
-	auto separator = payload.Find('\0');
-	if (separator == nullptr)
+	const auto [prefix, rest] = payload.Split('\0');
+	if (rest == nullptr)
 		throw std::runtime_error("malformed SUBST_YAML_FILE packet");
 
-	const auto yaml_file = separator + 1;
-	if (!IsValidAbsolutePath(yaml_file))
+	const auto [yaml_file, yaml_map_path] = rest.Split('\0');
+	if (yaml_map_path == nullptr ||
+	    !IsValidAbsolutePath(yaml_file))
 		throw std::runtime_error("malformed SUBST_YAML_FILE packet");
 
-	payload.MoveFront(yaml_file);
-	separator = payload.Find('\0');
-	if (separator == nullptr)
-		throw std::runtime_error("malformed SUBST_YAML_FILE packet");
-
-	const auto yaml_map_path = separator + 1;
-
-	payload.MoveFront(yaml_map_path);
-	separator = payload.Find('\0');
-	if (separator != nullptr)
-		throw std::runtime_error("malformed SUBST_YAML_FILE packet");
-
-	AddSubstYamlFile(prefix, yaml_file, yaml_map_path);
+	AddSubstYamlFile(prefix.data, yaml_file.data, yaml_map_path.data);
 }
 
 #endif
