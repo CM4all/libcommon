@@ -1107,6 +1107,13 @@ enum class TranslationCommand : uint16_t {
 	 * Collect statistics for this request under the given tag.
 	 */
 	STATS_TAG = 232,
+
+	/**
+	 * Mount a minimalistic /dev (but can be implemented by
+	 * bind-mounting the host /dev into the new container).  This
+	 * is useful for #MOUNT_EMPTY.
+	 */
+	MOUNT_DEV = 233,
 };
 
 struct TranslationHeader {

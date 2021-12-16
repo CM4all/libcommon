@@ -206,6 +206,7 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			      ns.network_namespace);
 	s.WriteOptional(SpawnExecCommand::IPC_NS, ns.enable_ipc);
 	s.WriteOptional(SpawnExecCommand::MOUNT_PROC, ns.mount.mount_proc);
+	s.WriteOptional(SpawnExecCommand::MOUNT_DEV, ns.mount.mount_dev);
 	s.WriteOptional(SpawnExecCommand::MOUNT_PTS, ns.mount.mount_pts);
 	s.WriteOptional(SpawnExecCommand::BIND_MOUNT_PTS,
 			ns.mount.bind_mount_pts);

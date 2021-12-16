@@ -3771,6 +3771,21 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.stats_tag = string_payload.data;
 		return;
+
+	case TranslationCommand::MOUNT_DEV:
+		if (!payload.empty())
+			throw std::runtime_error("malformed MOUNT_DEV packet");
+
+		if (ns_options == nullptr ||
+		    (!ns_options->mount.mount_root_tmpfs &&
+		     ns_options->mount.pivot_root == nullptr))
+			throw std::runtime_error("misplaced MOUNT_DEV packet");
+
+		if (ns_options->mount.mount_dev)
+			throw std::runtime_error("duplicate MOUNT_DEV packet");
+
+		ns_options->mount.mount_dev = true;
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

@@ -61,6 +61,7 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 	:mount_root_tmpfs(src.mount_root_tmpfs),
 	 mount_proc(src.mount_proc),
 	 writable_proc(src.writable_proc),
+	 mount_dev(src.mount_dev),
 	 mount_pts(src.mount_pts),
 	 bind_mount_pts(src.bind_mount_pts),
 	 pivot_root(alloc.CheckDup(src.pivot_root)),
@@ -173,6 +174,19 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		MountOrThrow("proc", "/proc", "proc", flags, nullptr);
 	}
 
+	if (mount_dev) {
+		vfs_builder.Add("/dev");
+
+		ChdirOrThrow(new_root != nullptr ? put_old : "/");
+
+		// TODO no bind-mount, just create /dev/null etc.
+		BindMount("dev", "/dev", MS_NOSUID|MS_NOEXEC);
+
+		if (new_root != nullptr)
+			/* back to the new root */
+			ChdirOrThrow("/");
+	}
+
 	if (mount_pts) {
 		vfs_builder.Add("/dev/pts");
 
@@ -263,6 +277,9 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 		if (writable_proc)
 			*p++ = 'w';
 	}
+
+	if (mount_dev)
+		p = (char *)mempcpy(p, ";dev", 4);
 
 	if (mount_pts)
 		p = (char *)mempcpy(p, ";pts", 4);

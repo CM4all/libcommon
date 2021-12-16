@@ -68,6 +68,7 @@ enum class SpawnExecCommand : uint8_t {
 	IPC_NS,
 	MOUNT_PROC,
 	WRITABLE_PROC,
+	MOUNT_DEV,
 	MOUNT_PTS,
 	BIND_MOUNT_PTS,
 	PIVOT_ROOT,

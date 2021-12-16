@@ -59,6 +59,11 @@ struct MountNamespaceOptions {
 	bool writable_proc = false;
 
 	/**
+	 * Mount /dev?
+	 */
+	bool mount_dev = false;
+
+	/**
 	 * Mount /dev/pts?
 	 */
 	bool mount_pts = false;
@@ -99,6 +104,7 @@ struct MountNamespaceOptions {
 		:mount_root_tmpfs(src.mount_root_tmpfs),
 		 mount_proc(src.mount_proc),
 		 writable_proc(src.writable_proc),
+		 mount_dev(src.mount_dev),
 		 mount_pts(src.mount_pts),
 		 bind_mount_pts(src.bind_mount_pts),
 		 pivot_root(src.pivot_root),
@@ -114,7 +120,7 @@ struct MountNamespaceOptions {
 			      const MountNamespaceOptions &src) noexcept;
 
 	bool IsEnabled() const noexcept {
-		return mount_root_tmpfs || mount_proc ||
+		return mount_root_tmpfs || mount_proc || mount_dev ||
 			mount_pts || bind_mount_pts ||
 			pivot_root != nullptr ||
 			mount_home != nullptr ||

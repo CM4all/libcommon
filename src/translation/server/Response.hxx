@@ -678,6 +678,11 @@ public:
 			return *this;
 		}
 
+		auto MountDev() noexcept {
+			response.Packet(TranslationCommand::MOUNT_DEV);
+			return *this;
+		}
+
 		auto MountTmpTmpfs(std::string_view payload={}) noexcept {
 			response.StringPacket(TranslationCommand::MOUNT_TMP_TMPFS,
 					      payload);

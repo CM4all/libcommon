@@ -582,6 +582,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.ns.mount.writable_proc = true;
 			break;
 
+		case SpawnExecCommand::MOUNT_DEV:
+			p.ns.mount.mount_dev = true;
+			break;
+
 		case SpawnExecCommand::MOUNT_PTS:
 			p.ns.mount.mount_pts = true;
 			break;
