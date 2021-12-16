@@ -127,9 +127,14 @@ MakeDirs(FileDescriptor fd, const char *suffix)
 
 		name2.assign(name.data, name.size);
 
-		if (mkdirat(fd.Get(), name2.c_str(), 0711) < 0)
-			throw FormatErrno("Failed to create mount point %s",
+		if (mkdirat(fd.Get(), name2.c_str(), 0711) < 0) {
+			const int e = errno;
+			if (e == EEXIST)
+				continue;
+
+			throw FormatErrno(e, "Failed to create mount point %s",
 					  suffix);
+		}
 	}
 }
 
