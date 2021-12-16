@@ -33,6 +33,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
 #include <vector>
 
 /**
@@ -58,7 +59,7 @@ public:
 	/**
 	 * Throws if the mount point could not be created.
 	 */
-	void Add(const char *path);
+	void Add(std::string_view path);
 
 	/**
 	 * Throws if the mount point could not be opened.
@@ -75,5 +76,5 @@ public:
 private:
 	struct FindWritableResult;
 
-	FindWritableResult FindWritable(const char *path) const;
+	FindWritableResult FindWritable(std::string_view path) const;
 };

@@ -80,23 +80,24 @@ VfsBuilder::AddWritableRoot(const char *path)
 
 struct VfsBuilder::FindWritableResult {
 	const Item *item;
-	const char *suffix;
+	std::string_view suffix;
 };
 
 VfsBuilder::FindWritableResult
-VfsBuilder::FindWritable(const char *path) const
+VfsBuilder::FindWritable(std::string_view path) const
 {
 	for (auto i = items.rbegin(), end = items.rend(); i != end; ++i) {
-		const char *suffix = StringAfterPrefix(path, i->path.c_str());
-		if (suffix == nullptr)
+		StringView suffix{path};
+		if (!suffix.SkipPrefix(std::string_view{i->path}))
 			/* mismatch, continue searching */
 			continue;
 
-		if (*suffix == 0)
-			throw FormatRuntimeError("Already a mount point: %s",
-						 path);
+		if (suffix.empty())
+			throw FormatRuntimeError("Already a mount point: %.*s",
+						 int(path.size()),
+						 path.data());
 
-		if (*suffix != '/')
+		if (suffix.front() != '/')
 			/* mismatch, continue searching */
 			continue;
 
@@ -104,16 +105,16 @@ VfsBuilder::FindWritable(const char *path) const
 			/* not writable: stop here */
 			break;
 
-		++suffix;
+		suffix.pop_front();
 
 		return {&*i, suffix};
 	}
 
-	return {nullptr, nullptr};
+	return {nullptr, std::string_view{}};
 }
 
 static void
-MakeDirs(FileDescriptor fd, const char *suffix)
+MakeDirs(FileDescriptor fd, std::string_view suffix)
 {
 	UniqueFileDescriptor ufd;
 
@@ -133,17 +134,18 @@ MakeDirs(FileDescriptor fd, const char *suffix)
 			if (e == EEXIST)
 				continue;
 
-			throw FormatErrno(e, "Failed to create mount point %s",
-					  suffix);
+			throw FormatErrno(e,
+					  "Failed to create mount point %.*s",
+					  int(suffix.size()),
+					  suffix.data());
 		}
 	}
 }
 
 void
-VfsBuilder::Add(const char *path)
+VfsBuilder::Add(std::string_view path)
 {
-	assert(path != nullptr);
-	assert(*path == 0 || *path == '/');
+	assert(path.empty() || path.front() == '/');
 
 	const auto fw = FindWritable(path);
 	if (fw.item != nullptr) {
