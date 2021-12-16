@@ -45,14 +45,15 @@
 #include <sys/stat.h>
 
 struct VfsBuilder::Item {
-	const char *path;
+	const std::string path;
 
 	UniqueFileDescriptor fd;
 
 	int remount_flags = 0;
 
-	explicit Item(const char *_path) noexcept
-		:path(_path) {}
+	template<typename P>
+	explicit Item(P &&_path) noexcept
+		:path(std::forward<P>(_path)) {}
 
 	bool IsWritable() const noexcept {
 		return fd.IsDefined();
@@ -73,7 +74,7 @@ VfsBuilder::AddWritableRoot(const char *path)
 {
 	assert(items.empty());
 
-	items.emplace_back("");
+	items.emplace_back(std::string_view{});
 	items.back().fd = OpenPath(path, O_DIRECTORY);
 }
 
@@ -86,7 +87,7 @@ VfsBuilder::FindWritableResult
 VfsBuilder::FindWritable(const char *path) const
 {
 	for (auto i = items.rbegin(), end = items.rend(); i != end; ++i) {
-		const char *suffix = StringAfterPrefix(path, i->path);
+		const char *suffix = StringAfterPrefix(path, i->path.c_str());
 		if (suffix == nullptr)
 			/* mismatch, continue searching */
 			continue;
@@ -163,7 +164,7 @@ VfsBuilder::MakeWritable()
 	auto &item = items.back();
 	assert(!item.fd.IsDefined());
 
-	item.fd = OpenPath(item.path, O_DIRECTORY);
+	item.fd = OpenPath(item.path.c_str(), O_DIRECTORY);
 }
 
 void
@@ -182,8 +183,9 @@ VfsBuilder::Finish()
 {
 	for (const auto &i : items) {
 		if (i.remount_flags != 0 &&
-		    mount(nullptr, i.path, nullptr, i.remount_flags,
+		    mount(nullptr, i.path.c_str(), nullptr, i.remount_flags,
 			  nullptr) < 0)
-		    throw FormatErrno("Failed to remount %s", i.path);
+			throw FormatErrno("Failed to remount %s",
+					  i.path.c_str());
 	}
 }
