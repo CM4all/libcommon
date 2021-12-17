@@ -652,7 +652,7 @@ TranslateParser::HandleBindMount(StringView payload,
 
 	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
 				   source.data + 1,
-				   target.data + 1,
+				   target.data,
 				   writable, exec);
 #if TRANSLATION_ENABLE_EXPAND
 	m->expand_source = expand;
