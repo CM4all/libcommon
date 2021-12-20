@@ -180,7 +180,10 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		ChdirOrThrow(new_root != nullptr ? put_old : "/");
 
 		// TODO no bind-mount, just create /dev/null etc.
-		BindMount("dev", "/dev", MS_NOSUID|MS_NOEXEC);
+		const char *source = "dev";
+		const char *target = "/dev";
+		if (mount(source, target, nullptr, MS_BIND|MS_REC, nullptr) < 0)
+			throw FormatErrno("bind_mount('%s', '%s') failed", source, target);
 
 		if (new_root != nullptr)
 			/* back to the new root */
