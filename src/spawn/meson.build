@@ -29,6 +29,7 @@ spawn_sources = [
   'UidGid.cxx',
   'UserNamespace.cxx',
   'VfsBuilder.cxx',
+  'ZombieReaper.cxx',
   'daemon/Client.cxx',
 ]
 

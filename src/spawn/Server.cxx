@@ -43,6 +43,7 @@
 #include "CgroupState.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
+#include "ZombieReaper.hxx"
 #include "ExitListener.hxx"
 #include "PidfdEvent.hxx"
 #include "event/SocketEvent.hxx"
@@ -249,6 +250,8 @@ class SpawnServerProcess {
 	EventLoop loop;
 
 	ChildProcessRegistry child_process_registry;
+
+	ZombieReaper zombie_reaper{loop};
 
 #ifdef HAVE_LIBSYSTEMD
 	std::unique_ptr<CgroupMemoryWatch> cgroup_memory_watch;
