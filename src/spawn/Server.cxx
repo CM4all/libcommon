@@ -327,6 +327,8 @@ private:
 #ifdef HAVE_LIBSYSTEMD
 		cgroup_memory_watch.reset();
 #endif
+
+		zombie_reaper.Disable();
 	}
 
 #ifdef HAVE_LIBSYSTEMD
