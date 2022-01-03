@@ -3,6 +3,7 @@ time_sources = [
   'ISO8601.cxx',
   'Parser.cxx',
   'Math.cxx',
+  'Zone.cxx',
   'gmtime.cxx',
 ]
 
