@@ -42,6 +42,8 @@
 UniqueX509
 LoadCertFile(const char *path)
 {
+	ERR_clear_error();
+
 	auto cert = TS_CONF_load_cert(path);
 	if (cert == nullptr)
 		throw SslError("Failed to load certificate");
@@ -52,6 +54,8 @@ LoadCertFile(const char *path)
 std::forward_list<UniqueX509>
 LoadCertChainFile(const char *path, bool first_is_ca)
 {
+	ERR_clear_error();
+
 	UniqueBIO bio(BIO_new_file(path, "r"));
 	if (!bio)
 		throw SslError(std::string("Failed to open ") + path);
@@ -101,6 +105,8 @@ LoadCertChainFile(const char *path, bool first_is_ca)
 UniqueEVP_PKEY
 LoadKeyFile(const char *path)
 {
+	ERR_clear_error();
+
 	auto key = TS_CONF_load_key(path, nullptr);
 	if (key == nullptr)
 		throw SslError("Failed to load key");
