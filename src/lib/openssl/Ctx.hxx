@@ -47,7 +47,7 @@ class SslCtx {
 	SSL_CTX *ssl_ctx = nullptr;
 
 public:
-	SslCtx() = default;
+	SslCtx() noexcept = default;
 
 	explicit SslCtx(const SSL_METHOD *meth)
 		:ssl_ctx(SSL_CTX_new(meth)) {
@@ -55,20 +55,20 @@ public:
 			throw SslError("SSL_CTX_new() failed");
 	}
 
-	SslCtx(const SslCtx &src)
+	SslCtx(const SslCtx &src) noexcept
 		:ssl_ctx(src.ssl_ctx) {
 		SSL_CTX_up_ref(ssl_ctx);
 	}
 
-	SslCtx(SslCtx &&src)
+	SslCtx(SslCtx &&src) noexcept
 		:ssl_ctx(std::exchange(src.ssl_ctx, nullptr)) {}
 
-	~SslCtx() {
+	~SslCtx() noexcept {
 		if (ssl_ctx != nullptr)
 			SSL_CTX_free(ssl_ctx);
 	}
 
-	SslCtx &operator=(const SslCtx &src) {
+	SslCtx &operator=(const SslCtx &src) noexcept {
 		/* this check is important because it protects against
 		   self-assignment */
 		if (ssl_ctx != src.ssl_ctx) {
@@ -83,24 +83,24 @@ public:
 		return *this;
 	}
 
-	SslCtx &operator=(SslCtx &&src) {
+	SslCtx &operator=(SslCtx &&src) noexcept {
 		std::swap(ssl_ctx, src.ssl_ctx);
 		return *this;
 	}
 
-	operator bool() const {
+	operator bool() const noexcept {
 		return ssl_ctx != nullptr;
 	}
 
-	SSL_CTX *get() const {
+	SSL_CTX *get() const noexcept {
 		return ssl_ctx;
 	}
 
-	SSL_CTX &operator*() const {
+	SSL_CTX &operator*() const noexcept {
 		return *ssl_ctx;
 	}
 
-	void reset() {
+	void reset() noexcept {
 		if (ssl_ctx != nullptr)
 			SSL_CTX_free(ssl_ctx);
 		ssl_ctx = nullptr;
