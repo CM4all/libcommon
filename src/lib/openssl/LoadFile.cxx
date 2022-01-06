@@ -34,6 +34,7 @@
 #include "Key.hxx"
 #include "Error.hxx"
 #include "UniqueBIO.hxx"
+#include "util/RuntimeError.hxx"
 
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -93,8 +94,13 @@ LoadCertChainFile(const char *path, bool first_is_ca)
 		if (key == nullptr)
 			throw SslError(std::string("CA certificate has no pubkey in ") + path);
 
-		if (X509_verify(i->get(), key) <= 0)
-			throw SslError(std::string("CA chain mismatch in ") + path);
+		if (int result = X509_verify(i->get(), key); result <= 0) {
+			if (result < 0)
+				throw SslError("Failed to verify CA chain");
+			else
+				throw FormatRuntimeError("CA chain mismatch in %s",
+							 path);
+		}
 
 		i = list.emplace_after(i, std::move(cert));
 	}
