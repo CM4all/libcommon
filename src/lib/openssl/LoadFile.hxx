@@ -47,7 +47,7 @@ UniqueX509
 LoadCertFile(const char *path);
 
 std::forward_list<UniqueX509>
-LoadCertChainFile(const char *path);
+LoadCertChainFile(const char *path, bool first_is_ca=true);
 
 UniqueEVP_PKEY
 LoadKeyFile(const char *path);

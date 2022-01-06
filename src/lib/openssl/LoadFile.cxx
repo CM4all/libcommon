@@ -50,7 +50,7 @@ LoadCertFile(const char *path)
 }
 
 std::forward_list<UniqueX509>
-LoadCertChainFile(const char *path)
+LoadCertChainFile(const char *path, bool first_is_ca)
 {
 	UniqueBIO bio(BIO_new_file(path, "r"));
 	if (!bio)
@@ -64,7 +64,7 @@ LoadCertChainFile(const char *path)
 	if (!cert)
 		throw SslError(std::string("Failed to read certificate from ") + path);
 
-	if (X509_check_ca(cert.get()) != 1)
+	if (first_is_ca && X509_check_ca(cert.get()) != 1)
 		throw SslError(std::string("Not a CA certificate: ") + path);
 
 	i = list.emplace_after(i, std::move(cert));
@@ -121,7 +121,7 @@ LoadCertKeyFile(const char *cert_path, const char *key_path)
 std::pair<std::forward_list<UniqueX509>, UniqueEVP_PKEY>
 LoadCertChainKeyFile(const char *cert_path, const char *key_path)
 {
-	std::pair pair{LoadCertChainFile(cert_path), LoadKeyFile(key_path)};
+	std::pair pair{LoadCertChainFile(cert_path, false), LoadKeyFile(key_path)};
 	if (!MatchModulus(*pair.first.front(), *pair.second))
 		throw std::runtime_error("Key does not match certificate");
 
