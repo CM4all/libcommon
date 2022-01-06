@@ -56,3 +56,9 @@ TEST(TestSHA256, Empty)
 	const auto hash = HexFormat(state.Final());
 	EXPECT_STREQ(hash, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 }
+
+TEST(TestSHA256, Empty1)
+{
+	const auto hash = HexFormat(SHA256(ConstBuffer<void>{}));
+	EXPECT_STREQ(hash, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+}

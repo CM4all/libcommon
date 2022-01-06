@@ -41,9 +41,7 @@
 inline auto
 UrlSafeBase64SHA256(ConstBuffer<void> src) noexcept
 {
-	SHA256State state;
-	state.Update(src);
-	const auto hash = state.Final();
+	const auto hash = SHA256(src);
 	return FixedBase64<crypto_hash_sha256_BYTES, sodium_base64_VARIANT_URLSAFE_NO_PADDING>(&hash);
 }
 

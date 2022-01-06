@@ -67,3 +67,14 @@ public:
 		return out;
 	}
 };
+
+[[gnu::pure]]
+inline auto
+SHA256(ConstBuffer<void> src) noexcept
+{
+	SHA256Digest out;
+	crypto_hash_sha256(reinterpret_cast<unsigned char *>(out.data()),
+			   (const unsigned char *)src.data,
+			   src.size);
+	return out;
+}
