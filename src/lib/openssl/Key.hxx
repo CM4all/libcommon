@@ -57,10 +57,10 @@ DecodeDerKey(ConstBuffer<void> der);
 
 [[gnu::pure]]
 bool
-MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2);
+MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2) noexcept;
 
 [[gnu::pure]]
 bool
-MatchModulus(X509 &cert, EVP_PKEY &key);
+MatchModulus(X509 &cert, EVP_PKEY &key) noexcept;
 
 #endif

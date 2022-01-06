@@ -111,7 +111,7 @@ DecodeDerKey(ConstBuffer<void> der)
 #if OPENSSL_VERSION_NUMBER < 0x30000000L
 
 static bool
-MatchModulus(RSA &key1, RSA &key2)
+MatchModulus(RSA &key1, RSA &key2) noexcept
 {
 	const BIGNUM *n1, *n2;
 
@@ -122,7 +122,7 @@ MatchModulus(RSA &key1, RSA &key2)
 }
 
 static bool
-MatchModulus(DSA &key1, DSA &key2)
+MatchModulus(DSA &key1, DSA &key2) noexcept
 {
 	const BIGNUM *n1, *n2;
 
@@ -138,7 +138,7 @@ MatchModulus(DSA &key1, DSA &key2)
  * Are both public keys equal?
  */
 bool
-MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2)
+MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2) noexcept
 {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	return EVP_PKEY_eq(&key1, &key2) == 1;
@@ -165,7 +165,7 @@ MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2)
  * Does the certificate belong to the given key?
  */
 bool
-MatchModulus(X509 &cert, EVP_PKEY &key)
+MatchModulus(X509 &cert, EVP_PKEY &key) noexcept
 {
 	UniqueEVP_PKEY public_key(X509_get_pubkey(&cert));
 	if (public_key == nullptr)
