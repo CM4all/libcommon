@@ -55,4 +55,7 @@ LoadKeyFile(const char *path);
 std::pair<UniqueX509, UniqueEVP_PKEY>
 LoadCertKeyFile(const char *cert_path, const char *key_path);
 
+std::pair<std::forward_list<UniqueX509>, UniqueEVP_PKEY>
+LoadCertChainKeyFile(const char *cert_path, const char *key_path);
+
 #endif

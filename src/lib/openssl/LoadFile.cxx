@@ -117,3 +117,13 @@ LoadCertKeyFile(const char *cert_path, const char *key_path)
 
 	return pair;
 }
+
+std::pair<std::forward_list<UniqueX509>, UniqueEVP_PKEY>
+LoadCertChainKeyFile(const char *cert_path, const char *key_path)
+{
+	std::pair pair{LoadCertChainFile(cert_path), LoadKeyFile(key_path)};
+	if (!MatchModulus(*pair.first.front(), *pair.second))
+		throw std::runtime_error("Key does not match certificate");
+
+	return pair;
+}
