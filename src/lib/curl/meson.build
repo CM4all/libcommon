@@ -9,6 +9,7 @@ curl_deps = []
 
 if get_variable('libcommon_enable_event', true)
   curl_sources += [
+    'Adapter.cxx',
     'Request.cxx',
     'Setup.cxx',
     'Global.cxx',

@@ -27,86 +27,61 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Request.hxx"
-#include "Setup.hxx"
-#include "Global.hxx"
+#ifndef CURL_ADAPTER_HXX
+#define CURL_ADAPTER_HXX
 
 #include <curl/curl.h>
 
-#include <cassert>
+#include <cstddef>
+#include <map>
+#include <string>
 
-CurlRequest::CurlRequest(CurlGlobal &_global, CurlEasy _easy,
-			 CurlResponseHandler &_handler)
-	:global(_global), handler(_handler), easy(std::move(_easy))
-{
-	SetupEasy();
-}
+struct StringView;
+class CurlEasy;
+class CurlResponseHandler;
 
-CurlRequest::CurlRequest(CurlGlobal &_global,
-			 CurlResponseHandler &_handler)
-	:global(_global), handler(_handler)
-{
-	SetupEasy();
-}
+class CurlResponseHandlerAdapter {
+	CURL *curl;
 
-CurlRequest::~CurlRequest() noexcept
-{
-	FreeEasy();
-}
+	CurlResponseHandler &handler;
 
-void
-CurlRequest::SetupEasy()
-{
-	easy.SetPrivate((void *)this);
+	std::multimap<std::string, std::string> headers;
 
-	handler.Install(easy);
+	/** error message provided by libcurl */
+	char error_buffer[CURL_ERROR_SIZE];
 
-	Curl::Setup(easy);
-}
+	enum class State {
+		UNINITIALISED,
+		HEADERS,
+		BODY,
+		CLOSED,
+	} state = State::UNINITIALISED;
 
-void
-CurlRequest::Start()
-{
-	assert(!registered);
+public:
+	explicit CurlResponseHandlerAdapter(CurlResponseHandler &_handler) noexcept
+		:handler(_handler) {}
 
-	global.Add(*this);
-	registered = true;
-}
+	void Install(CurlEasy &easy);
 
-void
-CurlRequest::Stop() noexcept
-{
-	if (!registered)
-		return;
+	void Done(CURLcode result) noexcept;
 
-	global.Remove(*this);
-	registered = false;
-}
+private:
+	void FinishHeaders();
+	void FinishBody();
 
-void
-CurlRequest::FreeEasy() noexcept
-{
-	if (!easy)
-		return;
+	void HeaderFunction(StringView s) noexcept;
 
-	Stop();
-	easy = nullptr;
-}
+	/** called by curl when a new header is available */
+	static std::size_t _HeaderFunction(char *ptr,
+					   std::size_t size, std::size_t nmemb,
+					   void *stream) noexcept;
 
-void
-CurlRequest::Resume() noexcept
-{
-	assert(registered);
+	std::size_t DataReceived(const void *ptr, std::size_t size) noexcept;
 
-	easy.Unpause();
+	/** called by curl when new data is available */
+	static std::size_t WriteFunction(char *ptr,
+					 std::size_t size, std::size_t nmemb,
+					 void *stream) noexcept;
+};
 
-	global.InvalidateSockets();
-}
-
-void
-CurlRequest::Done(CURLcode result) noexcept
-{
-	Stop();
-
-	handler.Done(result);
-}
+#endif
