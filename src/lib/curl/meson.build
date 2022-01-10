@@ -10,6 +10,7 @@ curl_deps = []
 if get_variable('libcommon_enable_event', true)
   curl_sources += [
     'Request.cxx',
+    'Setup.cxx',
     'Global.cxx',
   ]
   curl_deps += event_dep

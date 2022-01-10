@@ -28,13 +28,13 @@
  */
 
 #include "Request.hxx"
+#include "Setup.hxx"
 #include "Global.hxx"
 #include "Handler.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/StringStrip.hxx"
 #include "util/StringView.hxx"
 #include "util/CharUtil.hxx"
-#include "version.h"
 
 #include <curl/curl.h>
 
@@ -68,13 +68,11 @@ CurlRequest::SetupEasy()
 	error_buffer[0] = 0;
 
 	easy.SetPrivate((void *)this);
-	easy.SetUserAgent(PACKAGE " " VERSION);
 	easy.SetHeaderFunction(_HeaderFunction, this);
 	easy.SetWriteFunction(WriteFunction, this);
 	easy.SetErrorBuffer(error_buffer);
-	easy.SetNoProgress();
-	easy.SetNoSignal();
-	easy.SetConnectTimeout(10);
+
+	Curl::Setup(easy);
 }
 
 void
