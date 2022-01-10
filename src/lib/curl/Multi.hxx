@@ -69,13 +69,13 @@ public:
 			curl_multi_cleanup(handle);
 	}
 
-	operator bool() const noexcept {
-		return handle != nullptr;
-	}
-
 	CurlMulti &operator=(CurlMulti &&src) noexcept {
 		std::swap(handle, src.handle);
 		return *this;
+	}
+
+	operator bool() const noexcept {
+		return handle != nullptr;
 	}
 
 	CURLM *Get() noexcept {
@@ -89,14 +89,14 @@ public:
 			throw std::runtime_error(curl_multi_strerror(code));
 	}
 
-	void Add(CURL *easy_handle) {
-		auto code = curl_multi_add_handle(handle, easy_handle);
+	void Add(CURL *easy) {
+		auto code = curl_multi_add_handle(handle, easy);
 		if (code != CURLM_OK)
 			throw std::runtime_error(curl_multi_strerror(code));
 	}
 
-	void Remove(CURL *easy_handle) {
-		auto code = curl_multi_remove_handle(handle, easy_handle);
+	void Remove(CURL *easy) {
+		auto code = curl_multi_remove_handle(handle, easy);
 		if (code != CURLM_OK)
 			throw std::runtime_error(curl_multi_strerror(code));
 	}
