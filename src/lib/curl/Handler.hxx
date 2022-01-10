@@ -64,14 +64,14 @@ public:
 	virtual void OnData(ConstBuffer<void> data) = 0;
 
 	/**
-	 * The response has ended.  The method is allowed delete the
-	 * #CurlRequest here.
+	 * The response has ended.  The method is allowed to delete the
+	 * #CurlRequest.
 	 */
 	virtual void OnEnd() = 0;
 
 	/**
-	 * An error has occurred.  The method is allowed delete the
-	 * #CurlRequest here.
+	 * An error has occurred.  The method is allowed to delete the
+	 * #CurlRequest.
 	 */
 	virtual void OnError(std::exception_ptr e) noexcept = 0;
 };
