@@ -47,6 +47,9 @@ struct CgroupState {
 	 * The controller mount points below /sys/fs/cgroup which are
 	 * managed by us (delegated from systemd).  Each mount point may
 	 * contain several controllers.
+	 *
+	 * A single empty string means there is a cgroup2 "unified"
+	 * mount on /sys/fs/cgroup.
 	 */
 	std::forward_list<std::string> mounts;
 

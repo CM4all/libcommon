@@ -80,6 +80,9 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 		throw FormatErrno("write('%s') failed", path);
 }
 
+/**
+ * Create a new cgroup and return an O_PATH file descriptor to it.
+ */
 static UniqueFileDescriptor
 MakeCgroup(const char *mount_base_path, const char *controller,
 	   const char *delegated_group, const char *sub_group)
