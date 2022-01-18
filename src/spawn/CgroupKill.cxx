@@ -46,25 +46,16 @@
 #include <sys/inotify.h>
 
 static UniqueFileDescriptor
-OpenUnifiedCgroupMount(const CgroupState &state)
-{
-	return OpenPath(state.GetUnifiedMount().c_str());
-}
-
-static UniqueFileDescriptor
 OpenUnifiedCgroup(const CgroupState &state, const char *name)
 {
 	assert(state.IsEnabled());
-	assert(state.group_path.front() == '/');
 
-	return OpenPath(OpenPath(OpenUnifiedCgroupMount(state),
-				 state.group_path.c_str() + 1),
-			name);
+	return OpenPath(state.GetUnifiedMount(), name);
 }
 
 static UniqueFileDescriptor
 OpenUnifiedCgroup(const CgroupState &state, const char *name,
-		       const char *session)
+		  const char *session)
 {
 	return session != nullptr
 		? OpenPath(OpenUnifiedCgroup(state, name), session)
@@ -140,7 +131,7 @@ static std::string
 MakeCgroupUnifiedPath(const CgroupState &state, const char *name,
 		      const char *session) noexcept
 {
-	auto result = state.GetUnifiedMount() + state.group_path + "/" + name;
+	auto result = state.GetUnifiedMountPath() + state.group_path + "/" + name;
 	if (session != nullptr) {
 		result.push_back('/');
 		result += session;

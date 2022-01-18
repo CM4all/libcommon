@@ -60,7 +60,7 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 }
 
 std::string
-CgroupState::GetUnifiedMount() const noexcept
+CgroupState::GetUnifiedMountPath() const noexcept
 {
 	if (mounts.empty())
 		return {};
@@ -73,6 +73,19 @@ CgroupState::GetUnifiedMount() const noexcept
 		return "/sys/fs/cgroup/unified";
 
 	return {};
+}
+
+FileDescriptor
+CgroupState::GetUnifiedMount() const noexcept
+{
+	if (mounts.empty())
+		return FileDescriptor::Undefined();
+
+	if (const auto &m = mounts.front();
+	    m.name.empty() || m.name == "unified")
+		return m.fd;
+
+	return FileDescriptor::Undefined();
 }
 
 void
