@@ -40,4 +40,18 @@
 bool
 IsSysAdmin() noexcept;
 
+/**
+ * Does the current process have CAP_SETUID?
+ */
+[[gnu::pure]]
+bool
+HaveSetuid() noexcept;
+
+/**
+ * Does the current process have CAP_NET_BIND_SERVICE?
+ */
+[[gnu::pure]]
+bool
+HaveNetBindService() noexcept;
+
 #endif
