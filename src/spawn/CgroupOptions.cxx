@@ -96,12 +96,12 @@ MakeCgroup(const char *mount_base_path, const char *controller,
 		throw std::runtime_error("Path is too long");
 
 	if (mkdir(path, 0777) < 0) {
-		switch (errno) {
+		switch (const int e = errno) {
 		case EEXIST:
 			break;
 
 		default:
-			throw FormatErrno("mkdir('%s') failed", path);
+			throw FormatErrno(e, "mkdir('%s') failed", path);
 		}
 	}
 
