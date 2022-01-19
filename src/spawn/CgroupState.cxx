@@ -256,7 +256,8 @@ CgroupState::FromProcess(unsigned pid)
 		}
 
 		auto &mount = state.mounts.emplace_front(std::string{unified_mount},
-							 std::move(sys_fs_cgroup));
+							 OpenPath(sys_fs_cgroup,
+								  group_path.c_str() + 1));
 
 		state.cgroup_kill = HasCgroupKill(mount.fd, group_path);
 	}
