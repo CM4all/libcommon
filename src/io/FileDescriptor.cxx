@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2012-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -113,6 +113,12 @@ bool
 FileDescriptor::OpenReadOnly(const char *pathname) noexcept
 {
 	return Open(pathname, O_RDONLY);
+}
+
+bool
+FileDescriptor::OpenReadOnly(FileDescriptor dir, const char *pathname) noexcept
+{
+	return Open(dir, pathname, O_RDONLY);
 }
 
 #ifndef _WIN32
