@@ -70,6 +70,8 @@ struct LaunchSpawnServerContext {
 	bool pid_namespace;
 };
 
+#ifdef HAVE_LIBSYSTEMD
+
 static void
 Chown(const CgroupState::Mount &cgroup_mount, uid_t uid, gid_t gid) noexcept
 {
@@ -96,6 +98,8 @@ Chown(const CgroupState &cgroup_state, uid_t uid, gid_t gid) noexcept
 	for (const auto &mount : cgroup_state.mounts)
 		Chown(mount, uid, gid);
 }
+
+#endif // HAVE_LIBSYSTEMD
 
 /**
  * Drop capabilities which are not needed during normal spawner
