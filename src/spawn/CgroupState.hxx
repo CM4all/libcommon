@@ -68,7 +68,7 @@ struct CgroupState {
 	 */
 	bool cgroup_kill = false;
 
-	bool IsEnabled() const {
+	bool IsEnabled() const noexcept {
 		return !group_path.empty();
 	}
 
