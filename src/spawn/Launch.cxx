@@ -44,6 +44,7 @@
 #include "util/PrintException.hxx"
 
 #include <sched.h>
+#include <fcntl.h> // for AT_SYMLINK_NOFOLLOW
 #include <unistd.h>
 #include <string.h>
 #include <sys/signal.h>
@@ -69,6 +70,33 @@ struct LaunchSpawnServerContext {
 	bool pid_namespace;
 };
 
+static void
+Chown(const CgroupState::Mount &cgroup_mount, uid_t uid, gid_t gid) noexcept
+{
+	fchownat(cgroup_mount.fd.Get(), ".", uid, gid, AT_SYMLINK_NOFOLLOW);
+	fchownat(cgroup_mount.fd.Get(), "cgroup.procs", uid, gid,
+		 AT_SYMLINK_NOFOLLOW);
+}
+
+/**
+ * chown() the specified control group and its "cgroup.procs" file in
+ * all controllers.
+ *
+ * This is necessary if we are running in a user namespace, because
+ * the Linux kernel requires write permissions to cgroup.procs in the
+ * root user namespace ("init_user_ns") for some operations.  Write
+ * permissions in the current namespace is not enough.
+ *
+ * @see
+ * https://github.com/torvalds/linux/blob/99613159ad749543621da8238acf1a122880144e/kernel/cgroup/cgroup.c#L4856
+ */
+static void
+Chown(const CgroupState &cgroup_state, uid_t uid, gid_t gid) noexcept
+{
+	for (const auto &mount : cgroup_state.mounts)
+		Chown(mount, uid, gid);
+}
+
 /**
  * Drop capabilities which are not needed during normal spawner
  * operation.
@@ -80,6 +108,9 @@ DropCapabilities()
 		/* not needed at all by the spawner */
 		CAP_DAC_READ_SEARCH,
 		CAP_NET_BIND_SERVICE,
+
+		/* only needed during initialization */
+		CAP_CHOWN,
 	};
 
 	auto state = CapabilityState::Current();
@@ -145,6 +176,9 @@ RunSpawnServer2(void *p)
 						   ctx.config.systemd_scope_properties,
 						   real_pid, true,
 						   ctx.config.systemd_slice.empty() ? nullptr : ctx.config.systemd_slice.c_str());
+
+			Chown(cgroup_state, ctx.config.spawner_uid_gid.uid,
+			      ctx.config.spawner_uid_gid.gid);
 		} catch (...) {
 			fprintf(stderr, "Failed to create systemd scope: ");
 			PrintException(std::current_exception());
