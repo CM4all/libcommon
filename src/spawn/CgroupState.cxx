@@ -33,7 +33,6 @@
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
 #include "io/Open.hxx"
-#include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
@@ -43,6 +42,15 @@
 
 #include <fcntl.h>
 #include <sys/stat.h>
+
+CgroupState::CgroupState() noexcept {}
+CgroupState::~CgroupState() noexcept = default;
+
+bool
+CgroupState::IsV2() const noexcept
+{
+	return !mounts.empty() && mounts.front().name.empty();
+}
 
 static void
 WriteFile(FileDescriptor fd, const char *path, std::string_view data)
@@ -57,7 +65,7 @@ CgroupState::GetUnifiedMount() const noexcept
 	if (mounts.empty())
 		return {};
 
-	const auto &i = mounts.front();
+	const auto &i = mounts.front().name;
 	if (i.empty())
 		return "/sys/fs/cgroup";
 
@@ -75,8 +83,7 @@ CgroupState::EnableAllControllers() const
 		   cgroup1 and not hybrid) */
 		return;
 
-	auto spawn_group = OpenPath(OpenPath("/sys/fs/cgroup"),
-				    group_path.c_str() + 1);
+	const FileDescriptor spawn_group = mounts.front().fd;
 
 	/* create a leaf cgroup and move this process into it, or else
 	   we can't enable other controllers */
@@ -130,23 +137,11 @@ OpenProcCgroup(unsigned pid)
 
 [[gnu::pure]]
 static bool
-HasCgroupKill(const std::string &unified_mount,
+HasCgroupKill(FileDescriptor fd,
 	      const std::string &group_path) noexcept
 {
 	assert(!group_path.empty());
 	assert(group_path.front() == '/');
-
-	UniqueFileDescriptor fd;
-	if (!fd.Open("/sys/fs/cgroup", O_PATH))
-		return false;
-
-	if (!unified_mount.empty()) {
-		UniqueFileDescriptor fd2;
-		if (!fd2.Open(fd, unified_mount.c_str(), O_PATH))
-			return false;
-
-		fd = std::move(fd2);
-	}
 
 	UniqueFileDescriptor group_fd;
 	if (!group_fd.Open(fd, group_path.c_str() + 1, O_PATH))
@@ -214,25 +209,32 @@ CgroupState::FromProcess(unsigned pid)
 
 	CgroupState state;
 
+	auto sys_fs_cgroup = OpenPath("/sys/fs/cgroup");
+
 	for (auto &i : assignments) {
 		if (i.path == group_path) {
 			for (auto &controller : i.controllers)
 				state.controllers.emplace(std::move(controller), i.name);
 
-			state.mounts.emplace_front(std::move(i.name));
+			auto controller_fd = OpenPath(sys_fs_cgroup,
+						      i.name.c_str());
+			state.mounts.emplace_front(std::move(i.name),
+						   OpenPath(controller_fd,
+							    group_path.c_str() + 1));
 		}
 	}
 
 	if (have_systemd)
-		state.mounts.emplace_front("systemd");
+		state.mounts.emplace_front("systemd",
+					   OpenPath(sys_fs_cgroup, "systemd"));
 
 	if (have_unified) {
 		std::string_view unified_mount = "unified";
 		if (state.mounts.empty()) {
 			UniqueFileDescriptor fd;
-			if (!fd.OpenReadOnly("/sys/fs/cgroup/unified/cgroup.subtree_control")) {
+			if (!fd.OpenReadOnly(sys_fs_cgroup, "unified/cgroup.subtree_control")) {
 				unified_mount = {};
-				fd.OpenReadOnly("/sys/fs/cgroup/cgroup.subtree_control");
+				fd.OpenReadOnly(sys_fs_cgroup, "cgroup.subtree_control");
 			}
 
 			if (fd.IsDefined()) {
@@ -253,11 +255,10 @@ CgroupState::FromProcess(unsigned pid)
 			}
 		}
 
+		auto &mount = state.mounts.emplace_front(std::string{unified_mount},
+							 std::move(sys_fs_cgroup));
 
-		state.mounts.emplace_front(unified_mount);
-
-		state.cgroup_kill = HasCgroupKill(state.mounts.front(),
-						  group_path);
+		state.cgroup_kill = HasCgroupKill(mount.fd, group_path);
 	}
 
 	state.group_path = std::move(group_path);

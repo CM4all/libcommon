@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include "io/UniqueFileDescriptor.hxx"
+
 #include <forward_list>
 #include <string>
 #include <map>
@@ -43,14 +45,37 @@ struct CgroupState {
 	std::string group_path;
 
 	/**
+	 * A cgroup controller mount point below /sys/fs/cgroup.  A
+	 * mount point may contain several controllers.
+	 */
+	struct Mount {
+		/**
+		 * An empty string means this is a cgroup2 "unified"
+		 * mount on /sys/fs/cgroup.
+		 */
+		std::string name;
+
+		/**
+		 * An O_PATH file descriptor of the group managed by
+		 * us (delegated from systemd).
+		 */
+		UniqueFileDescriptor fd;
+
+#if defined(__clang__) && __clang_major__ + 0 < 12
+		template<typename N>
+		Mount(N &&_name, UniqueFileDescriptor &&_fd) noexcept
+			:name(std::forward<N>(_name)), fd(std::move(_fd)) {}
+#endif
+	};
+
+	/**
 	 * The controller mount points below /sys/fs/cgroup which are
-	 * managed by us (delegated from systemd).  Each mount point may
-	 * contain several controllers.
+	 * managed by us (delegated from systemd).
 	 *
-	 * A single empty string means there is a cgroup2 "unified"
+	 * A single item with an empty name means there is a cgroup2 "unified"
 	 * mount on /sys/fs/cgroup.
 	 */
-	std::forward_list<std::string> mounts;
+	std::forward_list<Mount> mounts;
 
 	/**
 	 * A mapping from controller name to mount point name.  More than
@@ -68,13 +93,18 @@ struct CgroupState {
 	 */
 	bool cgroup_kill = false;
 
+	CgroupState() noexcept;
+	~CgroupState() noexcept;
+
+	CgroupState(CgroupState &&) noexcept = default;
+	CgroupState &operator=(CgroupState &&) noexcept = default;
+
 	bool IsEnabled() const noexcept {
 		return !group_path.empty();
 	}
 
-	bool IsV2() const noexcept {
-		return !mounts.empty() && mounts.front().empty();
-	}
+	[[gnu::pure]]
+	bool IsV2() const noexcept;
 
 	/**
 	 * Returns the absolute path where the cgroup2 is mounted or

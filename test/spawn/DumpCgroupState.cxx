@@ -31,6 +31,7 @@
  */
 
 #include "spawn/CgroupState.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
 
 #include <cstdio>
@@ -47,7 +48,7 @@ try {
 	printf("group_path = '%s'\n", state.group_path.c_str());
 
 	for (const auto &i : state.mounts)
-		printf("mount = '%s'\n", i.c_str());
+		printf("mount = '%s'\n", i.name.c_str());
 
 	for (const auto &[name, mount] : state.controllers)
 		printf("controller '%s' = '%s'\n",

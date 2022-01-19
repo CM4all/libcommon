@@ -84,38 +84,27 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
  * Create a new cgroup and return an O_PATH file descriptor to it.
  */
 static UniqueFileDescriptor
-MakeCgroup(const char *mount_base_path, const char *controller,
-	   const char *delegated_group, const char *sub_group)
+MakeCgroup(const FileDescriptor group_fd, const char *sub_group)
 {
-	char path[PATH_MAX];
-
-	constexpr int max_path = sizeof(path);
-	if (snprintf(path, max_path, "%s/%s%s/%s",
-		     mount_base_path, controller,
-		     delegated_group, sub_group) >= max_path)
-		throw std::runtime_error("Path is too long");
-
-	if (mkdir(path, 0777) < 0) {
+	if (mkdirat(group_fd.Get(), sub_group, 0777) < 0) {
 		switch (const int e = errno) {
 		case EEXIST:
 			break;
 
 		default:
-			throw FormatErrno(e, "mkdir('%s') failed", path);
+			throw FormatErrno(e, "mkdir('%s') failed", sub_group);
 		}
 	}
 
-	return OpenPath(path);
+	return OpenPath(group_fd, sub_group);
 }
 
 static UniqueFileDescriptor
-MoveToNewCgroup(const char *mount_base_path, const char *controller,
-		const char *delegated_group, const char *sub_group,
-		const char *session_group,
+MoveToNewCgroup(const FileDescriptor group_fd,
+		const char *sub_group, const char *session_group,
 		std::string_view pid)
 {
-	auto fd = MakeCgroup(mount_base_path, controller,
-			     delegated_group, sub_group);
+	auto fd = MakeCgroup(group_fd, sub_group);
 
 	if (session_group != nullptr) {
 		if (mkdirat(fd.Get(), session_group, 0777) < 0) {
@@ -150,14 +139,10 @@ CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 	const std::string_view pid(pid_buffer,
 				   sprintf(pid_buffer, "%u", _pid));
 
-	const auto mount_base_path = "/sys/fs/cgroup";
-
 	std::map<std::string, UniqueFileDescriptor> fds;
-	for (const auto &mount_point : state.mounts)
-		fds[mount_point] =
-			MoveToNewCgroup(mount_base_path, mount_point.c_str(),
-					state.group_path.c_str(), name,
-					session, pid);
+	for (const auto &mount : state.mounts)
+		fds[mount.name] =
+			MoveToNewCgroup(mount.fd, name, session, pid);
 
 	for (const auto &s : set) {
 		const char *filename = s.name;
