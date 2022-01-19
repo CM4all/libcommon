@@ -70,12 +70,13 @@ CapabilityState::GetFlag(cap_value_t cap, cap_flag_t flag) const
 }
 
 void
-CapabilityState::SetFlag(cap_flag_t flag, ConstBuffer<cap_value_t> caps,
+CapabilityState::SetFlag(cap_flag_t flag, std::span<const cap_value_t> caps,
 			 cap_flag_value_t flag_value)
 {
 	assert(value != nullptr);
 
-	if (cap_set_flag(value, flag, caps.size, caps.data, flag_value) < 0)
+	if (cap_set_flag(value, flag, caps.size(), caps.data(),
+			 flag_value) < 0)
 		throw MakeErrno("cap_set_flag() failed");
 }
 

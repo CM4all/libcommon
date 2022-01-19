@@ -33,8 +33,7 @@
 #ifndef CAPABILITY_STATE_HXX
 #define CAPABILITY_STATE_HXX
 
-#include "util/ConstBuffer.hxx"
-
+#include <span>
 #include <utility>
 
 #include <sys/capability.h>
@@ -99,7 +98,7 @@ public:
 
 	cap_flag_value_t GetFlag(cap_value_t cap, cap_flag_t flag) const;
 
-	void SetFlag(cap_flag_t flag, ConstBuffer<cap_value_t> caps,
+	void SetFlag(cap_flag_t flag, std::span<const cap_value_t> caps,
 		     cap_flag_value_t flag_value);
 
 	/**
