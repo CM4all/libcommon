@@ -94,11 +94,11 @@ struct CgroupState {
 	/**
 	 * Obtain cgroup membership information from the cgroups
 	 * assigned by systemd to the specified process, and return it
-	 * as a #CgroupState instance.  Returns an empty #CgroupState
-	 * on error.
+	 * as a #CgroupState instance.
+	 *
+	 * Throws on error.
 	 *
 	 * @param pid the process id or 0 for the current process
 	 */
-	[[gnu::pure]]
-	static CgroupState FromProcess(unsigned pid=0) noexcept;
+	static CgroupState FromProcess(unsigned pid=0);
 };

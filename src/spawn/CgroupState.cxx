@@ -107,14 +107,24 @@ CgroupState::EnableAllControllers() const
 }
 
 static FILE *
-OpenProcCgroup(unsigned pid) noexcept
+OpenOrThrow(const char *path, const char *mode)
+{
+	FILE *file = fopen(path, mode);
+	if (file == nullptr)
+		throw FormatErrno("Failed to open %s", path);
+
+	return file;
+}
+
+static FILE *
+OpenProcCgroup(unsigned pid)
 {
 	if (pid > 0) {
 		char buffer[256];
 		sprintf(buffer, "/proc/%u/cgroup", pid);
-		return fopen(buffer, "r");
+		return OpenOrThrow(buffer, "r");
 	} else
-		return fopen("/proc/self/cgroup", "r");
+		return OpenOrThrow("/proc/self/cgroup", "r");
 
 }
 
@@ -148,12 +158,9 @@ HasCgroupKill(const std::string &unified_mount,
 }
 
 CgroupState
-CgroupState::FromProcess(unsigned pid) noexcept
+CgroupState::FromProcess(unsigned pid)
 {
 	FILE *file = OpenProcCgroup(pid);
-	if (file == nullptr)
-		return CgroupState();
-
 	AtScopeExit(file) { fclose(file); };
 
 	struct ControllerAssignment {
