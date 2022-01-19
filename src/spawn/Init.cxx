@@ -130,8 +130,8 @@ DropCapabilities()
 	};
 
 	CapabilityState state = CapabilityState::Empty();
-	state.SetFlag(CAP_EFFECTIVE, {keep_caps, std::size(keep_caps)}, CAP_SET);
-	state.SetFlag(CAP_PERMITTED, {keep_caps, std::size(keep_caps)}, CAP_SET);
+	state.SetFlag(CAP_EFFECTIVE, keep_caps, CAP_SET);
+	state.SetFlag(CAP_PERMITTED, keep_caps, CAP_SET);
 	state.Install();
 }
 
