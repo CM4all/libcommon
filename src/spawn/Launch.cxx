@@ -35,6 +35,7 @@
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
 #include "Server.hxx"
+#include "system/CapabilityState.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
@@ -67,6 +68,25 @@ struct LaunchSpawnServerContext {
 
 	bool pid_namespace;
 };
+
+/**
+ * Drop capabilities which are not needed during normal spawner
+ * operation.
+ */
+static void
+DropCapabilities()
+{
+	static constexpr cap_value_t drop_caps[] = {
+		/* not needed at all by the spawner */
+		CAP_DAC_READ_SEARCH,
+		CAP_NET_BIND_SERVICE,
+	};
+
+	auto state = CapabilityState::Current();
+	state.SetFlag(CAP_EFFECTIVE, drop_caps, CAP_CLEAR);
+	state.SetFlag(CAP_PERMITTED, drop_caps, CAP_CLEAR);
+	state.Install();
+}
 
 static int
 RunSpawnServer2(void *p)
@@ -138,6 +158,13 @@ RunSpawnServer2(void *p)
 		fprintf(stderr, "Failed to setup cgroup2: ");
 		PrintException(std::current_exception());
 		return EXIT_FAILURE;
+	}
+
+	try {
+		DropCapabilities();
+	} catch (...) {
+		fprintf(stderr, "Failed to drop capabilities: ");
+		PrintException(std::current_exception());
 	}
 
 	try {
