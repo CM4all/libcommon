@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_CGROUP_STATE_HXX
-#define BENG_PROXY_CGROUP_STATE_HXX
+#pragma once
 
 #include <forward_list>
 #include <string>
@@ -103,5 +102,3 @@ struct CgroupState {
 	[[gnu::pure]]
 	static CgroupState FromProcess(unsigned pid=0) noexcept;
 };
-
-#endif
