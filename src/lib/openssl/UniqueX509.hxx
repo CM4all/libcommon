@@ -67,10 +67,6 @@ using UniqueX509_EXTENSIONS = std::unique_ptr<X509_EXTENSIONS, X509Deleter>;
 static inline auto
 UpRef(X509 &cert) noexcept
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	CRYPTO_add(&cert.references, 1, CRYPTO_LOCK_X509);
-#else
 	X509_up_ref(&cert);
-#endif
 	return UniqueX509(&cert);
 }
