@@ -76,7 +76,7 @@ SimpleServer::CancelRequest() noexcept
 	if (!request.cancel_ptr)
 		return false;
 
-	request.cancel_ptr.CancelAndClear();
+	request.cancel_ptr.Cancel();
 	return true;
 }
 
