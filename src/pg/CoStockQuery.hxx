@@ -47,7 +47,7 @@ namespace Pg {
  */
 template<typename... Params>
 Co::Task<Result>
-CoStockQuery(Stock &stock, Params... params) noexcept
+CoStockQuery(Stock &stock, const Params&... params) noexcept
 {
 	auto *item = co_await CoStockGet(stock, {});
 	AtScopeExit(item) { item->Put(false); };

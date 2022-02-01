@@ -249,7 +249,8 @@ public:
 	bool CheckError(std::exception_ptr e) noexcept;
 
 	template<typename... Params>
-	void SendQueryParams(AsyncResultHandler &_handler, Params... params) {
+	void SendQueryParams(AsyncResultHandler &_handler,
+			     const Params&... params) {
 		assert(IsIdle());
 
 		result_handler = &_handler;
@@ -263,7 +264,7 @@ public:
 	}
 
 	template<typename... Params>
-	void SendQuery(AsyncResultHandler &_handler, Params... params) {
+	void SendQuery(AsyncResultHandler &_handler, const Params&... params) {
 		assert(IsIdle());
 
 		result_handler = &_handler;

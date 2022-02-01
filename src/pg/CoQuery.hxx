@@ -83,7 +83,7 @@ private:
 public:
 	template<typename... Params>
 	CoQuery(AsyncConnection &_connection, CancelType _cancel_type,
-		Params... params)
+		const Params&... params)
 		:connection(_connection),
 		 defer_resume(connection.GetEventLoop(),
 			      BIND_THIS_METHOD(OnDeferredResume)),
