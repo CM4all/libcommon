@@ -40,6 +40,7 @@ crypto = static_library(
   'LoadFile.cxx',
   'Name.cxx',
   'Time.cxx',
+  'TrivialExDataIndex.cxx',
   include_directories: inc,
   dependencies: [
     libcrypto,
