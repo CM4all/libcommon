@@ -43,7 +43,7 @@ namespace Curl {
 struct CoResponse {
 	unsigned status = 0;
 
-	std::multimap<std::string, std::string> headers;
+	Headers headers;
 
 	std::string body;
 };
@@ -90,8 +90,7 @@ public:
 
 private:
 	/* virtual methods from CurlResponseHandler */
-	void OnHeaders(unsigned status,
-		       std::multimap<std::string, std::string> &&headers) override;
+	void OnHeaders(unsigned status, Headers &&headers) override;
 	void OnData(ConstBuffer<void> data) override;
 	void OnEnd() override;
 	void OnError(std::exception_ptr e) noexcept override;

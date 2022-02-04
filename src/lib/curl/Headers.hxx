@@ -1,5 +1,8 @@
 /*
- * Copyright 2008-2018 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2020-2021 CM4all GmbH
+ * All rights reserved.
+ *
+ * author: Max Kellermann <mk@cm4all.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,46 +32,11 @@
 
 #pragma once
 
-#include "Headers.hxx"
-#include "util/ConstBuffer.hxx"
+#include <map>
+#include <string>
 
-#include <exception>
+namespace Curl {
 
-/**
- * Asynchronous response handler for a #CurlRequest.
- *
- * Its methods must be thread-safe.
- */
-class CurlResponseHandler {
-public:
-	/**
-	 * OnData() shall throw this to pause the stream.  Call
-	 * CurlEasy::Unpause() or CurlRequest::Resume() to resume the
-	 * transfer.
-	 */
-	struct Pause {};
+using Headers = std::multimap<std::string, std::string>;
 
-	/**
-	 * Status line and headers have been received.
-	 */
-	virtual void OnHeaders(unsigned status, Curl::Headers &&headers) = 0;
-
-	/**
-	 * Response body data has been received.
-	 *
-	 * May throw #Pause (but nothing else).
-	 */
-	virtual void OnData(ConstBuffer<void> data) = 0;
-
-	/**
-	 * The response has ended.  The method is allowed to delete the
-	 * #CurlRequest.
-	 */
-	virtual void OnEnd() = 0;
-
-	/**
-	 * An error has occurred.  The method is allowed to delete the
-	 * #CurlRequest.
-	 */
-	virtual void OnError(std::exception_ptr e) noexcept = 0;
-};
+} // namespace Curl
