@@ -62,7 +62,7 @@ public:
 private:
 	/* virtual methods from CurlResponseHandler */
 	void OnHeaders(unsigned status,
-		       std::multimap<std::string, std::string> &&headers) override {
+		       Curl::Headers &&headers) override {
 		fprintf(stderr, "status %u\n", status);
 
 		for (const auto &i : headers)
