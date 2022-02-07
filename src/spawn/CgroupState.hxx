@@ -61,7 +61,7 @@ struct CgroupState {
 		 */
 		UniqueFileDescriptor fd;
 
-#if defined(__clang__) && __clang_major__ + 0 < 12
+#ifdef __clang__
 		template<typename N>
 		Mount(N &&_name, UniqueFileDescriptor &&_fd) noexcept
 			:name(std::forward<N>(_name)), fd(std::move(_fd)) {}
