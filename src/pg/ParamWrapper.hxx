@@ -379,14 +379,22 @@ class TextParamArray {
 
 	static_assert(!decltype(collector)::HasBinary());
 
-public:
 	static constexpr size_t count = decltype(collector)::Count();
 	std::array<const char *, count> values;
 
+public:
 	explicit TextParamArray(const Params&... params) noexcept
 		:collector(params...)
 	{
 		collector.Fill(values.begin());
+	}
+
+	constexpr std::size_t size() const noexcept {
+		return count;
+	}
+
+	constexpr const char *const*GetValues() const noexcept {
+		return values.data();
 	}
 
 	constexpr const int *GetLengths() const noexcept {
@@ -402,18 +410,26 @@ template<typename... Params>
 class BinaryParamArray {
 	ParamCollector<Params...> collector;
 
-public:
 	static constexpr size_t count = decltype(collector)::Count();
 	std::array<const char *, count> values;
 	std::array<int, count> lengths;
 	std::array<int, count> formats;
 
+public:
 	explicit BinaryParamArray(const Params&... params) noexcept
 		:collector(params...)
 	{
 		collector.Fill(values.begin(),
 			       lengths.begin(),
 			       formats.begin());
+	}
+
+	constexpr std::size_t size() const noexcept {
+		return count;
+	}
+
+	constexpr const char *const*GetValues() const noexcept {
+		return values.data();
 	}
 
 	constexpr const int *GetLengths() const noexcept {
@@ -432,8 +448,8 @@ using AutoParamArray = std::conditional_t<ParamCollector<Params...>::HasBinary()
 
 template<typename T>
 concept ParamArray = requires (const T &t) {
-	{ t.count } noexcept -> std::convertible_to<std::size_t>;
-	{ t.values.data() } noexcept -> std::same_as<const char *const*>;
+	{ t.size() } noexcept -> std::convertible_to<std::size_t>;
+	{ t.GetValues() } noexcept -> std::same_as<const char *const*>;
 	{ t.GetLengths() } noexcept -> std::same_as<const int *>;
 	{ t.GetFormats() } noexcept -> std::same_as<const int *>;
 };
