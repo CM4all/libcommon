@@ -373,6 +373,25 @@ private:
 	}
 };
 
+class EmptyParamArray {
+public:
+	constexpr std::size_t size() const noexcept {
+		return 0;
+	}
+
+	constexpr const char *const*GetValues() const noexcept {
+		return nullptr;
+	}
+
+	constexpr const int *GetLengths() const noexcept {
+		return nullptr;
+	}
+
+	constexpr const int *GetFormats() const noexcept {
+		return nullptr;
+	}
+};
+
 template<typename... Params>
 class TextParamArray {
 	ParamCollector<Params...> collector;
@@ -442,9 +461,12 @@ public:
 };
 
 template<typename... Params>
-using AutoParamArray = std::conditional_t<ParamCollector<Params...>::HasBinary(),
-					  BinaryParamArray<Params...>,
-					  TextParamArray<Params...>>;
+using AutoParamArray =
+	std::conditional_t<sizeof...(Params) == 0,
+			   EmptyParamArray,
+			   std::conditional_t<ParamCollector<Params...>::HasBinary(),
+					      BinaryParamArray<Params...>,
+					      TextParamArray<Params...>>>;
 
 template<typename T>
 concept ParamArray = requires (const T &t) {
