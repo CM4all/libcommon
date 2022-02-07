@@ -46,13 +46,19 @@ namespace Pg {
  * #Pg::Result.
  */
 template<typename... Params>
-Co::Task<Result>
-CoStockQuery(Stock &stock, const Params&... params) noexcept
+Co::EagerTask<Result>
+CoStockQuery(Stock &stock, const char *query, const Params&... params) noexcept
 {
+	/* construct the ParamArray here (and return an EagerTask) to
+	   avoid dangling references in the "params", just in case the
+	   task gets passed around */
+	const AutoParamArray<Params...> param_array(params...);
+
 	auto *item = co_await CoStockGet(stock, {});
 	AtScopeExit(item) { item->Put(false); };
 
-	co_return co_await CoQuery(stock.GetConnection(*item), params...);
+	co_return co_await CoQuery(stock.GetConnection(*item), query,
+				   param_array);
 }
 
 } // namespace Co
