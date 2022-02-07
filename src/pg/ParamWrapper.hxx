@@ -38,6 +38,7 @@
 #include "util/Compiler.h"
 
 #include <array>
+#include <concepts>
 #include <list>
 #include <cinttypes>
 #include <cstdio>
@@ -428,5 +429,13 @@ template<typename... Params>
 using AutoParamArray = std::conditional_t<ParamCollector<Params...>::HasBinary(),
 					  BinaryParamArray<Params...>,
 					  TextParamArray<Params...>>;
+
+template<typename T>
+concept ParamArray = requires (const T &t) {
+	{ t.count } noexcept -> std::convertible_to<std::size_t>;
+	{ t.values.data() } noexcept -> std::same_as<const char *const*>;
+	{ t.GetLengths() } noexcept -> std::same_as<const int *>;
+	{ t.GetFormats() } noexcept -> std::same_as<const int *>;
+};
 
 } /* namespace Pg */

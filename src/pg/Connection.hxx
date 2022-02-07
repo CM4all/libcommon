@@ -263,6 +263,16 @@ public:
 						  result_binary));
 	}
 
+	template<ParamArray A>
+	Result ExecuteParams(bool result_binary, const char *query,
+			     const A &params) {
+		return CheckResult(::PQexecParams(conn, query, params.count,
+						  nullptr, params.values.data(),
+						  params.GetLengths(),
+						  params.GetFormats(),
+						  result_binary));
+	}
+
 	template<typename... Params>
 	Result ExecuteParams(bool result_binary,
 			     const char *query, const Params&... _params) {
@@ -270,12 +280,7 @@ public:
 		assert(query != nullptr);
 
 		const AutoParamArray<Params...> params(_params...);
-
-		return CheckResult(::PQexecParams(conn, query, params.count,
-						  nullptr, params.values.data(),
-						  params.GetLengths(),
-						  params.GetFormats(),
-						  result_binary));
+		return ExecuteParams(result_binary, query, params);
 	}
 
 	template<typename... Params>
@@ -406,6 +411,14 @@ public:
 			     size_t n_params, const char *const*values,
 			     const int *lengths, const int *formats);
 
+	template<ParamArray A>
+	void SendQuery(bool result_binary, const char *query,
+		       const A &params) {
+		SendQueryParams(result_binary, query, params.count,
+				params.values.data(), params.GetLengths(),
+				params.GetFormats());
+	}
+
 	template<typename... Params>
 	void SendQuery(bool result_binary,
 		       const char *query, const Params&... _params) {
@@ -413,10 +426,7 @@ public:
 		assert(query != nullptr);
 
 		const AutoParamArray<Params...> params(_params...);
-
-		SendQueryParams(result_binary, query, params.count,
-				params.values.data(), params.GetLengths(),
-				params.GetFormats());
+		SendQuery(result_binary, query, params);
 	}
 
 	template<typename... Params>
