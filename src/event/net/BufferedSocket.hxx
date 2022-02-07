@@ -610,13 +610,15 @@ public:
 	 * Defer a call to BufferedSocketHandler::OnBufferedWrite().
 	 */
 	void DeferWrite() noexcept {
-		defer_write.Schedule();
+		if (!base.IsWritePending())
+			defer_write.Schedule();
 	}
 
 	void ScheduleWrite() noexcept {
 		assert(!ended);
 		assert(!destroyed);
 
+		defer_write.Cancel();
 		base.ScheduleWrite(write_timeout);
 	}
 
