@@ -35,6 +35,7 @@
 #include "SocketAddress.hxx"
 #include "system/LargeAllocation.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "util/AllocatedArray.hxx"
 #include "util/OffsetPointer.hxx"
 #include "util/WritableBuffer.hxx"
 
@@ -49,12 +50,12 @@ class SocketDescriptor;
  */
 class MultiReceiveMessage {
 	const size_t allocated_datagrams;
-	const size_t max_payload_size, max_cmsg_size, max_fds;
+	const size_t max_payload_size, max_cmsg_size;
 	size_t n_datagrams = 0;
 
 	LargeAllocation buffer;
 
-	std::unique_ptr<UniqueFileDescriptor[]> fds;
+	AllocatedArray<UniqueFileDescriptor> fds;
 	size_t n_fds = 0;
 
 public:

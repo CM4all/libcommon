@@ -43,14 +43,11 @@ MultiReceiveMessage::MultiReceiveMessage(size_t _allocated_datagrams,
 					 size_t _max_fds)
 	:allocated_datagrams(_allocated_datagrams),
 	 max_payload_size(_max_payload_size), max_cmsg_size(_max_cmsg_size),
-	 max_fds(_max_fds),
 	 buffer(allocated_datagrams * (max_payload_size + max_cmsg_size
 				       + sizeof(struct mmsghdr)
 				       + sizeof(struct sockaddr_storage)
 				       + sizeof(struct iovec))),
-	 fds(max_fds > 0
-	     ? new UniqueFileDescriptor[allocated_datagrams * max_fds]
-	     : nullptr),
+	 fds(_max_fds),
 	 datagrams(new Datagram[allocated_datagrams])
 {
 	auto *m = GetMmsg();
@@ -125,7 +122,7 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 
 				for (unsigned ii = 0; ii < nn; ++ii) {
 					FileDescriptor fd(f[ii]);
-					if (d.fds.size < max_fds) {
+					if (d.fds.size < fds.size()) {
 						fds[n_fds++] = UniqueFileDescriptor(fd);
 						++d.fds.size;
 					} else
