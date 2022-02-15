@@ -282,6 +282,11 @@ public:
 
 	void Put(StockItem &item, bool destroy) noexcept override;
 
+	/**
+	 * Inject a newly created item into the "idle" list.
+	 */
+	void InjectIdle(StockItem &item) noexcept;
+
 	void ItemIdleDisconnect(StockItem &item) noexcept override;
 	void ItemBusyDisconnect(StockItem &item) noexcept override;
 	void ItemCreateSuccess(StockItem &item) noexcept override;

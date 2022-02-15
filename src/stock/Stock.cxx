@@ -473,16 +473,28 @@ Stock::Put(StockItem &item, bool destroy) noexcept
 	if (destroy || item.fade || !item.Release()) {
 		delete &item;
 		ScheduleCheckEmpty();
+		ScheduleRetryWaiting();
 	} else {
+		InjectIdle(item);
+	}
+
+	ScheduleRetryWaiting();
+}
+
+void
+Stock::InjectIdle(StockItem &item) noexcept
+{
+	assert(!item.is_idle);
+	assert(&item.stock == this);
+
 #ifndef NDEBUG
-		item.is_idle = true;
+	item.is_idle = true;
 #endif
 
-		if (idle.size() == max_idle)
-			ScheduleCleanup();
+	if (idle.size() == max_idle)
+		ScheduleCleanup();
 
-		idle.push_front(item);
-	}
+	idle.push_front(item);
 
 	ScheduleRetryWaiting();
 }
