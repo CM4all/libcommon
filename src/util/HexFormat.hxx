@@ -75,9 +75,9 @@ HexFormatUint32Fixed(char dest[8], uint32_t number) noexcept
 static constexpr char *
 HexFormatUint64Fixed(char dest[16], uint64_t number) noexcept
 {
-	HexFormatUint32Fixed(dest, number >> 32);
-	HexFormatUint32Fixed(dest + 8, number);
-	return dest + 16;
+	dest = HexFormatUint32Fixed(dest, number >> 32);
+	dest = HexFormatUint32Fixed(dest, number);
+	return dest;
 }
 
 #if __cplusplus >= 202002 || (defined(__GNUC__) && __GNUC__ >= 10)
