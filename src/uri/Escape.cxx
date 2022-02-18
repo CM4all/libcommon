@@ -47,7 +47,7 @@ UriEscape(char *dest, std::string_view src,
 			dest[dest_length++] = src[i];
 		} else {
 			dest[dest_length++] = escape_char;
-			format_uint8_hex_fixed(&dest[dest_length], (uint8_t)src[i]);
+			HexFormatUint8Fixed(&dest[dest_length], (uint8_t)src[i]);
 			dest_length += 2;
 		}
 	}

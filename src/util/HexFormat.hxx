@@ -38,7 +38,7 @@ constexpr char hex_digits[] = "0123456789abcdef";
 
 [[gnu::always_inline]]
 static constexpr char *
-format_uint8_hex_fixed(char dest[2], uint8_t number) noexcept
+HexFormatUint8Fixed(char dest[2], uint8_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 4) & 0xf];
 	dest[1] = hex_digits[number & 0xf];
@@ -47,7 +47,7 @@ format_uint8_hex_fixed(char dest[2], uint8_t number) noexcept
 
 [[gnu::always_inline]]
 static constexpr char *
-format_uint16_hex_fixed(char dest[4], uint16_t number) noexcept
+HexFormatUint16Fixed(char dest[4], uint16_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 12) & 0xf];
 	dest[1] = hex_digits[(number >> 8) & 0xf];
@@ -58,7 +58,7 @@ format_uint16_hex_fixed(char dest[4], uint16_t number) noexcept
 
 [[gnu::always_inline]]
 static constexpr char *
-format_uint32_hex_fixed(char dest[8], uint32_t number) noexcept
+HexFormatUint32Fixed(char dest[8], uint32_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 28) & 0xf];
 	dest[1] = hex_digits[(number >> 24) & 0xf];
@@ -73,10 +73,10 @@ format_uint32_hex_fixed(char dest[8], uint32_t number) noexcept
 
 [[gnu::always_inline]]
 static constexpr char *
-format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
+HexFormatUint64Fixed(char dest[16], uint64_t number) noexcept
 {
-	format_uint32_hex_fixed(dest, number >> 32);
-	format_uint32_hex_fixed(dest + 8, number);
+	HexFormatUint32Fixed(dest, number >> 32);
+	HexFormatUint32Fixed(dest + 8, number);
 	return dest + 16;
 }
 
@@ -99,7 +99,7 @@ constexpr char *
 HexFormat(char *output, std::span<const std::byte> input) noexcept
 {
 	for (const auto &i : input)
-		output = format_uint8_hex_fixed(output, (uint8_t)i);
+		output = HexFormatUint8Fixed(output, (uint8_t)i);
 
 	return output;
 }
