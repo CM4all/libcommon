@@ -88,7 +88,7 @@ format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
 char *
 format_uint32_hex(char dest[9], uint32_t number) noexcept;
 
-#if __cplusplus >= 202002 || defined(__GNUC__) && __GNUC__ >= 10
+#if __cplusplus >= 202002 || (defined(__GNUC__) && __GNUC__ >= 10)
 #include <version>
 #endif
 
