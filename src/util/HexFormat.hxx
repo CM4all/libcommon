@@ -95,15 +95,21 @@ format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
  *
  * @return a pointer to one after the last written character
  */
-char *
-HexFormat(char *output, std::span<const std::byte> input) noexcept;
+constexpr char *
+HexFormat(char *output, std::span<const std::byte> input) noexcept
+{
+	for (const auto &i : input)
+		output = format_uint8_hex_fixed(output, (uint8_t)i);
+
+	return output;
+}
 
 /**
  * Return a std::array<char> (not null-terminated) containing a hex
  * dump of the given fixed-size input.
  */
 template<std::size_t size>
-auto
+constexpr auto
 HexFormat(std::span<const std::byte, size> input) noexcept
 {
 	std::array<char, size * 2> output;

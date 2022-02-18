@@ -2,7 +2,6 @@ util_sources = [
   'AllocatedString.cxx',
   'DisposableBuffer.cxx',
   'Exception.cxx',
-  'HexFormat.cxx',
   'MimeType.cxx',
   'PrintException.cxx',
   'StringBuilder.cxx',
