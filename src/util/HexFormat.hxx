@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,15 +30,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HEX_FORMAT_H
-#define HEX_FORMAT_H
+#pragma once
 
 #include <cstdint>
 
 extern const char hex_digits[];
 
 [[gnu::always_inline]]
-static inline char *
+static constexpr char *
 format_uint8_hex_fixed(char dest[2], uint8_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 4) & 0xf];
@@ -47,7 +46,7 @@ format_uint8_hex_fixed(char dest[2], uint8_t number) noexcept
 }
 
 [[gnu::always_inline]]
-static inline char *
+static constexpr char *
 format_uint16_hex_fixed(char dest[4], uint16_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 12) & 0xf];
@@ -58,7 +57,7 @@ format_uint16_hex_fixed(char dest[4], uint16_t number) noexcept
 }
 
 [[gnu::always_inline]]
-static inline char *
+static constexpr char *
 format_uint32_hex_fixed(char dest[8], uint32_t number) noexcept
 {
 	dest[0] = hex_digits[(number >> 28) & 0xf];
@@ -73,7 +72,7 @@ format_uint32_hex_fixed(char dest[8], uint32_t number) noexcept
 }
 
 [[gnu::always_inline]]
-static inline char *
+static constexpr char *
 format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
 {
 	format_uint32_hex_fixed(dest, number >> 32);
@@ -119,7 +118,5 @@ HexFormat(std::span<const std::byte, size> input) noexcept
 	HexFormat(output.data(), input);
 	return output;
 }
-
-#endif
 
 #endif
