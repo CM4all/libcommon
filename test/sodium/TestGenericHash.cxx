@@ -44,9 +44,7 @@ static auto
 HexFormat(const std::array<std::byte, size> &src) noexcept
 {
 	StringBuffer<size * 2 + 1> dest;
-	for (size_t i = 0; i < src.size(); ++i)
-		format_uint8_hex_fixed(&dest[i * 2], uint8_t(src[i]));
-	dest[size * 2] = 0;
+	*HexFormat(dest.data(), std::span{src}) = 0;
 	return dest;
 }
 
