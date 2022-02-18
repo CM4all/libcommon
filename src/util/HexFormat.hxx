@@ -34,7 +34,7 @@
 
 #include <cstdint>
 
-extern const char hex_digits[];
+constexpr char hex_digits[] = "0123456789abcdef";
 
 [[gnu::always_inline]]
 static constexpr char *

@@ -32,12 +32,6 @@
 
 #include "HexFormat.hxx"
 
-#include <cstddef>
-
-#include <string.h>
-
-const char hex_digits[] = "0123456789abcdef";
-
 #ifdef __cpp_lib_span
 
 char *
