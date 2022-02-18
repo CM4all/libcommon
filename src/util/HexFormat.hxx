@@ -80,14 +80,6 @@ format_uint64_hex_fixed(char dest[16], uint64_t number) noexcept
 	return dest + 16;
 }
 
-/**
- * Format a 32 bit unsigned integer into a hex string.
- * Null-terminates the output buffer and returns a pointer to the null
- * terminator.
- */
-char *
-format_uint32_hex(char dest[9], uint32_t number) noexcept;
-
 #if __cplusplus >= 202002 || (defined(__GNUC__) && __GNUC__ >= 10)
 #include <version>
 #endif
