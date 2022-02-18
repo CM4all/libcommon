@@ -46,7 +46,7 @@
  */
 template<class T, std::size_t max>
 class TrivialArray {
-	typedef std::array<T, max> Array;
+	using Array = std::array<T, max>;
 
 public:
 	using size_type = typename Array::size_type;
