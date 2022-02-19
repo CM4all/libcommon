@@ -50,6 +50,7 @@ subdir('stock')
 subdir('time')
 subdir('uring')
 subdir('was')
+subdir('zlib')
 
 if get_option('coroutines')
   subdir('co')
