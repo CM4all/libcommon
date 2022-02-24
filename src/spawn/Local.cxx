@@ -113,7 +113,7 @@ LocalSpawnService::SpawnChildProcess(const char *name,
 		params.uid_gid = config.default_uid_gid;
 
 	auto pidfd = ::SpawnChildProcess(std::move(params), CgroupState(),
-					 false /* TODO? */);
+					 false /* TODO? */).first;
 	return std::make_unique<LocalChildProcess>(event_loop, registry,
 						   std::move(pidfd),
 						   name);

@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include <sys/types.h>
 
 struct PreparedChildProcess;
@@ -43,10 +45,11 @@ class UniqueFileDescriptor;
  *
  * @param is_sys_admin are we CAP_SYS_ADMIN?
  *
- * @return a pidfd
+ * @return a pidfd and a classic pid (the latter for legacy callers
+ * which cannot work with pidfds)
  */
 [[nodiscard]]
-UniqueFileDescriptor
+std::pair<UniqueFileDescriptor, pid_t>
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool is_sys_admin);

@@ -441,7 +441,7 @@ ReadErrorPipe(FileDescriptor error_pipe_r)
 	}
 }
 
-UniqueFileDescriptor
+std::pair<UniqueFileDescriptor, pid_t>
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool is_sys_admin)
@@ -585,5 +585,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	ReadErrorPipe(ctx.error_pipe_r);
 
-	return pidfd;
+	/* TODO don't return the "classic" pid_t as soon as all
+	   callers have been fully migrated to pidfd */
+	return {std::move(pidfd), pid};
 }

@@ -442,7 +442,7 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 	try {
 		pid = SpawnChildProcess(std::move(p),
 					process.GetCgroupState(),
-					process.IsSysAdmin());
+					process.IsSysAdmin()).first;
 	} catch (...) {
 		logger(1, "Failed to spawn child process: ",
 		       GetFullMessage(std::current_exception()).c_str());
