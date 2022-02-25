@@ -134,6 +134,11 @@ struct CgroupState {
 	 */
 	static CgroupState FromProcess(unsigned pid=0);
 
+	/**
+	 * This overload takes a custom group path.
+	 */
+	static CgroupState FromProcess(unsigned pid, std::string group_path);
+
 private:
 	[[gnu::pure]]
 	static CgroupState FromProcCgroup(ProcCgroup &&proc_cgroup) noexcept;

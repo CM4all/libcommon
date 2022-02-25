@@ -293,3 +293,12 @@ CgroupState::FromProcess(unsigned pid)
 {
 	return FromProcCgroup(ReadProcCgroup(pid));
 }
+
+CgroupState
+CgroupState::FromProcess(unsigned pid, std::string group_path)
+{
+	auto proc_cgroup = ReadProcCgroup(pid);
+	if (proc_cgroup.IsDefined())
+		proc_cgroup.group_path = std::move(group_path);
+	return FromProcCgroup(std::move(proc_cgroup));
+}
