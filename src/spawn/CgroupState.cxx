@@ -205,18 +205,10 @@ ReadProcCgroup(unsigned pid)
 
 [[gnu::pure]]
 static bool
-HasCgroupKill(FileDescriptor fd,
-	      const std::string &group_path) noexcept
+HasCgroupKill(FileDescriptor fd) noexcept
 {
-	assert(!group_path.empty());
-	assert(group_path.front() == '/');
-
-	UniqueFileDescriptor group_fd;
-	if (!group_fd.Open(fd, group_path.c_str() + 1, O_PATH))
-		return false;
-
 	struct stat st;
-	return fstatat(group_fd.Get(), "cgroup.kill", &st, 0) == 0 &&
+	return fstatat(fd.Get(), "cgroup.kill", &st, 0) == 0 &&
 		S_ISREG(st.st_mode);
 }
 
@@ -280,7 +272,7 @@ CgroupState::FromProcCgroup(ProcCgroup &&proc_cgroup) noexcept
 							 OpenPath(sys_fs_cgroup,
 								  proc_cgroup.group_path.c_str() + 1));
 
-		state.cgroup_kill = HasCgroupKill(mount.fd, proc_cgroup.group_path);
+		state.cgroup_kill = HasCgroupKill(mount.fd);
 	}
 
 	state.group_path = std::move(proc_cgroup.group_path);
