@@ -123,6 +123,28 @@ OpenOrThrow(const char *path, const char *mode)
 	return file;
 }
 
+struct ProcCgroup {
+	struct ControllerAssignment {
+		std::string name;
+		std::string path;
+
+		std::forward_list<std::string> controllers;
+
+		ControllerAssignment(std::string_view _name,
+				     std::string_view _path) noexcept
+			:name(_name), path(_path) {}
+	};
+
+	std::forward_list<ControllerAssignment> assignments;
+
+	std::string group_path;
+	bool have_unified = false, have_systemd = false;
+
+	bool IsDefined() const noexcept {
+		return !group_path.empty();
+	}
+};
+
 static FILE *
 OpenProcCgroup(unsigned pid)
 {
@@ -133,6 +155,52 @@ OpenProcCgroup(unsigned pid)
 	} else
 		return OpenOrThrow("/proc/self/cgroup", "r");
 
+}
+
+static ProcCgroup
+ReadProcCgroup(FILE *file)
+{
+	ProcCgroup pc;
+
+	char buffer[256];
+	while (fgets(buffer, sizeof(buffer), file) != nullptr) {
+		StringView line(buffer);
+		line.StripRight();
+
+		/* skip the hierarchy id */
+		line = line.Split(':').second;
+
+		const auto [name, path] = line.Split(':');
+		if (path.size < 2 || path.front() != '/')
+			/* ignore malformed lines and lines in the
+			   root cgroup */
+			continue;
+
+		if (name.Equals("name=systemd")) {
+			pc.group_path = path;
+			pc.have_systemd = true;
+		} else if (name.empty()) {
+			pc.group_path = path;
+			pc.have_unified = true;
+		} else {
+			pc.assignments.emplace_front(name, path);
+
+			auto &controllers = pc.assignments.front().controllers;
+			for (std::string_view i : IterableSplitString(name, ','))
+				controllers.emplace_front(i);
+		}
+	}
+
+	return pc;
+}
+
+static ProcCgroup
+ReadProcCgroup(unsigned pid)
+{
+	FILE *file = OpenProcCgroup(pid);
+	AtScopeExit(file) { fclose(file); };
+
+	return ReadProcCgroup(file);
 }
 
 [[gnu::pure]]
@@ -153,66 +221,18 @@ HasCgroupKill(FileDescriptor fd,
 }
 
 CgroupState
-CgroupState::FromProcess(unsigned pid)
+CgroupState::FromProcCgroup(ProcCgroup &&proc_cgroup) noexcept
 {
-	FILE *file = OpenProcCgroup(pid);
-	AtScopeExit(file) { fclose(file); };
-
-	struct ControllerAssignment {
-		std::string name;
-		std::string path;
-
-		std::forward_list<std::string> controllers;
-
-		ControllerAssignment(std::string_view _name,
-				     std::string_view _path) noexcept
-			:name(_name), path(_path) {}
-	};
-
-	std::forward_list<ControllerAssignment> assignments;
-
-	std::string group_path;
-	bool have_unified = false, have_systemd = false;
-
-	char buffer[256];
-	while (fgets(buffer, sizeof(buffer), file) != nullptr) {
-		StringView line(buffer);
-		line.StripRight();
-
-		/* skip the hierarchy id */
-		line = line.Split(':').second;
-
-		const auto [name, path] = line.Split(':');
-		if (path.size < 2 || path.front() != '/')
-			/* ignore malformed lines and lines in the
-			   root cgroup */
-			continue;
-
-		if (name.Equals("name=systemd")) {
-			group_path = path;
-			have_systemd = true;
-		} else if (name.empty()) {
-			group_path = path;
-			have_unified = true;
-		} else {
-			assignments.emplace_front(name, path);
-
-			auto &controllers = assignments.front().controllers;
-			for (std::string_view i : IterableSplitString(name, ','))
-				controllers.emplace_front(i);
-		}
-	}
-
-	if (group_path.empty())
+	if (!proc_cgroup.IsDefined())
 		/* no "systemd" controller found - disable the feature */
-		return CgroupState();
+		return {};
 
 	CgroupState state;
 
 	auto sys_fs_cgroup = OpenPath("/sys/fs/cgroup");
 
-	for (auto &i : assignments) {
-		if (i.path == group_path) {
+	for (auto &i : proc_cgroup.assignments) {
+		if (i.path == proc_cgroup.group_path) {
 			for (auto &controller : i.controllers)
 				state.controllers.emplace(std::move(controller), i.name);
 
@@ -220,15 +240,15 @@ CgroupState::FromProcess(unsigned pid)
 						      i.name.c_str());
 			state.mounts.emplace_front(std::move(i.name),
 						   OpenPath(controller_fd,
-							    group_path.c_str() + 1));
+							    proc_cgroup.group_path.c_str() + 1));
 		}
 	}
 
-	if (have_systemd)
+	if (proc_cgroup.have_systemd)
 		state.mounts.emplace_front("systemd",
 					   OpenPath(sys_fs_cgroup, "systemd"));
 
-	if (have_unified) {
+	if (proc_cgroup.have_unified) {
 		std::string_view unified_mount = "unified";
 		if (state.mounts.empty()) {
 			UniqueFileDescriptor fd;
@@ -238,6 +258,7 @@ CgroupState::FromProcess(unsigned pid)
 			}
 
 			if (fd.IsDefined()) {
+				char buffer[1024];
 				ssize_t nbytes = fd.Read(buffer, sizeof(buffer));
 				if (nbytes > 0) {
 					if (buffer[nbytes - 1] == '\n')
@@ -257,12 +278,18 @@ CgroupState::FromProcess(unsigned pid)
 
 		auto &mount = state.mounts.emplace_front(std::string{unified_mount},
 							 OpenPath(sys_fs_cgroup,
-								  group_path.c_str() + 1));
+								  proc_cgroup.group_path.c_str() + 1));
 
-		state.cgroup_kill = HasCgroupKill(mount.fd, group_path);
+		state.cgroup_kill = HasCgroupKill(mount.fd, proc_cgroup.group_path);
 	}
 
-	state.group_path = std::move(group_path);
+	state.group_path = std::move(proc_cgroup.group_path);
 
 	return state;
+}
+
+CgroupState
+CgroupState::FromProcess(unsigned pid)
+{
+	return FromProcCgroup(ReadProcCgroup(pid));
 }

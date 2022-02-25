@@ -38,6 +38,8 @@
 #include <string>
 #include <map>
 
+struct ProcCgroup;
+
 struct CgroupState {
 	/**
 	 * Our own control group path.  It starts with a slash.
@@ -131,4 +133,8 @@ struct CgroupState {
 	 * @param pid the process id or 0 for the current process
 	 */
 	static CgroupState FromProcess(unsigned pid=0);
+
+private:
+	[[gnu::pure]]
+	static CgroupState FromProcCgroup(ProcCgroup &&proc_cgroup) noexcept;
 };
