@@ -122,7 +122,7 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 
 				for (unsigned ii = 0; ii < nn; ++ii) {
 					FileDescriptor fd(f[ii]);
-					if (d.fds.size < fds.size()) {
+					if (n_fds < fds.size()) {
 						fds[n_fds++] = UniqueFileDescriptor(fd);
 						++d.fds.size;
 					} else
