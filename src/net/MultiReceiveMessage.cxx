@@ -95,6 +95,9 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 
 	n_datagrams = result;
 
+	auto *fds_p = fds.data();
+	std::size_t remaining_fds = fds.size();
+
 	for (size_t i = 0; i < n_datagrams; ++i) {
 		auto &mh = m[i].msg_hdr;
 		auto &d = datagrams[i];
@@ -102,7 +105,7 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 					  mh.msg_namelen);
 		d.payload = {GetPayload(i), m[i].msg_len};
 		d.cred = nullptr;
-		d.fds.data = &fds[n_fds];
+		d.fds.data = fds_p;
 		d.fds.size = 0;
 
 #ifdef __clang__
@@ -122,8 +125,9 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 
 				for (unsigned ii = 0; ii < nn; ++ii) {
 					FileDescriptor fd(f[ii]);
-					if (n_fds < fds.size()) {
-						fds[n_fds++] = UniqueFileDescriptor(fd);
+					if (remaining_fds > 0) {
+						*fds_p++ = UniqueFileDescriptor(fd);
+						--remaining_fds;
 						++d.fds.size;
 					} else
 						fd.Close();
