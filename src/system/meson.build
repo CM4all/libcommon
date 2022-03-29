@@ -1,4 +1,5 @@
 system_sources = [
+  'PageAllocator.cxx',
   'LargeAllocation.cxx',
   'BindMount.cxx',
   'ProcessName.cxx',

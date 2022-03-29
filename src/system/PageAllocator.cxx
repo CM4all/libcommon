@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,22 +30,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LargeAllocation.hxx"
 #include "PageAllocator.hxx"
 
 #include <new>
 
-#include <sys/mman.h>
-#include <unistd.h>
-
-LargeAllocation::LargeAllocation(size_t _size)
-	:the_size(AlignToPageSize(_size))
+void *
+AllocatePages(std::size_t size)
 {
-	data = AllocatePages(the_size);
-}
+	void *p = mmap(NULL, size, PROT_READ|PROT_WRITE,
+		       MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+	if (p == MAP_FAILED)
+		throw std::bad_alloc{};
 
-void
-LargeAllocation::Free(void *p, size_t size) noexcept
-{
-	FreePages(p, size);
+	return p;
 }
