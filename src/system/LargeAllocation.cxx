@@ -40,6 +40,7 @@
 /**
  * Round up the parameter, make it page-aligned.
  */
+[[gnu::const]]
 static size_t
 AlignToPageSize(size_t size) noexcept
 {
