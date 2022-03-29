@@ -66,6 +66,10 @@ public:
 		return *this;
 	}
 
+	operator bool() const noexcept {
+		return data != nullptr;
+	}
+
 	void reset() noexcept {
 		if (data != nullptr) {
 			Free(data, the_size);

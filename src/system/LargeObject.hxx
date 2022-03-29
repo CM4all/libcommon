@@ -69,6 +69,10 @@ public:
 
 	LargeObject &operator=(LargeObject &&src) = default;
 
+	operator bool() const noexcept {
+		return allocation;
+	}
+
 	/**
 	 * Returns the allocated size, i.e. the size passed to the
 	 * constructor.
