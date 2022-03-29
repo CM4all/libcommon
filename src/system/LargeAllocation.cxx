@@ -55,7 +55,7 @@ AlignToPageSize(size_t size) noexcept
 LargeAllocation::LargeAllocation(size_t _size)
 	:the_size(AlignToPageSize(_size))
 {
-	constexpr int flags = MAP_ANONYMOUS|MAP_PRIVATE|MAP_NORESERVE;
+	constexpr int flags = MAP_ANONYMOUS|MAP_PRIVATE;
 	data = mmap(nullptr, the_size,
 		    PROT_READ|PROT_WRITE, flags,
 		    -1, 0);
