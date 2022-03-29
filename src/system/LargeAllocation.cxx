@@ -59,7 +59,7 @@ LargeAllocation::LargeAllocation(size_t _size)
 	data = mmap(nullptr, the_size,
 		    PROT_READ|PROT_WRITE, flags,
 		    -1, 0);
-	if (data == (void *)-1)
+	if (data == MAP_FAILED)
 		throw std::bad_alloc();
 }
 
