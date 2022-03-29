@@ -34,6 +34,8 @@
 
 #include "Request.hxx"
 
+#include <cstdint>
+
 class CancellablePointer;
 struct CreateStockItem;
 
@@ -45,4 +47,13 @@ public:
 	virtual void Create(CreateStockItem c,
 			    StockRequest request,
 			    CancellablePointer &cancel_ptr) = 0;
+
+	/**
+	 * @return if non-zero, then two consecutive requests with the
+	 * same value are avoided (for fair scheduling)
+	 */
+	[[gnu::pure]]
+	virtual uint_fast64_t GetFairnessHash([[maybe_unused]] const void *request) const noexcept {
+		return 0;
+	}
 };

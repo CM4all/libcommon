@@ -44,6 +44,7 @@
 #include <boost/intrusive/list.hpp>
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 class CancellablePointer;
@@ -122,6 +123,8 @@ class Stock : public AbstractStock {
 				       boost::intrusive::constant_time_size<false>>;
 
 	WaitingList waiting;
+
+	uint_least64_t last_fairness_hash = 0;
 
 	bool may_clear = false;
 
@@ -299,6 +302,9 @@ public:
 	}
 
 private:
+	[[gnu::pure]]
+	WaitingList::iterator PickWaiting() noexcept;
+
 	/**
 	 * Retry the waiting requests.  This is called after the number of
 	 * busy items was reduced.

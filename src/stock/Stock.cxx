@@ -41,10 +41,11 @@ struct Stock::Waiting final
 	: boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
 	     Cancellable
 {
-
 	Stock &stock;
 
 	StockRequest request;
+
+	const uint_least64_t fairness_hash;
 
 	StockGetHandler &handler;
 
@@ -65,6 +66,7 @@ Stock::Waiting::Waiting(Stock &_stock, StockRequest &&_request,
 			StockGetHandler &_handler,
 			CancellablePointer &_cancel_ptr) noexcept
 	:stock(_stock), request(std::move(_request)),
+	 fairness_hash(_stock.cls.GetFairnessHash(request.get())),
 	 handler(_handler),
 	 cancel_ptr(_cancel_ptr)
 {
@@ -168,6 +170,24 @@ Stock::Waiting::Cancel() noexcept
 	list.erase_and_dispose(i, [](Stock::Waiting *w){ w->Destroy(); });
 }
 
+inline Stock::WaitingList::iterator
+Stock::PickWaiting() noexcept
+{
+	if (last_fairness_hash == 0 || waiting.empty())
+		/* fairness disabled or nobody is waiting */
+		return waiting.begin();
+
+	/* find the first "waiting" entry with a different
+	   fairness_hash than the last one */
+	const uint_fast64_t lfh = last_fairness_hash;
+	for (auto &i : waiting)
+		if (i.fairness_hash != lfh)
+			return waiting.iterator_to(i);
+
+	/* there is none: use an arbitrary waiting */
+	return waiting.begin();
+}
+
 void
 Stock::RetryWaiting() noexcept
 {
@@ -178,11 +198,13 @@ Stock::RetryWaiting() noexcept
 	/* first try to serve existing idle items */
 
 	while (!idle.empty()) {
-		const auto i = waiting.begin();
+		const auto i = PickWaiting();
 		if (i == waiting.end())
 			return;
 
 		auto &w = *i;
+
+		last_fairness_hash = w.fairness_hash;
 
 		waiting.erase(i);
 
