@@ -54,7 +54,8 @@ MakePassiveHints() noexcept
 }
 
 AllocatedSocketAddress
-ParseSocketAddress(const char *p, int default_port, bool passive)
+ParseSocketAddress(const char *p, int default_port,
+		   const struct addrinfo &hints)
 {
 	if (*p == '/') {
 		AllocatedSocketAddress address;
@@ -75,10 +76,16 @@ ParseSocketAddress(const char *p, int default_port, bool passive)
 #endif
 	}
 
-	static constexpr struct addrinfo hints = MakeActiveHints();
+	const auto ai = Resolve(p, default_port, &hints);
+	return AllocatedSocketAddress(ai.GetBest());
+}
+
+AllocatedSocketAddress
+ParseSocketAddress(const char *p, int default_port, bool passive)
+{
+	static constexpr struct addrinfo active_hints = MakeActiveHints();
 	static constexpr struct addrinfo passive_hints = MakePassiveHints();
 
-	const auto ai = Resolve(p, default_port,
-				passive ? &passive_hints : &hints);
-	return AllocatedSocketAddress(ai.GetBest());
+	return ParseSocketAddress(p, default_port,
+				  passive ? passive_hints : active_hints);
 }
