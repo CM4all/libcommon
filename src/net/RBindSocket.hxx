@@ -47,9 +47,17 @@ UniqueSocketDescriptor
 ResolveBindSocket(const char *host_and_port, int default_port,
 		  const struct addrinfo &hints);
 
+/**
+ * A specialization of ResolveBindSocket() for SOCK_STREAM and support
+ * for local sockets.
+ */
 UniqueSocketDescriptor
 ResolveBindStreamSocket(const char *host_and_port, int default_port);
 
+/**
+ * A specialization of ResolveBindSocket() for SOCK_DGRAM and support
+ * for local sockets.
+ */
 UniqueSocketDescriptor
 ResolveBindDatagramSocket(const char *host_and_port, int default_port);
 
