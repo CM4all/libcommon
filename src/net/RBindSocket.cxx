@@ -74,8 +74,12 @@ ParseBindSocket(const char *host_and_port, int default_port, int socktype)
 static UniqueSocketDescriptor
 ResolveBindSocket(const char *host_and_port, int default_port, int socktype)
 {
-	if (*host_and_port == '/' || *host_and_port == '@')
+	if (*host_and_port == '/' || *host_and_port == '@') {
+		if (*host_and_port == '/')
+			unlink(host_and_port);
+
 		return ParseBindSocket(host_and_port, default_port, socktype);
+	}
 
 	return ResolveBindSocket(host_and_port, default_port,
 				 MakeAddrInfo(AI_ADDRCONFIG|AI_PASSIVE,
