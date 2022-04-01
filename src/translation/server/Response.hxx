@@ -1228,6 +1228,22 @@ public:
 			return *this;
 		}
 
+		template<typename... Types>
+		auto RequestHeader(std::string_view name,
+				   Types... value) noexcept {
+			response.StringPacket(TranslationCommand::REQUEST_HEADER,
+					      name, ":", value...);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto ExpandRequestHeader(std::string_view name,
+				   Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_REQUEST_HEADER,
+					      name, ":", value...);
+			return *this;
+		}
+
 		auto NonBlocking() noexcept {
 			response.Packet(TranslationCommand::NON_BLOCKING);
 			return *this;
@@ -1371,6 +1387,22 @@ public:
 
 		auto Sticky() noexcept {
 			response.Packet(TranslationCommand::STICKY);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto RequestHeader(std::string_view name,
+				   Types... value) noexcept {
+			response.StringPacket(TranslationCommand::REQUEST_HEADER,
+					      name, ":", value...);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto ExpandRequestHeader(std::string_view name,
+				   Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_REQUEST_HEADER,
+					      name, ":", value...);
 			return *this;
 		}
 	};
