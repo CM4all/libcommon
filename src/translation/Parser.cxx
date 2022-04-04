@@ -3504,21 +3504,29 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::CACHE_TAG:
-#if TRANSLATION_ENABLE_TRANSFORMATION
+#if TRANSLATION_ENABLE_CACHE
 		if (!IsValidNonEmptyString(string_payload))
 			throw std::runtime_error("malformed CACHE_TAG packet");
 
+#if TRANSLATION_ENABLE_TRANSFORMATION
 		if (filter != nullptr) {
 			if (filter->cache_tag != nullptr)
 				throw std::runtime_error("duplicate CACHE_TAG packet");
 
 			filter->cache_tag = string_payload.data;
 			return;
-		} else
+		}
+#endif // TRANSLATION_ENABLE_TRANSFORMATION
+
+		if (!response.address.IsDefined())
 			throw std::runtime_error("misplaced CACHE_TAG packet");
-#else
+
+		if (response.cache_tag != nullptr)
+			throw std::runtime_error("duplicate CACHE_TAG packet");
+
+		response.cache_tag = string_payload.data;
+#endif // TRANSLATION_ENABLE_CACHE
 		break;
-#endif
 
 	case TranslationCommand::HTTP2:
 #if TRANSLATION_ENABLE_HTTP

@@ -274,6 +274,11 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
+	/**
+	 * From #TranslationCommand::CACHE_TAG.
+	 */
+	const char *cache_tag;
+
 	ConstBuffer<TranslationCommand> vary;
 	ConstBuffer<TranslationCommand> invalidate;
 #endif
