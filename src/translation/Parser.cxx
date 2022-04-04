@@ -3787,6 +3787,22 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		previous_command = command;
 		HandleBindMount(string_payload, false, false, false, true);
 		return;
+
+	case TranslationCommand::EAGER_CACHE:
+#if TRANSLATION_ENABLE_CACHE
+#if TRANSLATION_ENABLE_RADDRESS
+		if (resource_address == nullptr)
+			throw std::runtime_error("misplaced UNCACHED packet");
+#endif
+
+		if (response.eager_cache)
+			throw std::runtime_error("duplicate EAGER_CACHE packet");
+
+		response.eager_cache = true;
+		return;
+#else // !TRANSLATION_ENABLE_CACHE
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

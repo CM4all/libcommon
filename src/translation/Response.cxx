@@ -122,6 +122,7 @@ TranslateResponse::Clear()
 
 #if TRANSLATION_ENABLE_CACHE
 	uncached = false;
+	eager_cache = false;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
@@ -340,6 +341,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 
 #if TRANSLATION_ENABLE_CACHE
 	uncached = src.uncached;
+	eager_cache = src.eager_cache;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS

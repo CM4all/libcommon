@@ -1120,6 +1120,12 @@ enum class TranslationCommand : uint16_t {
 	 * target separated by a null byte.
 	 */
 	BIND_MOUNT_FILE = 234,
+
+	/**
+	 * The HTTP response should be cached even if it does not have
+	 * headers declaring its cacheability.
+	 */
+	EAGER_CACHE = 235,
 };
 
 struct TranslationHeader {

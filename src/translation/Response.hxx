@@ -343,6 +343,8 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_CACHE
 	bool uncached;
+
+	bool eager_cache;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS

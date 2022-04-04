@@ -1429,6 +1429,10 @@ public:
 		return Packet(TranslationCommand::UNCACHED);
 	}
 
+	auto &EagerCache() noexcept {
+		return Packet(TranslationCommand::EAGER_CACHE);
+	}
+
 	auto &Stateful() noexcept {
 		return Packet(TranslationCommand::STATEFUL);
 	}
