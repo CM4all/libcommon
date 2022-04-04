@@ -341,7 +341,9 @@ struct TranslateResponse {
 	HeaderForwardSettings response_header_forward;
 #endif
 
+#if TRANSLATION_ENABLE_CACHE
 	bool uncached;
+#endif
 
 #if TRANSLATION_ENABLE_RADDRESS
 	bool unsafe_base;

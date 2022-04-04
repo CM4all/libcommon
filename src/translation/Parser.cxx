@@ -3454,6 +3454,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::UNCACHED:
+#if TRANSLATION_ENABLE_CACHE
 #if TRANSLATION_ENABLE_RADDRESS
 		if (resource_address == nullptr)
 			throw std::runtime_error("misplaced UNCACHED packet");
@@ -3464,6 +3465,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.uncached = true;
 		return;
+#else // !TRANSLATION_ENABLE_CACHE
+		break;
+#endif
 
 	case TranslationCommand::PID_NAMESPACE_NAME:
 		if (!IsValidName(string_payload))

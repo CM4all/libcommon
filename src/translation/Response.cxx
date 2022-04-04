@@ -120,7 +120,9 @@ TranslateResponse::Clear()
 
 	stats_tag = nullptr;
 
+#if TRANSLATION_ENABLE_CACHE
 	uncached = false;
+#endif
 
 #if TRANSLATION_ENABLE_RADDRESS
 	unsafe_base = false;
@@ -336,7 +338,9 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 		alloc.CheckDup(src.untrusted_raw_site_suffix);
 #endif
 
+#if TRANSLATION_ENABLE_CACHE
 	uncached = src.uncached;
+#endif
 
 #if TRANSLATION_ENABLE_RADDRESS
 	unsafe_base = src.unsafe_base;
