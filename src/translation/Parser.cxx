@@ -3529,8 +3529,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("duplicate CACHE_TAG packet");
 
 		response.cache_tag = string_payload.data;
-#endif // TRANSLATION_ENABLE_CACHE
+		return;
+#else
 		break;
+#endif // TRANSLATION_ENABLE_CACHE
 
 	case TranslationCommand::HTTP2:
 #if TRANSLATION_ENABLE_HTTP
