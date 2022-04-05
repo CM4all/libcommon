@@ -1427,7 +1427,7 @@ public:
 	}
 
 	template<typename... Types>
-	auto CacheTag(Types... tag) noexcept {
+	auto &CacheTag(Types... tag) noexcept {
 		return StringPacket(TranslationCommand::CACHE_TAG,
 				    tag...);
 	}
