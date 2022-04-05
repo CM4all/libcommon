@@ -620,13 +620,6 @@ public:
 			response.Packet(TranslationCommand::FILTER_NO_BODY);
 			return *this;
 		}
-
-		template<typename... Types>
-		auto CacheTag(Types... tag) noexcept {
-			response.StringPacket(TranslationCommand::CACHE_TAG,
-					      tag...);
-			return *this;
-		}
 	};
 
 	FilterContext Filter() noexcept {
@@ -1431,6 +1424,12 @@ public:
 
 	auto &EagerCache() noexcept {
 		return Packet(TranslationCommand::EAGER_CACHE);
+	}
+
+	template<typename... Types>
+	auto CacheTag(Types... tag) noexcept {
+		return StringPacket(TranslationCommand::CACHE_TAG,
+				    tag...);
 	}
 
 	auto &Stateful() noexcept {
