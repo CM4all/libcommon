@@ -1426,6 +1426,10 @@ public:
 		return Packet(TranslationCommand::EAGER_CACHE);
 	}
 
+	auto &AutoFlushCache() noexcept {
+		return Packet(TranslationCommand::AUTO_FLUSH_CACHE);
+	}
+
 	template<typename... Types>
 	auto &CacheTag(Types... tag) noexcept {
 		return StringPacket(TranslationCommand::CACHE_TAG,

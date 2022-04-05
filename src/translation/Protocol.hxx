@@ -1126,6 +1126,12 @@ enum class TranslationCommand : uint16_t {
 	 * headers declaring its cacheability.
 	 */
 	EAGER_CACHE = 235,
+
+	/**
+	 * All (successful) modifying requests (POST, PUT ...) flush
+	 * the HTTP cache of the specified #CACHE_TAG.
+	 */
+	AUTO_FLUSH_CACHE = 236,
 };
 
 struct TranslationHeader {

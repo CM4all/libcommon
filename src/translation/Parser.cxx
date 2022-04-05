@@ -3792,13 +3792,32 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_CACHE
 #if TRANSLATION_ENABLE_RADDRESS
 		if (resource_address == nullptr)
-			throw std::runtime_error("misplaced UNCACHED packet");
+			throw std::runtime_error("misplaced EAGER_CACHE packet");
 #endif
 
 		if (response.eager_cache)
 			throw std::runtime_error("duplicate EAGER_CACHE packet");
 
 		response.eager_cache = true;
+		return;
+#else // !TRANSLATION_ENABLE_CACHE
+		break;
+#endif
+
+	case TranslationCommand::AUTO_FLUSH_CACHE:
+#if TRANSLATION_ENABLE_CACHE
+#if TRANSLATION_ENABLE_RADDRESS
+		if (resource_address == nullptr)
+			throw std::runtime_error("misplaced AUTO_FLUSH_CACHE packet");
+#endif
+
+		if (response.cache_tag == nullptr)
+			throw std::runtime_error("AUTO_FLUSH_CACHE without CACHE_TAG");
+
+		if (response.auto_flush_cache)
+			throw std::runtime_error("duplicate AUTO_FLUSH_CACHE packet");
+
+		response.auto_flush_cache = true;
 		return;
 #else // !TRANSLATION_ENABLE_CACHE
 		break;
