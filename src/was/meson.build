@@ -9,6 +9,7 @@ was = static_library(
   'FormRequestBody.cxx',
   'SimpleResponse.cxx',
   'StringRequestBody.cxx',
+  'Reader.cxx',
   'WasOutputStream.cxx',
   'WasSplice.cxx',
   include_directories: inc,
