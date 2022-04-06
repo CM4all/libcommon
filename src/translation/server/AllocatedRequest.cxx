@@ -239,7 +239,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		break;
 
 	case TranslationCommand::FUNCTIONS:
-		cron = true;
+		functions = true;
 		break;
 
 	case TranslationCommand::POOL:
