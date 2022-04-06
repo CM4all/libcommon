@@ -47,10 +47,15 @@ LoadStringFile(const char *path)
 	if (nbytes < 0)
 		throw FormatErrno("Failed to read %s", path);
 
-	size_t length = StripRight(buffer, nbytes);
+	size_t length = nbytes;
 	if (length >= sizeof(buffer))
 		throw FormatRuntimeError("File is too large: %s", path);
 
-	buffer[length] = 0;
-	return StripLeft(buffer);
+	const char *begin = buffer;
+	const char *end = buffer + length;
+
+	begin = StripLeft(begin, end);
+	end = StripRight(begin, end);
+
+	return std::string{begin, end};
 }
