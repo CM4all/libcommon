@@ -29,6 +29,7 @@ boost_json_dep = declare_dependency(
 boost_json = static_library(
   'boost_json',
   'Boost.cxx',
+  'Parse.cxx',
   'Serialize.cxx',
   'ToDisposableBuffer.cxx',
   'Was.cxx',
