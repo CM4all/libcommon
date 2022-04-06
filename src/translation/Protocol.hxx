@@ -1132,6 +1132,11 @@ enum class TranslationCommand : uint16_t {
 	 * the HTTP cache of the specified #CACHE_TAG.
 	 */
 	AUTO_FLUSH_CACHE = 236,
+
+	/**
+	 * Mark this request as a "functions" request.
+	 */
+	FUNCTIONS = 237,
 };
 
 struct TranslationHeader {
