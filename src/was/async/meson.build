@@ -1,5 +1,7 @@
 libwas_protocol = dependency('libcm4all-was-protocol', version: '>= 1.21', required: get_variable('libcommon_enable_was', true))
 if not libwas_protocol.found()
+  was_async_dep = disabler()
+  was_server_async_dep = disabler()
   subdir_done()
 endif
 
