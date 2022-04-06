@@ -34,6 +34,7 @@
 #include "system/Error.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "util/RuntimeError.hxx"
 #include "util/StringStrip.hxx"
 
 std::string
@@ -48,7 +49,7 @@ LoadStringFile(const char *path)
 
 	size_t length = StripRight(buffer, nbytes);
 	if (length >= sizeof(buffer))
-		throw std::runtime_error("File is too large: " + std::string(path));
+		throw FormatRuntimeError("File is too large: %s", path);
 
 	buffer[length] = 0;
 	return StripLeft(buffer);
