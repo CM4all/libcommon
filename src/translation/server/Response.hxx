@@ -795,8 +795,11 @@ public:
 		ChildContext(Response &_response) noexcept
 			:response(_response) {}
 
-		auto Tag(std::string_view value) noexcept {
-			response.StringPacket(TranslationCommand::CHILD_TAG, value);
+		template<typename... Types>
+		auto Tag(Types... value) noexcept {
+			static_assert(sizeof...(value) > 0);
+			response.StringPacket(TranslationCommand::CHILD_TAG,
+					      value...);
 			return *this;
 		}
 
