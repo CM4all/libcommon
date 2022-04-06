@@ -990,6 +990,12 @@ public:
 	};
 
 	template<typename... Types>
+	auto Execute(Types... path) noexcept {
+		StringPacket(TranslationCommand::EXECUTE, path...);
+		return ChildContext(*this);
+	}
+
+	template<typename... Types>
 	auto Pipe(Types... path) noexcept {
 		StringPacket(TranslationCommand::PIPE, path...);
 		return ChildContext(*this);
