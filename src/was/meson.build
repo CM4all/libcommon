@@ -6,6 +6,7 @@ endif
 
 was = static_library(
   'was',
+  'ExpectRequestBody.cxx',
   'FormRequestBody.cxx',
   'SimpleResponse.cxx',
   'StringRequestBody.cxx',

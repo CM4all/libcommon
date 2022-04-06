@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 CM4all GmbH
+ * Copyright 2020-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,20 +30,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FormRequestBody.hxx"
 #include "ExpectRequestBody.hxx"
-#include "StringRequestBody.hxx"
-#include "uri/MapQueryString.hxx"
+#include "ExceptionResponse.hxx"
+#include "util/MimeType.hxx"
+
+#include <was/simple.h>
+
+struct was_simple;
 
 namespace Was {
 
-std::multimap<std::string, std::string>
-FormRequestBodyToMap(was_simple *w, std::string::size_type limit)
+[[gnu::pure]]
+static bool
+IsContentType(was_simple *w, const std::string_view expected) noexcept
 {
-	ExpectRequestBody(w, "application/x-www-form-urlencoded");
+	const char *content_type = was_simple_get_header(w, "content-type");
+	return content_type != nullptr &&
+		GetMimeTypeBase(content_type).compare(expected) == 0;
+}
 
-	const auto raw = RequestBodyToString(w, limit);
-	return MapQueryString(raw);
+void
+ExpectRequestBody(was_simple *w, const std::string_view content_type)
+{
+	if (!was_simple_has_body(w))
+		throw BadRequest{"No request body\n"};
+
+	if (!IsContentType(w, content_type))
+		throw BadRequest{"Wrong request body type\n"};
 }
 
 } // namespace Was

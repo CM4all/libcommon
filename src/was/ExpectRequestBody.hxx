@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 CM4all GmbH
+ * Copyright 2020-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,20 +30,19 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FormRequestBody.hxx"
-#include "ExpectRequestBody.hxx"
-#include "StringRequestBody.hxx"
-#include "uri/MapQueryString.hxx"
+#pragma once
+
+#include <string_view>
+
+struct was_simple;
 
 namespace Was {
 
-std::multimap<std::string, std::string>
-FormRequestBodyToMap(was_simple *w, std::string::size_type limit)
-{
-	ExpectRequestBody(w, "application/x-www-form-urlencoded");
-
-	const auto raw = RequestBodyToString(w, limit);
-	return MapQueryString(raw);
-}
+/**
+ * Throws #BadRequest if there is no request body or if the
+ * Content-Type does not match the specified one.
+ */
+void
+ExpectRequestBody(was_simple *w, const std::string_view content_type);
 
 } // namespace Was
