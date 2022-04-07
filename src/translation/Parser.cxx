@@ -1068,7 +1068,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::LISTENER_TAG:
 	case TranslationCommand::LOGIN:
 	case TranslationCommand::CRON:
-	case TranslationCommand::FUNCTIONS:
 	case TranslationCommand::PASSWORD:
 	case TranslationCommand::SERVICE:
 	case TranslationCommand::ALT_HOST:

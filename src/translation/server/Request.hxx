@@ -122,8 +122,6 @@ struct Request {
 	bool login = false;
 
 	bool cron = false;
-
-	bool functions = false;
 };
 
 } // namespace Translation::Server

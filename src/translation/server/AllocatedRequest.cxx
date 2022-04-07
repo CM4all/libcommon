@@ -238,10 +238,6 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		cron = true;
 		break;
 
-	case TranslationCommand::FUNCTIONS:
-		functions = true;
-		break;
-
 	case TranslationCommand::POOL:
 		pool_buffer = ToString(payload);
 		pool = pool_buffer.c_str();
