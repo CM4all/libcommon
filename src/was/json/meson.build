@@ -1,5 +1,6 @@
 was_json = static_library(
   'was_json',
+  'Read.cxx',
   'Write.cxx',
   include_directories: inc,
   dependencies: [
