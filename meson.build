@@ -170,6 +170,7 @@ subdir('src/spawn')
 subdir('src/stock')
 subdir('src/translation')
 subdir('src/was')
+subdir('src/was/json')
 subdir('src/was/async')
 
 subdir('src/lua/event')
