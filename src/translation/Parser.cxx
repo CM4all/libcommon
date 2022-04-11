@@ -3826,8 +3826,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::PARALLELISM:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (payload.size != 2)
+			throw std::runtime_error("malformed CONCURRENCY packet");
+
 		// TODO implement
 		throw std::runtime_error("misplaced PARALLELISM packet");
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
