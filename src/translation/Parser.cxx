@@ -3824,6 +3824,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else // !TRANSLATION_ENABLE_CACHE
 		break;
 #endif
+
+	case TranslationCommand::PARALLELISM:
+		// TODO implement
+		throw std::runtime_error("misplaced PARALLELISM packet");
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

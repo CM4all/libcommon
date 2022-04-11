@@ -1132,6 +1132,13 @@ enum class TranslationCommand : uint16_t {
 	 * the HTTP cache of the specified #CACHE_TAG.
 	 */
 	AUTO_FLUSH_CACHE = 236,
+
+	/**
+	 * Lauch how many child processes of this kind?  This is
+	 * similar to #CONCURRENCY, but at the process level, not at
+	 * the connection level.
+	 */
+	PARALLELISM = 237,
 };
 
 struct TranslationHeader {
