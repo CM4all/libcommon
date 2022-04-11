@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -203,6 +203,16 @@ public:
 	}
 
 protected:
+	/**
+	 * Derived classes can override this method to choose a
+	 * per-#Stock limit.
+	 */
+	[[gnu::pure]]
+	virtual std::size_t GetLimit([[maybe_unused]] const void *request,
+				     std::size_t _limit) const noexcept {
+		return _limit;
+	}
+
 	/**
 	 * Derived classes can override this method to choose a
 	 * per-#Stock clear_interval.

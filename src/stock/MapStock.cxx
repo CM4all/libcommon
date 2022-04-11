@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -84,7 +84,9 @@ StockMap::GetStock(const char *uri, void *request) noexcept
 	auto i = map.insert_check(uri, Item::KeyHasher, Item::KeyValueEqual, hint);
 	if (i.second) {
 		auto *item = new Item(event_loop, cls,
-				      uri, limit, max_idle,
+				      uri,
+				      GetLimit(request, limit),
+				      max_idle,
 				      GetClearInterval(request),
 				      this);
 		map.insert_commit(*item, hint);
