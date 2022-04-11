@@ -207,7 +207,7 @@ protected:
 	 * Derived classes can override this method to choose a
 	 * per-#Stock clear_interval.
 	 */
-	virtual Event::Duration GetClearInterval(void *) const noexcept {
+	virtual Event::Duration GetClearInterval([[maybe_unused]] const void *request) const noexcept {
 		return clear_interval;
 	}
 
