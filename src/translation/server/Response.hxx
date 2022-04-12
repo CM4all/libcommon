@@ -1116,6 +1116,12 @@ public:
 			return *this;
 		}
 
+		auto Parallelism(uint16_t value) noexcept {
+			response.PacketT(TranslationCommand::PARALLELISM,
+					 value);
+			return *this;
+		}
+
 		auto Concurrency(uint16_t value) noexcept {
 			response.PacketT(TranslationCommand::CONCURRENCY,
 					 value);
@@ -1163,6 +1169,12 @@ public:
 		auto ExpandDocumentRoot(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
 					      value...);
+			return *this;
+		}
+
+		auto Parallelism(uint16_t value) noexcept {
+			response.PacketT(TranslationCommand::PARALLELISM,
+					 value);
 			return *this;
 		}
 	};
@@ -1248,6 +1260,12 @@ public:
 
 		auto NonBlocking() noexcept {
 			response.Packet(TranslationCommand::NON_BLOCKING);
+			return *this;
+		}
+
+		auto Parallelism(uint16_t value) noexcept {
+			response.PacketT(TranslationCommand::PARALLELISM,
+					 value);
 			return *this;
 		}
 

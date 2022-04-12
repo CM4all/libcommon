@@ -3830,8 +3830,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (payload.size != 2)
 			throw std::runtime_error("malformed CONCURRENCY packet");
 
-		// TODO implement
-		throw std::runtime_error("misplaced PARALLELISM packet");
+		if (lhttp_address != nullptr)
+			lhttp_address->parallelism = *(const uint16_t *)payload.data;
+		else if (cgi_address != nullptr)
+			cgi_address->parallelism = *(const uint16_t *)payload.data;
+		else
+			throw std::runtime_error("misplaced CONCURRENCY packet");
 #else
 		break;
 #endif
