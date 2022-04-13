@@ -35,6 +35,7 @@
 #include <gtest/gtest.h>
 
 #include <list>
+#include <forward_list>
 #include <vector>
 
 TEST(PgParamWrapperTest, CString)
@@ -143,4 +144,70 @@ TEST(PgParamWrapperTest, VectorOfStrings)
 	ASSERT_FALSE(b.IsBinary());
 	ASSERT_STREQ(b.GetValue(), "{\"foo\"}");
 	ASSERT_EQ(b.GetSize(), 0U);
+}
+
+TEST(PgParamWrapperTest, OptionalInt)
+{
+	std::optional<int> value;
+
+	const Pg::ParamWrapper a{value};
+	ASSERT_FALSE(a.IsBinary());
+	ASSERT_EQ(a.GetValue(), nullptr);
+	ASSERT_EQ(a.GetSize(), 0U);
+
+	value.emplace(0);
+	const Pg::ParamWrapper b{value};
+	ASSERT_FALSE(b.IsBinary());
+	ASSERT_STREQ(b.GetValue(), "0");
+	ASSERT_EQ(b.GetSize(), 0U);
+
+	value.emplace(-1);
+	const Pg::ParamWrapper c{value};
+	ASSERT_FALSE(c.IsBinary());
+	ASSERT_STREQ(c.GetValue(), "-1");
+	ASSERT_EQ(c.GetSize(), 0U);
+}
+
+TEST(PgParamWrapperTest, OptionalString)
+{
+	std::optional<std::string> value;
+
+	const Pg::ParamWrapper a{value};
+	ASSERT_FALSE(a.IsBinary());
+	ASSERT_EQ(a.GetValue(), nullptr);
+	ASSERT_EQ(a.GetSize(), 0U);
+
+	value.emplace();
+	const Pg::ParamWrapper b{value};
+	ASSERT_FALSE(b.IsBinary());
+	ASSERT_STREQ(b.GetValue(), "");
+	ASSERT_EQ(b.GetSize(), 0U);
+
+	value.emplace("foo");
+	const Pg::ParamWrapper c{value};
+	ASSERT_FALSE(c.IsBinary());
+	ASSERT_STREQ(c.GetValue(), "foo");
+	ASSERT_EQ(c.GetSize(), 0U);
+}
+
+TEST(PgParamWrapperTest, OptionalListOfStrings)
+{
+	std::optional<std::forward_list<std::string>> value;
+
+	const Pg::ParamWrapper a{value};
+	ASSERT_FALSE(a.IsBinary());
+	ASSERT_EQ(a.GetValue(), nullptr);
+	ASSERT_EQ(a.GetSize(), 0U);
+
+	value.emplace();
+	const Pg::ParamWrapper b{value};
+	ASSERT_FALSE(b.IsBinary());
+	ASSERT_STREQ(b.GetValue(), "{}");
+	ASSERT_EQ(b.GetSize(), 0U);
+
+	value->emplace_front("foo");
+	const Pg::ParamWrapper c{value};
+	ASSERT_FALSE(c.IsBinary());
+	ASSERT_STREQ(c.GetValue(), "{\"foo\"}");
+	ASSERT_EQ(c.GetSize(), 0U);
 }
