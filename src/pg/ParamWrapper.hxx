@@ -280,9 +280,8 @@ struct ParamWrapper<std::string> : ParamWrapper<const char *> {
  * Specialization for STL container types of std::string instances.
  */
 template<typename T>
-struct ParamWrapper<T,
-		    std::enable_if_t<std::is_same<typename T::value_type,
-						  std::string>::value>> {
+requires std::same_as<typename T::value_type, std::string>
+struct ParamWrapper<T> {
 	std::string value;
 
 	ParamWrapper(const T &list) noexcept
