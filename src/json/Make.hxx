@@ -39,14 +39,12 @@
 
 namespace Json {
 
-[[gnu::pure]]
 static inline auto &
 Make(boost::json::object &o, std::string_view key) noexcept
 {
 	return o[key];
 }
 
-[[gnu::pure]]
 static inline auto &
 Make(boost::json::value &v, std::string_view key) noexcept
 {
@@ -56,7 +54,6 @@ Make(boost::json::value &v, std::string_view key) noexcept
 	return Make(v.get_object(), key);
 }
 
-[[gnu::pure]]
 static inline auto &
 Make(boost::json::array &a, std::size_t i) noexcept
 {
@@ -66,7 +63,6 @@ Make(boost::json::array &a, std::size_t i) noexcept
 	return a[i];
 }
 
-[[gnu::pure]]
 static inline auto &
 Make(boost::json::value &v, std::size_t i) noexcept
 {
@@ -77,7 +73,6 @@ Make(boost::json::value &v, std::size_t i) noexcept
 }
 
 template<typename J, typename K, typename... Args>
-[[gnu::pure]]
 static inline auto &
 Make(J &j, K &&key, Args&&... args)
 {
