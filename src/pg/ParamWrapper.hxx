@@ -280,7 +280,7 @@ struct ParamWrapper<std::string> : ParamWrapper<const char *> {
  * Specialization for STL container types of std::string instances.
  */
 template<typename T>
-requires std::same_as<typename T::value_type, std::string>
+requires std::same_as<typename T::value_type, std::string> && std::forward_iterator<typename T::const_iterator>
 struct ParamWrapper<T> {
 	std::string value;
 
