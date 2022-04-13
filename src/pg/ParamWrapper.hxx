@@ -43,6 +43,7 @@
 #include <cinttypes>
 #include <cstdio>
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -323,6 +324,31 @@ struct ParamWrapper<const std::list<std::string> *> {
 		return 0;
 	}
 };
+
+template<typename T>
+struct ParamWrapper<std::optional<T>> {
+	std::optional<ParamWrapper<T>> inner;
+
+	ParamWrapper(const std::optional<T> &_value) noexcept
+		:inner()
+	{
+		if (_value)
+			inner.emplace(*_value);
+	}
+
+	static constexpr bool IsBinary() noexcept {
+		return ParamWrapper<T>::IsBinary();
+	}
+
+	const char *GetValue() const noexcept {
+		return inner ? inner->GetValue() : nullptr;
+	}
+
+	size_t GetSize() const noexcept {
+		return IsBinary() && inner ? inner->GetSize() : 0U;
+	}
+};
+
 
 template<typename... Params>
 class ParamCollector {
