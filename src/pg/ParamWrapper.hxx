@@ -329,7 +329,6 @@ struct ParamWrapper<std::optional<T>> {
 	std::optional<ParamWrapper<T>> inner;
 
 	ParamWrapper(const std::optional<T> &_value) noexcept
-		:inner()
 	{
 		if (_value)
 			inner.emplace(*_value);
