@@ -96,7 +96,7 @@ struct ParamWrapper<BinaryValue> {
 		:value(_value) {}
 
 	constexpr const char *GetValue() const noexcept {
-		return (const char *)value.data;
+		return (const char *)(const void *)value.data();
 	}
 
 	static constexpr bool IsBinary() noexcept {
@@ -104,7 +104,7 @@ struct ParamWrapper<BinaryValue> {
 	}
 
 	constexpr size_t GetSize() const noexcept {
-		return value.size;
+		return value.size();
 	}
 };
 
