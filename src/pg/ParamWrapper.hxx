@@ -48,7 +48,7 @@
 
 namespace Pg {
 
-template<typename T, typename Enable=void>
+template<typename T>
 struct ParamWrapper {
 	ParamWrapper(const T &t) noexcept;
 	const char *GetValue() const noexcept;
