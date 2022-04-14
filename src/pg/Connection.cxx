@@ -100,24 +100,14 @@ Connection::SendQueryParams(bool result_binary, const char *query,
 }
 
 std::string
-Connection::Escape(const char *p, size_t length) const noexcept
+Connection::Escape(const std::string_view src) const noexcept
 {
-	assert(p != nullptr || length == 0);
-
-	auto buffer = std::make_unique<char[]>(length * 2 + 1);
+	auto buffer = std::make_unique<char[]>(src.size() * 2 + 1);
 
 	size_t dest_length = ::PQescapeStringConn(conn, buffer.get(),
-						  p, length,
+						  src.data(), src.size(),
 						  nullptr);
 	return {buffer.get(), dest_length};
-}
-
-std::string
-Connection::Escape(const char *p) const noexcept
-{
-	assert(p != nullptr);
-
-	return Escape(p, std::strlen(p));
 }
 
 } /* namespace Pg */
