@@ -299,9 +299,9 @@ public:
 		assert(query != nullptr);
 
 		const size_t n = CountDynamic(params...);
-		std::unique_ptr<const char *[]> values(new const char *[n]);
-		std::unique_ptr<int[]> lengths(new int[n]);
-		std::unique_ptr<int[]> formats(new int[n]);
+		const auto values = std::make_unique<const char *[]>(n);
+		const auto lengths = std::make_unique<int[]>(n);
+		const auto formats = std::make_unique<int[]>(n);
 
 		return ExecuteDynamic2<Params...>(query, values.get(),
 						  lengths.get(), formats.get(), 0,
