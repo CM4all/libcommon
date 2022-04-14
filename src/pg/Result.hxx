@@ -34,17 +34,12 @@
 
 #include "BinaryValue.hxx"
 
-#include "util/Compiler.h"
-
-#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
-#include <string_view>
-#endif
-
 #include <libpq-fe.h>
 
 #include <cassert>
 #include <cstdlib>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace Pg {
@@ -205,14 +200,12 @@ public:
 		return ::PQgetlength(result, row, column);
 	}
 
-#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
 	[[gnu::pure]]
 	std::string_view GetValueView(unsigned row, unsigned column) const noexcept {
 		assert(IsDefined());
 
 		return {GetValue(row, column), GetValueLength(row, column)};
 	}
-#endif
 
 	[[gnu::pure]]
 	bool GetBoolValue(unsigned row, unsigned column) const noexcept {
@@ -324,12 +317,10 @@ public:
 			return ::PQgetlength(result, row, column);
 		}
 
-#if __cplusplus >= 201703L && !GCC_OLDER_THAN(7,0)
 		[[gnu::pure]]
 		std::string_view GetValueView(unsigned column) const noexcept {
 			return {GetValue(column), GetValueLength(column)};
 		}
-#endif
 
 		[[gnu::pure]]
 		bool GetBoolValue(unsigned column) const noexcept {

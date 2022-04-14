@@ -32,6 +32,7 @@
 
 #include "AsyncConnection.hxx"
 #include "Error.hxx"
+#include "util/Compiler.h"
 #include "util/Exception.hxx"
 
 namespace Pg {
