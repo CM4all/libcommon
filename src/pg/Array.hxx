@@ -48,6 +48,7 @@ std::forward_list<std::string>
 DecodeArray(const char *p);
 
 template<typename L>
+requires std::convertible_to<typename L::value_type, std::string_view> && std::forward_iterator<typename L::const_iterator>
 std::string
 EncodeArray(const L &src) noexcept
 {
