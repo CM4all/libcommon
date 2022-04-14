@@ -106,8 +106,9 @@ Connection::Escape(const char *p, size_t length) const noexcept
 
 	char *buffer = new char[length * 2 + 1];
 
-	::PQescapeStringConn(conn, buffer, p, length, nullptr);
-	std::string result(buffer, length);
+	size_t dest_length = ::PQescapeStringConn(conn, buffer, p, length,
+						  nullptr);
+	std::string result(buffer, dest_length);
 	delete[] buffer;
 	return result;
 }
