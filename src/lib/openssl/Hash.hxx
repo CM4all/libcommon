@@ -40,7 +40,7 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/sha.h>
 
-template<typename T> struct ConstBuffer;
+#include <span>
 
 struct SHA1Digest {
 	unsigned char data[SHA_DIGEST_LENGTH];
@@ -48,7 +48,7 @@ struct SHA1Digest {
 
 [[gnu::pure]]
 SHA1Digest
-CalcSHA1(ConstBuffer<void> src);
+CalcSHA1(std::span<const std::byte> src);
 
 [[gnu::pure]]
 SHA1Digest

@@ -39,6 +39,8 @@
 #include <openssl/ssl.h>
 #include <openssl/bn.h>
 
+#include <span>
+
 class SslBuffer : WritableBuffer<unsigned char> {
 public:
 	explicit SslBuffer(X509 &cert);
@@ -65,8 +67,8 @@ public:
 		return *this;
 	}
 
-	ConstBuffer<void> get() const noexcept {
-		return {data, size};
+	std::span<const std::byte> get() const noexcept {
+		return {(const std::byte *)data, size};
 	}
 };
 

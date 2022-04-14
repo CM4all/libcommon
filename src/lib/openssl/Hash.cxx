@@ -38,10 +38,11 @@
 #include <openssl/evp.h>
 
 SHA1Digest
-CalcSHA1(ConstBuffer<void> src)
+CalcSHA1(std::span<const std::byte> src)
 {
 	SHA1Digest result;
-	if (!EVP_Digest(src.data, src.size, result.data, nullptr, EVP_sha1(),
+	if (!EVP_Digest(src.data(), src.size(),
+			result.data, nullptr, EVP_sha1(),
 			nullptr))
 		throw SslError("EVP_Digest() failed");
 
