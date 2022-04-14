@@ -104,13 +104,12 @@ Connection::Escape(const char *p, size_t length) const noexcept
 {
 	assert(p != nullptr || length == 0);
 
-	char *buffer = new char[length * 2 + 1];
+	auto buffer = std::make_unique<char[]>(length * 2 + 1);
 
-	size_t dest_length = ::PQescapeStringConn(conn, buffer, p, length,
+	size_t dest_length = ::PQescapeStringConn(conn, buffer.get(),
+						  p, length,
 						  nullptr);
-	std::string result(buffer, dest_length);
-	delete[] buffer;
-	return result;
+	return {buffer.get(), dest_length};
 }
 
 std::string
