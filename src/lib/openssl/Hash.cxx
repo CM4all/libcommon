@@ -33,7 +33,6 @@
 #include "Hash.hxx"
 #include "Buffer.hxx"
 #include "Error.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <openssl/evp.h>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,7 +34,6 @@
 #include "Error.hxx"
 #include "UniqueBN.hxx"
 #include "UniqueRSA.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <openssl/bn.h>
 #include <openssl/evp.h>
@@ -96,12 +95,12 @@ GenerateRsaKey()
 }
 
 UniqueEVP_PKEY
-DecodeDerKey(ConstBuffer<void> der)
+DecodeDerKey(std::span<const std::byte> der)
 {
 	ERR_clear_error();
 
-	auto data = (const unsigned char *)der.data;
-	UniqueEVP_PKEY key(d2i_AutoPrivateKey(nullptr, &data, der.size));
+	auto data = (const unsigned char *)der.data();
+	UniqueEVP_PKEY key(d2i_AutoPrivateKey(nullptr, &data, der.size()));
 	if (!key)
 		throw SslError("d2i_AutoPrivateKey() failed");
 

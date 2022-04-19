@@ -34,7 +34,6 @@
 #define SSL_BUFFER_HXX
 
 #include "util/WritableBuffer.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <openssl/ssl.h>
 #include <openssl/bn.h>

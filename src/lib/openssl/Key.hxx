@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,14 +34,13 @@
  * OpenSSL key utilities.
  */
 
-#ifndef SSL_KEY_HXX
-#define SSL_KEY_HXX
+#pragma once
 
 #include "UniqueEVP.hxx"
 
 #include <openssl/ossl_typ.h>
 
-template<typename T> struct ConstBuffer;
+#include <span>
 
 UniqueEVP_PKEY
 GenerateRsaKey();
@@ -53,7 +52,7 @@ GenerateRsaKey();
  * Throws SslError on error.
  */
 UniqueEVP_PKEY
-DecodeDerKey(ConstBuffer<void> der);
+DecodeDerKey(std::span<const std::byte> der);
 
 [[gnu::pure]]
 bool
@@ -62,5 +61,3 @@ MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2) noexcept;
 [[gnu::pure]]
 bool
 MatchModulus(X509 &cert, EVP_PKEY &key) noexcept;
-
-#endif
