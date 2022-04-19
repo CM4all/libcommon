@@ -62,7 +62,8 @@ public:
 
 	template<typename T>
 	void UpdateT(const T &p) noexcept {
-		Update({&p, sizeof(p)});
+		const std::span<const T> span{&p, 1};
+		Update(span);
 	}
 
 	void Final(void *out) noexcept {

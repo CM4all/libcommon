@@ -35,6 +35,7 @@
 #include <sodium/crypto_generichash.h>
 
 #include <span>
+#include <string_view>
 
 class GenericHashState {
 	crypto_generichash_state state;
@@ -54,8 +55,18 @@ public:
 	}
 
 	template<typename T>
+	void Update(std::span<const T> src) noexcept {
+		Update(std::as_bytes(src));
+	}
+
+	void Update(std::string_view src) noexcept {
+		Update(std::span<const char>{src});
+	}
+
+	template<typename T>
 	void UpdateT(const T &p) noexcept {
-		Update({&p, sizeof(p)});
+		const std::span<const T> span{&p, 1};
+		Update(span);
 	}
 
 	void Final(std::span<std::byte> out) noexcept {
