@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 CM4all GmbH
+ * Copyright 2020-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,15 +33,14 @@
 #include "Base64.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
-#include "util/ConstBuffer.hxx"
 
 AllocatedString
-SodiumBase64(ConstBuffer<void> src, int variant) noexcept
+SodiumBase64(std::span<const std::byte> src, int variant) noexcept
 {
-	size_t size = sodium_base64_ENCODED_LEN(src.size, variant);
+	size_t size = sodium_base64_ENCODED_LEN(src.size(), variant);
 	auto buffer = new char[size];
 	sodium_bin2base64(buffer, size,
-			  (const unsigned char *)src.data, src.size,
+			  (const unsigned char *)src.data(), src.size(),
 			  variant);
 	return AllocatedString::Donate(buffer);
 }
@@ -49,12 +48,12 @@ SodiumBase64(ConstBuffer<void> src, int variant) noexcept
 AllocatedString
 SodiumBase64(std::string_view src, int variant) noexcept
 {
-	return SodiumBase64(ConstBuffer<void>{src.data(), src.size()},
-			    variant);
+	const std::span<const char> span{src};
+	return SodiumBase64(std::as_bytes(span), variant);
 }
 
 AllocatedString
-UrlSafeBase64(ConstBuffer<void> src) noexcept
+UrlSafeBase64(std::span<const std::byte> src) noexcept
 {
 	return SodiumBase64(src, sodium_base64_VARIANT_URLSAFE_NO_PADDING);
 }
@@ -62,7 +61,8 @@ UrlSafeBase64(ConstBuffer<void> src) noexcept
 AllocatedString
 UrlSafeBase64(std::string_view src) noexcept
 {
-	return UrlSafeBase64(ConstBuffer<void>{src.data(), src.size()});
+	const std::span<const char> span{src};
+	return UrlSafeBase64(std::as_bytes(span));
 }
 
 [[gnu::pure]]

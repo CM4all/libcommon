@@ -55,8 +55,7 @@ SignEdDSA(const Ed25519SecretKey &key, ConstBuffer<void> _input) noexcept
 			     input.data, input.size,
 			     (const unsigned char *)key.data());
 
-	return UrlSafeBase64(ConstBuffer<void>(signature.data(),
-					       signature.size()));
+	return UrlSafeBase64(signature);
 }
 
 AllocatedString

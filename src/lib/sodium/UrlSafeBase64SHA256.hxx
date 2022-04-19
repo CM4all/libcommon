@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 CM4all GmbH
+ * Copyright 2020-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -35,19 +35,11 @@
 #include "Base64.hxx"
 #include "SHA256.hxx"
 
-#include <string_view>
-
+template<typename T>
 [[gnu::pure]]
 inline auto
-UrlSafeBase64SHA256(ConstBuffer<void> src) noexcept
+UrlSafeBase64SHA256(const T &src) noexcept
 {
 	const auto hash = SHA256(src);
 	return FixedBase64<crypto_hash_sha256_BYTES, sodium_base64_VARIANT_URLSAFE_NO_PADDING>(&hash);
-}
-
-[[gnu::pure]]
-inline auto
-UrlSafeBase64SHA256(std::string_view src) noexcept
-{
-	return UrlSafeBase64SHA256(ConstBuffer<void>{src.data(), src.size()});
 }

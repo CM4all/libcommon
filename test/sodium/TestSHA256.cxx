@@ -37,7 +37,6 @@
 #include <gtest/gtest.h>
 
 #include <array>
-#include <cstddef> // for std::byte
 
 template<std::size_t size>
 static auto
@@ -57,6 +56,6 @@ TEST(TestSHA256, Empty)
 
 TEST(TestSHA256, Empty1)
 {
-	const auto hash = HexFormat(SHA256(ConstBuffer<void>{}));
+	const auto hash = HexFormat(SHA256(""));
 	EXPECT_STREQ(hash, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 }

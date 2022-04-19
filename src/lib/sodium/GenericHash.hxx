@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 CM4all GmbH
+ * Copyright 2020-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,24 +32,25 @@
 
 #pragma once
 
-#include "util/ConstBuffer.hxx"
-
 #include <sodium/crypto_generichash.h>
+
+#include <span>
 
 class GenericHashState {
 	crypto_generichash_state state;
 
 public:
 	explicit GenericHashState(size_t outlen,
-				  ConstBuffer<void> key=nullptr) noexcept {
+				  std::span<const std::byte> key={}) noexcept {
 		crypto_generichash_init(&state,
-					(const unsigned char *)key.data, key.size, outlen);
+					(const unsigned char *)key.data(),
+					key.size(), outlen);
 	}
 
-	void Update(ConstBuffer<void> p) noexcept {
+	void Update(std::span<const std::byte> p) noexcept {
 		crypto_generichash_update(&state,
-					  (const unsigned char *)p.data,
-					  p.size);
+					  (const unsigned char *)p.data(),
+					  p.size());
 	}
 
 	template<typename T>
@@ -57,13 +58,15 @@ public:
 		Update({&p, sizeof(p)});
 	}
 
-	void Final(void *out, size_t outlen) noexcept {
-		crypto_generichash_final(&state, (unsigned char *)out, outlen);
+	void Final(std::span<std::byte> out) noexcept {
+		crypto_generichash_final(&state, (unsigned char *)out.data(),
+					 out.size());
 	}
 
 	template<typename T>
 	void FinalT(T &p) noexcept {
-		Final(&p, sizeof(p));
+		const std::span<T> span{&p, 1};
+		Final(std::as_writable_bytes(span));
 	}
 
 	template<typename T>

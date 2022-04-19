@@ -77,12 +77,12 @@ SignRS256(EVP_PKEY &key, const SHA256Digest &digest)
 			  (const unsigned char *)&digest, sizeof(digest)) <= 0)
 		throw SslError("EVP_PKEY_sign() failed");
 
-	std::unique_ptr<unsigned char[]> buffer(new unsigned char[length]);
-	if (EVP_PKEY_sign(ctx.get(), buffer.get(), &length,
+	const auto buffer = std::make_unique<std::byte[]>(length);
+	if (EVP_PKEY_sign(ctx.get(), (unsigned char *)buffer.get(), &length,
 			  (const unsigned char *)&digest, sizeof(digest)) <= 0)
 		throw SslError("EVP_PKEY_sign() failed");
 
-	return UrlSafeBase64(ConstBuffer<void>(buffer.get(), length));
+	return UrlSafeBase64({buffer.get(), length});
 }
 
 AllocatedString
@@ -90,9 +90,9 @@ SignRS256(EVP_PKEY &key, std::string_view protected_header_b64,
 	  std::string_view payload_b64)
 {
 	SHA256State sha256;
-	sha256.Update(StringView(protected_header_b64).ToVoid());
-	sha256.Update(StringView(".").ToVoid());
-	sha256.Update(StringView(payload_b64).ToVoid());
+	sha256.Update(protected_header_b64);
+	sha256.Update(std::string_view{"."});
+	sha256.Update(payload_b64);
 
 	return SignRS256(key, sha256.Final());
 }

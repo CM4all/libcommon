@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 CM4all GmbH
+ * Copyright 2020-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,10 +36,9 @@
 
 #include <sodium/utils.h>
 
-#include <cstddef> // for std::byte
+#include <span>
 #include <string_view>
 
-template<typename T> struct ConstBuffer;
 class AllocatedString;
 template<typename T> class AllocatedArray;
 
@@ -57,7 +56,7 @@ FixedBase64(const void *src) noexcept
 
 [[gnu::pure]]
 AllocatedString
-SodiumBase64(ConstBuffer<void> src,
+SodiumBase64(std::span<const std::byte> src,
 	     int variant=sodium_base64_VARIANT_ORIGINAL) noexcept;
 
 [[gnu::pure]]
@@ -67,7 +66,7 @@ SodiumBase64(std::string_view src,
 
 [[gnu::pure]]
 AllocatedString
-UrlSafeBase64(ConstBuffer<void> src) noexcept;
+UrlSafeBase64(std::span<const std::byte> src) noexcept;
 
 [[gnu::pure]]
 AllocatedString
