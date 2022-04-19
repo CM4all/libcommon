@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,17 +32,16 @@
 
 #include "Request.hxx"
 #include "Error.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <openssl/err.h>
 
 UniqueX509_REQ
-DecodeDerCertificateRequest(ConstBuffer<void> der)
+DecodeDerCertificateRequest(std::span<const std::byte> der)
 {
 	ERR_clear_error();
 
-	auto data = (const unsigned char *)der.data;
-	UniqueX509_REQ req(d2i_X509_REQ(nullptr, &data, der.size));
+	auto data = (const unsigned char *)der.data();
+	UniqueX509_REQ req(d2i_X509_REQ(nullptr, &data, der.size()));
 	if (!req)
 		throw SslError("d2i_X509() failed");
 

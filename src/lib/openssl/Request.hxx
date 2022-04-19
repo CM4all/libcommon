@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,12 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SSL_REQUEST_HXX
-#define SSL_REQUEST_HXX
+#pragma once
 
 #include "UniqueX509.hxx"
 
-template<typename T> struct ConstBuffer;
+#include <span>
 
 /**
  * Decode an X.509 certificate request encoded with DER.  It is a
@@ -44,6 +43,4 @@ template<typename T> struct ConstBuffer;
  * Throws SslError on error.
  */
 UniqueX509_REQ
-DecodeDerCertificateRequest(ConstBuffer<void> der);
-
-#endif
+DecodeDerCertificateRequest(std::span<const std::byte> der);

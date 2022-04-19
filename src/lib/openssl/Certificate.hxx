@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,12 +34,11 @@
  * OpenSSL certificate utilities.
  */
 
-#ifndef SSL_CERTIFICATE_HXX
-#define SSL_CERTIFICATE_HXX
+#pragma once
 
 #include "UniqueX509.hxx"
 
-template<typename T> struct ConstBuffer;
+#include <span>
 
 /**
  * Decode an X.509 certificate encoded with DER.  It is a wrapper for
@@ -48,6 +47,4 @@ template<typename T> struct ConstBuffer;
  * Throws SslError on error.
  */
 UniqueX509
-DecodeDerCertificate(ConstBuffer<void> der);
-
-#endif
+DecodeDerCertificate(std::span<const std::byte> der);
