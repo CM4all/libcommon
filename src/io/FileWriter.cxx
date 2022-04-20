@@ -53,7 +53,7 @@ GetDirectory(const char *path) noexcept
 }
 
 static std::pair<std::string, UniqueFileDescriptor>
-MakeTempFileInDirectory(const std::string &directory)
+MakeTempFileInDirectory(const std::string &directory, mode_t mode)
 {
 	unsigned r = rand();
 
@@ -61,7 +61,7 @@ MakeTempFileInDirectory(const std::string &directory)
 		auto path = directory + "/tmp." + std::to_string(r);
 		UniqueFileDescriptor fd;
 		if (fd.Open(path.c_str(), O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,
-			    0666))
+			    mode))
 			return {std::move(path), std::move(fd)};
 
 		if (errno != EEXIST)
@@ -72,7 +72,7 @@ MakeTempFileInDirectory(const std::string &directory)
 }
 
 static std::pair<std::string, UniqueFileDescriptor>
-MakeTempFileInDirectory(FileDescriptor directory_fd)
+MakeTempFileInDirectory(FileDescriptor directory_fd, mode_t mode)
 {
 	unsigned r = rand();
 
@@ -81,7 +81,7 @@ MakeTempFileInDirectory(FileDescriptor directory_fd)
 		UniqueFileDescriptor fd;
 		if (fd.Open(directory_fd, path.c_str(),
 			    O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,
-			    0666))
+			    mode))
 			return {std::move(path), std::move(fd)};
 
 		if (errno != EEXIST)
@@ -91,30 +91,31 @@ MakeTempFileInDirectory(FileDescriptor directory_fd)
 	}
 }
 
-FileWriter::FileWriter(FileDescriptor _directory_fd, const char *_path)
+FileWriter::FileWriter(FileDescriptor _directory_fd, const char *_path,
+		       mode_t mode)
 	:path(_path), directory_fd(_directory_fd)
 {
 	if (directory_fd != FileDescriptor(AT_FDCWD)) {
-		if (fd.Open(directory_fd, ".", O_TMPFILE|O_WRONLY, 0666))
+		if (fd.Open(directory_fd, ".", O_TMPFILE|O_WRONLY, mode))
 			return;
 
-		auto tmp = MakeTempFileInDirectory(directory_fd);
+		auto tmp = MakeTempFileInDirectory(directory_fd, mode);
 		tmp_path = std::move(tmp.first);
 		fd = std::move(tmp.second);
 	} else {
 		const auto directory = GetDirectory(_path);
 
-		if (fd.Open(directory.c_str(), O_TMPFILE|O_WRONLY, 0666))
+		if (fd.Open(directory.c_str(), O_TMPFILE|O_WRONLY, mode))
 			return;
 
-		auto tmp = MakeTempFileInDirectory(directory);
+		auto tmp = MakeTempFileInDirectory(directory, mode);
 		tmp_path = std::move(tmp.first);
 		fd = std::move(tmp.second);
 	}
 }
 
-FileWriter::FileWriter(const char *_path)
-	:FileWriter(FileDescriptor(AT_FDCWD), _path) {}
+FileWriter::FileWriter(const char *_path, mode_t mode)
+	:FileWriter(FileDescriptor(AT_FDCWD), _path, mode) {}
 
 void
 FileWriter::Allocate(off_t size) noexcept

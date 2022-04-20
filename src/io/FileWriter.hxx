@@ -54,9 +54,10 @@ public:
 	/**
 	 * Throws std::system_error on error.
 	 */
-	explicit FileWriter(const char *_path);
+	explicit FileWriter(const char *_path, mode_t mode=0666);
 
-	FileWriter(FileDescriptor _directory_fd, const char *_path);
+	FileWriter(FileDescriptor _directory_fd, const char *_path,
+		   mode_t mode=0666);
 
 	~FileWriter() noexcept {
 		if (fd.IsDefined())
