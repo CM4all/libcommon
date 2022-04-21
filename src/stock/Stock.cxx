@@ -96,7 +96,7 @@ void
 Stock::FadeAll() noexcept
 {
 	for (auto &i : busy)
-		i.fade = true;
+		i.Fade();
 
 	ClearIdle();
 	ScheduleCheckEmpty();
@@ -492,7 +492,7 @@ Stock::Put(StockItem &item, bool destroy) noexcept
 
 	busy.erase(busy.iterator_to(item));
 
-	if (destroy || item.fade || !item.Release()) {
+	if (destroy || item.IsFading() || !item.Release()) {
 		delete &item;
 		ScheduleCheckEmpty();
 		ScheduleRetryWaiting();
@@ -543,5 +543,5 @@ Stock::ItemBusyDisconnect(StockItem &item) noexcept
 	assert(!item.is_idle);
 
 	/* this item will be destroyed by Put() */
-	item.fade = true;
+	item.Fade();
 }

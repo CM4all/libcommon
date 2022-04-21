@@ -61,13 +61,13 @@ MultiStock::OuterItem::~OuterItem() noexcept
 inline bool
 MultiStock::OuterItem::CanUse() const noexcept
 {
-	return !shared_item.fade && !IsFull();
+	return !shared_item.IsFading() && !IsFull();
 }
 
 inline bool
 MultiStock::OuterItem::ShouldDelete() const noexcept
 {
-	return shared_item.fade && IsEmpty();
+	return shared_item.IsFading() && IsEmpty();
 }
 
 void
@@ -76,7 +76,7 @@ MultiStock::OuterItem::OnCleanupTimer() noexcept
 	if (IsEmpty()) {
 		/* if this item was unused for one cleanup_timer
 		   period, let parent.OnLeaseReleased() discard it */
-		shared_item.fade = true;
+		shared_item.Fade();
 		parent.OnLeaseReleased(*this);
 		return;
 	}
@@ -99,7 +99,7 @@ MultiStock::OuterItem::DiscardUnused() noexcept
 void
 MultiStock::OuterItem::Fade() noexcept
 {
-	shared_item.fade = true;
+	shared_item.Fade();
 	DiscardUnused();
 
 	if (IsEmpty())
@@ -202,7 +202,8 @@ MultiStock::OuterItem::Put(StockItem &item, bool destroy) noexcept
 
 	busy.erase(busy.iterator_to(item));
 
-	if (shared_item.fade || destroy || item.fade || !item.Release()) {
+	if (shared_item.IsFading() || destroy || item.IsFading() ||
+	    !item.Release()) {
 		delete &item;
 	} else {
 #ifndef NDEBUG
@@ -235,7 +236,7 @@ MultiStock::OuterItem::ItemBusyDisconnect(StockItem &item) noexcept
 	assert(!item.is_idle);
 	assert(!busy.empty());
 
-	item.fade = true;
+	item.Fade();
 }
 
 void

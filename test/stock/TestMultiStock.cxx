@@ -212,7 +212,7 @@ struct MyLease final : public StockGetHandler {
 		--partition.ready;
 
 		if (!reuse)
-			item->outer_item.fade = true;
+			item->outer_item.Fade();
 		item->Put(!reuse);
 		item = nullptr;
 	}

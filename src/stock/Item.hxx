@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -71,11 +71,13 @@ struct StockItem
 
 	StockGetHandler &handler;
 
+private:
 	/**
 	 * If true, then this object will never be reused.
 	 */
 	bool fade = false;
 
+public:
 	/**
 	 * Kludge: this flag is true if this item is idle and is not yet
 	 * in a "clean" state (e.g. a WAS process after STOP), and cannot
@@ -122,6 +124,14 @@ struct StockItem
 	 * again; it will be destroyed by the caller
 	 */
 	virtual bool Release() noexcept = 0;
+
+	bool IsFading() const noexcept {
+		return fade;
+	}
+
+	void Fade() noexcept {
+		fade = true;
+	}
 
 	/**
 	 * Announce that the creation of this item has finished

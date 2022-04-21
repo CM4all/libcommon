@@ -204,7 +204,7 @@ public:
 	void FadeIf(P &&predicate) noexcept {
 		for (auto &i : busy)
 			if (predicate(i))
-				i.fade = true;
+				i.Fade();
 
 		ClearIdleIf(std::forward<P>(predicate));
 
