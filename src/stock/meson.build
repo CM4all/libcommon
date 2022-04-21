@@ -4,6 +4,7 @@ stock = static_library(
   'AbstractStock.cxx',
   'Stock.cxx',
   'MapStock.cxx',
+  'MultiStock.cxx',
   include_directories: inc,
 )
 

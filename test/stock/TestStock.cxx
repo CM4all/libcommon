@@ -44,6 +44,8 @@
 
 #include <assert.h>
 
+namespace {
+
 static unsigned num_create, num_fail, num_borrow, num_release, num_destroy;
 static bool next_fail;
 static bool got_item;
@@ -118,6 +120,8 @@ public:
 		last_item = nullptr;
 	}
 };
+
+} // anonymous namespace
 
 TEST(Stock, Basic)
 {
