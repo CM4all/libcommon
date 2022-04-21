@@ -70,13 +70,13 @@ StockItem::Put(bool destroy) noexcept
 void
 StockItem::InvokeCreateSuccess() noexcept
 {
-	stock.ItemCreateSuccess(*this);
+	stock.ItemCreateSuccess(handler, *this);
 }
 
 void
 StockItem::InvokeCreateError(std::exception_ptr ep) noexcept
 {
-	stock.ItemCreateError(*this, ep);
+	stock.ItemCreateError(*this, handler, ep);
 }
 
 void

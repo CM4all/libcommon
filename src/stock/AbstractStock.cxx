@@ -34,9 +34,10 @@
 #include "Item.hxx"
 
 void
-AbstractStock::ItemCreateError(StockItem &item, std::exception_ptr ep) noexcept
+AbstractStock::ItemCreateError(StockItem &item, StockGetHandler &get_handler,
+			       std::exception_ptr ep) noexcept
 {
-	ItemCreateError(item.handler, ep);
+	ItemCreateError(get_handler, ep);
 	delete &item;
 }
 

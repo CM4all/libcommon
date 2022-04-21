@@ -44,7 +44,7 @@ MultiStock::OuterItem::OuterItem(MapItem &_parent, StockItem &_item,
 				 std::size_t _limit) noexcept
 	:parent(_parent), shared_item(_item),
 	 limit(_limit),
-	 cleanup_timer(shared_item.stock.GetEventLoop(),
+	 cleanup_timer(shared_item.GetStock().GetEventLoop(),
 		       BIND_THIS_METHOD(OnCleanupTimer))
 {
 }
@@ -183,7 +183,7 @@ MultiStock::OuterItem::GetLease(MultiStockClass &_inner_class,
 const char *
 MultiStock::OuterItem::GetName() const noexcept
 {
-	return shared_item.stock.GetName();
+	return shared_item.GetStockName();
 }
 
 EventLoop &
@@ -196,7 +196,7 @@ void
 MultiStock::OuterItem::Put(StockItem &item, bool destroy) noexcept
 {
 	assert(!item.is_idle);
-	assert(&item.stock == this);
+	assert(&item.GetStock() == this);
 
 	assert(!busy.empty());
 
@@ -240,10 +240,11 @@ MultiStock::OuterItem::ItemBusyDisconnect(StockItem &item) noexcept
 }
 
 void
-MultiStock::OuterItem::ItemCreateSuccess(StockItem &item) noexcept
+MultiStock::OuterItem::ItemCreateSuccess(StockGetHandler &get_handler,
+					 StockItem &item) noexcept
 {
 	busy.push_front(item);
-	item.handler.OnStockItemReady(item);
+	get_handler.OnStockItemReady(item);
 }
 
 void

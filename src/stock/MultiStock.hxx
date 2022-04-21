@@ -46,7 +46,7 @@
 class CancellablePointer;
 class StockClass;
 struct CreateStockItem;
-struct StockItem;
+class StockItem;
 struct StockStats;
 
 class MultiStockClass {
@@ -166,7 +166,8 @@ class MultiStock {
 
 		void ItemIdleDisconnect(StockItem &item) noexcept override;
 		void ItemBusyDisconnect(StockItem &item) noexcept override;
-		void ItemCreateSuccess(StockItem &item) noexcept override;
+		void ItemCreateSuccess(StockGetHandler &get_handler,
+				       StockItem &item) noexcept override;
 		void ItemCreateError(StockGetHandler &get_handler,
 				     std::exception_ptr ep) noexcept override;
 		void ItemCreateAborted() noexcept override;

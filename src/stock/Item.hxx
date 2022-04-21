@@ -63,15 +63,14 @@ struct CreateStockItem {
 	void InvokeCreateAborted() noexcept;
 };
 
-struct StockItem
-	: boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
-	  private LeakDetector {
+class StockItem
+	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
+	  LeakDetector {
 
 	AbstractStock &stock;
 
 	StockGetHandler &handler;
 
-private:
 	/**
 	 * If true, then this object will never be reused.
 	 */
@@ -97,6 +96,10 @@ public:
 	StockItem &operator=(const StockItem &) = delete;
 
 	virtual ~StockItem() noexcept;
+
+	AbstractStock &GetStock() const noexcept {
+		return stock;
+	}
 
 	/**
 	 * Wrapper for Stock::GetName()

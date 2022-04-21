@@ -447,14 +447,15 @@ Stock::GetNow(StockRequest request)
 }
 
 void
-Stock::ItemCreateSuccess(StockItem &item) noexcept
+Stock::ItemCreateSuccess(StockGetHandler &get_handler,
+			 StockItem &item) noexcept
 {
 	assert(num_create > 0);
 	--num_create;
 
 	busy.push_front(item);
 
-	item.handler.OnStockItemReady(item);
+	get_handler.OnStockItemReady(item);
 }
 
 void
@@ -484,7 +485,7 @@ void
 Stock::Put(StockItem &item, bool destroy) noexcept
 {
 	assert(!item.is_idle);
-	assert(&item.stock == this);
+	assert(&item.GetStock() == this);
 
 	may_clear = false;
 
@@ -507,7 +508,7 @@ void
 Stock::InjectIdle(StockItem &item) noexcept
 {
 	assert(!item.is_idle);
-	assert(&item.stock == this);
+	assert(&item.GetStock() == this);
 
 #ifndef NDEBUG
 	item.is_idle = true;

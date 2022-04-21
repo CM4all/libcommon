@@ -34,7 +34,7 @@
 
 #include <exception>
 
-struct StockItem;
+class StockItem;
 
 class StockGetHandler {
 public:
