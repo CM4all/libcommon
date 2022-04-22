@@ -36,6 +36,7 @@
 #include "util/ShallowCopy.hxx"
 
 class AllocatorPtr;
+class UniqueFileDescriptor;
 struct StringView;
 struct CgroupState;
 
@@ -96,6 +97,15 @@ struct CgroupOptions {
 
 	void Set(AllocatorPtr alloc,
 		 StringView name, StringView value) noexcept;
+
+	/**
+	 * Create a cgroup2 group.  Returns an undefined
+	 * #UniqueFileDescriptor if this instance is not enabled or
+	 * this is not a cgroup2-only host.
+	 *
+	 * Throws on error.
+	 */
+	UniqueFileDescriptor Create2(const CgroupState &state) const;
 
 	/**
 	 * Throws std::runtime_error on error.

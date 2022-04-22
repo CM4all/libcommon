@@ -129,6 +129,31 @@ MkdirOpenPath(const FileDescriptor parent_fd,
 	return OpenPath(parent_fd, name);
 }
 
+UniqueFileDescriptor
+CgroupOptions::Create2(const CgroupState &state) const
+{
+	if (name == nullptr)
+		return {};
+
+	if (!state.IsEnabled())
+		throw std::runtime_error("Control groups are disabled");
+
+	if (!state.IsV2())
+		return {};
+
+	assert(state.memory_v2);
+
+	auto fd = MakeCgroup(state.mounts.front().fd, name);
+
+	for (const auto &s : set)
+		WriteCgroupFile(state, fd, s.name, s.value);
+
+	if (session != nullptr)
+		return MkdirOpenPath(fd, session);
+	else
+		return fd;
+}
+
 static UniqueFileDescriptor
 MoveToNewCgroup(const FileDescriptor group_fd,
 		const char *sub_group, const char *session_group,
@@ -157,6 +182,9 @@ CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 	char pid_buffer[32];
 	const std::string_view pid(pid_buffer,
 				   sprintf(pid_buffer, "%u", _pid));
+
+	/* TODO drop support for cgroup1 and hybrid, use only
+	   Create2() and CLONE_INTO_CGROUP */
 
 	std::map<std::string, UniqueFileDescriptor> fds;
 	for (const auto &mount : state.mounts)

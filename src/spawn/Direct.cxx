@@ -381,14 +381,6 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
-	if (params.cgroup != nullptr && params.cgroup->IsDefined())
-		/* postpone creating the new cgroup namespace until
-		   after this process has been moved to the new
-		   cgroup, or else it won't have the required
-		   permissions to do so, because the destination
-		   cgroup won't be visible from his namespace */
-		clone_flags &= ~CLONE_NEWCGROUP;
-
 	const char *path = params.Finish();
 
 	/**
@@ -491,6 +483,24 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	ca.flags = clone_flags;
 	ca.pidfd = (intptr_t)&_pidfd;
 	ca.exit_signal = SIGCHLD;
+
+	UniqueFileDescriptor cgroup_fd;
+	if (params.cgroup != nullptr) {
+		cgroup_fd = params.cgroup->Create2(cgroup_state);
+		if (cgroup_fd.IsDefined()) {
+			ca.flags |= CLONE_INTO_CGROUP;
+			ca.cgroup = cgroup_fd.Get();
+			params.cgroup = nullptr;
+		}
+	}
+
+	if (params.cgroup != nullptr && params.cgroup->IsDefined())
+		/* postpone creating the new cgroup namespace until
+		   after this process has been moved to the new
+		   cgroup, or else it won't have the required
+		   permissions to do so, because the destination
+		   cgroup won't be visible from his namespace */
+		ca.flags &= ~CLONE_NEWCGROUP;
 
 	long pid = clone3(&ca, sizeof(ca));
 	if (pid < 0)
