@@ -99,25 +99,6 @@ DisconnectTty() noexcept
 }
 
 static void
-UnignoreSignals() noexcept
-{
-	/* restore all signals which were set to SIG_IGN by
-	   RunSpawnServer2() and others */
-	static constexpr int signals[] = {
-		SIGHUP,
-		SIGINT, SIGQUIT,
-		SIGPIPE,
-		SIGTERM,
-		SIGUSR1, SIGUSR2,
-		SIGCHLD,
-		SIGTRAP,
-	};
-
-	for (auto i : signals)
-		signal(i, SIG_DFL);
-}
-
-static void
 UnblockSignals() noexcept
 {
 	sigset_t mask;
@@ -168,7 +149,6 @@ Exec(const char *path, PreparedChildProcess &&p,
 try {
 	assert(error_pipe_w.IsDefined());
 
-	UnignoreSignals();
 	UnblockSignals();
 
 	if (p.umask >= 0)
@@ -394,7 +374,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool is_sys_admin)
 {
-	uint_least64_t clone_flags = CLONE_PIDFD;
+	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
 	if (params.cgroup != nullptr && params.cgroup->IsDefined())
