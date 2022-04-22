@@ -100,6 +100,24 @@ MakeCgroup(const FileDescriptor group_fd, const char *sub_group)
 }
 
 static UniqueFileDescriptor
+MkdirOpenPath(const FileDescriptor parent_fd,
+	      const char *name, mode_t mode=0777)
+{
+	if (mkdirat(parent_fd.Get(), name, mode) < 0) {
+		switch (errno) {
+		case EEXIST:
+			break;
+
+		default:
+			throw FormatErrno("mkdir('%s') failed",
+					  name);
+		}
+	}
+
+	return OpenPath(parent_fd, name);
+}
+
+static UniqueFileDescriptor
 MoveToNewCgroup(const FileDescriptor group_fd,
 		const char *sub_group, const char *session_group,
 		std::string_view pid)
@@ -107,18 +125,7 @@ MoveToNewCgroup(const FileDescriptor group_fd,
 	auto fd = MakeCgroup(group_fd, sub_group);
 
 	if (session_group != nullptr) {
-		if (mkdirat(fd.Get(), session_group, 0777) < 0) {
-			switch (errno) {
-			case EEXIST:
-				break;
-
-			default:
-				throw FormatErrno("mkdir('%s') failed",
-						  session_group);
-			}
-		}
-
-		auto session_fd = OpenPath(fd, session_group);
+		auto session_fd = MkdirOpenPath(fd, session_group);
 		WriteFile(session_fd, "cgroup.procs", pid);
 	} else
 		WriteFile(fd, "cgroup.procs", pid);
