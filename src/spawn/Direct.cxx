@@ -490,7 +490,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	long pid = clone3(&ca, sizeof(ca));
 	if (pid < 0)
-		throw MakeErrno(-pid, "clone() failed");
+		throw MakeErrno("clone() failed");
 
 	if (pid == 0) {
 		userns_map_pipe_w.Close();

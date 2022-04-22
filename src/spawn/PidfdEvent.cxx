@@ -35,6 +35,7 @@
 #include "system/PidFD.h"
 #include "io/UniqueFileDescriptor.hxx"
 
+#include <errno.h>
 #include <linux/wait.h>
 #include <sys/wait.h>
 
@@ -132,10 +133,9 @@ PidfdEvent::Kill(int signo) noexcept
 {
 	assert(IsDefined());
 
-	if (int error = my_pidfd_send_signal(event.GetFileDescriptor().Get(),
-					     signo, nullptr, 0);
-	    error < 0) {
-		logger(1, "failed to kill child process: ", strerror(-error));
+	if (my_pidfd_send_signal(event.GetFileDescriptor().Get(),
+				 signo, nullptr, 0) < 0) {
+		logger(1, "failed to kill child process: ", strerror(errno));
 		return false;
 	}
 
