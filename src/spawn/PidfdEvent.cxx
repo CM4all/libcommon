@@ -74,10 +74,8 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 
 	// TODO use the "struct rusage" parameter
 
-	/* the __WALL is necessary because we clone() without
-	   SIGCHLD */
 	if (waitid((idtype_t)P_PIDFD, event.GetFileDescriptor().Get(),
-		   &info, WEXITED|WNOHANG|__WALL) < 0) {
+		   &info, WEXITED|WNOHANG) < 0) {
 		/* should not happen ... */
 		logger(1, "waitid() failed: ", strerror(errno));
 		event.Cancel();
