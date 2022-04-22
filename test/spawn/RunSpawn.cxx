@@ -157,9 +157,6 @@ try {
 
 	siginfo_t info;
 
-	int status;
-	wait(&status);
-
 	/* the __WALL is necessary because we clone() without
 	   SIGCHLD */
 	if (waitid((idtype_t)P_PIDFD, pid.Get(),
