@@ -76,9 +76,14 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 
 	if (waitid((idtype_t)P_PIDFD, event.GetFileDescriptor().Get(),
 		   &info, WEXITED|WNOHANG) < 0) {
-		/* should not happen ... */
-		logger(1, "waitid() failed: ", strerror(errno));
-		event.Cancel();
+		/* errno==ECHILD can happen if the child has exited
+		   while ZombieReaper was already running (because
+		   many child processes have exited at the same time)
+		   - pretend the child has exited */
+		const int e = errno;
+		logger(3, "waitid() failed: ", strerror(e));
+		event.Close();
+		listener->OnChildProcessExit(-e);
 		return;
 	}
 
