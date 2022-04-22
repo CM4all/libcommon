@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 CM4all GmbH
+ * Copyright 2021-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,18 +32,32 @@
 
 #include "PidfdEvent.hxx"
 #include "ExitListener.hxx"
+#include "event/Loop.hxx"
 #include "system/PidFD.h"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <errno.h>
 #include <linux/wait.h>
+#include <sys/resource.h> // for struct rusage
 #include <sys/wait.h>
+
+/**
+ * A custom waitid() system call wrapper which, unlike the glibc
+ * wrapper, supports the "rusage" parameter.
+ */
+static inline int
+my_waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options,
+	  struct rusage *rusage) noexcept
+{
+	return syscall(__NR_waitid, idtype, id, infop, options, rusage);
+}
 
 PidfdEvent::PidfdEvent(EventLoop &event_loop,
 		       UniqueFileDescriptor &&_pidfd,
 		       const char *_name,
 		       ExitListener &_listener) noexcept
 	:logger(_name),
+	 start_time(event_loop.SteadyNow()),
 	 event(event_loop, BIND_THIS_METHOD(OnPidfdReady),
 	       _pidfd.Release()),
 	 listener(&_listener)
@@ -56,13 +70,11 @@ PidfdEvent::~PidfdEvent() noexcept
 	event.Close();
 }
 
-/* TODO
 static constexpr double
 timeval_to_double(const struct timeval &tv) noexcept
 {
 	return tv.tv_sec + tv.tv_usec / 1000000.;
 }
-*/
 
 inline void
 PidfdEvent::OnPidfdReady(unsigned) noexcept
@@ -72,10 +84,9 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 	siginfo_t info;
 	info.si_pid = 0;
 
-	// TODO use the "struct rusage" parameter
-
-	if (waitid((idtype_t)P_PIDFD, event.GetFileDescriptor().Get(),
-		   &info, WEXITED|WNOHANG) < 0) {
+	struct rusage rusage;
+	if (my_waitid((idtype_t)P_PIDFD, event.GetFileDescriptor().Get(),
+		      &info, WEXITED|WNOHANG, &rusage) < 0) {
 		/* errno==ECHILD can happen if the child has exited
 		   while ZombieReaper was already running (because
 		   many child processes have exited at the same time)
@@ -114,7 +125,6 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 		return;
 	}
 
-	/* TODO
 	const auto duration = GetEventLoop().SteadyNow() - start_time;
 	const auto duration_f = std::chrono::duration_cast<std::chrono::duration<double>>(duration);
 
@@ -124,7 +134,6 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 		      timeval_to_double(rusage.ru_stime),
 		      rusage.ru_minflt, rusage.ru_majflt,
 		      rusage.ru_nvcsw, rusage.ru_nivcsw);
-	*/
 
 	event.Close();
 

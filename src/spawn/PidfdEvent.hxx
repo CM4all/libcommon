@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 CM4all GmbH
+ * Copyright 2021-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,6 +33,7 @@
 #pragma once
 
 #include "event/PipeEvent.hxx"
+#include "event/Chrono.hxx"
 #include "io/Logger.hxx"
 
 class ExitListener;
@@ -40,6 +41,8 @@ class UniqueFileDescriptor;
 
 class PidfdEvent final {
 	const Logger logger;
+
+	const Event::TimePoint start_time;
 
 	PipeEvent event;
 
