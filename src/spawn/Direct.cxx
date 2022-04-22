@@ -44,7 +44,6 @@
 #include "system/CoreScheduling.hxx"
 #include "system/IOPrio.hxx"
 #include "util/Exception.hxx"
-#include "util/Sanitizer.hxx"
 #include "util/ScopeExit.hxx"
 
 #ifdef HAVE_LIBSYSTEMD
@@ -57,6 +56,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <linux/sched.h>
+#include <sys/syscall.h>
 #include <sys/prctl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -67,6 +68,12 @@
 #ifndef PR_SET_NO_NEW_PRIVS
 #define PR_SET_NO_NEW_PRIVS 38
 #endif
+
+static long
+clone3(const struct clone_args *cl_args, size_t size) noexcept
+{
+	return syscall(__NR_clone3, cl_args, size);
+}
 
 static void
 CheckedDup2(FileDescriptor oldfd, FileDescriptor newfd) noexcept
@@ -408,24 +415,6 @@ struct SpawnChildProcessContext {
 	}
 };
 
-static int
-spawn_fn(void *_ctx) noexcept
-{
-	auto &ctx = *(SpawnChildProcessContext *)_ctx;
-
-	ctx.userns_map_pipe_w.Close();
-	ctx.userns_create_pipe_r.Close();
-	ctx.wait_pipe_w.Close();
-	ctx.error_pipe_r.Close();
-
-	Exec(ctx.path, std::move(ctx.params),
-	     std::move(ctx.userns_map_pipe_r),
-	     std::move(ctx.userns_create_pipe_w),
-	     std::move(ctx.wait_pipe_r),
-	     std::move(ctx.error_pipe_w),
-	     ctx.cgroup_state);
-}
-
 /**
  * Read an error message from the pipe and if there is one, throw it
  * as a C++ exception.
@@ -446,7 +435,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool is_sys_admin)
 {
-	int clone_flags = SIGCHLD|CLONE_PIDFD;
+	int clone_flags = CLONE_PIDFD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
 	if (params.cgroup != nullptr && params.cgroup->IsDefined())
@@ -527,12 +516,30 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		ctx.params.ns.enable_user = false;
 	}
 
-	char stack[HaveAddressSanitizer() ? 32768 : 16384];
 	int _pidfd;
-	long pid = clone(spawn_fn, stack + sizeof(stack), clone_flags,
-			 &ctx, &_pidfd);
+
+	struct clone_args ca{};
+	ca.flags = clone_flags;
+	ca.pidfd = (intptr_t)&_pidfd;
+	ca.exit_signal = SIGCHLD;
+
+	long pid = clone3(&ca, sizeof(ca));
 	if (pid < 0)
-		throw MakeErrno("clone() failed");
+		throw MakeErrno(-pid, "clone() failed");
+
+	if (pid == 0) {
+		ctx.userns_map_pipe_w.Close();
+		ctx.userns_create_pipe_r.Close();
+		ctx.wait_pipe_w.Close();
+		ctx.error_pipe_r.Close();
+
+		Exec(ctx.path, std::move(ctx.params),
+		     std::move(ctx.userns_map_pipe_r),
+		     std::move(ctx.userns_create_pipe_w),
+		     std::move(ctx.wait_pipe_r),
+		     std::move(ctx.error_pipe_w),
+		     ctx.cgroup_state);
+	}
 
 	ctx.error_pipe_w.Close();
 
