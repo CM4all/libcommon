@@ -38,7 +38,7 @@
 
 static inline int
 my_pidfd_send_signal(int pidfd, int sig, siginfo_t *info,
-		     unsigned int flags)
+		     unsigned int flags) noexcept
 {
 	return syscall(__NR_pidfd_send_signal, pidfd, sig, info, flags);
 }
