@@ -69,10 +69,6 @@
 #define CLONE_CLEAR_SIGHAND 0x100000000ULL
 #endif
 
-#ifndef CLONE_INTO_CGROUP
-#define CLONE_INTO_CGROUP 0x200000000ULL
-#endif
-
 #ifndef PR_SET_NO_NEW_PRIVS
 #define PR_SET_NO_NEW_PRIVS 38
 #endif
@@ -488,6 +484,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	ca.pidfd = (intptr_t)&_pidfd;
 	ca.exit_signal = SIGCHLD;
 
+#ifdef CLONE_INTO_CGROUP
 	UniqueFileDescriptor cgroup_fd;
 	if (params.cgroup != nullptr) {
 		cgroup_fd = params.cgroup->Create2(cgroup_state);
@@ -497,6 +494,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			params.cgroup = nullptr;
 		}
 	}
+#endif
 
 	if (params.cgroup != nullptr && params.cgroup->IsDefined())
 		/* postpone creating the new cgroup namespace until
