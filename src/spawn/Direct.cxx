@@ -374,47 +374,6 @@ try {
 	_exit(EXIT_FAILURE);
 }
 
-struct SpawnChildProcessContext {
-	PreparedChildProcess &&params;
-	const CgroupState &cgroup_state;
-
-	const char *path;
-
-	/**
-	 * The child waits for this pipe before it applies namespaces.
-	 */
-	UniqueFileDescriptor userns_map_pipe_r, userns_map_pipe_w;
-
-	/**
-	 * A pipe used by the parent process to wait for the child to
-	 * create the user namespace.
-	 */
-	UniqueFileDescriptor userns_create_pipe_r, userns_create_pipe_w;
-
-	/**
-	 * A pipe used by the child process to wait for the parent to set
-	 * it up (e.g. uid/gid mappings).
-	 */
-	UniqueFileDescriptor wait_pipe_r, wait_pipe_w;
-
-	/**
-	 * If an error occurs during setup, the child process will
-	 * write an error message to this pipe.
-	 */
-	UniqueFileDescriptor error_pipe_r, error_pipe_w;
-
-	SpawnChildProcessContext(PreparedChildProcess &&_params,
-				 const CgroupState &_cgroup_state)
-		:params(std::move(_params)),
-		 cgroup_state(_cgroup_state),
-		 path(_params.Finish())
-	{
-		if (!UniqueFileDescriptor::CreatePipe(error_pipe_r,
-						      error_pipe_w))
-			throw MakeErrno("pipe() failed");
-	}
-};
-
 /**
  * Read an error message from the pipe and if there is one, throw it
  * as a C++ exception.
@@ -446,7 +405,15 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		   cgroup won't be visible from his namespace */
 		clone_flags &= ~CLONE_NEWCGROUP;
 
-	SpawnChildProcessContext ctx(std::move(params), cgroup_state);
+	const char *path = params.Finish();
+
+	/**
+	 * If an error occurs during setup, the child process will
+	 * write an error message to this pipe.
+	 */
+	UniqueFileDescriptor error_pipe_r, error_pipe_w;
+	if (!UniqueFileDescriptor::CreatePipe(error_pipe_r, error_pipe_w))
+		throw MakeErrno("pipe() failed");
 
 	UniqueFileDescriptor old_pidns;
 
@@ -456,19 +423,36 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			setns(old_pidns.Get(), CLONE_NEWPID);
 	};
 
-	if (ctx.params.ns.pid_namespace != nullptr) {
+	if (params.ns.pid_namespace != nullptr) {
 		/* first open a handle to our existing (old) namespaces
 		   to be able to restore them later (see above) */
 		if (!old_pidns.OpenReadOnly("/proc/self/ns/pid"))
 			throw MakeErrno("Failed to open current PID namespace");
 
 		auto fd = SpawnDaemon::MakePidNamespace(SpawnDaemon::Connect(),
-							ctx.params.ns.pid_namespace);
+							params.ns.pid_namespace);
 		if (setns(fd.Get(), CLONE_NEWPID) < 0)
 			throw MakeErrno("setns(CLONE_NEWPID) failed");
 	}
 
-	if (ctx.params.ns.enable_user && is_sys_admin) {
+	/**
+	 * A pipe used by the parent process to wait for the child to
+	 * create the user namespace.
+	 */
+	UniqueFileDescriptor userns_create_pipe_r, userns_create_pipe_w;
+
+	/**
+	 * The child waits for this pipe before it applies namespaces.
+	 */
+	UniqueFileDescriptor userns_map_pipe_r, userns_map_pipe_w;
+
+	/**
+	 * A pipe used by the child process to wait for the parent to set
+	 * it up (e.g. uid/gid mappings).
+	 */
+	UniqueFileDescriptor wait_pipe_r, wait_pipe_w;
+
+	if (params.ns.enable_user && is_sys_admin) {
 		/* from inside the new user namespace, we cannot
 		   reassociate with a new network namespace or mount
 		   /proc of a reassociated PID namespace, because at
@@ -477,11 +461,12 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		   everything is set up; to synchronize this, create
 		   two pairs of pipes */
 
-		if (!UniqueFileDescriptor::CreatePipe(ctx.userns_create_pipe_r,
-						      ctx.userns_create_pipe_w))
+		if (!UniqueFileDescriptor::CreatePipe(userns_create_pipe_r,
+						      userns_create_pipe_w))
 			throw MakeErrno("pipe() failed");
 
-		if (!UniqueFileDescriptor::CreatePipe(ctx.wait_pipe_r, ctx.wait_pipe_w))
+		if (!UniqueFileDescriptor::CreatePipe(wait_pipe_r,
+						      wait_pipe_w))
 			throw MakeErrno("pipe() failed");
 
 		/* disable CLONE_NEWUSER for the clone() call, because
@@ -491,9 +476,9 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 		/* this process will set up the uid/gid maps, so
 		   disable that part in the child process */
-		ctx.params.ns.enable_user = false;
-	} else if (ctx.params.ns.enable_user &&
-		   !ctx.params.uid_gid.IsEmpty()) {
+		params.ns.enable_user = false;
+	} else if (params.ns.enable_user &&
+		   !params.uid_gid.IsEmpty()) {
 		/* if we have to set a user or group without being
 		   CAP_SYS_ADMIN (only CAP_SETUID/CAP_SETGID,
 		   e.g. inside a container), then the child process
@@ -507,13 +492,13 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		   later, i.e. the new user namespace does not yet
 		   exist the child calls mkdir() */
 
-		if (!UniqueFileDescriptor::CreatePipe(ctx.userns_map_pipe_r,
-						      ctx.userns_map_pipe_w))
+		if (!UniqueFileDescriptor::CreatePipe(userns_map_pipe_r,
+						      userns_map_pipe_w))
 			throw MakeErrno("pipe() failed");
 
 		/* this process will set up the uid/gid maps, so
 		   disable that part in the child process */
-		ctx.params.ns.enable_user = false;
+		params.ns.enable_user = false;
 	}
 
 	int _pidfd;
@@ -528,53 +513,53 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		throw MakeErrno(-pid, "clone() failed");
 
 	if (pid == 0) {
-		ctx.userns_map_pipe_w.Close();
-		ctx.userns_create_pipe_r.Close();
-		ctx.wait_pipe_w.Close();
-		ctx.error_pipe_r.Close();
+		userns_map_pipe_w.Close();
+		userns_create_pipe_r.Close();
+		wait_pipe_w.Close();
+		error_pipe_r.Close();
 
-		Exec(ctx.path, std::move(ctx.params),
-		     std::move(ctx.userns_map_pipe_r),
-		     std::move(ctx.userns_create_pipe_w),
-		     std::move(ctx.wait_pipe_r),
-		     std::move(ctx.error_pipe_w),
-		     ctx.cgroup_state);
+		Exec(path, std::move(params),
+		     std::move(userns_map_pipe_r),
+		     std::move(userns_create_pipe_w),
+		     std::move(wait_pipe_r),
+		     std::move(error_pipe_w),
+		     cgroup_state);
 	}
 
-	ctx.error_pipe_w.Close();
+	error_pipe_w.Close();
 
 	UniqueFileDescriptor pidfd{_pidfd};
 
-	if (ctx.userns_map_pipe_w.IsDefined()) {
+	if (userns_map_pipe_w.IsDefined()) {
 		/* set up the child's uid/gid mapping and wake it
 		   up */
-		ctx.params.ns.SetupUidGidMap(ctx.params.uid_gid, pid);
+		params.ns.SetupUidGidMap(params.uid_gid, pid);
 
 		/* now the right process is ready to set up its mount
 		   namespace */
-		WakeUpPipe(std::move(ctx.userns_map_pipe_w));
+		WakeUpPipe(std::move(userns_map_pipe_w));
 	}
 
-	if (ctx.userns_create_pipe_r.IsDefined()) {
+	if (userns_create_pipe_r.IsDefined()) {
 		/* wait for the child to create the user namespace */
 
-		ctx.userns_create_pipe_w.Close();
+		userns_create_pipe_w.Close();
 
 		/* expect one byte to indicate success, and then the
 		   pipe will be closed by the child */
-		if (!WaitForPipe(ctx.userns_create_pipe_r))
+		if (!WaitForPipe(userns_create_pipe_r))
 			throw std::runtime_error("User namespace setup failed");
 	}
 
-	if (ctx.wait_pipe_w.IsDefined()) {
+	if (wait_pipe_w.IsDefined()) {
 		/* set up the child's uid/gid mapping and wake it up */
-		ctx.wait_pipe_r.Close();
-		ctx.params.ns.SetupUidGidMap(ctx.params.uid_gid, pid);
+		wait_pipe_r.Close();
+		params.ns.SetupUidGidMap(params.uid_gid, pid);
 
 		/* apply the resource limits in the parent process, because
 		   the child has lost all root namespace capabilities by
 		   entering a new user namespace */
-		ctx.params.rlimits.Apply(pid);
+		params.rlimits.Apply(pid);
 
 		/* if this is a jailed process, we assume it's
 		   unprivileged and should not share a HT core with a
@@ -582,15 +567,15 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		   attacks, so create a new core scheduling cookie */
 		/* failure to do so will be ignored silently, because
 		   the Linux kernel may not have that feature yet */
-		if (ctx.params.ns.mount.pivot_root != nullptr)
+		if (params.ns.mount.pivot_root != nullptr)
 			CoreScheduling::Create(pid);
 
 		/* after success (no exception was thrown), wake up
 		   the child */
-		WakeUpPipe(std::move(ctx.wait_pipe_w));
+		WakeUpPipe(std::move(wait_pipe_w));
 	}
 
-	ReadErrorPipe(ctx.error_pipe_r);
+	ReadErrorPipe(error_pipe_r);
 
 	/* TODO don't return the "classic" pid_t as soon as all
 	   callers have been fully migrated to pidfd */
