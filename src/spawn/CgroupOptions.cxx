@@ -150,11 +150,12 @@ CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 		const char *dot = strchr(filename, '.');
 		assert(dot != nullptr);
 
-		const std::string controller(filename, dot);
-		auto i = state.controllers.find(controller);
+		const std::string_view controller{filename, dot};
+		const auto i = state.controllers.find(controller);
 		if (i == state.controllers.end())
-			throw FormatRuntimeError("cgroup controller '%s' is unavailable",
-						 controller.c_str());
+			throw FormatRuntimeError("cgroup controller '%.*s' is unavailable",
+						 int(controller.size()),
+						 controller.data());
 
 		const std::string &mount_point = i->second;
 

@@ -83,7 +83,7 @@ struct CgroupState {
 	 * A mapping from controller name to mount point name.  More than
 	 * one controller may be mounted at one mount point.
 	 */
-	std::map<std::string, std::string> controllers;
+	std::map<std::string, std::string, std::less<>> controllers;
 
 	/**
 	 * Is the "memory" cgroup controller using the cgroup2 interface?
