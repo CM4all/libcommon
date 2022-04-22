@@ -80,6 +80,18 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 		throw FormatErrno("write('%s') failed", path);
 }
 
+static void
+WriteCgroupFile(const CgroupState &state, FileDescriptor group_fd,
+		const char *filename, std::string_view value)
+{
+	/* emulate cgroup1 for old translation servers */
+	if (state.memory_v2 &&
+	    StringIsEqual(filename, "memory.limit_in_bytes"))
+		filename = "memory.max";
+
+	WriteFile(group_fd, filename, value);
+}
+
 /**
  * Create a new cgroup and return an O_PATH file descriptor to it.
  */
@@ -169,13 +181,7 @@ CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 		const auto j = fds.find(mount_point);
 		assert(j != fds.end());
 
-		/* emulate cgroup1 for old translation servers */
-		if (state.memory_v2 &&
-		    StringIsEqual(filename, "memory.limit_in_bytes"))
-			filename = "memory.max";
-
-		const FileDescriptor fd = j->second;
-		WriteFile(fd, filename, s.value);
+		WriteCgroupFile(state, j->second, filename, s.value);
 	}
 }
 
