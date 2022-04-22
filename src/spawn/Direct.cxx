@@ -65,6 +65,10 @@
 #include <signal.h>
 #include <sched.h>
 
+#ifndef CLONE_CLEAR_SIGHAND
+#define CLONE_CLEAR_SIGHAND 0x100000000ULL
+#endif
+
 #ifndef PR_SET_NO_NEW_PRIVS
 #define PR_SET_NO_NEW_PRIVS 38
 #endif
