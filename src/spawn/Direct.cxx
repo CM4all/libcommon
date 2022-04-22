@@ -394,7 +394,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool is_sys_admin)
 {
-	int clone_flags = CLONE_PIDFD;
+	uint_least64_t clone_flags = CLONE_PIDFD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
 	if (params.cgroup != nullptr && params.cgroup->IsDefined())

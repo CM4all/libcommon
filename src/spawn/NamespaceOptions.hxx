@@ -35,6 +35,8 @@
 #include "MountNamespaceOptions.hxx"
 #include "translation/Features.hxx"
 
+#include <cstdint>
+
 class AllocatorPtr;
 struct UidGid;
 class MatchData;
@@ -122,7 +124,7 @@ struct NamespaceOptions {
 	}
 
 	[[gnu::pure]]
-	int GetCloneFlags(int flags) const;
+	uint_least64_t GetCloneFlags(uint_least64_t flags) const noexcept;
 
 	void SetupUidGidMap(const UidGid &uid_gid,
 			    int pid) const;

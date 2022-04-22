@@ -79,8 +79,8 @@ NamespaceOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 
 #endif
 
-int
-NamespaceOptions::GetCloneFlags(int flags) const
+uint_least64_t
+NamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 {
 	if (enable_user)
 		flags |= CLONE_NEWUSER;
