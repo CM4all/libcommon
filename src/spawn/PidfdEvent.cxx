@@ -33,6 +33,7 @@
 #include "PidfdEvent.hxx"
 #include "ExitListener.hxx"
 #include "event/Loop.hxx"
+#include "time/Convert.hxx"
 #include "system/PidFD.h"
 #include "io/UniqueFileDescriptor.hxx"
 
@@ -68,12 +69,6 @@ PidfdEvent::PidfdEvent(EventLoop &event_loop,
 PidfdEvent::~PidfdEvent() noexcept
 {
 	event.Close();
-}
-
-static constexpr double
-timeval_to_double(const struct timeval &tv) noexcept
-{
-	return tv.tv_sec + tv.tv_usec / 1000000.;
 }
 
 inline void
@@ -127,11 +122,15 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 
 	const auto duration = GetEventLoop().SteadyNow() - start_time;
 	const auto duration_f = std::chrono::duration_cast<std::chrono::duration<double>>(duration);
+	const auto utime = ToSteadyClockDuration(rusage.ru_utime);
+	const auto utime_f = std::chrono::duration_cast<std::chrono::duration<double>>(utime);
+	const auto stime = ToSteadyClockDuration(rusage.ru_stime);
+	const auto stime_f = std::chrono::duration_cast<std::chrono::duration<double>>(stime);
 
 	logger.Format(6, "stats: %1.3fs elapsed, %1.3fs user, %1.3fs sys, %ld/%ld faults, %ld/%ld switches",
 		      duration_f.count(),
-		      timeval_to_double(rusage.ru_utime),
-		      timeval_to_double(rusage.ru_stime),
+		      utime_f.count(),
+		      stime_f.count(),
 		      rusage.ru_minflt, rusage.ru_majflt,
 		      rusage.ru_nvcsw, rusage.ru_nivcsw);
 
