@@ -80,32 +80,6 @@ DecodeDerKey(std::span<const std::byte> der)
 	return key;
 }
 
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-
-static bool
-MatchModulus(RSA &key1, RSA &key2) noexcept
-{
-	const BIGNUM *n1, *n2;
-
-	RSA_get0_key(&key1, &n1, nullptr, nullptr);
-	RSA_get0_key(&key2, &n2, nullptr, nullptr);
-
-	return BN_cmp(n1, n2) == 0;
-}
-
-static bool
-MatchModulus(DSA &key1, DSA &key2) noexcept
-{
-	const BIGNUM *n1, *n2;
-
-	DSA_get0_key(&key1, &n1, nullptr);
-	DSA_get0_key(&key2, &n2, nullptr);
-
-	return BN_cmp(n1, n2) == 0;
-}
-
-#endif
-
 /**
  * Are both public keys equal?
  */
@@ -115,21 +89,7 @@ MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2) noexcept
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	return EVP_PKEY_eq(&key1, &key2) == 1;
 #else
-	if (EVP_PKEY_base_id(&key1) != EVP_PKEY_base_id(&key2))
-		return false;
-
-	switch (EVP_PKEY_base_id(&key1)) {
-	case EVP_PKEY_RSA:
-		return MatchModulus(*EVP_PKEY_get0_RSA(&key1),
-				    *EVP_PKEY_get0_RSA(&key2));
-
-	case EVP_PKEY_DSA:
-		return MatchModulus(*EVP_PKEY_get0_DSA(&key1),
-				    *EVP_PKEY_get0_DSA(&key2));
-
-	default:
-		return false;
-	}
+	return EVP_PKEY_cmp(&key1, &key2) == 1;
 #endif
 }
 
