@@ -9,6 +9,7 @@ test(
     'TestEvpDigest.cxx',
     'TestSHA1.cxx',
     'TestSHA3.cxx',
+    'TestDummyCert.cxx',
     include_directories: inc,
     dependencies: [gtest, ssl_dep],
   ),
