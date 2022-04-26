@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,6 +39,7 @@
 #include "util/WritableBuffer.hxx"
 
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -1503,7 +1504,7 @@ public:
 		return Packet(TranslationCommand::ANCHOR_ABSOLUTE);
 	}
 
-	auto &ExpiresRelative(uint32_t seconds) noexcept {
+	auto &ExpiresRelative(const std::chrono::duration<uint32_t> &seconds) noexcept {
 		return PacketT(TranslationCommand::EXPIRES_RELATIVE, seconds);
 	}
 
