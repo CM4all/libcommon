@@ -3836,6 +3836,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			cgi_address->parallelism = *(const uint16_t *)payload.data;
 		else
 			throw std::runtime_error("misplaced CONCURRENCY packet");
+		return;
 #else
 		break;
 #endif
