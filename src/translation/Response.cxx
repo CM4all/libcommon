@@ -59,6 +59,7 @@ TranslateResponse::Clear()
 	protocol_version = 0;
 	max_age = std::chrono::seconds(-1);
 	expires_relative = std::chrono::seconds::zero();
+	expires_relative_with_query = std::chrono::seconds::zero();
 #if TRANSLATION_ENABLE_HTTP
 	status = (http_status_t)0;
 #else
@@ -287,6 +288,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	   by the tcache itself */
 
 	expires_relative = src.expires_relative;
+	expires_relative_with_query = src.expires_relative_with_query;
 
 #if TRANSLATION_ENABLE_HTTP
 	status = src.status;

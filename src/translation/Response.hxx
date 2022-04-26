@@ -79,6 +79,11 @@ struct TranslateResponse {
 	 */
 	std::chrono::duration<uint32_t> expires_relative;
 
+	/**
+	 * From #TranslationCommand::EXPIRES_RELATIVE_WITH_QUERY
+	 */
+	std::chrono::duration<uint32_t> expires_relative_with_query;
+
 #if TRANSLATION_ENABLE_HTTP
 	http_status_t status;
 #else
@@ -479,6 +484,13 @@ struct TranslateResponse {
 			untrusted_raw_site_suffix != nullptr;
 	}
 #endif
+
+	auto GetExpiresRelative(bool has_query) const noexcept {
+		return has_query && expires_relative_with_query.count() > 0
+			? expires_relative_with_query
+			: expires_relative;
+	}
+
 
 	void CopyFrom(AllocatorPtr alloc, const TranslateResponse &src);
 

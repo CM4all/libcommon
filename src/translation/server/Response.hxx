@@ -1508,6 +1508,10 @@ public:
 		return PacketT(TranslationCommand::EXPIRES_RELATIVE, seconds);
 	}
 
+	auto &ExpiresRelativeWithQuery(const std::chrono::duration<uint32_t> &seconds) noexcept {
+		return PacketT(TranslationCommand::EXPIRES_RELATIVE_WITH_QUERY, seconds);
+	}
+
 	template<typename... Types>
 	auto &Chain(Types... value) noexcept {
 		return StringPacket(TranslationCommand::CHAIN, value...);

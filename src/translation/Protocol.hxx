@@ -1139,6 +1139,12 @@ enum class TranslationCommand : uint16_t {
 	 * the connection level.
 	 */
 	PARALLELISM = 237,
+
+	/**
+	 * Like #EXPIRES_RELATIVE, but this value is only used if
+	 * there is a non-empty query string.
+	 */
+	EXPIRES_RELATIVE_WITH_QUERY = 238,
 };
 
 struct TranslationHeader {

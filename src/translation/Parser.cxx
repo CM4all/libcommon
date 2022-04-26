@@ -846,6 +846,19 @@ translate_client_expires_relative(TranslateResponse &response,
 }
 
 static void
+translate_client_expires_relative_with_query(TranslateResponse &response,
+					     ConstBuffer<void> payload)
+{
+	if (response.expires_relative_with_query > std::chrono::seconds::zero())
+		throw std::runtime_error("duplicate EXPIRES_RELATIVE_WITH_QUERY");
+
+	if (payload.size != sizeof(uint32_t))
+		throw std::runtime_error("malformed EXPIRES_RELATIVE_WITH_QUERY");
+
+	response.expires_relative_with_query = std::chrono::seconds(*(const uint32_t *)payload.data);
+}
+
+static void
 translate_client_stderr_path(ChildOptions *child_options,
 			     ConstBuffer<void> payload,
 			     bool jailed)
@@ -2606,7 +2619,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		translate_client_expires_relative(response, payload);
 		return;
 
-
 	case TranslationCommand::TEST_PATH:
 		if (!IsValidAbsolutePath(string_payload))
 			throw std::runtime_error("malformed TEST_PATH packet");
@@ -3840,6 +3852,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::EXPIRES_RELATIVE_WITH_QUERY:
+		translate_client_expires_relative_with_query(response, payload);
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
