@@ -32,20 +32,11 @@
 
 #include "Key.hxx"
 #include "Error.hxx"
-#include "UniqueBN.hxx"
-#include "UniqueRSA.hxx"
 
-#include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 #include <openssl/err.h>
-
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-#include <openssl/dsa.h>
-#endif
-
-#include <assert.h>
 
 UniqueEVP_PKEY
 GenerateRsaKey()
