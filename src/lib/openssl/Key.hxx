@@ -46,6 +46,14 @@ UniqueEVP_PKEY
 GenerateRsaKey();
 
 /**
+ * Generate a new elliptic curve key.
+ *
+ * Throws #SslError on error.
+ */
+UniqueEVP_PKEY
+GenerateEcKey();
+
+/**
  * Decode a private key encoded with DER.  It is a wrapper for
  * d2i_AutoPrivateKey().
  *

@@ -59,6 +59,27 @@ GenerateRsaKey()
 }
 
 UniqueEVP_PKEY
+GenerateEcKey()
+{
+	const UniqueEVP_PKEY_CTX ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_EC, nullptr));
+	if (!ctx)
+		throw SslError("EVP_PKEY_CTX_new_id() failed");
+
+	if (EVP_PKEY_keygen_init(ctx.get()) <= 0)
+		throw SslError("EVP_PKEY_keygen_init() failed");
+
+	if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx.get(),
+						   NID_X9_62_prime256v1) <= 0)
+		throw SslError("EVP_PKEY_CTX_set_ec_paramgen_curve_nid() failed");
+
+	EVP_PKEY *pkey = nullptr;
+	if (EVP_PKEY_keygen(ctx.get(), &pkey) <= 0)
+		throw SslError("EVP_PKEY_keygen() failed");
+
+	return UniqueEVP_PKEY{pkey};
+}
+
+UniqueEVP_PKEY
 DecodeDerKey(std::span<const std::byte> der)
 {
 	ERR_clear_error();
