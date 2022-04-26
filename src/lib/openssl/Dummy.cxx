@@ -66,7 +66,7 @@ MakeSelfSignedDummyCert(EVP_PKEY &key, const char *common_name)
 {
 	auto cert = MakeSelfIssuedDummyCert(common_name);
 	X509_set_pubkey(cert.get(), &key);
-	if (!X509_sign(cert.get(), &key, EVP_sha1()))
+	if (!X509_sign(cert.get(), &key, EVP_sha256()))
 		throw SslError("X509_sign() failed");
 
 	return cert;
