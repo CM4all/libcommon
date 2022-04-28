@@ -297,6 +297,14 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		}
 
 		return false;
+
+	case WAS_COMMAND_REMOTE_HOST:
+		if (request.state != Request::State::HEADERS)
+			AbortProtocolError("misplaced REMOTE_HOST packet");
+
+		request.request->remote_host.assign((const char *)payload.data,
+						    payload.size);
+		break;
 	}
 
 	return true;

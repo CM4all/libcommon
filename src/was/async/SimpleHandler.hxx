@@ -44,6 +44,7 @@ class CancellablePointer;
 namespace Was {
 
 struct SimpleRequest {
+	std::string remote_host;
 	std::map<std::string, std::string, std::less<>> parameters;
 	http_method_t method;
 	std::string uri;
