@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 
 constexpr char hex_digits[] = "0123456789abcdef";
