@@ -145,6 +145,7 @@ WaitForPipe(FileDescriptor r) noexcept
 [[noreturn]]
 static void
 Exec(const char *path, PreparedChildProcess &&p,
+     const char *name,
      UniqueFileDescriptor &&userns_map_pipe_r,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
@@ -256,10 +257,6 @@ try {
 
 	if (p.ns.enable_pid && p.ns.pid_namespace == nullptr) {
 		setsid();
-
-		const char *name = nullptr;
-		if (p.cgroup != nullptr)
-			name = p.cgroup->name;
 
 		const auto pid = SpawnInitFork(name);
 		assert(pid >= 0);
@@ -484,6 +481,14 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	ca.pidfd = (intptr_t)&_pidfd;
 	ca.exit_signal = SIGCHLD;
 
+	/* if a cgroup name is specified, it is used as the name for
+	   the "init" process; we need to extract it now, because the
+	   CLONE_INTO_CGROUP code below will clear the CgroupOptions
+	   pointer */
+	const char *const name = params.cgroup != nullptr
+		? params.cgroup->name
+		: nullptr;
+
 #ifdef CLONE_INTO_CGROUP
 	UniqueFileDescriptor cgroup_fd;
 	if (params.cgroup != nullptr) {
@@ -515,6 +520,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		error_pipe_r.Close();
 
 		Exec(path, std::move(params),
+		     name,
 		     std::move(userns_map_pipe_r),
 		     std::move(userns_create_pipe_w),
 		     std::move(wait_pipe_r),
