@@ -90,8 +90,7 @@ public:
 	Response() noexcept
 	{
 		static constexpr uint8_t protocol_version = 3;
-		Packet(TranslationCommand::BEGIN,
-		       {&protocol_version, sizeof(protocol_version)});
+		PacketT(TranslationCommand::BEGIN, protocol_version);
 	}
 
 	Response(Response &&other) noexcept
@@ -219,7 +218,7 @@ public:
 	 * Append a packet by copying the raw bytes of an object.
 	 */
 	template<typename T>
-	auto &PacketT(TranslationCommand cmd, const T &payload) noexcept {
+	Response &PacketT(TranslationCommand cmd, const T &payload) noexcept {
 		return Packet(cmd, ConstBuffer<void>(&payload, sizeof(payload)));
 	}
 
