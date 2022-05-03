@@ -51,7 +51,7 @@
 namespace Translation::Server {
 
 class Response {
-	uint8_t *buffer = nullptr;
+	std::byte *buffer = nullptr;
 	std::size_t capacity = 0, size = 0;
 
 	enum VaryIndex {
@@ -1528,7 +1528,7 @@ public:
 		return PacketT(TranslationCommand::MAX_AGE, seconds);
 	}
 
-	WritableBuffer<uint8_t> Finish() noexcept;
+	WritableBuffer<std::byte> Finish() noexcept;
 
 private:
 	void Grow(std::size_t new_capacity) noexcept;

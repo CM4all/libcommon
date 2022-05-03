@@ -62,7 +62,7 @@ class Connection : AutoUnlinkIntrusiveListHook
 		RESPONSE,
 	} state;
 
-	DynamicFifoBuffer<uint8_t> input;
+	DynamicFifoBuffer<std::byte> input;
 
 	AllocatedRequest request;
 
@@ -72,9 +72,9 @@ class Connection : AutoUnlinkIntrusiveListHook
 	 */
 	CancellablePointer cancel_ptr{nullptr};
 
-	uint8_t *response;
+	std::byte *response;
 
-	WritableBuffer<uint8_t> output;
+	WritableBuffer<std::byte> output;
 
 public:
 	Connection(EventLoop &event_loop,

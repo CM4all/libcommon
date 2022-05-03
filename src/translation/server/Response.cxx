@@ -45,7 +45,7 @@ Response::Grow(std::size_t new_capacity) noexcept
 	assert(size <= capacity);
 	assert(new_capacity > capacity);
 
-	uint8_t *new_buffer = new uint8_t[new_capacity];
+	std::byte *new_buffer = new std::byte[new_capacity];
 	std::copy_n(buffer, size, new_buffer);
 	delete[] buffer;
 	buffer = new_buffer;
@@ -84,7 +84,7 @@ Response::Packet(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
 	return *this;
 }
 
-WritableBuffer<uint8_t>
+WritableBuffer<std::byte>
 Response::Finish() noexcept
 {
 	/* generate a VARY packet? */
@@ -101,7 +101,7 @@ Response::Finish() noexcept
 
 	Packet(TranslationCommand::END);
 
-	WritableBuffer<uint8_t> result(buffer, size);
+	WritableBuffer<std::byte> result(buffer, size);
 	buffer = nullptr;
 	capacity = size = 0;
 	return result;
