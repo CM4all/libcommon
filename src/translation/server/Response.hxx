@@ -954,7 +954,7 @@ public:
 			return MountNamespaceContext(response);
 		}
 
-		auto UidGid(uint32_t uid, uint32_t gid,
+		auto UidGid(const uint32_t &uid, const uint32_t &gid,
 			    ConstBuffer<uint32_t> supplementary_groups=nullptr) noexcept {
 			response.MultiPacket(TranslationCommand::UID_GID,
 					     ConstBuffer<void>(&uid, sizeof(uid)),
