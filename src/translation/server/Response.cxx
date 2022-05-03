@@ -77,14 +77,14 @@ Response::WriteHeader(TranslationCommand cmd, std::size_t payload_size) noexcept
 }
 
 Response &
-Response::Packet(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
+Response::Packet(TranslationCommand cmd, std::span<const std::byte> payload) noexcept
 {
-	void *p = WriteHeader(cmd, payload.size);
-	memcpy(p, payload.data, payload.size);
+	void *p = WriteHeader(cmd, payload.size());
+	memcpy(p, payload.data(), payload.size());
 	return *this;
 }
 
-WritableBuffer<std::byte>
+std::span<std::byte>
 Response::Finish() noexcept
 {
 	/* generate a VARY packet? */
@@ -101,7 +101,7 @@ Response::Finish() noexcept
 
 	Packet(TranslationCommand::END);
 
-	WritableBuffer<std::byte> result(buffer, size);
+	std::span<std::byte> result{buffer, size};
 	buffer = nullptr;
 	capacity = size = 0;
 	return result;

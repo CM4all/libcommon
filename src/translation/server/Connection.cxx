@@ -167,7 +167,7 @@ Connection::TryWrite() noexcept
 	assert(state == State::RESPONSE);
 
 	ssize_t nbytes = send(event.GetSocket().Get(),
-			      output.data, output.size,
+			      output.data(), output.size(),
 			      MSG_DONTWAIT|MSG_NOSIGNAL);
 	if (nbytes < 0) {
 		if (gcc_likely(errno == EAGAIN)) {
@@ -180,8 +180,7 @@ Connection::TryWrite() noexcept
 		return false;
 	}
 
-	output.data += nbytes;
-	output.size -= nbytes;
+	output = output.subspan(nbytes);
 
 	if (output.empty()) {
 		delete[] response;
@@ -199,7 +198,7 @@ Connection::SendResponse(Response &&_response) noexcept
 
 	state = State::RESPONSE;
 	output = _response.Finish();
-	response = output.data;
+	response = output.data();
 	cancel_ptr = nullptr;
 
 	return TryWrite();

@@ -35,7 +35,6 @@
 #include "../Protocol.hxx"
 #include "http/Status.h"
 #include "net/SocketAddress.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/WritableBuffer.hxx"
 
 #include <array>
@@ -43,6 +42,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -203,15 +203,30 @@ public:
 	}
 
 	Response &Packet(TranslationCommand cmd,
-			 ConstBuffer<void> payload) noexcept;
+			 std::span<const std::byte> payload) noexcept;
 
-	Response &Packet(TranslationCommand cmd, std::nullptr_t n) noexcept {
-		return Packet(cmd, ConstBuffer<void>{n});
+	template<typename T>
+	Response &Packet(TranslationCommand cmd,
+			 std::span<const T> payload) noexcept {
+		return Packet(cmd, std::as_bytes(payload));
+	}
+
+	Response &Packet(TranslationCommand cmd, std::nullptr_t) noexcept {
+		return Packet(cmd, std::span<const std::byte>{});
 	}
 
 	auto &Packet(TranslationCommand cmd,
 		     std::string_view payload) noexcept {
-		return Packet(cmd, ConstBuffer<void>{payload.data(), payload.size()});
+		return Packet(cmd, std::span{payload});
+	}
+
+	Response &Packet(TranslationCommand cmd,
+			 SocketAddress address) noexcept {
+		return Packet(cmd,
+			      std::span<const std::byte>{
+				      (const std::byte *)address.GetAddress(),
+				      address.GetSize(),
+			      });
 	}
 
 	/**
@@ -219,7 +234,7 @@ public:
 	 */
 	template<typename T>
 	Response &PacketT(TranslationCommand cmd, const T &payload) noexcept {
-		return Packet(cmd, ConstBuffer<void>(&payload, sizeof(payload)));
+		return Packet(cmd, std::span{&payload, 1});
 	}
 
 	/**
@@ -505,9 +520,7 @@ public:
 	}
 
 	auto &Want(std::initializer_list<TranslationCommand> cmds) noexcept {
-		ConstBuffer<TranslationCommand> payload(&*cmds.begin(),
-							cmds.size());
-		return Packet(TranslationCommand::WANT, payload.ToVoid());
+		return Packet(TranslationCommand::WANT, std::span{cmds});
 	}
 
 	auto &Want(const TranslationCommand &cmd) noexcept {
@@ -582,7 +595,7 @@ public:
 
 	template<typename P>
 	auto &ProbePathSuffixes(P payload,
-				ConstBuffer<std::string_view> suffixes) noexcept {
+				std::span<const std::string_view> suffixes) noexcept {
 		Packet(TranslationCommand::PROBE_PATH_SUFFIXES, payload);
 		for (auto i : suffixes)
 			StringPacket(TranslationCommand::PROBE_SUFFIX, i);
@@ -955,11 +968,11 @@ public:
 		}
 
 		auto UidGid(const uint32_t &uid, const uint32_t &gid,
-			    ConstBuffer<uint32_t> supplementary_groups=nullptr) noexcept {
+			    std::span<const uint32_t> supplementary_groups={}) noexcept {
 			response.MultiPacket(TranslationCommand::UID_GID,
-					     ConstBuffer<void>(&uid, sizeof(uid)),
-					     ConstBuffer<void>(&gid, sizeof(gid)),
-					     supplementary_groups.ToVoid());
+					     std::span{&uid, 1},
+					     std::span{&gid, 1},
+					     supplementary_groups);
 			return *this;
 		}
 
@@ -1084,8 +1097,7 @@ public:
 		using CgiAlikeChildContext::CgiAlikeChildContext;
 
 		auto Address(SocketAddress address) noexcept {
-			response.Packet(TranslationCommand::ADDRESS,
-					ConstBuffer<void>{address.GetAddress(), address.GetSize()});
+			response.Packet(TranslationCommand::ADDRESS, address);
 			return *this;
 		}
 
@@ -1388,8 +1400,7 @@ public:
 		}
 
 		auto Address(SocketAddress address) noexcept {
-			response.Packet(TranslationCommand::ADDRESS,
-					ConstBuffer<void>{address.GetAddress(), address.GetSize()});
+			response.Packet(TranslationCommand::ADDRESS, address);
 			return *this;
 		}
 
@@ -1528,7 +1539,7 @@ public:
 		return PacketT(TranslationCommand::MAX_AGE, seconds);
 	}
 
-	WritableBuffer<std::byte> Finish() noexcept;
+	std::span<std::byte> Finish() noexcept;
 
 private:
 	void Grow(std::size_t new_capacity) noexcept;
@@ -1537,12 +1548,17 @@ private:
 	void *WriteHeader(TranslationCommand cmd,
 			  std::size_t payload_size) noexcept;
 
-	static constexpr std::size_t GetParamLength(ConstBuffer<void> b) noexcept {
-		return b.size;
+	static constexpr std::size_t GetParamLength(std::span<const std::byte> src) noexcept {
+		return src.size();
 	}
 
-	static constexpr std::size_t GetParamLength(std::string_view sv) noexcept {
-		return sv.size();
+	template<typename T>
+	static constexpr std::size_t GetParamLength(std::span<const T> src) noexcept {
+		return GetParamLength(std::as_bytes(src));
+	}
+
+	static constexpr std::size_t GetParamLength(std::string_view src) noexcept {
+		return GetParamLength(std::span{src});
 	}
 
 	template<typename T>
@@ -1553,12 +1569,17 @@ private:
 				       });
 	}
 
-	static void *WriteParam(void *dest, ConstBuffer<void> src) noexcept {
-		return mempcpy(dest, src.data, src.size);
+	static void *WriteParam(void *dest, std::span<const std::byte> src) noexcept {
+		return mempcpy(dest, src.data(), src.size());
+	}
+
+	template<typename T>
+	static void *WriteParam(void *dest, std::span<const T> src) noexcept {
+		return WriteParam(dest, std::as_bytes(src));
 	}
 
 	static void *WriteParam(void *dest, std::string_view src) noexcept {
-		return mempcpy(dest, src.data(), src.size());
+		return WriteParam(dest, std::span{src});
 	}
 
 	template<typename T>

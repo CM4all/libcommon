@@ -39,6 +39,8 @@
 #include "util/IntrusiveList.hxx"
 #include "AllocatedRequest.hxx"
 
+#include <span>
+
 enum class TranslationCommand : uint16_t;
 template<typename T> struct ConstBuffer;
 
@@ -74,7 +76,7 @@ class Connection : AutoUnlinkIntrusiveListHook
 
 	std::byte *response;
 
-	WritableBuffer<std::byte> output;
+	std::span<std::byte> output;
 
 public:
 	Connection(EventLoop &event_loop,
