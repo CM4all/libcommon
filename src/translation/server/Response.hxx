@@ -1193,7 +1193,7 @@ public:
 
 	template<typename... Types>
 	FastCgiChildContext FastCGI(Types... path) noexcept {
-		Packet(TranslationCommand::FASTCGI, path...);
+		StringPacket(TranslationCommand::FASTCGI, path...);
 		return FastCgiChildContext(*this);
 	}
 
