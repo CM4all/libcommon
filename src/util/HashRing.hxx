@@ -33,6 +33,7 @@
 #ifndef HASH_RING_HXX
 #define HASH_RING_HXX
 
+#include <algorithm> // for std::fill()
 #include <array>
 
 #include <stddef.h>
