@@ -232,22 +232,22 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			s.Write(SpawnExecCommand::BIND_MOUNT);
 			s.WriteString(i.source);
 			s.WriteString(i.target);
-			s.WriteByte(i.writable);
-			s.WriteByte(i.exec);
-			s.WriteByte(i.optional);
+			s.WriteBool(i.writable);
+			s.WriteBool(i.exec);
+			s.WriteBool(i.optional);
 			break;
 
 		case Mount::Type::BIND_FILE:
 			s.Write(SpawnExecCommand::BIND_MOUNT_FILE);
 			s.WriteString(i.source);
 			s.WriteString(i.target);
-			s.WriteByte(i.optional);
+			s.WriteBool(i.optional);
 			break;
 
 		case Mount::Type::TMPFS:
 			s.WriteString(SpawnExecCommand::MOUNT_TMPFS,
 				      i.target);
-			s.WriteByte(i.writable);
+			s.WriteBool(i.writable);
 			break;
 		}
 	}
@@ -262,7 +262,7 @@ Serialize(SpawnSerializer &s, unsigned i, const ResourceLimit &rlimit)
 		return;
 
 	s.Write(SpawnExecCommand::RLIMIT);
-	s.WriteByte(i);
+	s.WriteU8(i);
 
 	const struct rlimit &data = rlimit;
 	s.WriteT(data);
@@ -286,7 +286,7 @@ Serialize(SpawnSerializer &s, const UidGid &uid_gid)
 	s.WriteT(uid_gid.gid);
 
 	const size_t n_groups = uid_gid.CountGroups();
-	s.WriteByte(n_groups);
+	s.WriteU8(n_groups);
 	for (size_t i = 0; i < n_groups; ++i)
 		s.WriteT(uid_gid.groups[i]);
 }

@@ -43,6 +43,8 @@
 #include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"
 
+#include <cstddef>
+
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
@@ -54,28 +56,36 @@ class SpawnSerializer {
 
 	size_t size = 0;
 
-	uint8_t buffer[capacity];
+	std::byte buffer[capacity];
 
 	StaticArray<FileDescriptor, 8> fds;
 
 public:
 	explicit SpawnSerializer(SpawnRequestCommand cmd) {
-		buffer[size++] = (uint8_t)cmd;
+		buffer[size++] = static_cast<std::byte>(cmd);
 	}
 
 	explicit SpawnSerializer(SpawnResponseCommand cmd) {
-		buffer[size++] = (uint8_t)cmd;
+		buffer[size++] = static_cast<std::byte>(cmd);
 	}
 
-	void WriteByte(uint8_t value) {
+	void WriteByte(std::byte value) {
 		if (size >= capacity)
 			throw SpawnPayloadTooLargeError();
 
 		buffer[size++] = value;
 	}
 
+	void WriteU8(uint8_t value) {
+		WriteByte(static_cast<std::byte>(value));
+	}
+
+	void WriteBool(bool value) {
+		WriteByte(static_cast<std::byte>(value));
+	}
+
 	void Write(SpawnExecCommand cmd) {
-		WriteByte((uint8_t)cmd);
+		WriteByte(static_cast<std::byte>(cmd));
 	}
 
 	void WriteOptional(SpawnExecCommand cmd, bool value) {
