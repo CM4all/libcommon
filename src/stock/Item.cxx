@@ -40,7 +40,8 @@ CreateStockItem::GetStockName() const noexcept
 }
 
 void
-CreateStockItem::InvokeCreateError(std::exception_ptr ep) noexcept
+CreateStockItem::InvokeCreateError(StockGetHandler &handler,
+				   std::exception_ptr ep) noexcept
 {
 	stock.ItemCreateError(handler, ep);
 }
@@ -68,13 +69,14 @@ StockItem::Put(bool destroy) noexcept
 }
 
 void
-StockItem::InvokeCreateSuccess() noexcept
+StockItem::InvokeCreateSuccess(StockGetHandler &handler) noexcept
 {
 	stock.ItemCreateSuccess(handler, *this);
 }
 
 void
-StockItem::InvokeCreateError(std::exception_ptr ep) noexcept
+StockItem::InvokeCreateError(StockGetHandler &handler,
+			     std::exception_ptr ep) noexcept
 {
 	stock.ItemCreateError(*this, handler, ep);
 }

@@ -40,6 +40,8 @@
 namespace Pg {
 
 class Stock::Item final : public StockItem, Cancellable, AsyncConnectionHandler {
+	StockGetHandler &handler;
+
 	AsyncConnection connection;
 
 	bool initialized = false, idle;
@@ -49,9 +51,11 @@ class Stock::Item final : public StockItem, Cancellable, AsyncConnectionHandler 
 	std::exception_ptr error;
 
 public:
-	Item(CreateStockItem c, EventLoop &event_loop,
+	Item(CreateStockItem c, StockGetHandler &_handler,
+	     EventLoop &event_loop,
 	     const char *conninfo, const char *schema) noexcept
 		:StockItem(c),
+		 handler(_handler),
 		 connection(event_loop, conninfo, schema, *this),
 		 defer_initialized(event_loop,
 				   BIND_THIS_METHOD(OnDeferredInitialized))
@@ -74,10 +78,10 @@ private:
 		assert(initialized);
 
 		if (error) {
-			InvokeCreateError(std::move(error));
+			InvokeCreateError(handler, std::move(error));
 		} else {
 			idle = false;
-			InvokeCreateSuccess();
+			InvokeCreateSuccess(handler);
 		}
 	}
 
@@ -146,9 +150,10 @@ private:
 };
 
 void
-Stock::Create(CreateStockItem c, StockRequest, CancellablePointer &cancel_ptr)
+Stock::Create(CreateStockItem c, StockRequest,
+	      StockGetHandler &handler, CancellablePointer &cancel_ptr)
 {
-	auto *item = new Item(c, stock.GetEventLoop(),
+	auto *item = new Item(c, handler, stock.GetEventLoop(),
 			      conninfo.c_str(), schema.c_str());
 	item->Connect(cancel_ptr);
 }

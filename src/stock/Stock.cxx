@@ -375,8 +375,8 @@ Stock::GetCreate(StockRequest request,
 	++num_create;
 
 	try {
-		cls.Create({*this, get_handler},
-			   std::move(request), cancel_ptr);
+		cls.Create({*this}, std::move(request),
+			   get_handler, cancel_ptr);
 	} catch (...) {
 		ItemCreateError(get_handler, std::current_exception());
 	}

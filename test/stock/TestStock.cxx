@@ -82,12 +82,14 @@ class MyStockClass final : public StockClass {
 public:
 	/* virtual methods from class StockClass */
 	void Create(CreateStockItem c, StockRequest request,
+		    StockGetHandler &handler,
 		    CancellablePointer &cancel_ptr) override;
 };
 
 void
 MyStockClass::Create(CreateStockItem c,
 		     StockRequest request,
+		     StockGetHandler &handler,
 		     gcc_unused CancellablePointer &cancel_ptr)
 {
 	auto *item = new MyStockItem(c);
@@ -99,7 +101,7 @@ MyStockClass::Create(CreateStockItem c,
 		throw std::runtime_error("next_fail");
 	} else {
 		++num_create;
-		item->InvokeCreateSuccess();
+		item->InvokeCreateSuccess(handler);
 	}
 }
 

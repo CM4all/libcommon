@@ -83,12 +83,14 @@ class MyStockClass final : public StockClass, public MultiStockClass {
 
 		CreateStockItem c;
 		StockRequest request;
+		StockGetHandler &handler;
 
 		DeferEvent defer_event;
 
 	public:
 		DeferredRequest(Partition &_partition,
 				CreateStockItem _c, StockRequest _request,
+				StockGetHandler &_handler,
 				CancellablePointer &cancel_ptr) noexcept;
 
 	private:
@@ -108,6 +110,7 @@ public:
 	}
 
 	void Create(CreateStockItem c, StockRequest request,
+		    StockGetHandler &handler,
 		    CancellablePointer &cancel_ptr) override;
 
 	/* virtual methods from class MultiStockClass */
@@ -297,8 +300,10 @@ Partition::PutOuterDirty() noexcept
 MyStockClass::DeferredRequest::DeferredRequest(Partition &_partition,
 					       CreateStockItem _c,
 					       StockRequest _request,
+					       StockGetHandler &_handler,
 					       CancellablePointer &cancel_ptr) noexcept
 	:partition(_partition), c(_c), request(std::move(_request)),
+	 handler(_handler),
 	 defer_event(partition.instance.event_loop, BIND_THIS_METHOD(OnDeferred))
 {
 	cancel_ptr = *this;
@@ -311,12 +316,12 @@ MyStockClass::DeferredRequest::OnDeferred() noexcept
 	if (partition.next_error) {
 		++partition.factory_failed;
 
-		c.InvokeCreateError(partition.next_error);
+		c.InvokeCreateError(handler, partition.next_error);
 	} else {
 		++partition.factory_created;
 
 		auto *item = new MyStockItem(c, std::move(request));
-		item->InvokeCreateSuccess();
+		item->InvokeCreateSuccess(handler);
 	}
 
 	delete this;
@@ -332,25 +337,26 @@ MyStockClass::DeferredRequest::Cancel() noexcept
 void
 MyStockClass::Create(CreateStockItem c,
 		     StockRequest request,
+		     StockGetHandler &handler,
 		     gcc_unused CancellablePointer &cancel_ptr)
 {
 	auto &partition = *(Partition *)request.get();
 
 	if (partition.defer_create) {
 		new DeferredRequest(partition, c, std::move(request),
-				    cancel_ptr);
+				    handler, cancel_ptr);
 		return;
 	}
 
 	if (partition.next_error) {
 		++partition.factory_failed;
 
-		c.InvokeCreateError(partition.next_error);
+		c.InvokeCreateError(handler, partition.next_error);
 	} else {
 		++partition.factory_created;
 
 		auto *item = new MyStockItem(c, std::move(request));
-		item->InvokeCreateSuccess();
+		item->InvokeCreateSuccess(handler);
 	}
 }
 

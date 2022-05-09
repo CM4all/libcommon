@@ -109,10 +109,10 @@ MultiStock::OuterItem::Fade() noexcept
 
 inline void
 MultiStock::OuterItem::CreateLease(MultiStockClass &_inner_class,
-				    StockGetHandler &handler) noexcept
+				   StockGetHandler &handler) noexcept
 try {
-	auto *lease = _inner_class.Create({*this, handler}, shared_item);
-	lease->InvokeCreateSuccess();
+	auto *lease = _inner_class.Create({*this}, shared_item);
+	lease->InvokeCreateSuccess(handler);
 } catch (...) {
 	ItemCreateError(handler, std::current_exception());
 }

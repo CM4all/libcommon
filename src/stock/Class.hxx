@@ -36,6 +36,7 @@
 
 #include <cstdint>
 
+class StockGetHandler;
 class CancellablePointer;
 struct CreateStockItem;
 
@@ -46,6 +47,7 @@ public:
 	 */
 	virtual void Create(CreateStockItem c,
 			    StockRequest request,
+			    StockGetHandler &handler,
 			    CancellablePointer &cancel_ptr) = 0;
 
 	/**

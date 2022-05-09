@@ -43,7 +43,6 @@ class StockGetHandler;
 
 struct CreateStockItem {
 	AbstractStock &stock;
-	StockGetHandler &handler;
 
 	/**
 	 * Wrapper for Stock::GetName()
@@ -54,7 +53,8 @@ struct CreateStockItem {
 	/**
 	 * Announce that the creation of this item has failed.
 	 */
-	void InvokeCreateError(std::exception_ptr ep) noexcept;
+	void InvokeCreateError(StockGetHandler &handler,
+			       std::exception_ptr ep) noexcept;
 
 	/**
 	 * Announce that the creation of this item has been aborted by the
@@ -68,8 +68,6 @@ class StockItem
 	  LeakDetector {
 
 	AbstractStock &stock;
-
-	StockGetHandler &handler;
 
 	/**
 	 * If true, then this object will never be reused.
@@ -90,7 +88,7 @@ public:
 #endif
 
 	explicit StockItem(CreateStockItem c) noexcept
-		:stock(c.stock), handler(c.handler) {}
+		:stock(c.stock) {}
 
 	StockItem(const StockItem &) = delete;
 	StockItem &operator=(const StockItem &) = delete;
@@ -140,12 +138,13 @@ public:
 	 * Announce that the creation of this item has finished
 	 * successfully, and it is ready to be used.
 	 */
-	void InvokeCreateSuccess() noexcept;
+	void InvokeCreateSuccess(StockGetHandler &handler) noexcept;
 
 	/**
 	 * Announce that the creation of this item has failed.
 	 */
-	void InvokeCreateError(std::exception_ptr ep) noexcept;
+	void InvokeCreateError(StockGetHandler &handler,
+			       std::exception_ptr ep) noexcept;
 
 	/**
 	 * Announce that the creation of this item has been aborted by the
