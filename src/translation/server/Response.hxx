@@ -1553,7 +1553,12 @@ private:
 	}
 
 	template<typename T>
-	static constexpr std::size_t GetParamLength(std::span<const T> src) noexcept {
+#ifndef __clang__
+	/* disabling constexpr on clang to work around bogus
+	   -Wundefined-inline */
+	constexpr
+#endif
+	static std::size_t GetParamLength(std::span<const T> src) noexcept {
 		return GetParamLength(std::as_bytes(src));
 	}
 
