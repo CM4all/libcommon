@@ -32,9 +32,8 @@
 
 #pragma once
 
-#include "util/ConstBuffer.hxx"
-
 #include <algorithm>
+#include <span>
 
 #include <assert.h>
 #include <stdint.h>
@@ -43,11 +42,11 @@
 class MalformedSpawnPayloadError {};
 
 class SpawnPayload {
-	const uint8_t *begin, *const end;
+	const std::byte *begin, *const end;
 
 public:
-	explicit SpawnPayload(ConstBuffer<uint8_t> _payload)
-		:begin(_payload.begin()), end(_payload.end()) {}
+	explicit SpawnPayload(std::span<const std::byte> _payload)
+		:begin(_payload.data()), end(begin + _payload.size()) {}
 
 	bool IsEmpty() const {
 		return begin == end;
@@ -57,9 +56,13 @@ public:
 		return begin - end;
 	}
 
-	uint8_t ReadByte() {
+	std::byte ReadByte() {
 		assert(!IsEmpty());
 		return *begin++;
+	}
+
+	bool ReadBool() {
+		return (bool)ReadByte();
 	}
 
 	void Read(void *p, size_t size) {
@@ -80,7 +83,7 @@ public:
 	}
 
 	const char *ReadString() {
-		auto n = std::find(begin, end, 0);
+		auto n = std::find(begin, end, std::byte{0});
 		if (n == end)
 			throw MalformedSpawnPayloadError();
 

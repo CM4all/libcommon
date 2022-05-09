@@ -42,8 +42,8 @@
 
 #include <forward_list>
 #include <map>
+#include <span>
 
-template<typename T> struct ConstBuffer;
 struct PreparedChildProcess;
 class SpawnPayload;
 class SpawnSerializer;
@@ -148,11 +148,12 @@ private:
 	 */
 	void CheckOrAbort() noexcept;
 
-	void Send(ConstBuffer<void> payload, ConstBuffer<FileDescriptor> fds);
+	void Send(std::span<const std::byte> payload,
+		  std::span<const FileDescriptor> fds);
 	void Send(const SpawnSerializer &s);
 
 	void HandleExitMessage(SpawnPayload payload);
-	void HandleMessage(ConstBuffer<uint8_t> payload);
+	void HandleMessage(std::span<const std::byte> payload);
 
 	/**
 	 * Throws on error.

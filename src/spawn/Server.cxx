@@ -215,7 +215,7 @@ private:
 
 	void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
 	void HandleKillMessage(SpawnPayload payload, SpawnFdList &&fds);
-	void HandleMessage(ConstBuffer<uint8_t> payload, SpawnFdList &&fds);
+	void HandleMessage(std::span<const std::byte> payload, SpawnFdList &&fds);
 	void HandleMessage(ReceiveMessageResult &&result);
 
 	void ReceiveAndHandle();
@@ -458,7 +458,7 @@ SpawnServerConnection::SpawnChild(int id, const char *name,
 static void
 Read(SpawnPayload &payload, ResourceLimits &rlimits)
 {
-	unsigned i = payload.ReadByte();
+	unsigned i = (unsigned)payload.ReadByte();
 	struct rlimit &data = rlimits.values[i];
 	payload.ReadT(data);
 }
@@ -469,7 +469,7 @@ Read(SpawnPayload &payload, UidGid &uid_gid)
 	payload.ReadT(uid_gid.uid);
 	payload.ReadT(uid_gid.gid);
 
-	const size_t n_groups = payload.ReadByte();
+	const size_t n_groups = (std::size_t)payload.ReadByte();
 	if (n_groups > uid_gid.groups.max_size())
 		throw MalformedSpawnPayloadError();
 
@@ -619,7 +619,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 		case SpawnExecCommand::MOUNT_TMPFS:
 			{
 				const char *target = payload.ReadString();
-				bool writable = payload.ReadByte();
+				bool writable = payload.ReadBool();
 				mounts.emplace_front(Mount::Tmpfs{}, target,
 						     writable);
 			}
@@ -632,11 +632,11 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			{
 				const char *source = payload.ReadString();
 				const char *target = payload.ReadString();
-				bool writable = payload.ReadByte();
-				bool exec = payload.ReadByte();
+				bool writable = payload.ReadBool();
+				bool exec = payload.ReadBool();
 				mounts.emplace_front(source, target,
 						     writable, exec);
-				mounts.front().optional = payload.ReadByte();
+				mounts.front().optional = payload.ReadBool();
 			}
 
 			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
@@ -649,7 +649,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				const char *target = payload.ReadString();
 				mounts.emplace_front(source, target);
 				mounts.front().type = Mount::Type::BIND_FILE;
-				mounts.front().optional = payload.ReadByte();
+				mounts.front().optional = payload.ReadBool();
 			}
 
 			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
@@ -770,10 +770,11 @@ SpawnServerConnection::HandleKillMessage(SpawnPayload payload,
 }
 
 inline void
-SpawnServerConnection::HandleMessage(ConstBuffer<uint8_t> payload,
+SpawnServerConnection::HandleMessage(std::span<const std::byte> payload,
 				     SpawnFdList &&fds)
 {
-	const auto cmd = (SpawnRequestCommand)payload.shift();
+	const auto cmd = (SpawnRequestCommand)payload.front();
+	payload = payload.subspan(1);
 
 	switch (cmd) {
 	case SpawnRequestCommand::CONNECT:
@@ -796,8 +797,7 @@ SpawnServerConnection::HandleMessage(ConstBuffer<uint8_t> payload,
 inline void
 SpawnServerConnection::HandleMessage(ReceiveMessageResult &&result)
 {
-	HandleMessage(ConstBuffer<uint8_t>::FromVoid(result.payload),
-		      std::move(result.fds));
+	HandleMessage(result.payload, std::move(result.fds));
 }
 
 inline void

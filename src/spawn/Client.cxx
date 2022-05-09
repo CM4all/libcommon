@@ -145,8 +145,8 @@ SpawnServerClient::CheckOrAbort() noexcept
 }
 
 inline void
-SpawnServerClient::Send(ConstBuffer<void> payload,
-			ConstBuffer<FileDescriptor> fds)
+SpawnServerClient::Send(std::span<const std::byte> payload,
+			std::span<const FileDescriptor> fds)
 {
 	::Send<MAX_FDS>(event.GetSocket(), payload, fds);
 }
@@ -173,7 +173,8 @@ SpawnServerClient::Connect()
 	const FileDescriptor remote_fd = remote_socket.ToFileDescriptor();
 
 	try {
-		Send(ConstBuffer<void>(&cmd, sizeof(cmd)), {&remote_fd, 1});
+		const std::span payload{&cmd, 1};
+		Send(std::as_bytes(payload), {&remote_fd, 1});
 	} catch (...) {
 		std::throw_with_nested(std::runtime_error("Spawn server failed"));
 	}
@@ -455,9 +456,10 @@ SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 }
 
 inline void
-SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
+SpawnServerClient::HandleMessage(std::span<const std::byte> payload)
 {
-	const auto cmd = (SpawnResponseCommand)payload.shift();
+	const auto cmd = (SpawnResponseCommand)payload.front();
+	payload = payload.subspan(1);
 
 	switch (cmd) {
 	case SpawnResponseCommand::CGROUPS_AVAILABLE:
@@ -467,8 +469,8 @@ SpawnServerClient::HandleMessage(ConstBuffer<uint8_t> payload)
 	case SpawnResponseCommand::MEMORY_WARNING:
 		if (handler != nullptr) {
 			// TODO: fix alignment
-			const auto &p = *(const SpawnMemoryWarningPayload *)(const void *)payload.data;
-			assert(payload.size == sizeof(p));
+			const auto &p = *(const SpawnMemoryWarningPayload *)(const void *)payload.data();
+			assert(payload.size() == sizeof(p));
 			handler->OnMemoryWarning(p.memory_usage, p.memory_max);
 		}
 
@@ -518,7 +520,7 @@ SpawnServerClient::ReceiveAndHandle()
 			throw std::runtime_error("spawner closed the socket");
 
 		try {
-			HandleMessage(ConstBuffer<uint8_t>::FromVoid(i.payload));
+			HandleMessage(i.payload);
 		} catch (...) {
 			PrintException(std::current_exception());
 		}

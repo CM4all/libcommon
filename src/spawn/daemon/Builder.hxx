@@ -48,30 +48,36 @@ public:
 	DatagramBuilder() noexcept {
 		header.magic = SpawnDaemon::MAGIC;
 
-		AppendRaw({&header, sizeof(header)});
+		AppendRaw(std::span{&header, 1});
 	}
 
 	DatagramBuilder(const DatagramBuilder &) = delete;
 	DatagramBuilder &operator=(const DatagramBuilder &) = delete;
 
-	void AppendRaw(ConstBuffer<void> b) noexcept {
-		v.append() = MakeIovec(b);
+	template<typename T>
+	void AppendRaw(std::span<T> s) noexcept {
+		v.append() = MakeIovec(s);
 	}
 
-	void AppendPadded(ConstBuffer<void> b) noexcept {
+	void AppendPadded(std::span<const std::byte> b) noexcept {
 		AppendRaw(b);
 
-		const size_t padding_size = (-b.size) & 3;
-		static constexpr uint8_t padding[] = {0, 0, 0};
-		AppendRaw({padding, padding_size});
+		const size_t padding_size = (-b.size()) & 3;
+		static constexpr std::byte padding[3]{};
+		AppendRaw(std::span{padding, padding_size});
+	}
+
+	template<typename T>
+	void AppendPadded(std::span<const T> s) noexcept {
+		AppendPadded(std::as_bytes(s));
 	}
 
 	void Append(const SpawnDaemon::RequestHeader &rh) noexcept {
-		AppendRaw({&rh, sizeof(rh)});
+		AppendRaw(std::as_bytes(std::span{&rh, 1}));
 	}
 
 	void Append(const SpawnDaemon::ResponseHeader &rh) noexcept {
-		AppendRaw({&rh, sizeof(rh)});
+		AppendRaw(std::span{&rh, 1});
 	}
 
 	MessageHeader Finish() noexcept {

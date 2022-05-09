@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,32 +32,28 @@
 
 #pragma once
 
-#include "util/ConstBuffer.hxx"
-#include "util/WritableBuffer.hxx"
+#include <span>
 
 #include <sys/uio.h>
 
-template<typename T>
 constexpr struct iovec
-MakeIovec(ConstBuffer<T> t) noexcept
+MakeIovec(std::span<const std::byte> s) noexcept
 {
-	auto b = t.ToVoid();
-	return { const_cast<void *>(b.data), b.size };
+	return { const_cast<std::byte *>(s.data()), s.size() };
 }
 
 template<typename T>
 constexpr struct iovec
-MakeIovec(WritableBuffer<T> t) noexcept
+MakeIovec(std::span<T> s) noexcept
 {
-	auto b = t.ToVoid();
-	return { b.data, b.size };
+	return MakeIovec(std::as_bytes(s));
 }
 
 template<typename T>
 constexpr struct iovec
 MakeIovecT(const T &t) noexcept
 {
-	return { const_cast<T *>(&t), sizeof(t) };
+	return MakeIovec(std::span{&t, 1});
 }
 
 template<typename T, T _value>

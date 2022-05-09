@@ -34,16 +34,17 @@
 
 #include "SocketAddress.hxx"
 #include "StaticSocketAddress.hxx"
-#include "util/ConstBuffer.hxx"
+
+#include <span>
 
 #include <sys/socket.h>
 
 inline constexpr struct msghdr
-MakeMsgHdr(ConstBuffer<struct iovec> iov) noexcept
+MakeMsgHdr(std::span<const struct iovec> iov) noexcept
 {
 	struct msghdr mh{};
-	mh.msg_iov = const_cast<struct iovec *>(iov.data);
-	mh.msg_iovlen = iov.size;
+	mh.msg_iov = const_cast<struct iovec *>(iov.data());
+	mh.msg_iovlen = iov.size();
 	return mh;
 }
 
@@ -53,37 +54,37 @@ MakeMsgHdr(ConstBuffer<struct iovec> iov) noexcept
  * actually be writable.
  */
 inline constexpr struct msghdr
-MakeMsgHdr(SocketAddress name, ConstBuffer<struct iovec> iov,
-	   ConstBuffer<void> control) noexcept
+MakeMsgHdr(SocketAddress name, std::span<const struct iovec> iov,
+	   std::span<const std::byte> control) noexcept
 {
 	auto mh = MakeMsgHdr(iov);
 	mh.msg_name = const_cast<struct sockaddr *>(name.GetAddress());
 	mh.msg_namelen = name.GetSize();
-	mh.msg_control = const_cast<void *>(control.data);
-	mh.msg_controllen = control.size;
+	mh.msg_control = const_cast<std::byte *>(control.data());
+	mh.msg_controllen = control.size();
 	return mh;
 }
 
 inline constexpr struct msghdr
-MakeMsgHdr(StaticSocketAddress &name, ConstBuffer<struct iovec> iov,
-	   ConstBuffer<void> control) noexcept
+MakeMsgHdr(StaticSocketAddress &name, std::span<const struct iovec> iov,
+	   std::span<const std::byte> control) noexcept
 {
 	auto mh = MakeMsgHdr(iov);
 	mh.msg_name = name;
 	mh.msg_namelen = name.GetCapacity();
-	mh.msg_control = const_cast<void *>(control.data);
-	mh.msg_controllen = control.size;
+	mh.msg_control = const_cast<std::byte *>(control.data());
+	mh.msg_controllen = control.size();
 	return mh;
 }
 
 inline constexpr struct msghdr
-MakeMsgHdr(struct sockaddr_storage &name, ConstBuffer<struct iovec> iov,
-	   ConstBuffer<void> control) noexcept
+MakeMsgHdr(struct sockaddr_storage &name, std::span<const struct iovec> iov,
+	   std::span<const std::byte> control) noexcept
 {
 	auto mh = MakeMsgHdr(iov);
 	mh.msg_name = static_cast<struct sockaddr *>(static_cast<void *>(&name));
 	mh.msg_namelen = sizeof(name);
-	mh.msg_control = const_cast<void *>(control.data);
-	mh.msg_controllen = control.size;
+	mh.msg_control = const_cast<std::byte *>(control.data());
+	mh.msg_controllen = control.size();
 	return mh;
 }

@@ -42,14 +42,14 @@
 
 #include <sys/socket.h>
 
+static constexpr struct iovec
+MakeIovec(std::string_view s) noexcept
+{
+	return MakeIovec(std::span{s});
+}
+
 namespace Net {
 namespace Log {
-
-static struct iovec
-MakeIovec(const char *s) noexcept
-{
-	return { const_cast<char *>(s), strlen(s) + 1 };
-}
 
 template<Attribute value>
 static auto
@@ -117,7 +117,7 @@ Send(SocketDescriptor s, const Datagram &d)
 
 	if (d.message != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::MESSAGE>());
-		v.push_back(MakeIovec(d.message.ToVoid()));
+		v.push_back(MakeIovec(d.message));
 		v.push_back(MakeIovecStatic<uint8_t, 0>());
 	}
 

@@ -37,8 +37,8 @@
 #include "MsgHdr.hxx"
 #include "SocketError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "util/ConstBuffer.hxx"
 
+#include <span>
 #include <vector>
 
 #include <stdint.h>
@@ -47,7 +47,7 @@ template<size_t PAYLOAD_SIZE, size_t CMSG_SIZE>
 struct ReceiveMessageBuffer {
 	StaticSocketAddress address;
 
-	uint8_t payload[PAYLOAD_SIZE];
+	std::byte payload[PAYLOAD_SIZE];
 
 	static constexpr size_t CMSG_BUFFER_SIZE = CMSG_SPACE(CMSG_SIZE);
 	static constexpr size_t CMSG_N_LONGS = (CMSG_BUFFER_SIZE + sizeof(long) - 1) / sizeof(long);
@@ -57,7 +57,7 @@ struct ReceiveMessageBuffer {
 struct ReceiveMessageResult {
 	SocketAddress address;
 
-	ConstBuffer<void> payload = nullptr;
+	std::span<const std::byte> payload{};
 
 	const struct ucred *cred = nullptr;
 
@@ -80,7 +80,7 @@ ReceiveMessage(SocketDescriptor s,
 	iov.iov_len = sizeof(buffer.payload);
 
 	auto msg = MakeMsgHdr(buffer.address, {&iov, 1},
-			      {buffer.cmsg, sizeof(buffer.cmsg)});
+			      {(const std::byte *)buffer.cmsg, sizeof(buffer.cmsg)});
 
 	auto nbytes = recvmsg(s.Get(), &msg, flags);
 	if (nbytes < 0)

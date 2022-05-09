@@ -37,9 +37,9 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/OffsetPointer.hxx"
-#include "util/WritableBuffer.hxx"
 
 #include <memory>
+#include <span>
 
 class SocketDescriptor;
 
@@ -61,9 +61,9 @@ class MultiReceiveMessage {
 public:
 	struct Datagram {
 		SocketAddress address;
-		WritableBuffer<void> payload;
+		std::span<std::byte> payload;
 		const struct ucred *cred;
-		WritableBuffer<UniqueFileDescriptor> fds;
+		std::span<UniqueFileDescriptor> fds;
 
 		/*
 		constexpr Datagram(SocketAddress _address,

@@ -45,9 +45,9 @@ LoggerDetail::ParamWrapper<std::exception_ptr>::ParamWrapper(std::exception_ptr 
 	:ParamWrapper<std::string>(GetFullMessage(ep)) {}
 
 static constexpr struct iovec
-MakeIovec(StringView s) noexcept
+MakeIovec(std::string_view s) noexcept
 {
-	return MakeIovec(s.ToVoid());
+	return MakeIovec(std::span{s});
 }
 
 void

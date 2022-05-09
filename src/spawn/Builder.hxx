@@ -40,11 +40,12 @@
 #include "system/Error.hxx"
 #include "io/FileDescriptor.hxx"
 #include "io/Iovec.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"
 
 #include <array>
 #include <cstddef>
+#include <span>
+#include <string_view>
 
 #include <assert.h>
 #include <stdint.h>
@@ -92,30 +93,34 @@ public:
 			Write(cmd);
 	}
 
-	void Write(ConstBuffer<void> value) {
-		if (size + value.size > buffer.size())
+	void Write(std::span<const std::byte> value) {
+		if (size + value.size() > buffer.size())
 			throw SpawnPayloadTooLargeError();
 
-		memcpy(buffer.data() + size, value.data, value.size);
-		size += value.size;
+		std::copy(value.begin(), value.end(),
+			  std::next(buffer.begin(), size));
+		size += value.size();
+	}
+
+	template<typename T>
+	void Write(std::span<const T> value) noexcept {
+		Write(std::as_bytes(value));
 	}
 
 	template<typename T>
 	void WriteT(const T &value) {
-		Write(ConstBuffer<void>(&value, sizeof(value)));
+		Write(std::span{&value, 1});
 	}
 
 	void WriteInt(int value) {
 		WriteT(value);
 	}
 
-	void WriteString(const char *value) {
-		assert(value != nullptr);
-
-		Write(ConstBuffer<void>(value, strlen(value) + 1));
+	void WriteString(std::string_view value) {
+		Write(std::span{value});
 	}
 
-	void WriteString(SpawnExecCommand cmd, const char *value) {
+	void WriteString(SpawnExecCommand cmd, std::string_view value) {
 		Write(cmd);
 		WriteString(value);
 	}
@@ -140,19 +145,19 @@ public:
 			WriteFd(cmd, fd);
 	}
 
-	ConstBuffer<void> GetPayload() const {
+	std::span<const std::byte> GetPayload() const {
 		return {buffer.data(), size};
 	}
 
-	ConstBuffer<FileDescriptor> GetFds() const noexcept {
+	std::span<const FileDescriptor> GetFds() const noexcept {
 		return fds;
 	}
 };
 
 template<size_t MAX_FDS>
 static void
-Send(SocketDescriptor s, ConstBuffer<void> payload,
-     ConstBuffer<FileDescriptor> fds)
+Send(SocketDescriptor s, std::span<const std::byte> payload,
+     std::span<const FileDescriptor> fds)
 {
 	assert(s.IsDefined());
 

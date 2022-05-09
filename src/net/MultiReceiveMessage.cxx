@@ -59,9 +59,9 @@ MultiReceiveMessage::MultiReceiveMessage(size_t _allocated_datagrams,
 	for (size_t i = 0; i < allocated_datagrams; ++i) {
 		v[i] = {GetPayload(i), max_payload_size};
 
-		ConstBuffer<void> cmsg = nullptr;
+		std::span<const std::byte> cmsg{};
 		if (max_cmsg_size > 0)
-			cmsg = {GetCmsg(i), max_cmsg_size};
+			cmsg = {(const std::byte *)GetCmsg(i), max_cmsg_size};
 
 		m[i].msg_hdr = MakeMsgHdr(*a, {v + i, 1}, cmsg);
 	}
@@ -103,10 +103,10 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 		auto &d = datagrams[i];
 		d.address = SocketAddress((const struct sockaddr *)mh.msg_name,
 					  mh.msg_namelen);
-		d.payload = {GetPayload(i), m[i].msg_len};
+		d.payload = {(std::byte *)GetPayload(i), m[i].msg_len};
 		d.cred = nullptr;
-		d.fds.data = fds_p;
-		d.fds.size = 0;
+
+		d.fds = {fds_p, 0};
 
 #ifdef __clang__
 #pragma GCC diagnostic push
@@ -128,7 +128,7 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 					if (remaining_fds > 0) {
 						*fds_p++ = UniqueFileDescriptor(fd);
 						--remaining_fds;
-						++d.fds.size;
+						d.fds = {d.fds.data(), d.fds.size() + 1};
 					} else
 						fd.Close();
 				}
