@@ -79,6 +79,7 @@ private:
 
 		if (error) {
 			InvokeCreateError(handler, std::move(error));
+			delete this;
 		} else {
 			idle = false;
 			InvokeCreateSuccess(handler);
@@ -108,6 +109,7 @@ private:
 		assert(!initialized || defer_initialized.IsPending());
 
 		InvokeCreateAborted();
+		delete this;
 	}
 
 	/* virtual methods from class AsyncConnectionHandler */
