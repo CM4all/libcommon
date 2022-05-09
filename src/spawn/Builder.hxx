@@ -43,6 +43,7 @@
 #include "util/ConstBuffer.hxx"
 #include "util/StaticArray.hxx"
 
+#include <array>
 #include <cstddef>
 
 #include <assert.h>
@@ -52,11 +53,9 @@
 class SpawnPayloadTooLargeError {};
 
 class SpawnSerializer {
-	static constexpr size_t capacity = 65536;
-
 	size_t size = 0;
 
-	std::byte buffer[capacity];
+	std::array<std::byte, 65536> buffer;
 
 	StaticArray<FileDescriptor, 8> fds;
 
@@ -70,7 +69,7 @@ public:
 	}
 
 	void WriteByte(std::byte value) {
-		if (size >= capacity)
+		if (size >= buffer.size())
 			throw SpawnPayloadTooLargeError();
 
 		buffer[size++] = value;
@@ -94,10 +93,10 @@ public:
 	}
 
 	void Write(ConstBuffer<void> value) {
-		if (size + value.size > capacity)
+		if (size + value.size > buffer.size())
 			throw SpawnPayloadTooLargeError();
 
-		memcpy(buffer + size, value.data, value.size);
+		memcpy(buffer.data() + size, value.data, value.size);
 		size += value.size;
 	}
 
@@ -142,7 +141,7 @@ public:
 	}
 
 	ConstBuffer<void> GetPayload() const {
-		return {buffer, size};
+		return {buffer.data(), size};
 	}
 
 	ConstBuffer<FileDescriptor> GetFds() const noexcept {
