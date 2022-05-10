@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -40,7 +40,7 @@
 #include <sys/socket.h>
 
 ssize_t
-ReceiveToBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer)
+ReceiveToBuffer(int fd, ForeignFifoBuffer<std::byte> &buffer)
 {
 	assert(fd >= 0);
 
@@ -56,7 +56,7 @@ ReceiveToBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer)
 }
 
 ssize_t
-SendFromBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer)
+SendFromBuffer(int fd, ForeignFifoBuffer<std::byte> &buffer)
 {
 	auto r = buffer.Read();
 	if (r.empty())

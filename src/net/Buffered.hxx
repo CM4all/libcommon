@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,11 +30,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NET_BUFFERED_HXX
-#define NET_BUFFERED_HXX
+#pragma once
+
+#include <cstddef>
 
 #include <sys/types.h>
-#include <stdint.h>
 
 template<typename T> class ForeignFifoBuffer;
 
@@ -46,7 +46,7 @@ template<typename T> class ForeignFifoBuffer;
  * @return -1 on error, -2 if the buffer is full, or the amount appended to the buffer
  */
 ssize_t
-ReceiveToBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer);
+ReceiveToBuffer(int fd, ForeignFifoBuffer<std::byte> &buffer);
 
 /**
  * Sends data from the buffer to the socket.
@@ -57,6 +57,4 @@ ReceiveToBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer);
  * bytes sent
  */
 ssize_t
-SendFromBuffer(int fd, ForeignFifoBuffer<uint8_t> &buffer);
-
-#endif
+SendFromBuffer(int fd, ForeignFifoBuffer<std::byte> &buffer);

@@ -195,7 +195,7 @@ public:
 		return socket_event.IsWritePending();
 	}
 
-	ssize_t ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer) noexcept;
+	ssize_t ReadToBuffer(ForeignFifoBuffer<std::byte> &buffer) noexcept;
 
 	[[gnu::pure]]
 	bool IsReadyForWriting() const noexcept;

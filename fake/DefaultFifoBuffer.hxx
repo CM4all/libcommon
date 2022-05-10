@@ -41,7 +41,7 @@
  * simple heap-allocated buffer when some client code gets copied to
  * another project.
  */
-class DefaultFifoBuffer : public ForeignFifoBuffer<uint8_t> {
+class DefaultFifoBuffer : public ForeignFifoBuffer<std::byte> {
 	static constexpr size_t SIZE = 8192;
 
 public:
@@ -52,7 +52,7 @@ public:
 	}
 
 	void Allocate() {
-		SetBuffer(new uint8_t[SIZE], SIZE);
+		SetBuffer(new std::byte[SIZE], SIZE);
 	}
 
 	void Free() {

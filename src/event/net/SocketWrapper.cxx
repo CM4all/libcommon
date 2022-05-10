@@ -144,7 +144,7 @@ SocketWrapper::AsFD() noexcept
 }
 
 ssize_t
-SocketWrapper::ReadToBuffer(ForeignFifoBuffer<uint8_t> &buffer) noexcept
+SocketWrapper::ReadToBuffer(ForeignFifoBuffer<std::byte> &buffer) noexcept
 {
 	assert(IsValid());
 
