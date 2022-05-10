@@ -37,7 +37,6 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "system/Error.hxx"
 #include "util/Compiler.h"
-#include "util/WritableBuffer.hxx"
 
 #include <assert.h>
 #include <errno.h>
@@ -85,7 +84,7 @@ UdpListener::ReceiveOne()
 		? result.cred->uid
 		: -1;
 
-	WritableBuffer<UniqueFileDescriptor> fds = nullptr;
+	std::span<UniqueFileDescriptor> fds{};
 	if (!result.fds.empty())
 		fds =  {&result.fds.front(), result.fds.size()};
 
