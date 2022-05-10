@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,7 +39,7 @@ namespace Net {
 namespace Log {
 
 bool
-PipeAdapter::OnPipeLine(WritableBuffer<char> line) noexcept
+PipeAdapter::OnPipeLine(std::span<char> line) noexcept
 {
 	if (rate_limit > 0) {
 		const auto now = GetEventLoop().SteadyNow();
@@ -54,15 +54,15 @@ PipeAdapter::OnPipeLine(WritableBuffer<char> line) noexcept
 	datagram.SetTimestamp(GetEventLoop().SystemNow());
 
 	constexpr size_t MAX_LENGTH = 1024;
-	if (line.size >= MAX_LENGTH) {
+	if (line.size() >= MAX_LENGTH) {
 		/* truncate long lines */
 		line[MAX_LENGTH - 3] = '.';
 		line[MAX_LENGTH - 2] = '.';
 		line[MAX_LENGTH - 1] = '.';
-		line.size = MAX_LENGTH;
+		line = line.subspan(0, MAX_LENGTH);
 	}
 
-	datagram.message = {line.data, line.size};
+	datagram.message = {line.data(), line.size()};
 
 	try {
 		Send(socket, datagram);

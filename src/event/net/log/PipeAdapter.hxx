@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -94,7 +94,7 @@ public:
 
 private:
 	/* virtual methods from class PipeLineReaderHandler */
-	bool OnPipeLine(WritableBuffer<char> line) noexcept override;
+	bool OnPipeLine(std::span<char> line) noexcept override;
 	void OnPipeEnd() noexcept override;
 };
 

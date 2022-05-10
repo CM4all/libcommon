@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -36,7 +36,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/StaticFifoBuffer.hxx"
 
-template <typename T> struct WritableBuffer;
+#include <span>
 
 class PipeLineReaderHandler {
 public:
@@ -44,7 +44,7 @@ public:
 	 * @return true to continue reading lines, false if the
 	 * #PipeLineReader has been destroyed
 	 */
-	virtual bool OnPipeLine(WritableBuffer<char> line) noexcept = 0;
+	virtual bool OnPipeLine(std::span<char> line) noexcept = 0;
 	virtual void OnPipeEnd() noexcept = 0;
 };
 
