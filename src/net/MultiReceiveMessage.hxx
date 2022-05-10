@@ -64,15 +64,6 @@ public:
 		std::span<std::byte> payload;
 		const struct ucred *cred;
 		std::span<UniqueFileDescriptor> fds;
-
-		/*
-		constexpr Datagram(SocketAddress _address,
-				   WritableBuffer<void> _payload,
-				   const struct ucred *_cred,
-				   WritableBuffer<UniqueFileDescriptor> _fds)
-			:address(_address), payload(_payload),
-			 cred(_cred), fds(_fds) {}
-		*/
 	};
 
 	typedef Datagram *iterator;
