@@ -99,8 +99,9 @@ Control::OnBufferedData()
 
 	while (true) {
 		auto r = socket.ReadBuffer();
-		const auto header = (const struct was_header *)r.data;
-		if (r.size < sizeof(*header) || r.size < sizeof(*header) + header->length) {
+		const auto header = (const struct was_header *)(const void *)r.data();
+		if (r.size() < sizeof(*header) ||
+		    r.size() < sizeof(*header) + header->length) {
 			/* not enough data yet */
 			if (!InvokeDrained())
 				return BufferedResult::CLOSED;

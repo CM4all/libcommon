@@ -508,10 +508,10 @@ public:
 	std::size_t GetAvailable() const noexcept;
 
 	[[gnu::pure]]
-	WritableBuffer<void> ReadBuffer() const noexcept {
+	std::span<std::byte> ReadBuffer() const noexcept {
 		assert(!ended);
 
-		return input.Read().ToVoid();
+		return input.Read();
 	}
 
 	/**
