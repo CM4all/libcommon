@@ -36,7 +36,6 @@
 #include "net/SocketAddress.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "util/WritableBuffer.hxx"
 
 #include <was/protocol.h>
 

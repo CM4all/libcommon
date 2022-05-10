@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,9 +33,9 @@
 #pragma once
 
 #include "util/DisposableBuffer.hxx"
-#include "util/WritableBuffer.hxx"
 
 #include <array>
+#include <span>
 
 namespace Was {
 
@@ -70,7 +70,7 @@ public:
 		return fill == length;
 	}
 
-	constexpr WritableBuffer<std::byte> Write() noexcept {
+	constexpr std::span<std::byte> Write() noexcept {
 		return {&buffer[fill], MAX_SIZE - fill};
 	}
 
