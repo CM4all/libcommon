@@ -132,13 +132,13 @@ public:
 		const auto first = &*list->begin();
 		const auto last = &*list->last();
 
-		const auto after_last = (const uint8_t *)AfterLast(&*last);
+		const auto after_last = (const std::byte *)AfterLast(&*last);
 
 		if (first <= last)
-			return after_last - (const uint8_t *)first;
+			return after_last - (const std::byte *)first;
 
-		const auto buffer_end = (const uint8_t *)EndOfBuffer();
-		return (after_last - (const uint8_t *)list) + (buffer_end - (const uint8_t *)first);
+		const auto buffer_end = (const std::byte *)EndOfBuffer();
+		return (after_last - (const std::byte *)list) + (buffer_end - (const std::byte *)first);
 	}
 
 	void clear() noexcept {
@@ -239,28 +239,28 @@ private:
 		return (align - (p % align)) % align;
 	}
 
-	static constexpr uint8_t *Align(uint8_t *p, size_t align) noexcept {
+	static constexpr std::byte *Align(std::byte *p, size_t align) noexcept {
 		return p + DeltaRoundUp((size_t)p, align);
 	}
 
 	static constexpr void *Align(void *p, size_t align) noexcept {
-		return Align((uint8_t *)p, align);
+		return Align((std::byte *)p, align);
 	}
 
 	static constexpr void *Align(void *p) noexcept {
 		return Align(p, alignof(Item));
 	}
 
-	static constexpr WritableBuffer<uint8_t> Align(WritableBuffer<uint8_t> src,
-						       size_t align) noexcept {
-		return WritableBuffer<uint8_t>(std::next(src.begin(),
+	static constexpr WritableBuffer<std::byte> Align(WritableBuffer<std::byte> src,
+							 size_t align) noexcept {
+		return WritableBuffer<std::byte>(std::next(src.begin(),
 							 DeltaRoundUp((size_t)src.data, align)),
 					       src.end());
 	}
 
 	static constexpr WritableBuffer<void> Align(WritableBuffer<void> src,
 						    size_t align) noexcept {
-		return Align(WritableBuffer<uint8_t>::FromVoid(src),
+		return Align(WritableBuffer<std::byte>::FromVoid(src),
 			     align).ToVoid();
 	}
 
@@ -273,8 +273,8 @@ private:
 	}
 
 	static constexpr size_t BytesDelta(const void *a, const void *b) noexcept {
-		return static_cast<const uint8_t *>(b)
-			- static_cast<const uint8_t *>(a);
+		return static_cast<const std::byte *>(b)
+			- static_cast<const std::byte *>(a);
 	}
 
 	constexpr void *FirstSlot() noexcept {
