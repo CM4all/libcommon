@@ -43,7 +43,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 	auto w = buffer.Write();
 	assert(!w.empty());
 
-	auto nbytes = event.GetFileDescriptor().Read(w.data, w.size);
+	auto nbytes = event.GetFileDescriptor().Read(w.data(), w.size());
 	if (nbytes < 0 && errno == EAGAIN)
 		return;
 
@@ -57,7 +57,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 
 	while (true) {
 		auto r = ExtractLine(buffer, flush);
-		if (r.IsNull())
+		if (r.data() == nullptr)
 			break;
 
 		if (!handler.OnPipeLine(r))

@@ -73,7 +73,7 @@ Connection::TryRead() noexcept
 	auto r = input.Write();
 	assert(!r.empty());
 
-	ssize_t nbytes = recv(event.GetSocket().Get(), r.data, r.size,
+	ssize_t nbytes = recv(event.GetSocket().Get(), r.data(), r.size(),
 			      MSG_DONTWAIT);
 	if (gcc_likely(nbytes > 0)) {
 		input.Append(nbytes);
@@ -98,14 +98,14 @@ Connection::OnReceived() noexcept
 
 	while (true) {
 		auto r = input.Read();
-		const void *p = r.data;
+		const void *p = r.data();
 		const auto *header = (const TranslationHeader *)p;
-		if (r.size < sizeof(*header))
+		if (r.size() < sizeof(*header))
 			break;
 
 		const size_t payload_length = header->length;
 		const size_t total_size = sizeof(*header) + payload_length;
-		if (r.size < total_size)
+		if (r.size() < total_size)
 			break;
 
 		if (!OnPacket(header->command, {header + 1, payload_length}))

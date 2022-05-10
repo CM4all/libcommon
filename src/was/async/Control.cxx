@@ -134,7 +134,7 @@ Control::OnBufferedWrite()
 	auto r = output_buffer.Read();
 	assert(!r.empty());
 
-	ssize_t nbytes = socket.Write(r.data, r.size);
+	ssize_t nbytes = socket.Write(r.data(), r.size());
 	if (nbytes <= 0) {
 		if (nbytes == WRITE_ERRNO)
 			throw MakeErrno("WAS control send error");
@@ -200,9 +200,9 @@ Control::Start(enum was_command cmd, size_t payload_length) noexcept
 	assert(!done);
 
 	output_buffer.AllocateIfNull();
-	auto w = output_buffer.Write().ToVoid();
-	struct was_header *header = (struct was_header *)w.data;
-	if (w.size < sizeof(*header) + payload_length) {
+	auto w = output_buffer.Write();
+	struct was_header *header = (struct was_header *)(void *)w.data();
+	if (w.size() < sizeof(*header) + payload_length) {
 		InvokeError("control output is too large");
 		return nullptr;
 	}

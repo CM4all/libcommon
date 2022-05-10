@@ -39,21 +39,20 @@ auto
 ExtractLine(B &buffer, bool flush=false)
 {
 	auto r = buffer.Read();
-	char *newline = (char *)memchr(r.data, '\n', r.size);
+	char *newline = (char *)memchr(r.data(), '\n', r.size());
 	if (newline == nullptr) {
 		if (!r.empty() && (flush || buffer.IsFull())) {
 			buffer.Clear();
 			return r;
 		}
 
-		return decltype(r)(nullptr);
+		return decltype(r){};
 	}
 
-	buffer.Consume(newline + 1 - r.data);
+	buffer.Consume(newline + 1 - r.data());
 
-	while (newline > r.data && newline[-1] == '\r')
+	while (newline > r.data() && newline[-1] == '\r')
 		--newline;
 
-	r.size = newline - r.data;
-	return r;
+	return r.subspan(0, newline - r.data());
 }
