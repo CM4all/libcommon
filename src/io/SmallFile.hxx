@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 CM4all GmbH
+ * Copyright 2021-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -32,9 +32,8 @@
 
 #pragma once
 
-#include "util/WritableBuffer.hxx"
-
 #include <type_traits>
+#include <span>
 
 /**
  * Read the contents of a regular file to the given buffer.
@@ -43,16 +42,16 @@
  * file has a different size.
  */
 void
-ReadSmallFile(const char *path, WritableBuffer<void> dest);
+ReadSmallFile(const char *path, std::span<std::byte> dest);
 
 template<typename T>
 void
-ReadSmallFile(const char *path, WritableBuffer<T> dest)
+ReadSmallFile(const char *path, std::span<T> dest)
 {
 	static_assert(std::is_trivially_copyable_v<T>);
 	static_assert(std::is_standard_layout_v<T>);
 
-	ReadSmallFile(path, dest.ToVoid());
+	ReadSmallFile(path, std::as_writable_bytes(dest));
 }
 
 template<typename T>
@@ -60,6 +59,6 @@ T
 ReadSmallFile(const char *path)
 {
 	T value;
-	ReadSmallFile(path, WritableBuffer<T>{&value, 1U});
+	ReadSmallFile(path, std::span{&value, 1U});
 	return value;
 }

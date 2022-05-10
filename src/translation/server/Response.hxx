@@ -35,7 +35,6 @@
 #include "../Protocol.hxx"
 #include "http/Status.h"
 #include "net/SocketAddress.hxx"
-#include "util/WritableBuffer.hxx"
 
 #include <array>
 #include <chrono>
