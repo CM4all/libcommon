@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,17 +30,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SSL_BUFFER_HXX
-#define SSL_BUFFER_HXX
-
-#include "util/WritableBuffer.hxx"
+#pragma once
 
 #include <openssl/ssl.h>
 #include <openssl/bn.h>
 
 #include <span>
+#include <utility>
 
-class SslBuffer : WritableBuffer<unsigned char> {
+class SslBuffer {
+	std::span<unsigned char> span;
+
 public:
 	explicit SslBuffer(X509 &cert);
 	explicit SslBuffer(X509_NAME &cert);
@@ -49,26 +49,22 @@ public:
 	explicit SslBuffer(const BIGNUM &bn);
 
 	SslBuffer(SslBuffer &&src) noexcept
-		:WritableBuffer<unsigned char>(src)
+		:span(std::exchange(src.span, {}))
 	{
-		src.data = nullptr;
 	}
 
 	~SslBuffer() noexcept {
-		if (data != nullptr)
-			OPENSSL_free(data);
+		if (span.data() != nullptr)
+			OPENSSL_free(span.data());
 	}
 
 	SslBuffer &operator=(SslBuffer &&src) noexcept {
-		data = src.data;
-		size = src.size;
-		src.data = nullptr;
+		using std::swap;
+		swap(span, src.span);
 		return *this;
 	}
 
 	std::span<const std::byte> get() const noexcept {
-		return {(const std::byte *)data, size};
+		return std::as_bytes(span);
 	}
 };
-
-#endif

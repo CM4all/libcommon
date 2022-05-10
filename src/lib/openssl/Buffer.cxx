@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -37,52 +37,52 @@
 
 SslBuffer::SslBuffer(X509 &cert)
 {
-	data = nullptr;
+	unsigned char *data = nullptr;
 	int result = i2d_X509(&cert, &data);
 	if (result < 0)
 		throw SslError("Failed to encode certificate");
 
-	size = result;
+	span = {data, static_cast<std::size_t>(result)};
 }
 
 SslBuffer::SslBuffer(X509_NAME &name)
 {
-	data = nullptr;
+	unsigned char *data = nullptr;
 	int result = i2d_X509_NAME(&name, &data);
 	if (result < 0)
 		throw SslError("Failed to encode name");
 
-	size = result;
+	span = {data, static_cast<std::size_t>(result)};
 }
 
 SslBuffer::SslBuffer(X509_REQ &req)
 {
-	data = nullptr;
+	unsigned char *data = nullptr;
 	int result = i2d_X509_REQ(&req, &data);
 	if (result < 0)
 		throw SslError("Failed to encode certificate request");
 
-	size = result;
+	span = {data, static_cast<std::size_t>(result)};
 }
 
 SslBuffer::SslBuffer(EVP_PKEY &key)
 {
-	data = nullptr;
+	unsigned char *data = nullptr;
 	int result = i2d_PrivateKey(&key, &data);
 	if (result < 0)
 		throw SslError("Failed to encode key");
 
-	size = result;
+	span = {data, static_cast<std::size_t>(result)};
 }
 
 SslBuffer::SslBuffer(const BIGNUM &bn)
 {
-	data = nullptr;
-
-	size = BN_num_bytes(&bn);
-	data = (unsigned char *)OPENSSL_malloc(size);
+	const std::size_t size = BN_num_bytes(&bn);
+	unsigned char *data = (unsigned char *)OPENSSL_malloc(size);
 	if (data == nullptr)
 		throw std::bad_alloc();
 
 	BN_bn2bin(&bn, data);
+
+	span = {data, size};
 }
