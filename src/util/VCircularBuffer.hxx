@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 CM4all GmbH
+ * Copyright 2017-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -33,15 +33,14 @@
 #pragma once
 
 #include "Cast.hxx"
-#include "WritableBuffer.hxx"
 #include "MemberIteratorAdapter.hxx"
 
 #include <boost/intrusive/slist.hpp>
 
-#include <new>
+#include <cassert>
 #include <iterator>
-
-#include <assert.h>
+#include <new>
+#include <span>
 
 /**
  * A fixed-size circular buffer which allocates variable-size items.
@@ -99,10 +98,10 @@ private:
 	size_t tail_item_size;
 
 public:
-	VCircularBuffer(WritableBuffer<void> buffer) noexcept
-		:list(::new(Align(buffer, alignof(List)).data) List()),
-		 buffer_size(Align(buffer, alignof(List)).size) {
-		assert(buffer.size >= sizeof(List) + sizeof(Item));
+	VCircularBuffer(std::span<std::byte> buffer) noexcept
+		:list(::new(Align(buffer, alignof(List)).data()) List()),
+		 buffer_size(Align(buffer, alignof(List)).size()) {
+		assert(buffer.size() >= sizeof(List) + sizeof(Item));
 	}
 
 	~VCircularBuffer() noexcept {
@@ -251,20 +250,16 @@ private:
 		return Align(p, alignof(Item));
 	}
 
-	static constexpr WritableBuffer<std::byte> Align(WritableBuffer<std::byte> src,
-							 size_t align) noexcept {
-		return WritableBuffer<std::byte>(std::next(src.begin(),
-							 DeltaRoundUp((size_t)src.data, align)),
-					       src.end());
-	}
-
-	static constexpr WritableBuffer<void> Align(WritableBuffer<void> src,
+	static constexpr std::span<std::byte> Align(std::span<std::byte> src,
 						    size_t align) noexcept {
-		return Align(WritableBuffer<std::byte>::FromVoid(src),
-			     align).ToVoid();
+		return {
+			std::next(src.begin(),
+				  DeltaRoundUp((size_t)src.data(), align)),
+			src.end(),
+		};
 	}
 
-	static constexpr WritableBuffer<void> Align(WritableBuffer<void> src) noexcept {
+	static constexpr std::span<std::byte> Align(std::span<std::byte> src) noexcept {
 		return Align(src, alignof(Item));
 	}
 

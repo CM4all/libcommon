@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,6 +34,8 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
+
 TEST(VCircularBuffer, Basic)
 {
 	struct Foo {
@@ -42,8 +44,8 @@ TEST(VCircularBuffer, Basic)
 		Foo(int _value):value(_value) {}
 	};
 
-	uint8_t buffer[4096];
-	VCircularBuffer<Foo> cb(WritableBuffer<void>(buffer, sizeof(buffer)));
+	std::array<std::byte, 4096> buffer;
+	VCircularBuffer<Foo> cb{std::span{buffer}};
 	ASSERT_TRUE(cb.empty());
 	EXPECT_EQ(cb.size(), 0u);
 
