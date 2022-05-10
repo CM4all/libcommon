@@ -52,7 +52,7 @@ MakeIovec(std::string_view s) noexcept
 
 void
 LoggerDetail::WriteV(std::string_view domain,
-		     ConstBuffer<std::string_view> buffers) noexcept
+		     std::span<const std::string_view> buffers) noexcept
 {
 	StaticArray<struct iovec, 64> v;
 

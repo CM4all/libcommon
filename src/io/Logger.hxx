@@ -34,12 +34,12 @@
 #define LOGGER_HXX
 
 #include "util/StringView.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/Compiler.h"
 
 #include <cstdint>
 #include <array>
 #include <exception>
+#include <span>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -178,7 +178,7 @@ CheckLevel(unsigned level) noexcept
 }
 
 void
-WriteV(std::string_view domain, ConstBuffer<std::string_view> buffers) noexcept;
+WriteV(std::string_view domain, std::span<const std::string_view> buffers) noexcept;
 
 template<typename... Params>
 void
@@ -258,7 +258,7 @@ public:
 	}
 
 private:
-	void WriteV(ConstBuffer<std::string_view> buffers) const noexcept {
+	void WriteV(std::span<const std::string_view> buffers) const noexcept {
 		LoggerDetail::WriteV(GetDomain(), buffers);
 	}
 };
