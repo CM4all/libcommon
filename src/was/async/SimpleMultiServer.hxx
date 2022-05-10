@@ -72,8 +72,8 @@ public:
 
 private:
 	/* virtual methods from class UdpHandler */
-	bool OnUdpDatagram(ConstBuffer<void> payload,
-			   WritableBuffer<UniqueFileDescriptor> fds,
+	bool OnUdpDatagram(std::span<const std::byte> payload,
+			   std::span<UniqueFileDescriptor> fds,
 			   SocketAddress address, int uid) override;
 
 	bool OnUdpHangup() override {

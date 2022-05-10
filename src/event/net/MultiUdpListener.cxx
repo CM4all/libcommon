@@ -66,7 +66,7 @@ try {
 		return;
 
 	if (!multi.Receive(GetSocket())) {
-		handler.OnUdpDatagram(nullptr, nullptr, nullptr, -1);
+		handler.OnUdpDatagram({}, {}, nullptr, -1);
 		return;
 	}
 

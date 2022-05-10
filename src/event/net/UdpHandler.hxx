@@ -33,9 +33,8 @@
 #pragma once
 
 #include <exception>
+#include <span>
 
-template<typename T> struct ConstBuffer;
-template<typename T> struct WritableBuffer;
 class SocketAddress;
 class UniqueFileDescriptor;
 
@@ -53,8 +52,8 @@ public:
 	 * @param uid the peer process uid, or -1 if unknown
 	 * @return false if the #UdpHandler was destroyed inside this method
 	 */
-	virtual bool OnUdpDatagram(ConstBuffer<void> payload,
-				   WritableBuffer<UniqueFileDescriptor> fds,
+	virtual bool OnUdpDatagram(std::span<const std::byte> payload,
+				   std::span<UniqueFileDescriptor> fds,
 				   SocketAddress address, int uid) = 0;
 
 	/**
