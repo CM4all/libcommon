@@ -56,7 +56,7 @@ ToDisposableBuffer(const boost::json::value &v) noexcept
 		size += r.size();
 	}
 
-	return {ToDeleteArray(array.release().data), size};
+	return {ToDeleteArray(array.release().data()), size};
 }
 
 } // namespace Json

@@ -167,7 +167,8 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		break;
 
 	case TranslationCommand::WANT:
-		want = want_buffer = ConstBuffer<TranslationCommand>::FromVoid(payload);
+		want_buffer = std::span{ConstBuffer<TranslationCommand>::FromVoid(payload)};
+		want = std::span<const TranslationCommand>{want_buffer};
 		break;
 
 	case TranslationCommand::WANT_FULL_URI:
