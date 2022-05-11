@@ -346,11 +346,13 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 
 	get_concurrency = concurrency;
 
+	const bool waiting_empty = waiting.empty();
+
 	auto *w = new Waiting(*this, std::move(request),
 			      get_handler, cancel_ptr);
 	waiting.push_back(*w);
 
-	if (!IsFull() && !get_cancel_ptr)
+	if (waiting_empty && !IsFull() && !get_cancel_ptr)
 		GetCreate(std::move(w->request), *this, get_cancel_ptr);
 }
 
