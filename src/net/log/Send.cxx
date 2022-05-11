@@ -167,8 +167,7 @@ Send(SocketDescriptor s, const Datagram &d)
 	const uint32_t crc_value = ToBE32(crc.Finish());
 	v.push_back(MakeIovecT(crc_value));
 
-	SendMessage(s, ConstBuffer<struct iovec>(&v.front(), v.size()),
-		    MSG_DONTWAIT);
+	SendMessage(s, std::span{v}, MSG_DONTWAIT);
 }
 
 }}

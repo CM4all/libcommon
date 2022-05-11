@@ -62,9 +62,8 @@ SendMultiNew(SocketDescriptor s, WasSocket &&socket)
 {
 	static constexpr auto header =
 		MakeMultiWasHeader(MULTI_WAS_COMMAND_NEW, 0);
-	auto vec = MakeIovecT(header);
-
-	MessageHeader msg({&vec, 1});
+	const struct iovec v[] = {MakeIovecT(header)};
+	MessageHeader msg{v};
 
 	ScmRightsBuilder<3> b(msg);
 	b.push_back(socket.control.Get());

@@ -43,8 +43,8 @@ void
 EasySendMessage(SocketDescriptor s, FileDescriptor fd)
 {
 	static uint8_t dummy_payload = 0;
-	auto vec = MakeIovecT(dummy_payload);
-	MessageHeader msg({&vec, 1});
+	const struct iovec v[] = {MakeIovecT(dummy_payload)};
+	MessageHeader msg{v};
 
 	ScmRightsBuilder<1> srb(msg);
 	srb.push_back(fd.Get());
