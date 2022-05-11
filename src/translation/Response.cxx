@@ -85,8 +85,8 @@ TranslateResponse::Clear()
 
 #if TRANSLATION_ENABLE_RADDRESS
 	base = nullptr;
-	layout = nullptr;
-	layout_items = nullptr;
+	layout = {};
+	layout_items = {};
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -189,26 +189,26 @@ TranslateResponse::Clear()
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = false;
 
-	session = nullptr;
-	attach_session = nullptr;
+	session = {};
+	attach_session = {};
 #endif
 	pool = nullptr;
 #if TRANSLATION_ENABLE_HTTP
-	internal_redirect = nullptr;
-	http_auth = nullptr;
-	token_auth = nullptr;
+	internal_redirect = {};
+	http_auth = {};
+	token_auth = {};
 #endif
 #if TRANSLATION_ENABLE_SESSION
-	check = nullptr;
-	auth = nullptr;
+	check = {};
+	auth = {};
 	auth_file = nullptr;
-	append_auth = nullptr;
+	append_auth = {};
 	expand_append_auth = nullptr;
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
-	want_full_uri = nullptr;
-	chain = nullptr;
+	want_full_uri = {};
+	chain = {};
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
@@ -243,21 +243,21 @@ TranslateResponse::Clear()
 
 #if TRANSLATION_ENABLE_CACHE
 	cache_tag = nullptr;
-	vary = nullptr;
-	invalidate = nullptr;
+	vary = {};
+	invalidate = {};
 #endif
 #if TRANSLATION_ENABLE_WANT
-	want = nullptr;
+	want = {};
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
-	file_not_found = nullptr;
+	file_not_found = {};
 	content_type = nullptr;
-	enotdir = nullptr;
-	directory_index = nullptr;
+	enotdir = {};
+	directory_index = {};
 #endif
-	error_document = nullptr;
-	probe_path_suffixes = nullptr;
-	probe_suffixes = nullptr;
+	error_document = {};
+	probe_path_suffixes = {};
+	probe_suffixes = {};
 	read_file = nullptr;
 
 	validate_mtime.mtime = 0;
@@ -427,8 +427,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	auto_gzip = src.auto_gzip;
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = src.realm_from_auth_base;
-	session = nullptr;
-	attach_session = nullptr;
+	session = {};
+	attach_session = {};
 #endif
 
 	pool = alloc.CheckDup(src.pool);
@@ -521,7 +521,7 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 
 	const bool expandable = src.IsExpandable();
 
-	if (src.address.IsDefined() || layout == nullptr)
+	if (src.address.IsDefined() || layout.data() == nullptr)
 		address.CacheStore(alloc, src.address,
 				   request_uri, base,
 				   easy_base,
@@ -538,7 +538,8 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 					? alloc.DupZ({uri, length})
 					: nullptr;
 
-				if (uri == nullptr && !internal_redirect.IsNull())
+				if (uri == nullptr &&
+				    internal_redirect.data() != nullptr)
 					/* this BASE mismatch is
 					   fatal, because it
 					   invalidates a required
@@ -680,7 +681,7 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 	if (expand_append_auth != nullptr) {
 		const char *value = expand_string_unescaped(alloc, expand_append_auth,
 							    match_data);
-		append_auth = { value, strlen(value) };
+		append_auth = { (const std::byte *)value, strlen(value) };
 	}
 
 	if (expand_cookie_host) {

@@ -34,7 +34,6 @@
 #define BENG_PROXY_TRANSLATE_RESPONSE_HXX
 
 #include "translation/Features.hxx"
-#include "util/ConstBuffer.hxx"
 #if TRANSLATION_ENABLE_HTTP
 #include "util/kvlist.hxx"
 #include "bp/ForwardHeaders.hxx"
@@ -44,6 +43,7 @@
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
+#include "translation/Layout.hxx"
 #endif
 #if TRANSLATION_ENABLE_EXECUTE
 #include "adata/ExpandableStringList.hxx"
@@ -55,13 +55,13 @@
 #endif
 
 #include <chrono>
+#include <span>
 
 #include <assert.h>
 #include <stdint.h>
 
 enum class TranslationCommand : uint16_t;
 struct WidgetView;
-struct TranslationLayoutItem;
 class AllocatorPtr;
 class UniqueRegex;
 class MatchData;
@@ -110,8 +110,8 @@ struct TranslateResponse {
 
 	const char *base;
 
-	ConstBuffer<void> layout;
-	ConstBuffer<TranslationLayoutItem> layout_items;
+	std::span<const std::byte> layout;
+	std::span<const TranslationLayoutItem> layout_items;
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -154,8 +154,8 @@ struct TranslateResponse {
 	const char *stats_tag;
 
 #if TRANSLATION_ENABLE_SESSION
-	ConstBuffer<void> session;
-	ConstBuffer<void> attach_session;
+	std::span<const std::byte> session;
+	std::span<const std::byte> attach_session;
 #endif
 
 	const char *pool;
@@ -163,38 +163,38 @@ struct TranslateResponse {
 #if TRANSLATION_ENABLE_HTTP
 	/**
 	 * The payload of the #TranslationCommand::INTERNAL_REDIRECT
-	 * packet.  If ConstBuffer::IsNull(), then no
+	 * packet.  If nullptr, then no
 	 * #TranslationCommand::INTERNAL_REDIRECT packet was received.
 	 */
-	ConstBuffer<void> internal_redirect;
+	std::span<const std::byte> internal_redirect;
 
 	/**
 	 * The payload of the HTTP_AUTH packet.  If
-	 * ConstBuffer::IsNull(), then no HTTP_AUTH packet was
+	 * nullptr, then no HTTP_AUTH packet was
 	 * received.
 	 */
-	ConstBuffer<void> http_auth;
+	std::span<const std::byte> http_auth;
 
 	/**
 	 * The payload of the TOKEN_AUTH packet.  If
-	 * ConstBuffer::IsNull(), then no TOKEN_AUTH packet was
+	 * nullptr, then no TOKEN_AUTH packet was
 	 * received.
 	 */
-	ConstBuffer<void> token_auth;
+	std::span<const std::byte> token_auth;
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
 	/**
-	 * The payload of the CHECK packet.  If ConstBuffer::IsNull(),
+	 * The payload of the CHECK packet.  If nullptr,
 	 * then no CHECK packet was received.
 	 */
-	ConstBuffer<void> check;
+	std::span<const std::byte> check;
 
 	/**
-	 * The payload of the AUTH packet.  If ConstBuffer::IsNull(), then
+	 * The payload of the AUTH packet.  If nullptr, then
 	 * no AUTH packet was received.
 	 */
-	ConstBuffer<void> auth;
+	std::span<const std::byte> auth;
 
 	/**
 	 * @see #TranslationCommand::AUTH_FILE,
@@ -205,7 +205,7 @@ struct TranslateResponse {
 	/**
 	 * @see #TranslationCommand::APPEND_AUTH
 	 */
-	ConstBuffer<void> append_auth;
+	std::span<const std::byte> append_auth;
 
 	/**
 	 * @see #TranslationCommand::EXPAND_APPEND_AUTH
@@ -216,16 +216,16 @@ struct TranslateResponse {
 #if TRANSLATION_ENABLE_HTTP
 	/**
 	 * The payload of the #TranslationCommand::WANT_FULL_URI packet.
-	 * If ConstBuffer::IsNull(), then no
+	 * If nullptr, then no
 	 * #TranslationCommand::WANT_FULL_URI packet was received.
 	 */
-	ConstBuffer<void> want_full_uri;
+	std::span<const std::byte> want_full_uri;
 
 	/**
 	 * The payload of the #TranslationCommand::CHAIN
 	 * packet.
 	 */
-	ConstBuffer<void> chain;
+	std::span<const std::byte> chain;
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
@@ -284,16 +284,16 @@ struct TranslateResponse {
 	 */
 	const char *cache_tag;
 
-	ConstBuffer<TranslationCommand> vary;
-	ConstBuffer<TranslationCommand> invalidate;
+	std::span<const TranslationCommand> vary;
+	std::span<const TranslationCommand> invalidate;
 #endif
 
 #if TRANSLATION_ENABLE_WANT
-	ConstBuffer<TranslationCommand> want;
+	std::span<const TranslationCommand> want;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
-	ConstBuffer<void> file_not_found;
+	std::span<const std::byte> file_not_found;
 
 	/**
 	 * From #TranslationCommand::CONTENT_TYPE, but only in reply to
@@ -302,19 +302,19 @@ struct TranslateResponse {
 	 */
 	const char *content_type;
 
-	ConstBuffer<void> enotdir;
+	std::span<const std::byte> enotdir;
 
-	ConstBuffer<void> directory_index;
+	std::span<const std::byte> directory_index;
 #endif
 
-	ConstBuffer<void> error_document;
+	std::span<const std::byte> error_document;
 
 	/**
 	 * From #TranslationCommand::PROBE_PATH_SUFFIXES.
 	 */
-	ConstBuffer<void> probe_path_suffixes;
+	std::span<const std::byte> probe_path_suffixes;
 
-	ConstBuffer<const char *> probe_suffixes;
+	std::span<const char *const> probe_suffixes;
 
 	const char *read_file;
 
@@ -460,21 +460,21 @@ struct TranslateResponse {
 	bool Wants(TranslationCommand cmd) const {
 		assert(protocol_version >= 1);
 
-		return want.Contains(cmd);
+		return std::find(want.begin(), want.end(), cmd) != want.end();
 	}
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
 	[[gnu::pure]]
 	bool VaryContains(TranslationCommand cmd) const {
-		return vary.Contains(cmd);
+		return std::find(vary.begin(), vary.end(), cmd) != vary.end();
 	}
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
 	[[gnu::pure]]
 	bool HasAuth() const {
-		return !auth.IsNull() ||
+		return auth.data() != nullptr ||
 			auth_file != nullptr;
 	}
 

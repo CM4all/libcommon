@@ -91,12 +91,12 @@ class TranslateParser {
 			uri(r.uri),
 #endif
 #if TRANSLATION_ENABLE_HTTP
-			want_full_uri(!r.want_full_uri.IsNull()),
-			chain(!r.chain.IsNull()),
+			want_full_uri(r.want_full_uri.data() != nullptr),
+			chain(r.chain.data() != nullptr),
 #endif
 			want(!r.want.empty())
 #if TRANSLATION_ENABLE_RADDRESS
-			, content_type_lookup(!r.content_type_lookup.IsNull())
+			, content_type_lookup(r.content_type_lookup.data() != nullptr)
 #endif
 		{}
 	} from_request;

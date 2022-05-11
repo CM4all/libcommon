@@ -388,10 +388,10 @@ static void
 FinishTranslateResponse(AllocatorPtr alloc,
 #if TRANSLATION_ENABLE_RADDRESS
 			const char *base_suffix,
-			ConstBuffer<TranslationLayoutItem> layout_items,
+			std::span<const TranslationLayoutItem> layout_items,
 #endif
 			TranslateResponse &response,
-			ConstBuffer<const char *> probe_suffixes)
+			std::span<const char *const> probe_suffixes)
 {
 #if TRANSLATION_ENABLE_RADDRESS
 	if (response.address.IsCgiAlike()) {
@@ -431,7 +431,7 @@ FinishTranslateResponse(AllocatorPtr alloc,
 
 	response.address.Check();
 
-	if (response.layout != nullptr) {
+	if (response.layout.data() != nullptr) {
 		if (layout_items.empty())
 		throw std::runtime_error("empty LAYOUT");
 
@@ -454,19 +454,20 @@ FinishTranslateResponse(AllocatorPtr alloc,
 	response.response_headers.Reverse();
 #endif
 
-	if (!probe_suffixes.IsNull())
+	if (probe_suffixes.data() != nullptr)
 		response.probe_suffixes = alloc.Dup(probe_suffixes);
 
-	if (!response.probe_path_suffixes.IsNull() &&
+	if (response.probe_path_suffixes.data() != nullptr &&
 	    response.probe_suffixes.empty())
 		throw std::runtime_error("PROBE_PATH_SUFFIX without PROBE_SUFFIX");
 
 #if TRANSLATION_ENABLE_HTTP
-	if (!response.internal_redirect.IsNull() && response.uri == nullptr)
+	if (response.internal_redirect.data() != nullptr &&
+	    response.uri == nullptr)
 		throw std::runtime_error("INTERNAL_REDIRECT without URI");
 
-	if (!response.internal_redirect.IsNull() &&
-	    !response.want_full_uri.IsNull())
+	if (response.internal_redirect.data() != nullptr &&
+	    response.want_full_uri.data() != nullptr)
 		throw std::runtime_error("INTERNAL_REDIRECT conflicts with WANT_FULL_URI");
 #endif
 }
@@ -723,7 +724,7 @@ static void
 translate_client_file_not_found(TranslateResponse &response,
 				ConstBuffer<void> payload)
 {
-	if (!response.file_not_found.IsNull())
+	if (response.file_not_found.data() != nullptr)
 		throw std::runtime_error("duplicate FILE_NOT_FOUND packet");
 
 	if (response.test_path == nullptr) {
@@ -776,7 +777,7 @@ static void
 translate_client_enotdir(TranslateResponse &response,
 			 ConstBuffer<void> payload)
 {
-	if (!response.enotdir.IsNull())
+	if (response.enotdir.data() != nullptr)
 		throw std::runtime_error("duplicate ENOTDIR");
 
 	if (response.test_path == nullptr) {
@@ -805,7 +806,7 @@ static void
 translate_client_directory_index(TranslateResponse &response,
 				 ConstBuffer<void> payload)
 {
-	if (!response.directory_index.IsNull())
+	if (response.directory_index.data() != nullptr)
 		throw std::runtime_error("duplicate DIRECTORY_INDEX");
 
 	if (response.test_path == nullptr) {
@@ -1829,23 +1830,26 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::VARY:
 #if TRANSLATION_ENABLE_CACHE
 		if (payload.empty() ||
-		    payload.size % sizeof(response.vary.data[0]) != 0)
+		    payload.size % sizeof(response.vary.front()) != 0)
 			throw std::runtime_error("malformed VARY packet");
 
-		response.vary.data = (const TranslationCommand *)payload.data;
-		response.vary.size = payload.size / sizeof(response.vary.data[0]);
+		response.vary = {
+			(const TranslationCommand *)payload.data,
+			payload.size / sizeof(response.vary.front()),
+		};
 #endif
 		return;
 
 	case TranslationCommand::INVALIDATE:
 #if TRANSLATION_ENABLE_CACHE
 		if (payload.empty() ||
-		    payload.size % sizeof(response.invalidate.data[0]) != 0)
+		    payload.size % sizeof(response.invalidate.front()) != 0)
 			throw std::runtime_error("malformed INVALIDATE packet");
 
-		response.invalidate.data = (const TranslationCommand *)payload.data;
-		response.invalidate.size = payload.size /
-			sizeof(response.invalidate.data[0]);
+		response.invalidate = {
+			(const TranslationCommand *)payload.data,
+			payload.size / sizeof(response.invalidate.front()),
+		};
 #endif
 		return;
 
@@ -1855,7 +1859,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		    string_payload.back() != '/')
 			throw std::runtime_error("malformed BASE packet");
 
-		if (response.layout != nullptr) {
+		if (response.layout.data() != nullptr) {
 			if (layout_items_builder.full())
 				throw std::runtime_error("too many BASE packets");
 
@@ -1918,7 +1922,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidNonEmptyString(string_payload))
 			throw std::runtime_error("malformed REGEX packet");
 
-		if (response.layout != nullptr) {
+		if (response.layout.data() != nullptr) {
 			if (layout_items_builder.full())
 				throw std::runtime_error("too many REGEX packets");
 
@@ -1963,7 +1967,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		if (response.regex == nullptr &&
 		    response.inverse_regex == nullptr &&
-		    response.layout == nullptr)
+		    response.layout.data() == nullptr)
 			throw std::runtime_error("misplaced REGEX_TAIL packet");
 
 		if (response.regex_tail)
@@ -2191,7 +2195,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::CHECK:
 #if TRANSLATION_ENABLE_SESSION
-		if (!response.check.IsNull())
+		if (response.check.data() != nullptr)
 			throw std::runtime_error("duplicate CHECK packet");
 
 		response.check = payload;
@@ -2504,7 +2508,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (from_request.want_full_uri)
 			throw std::runtime_error("WANT_FULL_URI loop");
 
-		if (!response.want_full_uri.IsNull())
+		if (response.want_full_uri.data() != nullptr)
 			throw std::runtime_error("duplicate WANT_FULL_URI packet");
 
 		response.want_full_uri = payload;
@@ -2681,10 +2685,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.HasAuth())
 			throw std::runtime_error("duplicate AUTH packet");
 
-		if (!response.http_auth.IsNull())
+		if (response.http_auth.data() != nullptr)
 			throw std::runtime_error("cannot combine AUTH and HTTP_AUTH");
 
-		if (!response.token_auth.IsNull())
+		if (response.token_auth.data() != nullptr)
 			throw std::runtime_error("cannot combine AUTH and TOKEN_AUTH");
 
 		response.auth = payload;
@@ -2790,7 +2794,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::PROBE_PATH_SUFFIXES:
-		if (!response.probe_path_suffixes.IsNull() ||
+		if (response.probe_path_suffixes.data() != nullptr ||
 		    response.test_path == nullptr)
 			throw std::runtime_error("misplaced PROBE_PATH_SUFFIXES packet");
 
@@ -2798,7 +2802,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::PROBE_SUFFIX:
-		if (response.probe_path_suffixes.IsNull())
+		if (response.probe_path_suffixes.data() == nullptr)
 			throw std::runtime_error("misplaced PROBE_SUFFIX packet");
 
 		if (probe_suffixes_builder.full())
@@ -2845,7 +2849,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::APPEND_AUTH:
 #if TRANSLATION_ENABLE_SESSION
 		if (!response.HasAuth() ||
-		    !response.append_auth.IsNull() ||
+		    response.append_auth.data() != nullptr ||
 		    response.expand_append_auth != nullptr)
 			throw std::runtime_error("misplaced APPEND_AUTH packet");
 
@@ -2859,7 +2863,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_SESSION
 		if (response.regex == nullptr ||
 		    !response.HasAuth() ||
-		    !response.append_auth.IsNull() ||
+		    response.append_auth.data() != nullptr ||
 		    response.expand_append_auth != nullptr)
 			throw std::runtime_error("misplaced EXPAND_APPEND_AUTH packet");
 
@@ -3046,7 +3050,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::INTERNAL_REDIRECT:
 #if TRANSLATION_ENABLE_HTTP
-		if (!response.internal_redirect.IsNull())
+		if (response.internal_redirect.data() != nullptr)
 			throw std::runtime_error("duplicate INTERNAL_REDIRECT packet");
 
 		response.internal_redirect = payload;
@@ -3057,10 +3061,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::HTTP_AUTH:
 #if TRANSLATION_ENABLE_HTTP
-		if (!response.http_auth.IsNull())
+		if (response.http_auth.data() != nullptr)
 			throw std::runtime_error("duplicate HTTP_AUTH packet");
 
-		if (!response.auth.IsNull())
+		if (response.auth.data() != nullptr)
 			throw std::runtime_error("cannot combine AUTH and HTTP_AUTH");
 
 		response.http_auth = payload;
@@ -3071,10 +3075,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::TOKEN_AUTH:
 #if TRANSLATION_ENABLE_HTTP
-		if (!response.token_auth.IsNull())
+		if (response.token_auth.data() != nullptr)
 			throw std::runtime_error("duplicate TOKEN_AUTH packet");
 
-		if (!response.auth.IsNull())
+		if (response.auth.data() != nullptr)
 			throw std::runtime_error("cannot combine AUTH and TOKEN_AUTH");
 
 		response.token_auth = payload;
@@ -3602,7 +3606,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::CHAIN:
 #if TRANSLATION_ENABLE_HTTP
-		if (!response.chain.IsNull())
+		if (response.chain.data() != nullptr)
 			throw std::runtime_error("duplicate CHAIN packet");
 
 		response.chain = payload;
@@ -3664,7 +3668,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (payload.empty())
 			throw std::runtime_error("malformed ATTACH_SESSION packet");
 
-		if (!response.attach_session.IsNull())
+		if (response.attach_session.data() != nullptr)
 			throw std::runtime_error("duplicate ATTACH_SESSION packet");
 
 		response.attach_session = payload;
@@ -3688,7 +3692,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (payload.empty())
 			throw std::runtime_error("malformed LAYOUT packet");
 
-		if (response.layout != nullptr)
+		if (response.layout.data() != nullptr)
 			throw std::runtime_error("duplicate LAYOUT packet");
 
 		response.layout = payload;
@@ -3760,7 +3764,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed TRANSPARENT_CHAIN packet");
 
-		if (response.chain == nullptr)
+		if (response.chain.data() == nullptr)
 			throw std::runtime_error("TRANSPARENT_CHAIN without CHAIN");
 
 		if (response.transparent_chain)
