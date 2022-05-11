@@ -107,9 +107,9 @@ public:
 		return *this;
 	}
 
-	AllocatedArray &operator=(std::nullptr_t n) noexcept {
+	AllocatedArray &operator=(std::nullptr_t) noexcept {
 		delete[] buffer.data();
-		buffer = n;
+		buffer = {};
 		return *this;
 	}
 
@@ -122,11 +122,11 @@ public:
 	}
 
 	constexpr bool operator==(std::nullptr_t) const noexcept {
-		return buffer == nullptr;
+		return buffer.data() == nullptr;
 	}
 
 	constexpr bool operator!=(std::nullptr_t) const noexcept {
-		return buffer != nullptr;
+		return buffer.data() != nullptr;
 	}
 
 	/**
