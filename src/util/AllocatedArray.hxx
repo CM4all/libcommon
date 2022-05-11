@@ -193,7 +193,7 @@ public:
 	}
 
 	constexpr const_iterator begin() const noexcept {
-		return buffer.cbegin();
+		return buffer.begin();
 	}
 
 	iterator end() noexcept {
@@ -201,7 +201,7 @@ public:
 	}
 
 	constexpr const_iterator end() const noexcept {
-		return buffer.cend();
+		return buffer.end();
 	}
 
 	/**
