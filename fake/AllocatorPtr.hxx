@@ -38,6 +38,7 @@
 #include <forward_list>
 #include <functional>
 #include <new>
+#include <span>
 
 #include <stdlib.h>
 #include <string.h>
@@ -142,7 +143,7 @@ private:
 		return sv.size();
 	}
 
-	static constexpr size_t ConcatLength(ConstBuffer<StringView> s) noexcept {
+	static constexpr size_t ConcatLength(std::span<const StringView> s) noexcept {
 		size_t length = 0;
 		for (const auto &i : s)
 			length += i.size;
@@ -162,7 +163,7 @@ private:
 		return (char *)mempcpy(p, sv.data(), sv.size());
 	}
 
-	static char *ConcatCopy(char *p, ConstBuffer<StringView> s) noexcept {
+	static char *ConcatCopy(char *p, std::span<const StringView> s) noexcept {
 		for (const auto &i : s)
 			p = ConcatCopy(p, i);
 		return p;
@@ -216,11 +217,15 @@ public:
 		return p;
 	}
 
-	ConstBuffer<void> Dup(ConstBuffer<void> src) const noexcept;
+	std::span<const std::byte> Dup(std::span<const std::byte> src) const noexcept;
 
 	template<typename T>
-	ConstBuffer<T> Dup(ConstBuffer<T> src) const noexcept {
-		return ConstBuffer<T>::FromVoid(Dup(src.ToVoid()));
+	std::span<const T> Dup(std::span<const T> src) const noexcept {
+		auto dest = Dup(std::as_bytes(src));
+		return {
+			(const T *)(const void *)(dest.data()),
+			dest.size() / sizeof(T),
+		};
 	}
 
 	StringView Dup(StringView src) const noexcept {
