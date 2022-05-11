@@ -118,6 +118,7 @@ public:
 
 	void WriteString(std::string_view value) {
 		Write(std::span{value});
+		WriteU8(0);
 	}
 
 	void WriteString(SpawnExecCommand cmd, std::string_view value) {
