@@ -89,7 +89,6 @@ public:
 
 		header.crc = crc.checksum();
 
-		const ConstBuffer<struct iovec> b = v;
-		return std::span{b};
+		return std::span{v};
 	}
 };

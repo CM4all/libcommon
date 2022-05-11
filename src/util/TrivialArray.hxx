@@ -29,9 +29,6 @@
 
 #pragma once
 
-#include "ConstBuffer.hxx"
-#include "WritableBuffer.hxx"
-
 #include <algorithm>
 #include <array>
 #include <initializer_list>
@@ -97,14 +94,6 @@ public:
 	}
 
 	constexpr operator std::span<T>() noexcept {
-		return {data(), size()};
-	}
-
-	constexpr operator ConstBuffer<T>() const noexcept {
-		return {data(), size()};
-	}
-
-	constexpr operator WritableBuffer<T>() noexcept {
 		return {data(), size()};
 	}
 
