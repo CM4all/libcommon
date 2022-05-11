@@ -818,3 +818,46 @@ TEST(MultiStock, FadeOuter)
 	ASSERT_EQ(foo.ready, 1);
 	ASSERT_EQ(foo.failed, 0);
 }
+
+TEST(MultiStock, ConsumedRequest)
+{
+	Instance instance{2};
+
+	Partition foo{instance, "foo"};
+
+	/* create 6 (4 ready and 2 waiting) */
+	foo.Get(6);
+	instance.RunSome();
+	ASSERT_EQ(foo.factory_created, 2);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 6);
+	ASSERT_EQ(foo.waiting, 2);
+	ASSERT_EQ(foo.ready, 4);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* release 2 */
+	foo.PutDirty(2);
+	ASSERT_EQ(foo.factory_created, 2);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 1);
+	ASSERT_EQ(foo.total, 4);
+	ASSERT_EQ(foo.waiting, 2);
+	ASSERT_EQ(foo.ready, 2);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* create a new one */
+	/* this triggers a bug: the "request" object is consumed, but
+	   the item will be used by the old "waiting" list, causing an
+	   assertion failure when another item needs to be created,
+	   but the request object is gone */
+	foo.Get(1);
+	instance.RunSome();
+	ASSERT_EQ(foo.factory_created, 3);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 1);
+	ASSERT_EQ(foo.total, 5);
+	ASSERT_EQ(foo.waiting, 1);
+	ASSERT_EQ(foo.ready, 4);
+	ASSERT_EQ(foo.failed, 0);
+}
