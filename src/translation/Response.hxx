@@ -54,6 +54,7 @@
 #include "http/Status.h"
 #endif
 
+#include <algorithm> // for std::find()
 #include <chrono>
 #include <span>
 
