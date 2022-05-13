@@ -31,6 +31,7 @@
  */
 
 #include "LoadFile.hxx"
+#include "UniqueCertKey.hxx"
 #include "Key.hxx"
 #include "Error.hxx"
 #include "UniqueBIO.hxx"
@@ -120,14 +121,18 @@ LoadKeyFile(const char *path)
 	return UniqueEVP_PKEY(key);
 }
 
-std::pair<UniqueX509, UniqueEVP_PKEY>
+UniqueCertKey
 LoadCertKeyFile(const char *cert_path, const char *key_path)
 {
-	std::pair pair{LoadCertFile(cert_path), LoadKeyFile(key_path)};
-	if (!MatchModulus(*pair.first, *pair.second))
+	UniqueCertKey ck{
+		LoadCertFile(cert_path),
+		LoadKeyFile(key_path),
+	};
+
+	if (!MatchModulus(*ck.cert, *ck.key))
 		throw std::runtime_error("Key does not match certificate");
 
-	return pair;
+	return ck;
 }
 
 std::pair<std::forward_list<UniqueX509>, UniqueEVP_PKEY>

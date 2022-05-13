@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,34 +30,25 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Load OpenSSL objects from files.
- */
+#pragma once
 
-#ifndef SSL_LOAD_FILE_HXX
-#define SSL_LOAD_FILE_HXX
-
-#include "UniqueEVP.hxx"
 #include "UniqueX509.hxx"
+#include "UniqueEVP.hxx"
 
-#include <forward_list>
-#include <utility>
+struct UniqueCertKey {
+	UniqueX509 cert;
+	UniqueEVP_PKEY key;
 
-struct UniqueCertKey;
+	operator bool() const noexcept {
+		return (bool)key;
+	}
+};
 
-UniqueX509
-LoadCertFile(const char *path);
-
-std::forward_list<UniqueX509>
-LoadCertChainFile(const char *path, bool first_is_ca=true);
-
-UniqueEVP_PKEY
-LoadKeyFile(const char *path);
-
-UniqueCertKey
-LoadCertKeyFile(const char *cert_path, const char *key_path);
-
-std::pair<std::forward_list<UniqueX509>, UniqueEVP_PKEY>
-LoadCertChainKeyFile(const char *cert_path, const char *key_path);
-
-#endif
+static inline UniqueCertKey
+UpRef(const UniqueCertKey &cert_key) noexcept
+{
+	return {
+		UpRef(*cert_key.cert),
+		UpRef(*cert_key.key),
+	};
+}
