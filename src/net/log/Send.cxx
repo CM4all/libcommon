@@ -42,6 +42,12 @@
 
 #include <sys/socket.h>
 
+static struct iovec
+MakeIovec(const char *s) noexcept
+{
+	return { const_cast<char *>(s), strlen(s) + 1 };
+}
+
 static constexpr struct iovec
 MakeIovec(std::string_view s) noexcept
 {
