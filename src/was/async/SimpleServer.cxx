@@ -106,7 +106,7 @@ SimpleServer::AbortProtocolError(const char *msg) noexcept
 
 bool
 SimpleServer::OnWasControlPacket(enum was_command cmd,
-				 ConstBuffer<void> payload) noexcept
+				 std::span<const std::byte> payload) noexcept
 {
 	switch (cmd) {
 	case WAS_COMMAND_NOP:
@@ -133,13 +133,13 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
-		if (payload.size != sizeof(request.request->method)) {
+		if (payload.size() != sizeof(request.request->method)) {
 			AbortProtocolError("malformed METHOD packet");
 			return false;
 		}
 
 		{
-			auto method = *(const http_method_t *)payload.data;
+			auto method = *(const http_method_t *)payload.data();
 			if (request.request->method != HTTP_METHOD_GET &&
 			    method != request.request->method) {
 				/* sending that packet twice is illegal */
@@ -164,32 +164,32 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
-		request.request->uri.assign((const char *)payload.data,
-					    payload.size);
+		request.request->uri.assign((const char *)payload.data(),
+					    payload.size());
 		break;
 
 	case WAS_COMMAND_SCRIPT_NAME:
 		if (request.state != Request::State::HEADERS)
 			AbortProtocolError("misplaced SCRIPT_NAME packet");
 
-		request.request->script_name.assign((const char *)payload.data,
-						    payload.size);
+		request.request->script_name.assign((const char *)payload.data(),
+						    payload.size());
 		break;
 
 	case WAS_COMMAND_PATH_INFO:
 		if (request.state != Request::State::HEADERS)
 			AbortProtocolError("misplaced PATH_INFO packet");
 
-		request.request->path_info.assign((const char *)payload.data,
-						    payload.size);
+		request.request->path_info.assign((const char *)payload.data(),
+						    payload.size());
 		break;
 
 	case WAS_COMMAND_QUERY_STRING:
 		if (request.state != Request::State::HEADERS)
 			AbortProtocolError("misplaced QUERY_STRING packet");
 
-		request.request->query_string.assign((const char *)payload.data,
-						     payload.size);
+		request.request->query_string.assign((const char *)payload.data(),
+						     payload.size());
 		break;
 
 	case WAS_COMMAND_HEADER:
@@ -257,8 +257,8 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		}
 
 		{
-			auto length_p = (const uint64_t *)payload.data;
-			if (payload.size != sizeof(*length_p)) {
+			auto length_p = (const uint64_t *)payload.data();
+			if (payload.size() != sizeof(*length_p)) {
 				AbortProtocolError("malformed LENGTH packet");
 				return false;
 			}
@@ -282,8 +282,8 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 
 	case WAS_COMMAND_PREMATURE:
 		{
-			auto length_p = (const uint64_t *)payload.data;
-			if (payload.size != sizeof(*length_p)) {
+			auto length_p = (const uint64_t *)payload.data();
+			if (payload.size() != sizeof(*length_p)) {
 				AbortError(std::make_exception_ptr("malformed PREMATURE packet"));
 				return false;
 			}
@@ -302,8 +302,8 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		if (request.state != Request::State::HEADERS)
 			AbortProtocolError("misplaced REMOTE_HOST packet");
 
-		request.request->remote_host.assign((const char *)payload.data,
-						    payload.size);
+		request.request->remote_host.assign((const char *)payload.data(),
+						    payload.size());
 		break;
 	}
 

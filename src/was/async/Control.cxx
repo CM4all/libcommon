@@ -33,7 +33,6 @@
 #include "Control.hxx"
 #include "Error.hxx"
 #include "system/Error.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <was/protocol.h>
 
@@ -109,7 +108,7 @@ Control::OnBufferedData()
 			return BufferedResult::MORE;
 		}
 
-		const void *payload = header + 1;
+		const std::byte *payload = (const std::byte *)header + 1;
 
 		socket.KeepConsumed(sizeof(*header) + header->length);
 
@@ -264,7 +263,7 @@ Control::SendPair(enum was_command cmd, std::string_view name,
 
 bool
 Control::SendArray(enum was_command cmd,
-		   ConstBuffer<const char *> values) noexcept
+		   std::span<const char *const> values) noexcept
 {
 	for (auto value : values) {
 		assert(value != nullptr);

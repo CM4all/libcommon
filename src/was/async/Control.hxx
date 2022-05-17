@@ -37,9 +37,9 @@
 
 #include <was/protocol.h>
 
+#include <cstddef>
+#include <span>
 #include <string_view>
-
-template<typename T> struct ConstBuffer;
 
 namespace Was {
 
@@ -51,7 +51,7 @@ public:
 	 * @return false if the object was closed
 	 */
 	virtual bool OnWasControlPacket(enum was_command cmd,
-					ConstBuffer<void> payload) noexcept = 0;
+					std::span<const std::byte> payload) noexcept = 0;
 
 	/**
 	 * Called after a group of control packets have been handled, and
@@ -129,7 +129,7 @@ public:
 	}
 
 	bool SendArray(enum was_command cmd,
-		       ConstBuffer<const char *> values) noexcept;
+		       std::span<const char *const> values) noexcept;
 
 	void Done() noexcept;
 
