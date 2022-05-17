@@ -60,6 +60,12 @@ struct CgroupOptions {
 	const char *session = nullptr;
 
 	/**
+	 * A list of cgroup extended attributes.  They should usually
+	 * be in the "user" namespace.
+	 */
+	AssignmentList xattr;
+
+	/**
 	 * A list of cgroup controller settings.
 	 *
 	 * The name of the controller setting,
@@ -76,6 +82,7 @@ struct CgroupOptions {
 				const CgroupOptions &src) noexcept
 		:name(src.name),
 		 session(src.session),
+		 xattr(shallow_copy, src.xattr),
 		 set(shallow_copy, src.set) {}
 
 	CgroupOptions(CgroupOptions &&) = default;
@@ -84,6 +91,9 @@ struct CgroupOptions {
 	constexpr bool IsDefined() const noexcept {
 		return name != nullptr;
 	}
+
+	void SetXattr(AllocatorPtr alloc,
+		      std::string_view name, std::string_view value) noexcept;
 
 	void Set(AllocatorPtr alloc,
 		 std::string_view name, std::string_view value) noexcept;

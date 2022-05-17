@@ -45,6 +45,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/xattr.h>
 #include <limits.h>
 
 #ifndef __linux__
@@ -54,8 +55,16 @@
 CgroupOptions::CgroupOptions(AllocatorPtr alloc,
 			     const CgroupOptions &src) noexcept
 	:name(alloc.CheckDup(src.name)),
+	 xattr(alloc, src.xattr),
 	 set(alloc, src.set)
 {
+}
+
+void
+CgroupOptions::SetXattr(AllocatorPtr alloc,
+			std::string_view _name, std::string_view _value) noexcept
+{
+	xattr.Add(alloc, _name, _value);
 }
 
 void
@@ -136,6 +145,18 @@ CgroupOptions::Create2(const CgroupState &state) const
 	assert(state.memory_v2);
 
 	auto fd = MakeCgroup(state.mounts.front().fd, name);
+
+	if (!xattr.empty()) {
+		/* reopen the directory because fsetxattr() refuses to
+		   work with an O_PATH fildescriptor */
+		auto d = OpenDirectory(fd, ".");
+
+		for (const auto &i : xattr)
+			if (fsetxattr(d.Get(), i.name,
+				      i.value, strlen(i.value), 0) < 0)
+				throw FormatErrno("Failed to set xattr '%s'",
+						  i.name);
+	}
 
 	for (const auto &s : set)
 		WriteCgroupFile(state, fd, s.name, s.value);

@@ -88,6 +88,7 @@ enum class SpawnExecCommand : uint8_t {
 	CGROUP,
 	CGROUP_SESSION,
 	CGROUP_SET,
+	CGROUP_XATTR,
 	PRIORITY,
 	SCHED_IDLE_,
 	IOPRIO_IDLE,

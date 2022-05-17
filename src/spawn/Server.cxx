@@ -724,6 +724,22 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 			break;
 
+		case SpawnExecCommand::CGROUP_XATTR:
+			if (p.cgroup != nullptr) {
+				const char *_name = payload.ReadString();
+				const char *_value = payload.ReadString();
+				strings.emplace_front(_name);
+				_name = strings.front().c_str();
+				strings.emplace_front(_value);
+				_value = strings.front().c_str();
+
+				assignments.emplace_front(_name, _value);
+				cgroup.xattr.Add(assignments.front());
+			} else
+				throw MalformedSpawnPayloadError();
+
+			break;
+
 		case SpawnExecCommand::PRIORITY:
 			payload.ReadInt(p.priority);
 			break;

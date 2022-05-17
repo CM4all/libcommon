@@ -188,6 +188,12 @@ Serialize(SpawnSerializer &s, const CgroupOptions &c)
 	s.WriteOptionalString(SpawnExecCommand::CGROUP, c.name);
 	s.WriteOptionalString(SpawnExecCommand::CGROUP_SESSION, c.session);
 
+	for (const auto &i : c.xattr) {
+		s.Write(SpawnExecCommand::CGROUP_XATTR);
+		s.WriteString(i.name);
+		s.WriteString(i.value);
+	}
+
 	for (const auto &i : c.set) {
 		s.Write(SpawnExecCommand::CGROUP_SET);
 		s.WriteString(i.name);
