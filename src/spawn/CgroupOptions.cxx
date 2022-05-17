@@ -38,7 +38,6 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "util/StringAPI.hxx"
-#include "util/StringView.hxx"
 #include "util/RuntimeError.hxx"
 
 #include <assert.h>
@@ -67,7 +66,7 @@ CgroupOptions::CgroupOptions(AllocatorPtr alloc,
 
 void
 CgroupOptions::Set(AllocatorPtr alloc,
-		   StringView _name, StringView _value) noexcept
+		   std::string_view _name, std::string_view _value) noexcept
 {
 	auto *new_set = alloc.New<SetItem>(alloc.DupZ(_name), alloc.DupZ(_value));
 	set.push_front(*new_set);

@@ -35,9 +35,10 @@
 #include "util/IntrusiveForwardList.hxx"
 #include "util/ShallowCopy.hxx"
 
+#include <string_view>
+
 class AllocatorPtr;
 class UniqueFileDescriptor;
-struct StringView;
 struct CgroupState;
 
 /**
@@ -96,7 +97,7 @@ struct CgroupOptions {
 	}
 
 	void Set(AllocatorPtr alloc,
-		 StringView name, StringView value) noexcept;
+		 std::string_view name, std::string_view value) noexcept;
 
 	/**
 	 * Create a cgroup2 group.  Returns an undefined
