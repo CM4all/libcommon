@@ -104,6 +104,13 @@ CgroupState::EnableAllControllers() const
 		if (!mount.empty())
 			continue;
 
+		if (controller == "cpuset")
+			/* ignoring the "cpuset" controller because we
+			   never used it and its cpuset_css_online()
+			   function adds 70ms delay */
+			// TODO make this a runtime configuration
+			continue;
+
 		if (!subtree_control.empty())
 			subtree_control.push_back(' ');
 		subtree_control.push_back('+');
