@@ -195,7 +195,7 @@ Send(SocketDescriptor s, const Datagram &d)
 
 	const auto begin = std::next(v.begin()), end = v.end();
 	for (auto i = begin; i != end; ++i)
-		crc.Update({i->iov_base, i->iov_len});
+		crc.Update(std::span{(const std::byte *)i->iov_base, i->iov_len});
 
 	const uint32_t crc_value = ToBE32(crc.Finish());
 	v.push_back(MakeIovecT(crc_value));

@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "ConstBuffer.hxx"
-
+#include <cstddef>
 #include <cstdint>
+#include <span>
 
 /**
  * A naive (and slow) CRC-32/ISO-HDLC implementation.
@@ -47,14 +47,10 @@ private:
 	value_type state = 0xffffffff;
 
 public:
-	constexpr const auto &Update(ConstBuffer<uint8_t> b) noexcept {
+	constexpr const auto &Update(std::span<const std::byte> b) noexcept {
 		for (auto i : b)
-			state = Update(state, i);
+			state = Update(state, (uint8_t)i);
 		return *this;
-	}
-
-	constexpr auto &Update(ConstBuffer<void> b) noexcept {
-		return Update(ConstBuffer<uint8_t>::FromVoid(b));
 	}
 
 	constexpr value_type Finish() const noexcept {

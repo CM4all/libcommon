@@ -36,5 +36,6 @@
 
 TEST(CRC32, Basic)
 {
-	EXPECT_EQ(CRC32{}.Update({"123456789", 9}).Finish(), 0xcbf43926);
+	EXPECT_EQ(CRC32{}.Update(std::as_bytes(std::span{"123456789", 9})).Finish(),
+		  0xcbf43926);
 }
