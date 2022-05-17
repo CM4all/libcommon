@@ -40,18 +40,20 @@
 #include "util/ByteOrder.hxx"
 #include "util/StaticArray.hxx"
 
+#include <string.h>
 #include <sys/socket.h>
 
-static struct iovec
-MakeIovec(const char *s) noexcept
+static void
+PushString(auto &v, const char *s) noexcept
 {
-	return { const_cast<char *>(s), strlen(s) + 1 };
+	v.emplace_back(MakeIovec(std::span{const_cast<char *>(s), strlen(s) + 1}));
 }
 
-static constexpr struct iovec
-MakeIovec(std::string_view s) noexcept
+static void
+PushString(auto &v, std::string_view s) noexcept
 {
-	return MakeIovec(std::span{s});
+	v.push_back(MakeIovec(std::span{s}));
+	v.push_back(MakeIovecStatic<char, 0>());
 }
 
 namespace Net {
@@ -81,22 +83,22 @@ Send(SocketDescriptor s, const Datagram &d)
 
 	if (d.remote_host != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::REMOTE_HOST>());
-		v.push_back(MakeIovec(d.remote_host));
+		PushString(v, d.remote_host);
 	}
 
 	if (d.host != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::HOST>());
-		v.push_back(MakeIovec(d.host));
+		PushString(v, d.host);
 	}
 
 	if (d.site != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::SITE>());
-		v.push_back(MakeIovec(d.site));
+		PushString(v, d.site);
 	}
 
 	if (d.forwarded_to != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::FORWARDED_TO>());
-		v.push_back(MakeIovec(d.forwarded_to));
+		PushString(v, d.forwarded_to);
 	}
 
 	uint8_t http_method;
@@ -108,23 +110,22 @@ Send(SocketDescriptor s, const Datagram &d)
 
 	if (d.http_uri != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::HTTP_URI>());
-		v.push_back(MakeIovec(d.http_uri));
+		PushString(v, d.http_uri);
 	}
 
 	if (d.http_referer != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::HTTP_REFERER>());
-		v.push_back(MakeIovec(d.http_referer));
+		PushString(v, d.http_referer);
 	}
 
 	if (d.user_agent != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::USER_AGENT>());
-		v.push_back(MakeIovec(d.user_agent));
+		PushString(v, d.user_agent);
 	}
 
 	if (d.message != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::MESSAGE>());
-		v.push_back(MakeIovec(d.message));
-		v.push_back(MakeIovecStatic<uint8_t, 0>());
+		PushString(v, d.message);
 	}
 
 	uint16_t http_status;
