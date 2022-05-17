@@ -495,7 +495,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 	std::forward_list<Mount> mounts;
 	std::forward_list<std::string> strings;
-	std::forward_list<CgroupOptions::SetItem> cgroup_sets;
+	std::forward_list<AssignmentList::Item> assignments;
 
 	while (!payload.IsEmpty()) {
 		const SpawnExecCommand cmd = (SpawnExecCommand)payload.ReadByte();
@@ -716,9 +716,9 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				strings.emplace_front(set_value);
 				set_value = strings.front().c_str();
 
-				cgroup_sets.emplace_front(set_name, set_value);
-				auto &set = cgroup_sets.front();
-				cgroup.set.push_front(set);
+				assignments.emplace_front(set_name, set_value);
+				auto &set = assignments.front();
+				cgroup.set.Add(set);
 			} else
 				throw MalformedSpawnPayloadError();
 

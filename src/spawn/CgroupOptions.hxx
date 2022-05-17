@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "util/IntrusiveForwardList.hxx"
+#include "adata/AssignmentList.hxx"
 #include "util/ShallowCopy.hxx"
 
 #include <string_view>
@@ -59,26 +59,15 @@ struct CgroupOptions {
 	 */
 	const char *session = nullptr;
 
-	struct SetItem : IntrusiveForwardListHook {
-		/**
-		 * The filename of the controller setting,
-		 * e.g. "cpu.shares".
-		 */
-		const char *const name;
-
-		/**
-		 * The value to be written to the specified setting.
-		 */
-		const char *const value;
-
-		constexpr SetItem(const char *_name, const char *_value)
-		:name(_name), value(_value) {}
-	};
-
 	/**
 	 * A list of cgroup controller settings.
+	 *
+	 * The name of the controller setting,
+	 * e.g. "cpu.shares".
+	 *
+	 * The value to be written to the specified setting.
 	 */
-	IntrusiveForwardList<SetItem> set;
+	AssignmentList set;
 
 	CgroupOptions() = default;
 	CgroupOptions(AllocatorPtr alloc, const CgroupOptions &src) noexcept;

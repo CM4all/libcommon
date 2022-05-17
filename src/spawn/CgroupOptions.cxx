@@ -53,23 +53,16 @@
 
 CgroupOptions::CgroupOptions(AllocatorPtr alloc,
 			     const CgroupOptions &src) noexcept
-	:name(alloc.CheckDup(src.name))
+	:name(alloc.CheckDup(src.name)),
+	 set(alloc, src.set)
 {
-	auto set_tail = set.before_begin();
-
-	for (const auto &i : src.set) {
-		auto *new_set = alloc.New<SetItem>(alloc.Dup(i.name),
-						   alloc.Dup(i.value));
-		set_tail = set.insert_after(set_tail, *new_set);
-	}
 }
 
 void
 CgroupOptions::Set(AllocatorPtr alloc,
 		   std::string_view _name, std::string_view _value) noexcept
 {
-	auto *new_set = alloc.New<SetItem>(alloc.DupZ(_name), alloc.DupZ(_value));
-	set.push_front(*new_set);
+	set.Add(alloc, _name, _value);
 }
 
 static void

@@ -1,6 +1,7 @@
 adata = static_library(
   'adata',
   'ExpandableStringList.cxx',
+  'AssignmentList.cxx',
   include_directories: inc,
 )
 
