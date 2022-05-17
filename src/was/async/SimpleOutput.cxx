@@ -95,11 +95,11 @@ SimpleOutput::TryWrite()
 	assert(buffer);
 	assert(position < buffer.size());
 
-	ConstBuffer<std::byte> r = buffer;
-	r.skip_front(position);
+	std::span<const std::byte> r = buffer;
+	r = r.subspan(position);
 	assert(!r.empty());
 
-	auto nbytes = GetPipe().Write(r.data, r.size);
+	auto nbytes = GetPipe().Write(r.data(), r.size());
 	if (nbytes <= 0) {
 		if (nbytes == 0 || errno == EAGAIN) {
 			event.ScheduleWrite();

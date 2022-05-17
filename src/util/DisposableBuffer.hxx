@@ -33,8 +33,8 @@
 #pragma once
 
 #include "DisposablePointer.hxx"
-#include "ConstBuffer.hxx"
 
+#include <span>
 #include <string_view>
 
 /**
@@ -57,11 +57,7 @@ public:
 	DisposableBuffer &operator=(DisposableBuffer &&) noexcept = default;
 
 	static DisposableBuffer Dup(std::string_view src) noexcept;
-	static DisposableBuffer Dup(ConstBuffer<std::byte> src) noexcept;
-
-	static DisposableBuffer Dup(ConstBuffer<void> src) noexcept {
-		return Dup(ConstBuffer<std::byte>::FromVoid(src));
-	}
+	static DisposableBuffer Dup(std::span<const std::byte> src) noexcept;
 
 	operator bool() const noexcept {
 		return data_;
@@ -83,11 +79,7 @@ public:
 		return {(const char *)data_.get(), size()};
 	}
 
-	operator ConstBuffer<void>() const noexcept {
-		return {data_.get(), size()};
-	}
-
-	operator ConstBuffer<std::byte>() const noexcept {
+	operator std::span<const std::byte>() const noexcept {
 		return {(const std::byte *)data_.get(), size()};
 	}
 };

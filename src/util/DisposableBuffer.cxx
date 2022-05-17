@@ -43,12 +43,12 @@ DisposableBuffer::Dup(std::string_view src) noexcept
 }
 
 DisposableBuffer
-DisposableBuffer::Dup(ConstBuffer<std::byte> src) noexcept
+DisposableBuffer::Dup(std::span<const std::byte> src) noexcept
 {
-	if (src == nullptr)
+	if (src.data() == nullptr)
 		return nullptr;
 
-	DisposableBuffer b{ToDeleteArray(new std::byte[src.size]), src.size};
+	DisposableBuffer b{ToDeleteArray(new std::byte[src.size()]), src.size()};
 	std::copy(src.begin(), src.end(), (std::byte *)b.data());
 	return b;
 }
