@@ -73,11 +73,14 @@ Send(SocketDescriptor s, const Datagram &d)
 
 	v.push_back(MakeIovecStatic<uint32_t, ToBE32(MAGIC_V2)>());
 
-	uint64_t timestamp;
+	struct {
+		Attribute attribute;
+		PackedBE64 value;
+	} timestamp;
 
 	if (d.HasTimestamp()) {
-		v.push_back(MakeIovecAttribute<Attribute::TIMESTAMP>());
-		timestamp = ToBE64(d.timestamp.time_since_epoch().count());
+		timestamp.attribute = Attribute::TIMESTAMP;
+		timestamp.value = d.timestamp.time_since_epoch().count();
 		v.push_back(MakeIovecT(timestamp));
 	}
 
@@ -101,10 +104,14 @@ Send(SocketDescriptor s, const Datagram &d)
 		PushString(v, d.forwarded_to);
 	}
 
-	uint8_t http_method;
+	struct {
+		Attribute attribute;
+		uint8_t value;
+	} http_method;
+
 	if (d.HasHttpMethod()) {
-		v.push_back(MakeIovecAttribute<Attribute::HTTP_METHOD>());
-		http_method = uint8_t(d.http_method);
+		http_method.attribute = Attribute::HTTP_METHOD;
+		http_method.value = uint8_t(d.http_method);
 		v.push_back(MakeIovecT(http_method));
 	}
 
@@ -128,41 +135,60 @@ Send(SocketDescriptor s, const Datagram &d)
 		PushString(v, d.message);
 	}
 
-	uint16_t http_status;
+	struct {
+		Attribute attribute;
+		PackedBE16 value;
+	} http_status;
+
 	if (d.HasHttpStatus()) {
-		v.push_back(MakeIovecAttribute<Attribute::HTTP_STATUS>());
-		http_status = ToBE16(int(d.http_status));
+		http_status.attribute = Attribute::HTTP_STATUS;
+		http_status.value = unsigned(d.http_status);
 		v.push_back(MakeIovecT(http_status));
 	}
 
-	uint64_t length;
+	struct {
+		Attribute attribute;
+		PackedBE64 value;
+	} length;
+
 	if (d.valid_length) {
-		v.push_back(MakeIovecAttribute<Attribute::LENGTH>());
-		length = ToBE64(d.length);
+		length.attribute = Attribute::LENGTH;
+		length.value = d.length;
 		v.push_back(MakeIovecT(length));
 	}
 
 	struct {
-		uint64_t received, sent;
+		Attribute attribute;
+		PackedBE64 received, sent;
 	} traffic;
 
 	if (d.valid_traffic) {
-		v.push_back(MakeIovecAttribute<Attribute::TRAFFIC>());
-		traffic.received = ToBE64(d.traffic_received);
-		traffic.sent = ToBE64(d.traffic_sent);
+		traffic.attribute = Attribute::TRAFFIC;
+		traffic.received = d.traffic_received;
+		traffic.sent = d.traffic_sent;
 		v.push_back(MakeIovecT(traffic));
 	}
 
-	uint64_t duration;
+	struct {
+		Attribute attribute;
+		PackedBE64 value;
+	} duration;
+
 	if (d.valid_duration) {
-		v.push_back(MakeIovecAttribute<Attribute::DURATION>());
-		duration = ToBE64(d.duration.count());
+		duration.attribute = Attribute::DURATION;
+		duration.value = d.duration.count();
 		v.push_back(MakeIovecT(duration));
 	}
 
+	struct {
+		Attribute attribute;
+		Net::Log::Type value;
+	} type;
+
 	if (d.type != Net::Log::Type::UNSPECIFIED) {
-		v.push_back(MakeIovecAttribute<Attribute::TYPE>());
-		v.push_back(MakeIovecT(d.type));
+		type.attribute = Attribute::TYPE;
+		type.value = d.type;
+		v.push_back(MakeIovecT(type));
 	}
 
 	Crc crc;
