@@ -108,7 +108,7 @@ Control::OnBufferedData()
 			return BufferedResult::MORE;
 		}
 
-		const std::byte *payload = (const std::byte *)header + 1;
+		const std::byte *payload = (const std::byte *)(header + 1);
 
 		socket.KeepConsumed(sizeof(*header) + header->length);
 
