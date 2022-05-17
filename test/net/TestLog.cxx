@@ -30,13 +30,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "net/log/Send.hxx"
 #include "net/log/Serializer.hxx"
 #include "net/log/Parser.hxx"
 #include "net/log/Datagram.hxx"
+#include "net/SocketError.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 
 #include <gtest/gtest.h>
 
 #include <string.h>
+#include <sys/socket.h>
 
 static bool
 StringAttributeEquals(const char *a, const char *b) noexcept
@@ -123,4 +127,53 @@ TEST(Log, Serializer)
 	memset(buffer, 0xff, sizeof(buffer));
 	size = Net::Log::Serialize(buffer, sizeof(buffer), d);
 	EXPECT_TRUE(Net::Log::ParseDatagram({buffer, size}) == d);
+}
+
+static auto
+SendReceive(const Net::Log::Datagram &src)
+{
+	UniqueSocketDescriptor a, b;
+	if (!UniqueSocketDescriptor::CreateSocketPair(AF_LOCAL, SOCK_SEQPACKET,
+						      0, a, b))
+		throw MakeSocketError("Failed to create socket pair");
+
+	Net::Log::Send(a, src);
+
+	static std::array<std::byte, 4096> buffer;
+	auto nbytes = b.Read(buffer.data(), buffer.size());
+	if (nbytes < 0)
+		throw MakeSocketError("Failed to receive");
+
+	return Net::Log::ParseDatagram(buffer.data(), buffer.data() + nbytes);
+}
+
+TEST(Log, Send)
+{
+	Net::Log::Datagram d;
+
+	EXPECT_TRUE(SendReceive(d) == d);
+
+	d.message = "foo";
+	EXPECT_TRUE(SendReceive(d) == d);
+
+	d.remote_host = "a";
+	d.host = "b";
+	d.site = "c";
+	d.http_uri = "d";
+	d.http_referer = "e";
+	d.user_agent = "f";
+	d.http_method = HTTP_METHOD_POST;
+	d.http_status = HTTP_STATUS_NO_CONTENT;
+	d.type = Net::Log::Type::SSH;
+	EXPECT_TRUE(SendReceive(d) == d);
+
+	d.timestamp = Net::Log::FromSystem(std::chrono::system_clock::now());
+	d.valid_length = true;
+	d.length = 0x123456789abcdef;
+	d.valid_traffic = true;
+	d.traffic_received = 1;
+	d.traffic_sent = 2;
+	d.valid_duration = true;
+	d.duration = Net::Log::Duration(3);
+	EXPECT_TRUE(SendReceive(d) == d);
 }
