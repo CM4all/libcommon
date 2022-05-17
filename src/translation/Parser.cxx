@@ -114,12 +114,13 @@ TranslateParser::SetCgiAddress(ResourceAddress::Type type,
 void
 TranslateParser::FinishAddressList() noexcept
 {
-	if (address_list == nullptr)
+	if (address_list == nullptr || address_list_builder.empty())
 		return;
 
-	// TODO implement
+	*address_list = address_list_builder.Finish(alloc);
 
 	address_list = nullptr;
+	address_list_builder.clear();
 }
 
 #endif
@@ -1785,9 +1786,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (payload.size < 2)
 			throw std::runtime_error("malformed ADDRESS packet");
 
-		address_list->Add(alloc,
-				  SocketAddress((const struct sockaddr *)payload.data,
-						payload.size));
+		address_list_builder.Add(alloc,
+					 SocketAddress((const struct sockaddr *)payload.data,
+						       payload.size));
 		return;
 #else
 		break;
@@ -1802,9 +1803,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed ADDRESS_STRING packet");
 
 		try {
-			address_list->Add(alloc,
-					  ParseSocketAddress(string_payload.data,
-							     default_port, false));
+			address_list_builder.Add(alloc,
+						 ParseSocketAddress(string_payload.data,
+								    default_port, false));
 		} catch (const std::exception &e) {
 			throw FormatRuntimeError("malformed ADDRESS_STRING packet: %s",
 						 e.what());
@@ -2260,7 +2261,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (address_list == nullptr)
 			throw std::runtime_error("misplaced STICKY packet");
 
-		address_list->SetStickyMode(StickyMode::SESSION_MODULO);
+		address_list_builder.SetStickyMode(StickyMode::SESSION_MODULO);
 		return;
 #else
 		break;

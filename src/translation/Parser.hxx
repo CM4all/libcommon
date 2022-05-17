@@ -41,6 +41,7 @@
 #if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
 #include "translation/Layout.hxx"
+#include "cluster/AddressListBuilder.hxx"
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
@@ -150,6 +151,8 @@ class TranslateParser {
 
 	/** the current address list being edited */
 	AddressList *address_list;
+
+	AddressListBuilder address_list_builder;
 #endif
 
 	ExpandableStringList::Builder env_builder, args_builder;
