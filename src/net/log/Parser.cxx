@@ -47,8 +47,8 @@ class Deserializer {
 	const std::byte *end;
 
 public:
-	Deserializer(ConstBuffer<void> src) noexcept
-		:p((const std::byte *)src.data), end(p + src.size) {
+	Deserializer(std::span<const std::byte> src) noexcept
+		:p(src.data()), end(p + src.size()) {
 		assert(p != nullptr);
 		assert(end != nullptr);
 		assert(p <= end);
@@ -203,31 +203,29 @@ log_server_apply_attributes(Deserializer d)
 }
 
 Datagram
-ParseDatagram(ConstBuffer<void> _d)
+ParseDatagram(std::span<const std::byte> d)
 {
-	auto d = ConstBuffer<std::byte>::FromVoid(_d);
-
-	auto magic = (const uint32_t *)(const void *)d.data;
-	if (d.size < sizeof(*magic))
+	auto magic = (const uint32_t *)(const void *)d.data();
+	if (d.size() < sizeof(*magic))
 		throw ProtocolError();
 
-	d.MoveFront((const std::byte *)(magic + 1));
+	d = d.subspan(sizeof(*magic));
 
 	if (*magic == ToBE32(MAGIC_V2)) {
-		if (d.size < sizeof(Crc::value_type))
+		if (d.size() < sizeof(Crc::value_type))
 			throw ProtocolError();
 
 		auto &expected_crc =
 			*(const Crc::value_type *)(const void *)
-			(d.data + d.size - sizeof(Crc::value_type));
-		d.SetEnd((const std::byte *)&expected_crc);
+			(d.data() + d.size() - sizeof(Crc::value_type));
+		d = d.first(d.size() - sizeof(expected_crc));
 
 		Crc crc;
-		crc.Update(d.ToVoid());
+		crc.Update(d);
 		if (crc.Finish() != FromBE32(expected_crc))
 			throw ProtocolError();
 
-		return log_server_apply_attributes(ConstBuffer<void>(d.data, d.size));
+		return log_server_apply_attributes(d);
 	}
 
 	/* allow both little-endian and big-endian magic in the V1
@@ -236,14 +234,7 @@ ParseDatagram(ConstBuffer<void> _d)
 	if (*magic != ToLE32(MAGIC_V1) && *magic != ToBE32(MAGIC_V1))
 		throw ProtocolError();
 
-	return log_server_apply_attributes(ConstBuffer<void>(d.data, d.size));
-}
-
-Datagram
-ParseDatagram(const void *p, const void *end)
-{
-	return ParseDatagram(ConstBuffer<std::byte>((const std::byte *)p,
-						    (const std::byte *)end).ToVoid());
+	return log_server_apply_attributes(d);
 }
 
 }} // namespace Net::Log

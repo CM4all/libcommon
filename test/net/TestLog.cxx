@@ -39,6 +39,8 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
+
 #include <string.h>
 #include <sys/socket.h>
 
@@ -87,21 +89,21 @@ operator==(const Net::Log::Datagram &a, const Net::Log::Datagram &b) noexcept
 
 TEST(Log, Serializer)
 {
-	uint8_t buffer[4096];
+	std::array<std::byte, 4096> buffer;
 	Net::Log::Datagram d;
 
-	memset(buffer, 0xff, sizeof(buffer));
-	size_t size = Net::Log::Serialize(buffer, sizeof(buffer), d);
+	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
+	size_t size = Net::Log::Serialize(buffer.data(), sizeof(buffer), d);
 	ASSERT_EQ(size, 8u);
-	EXPECT_EQ(memcmp(buffer, "\x63\x04\x61\x03", 4), 0);
-	EXPECT_TRUE(Net::Log::ParseDatagram({buffer, size}) == d);
+	EXPECT_EQ(memcmp(buffer.data(), "\x63\x04\x61\x03", 4), 0);
+	EXPECT_TRUE(Net::Log::ParseDatagram(std::span{buffer}.first(size)) == d);
 
 	d.message = "foo";
-	memset(buffer, 0xff, sizeof(buffer));
-	size = Net::Log::Serialize(buffer, sizeof(buffer), d);
+	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
+	size = Net::Log::Serialize(buffer.data(), buffer.size(), d);
 	ASSERT_EQ(size, 13u);
-	EXPECT_EQ(memcmp(buffer, "\x63\x04\x61\x03" "\x0d" "foo\0", 9), 0);
-	EXPECT_TRUE(Net::Log::ParseDatagram({buffer, size}) == d);
+	EXPECT_EQ(memcmp(buffer.data(), "\x63\x04\x61\x03" "\x0d" "foo\0", 9), 0);
+	EXPECT_TRUE(Net::Log::ParseDatagram(std::span{buffer}.first(size)) == d);
 
 	d.remote_host = "a";
 	d.host = "b";
@@ -112,9 +114,9 @@ TEST(Log, Serializer)
 	d.http_method = HTTP_METHOD_POST;
 	d.http_status = HTTP_STATUS_NO_CONTENT;
 	d.type = Net::Log::Type::SSH;
-	memset(buffer, 0xff, sizeof(buffer));
-	size = Net::Log::Serialize(buffer, sizeof(buffer), d);
-	EXPECT_TRUE(Net::Log::ParseDatagram({buffer, size}) == d);
+	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
+	size = Net::Log::Serialize(buffer.data(), buffer.size(), d);
+	EXPECT_TRUE(Net::Log::ParseDatagram(std::span{buffer}.first(size)) == d);
 
 	d.timestamp = Net::Log::FromSystem(std::chrono::system_clock::now());
 	d.valid_length = true;
@@ -124,9 +126,9 @@ TEST(Log, Serializer)
 	d.traffic_sent = 2;
 	d.valid_duration = true;
 	d.duration = Net::Log::Duration(3);
-	memset(buffer, 0xff, sizeof(buffer));
-	size = Net::Log::Serialize(buffer, sizeof(buffer), d);
-	EXPECT_TRUE(Net::Log::ParseDatagram({buffer, size}) == d);
+	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
+	size = Net::Log::Serialize(buffer.data(), buffer.size(), d);
+	EXPECT_TRUE(Net::Log::ParseDatagram(std::span{buffer}.first(size)) == d);
 }
 
 static auto
@@ -144,7 +146,7 @@ SendReceive(const Net::Log::Datagram &src)
 	if (nbytes < 0)
 		throw MakeSocketError("Failed to receive");
 
-	return Net::Log::ParseDatagram(buffer.data(), buffer.data() + nbytes);
+	return Net::Log::ParseDatagram(std::span{buffer}.first(nbytes));
 }
 
 TEST(Log, Send)

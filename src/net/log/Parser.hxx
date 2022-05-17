@@ -32,7 +32,7 @@
 
 #pragma once
 
-template<typename T> struct ConstBuffer;
+#include <span>
 
 namespace Net {
 namespace Log {
@@ -45,9 +45,6 @@ class ProtocolError {};
  * Throws #ProtocolError on error.
  */
 Datagram
-ParseDatagram(ConstBuffer<void> d);
-
-Datagram
-ParseDatagram(const void *p, const void *end);
+ParseDatagram(std::span<const std::byte> d);
 
 }}
