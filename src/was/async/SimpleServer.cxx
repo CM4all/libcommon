@@ -139,7 +139,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		}
 
 		{
-			auto method = *(const http_method_t *)payload.data();
+			auto method = *(const http_method_t *)(const void *)payload.data();
 			if (request.request->method != HTTP_METHOD_GET &&
 			    method != request.request->method) {
 				/* sending that packet twice is illegal */
@@ -257,7 +257,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		}
 
 		{
-			auto length_p = (const uint64_t *)payload.data();
+			auto length_p = (const uint64_t *)(const void *)payload.data();
 			if (payload.size() != sizeof(*length_p)) {
 				AbortProtocolError("malformed LENGTH packet");
 				return false;
@@ -282,7 +282,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 
 	case WAS_COMMAND_PREMATURE:
 		{
-			auto length_p = (const uint64_t *)payload.data();
+			auto length_p = (const uint64_t *)(const void *)payload.data();
 			if (payload.size() != sizeof(*length_p)) {
 				AbortError(std::make_exception_ptr("malformed PREMATURE packet"));
 				return false;
