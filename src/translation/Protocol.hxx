@@ -1145,6 +1145,12 @@ enum class TranslationCommand : uint16_t {
 	 * there is a non-empty query string.
 	 */
 	EXPIRES_RELATIVE_WITH_QUERY = 238,
+
+	/**
+	 * Set a cgroup extended attribute.  Payload is in the form
+	 * "user.name=value", e.g. "user.account_id=42".
+	 */
+	CGROUP_XATTR = 239,
 };
 
 struct TranslationHeader {

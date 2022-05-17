@@ -796,6 +796,19 @@ public:
 					      name, "=", value...);
 			return *this;
 		}
+
+		auto SetXattr(std::string_view payload) noexcept {
+			response.StringPacket(TranslationCommand::CGROUP_XATTR,
+					      payload);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto SetXattr(std::string_view name, Types... value) noexcept {
+			response.StringPacket(TranslationCommand::CGROUP_XATTR,
+					      name, "=", value...);
+			return *this;
+		}
 	};
 
 	class ChildContext {

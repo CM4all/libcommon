@@ -268,6 +268,7 @@ private:
 	void HandleUmask(ConstBuffer<void> payload);
 
 	void HandleCgroupSet(StringView payload);
+	void HandleCgroupXattr(StringView payload);
 
 	void HandleSubstYamlFile(StringView payload);
 

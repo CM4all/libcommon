@@ -1032,6 +1032,19 @@ TranslateParser::HandleCgroupSet(StringView payload)
 	child_options->cgroup.Set(alloc, set.first, set.second);
 }
 
+inline void
+TranslateParser::HandleCgroupXattr(StringView payload)
+{
+	if (child_options == nullptr)
+		throw std::runtime_error("misplaced CGROUP_XATTR packet");
+
+	auto xattr = ParseCgroupSet(payload);
+	if (xattr.first.IsNull())
+		throw std::runtime_error("malformed CGROUP_XATTR packet");
+
+	child_options->cgroup.SetXattr(alloc, xattr.first, xattr.second);
+}
+
 static bool
 CheckProbeSuffix(StringView payload) noexcept
 {
@@ -3859,6 +3872,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::EXPIRES_RELATIVE_WITH_QUERY:
 		translate_client_expires_relative_with_query(response, payload);
+		return;
+
+	case TranslationCommand::CGROUP_XATTR:
+		HandleCgroupXattr(string_payload);
 		return;
 	}
 
