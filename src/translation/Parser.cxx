@@ -111,6 +111,17 @@ TranslateParser::SetCgiAddress(ResourceAddress::Type type,
 	SetChildOptions(cgi_address->options);
 }
 
+void
+TranslateParser::FinishAddressList() noexcept
+{
+	if (address_list == nullptr)
+		return;
+
+	// TODO implement
+
+	address_list = nullptr;
+}
+
 #endif
 
 /*
@@ -257,6 +268,8 @@ TranslateParser::FinishView()
 {
 	assert(response.views != nullptr);
 
+	FinishAddressList();
+
 	WidgetView *v = view;
 	if (view == nullptr) {
 		v = response.views;
@@ -285,6 +298,8 @@ TranslateParser::AddView(const char *name)
 {
 	FinishView();
 
+	assert(address_list == nullptr);
+
 	auto new_view = alloc.New<WidgetView>(name);
 	new_view->request_header_forward = response.request_header_forward;
 	new_view->response_header_forward = response.response_header_forward;
@@ -301,7 +316,6 @@ TranslateParser::AddView(const char *name)
 	cgi_address = nullptr;
 	nfs_address = nullptr;
 	lhttp_address = nullptr;
-	address_list = nullptr;
 	transformation_tail = new_view->transformations.before_begin();
 	transformation = nullptr;
 	filter = nullptr;
@@ -1296,6 +1310,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		*resource_address = *http_address;
 
+		FinishAddressList();
 		address_list = &http_address->addresses;
 		default_port = http_address->GetDefaultPort();
 		return;
@@ -1344,6 +1359,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::FILTER:
 #if TRANSLATION_ENABLE_TRANSFORMATION
+		FinishAddressList();
+
 		resource_address = AddFilter();
 		child_options = nullptr;
 		ns_options = nullptr;
@@ -1352,7 +1369,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		cgi_address = nullptr;
 		nfs_address = nullptr;
 		lhttp_address = nullptr;
-		address_list = nullptr;
 		return;
 #else
 		break;
@@ -1606,6 +1622,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed FASTCGI packet");
 
 		SetCgiAddress(ResourceAddress::Type::FASTCGI, string_payload.data);
+		FinishAddressList();
 		address_list = &cgi_address->address_list;
 		default_port = 9000;
 		return;
@@ -2220,6 +2237,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed WAS packet");
 
 		SetCgiAddress(ResourceAddress::Type::WAS, string_payload.data);
+		FinishAddressList();
 		address_list = &cgi_address->address_list;
 		default_port = 0;
 		return;

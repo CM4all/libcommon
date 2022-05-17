@@ -220,6 +220,8 @@ private:
 
 #if TRANSLATION_ENABLE_RADDRESS
 	void SetCgiAddress(ResourceAddress::Type type, const char *path);
+
+	void FinishAddressList() noexcept;
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
