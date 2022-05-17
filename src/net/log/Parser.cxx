@@ -43,12 +43,12 @@ namespace Net {
 namespace Log {
 
 class Deserializer {
-	const uint8_t *p;
-	const uint8_t *end;
+	const std::byte *p;
+	const std::byte *end;
 
 public:
 	Deserializer(ConstBuffer<void> src) noexcept
-		:p((const uint8_t *)src.data), end(p + src.size) {
+		:p((const std::byte *)src.data), end(p + src.size) {
 		assert(p != nullptr);
 		assert(end != nullptr);
 		assert(p <= end);
@@ -74,7 +74,7 @@ public:
 		const char *result = (const char *)p;
 		/* buffer is null-terminated, so strlen() is legal */
 		const size_t length = strlen(result);
-		const uint8_t *after = (const uint8_t *)(result + length + 1);
+		const std::byte *after = (const std::byte *)(result + length + 1);
 		if (after > end)
 			throw ProtocolError();
 		p = after;
@@ -87,7 +87,7 @@ public:
 
 private:
 	const void *ReadRaw(size_t size) {
-		const uint8_t *result = p;
+		const std::byte *result = p;
 		if (result + size > end)
 			throw ProtocolError();
 
@@ -205,13 +205,13 @@ log_server_apply_attributes(Deserializer d)
 Datagram
 ParseDatagram(ConstBuffer<void> _d)
 {
-	auto d = ConstBuffer<uint8_t>::FromVoid(_d);
+	auto d = ConstBuffer<std::byte>::FromVoid(_d);
 
 	auto magic = (const uint32_t *)(const void *)d.data;
 	if (d.size < sizeof(*magic))
 		throw ProtocolError();
 
-	d.MoveFront((const uint8_t *)(magic + 1));
+	d.MoveFront((const std::byte *)(magic + 1));
 
 	if (*magic == ToBE32(MAGIC_V2)) {
 		if (d.size < sizeof(Crc::value_type))
@@ -220,7 +220,7 @@ ParseDatagram(ConstBuffer<void> _d)
 		auto &expected_crc =
 			*(const Crc::value_type *)(const void *)
 			(d.data + d.size - sizeof(Crc::value_type));
-		d.SetEnd((const uint8_t *)&expected_crc);
+		d.SetEnd((const std::byte *)&expected_crc);
 
 		Crc crc;
 		crc.Update(d.ToVoid());
@@ -242,8 +242,8 @@ ParseDatagram(ConstBuffer<void> _d)
 Datagram
 ParseDatagram(const void *p, const void *end)
 {
-	return ParseDatagram(ConstBuffer<uint8_t>((const uint8_t *)p,
-						  (const uint8_t *)end).ToVoid());
+	return ParseDatagram(ConstBuffer<std::byte>((const std::byte *)p,
+						    (const std::byte *)end).ToVoid());
 }
 
 }} // namespace Net::Log
