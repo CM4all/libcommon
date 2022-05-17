@@ -231,17 +231,6 @@ TranslateParser::AddSubstYamlFile(const char *prefix,
 
 #endif
 
-#if TRANSLATION_ENABLE_HTTP
-
-static void
-parse_address_string(AllocatorPtr alloc, AddressList *list,
-		     const char *p, int default_port)
-{
-	list->Add(alloc, ParseSocketAddress(p, default_port, false));
-}
-
-#endif
-
 static bool
 valid_view_name_char(char ch)
 {
@@ -1796,8 +1785,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed ADDRESS_STRING packet");
 
 		try {
-			parse_address_string(alloc, address_list,
-					     string_payload.data, default_port);
+			address_list->Add(alloc,
+					  ParseSocketAddress(string_payload.data,
+							     default_port, false));
 		} catch (const std::exception &e) {
 			throw FormatRuntimeError("malformed ADDRESS_STRING packet: %s",
 						 e.what());
