@@ -38,6 +38,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <array>
+#include <span>
 
 #include <assert.h>
 #include <fcntl.h>
@@ -188,7 +189,7 @@ CgroupKill::OnInotifyEvent(unsigned) noexcept
 }
 
 static size_t
-LoadCgroupPids(FileDescriptor cgroup_procs_fd, pid_t *pids, size_t max_pids)
+LoadCgroupPids(FileDescriptor cgroup_procs_fd, std::span<pid_t> pids)
 {
 	char buffer[8192];
 
@@ -202,7 +203,7 @@ LoadCgroupPids(FileDescriptor cgroup_procs_fd, pid_t *pids, size_t max_pids)
 	const char *s = buffer;
 	size_t n = 0;
 
-	while (n < max_pids) {
+	while (n < pids.size()) {
 		char *endptr;
 		auto value = strtoul(s, &endptr, 10);
 		if (*endptr == 0)
@@ -221,7 +222,7 @@ static void
 KillCgroup(FileDescriptor cgroup_procs_fd, int sig)
 {
 	std::array<pid_t, 256> pids;
-	size_t n = LoadCgroupPids(cgroup_procs_fd, pids.data(), pids.size());
+	size_t n = LoadCgroupPids(cgroup_procs_fd, pids);
 	if (n == 0)
 		throw std::runtime_error("Populated cgroup has no tasks");
 
