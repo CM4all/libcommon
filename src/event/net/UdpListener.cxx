@@ -86,7 +86,7 @@ UdpListener::ReceiveOne()
 
 	std::span<UniqueFileDescriptor> fds{};
 	if (!result.fds.empty())
-		fds =  {&result.fds.front(), result.fds.size()};
+		fds = result.fds;
 
 	return handler.OnUdpDatagram(result.payload,
 				     fds,

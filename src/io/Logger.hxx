@@ -188,8 +188,7 @@ LogConcat(unsigned level, std::string_view domain, Params... _params) noexcept
 		return;
 
 	const ParamArray<Params...> params(_params...);
-	WriteV(domain,
-	       {&params.values.front(), params.values.size()});
+	WriteV(domain, params.values);
 }
 
 gcc_printf(3, 4)
