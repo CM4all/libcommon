@@ -100,7 +100,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	value_position = 0;
 
 	size_t vbytes = header_position - (colon - header_buffer) - 1;
-	memcpy(&value.front(), colon + 1, vbytes);
+	memcpy(value.data(), colon + 1, vbytes);
 	return ValueData(vbytes);
 }
 
@@ -128,7 +128,7 @@ NetstringInput::ValueData(size_t nbytes)
 inline NetstringInput::Result
 NetstringInput::ReceiveValue(FileDescriptor fd)
 {
-	ssize_t nbytes = fd.Read(&value.front() + value_position,
+	ssize_t nbytes = fd.Read(value.data() + value_position,
 				 value.size() - value_position);
 	if (nbytes < 0) {
 		switch (errno) {

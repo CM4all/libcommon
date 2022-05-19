@@ -221,7 +221,7 @@ static void
 KillCgroup(FileDescriptor cgroup_procs_fd, int sig)
 {
 	std::array<pid_t, 256> pids;
-	size_t n = LoadCgroupPids(cgroup_procs_fd, &pids.front(), pids.size());
+	size_t n = LoadCgroupPids(cgroup_procs_fd, pids.data(), pids.size());
 	if (n == 0)
 		throw std::runtime_error("Populated cgroup has no tasks");
 

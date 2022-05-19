@@ -257,7 +257,7 @@ VariableConfigParser::Expand(const char *src) const
 
 	buffer.clear();
 	Expand(buffer, src);
-	return &buffer.front();
+	return buffer.data();
 }
 
 void

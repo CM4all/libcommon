@@ -344,8 +344,8 @@ try {
 	if (p.exec_function != nullptr) {
 		_exit(p.exec_function(std::move(p)));
 	} else {
-		execve(path, const_cast<char *const*>(&p.args.front()),
-		       const_cast<char *const*>(&p.env.front()));
+		execve(path, const_cast<char *const*>(p.args.data()),
+		       const_cast<char *const*>(p.env.data()));
 
 		throw FormatErrno("Failed to execute '%s'", path);
 	}
