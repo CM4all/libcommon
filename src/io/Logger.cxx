@@ -32,7 +32,7 @@
 
 #include "Logger.hxx"
 #include "Iovec.hxx"
-#include "util/StaticArray.hxx"
+#include "util/StaticVector.hxx"
 #include "util/Exception.hxx"
 
 #include <sys/uio.h>
@@ -54,7 +54,7 @@ void
 LoggerDetail::WriteV(std::string_view domain,
 		     std::span<const std::string_view> buffers) noexcept
 {
-	StaticArray<struct iovec, 64> v;
+	StaticVector<struct iovec, 64> v;
 
 	if (!domain.empty()) {
 		v.push_back(MakeIovec("["));
@@ -63,7 +63,7 @@ LoggerDetail::WriteV(std::string_view domain,
 	}
 
 	for (const auto i : buffers) {
-		if (v.size() >= v.capacity() - 1)
+		if (v.size() >= v.max_size() - 1)
 			break;
 
 		v.push_back(MakeIovec(i));

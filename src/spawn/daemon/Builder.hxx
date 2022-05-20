@@ -35,14 +35,14 @@
 #include "Protocol.hxx"
 #include "net/SendMessage.hxx"
 #include "io/Iovec.hxx"
-#include "util/StaticArray.hxx"
+#include "util/StaticVector.hxx"
 
 #include <boost/crc.hpp>
 
 class DatagramBuilder {
 	SpawnDaemon::DatagramHeader header;
 
-	StaticArray<struct iovec, 16> v;
+	StaticVector<struct iovec, 16> v;
 
 public:
 	DatagramBuilder() noexcept {
@@ -56,7 +56,7 @@ public:
 
 	template<typename T>
 	void AppendRaw(std::span<T> s) noexcept {
-		v.append() = MakeIovec(s);
+		v.push_back(MakeIovec(s));
 	}
 
 	void AppendPadded(std::span<const std::byte> b) noexcept {

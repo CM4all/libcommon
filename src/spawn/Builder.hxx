@@ -40,7 +40,7 @@
 #include "system/Error.hxx"
 #include "io/FileDescriptor.hxx"
 #include "io/Iovec.hxx"
-#include "util/StaticArray.hxx"
+#include "util/StaticVector.hxx"
 
 #include <array>
 #include <cstddef>
@@ -58,7 +58,7 @@ class SpawnSerializer {
 
 	std::array<std::byte, 65536> buffer;
 
-	StaticArray<FileDescriptor, 8> fds;
+	StaticVector<FileDescriptor, 8> fds;
 
 public:
 	explicit SpawnSerializer(SpawnRequestCommand cmd) {

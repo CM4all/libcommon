@@ -38,7 +38,7 @@
 #include "net/SendMessage.hxx"
 #include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
-#include "util/StaticArray.hxx"
+#include "util/StaticVector.hxx"
 
 #include <string.h>
 #include <sys/socket.h>
@@ -69,7 +69,7 @@ MakeIovecAttribute()
 void
 Send(SocketDescriptor s, const Datagram &d)
 {
-	StaticArray<struct iovec, 64> v;
+	StaticVector<struct iovec, 64> v;
 
 	v.push_back(MakeIovecStatic<uint32_t, ToBE32(MAGIC_V2)>());
 
