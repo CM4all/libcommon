@@ -50,7 +50,7 @@ OpenUnifiedCgroup(const CgroupState &state, const char *name)
 {
 	assert(state.IsEnabled());
 
-	return OpenPath(state.GetUnifiedMount(), name);
+	return OpenPath(state.GetUnifiedGroupMount(), name);
 }
 
 static UniqueFileDescriptor

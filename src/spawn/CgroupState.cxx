@@ -76,7 +76,7 @@ CgroupState::GetUnifiedMountPath() const noexcept
 }
 
 FileDescriptor
-CgroupState::GetUnifiedMount() const noexcept
+CgroupState::GetUnifiedGroupMount() const noexcept
 {
 	if (mounts.empty())
 		return FileDescriptor::Undefined();

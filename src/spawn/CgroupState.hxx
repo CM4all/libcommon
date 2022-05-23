@@ -116,10 +116,11 @@ struct CgroupState {
 	std::string GetUnifiedMountPath() const noexcept;
 
 	/**
-	 * Returns an O_PATH file descriptor where cgroup2 is mounted
-	 * or FileDescriptor::Undefined() if none was mounted.
+	 * Returns an O_PATH file descriptor to our group in the
+	 * cgroup2 mount or FileDescriptor::Undefined() if none was
+	 * mounted.
 	 */
-	FileDescriptor GetUnifiedMount() const noexcept;
+	FileDescriptor GetUnifiedGroupMount() const noexcept;
 
 	/**
 	 * Enable all controllers for newly created groups by writing
