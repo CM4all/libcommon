@@ -220,7 +220,7 @@ HasCgroupKill(FileDescriptor fd) noexcept
 }
 
 CgroupState
-CgroupState::FromProcCgroup(ProcCgroup &&proc_cgroup) noexcept
+CgroupState::FromProcCgroup(ProcCgroup &&proc_cgroup)
 {
 	if (!proc_cgroup.IsDefined())
 		/* no "systemd" controller found - disable the feature */

@@ -140,6 +140,9 @@ struct CgroupState {
 	static CgroupState FromProcess(unsigned pid, std::string group_path);
 
 private:
+	/**
+	 * Throws on error.
+	 */
 	[[gnu::pure]]
-	static CgroupState FromProcCgroup(ProcCgroup &&proc_cgroup) noexcept;
+	static CgroupState FromProcCgroup(ProcCgroup &&proc_cgroup);
 };
