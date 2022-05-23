@@ -75,8 +75,7 @@ try {
 	if (!args.empty())
 		throw Usage{};
 
-	auto cgroup_state = CgroupState::FromProcess();
-	cgroup_state.group_path = scope;
+	const auto cgroup_state = CgroupState::FromProcess(0, scope);
 
 	EventLoop event_loop;
 
