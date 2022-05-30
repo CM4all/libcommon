@@ -537,6 +537,21 @@ public:
 	void KeepConsumed(std::size_t nbytes) noexcept;
 
 	/**
+	 * Provides direct access to the input buffer.  The caller may
+	 * use this to efficiently move data from it, for example by
+	 * swapping pointers.  It is allowed to leave the buffer
+	 * "nulled"; it will be reallocated automatically when new
+	 * data is read from the socket.
+	 */
+	DefaultFifoBuffer &GetInputBuffer() noexcept {
+		return input;
+	}
+
+	const DefaultFifoBuffer &GetInputBuffer() const noexcept {
+		return input;
+	}
+
+	/**
 	 * The caller wants to read more data from the socket.  There
 	 * are four possible outcomes: a call to
 	 * BufferedSocketHandler::OnBufferedData(), a call to
