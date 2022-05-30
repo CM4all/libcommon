@@ -41,6 +41,8 @@
 #include <openssl/pem.h>
 #include <openssl/ts.h>
 
+#include <string>
+
 UniqueX509
 LoadCertFile(const char *path)
 {
