@@ -360,14 +360,14 @@ BufferedSocket::FillBuffer() noexcept
 		return ClosedByPeer();
 
 	if (nbytes == -1) {
-		if (errno == EAGAIN) {
+		if (const int e = errno; e == EAGAIN) [[likely]] {
 			/* schedule read, but don't refresh timeout of old
 			   scheduled read */
 			if (!base.IsReadPending())
 				base.ScheduleRead(read_timeout);
 			return true;
 		} else {
-			handler->OnBufferedError(std::make_exception_ptr(MakeErrno("recv() failed")));
+			handler->OnBufferedError(std::make_exception_ptr(MakeErrno(e, "recv() failed")));
 			return false;
 		}
 	}
