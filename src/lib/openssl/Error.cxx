@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -39,8 +39,8 @@ static AllocatedString
 ErrToString()
 {
 	return BioWriterToString([](BIO &bio){
-			ERR_print_errors(&bio);
-		});
+		ERR_print_errors(&bio);
+	});
 }
 
 SslError::SslError(const std::string &msg)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -34,8 +34,7 @@
  * OpenSSL error reporting.
  */
 
-#ifndef SSL_ERROR_HXX
-#define SSL_ERROR_HXX
+#pragma once
 
 #include <stdexcept>
 #include <string> // TODO: migrate to std::string_view
@@ -44,5 +43,3 @@ class SslError : public std::runtime_error {
 public:
 	SslError(const std::string &msg);
 };
-
-#endif
