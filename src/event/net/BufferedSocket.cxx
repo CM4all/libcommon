@@ -668,8 +668,7 @@ BufferedSocket::Write(const void *data, std::size_t length) noexcept
 	ssize_t nbytes = base.Write(data, length);
 
 	if (gcc_unlikely(nbytes < 0)) {
-		const int e = errno;
-		if (gcc_likely(e == EAGAIN)) {
+		if (const int e = errno; e == EAGAIN) [[likely]] {
 			ScheduleWrite();
 			return WRITE_BLOCKING;
 		} else if (e == EPIPE || e == ECONNRESET) {
@@ -691,8 +690,7 @@ BufferedSocket::WriteV(const struct iovec *v, std::size_t n) noexcept
 	ssize_t nbytes = base.WriteV(v, n);
 
 	if (gcc_unlikely(nbytes < 0)) {
-		const int e = errno;
-		if (gcc_likely(e == EAGAIN)) {
+		if (const int e = errno; e == EAGAIN) [[likely]] {
 			ScheduleWrite();
 			return WRITE_BLOCKING;
 		} else if (e == EPIPE || e == ECONNRESET) {
@@ -713,8 +711,7 @@ BufferedSocket::WriteFrom(int other_fd, FdType other_fd_type,
 {
 	ssize_t nbytes = base.WriteFrom(other_fd, other_fd_type, length);
 	if (gcc_unlikely(nbytes < 0)) {
-		const int e = errno;
-		if (gcc_likely(e == EAGAIN)) {
+		if (const int e = errno; e == EAGAIN) [[likely]] {
 			if (!IsReadyForWriting()) {
 				ScheduleWrite();
 				return WRITE_BLOCKING;
