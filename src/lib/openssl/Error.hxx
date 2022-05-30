@@ -37,9 +37,9 @@
 #pragma once
 
 #include <stdexcept>
-#include <string> // TODO: migrate to std::string_view
+#include <string_view>
 
 class SslError : public std::runtime_error {
 public:
-	explicit SslError(const std::string &msg) noexcept;
+	explicit SslError(std::string_view msg) noexcept;
 };

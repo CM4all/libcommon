@@ -36,12 +36,17 @@
 #include <openssl/err.h>
 
 static AllocatedString
-ErrToString() noexcept
+ErrToString(std::string_view prefix) noexcept
 {
-	return BioWriterToString([](BIO &bio){
+	return BioWriterToString([prefix](BIO &bio){
+		if (!prefix.empty()) {
+			BIO_write(&bio, prefix.data(), prefix.size());
+			BIO_write(&bio, ": ", 2);
+		}
+
 		ERR_print_errors(&bio);
 	});
 }
 
-SslError::SslError(const std::string &msg) noexcept
-	:std::runtime_error(msg + ": " + ErrToString().c_str()) {}
+SslError::SslError(std::string_view msg) noexcept
+	:std::runtime_error(ErrToString(msg).c_str()) {}
