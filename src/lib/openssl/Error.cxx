@@ -36,12 +36,12 @@
 #include <openssl/err.h>
 
 static AllocatedString
-ErrToString()
+ErrToString() noexcept
 {
 	return BioWriterToString([](BIO &bio){
 		ERR_print_errors(&bio);
 	});
 }
 
-SslError::SslError(const std::string &msg)
+SslError::SslError(const std::string &msg) noexcept
 	:std::runtime_error(msg + ": " + ErrToString().c_str()) {}

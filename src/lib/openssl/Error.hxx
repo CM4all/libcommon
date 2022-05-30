@@ -41,5 +41,5 @@
 
 class SslError : public std::runtime_error {
 public:
-	SslError(const std::string &msg);
+	explicit SslError(const std::string &msg) noexcept;
 };
