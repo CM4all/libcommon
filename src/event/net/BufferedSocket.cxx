@@ -628,22 +628,6 @@ BufferedSocket::Destroy() noexcept
 }
 
 bool
-BufferedSocket::IsEmpty() const noexcept
-{
-	assert(!ended);
-
-	return input.empty();
-}
-
-bool
-BufferedSocket::IsFull() const noexcept
-{
-	assert(!ended);
-
-	return input.IsDefinedAndFull();
-}
-
-bool
 BufferedSocket::Read(bool _expect_more) noexcept
 {
 	assert(!reading);

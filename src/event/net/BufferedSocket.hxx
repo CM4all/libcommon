@@ -39,9 +39,8 @@
 #include "util/DestructObserver.hxx"
 #include "util/LeakDetector.hxx"
 
+#include <cassert>
 #include <exception>
-
-#include <assert.h>
 
 enum class BufferedResult {
 	/**
@@ -493,13 +492,21 @@ public:
 	 * Is the input buffer empty?
 	 */
 	[[gnu::pure]]
-	bool IsEmpty() const noexcept;
+	bool IsEmpty() const noexcept {
+		assert(!ended);
+
+		return input.empty();
+	}
 
 	/**
 	 * Is the input buffer full?
 	 */
 	[[gnu::pure]]
-	bool IsFull() const noexcept;
+	bool IsFull() const noexcept {
+		assert(!ended);
+
+		return input.IsDefinedAndFull();
+	}
 
 	/**
 	 * Returns the number of bytes in the input buffer.
