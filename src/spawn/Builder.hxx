@@ -162,9 +162,9 @@ Send(SocketDescriptor s, std::span<const std::byte> payload,
 {
 	assert(s.IsDefined());
 
-	auto vec = MakeIovec(payload);
+	const std::array vec{MakeIovec(payload)};
 
-	MessageHeader msg(ConstBuffer<struct iovec>(&vec, 1));
+	MessageHeader msg{std::span{vec}};
 
 	ScmRightsBuilder<MAX_FDS> b(msg);
 	for (const auto &i : fds)

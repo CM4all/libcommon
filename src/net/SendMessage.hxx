@@ -33,11 +33,9 @@
 #pragma once
 
 #include "SocketAddress.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <sys/socket.h>
 
-template<typename T> struct ConstBuffer;
 class SocketDescriptor;
 
 /**
