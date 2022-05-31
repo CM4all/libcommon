@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2021 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,8 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WRITE_FILE_HXX
-#define WRITE_FILE_HXX
+#pragma once
 
 #include <string_view>
 
@@ -70,7 +69,5 @@ TryWriteExistingFile(const char *path, std::string_view value) noexcept;
 WriteFileResult
 TryWriteExistingFile(FileDescriptor directory, const char *path,
 		     std::string_view value) noexcept;
-
-#endif
 
 #endif

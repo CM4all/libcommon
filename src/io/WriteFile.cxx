@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2021 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,25 +29,25 @@
 
 #include "WriteFile.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "util/ConstBuffer.hxx"
-#include "util/StringView.hxx"
+
+#include <span>
 
 #include <fcntl.h>
 
 static WriteFileResult
-TryWrite(FileDescriptor fd, ConstBuffer<void> value) noexcept
+TryWrite(FileDescriptor fd, std::span<const std::byte> value) noexcept
 {
-	ssize_t nbytes = fd.Write(value.data, value.size);
+	ssize_t nbytes = fd.Write(value.data(), value.size());
 	if (nbytes < 0)
 		return WriteFileResult::ERROR;
-	else if (ConstBuffer<void>::size_type(nbytes) == value.size)
+	else if (std::span<const std::byte>::size_type(nbytes) == value.size())
 		return WriteFileResult::SUCCESS;
 	else
 		return WriteFileResult::SHORT;
 }
 
 static WriteFileResult
-TryWriteExistingFile(const char *path, ConstBuffer<void> value) noexcept
+TryWriteExistingFile(const char *path, std::span<const std::byte> value) noexcept
 {
 	UniqueFileDescriptor fd;
 	if (!fd.Open(path, O_WRONLY))
@@ -59,12 +59,12 @@ TryWriteExistingFile(const char *path, ConstBuffer<void> value) noexcept
 WriteFileResult
 TryWriteExistingFile(const char *path, std::string_view value) noexcept
 {
-	return TryWriteExistingFile(path, StringView(value).ToVoid());
+	return TryWriteExistingFile(path, std::as_bytes(std::span{value}));
 }
 
 static WriteFileResult
 TryWriteExistingFile(FileDescriptor directory, const char *path,
-		     ConstBuffer<void> value) noexcept
+		     std::span<const std::byte> value) noexcept
 {
 	UniqueFileDescriptor fd;
 	if (!fd.Open(directory, path, O_WRONLY))
@@ -78,5 +78,5 @@ TryWriteExistingFile(FileDescriptor directory, const char *path,
 		     std::string_view value) noexcept
 {
 	return TryWriteExistingFile(directory, path,
-				    StringView(value).ToVoid());
+				    std::as_bytes(std::span{value}));
 }
