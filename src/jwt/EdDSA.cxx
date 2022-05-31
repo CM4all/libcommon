@@ -34,7 +34,6 @@
 #include "lib/sodium/Base64.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/StringView.hxx"
 
 #include <sodium/crypto_sign.h>
@@ -46,13 +45,11 @@ namespace JWT {
 using Ed25519Signature = std::array<std::byte, crypto_sign_BYTES>;
 
 static AllocatedString
-SignEdDSA(const Ed25519SecretKey &key, ConstBuffer<void> _input) noexcept
+SignEdDSA(const Ed25519SecretKey &key, std::span<const std::byte> input) noexcept
 {
-	const auto input = ConstBuffer<unsigned char>::FromVoid(_input);
-
 	Ed25519Signature signature;
 	crypto_sign_detached((unsigned char *)signature.data(), nullptr,
-			     input.data, input.size,
+			     (const unsigned char *)input.data(), input.size(),
 			     (const unsigned char *)key.data());
 
 	return UrlSafeBase64(signature);
@@ -71,7 +68,7 @@ SignEdDSA(const Ed25519SecretKey &key, std::string_view header_b64,
 	input.push_back('.');
 	input.append(payload_b64);
 
-	return SignEdDSA(key, StringView(input).ToVoid());
+	return SignEdDSA(key, std::as_bytes(std::span{input}));
 }
 
 bool
