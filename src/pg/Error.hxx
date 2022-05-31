@@ -35,8 +35,7 @@
 #include "Result.hxx"
 
 #include <exception>
-
-struct StringView;
+#include <string_view>
 
 namespace Pg {
 
@@ -76,7 +75,7 @@ public:
 	bool IsType(const char *type) const noexcept;
 
 	[[gnu::pure]]
-	bool HasTypePrefix(StringView type_prefix) const noexcept;
+	bool HasTypePrefix(std::string_view type_prefix) const noexcept;
 
 	/**
 	 * Is this error fatal, i.e. has the connection become

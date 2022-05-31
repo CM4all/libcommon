@@ -42,7 +42,7 @@ Pg::Error::IsType(const char *expected_type) const noexcept
 }
 
 bool
-Pg::Error::HasTypePrefix(StringView type_prefix) const noexcept
+Pg::Error::HasTypePrefix(std::string_view type_prefix) const noexcept
 {
 	const char *actual_type = GetType();
 	return actual_type != nullptr &&
