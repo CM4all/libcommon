@@ -53,7 +53,6 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/CapabilityGlue.hxx"
 #include "util/DeleteDisposer.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
 

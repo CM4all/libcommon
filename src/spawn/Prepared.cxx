@@ -33,7 +33,6 @@
 #include "Prepared.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/StringCompare.hxx"
 
 #include <string.h>
@@ -59,7 +58,7 @@ PreparedChildProcess::~PreparedChildProcess() noexcept
 }
 
 void
-PreparedChildProcess::InsertWrapper(ConstBuffer<const char *> w) noexcept
+PreparedChildProcess::InsertWrapper(std::span<const char *const> w) noexcept
 {
 	args.insert(args.begin(), w.begin(), w.end());
 }

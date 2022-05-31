@@ -39,6 +39,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
+#include <span>
 #include <string>
 #include <vector>
 #include <forward_list>
@@ -47,7 +48,6 @@ struct StringView;
 struct CgroupOptions;
 class UniqueFileDescriptor;
 class UniqueSocketDescriptor;
-template<typename T> struct ConstBuffer;
 
 struct PreparedChildProcess {
 	/**
@@ -175,7 +175,7 @@ struct PreparedChildProcess {
 		return forbid_user_ns || forbid_multicast || forbid_bind;
 	}
 
-	void InsertWrapper(ConstBuffer<const char *> w) noexcept;
+	void InsertWrapper(std::span<const char *const> w) noexcept;
 
 	void Append(const char *arg) noexcept {
 		args.push_back(arg);
