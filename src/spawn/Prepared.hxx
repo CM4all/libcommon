@@ -41,10 +41,10 @@
 
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <forward_list>
 
-struct StringView;
 struct CgroupOptions;
 class UniqueFileDescriptor;
 class UniqueSocketDescriptor;
@@ -187,7 +187,7 @@ struct PreparedChildProcess {
 
 	void SetEnv(const char *name, const char *value) noexcept;
 
-	const char *GetEnv(StringView name) const noexcept;
+	const char *GetEnv(std::string_view name) const noexcept;
 
 	void SetStdin(int fd) noexcept;
 	void SetStdout(int fd) noexcept;

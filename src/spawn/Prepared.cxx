@@ -77,7 +77,7 @@ PreparedChildProcess::SetEnv(const char *name, const char *value) noexcept
 }
 
 const char *
-PreparedChildProcess::GetEnv(StringView name) const noexcept
+PreparedChildProcess::GetEnv(std::string_view name) const noexcept
 {
 	for (const char *i : env) {
 		if (i == nullptr)
