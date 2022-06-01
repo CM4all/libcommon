@@ -140,7 +140,7 @@ BufferedOutputStream::WriteWideToUTF8(const wchar_t *src,
 	}
 
 	int length = WideCharToMultiByte(CP_UTF8, 0, src, src_length,
-					 (char *)r.data, r.size,
+					 (char *)r.data(), r.size(),
 					 nullptr, nullptr);
 	if (length <= 0) {
 		const auto error = GetLastError();
