@@ -86,7 +86,7 @@ public:
 			 LightUserData(const_cast<Value *>(this)));
 	}
 
-	lua_State *GetState() const {
+	lua_State *GetState() const noexcept {
 		return L;
 	}
 };
