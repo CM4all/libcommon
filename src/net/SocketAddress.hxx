@@ -165,7 +165,7 @@ public:
 		const void *q = reinterpret_cast<const void *>(address);
 		return {
 			(const std::byte *)q,
-			size,
+			(std::size_t)size,
 		};
 	}
 
