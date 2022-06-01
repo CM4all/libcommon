@@ -31,10 +31,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
+#include <cstddef>
 #include <initializer_list>
 #include <span>
-
-#include <assert.h>
 
 /**
  * An array with a maximum size known at compile time.  It keeps track
