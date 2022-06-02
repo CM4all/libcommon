@@ -413,6 +413,11 @@ public:
 	}
 
 	template<typename... Types>
+	auto &Uri(Types... value) noexcept {
+		return StringPacket(TranslationCommand::URI, value...);
+	}
+
+	template<typename... Types>
 	auto &LocalUri(Types... value) noexcept {
 		return StringPacket(TranslationCommand::LOCAL_URI, value...);
 	}
