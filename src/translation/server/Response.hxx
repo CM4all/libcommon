@@ -337,6 +337,11 @@ public:
 	}
 
 	template<typename... Types>
+	auto &ListenerTag(Types... value) noexcept {
+		return StringPacket(TranslationCommand::LISTENER_TAG, value...);
+	}
+
+	template<typename... Types>
 	auto &Site(Types... value) noexcept {
 		return StringPacket(TranslationCommand::SITE, value...);
 	}

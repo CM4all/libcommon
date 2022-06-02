@@ -1096,7 +1096,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::AUTHORIZATION:
 	case TranslationCommand::UA_CLASS:
 	case TranslationCommand::SUFFIX:
-	case TranslationCommand::LISTENER_TAG:
 	case TranslationCommand::LOGIN:
 	case TranslationCommand::CRON:
 	case TranslationCommand::PASSWORD:
@@ -2897,6 +2896,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::LISTENER_TAG:
+		if (!IsValidNonEmptyString(string_payload))
+			throw std::runtime_error("malformed LISTENER_TAG packet");
+
+		if (response.listener_tag != nullptr)
+			throw std::runtime_error("duplicate LISTENER_TAG packet");
+
+		response.listener_tag = string_payload.data;
+		return;
 
 	case TranslationCommand::EXPAND_COOKIE_HOST:
 #if TRANSLATION_ENABLE_SESSION

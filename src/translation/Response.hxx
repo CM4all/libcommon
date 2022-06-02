@@ -120,6 +120,13 @@ struct TranslateResponse {
 	const char *inverse_regex;
 #endif
 
+	/**
+	 * Override the LISTENER_TAG.
+	 *
+	 * @see TranslationCommand::LISTENER_TAG
+	 */
+	const char *listener_tag;
+
 	const char *site;
 
 	const char *like_host;

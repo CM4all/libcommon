@@ -92,6 +92,7 @@ TranslateResponse::Clear()
 #if TRANSLATION_ENABLE_EXPAND
 	regex = inverse_regex = nullptr;
 #endif
+	listener_tag = nullptr;
 	site = nullptr;
 	like_host = nullptr;
 	canonical_host = nullptr;
@@ -318,6 +319,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	regex = alloc.CheckDup(src.regex);
 	inverse_regex = alloc.CheckDup(src.inverse_regex);
 #endif
+	listener_tag = alloc.CheckDup(src.listener_tag);
 	site = alloc.CheckDup(src.site);
 	like_host = alloc.CheckDup(src.like_host);
 	canonical_host = alloc.CheckDup(src.canonical_host);
