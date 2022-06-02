@@ -210,6 +210,19 @@ IsValidCookieValue(StringView s) noexcept
 	return std::all_of(s.begin(), s.end(), IsValidCookieValueChar);
 }
 
+static constexpr bool
+IsValidLowerHeaderNameChar(char ch) noexcept
+{
+	return IsLowerAlphaASCII(ch) || IsDigitASCII(ch) || ch == '-';
+}
+
+static constexpr bool
+IsValidLowerHeaderName(std::string_view s) noexcept
+{
+	return !s.empty() &&
+		std::all_of(s.begin(), s.end(), IsValidLowerHeaderNameChar);
+}
+
 #endif
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
@@ -3899,6 +3912,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::CGROUP_XATTR:
 		HandleCgroupXattr(string_payload);
 		return;
+
+	case TranslationCommand::CHECK_HEADER:
+#if TRANSLATION_ENABLE_SESSION
+		if (response.check.data() == nullptr)
+			throw std::runtime_error("CHECK_HEADER without CHECK");
+
+		if (response.check_header != nullptr)
+			throw std::runtime_error("duplicate CHECK_HEADER packet");
+
+		if (!IsValidLowerHeaderName(string_payload))
+			throw std::runtime_error("malformed CHECK_HEADER packet");
+
+		response.check_header = string_payload.data;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

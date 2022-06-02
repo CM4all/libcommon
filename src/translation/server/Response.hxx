@@ -500,6 +500,11 @@ public:
 		return StringPacket(TranslationCommand::CHECK, value...);
 	}
 
+	template<typename... Types>
+	auto CheckHeader(Types... value) noexcept {
+		return StringPacket(TranslationCommand::CHECK_HEADER, value...);
+	}
+
 	template<typename... Params>
 	auto &Auth(Params... params) noexcept {
 		return MultiPacket(TranslationCommand::AUTH, params...);

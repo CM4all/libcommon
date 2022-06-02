@@ -65,6 +65,7 @@ class AllocatedRequest : public Request {
 	std::string auth_token_buffer;
 	std::string recover_session_buffer;
 	std::string check_buffer;
+	std::string check_header_buffer;
 	AllocatedArray<TranslationCommand> want_buffer;
 	std::string want_full_uri_buffer;
 	std::string chain_buffer, chain_header_buffer;

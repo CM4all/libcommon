@@ -88,6 +88,8 @@ struct Request {
 
 	ConstBuffer<void> check = nullptr;
 
+	const char *check_header = nullptr;
+
 	ConstBuffer<TranslationCommand> want = nullptr;
 	ConstBuffer<void> want_full_uri = nullptr;
 

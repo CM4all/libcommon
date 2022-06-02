@@ -1151,6 +1151,12 @@ enum class TranslationCommand : uint16_t {
 	 * "user.name=value", e.g. "user.account_id=42".
 	 */
 	CGROUP_XATTR = 239,
+
+	/**
+	 * A #CHECK request shall include the value of the specified
+	 * request header.
+	 */
+	CHECK_HEADER = 240,
 };
 
 struct TranslationHeader {

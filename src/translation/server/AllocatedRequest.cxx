@@ -166,6 +166,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		check = {check_buffer.data(), check_buffer.size()};
 		break;
 
+	case TranslationCommand::CHECK_HEADER:
+		check_header_buffer = ToString(payload);
+		check_header = check_header_buffer.c_str();
+		break;
+
 	case TranslationCommand::WANT:
 		want_buffer = std::span{ConstBuffer<TranslationCommand>::FromVoid(payload)};
 		want = std::span<const TranslationCommand>{want_buffer};

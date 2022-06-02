@@ -198,6 +198,8 @@ struct TranslateResponse {
 	 */
 	std::span<const std::byte> check;
 
+	const char *check_header;
+
 	/**
 	 * The payload of the AUTH packet.  If nullptr, then
 	 * no AUTH packet was received.

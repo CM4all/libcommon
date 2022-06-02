@@ -201,6 +201,7 @@ TranslateResponse::Clear()
 #endif
 #if TRANSLATION_ENABLE_SESSION
 	check = {};
+	check_header = nullptr;
 	auth = {};
 	auth_file = nullptr;
 	append_auth = {};
@@ -442,6 +443,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
 #if TRANSLATION_ENABLE_SESSION
 	check = alloc.Dup(src.check);
+	check_header = alloc.CheckDup(src.check_header);
 	auth = alloc.Dup(src.auth);
 	want_full_uri = alloc.Dup(src.want_full_uri);
 	chain = alloc.Dup(src.chain);
