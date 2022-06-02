@@ -3253,6 +3253,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		response.external_session_manager = http_address =
 			http_address_parse(alloc, string_payload.data);
 
+		FinishAddressList();
 		address_list = &http_address->addresses;
 		default_port = http_address->GetDefaultPort();
 		return;
@@ -3916,6 +3917,10 @@ TranslateParser::HandlePacket(TranslationCommand command,
 
 	switch (command) {
 	case TranslationCommand::END:
+#if TRANSLATION_ENABLE_RADDRESS
+		FinishAddressList();
+#endif
+
 		FinishTranslateResponse(alloc,
 #if TRANSLATION_ENABLE_RADDRESS
 					base_suffix,
