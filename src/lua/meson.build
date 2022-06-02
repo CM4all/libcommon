@@ -2,6 +2,7 @@ liblua = dependency('luajit')
 
 lua = static_library(
   'lua',
+  'CoRunner.cxx',
   'Error.cxx',
   'Panic.cxx',
   'Resume.cxx',
