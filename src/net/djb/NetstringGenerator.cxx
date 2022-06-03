@@ -50,7 +50,7 @@ void
 NetstringGenerator::operator()(std::list<ConstBuffer<void>> &list,
 			       bool comma) noexcept
 {
-	list.emplace_front(header(GetTotalSize(list)).ToVoid());
+	list.emplace_front(StringView{header(GetTotalSize(list))}.ToVoid());
 
 	if (comma)
 		list.emplace_back(",", 1);

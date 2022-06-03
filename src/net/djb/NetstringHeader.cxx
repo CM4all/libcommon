@@ -35,7 +35,7 @@
 
 #include <stdio.h>
 
-StringView
+std::string_view
 NetstringHeader::operator()(std::size_t size) noexcept
 {
 	return {buffer, (std::size_t)sprintf(buffer, "%zu:", size)};

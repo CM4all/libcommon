@@ -39,7 +39,7 @@ QmqpClient::AppendNetstring(StringView value) noexcept
 {
 	netstring_headers.emplace_front();
 	auto &g = netstring_headers.front();
-	request.emplace_back(g(value.size).ToVoid());
+	request.emplace_back(StringView{g(value.size)}.ToVoid());
 	request.emplace_back(value.ToVoid());
 	request.emplace_back(",", 1);
 }

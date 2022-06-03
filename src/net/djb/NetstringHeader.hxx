@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,18 +30,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NETSTRING_HEADER_HXX
-#define NETSTRING_HEADER_HXX
+#pragma once
 
 #include <cstddef>
-
-struct StringView;
+#include <string_view>
 
 class NetstringHeader {
 	char buffer[32];
 
 public:
-	StringView operator()(std::size_t size) noexcept;
+	std::string_view operator()(std::size_t size) noexcept;
 };
-
-#endif
