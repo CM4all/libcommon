@@ -35,17 +35,17 @@
 #include "NetstringClient.hxx"
 #include "net/djb/NetstringHeader.hxx"
 #include "util/ConstBuffer.hxx"
-#include "util/StringView.hxx"
 
 #include <list>
 #include <forward_list>
 #include <stdexcept>
+#include <string_view>
 
 #include <assert.h>
 
 class QmqpClientHandler {
 public:
-	virtual void OnQmqpClientSuccess(StringView description) noexcept = 0;
+	virtual void OnQmqpClientSuccess(std::string_view description) noexcept = 0;
 	virtual void OnQmqpClientError(std::exception_ptr error) noexcept = 0;
 };
 
@@ -87,7 +87,7 @@ public:
 		:client(event_loop, 1024, *this),
 		 handler(_handler) {}
 
-	void Begin(StringView message, StringView sender) noexcept {
+	void Begin(std::string_view message, std::string_view sender) noexcept {
 		assert(netstring_headers.empty());
 		assert(request.empty());
 
@@ -95,7 +95,7 @@ public:
 		AppendNetstring(sender);
 	}
 
-	void AddRecipient(StringView recipient) noexcept {
+	void AddRecipient(std::string_view recipient) noexcept {
 		assert(!netstring_headers.empty());
 		assert(!request.empty());
 
@@ -105,7 +105,7 @@ public:
 	void Commit(FileDescriptor out_fd, FileDescriptor in_fd) noexcept;
 
 private:
-	void AppendNetstring(StringView value) noexcept;
+	void AppendNetstring(std::string_view value) noexcept;
 
 	/* virtual methods from NetstringClientHandler */
 	void OnNetstringResponse(AllocatedArray<std::byte> &&payload) noexcept override;

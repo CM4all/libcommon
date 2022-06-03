@@ -31,16 +31,17 @@
  */
 
 #include "QmqpClient.hxx"
+#include "util/StringView.hxx"
 
 #include <string> // TODO: migrate to std::string_view
 
 void
-QmqpClient::AppendNetstring(StringView value) noexcept
+QmqpClient::AppendNetstring(std::string_view value) noexcept
 {
 	netstring_headers.emplace_front();
 	auto &g = netstring_headers.front();
-	request.emplace_back(StringView{g(value.size)}.ToVoid());
-	request.emplace_back(value.ToVoid());
+	request.emplace_back(StringView{g(value.size())}.ToVoid());
+	request.emplace_back(StringView{value}.ToVoid());
 	request.emplace_back(",", 1);
 }
 
@@ -56,27 +57,22 @@ QmqpClient::Commit(FileDescriptor out_fd, FileDescriptor in_fd) noexcept
 void
 QmqpClient::OnNetstringResponse(AllocatedArray<std::byte> &&_payload) noexcept
 try {
-	StringView payload((const char *)&_payload.front(), _payload.size());
+	std::string_view payload{(const char *)_payload.data(), _payload.size()};
 
 	if (!payload.empty()) {
 		switch (payload[0]) {
 		case 'K':
 			// success
-			payload.pop_front();
-			handler.OnQmqpClientSuccess(payload);
+			handler.OnQmqpClientSuccess(payload.substr(1));
 			return;
 
 		case 'Z':
 			// temporary failure
-			payload.pop_front();
-			throw QmqpClientTemporaryFailure(std::string(payload.data,
-								     payload.size));
+			throw QmqpClientTemporaryFailure(std::string{payload.substr(1)});
 
 		case 'D':
 			// permanent failure
-			payload.pop_front();
-			throw QmqpClientPermanentFailure(std::string(payload.data,
-								     payload.size));
+			throw QmqpClientPermanentFailure(std::string{payload.substr(1)});
 		}
 	}
 
