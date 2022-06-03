@@ -31,10 +31,11 @@
  */
 
 #include "NetstringGenerator.hxx"
-#include "util/ConstBuffer.hxx"
-#include "util/StringView.hxx"
 
 #include <cstddef>
+#include <string_view>
+
+using std::string_view_literals::operator""sv;
 
 template<typename L>
 static inline size_t
@@ -42,16 +43,16 @@ GetTotalSize(const L &list) noexcept
 {
 	size_t result = 0;
 	for (const auto &i : list)
-		result += i.size;
+		result += i.size();
 	return result;
 }
 
 void
-NetstringGenerator::operator()(std::list<ConstBuffer<void>> &list,
+NetstringGenerator::operator()(std::list<std::span<const std::byte>> &list,
 			       bool comma) noexcept
 {
-	list.emplace_front(StringView{header(GetTotalSize(list))}.ToVoid());
+	list.emplace_front(std::as_bytes(std::span{header(GetTotalSize(list))}));
 
 	if (comma)
-		list.emplace_back(",", 1);
+		list.emplace_back(std::as_bytes(std::span{","sv}));
 }

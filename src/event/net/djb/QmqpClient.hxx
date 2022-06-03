@@ -34,7 +34,6 @@
 
 #include "NetstringClient.hxx"
 #include "net/djb/NetstringHeader.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <list>
 #include <forward_list>
@@ -78,7 +77,7 @@ class QmqpClient final : NetstringClientHandler {
 	NetstringClient client;
 
 	std::forward_list<NetstringHeader> netstring_headers;
-	std::list<ConstBuffer<void>> request;
+	std::list<std::span<const std::byte>> request;
 
 	QmqpClientHandler &handler;
 

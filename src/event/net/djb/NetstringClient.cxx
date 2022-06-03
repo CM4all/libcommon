@@ -31,7 +31,6 @@
  */
 
 #include "NetstringClient.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <stdexcept>
 
@@ -61,7 +60,7 @@ NetstringClient::~NetstringClient() noexcept
 
 void
 NetstringClient::Request(FileDescriptor _out_fd, FileDescriptor _in_fd,
-			 std::list<ConstBuffer<void>> &&data) noexcept
+			 std::list<std::span<const std::byte>> &&data) noexcept
 {
 	assert(!in_fd.IsDefined());
 	assert(!out_fd.IsDefined());
@@ -73,7 +72,7 @@ NetstringClient::Request(FileDescriptor _out_fd, FileDescriptor _in_fd,
 
 	generator(data);
 	for (const auto &i : data)
-		write.Push(i.data, i.size);
+		write.Push(i.data(), i.size());
 
 	event.Open(SocketDescriptor::FromFileDescriptor(out_fd));
 	event.ScheduleWrite();

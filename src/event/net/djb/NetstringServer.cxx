@@ -34,11 +34,8 @@
 #include "system/Error.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/Compiler.h"
-#include "util/ConstBuffer.hxx"
 
 #include <stdexcept>
-
-#include <string.h>
 
 static constexpr auto busy_timeout = std::chrono::seconds(5);
 
@@ -59,12 +56,12 @@ NetstringServer::~NetstringServer() noexcept
 }
 
 bool
-NetstringServer::SendResponse(const void *data, size_t size) noexcept
+NetstringServer::SendResponse(std::span<const std::byte> response) noexcept
 try {
-	std::list<ConstBuffer<void>> list{{data, size}};
+	std::list<std::span<const std::byte>> list{response};
 	generator(list);
 	for (const auto &i : list)
-		write.Push(i.data, i.size);
+		write.Push(i.data(), i.size());
 
 	switch (write.Write(GetSocket().ToFileDescriptor())) {
 	case MultiWriteBuffer::Result::MORE:
@@ -79,12 +76,6 @@ try {
 } catch (...) {
 	OnError(std::current_exception());
 	return false;
-}
-
-bool
-NetstringServer::SendResponse(const char *data) noexcept
-{
-	return SendResponse((const void *)data, strlen(data));
 }
 
 void

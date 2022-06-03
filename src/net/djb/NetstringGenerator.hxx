@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,14 +30,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NETSTRING_GENERATOR_HXX
-#define NETSTRING_GENERATOR_HXX
+#pragma once
 
 #include "NetstringHeader.hxx"
 
 #include <list>
-
-template<typename T> struct ConstBuffer;
+#include <span>
 
 class NetstringGenerator {
 	NetstringHeader header;
@@ -46,8 +44,6 @@ public:
 	/**
 	 * @param comma generate the trailing comma?
 	 */
-	void operator()(std::list<ConstBuffer<void>> &list,
+	void operator()(std::list<std::span<const std::byte>> &list,
 			bool comma=true) noexcept;
 };
-
-#endif

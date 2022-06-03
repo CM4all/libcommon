@@ -40,6 +40,7 @@
 
 #include <exception>
 #include <cstddef>
+#include <span>
 
 class UniqueSocketDescriptor;
 
@@ -67,8 +68,11 @@ protected:
 		return event.GetSocket();
 	}
 
-	bool SendResponse(const void *data, size_t size) noexcept;
-	bool SendResponse(const char *data) noexcept;
+	bool SendResponse(std::span<const std::byte> response) noexcept;
+
+	bool SendResponse(std::string_view response) noexcept {
+		return SendResponse(std::as_bytes(std::span{response}));
+	}
 
 	/**
 	 * A netstring has been received.

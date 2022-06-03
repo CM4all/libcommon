@@ -42,8 +42,6 @@
 #include <list>
 #include <exception>
 
-template<typename T> struct ConstBuffer;
-
 class NetstringClientHandler {
 public:
 	virtual void OnNetstringResponse(AllocatedArray<std::byte> &&payload) noexcept = 0;
@@ -95,7 +93,7 @@ public:
 	 * has been invoked)
 	 */
 	void Request(FileDescriptor _out_fd, FileDescriptor _in_fd,
-		     std::list<ConstBuffer<void>> &&data) noexcept;
+		     std::list<std::span<const std::byte>> &&data) noexcept;
 
 private:
 	void OnEvent(unsigned events) noexcept;

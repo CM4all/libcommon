@@ -31,18 +31,19 @@
  */
 
 #include "QmqpClient.hxx"
-#include "util/StringView.hxx"
 
 #include <string> // TODO: migrate to std::string_view
+
+using std::string_view_literals::operator""sv;
 
 void
 QmqpClient::AppendNetstring(std::string_view value) noexcept
 {
 	netstring_headers.emplace_front();
 	auto &g = netstring_headers.front();
-	request.emplace_back(StringView{g(value.size())}.ToVoid());
-	request.emplace_back(StringView{value}.ToVoid());
-	request.emplace_back(",", 1);
+	request.emplace_back(std::as_bytes(std::span{g(value.size())}));
+	request.emplace_back(std::as_bytes(std::span{value}));
+	request.emplace_back(std::as_bytes(std::span{","sv}));
 }
 
 void
