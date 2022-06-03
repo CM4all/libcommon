@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,14 +30,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NETSTRING_INPUT_HXX
-#define NETSTRING_INPUT_HXX
+#pragma once
 
 #include "util/AllocatedArray.hxx"
 
 #include <cstddef>
 #include <cassert>
-#include <cstdint>
 
 class FileDescriptor;
 
@@ -56,7 +54,7 @@ class NetstringInput {
 	char header_buffer[32];
 	size_t header_position = 0;
 
-	AllocatedArray<uint8_t> value;
+	AllocatedArray<std::byte> value;
 	size_t value_position;
 
 	const size_t max_size;
@@ -80,7 +78,7 @@ public:
 		return state == State::FINISHED;
 	}
 
-	AllocatedArray<uint8_t> &GetValue() noexcept {
+	AllocatedArray<std::byte> &GetValue() noexcept {
 		assert(IsFinished());
 
 		return value;
@@ -91,5 +89,3 @@ private:
 	Result ValueData(size_t nbytes);
 	Result ReceiveValue(FileDescriptor fd);
 };
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -76,7 +76,7 @@ protected:
 	 * @param payload the netstring value; for the implementation's
 	 * convenience, the netstring is writable
 	 */
-	virtual void OnRequest(AllocatedArray<uint8_t> &&payload) = 0;
+	virtual void OnRequest(AllocatedArray<std::byte> &&payload) = 0;
 	virtual void OnError(std::exception_ptr ep) noexcept = 0;
 	virtual void OnDisconnect() noexcept = 0;
 

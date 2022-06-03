@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -54,7 +54,7 @@ QmqpClient::Commit(FileDescriptor out_fd, FileDescriptor in_fd) noexcept
 }
 
 void
-QmqpClient::OnNetstringResponse(AllocatedArray<uint8_t> &&_payload) noexcept
+QmqpClient::OnNetstringResponse(AllocatedArray<std::byte> &&_payload) noexcept
 try {
 	StringView payload((const char *)&_payload.front(), _payload.size());
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -108,7 +108,7 @@ private:
 	void AppendNetstring(StringView value) noexcept;
 
 	/* virtual methods from NetstringClientHandler */
-	void OnNetstringResponse(AllocatedArray<uint8_t> &&payload) noexcept override;
+	void OnNetstringResponse(AllocatedArray<std::byte> &&payload) noexcept override;
 
 	void OnNetstringError(std::exception_ptr error) noexcept override {
 		/* forward to the QmqpClientHandler */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -46,7 +46,7 @@ template<typename T> struct ConstBuffer;
 
 class NetstringClientHandler {
 public:
-	virtual void OnNetstringResponse(AllocatedArray<uint8_t> &&payload) noexcept = 0;
+	virtual void OnNetstringResponse(AllocatedArray<std::byte> &&payload) noexcept = 0;
 	virtual void OnNetstringError(std::exception_ptr error) noexcept = 0;
 };
 

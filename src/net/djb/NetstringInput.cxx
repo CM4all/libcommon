@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2021 CM4all GmbH
+ * Copyright 2007-2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -112,7 +112,7 @@ NetstringInput::ValueData(size_t nbytes)
 	value_position += nbytes;
 
 	if (value_position >= value.size()) {
-		if (value.back() != ',')
+		if (value.back() != std::byte{','})
 			throw std::runtime_error("Malformed netstring");
 
 		/* erase the trailing comma */
