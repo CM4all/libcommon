@@ -147,7 +147,7 @@ GetSteadyPart(const struct sockaddr_in6 &address) noexcept
 	};
 }
 
-#endif
+#endif // HAVE_TCP
 
 std::span<const std::byte>
 SocketAddress::GetSteadyPart() const noexcept
