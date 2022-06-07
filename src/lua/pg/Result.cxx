@@ -95,7 +95,7 @@ PgResult::_Fetch(lua_State *L)
 
 	for (unsigned i = 0; i < n_columns; ++i) {
 		if (numerical)
-			Push(L, (int)i + 1);
+			Push(L, (lua_Integer)i + 1);
 		else
 			Push(L, result.GetColumnName(i));
 
