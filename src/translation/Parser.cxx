@@ -114,13 +114,16 @@ TranslateParser::SetCgiAddress(ResourceAddress::Type type,
 void
 TranslateParser::FinishAddressList() noexcept
 {
-	if (address_list == nullptr || address_list_builder.empty())
+	if (address_list == nullptr)
 		return;
 
-	*address_list = address_list_builder.Finish(alloc);
+	if (!address_list_builder.empty()) {
+		*address_list = address_list_builder.Finish(alloc);
+		address_list_builder.clear();
+	}
+
 
 	address_list = nullptr;
-	address_list_builder.clear();
 }
 
 #endif
