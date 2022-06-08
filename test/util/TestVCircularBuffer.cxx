@@ -48,6 +48,7 @@ TEST(VCircularBuffer, Basic)
 	VCircularBuffer<Foo> cb{std::span{buffer}};
 	ASSERT_TRUE(cb.empty());
 	EXPECT_EQ(cb.size(), 0u);
+	EXPECT_EQ(cb.begin(), cb.end());
 
 	int i = 0;
 	do {
@@ -57,6 +58,15 @@ TEST(VCircularBuffer, Basic)
 	} while (cb.front().value == 0);
 
 	EXPECT_EQ(cb.size(), size_t(i - 1));
+	EXPECT_NE(cb.begin(), cb.end());
+	EXPECT_EQ(&cb.front(), &*cb.begin());
+	EXPECT_EQ(std::distance(cb.begin(), cb.end()), i - 1);
+
+	i = cb.front().value;
+	for (const auto &j : cb) {
+		EXPECT_EQ(j.value, i);
+		++i;
+	}
 
 	ASSERT_EQ(cb.front().value, 1);
 	cb.emplace_back(sizeof(Foo), i++);
