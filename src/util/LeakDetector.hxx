@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,13 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LEAK_DETECTOR_HXX
-#define LEAK_DETECTOR_HXX
+#pragma once
 
 #ifndef NDEBUG
 
-#include <boost/intrusive/link_mode.hpp>
-#include <boost/intrusive/list_hook.hpp>
+#include "IntrusiveList.hxx"
 
 /**
  * Derive from this class to verify that its destructor gets called
@@ -41,9 +39,9 @@
  */
 class LeakDetector {
 	friend class LeakDetectorContainer;
+	template<auto member> friend struct IntrusiveListMemberHookTraits;
 
-	typedef boost::intrusive::list_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> LeakDetectorSiblingsHook;
-	LeakDetectorSiblingsHook leak_detector_siblings;
+	IntrusiveListHook leak_detector_siblings;
 
 	enum class State {
 		INITIAL,
@@ -66,7 +64,5 @@ protected:
 #else
 
 class LeakDetector {};
-
-#endif
 
 #endif

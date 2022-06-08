@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,20 +31,13 @@
 
 #ifndef NDEBUG
 
-#include <boost/intrusive/list.hpp>
-
+#include <cassert>
 #include <mutex>
-
-#include <assert.h>
 
 class LeakDetectorContainer {
 	std::mutex mutex;
 
-	boost::intrusive::list<LeakDetector,
-			       boost::intrusive::member_hook<LeakDetector,
-							     LeakDetector::LeakDetectorSiblingsHook,
-							     &LeakDetector::leak_detector_siblings>,
-			       boost::intrusive::constant_time_size<false>> list;
+	IntrusiveList<LeakDetector, IntrusiveListMemberHookTraits<&LeakDetector::leak_detector_siblings>> list;
 
 public:
 	~LeakDetectorContainer() noexcept {
