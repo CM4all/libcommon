@@ -99,6 +99,22 @@ EnablePageFork(void *p, std::size_t size, bool inherit) noexcept
 }
 
 /**
+ * Controls whether the specified pages will be included in a core
+ * dump.
+ */
+static inline void
+EnablePageDump(void *p, std::size_t size, bool dump) noexcept
+{
+#ifdef __linux__
+	madvise(p, size, dump ? MADV_DODUMP : MADV_DONTDUMP);
+#else
+	(void)p;
+	(void)size;
+	(void)dump;
+#endif
+}
+
+/**
  * Discard the specified page contents, giving memory back to the
  * kernel.  The mapping is preserved, and new memory will be allocated
  * automatically on the next write access.
