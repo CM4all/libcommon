@@ -51,7 +51,7 @@ class Handler;
 
 class Connection : AutoUnlinkIntrusiveListHook
 {
-	friend class IntrusiveList<Connection>;
+	friend struct IntrusiveListBaseHookTraits<Connection>;
 
 	Handler &handler;
 
