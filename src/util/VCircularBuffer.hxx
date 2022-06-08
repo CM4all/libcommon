@@ -201,7 +201,6 @@ public:
 	}
 
 	using const_iterator = MemberIteratorAdapter<typename List::const_iterator,
-						     const Item, const T,
 						     &Item::value>;
 
 	constexpr const_iterator begin() const noexcept {
@@ -217,7 +216,6 @@ public:
 	}
 
 	using iterator = MemberIteratorAdapter<typename List::iterator,
-					       Item, T,
 					       &Item::value>;
 
 	constexpr iterator begin() noexcept {

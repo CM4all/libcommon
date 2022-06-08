@@ -32,6 +32,9 @@
 
 #pragma once
 
+#include "MemberPointer.hxx"
+#include "CopyConst.hxx"
+
 #include <utility>
 
 /**
@@ -41,15 +44,17 @@
  * TODO: implement operator+=() operator+() operator-() for
  * RandomAccessIterator
  */
-template<typename I, typename C, typename M, M C::*member>
+template<typename I, auto member>
 class MemberIteratorAdapter : I
 {
 public:
 	using typename I::iterator_category;
-	typedef M value_type;
+	using value_type = MemberPointerType<decltype(member)>;
+	using maybe_const_value_type = CopyConst<value_type,
+						 std::remove_reference_t<typename I::reference>>;
 	using typename I::difference_type;
-	using pointer = M *;
-	using reference = M &;
+	using pointer = maybe_const_value_type *;
+	using reference = maybe_const_value_type &;
 
 	template<typename T>
 	constexpr MemberIteratorAdapter(T &&t) noexcept
