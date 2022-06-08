@@ -45,6 +45,18 @@ ParseTimePoint(const char *s)
 			std::chrono::hours(24),
 		};
 
+	if (StringIsEqual(s, "yesterday"))
+		return {
+			PrecedingMidnightLocal(std::chrono::system_clock::now()) - std::chrono::hours{24},
+			std::chrono::hours(24),
+		};
+
+	if (StringIsEqual(s, "tomorrow"))
+		return {
+			PrecedingMidnightLocal(std::chrono::system_clock::now()) + std::chrono::hours{24},
+			std::chrono::hours(24),
+		};
+
 	if (StringIsEqual(s, "now"))
 		return {
 			std::chrono::system_clock::now(),

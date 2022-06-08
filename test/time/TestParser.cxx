@@ -46,8 +46,18 @@ TEST(Parser, Today)
 	tm.tm_hour = 0;
 	const time_t expected = mktime(&tm);
 
-	const auto result = ParseTimePoint("today");
+	auto result = ParseTimePoint("today");
 	EXPECT_NEAR(std::chrono::system_clock::to_time_t(result.first), expected, 10);
+	EXPECT_EQ(result.second,
+		  std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::hours(24)));
+
+	result = ParseTimePoint("yesterday");
+	EXPECT_NEAR(std::chrono::system_clock::to_time_t(result.first), expected - 24 * 3600, 10);
+	EXPECT_EQ(result.second,
+		  std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::hours(24)));
+
+	result = ParseTimePoint("tomorrow");
+	EXPECT_NEAR(std::chrono::system_clock::to_time_t(result.first), expected + 24 * 3600, 10);
 	EXPECT_EQ(result.second,
 		  std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::hours(24)));
 }
