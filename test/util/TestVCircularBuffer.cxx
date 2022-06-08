@@ -68,6 +68,14 @@ TEST(VCircularBuffer, Basic)
 		++i;
 	}
 
+	// const_iterator test
+	const auto &cb_const = cb;
+	i = cb_const.front().value;
+	for (const auto &j : cb_const) {
+		EXPECT_EQ(j.value, i);
+		++i;
+	}
+
 	ASSERT_EQ(cb.front().value, 1);
 	cb.emplace_back(sizeof(Foo), i++);
 	ASSERT_EQ(cb.front().value, 2);
