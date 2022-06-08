@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include <iterator>
+#include <utility>
 
 /**
  * An adapter for an existing iterator class which returns a member of
