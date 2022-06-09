@@ -33,8 +33,7 @@
 #pragma once
 
 #include "util/LeakDetector.hxx"
-
-#include <boost/intrusive/list_hook.hpp>
+#include "util/IntrusiveList.hxx"
 
 #include <exception>
 
@@ -64,8 +63,9 @@ struct CreateStockItem {
 };
 
 class StockItem
-	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
-	  LeakDetector {
+	: LeakDetector
+{
+	IntrusiveListHook stock_item_siblings;
 
 	AbstractStock &stock;
 
@@ -75,6 +75,11 @@ class StockItem
 	bool fade = false;
 
 public:
+	using List =
+		IntrusiveList<StockItem,
+			      IntrusiveListMemberHookTraits<&StockItem::stock_item_siblings>,
+			      true>;
+
 	/**
 	 * Kludge: this flag is true if this item is idle and is not yet
 	 * in a "clean" state (e.g. a WAS process after STOP), and cannot

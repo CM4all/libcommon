@@ -40,7 +40,6 @@
 #include "event/TimerEvent.hxx"
 #include "util/Cancellable.hxx"
 
-#include <boost/intrusive/list.hpp>
 #include <boost/intrusive/unordered_set.hpp>
 
 class CancellablePointer;
@@ -72,9 +71,11 @@ class MultiStock {
 	 * multiple clients.
 	 */
 	class OuterItem final
-		: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
+		: IntrusiveListHook,
 		  AbstractStock
 	{
+		friend struct IntrusiveListBaseHookTraits<OuterItem>;
+
 		MapItem &parent;
 
 		StockItem &shared_item;
@@ -88,10 +89,7 @@ class MultiStock {
 		 */
 		TimerEvent cleanup_timer;
 
-		using ItemList =
-			boost::intrusive::list<StockItem,
-					       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>>,
-					       boost::intrusive::constant_time_size<true>>;
+		using ItemList = StockItem::List;
 
 		ItemList idle, busy;
 
@@ -181,16 +179,12 @@ class MultiStock {
 	{
 		MultiStockClass &inner_class;
 
-		using OuterItemList =
-			boost::intrusive::list<OuterItem,
-					       boost::intrusive::constant_time_size<false>>;
+		using OuterItemList = IntrusiveList<OuterItem>;
+
 		OuterItemList items;
 
 		struct Waiting;
-		using WaitingList =
-			boost::intrusive::list<Waiting,
-					       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>>,
-					       boost::intrusive::constant_time_size<false>>;
+		using WaitingList = IntrusiveList<Waiting>;
 
 		WaitingList waiting;
 

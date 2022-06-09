@@ -38,8 +38,7 @@
 #include <cassert>
 
 struct Stock::Waiting final
-	: boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>,
-	     Cancellable
+	: IntrusiveListHook, Cancellable
 {
 	Stock &stock;
 

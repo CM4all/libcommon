@@ -40,8 +40,7 @@
 #include "event/DeferEvent.hxx"
 #include "io/Logger.hxx"
 #include "util/DeleteDisposer.hxx"
-
-#include <boost/intrusive/list.hpp>
+#include "util/IntrusiveList.hxx"
 
 #include <cstddef>
 #include <cstdint>
@@ -106,9 +105,7 @@ class Stock : public AbstractStock {
 	CoarseTimerEvent cleanup_event;
 	CoarseTimerEvent clear_event;
 
-	using ItemList =
-		boost::intrusive::list<StockItem,
-				       boost::intrusive::constant_time_size<true>>;
+	using ItemList = StockItem::List;
 
 	ItemList idle;
 
@@ -117,10 +114,7 @@ class Stock : public AbstractStock {
 	std::size_t num_create = 0;
 
 	struct Waiting;
-	using WaitingList =
-		boost::intrusive::list<Waiting,
-				       boost::intrusive::base_hook<boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>>,
-				       boost::intrusive::constant_time_size<false>>;
+	using WaitingList = IntrusiveList<Waiting>;
 
 	WaitingList waiting;
 
