@@ -34,20 +34,14 @@
 
 #include <stdexcept>
 
-class SocketProtocolError : public std::runtime_error {
+/**
+ * Some operation has timed out (e.g. connecting to a server, waiting
+ * for reply from a server).
+ */
+class TimeoutError : public std::runtime_error {
 public:
-	SocketProtocolError(const char *msg) noexcept
-		:std::runtime_error(msg) {}
-};
+	using std::runtime_error::runtime_error;
 
-class SocketClosedPrematurelyError : public SocketProtocolError {
-public:
-	SocketClosedPrematurelyError() noexcept
-		:SocketProtocolError("Peer closed the socket prematurely") {}
-};
-
-class SocketBufferFullError : public SocketProtocolError {
-public:
-	SocketBufferFullError() noexcept
-		:SocketProtocolError("Socket buffer overflow") {}
+	TimeoutError() noexcept
+		:std::runtime_error("Timeout") {}
 };

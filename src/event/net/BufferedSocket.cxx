@@ -33,6 +33,7 @@
 #include "BufferedSocket.hxx"
 #include "system/Error.hxx"
 #include "net/SocketProtocolError.hxx"
+#include "net/TimeoutError.hxx"
 
 #include <errno.h>
 
@@ -48,7 +49,7 @@ BufferedSocket::~BufferedSocket() noexcept = default;
 bool
 BufferedSocketHandler::OnBufferedTimeout() noexcept
 {
-	OnBufferedError(std::make_exception_ptr(SocketTimeoutError()));
+	OnBufferedError(std::make_exception_ptr(TimeoutError()));
 	return false;
 }
 
