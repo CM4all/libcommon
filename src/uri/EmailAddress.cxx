@@ -32,7 +32,7 @@
 
 #include "EmailAddress.hxx"
 #include "Verify.hxx"
-#include "util/StringVerify.hxx"
+#include "util/StringListVerify.hxx"
 #include "util/StringView.hxx"
 
 #include <algorithm>

@@ -34,7 +34,7 @@
 #include "Chars.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
-#include "util/StringVerify.hxx"
+#include "util/StringListVerify.hxx"
 #include "util/StringView.hxx"
 
 #include <algorithm>
