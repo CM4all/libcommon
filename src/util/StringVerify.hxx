@@ -33,6 +33,7 @@
 #pragma once
 
 #include <algorithm>
+#include <string_view>
 
 /**
  * Is the given string non-empty and consists only of characters
