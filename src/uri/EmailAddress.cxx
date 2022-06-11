@@ -33,9 +33,8 @@
 #include "EmailAddress.hxx"
 #include "Verify.hxx"
 #include "util/StringListVerify.hxx"
+#include "util/StringVerify.hxx"
 #include "util/StringView.hxx"
-
-#include <algorithm>
 
 /**
  * @see https://datatracker.ietf.org/doc/html/rfc5322#section-3.2.4
@@ -72,7 +71,7 @@ IsAtomTextChar(char ch) noexcept
 static constexpr bool
 IsAtomText(std::string_view s) noexcept
 {
-	return !s.empty() && std::all_of(s.begin(), s.end(), IsAtomTextChar);
+	return CheckCharsNonEmpty(s, IsAtomTextChar);
 }
 
 /**

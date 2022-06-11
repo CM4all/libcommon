@@ -35,6 +35,7 @@
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
 #include "util/StringListVerify.hxx"
+#include "util/StringVerify.hxx"
 #include "util/StringView.hxx"
 
 #include <algorithm>
@@ -85,8 +86,8 @@ VerifyDomainName(std::string_view s) noexcept
 static bool
 VerifyPort(StringView s) noexcept
 {
-	return !s.empty() && s.size <= 5 &&
-		std::all_of(s.begin(), s.end(), IsDigitASCII);
+	return s.size <= 5 &&
+		CheckCharsNonEmpty(s, IsDigitASCII);
 }
 
 [[gnu::pure]]

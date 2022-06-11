@@ -61,6 +61,7 @@
 #include "util/Compiler.h"
 #include "util/RuntimeError.hxx"
 #include "util/StringCompare.hxx"
+#include "util/StringVerify.hxx"
 
 #if TRANSLATION_ENABLE_HTTP
 #include "http/HeaderName.hxx"
@@ -160,11 +161,10 @@ IsValidNameChar(char ch)
 	return IsAlphaNumericASCII(ch) || ch == '-' || ch == '_';
 }
 
-[[gnu::pure]]
-static bool
-IsValidName(StringView s)
+static constexpr bool
+IsValidName(std::string_view s) noexcept
 {
-	return !s.empty() && std::all_of(s.begin(), s.end(), IsValidNameChar);
+	return CheckCharsNonEmpty(s, IsValidNameChar);
 }
 
 [[gnu::pure]]
@@ -219,8 +219,7 @@ IsValidLowerHeaderNameChar(char ch) noexcept
 static constexpr bool
 IsValidLowerHeaderName(std::string_view s) noexcept
 {
-	return !s.empty() &&
-		std::all_of(s.begin(), s.end(), IsValidLowerHeaderNameChar);
+	return CheckCharsNonEmpty(s, IsValidLowerHeaderNameChar);
 }
 
 #endif
@@ -977,7 +976,7 @@ constexpr
 static bool
 IsValidCgroupName(StringView s) noexcept
 {
-	return std::all_of(s.begin(), s.end(), IsValidCgroupNameChar);
+	return CheckCharsNonEmpty(s, IsValidCgroupNameChar);
 }
 
 static constexpr bool
@@ -986,14 +985,10 @@ IsValidCgroupAttributeNameChar(char ch) noexcept
 	return IsLowerAlphaASCII(ch) || ch == '_';
 }
 
-#if !GCC_OLDER_THAN(10,0)
-constexpr
-#endif
-static bool
+static constexpr bool
 IsValidCgroupAttributeName(StringView s) noexcept
 {
-	return std::all_of(s.begin(), s.end(),
-			   IsValidCgroupAttributeNameChar);
+	return CheckCharsNonEmpty(s, IsValidCgroupAttributeNameChar);
 }
 
 [[gnu::pure]]
@@ -1001,18 +996,13 @@ static bool
 IsValidCgroupSetName(StringView name) noexcept
 {
 	const auto [controller, attribute] = name.Split('.');
-	if (controller.empty() || attribute.empty())
-		return false;
-
-	if (!IsValidCgroupName(controller))
+	if (!IsValidCgroupName(controller) ||
+	    !IsValidCgroupAttributeName(attribute))
 		return false;
 
 	if (controller.Equals("cgroup"))
 		/* this is not a controller, this is a core cgroup
 		   attribute */
-		return false;
-
-	if (!IsValidCgroupAttributeName(attribute))
 		return false;
 
 	return true;
