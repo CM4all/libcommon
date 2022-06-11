@@ -85,6 +85,7 @@ spawn_dep = declare_dependency(
     system_dep,
     io_dep,
     net_dep,
+    time_dep,
     libsystemd,
   ],
 )
