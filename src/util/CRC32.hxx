@@ -72,3 +72,11 @@ private:
 		return crc;
 	}
 };
+
+constexpr auto
+CRC32(std::span<const std::byte> src) noexcept
+{
+	CRC32State crc;
+	crc.Update(src);
+	return crc.Finish();
+}
