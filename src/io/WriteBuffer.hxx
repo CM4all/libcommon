@@ -33,17 +33,16 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
 
 class WriteBuffer {
 	friend class MultiWriteBuffer;
 
-	const uint8_t *buffer, *end;
+	const std::byte *buffer, *end;
 
 public:
 	WriteBuffer() = default;
 	WriteBuffer(const void *_buffer, size_t size)
-		:buffer((const uint8_t *)_buffer), end(buffer + size) {}
+		:buffer((const std::byte *)_buffer), end(buffer + size) {}
 
 	const void *GetData() const {
 		return buffer;
