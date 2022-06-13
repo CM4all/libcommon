@@ -39,7 +39,6 @@
 #include "util/Compiler.h"
 
 #include <assert.h>
-#include <errno.h>
 #include <unistd.h>
 
 UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
@@ -63,7 +62,7 @@ try {
 			if (!ReceiveOne())
 				return false;
 		} catch (const std::system_error &e) {
-			if (IsErrno(e, EAGAIN))
+			if (IsSocketErrorReceiveWouldBlock(e))
 				/* no more pending datagrams */
 				return true;
 
