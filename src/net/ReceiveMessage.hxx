@@ -36,6 +36,7 @@
 #include "StaticSocketAddress.hxx"
 #include "MsgHdr.hxx"
 #include "SocketError.hxx"
+#include "io/Iovec.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <span>
@@ -75,9 +76,7 @@ ReceiveMessage(SocketDescriptor s,
 	flags |= MSG_CMSG_CLOEXEC;
 #endif
 
-	struct iovec iov;
-	iov.iov_base = buffer.payload;
-	iov.iov_len = sizeof(buffer.payload);
+	struct iovec iov = MakeIovec(buffer.payload);
 
 	auto msg = MakeMsgHdr(buffer.address, {&iov, 1},
 			      {(const std::byte *)buffer.cmsg, sizeof(buffer.cmsg)});
