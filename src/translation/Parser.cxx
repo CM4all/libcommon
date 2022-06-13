@@ -1109,6 +1109,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::ALT_HOST:
 	case TranslationCommand::CHAIN_HEADER:
 	case TranslationCommand::AUTH_TOKEN:
+	case TranslationCommand::PLAN:
 		throw std::runtime_error("misplaced translate request packet");
 
 	case TranslationCommand::UID_GID:

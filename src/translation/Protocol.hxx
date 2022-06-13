@@ -1161,6 +1161,13 @@ enum class TranslationCommand : uint16_t {
 	 * request header.
 	 */
 	CHECK_HEADER = 240,
+
+	/**
+	 * The name of the Workshop
+	 * (https://github.com/CM4all/workshop/) plan which triggered
+	 * this request.
+	 */
+	PLAN = 241,
 };
 
 struct TranslationHeader {

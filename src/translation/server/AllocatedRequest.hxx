@@ -82,6 +82,7 @@ class AllocatedRequest : public Request {
 	std::string pool_buffer;
 	std::string execute_buffer;
 	std::string service_buffer;
+	std::string plan_buffer;
 
 public:
 	/**

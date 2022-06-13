@@ -123,6 +123,8 @@ struct Request {
 
 	const char *service = nullptr;
 
+	const char *plan = nullptr;
+
 	bool login = false;
 
 	bool cron = false;
