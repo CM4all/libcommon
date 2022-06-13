@@ -63,3 +63,9 @@ MakeIovecStatic() noexcept
 	static constexpr T value = _value;
 	return MakeIovecT<T>(value);
 }
+
+constexpr std::span<std::byte>
+ToSpan(const struct iovec &i) noexcept
+{
+	return {(std::byte *)i.iov_base, i.iov_len};
+}
