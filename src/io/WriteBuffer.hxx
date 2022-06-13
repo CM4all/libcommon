@@ -33,6 +33,7 @@
 #pragma once
 
 #include <cstddef>
+#include <span>
 
 class WriteBuffer {
 	friend class MultiWriteBuffer;
@@ -50,6 +51,10 @@ public:
 
 	size_t GetSize() const {
 		return end - buffer;
+	}
+
+	constexpr operator std::span<const std::byte>() noexcept {
+		return {buffer, end};
 	}
 
 	enum class Result {

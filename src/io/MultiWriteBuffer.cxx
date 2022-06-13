@@ -31,7 +31,8 @@
  */
 
 #include "MultiWriteBuffer.hxx"
-#include "io/FileDescriptor.hxx"
+#include "FileDescriptor.hxx"
+#include "Iovec.hxx"
 #include "system/Error.hxx"
 
 #include <sys/uio.h>
@@ -44,10 +45,8 @@ MultiWriteBuffer::Write(FileDescriptor fd)
 
 	std::array<iovec, MAX_BUFFERS> iov;
 
-	for (unsigned k = i; k != n; ++k) {
-		iov[k].iov_base = const_cast<void *>(buffers[k].GetData());
-		iov[k].iov_len = buffers[k].GetSize();
-	};
+	for (unsigned k = i; k != n; ++k)
+		iov[k] = MakeIovec(buffers[k]);
 
 	ssize_t nbytes = writev(fd.Get(), &iov[i], n - i);
 	if (nbytes < 0) {
