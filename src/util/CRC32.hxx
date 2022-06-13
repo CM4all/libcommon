@@ -39,7 +39,7 @@
 /**
  * A naive (and slow) CRC-32/ISO-HDLC implementation.
  */
-class CRC32 {
+class CRC32State {
 public:
 	using value_type = uint32_t;
 

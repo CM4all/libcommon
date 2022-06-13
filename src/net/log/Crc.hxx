@@ -40,6 +40,6 @@ namespace Log {
 /**
  * The CRC algorithm.
  */
-using Crc = CRC32;
+using Crc = CRC32State;
 
 }}
