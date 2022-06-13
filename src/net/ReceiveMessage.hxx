@@ -76,9 +76,9 @@ ReceiveMessage(SocketDescriptor s,
 	flags |= MSG_CMSG_CLOEXEC;
 #endif
 
-	struct iovec iov = MakeIovec(buffer.payload);
+	struct iovec iov[] = {MakeIovec(buffer.payload)};
 
-	auto msg = MakeMsgHdr(buffer.address, {&iov, 1},
+	auto msg = MakeMsgHdr(buffer.address, iov,
 			      {(const std::byte *)buffer.cmsg, sizeof(buffer.cmsg)});
 
 	auto nbytes = recvmsg(s.Get(), &msg, flags);
