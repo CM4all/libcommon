@@ -37,10 +37,9 @@
 #include "net/ReceiveMessage.hxx"
 #include "net/SendMessage.hxx"
 #include "system/Error.hxx"
+#include "util/CRC32.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/StringView.hxx"
-
-#include <boost/crc.hpp>
 
 #include <sched.h>
 
@@ -103,13 +102,8 @@ ReceiveDatagram(SocketDescriptor s,
 
 	payload = payload.subspan(sizeof(dh));
 
-	{
-		boost::crc_32_type crc;
-		crc.reset();
-		crc.process_bytes(payload.data(), payload.size());
-		if (dh.crc != crc.checksum())
-			throw std::runtime_error("Bad CRC in response datagram");
-	}
+	if (dh.crc != CRC32(payload))
+		throw std::runtime_error("Bad CRC in response datagram");
 
 	return {payload, std::move(response.fds)};
 }

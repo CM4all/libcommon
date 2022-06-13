@@ -35,9 +35,8 @@
 #include "Protocol.hxx"
 #include "net/SendMessage.hxx"
 #include "io/Iovec.hxx"
+#include "util/CRC32.hxx"
 #include "util/StaticVector.hxx"
-
-#include <boost/crc.hpp>
 
 class DatagramBuilder {
 	SpawnDaemon::DatagramHeader header;
@@ -81,13 +80,12 @@ public:
 	}
 
 	MessageHeader Finish() noexcept {
-		boost::crc_32_type crc;
-		crc.reset();
+		CRC32State crc;
 
-		for (size_t i = 1; i < v.size(); ++i)
-			crc.process_bytes(v[i].iov_base, v[i].iov_len);
+		for (const auto &i : v)
+			crc.Update(ToSpan(i));
 
-		header.crc = crc.checksum();
+		header.crc = crc.Finish();
 
 		return std::span{v};
 	}
