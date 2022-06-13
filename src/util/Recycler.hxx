@@ -34,8 +34,7 @@
 #define RECYCLER_HXX
 
 #include "Poison.hxx"
-
-#include <boost/intrusive/slist.hpp>
+#include "IntrusiveForwardList.hxx"
 
 #include <new>
 #include <utility>
@@ -48,7 +47,7 @@
  */
 template<class T, size_t N>
 class Recycler {
-	typedef boost::intrusive::slist_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> Hook;
+	using Hook = IntrusiveForwardListHook;
 
 	union Item {
 		Hook hook;
@@ -62,9 +61,9 @@ class Recycler {
 		~Item() {}
 	};
 
-	boost::intrusive::slist<Item,
-				boost::intrusive::member_hook<Item, Hook, &Item::hook>,
-				boost::intrusive::constant_time_size<true>> list;
+	IntrusiveForwardList<Item,
+			     IntrusiveForwardListMemberHookTraits<&Item::hook>,
+			     true> list;
 
 public:
 	~Recycler() {
