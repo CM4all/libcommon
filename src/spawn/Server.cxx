@@ -53,10 +53,11 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/CapabilityGlue.hxx"
 #include "util/DeleteDisposer.hxx"
+#include "util/IntrusiveList.hxx"
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
 
-#include <boost/intrusive/list.hpp>
+#include <boost/intrusive/set.hpp>
 
 #include <forward_list>
 #include <memory>
@@ -162,8 +163,9 @@ public:
 	};
 };
 
-class SpawnServerConnection
-	: public boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
+class SpawnServerConnection final
+	: public IntrusiveListHook
+{
 	SpawnServerProcess &process;
 	UniqueSocketDescriptor socket;
 
@@ -256,8 +258,7 @@ class SpawnServerProcess {
 	std::unique_ptr<CgroupMemoryWatch> cgroup_memory_watch;
 #endif
 
-	using ConnectionList = boost::intrusive::list<SpawnServerConnection,
-						      boost::intrusive::constant_time_size<false>>;
+	using ConnectionList = IntrusiveList<SpawnServerConnection>;
 	ConnectionList connections;
 
 	const bool is_sys_admin = ::IsSysAdmin();
