@@ -99,7 +99,7 @@ public:
 	}
 
 	UniqueSocketDescriptor GetSocket() {
-		return UniqueSocketDescriptor(Get().Steal());
+		return UniqueSocketDescriptor{Get().Release()};
 	}
 };
 
@@ -540,7 +540,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::RETURN_STDERR:
-			p.return_stderr = UniqueSocketDescriptor(fds.Get().Steal());
+			p.return_stderr = UniqueSocketDescriptor{fds.Get().Release()};
 			break;
 
 		case SpawnExecCommand::CONTROL:
