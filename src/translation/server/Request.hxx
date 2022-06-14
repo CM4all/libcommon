@@ -119,6 +119,8 @@ struct Request {
 
 	const char *pool = nullptr;
 
+	const char *execute = nullptr;
+
 	const char *service = nullptr;
 
 	bool login = false;

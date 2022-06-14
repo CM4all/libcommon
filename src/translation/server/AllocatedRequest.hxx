@@ -80,6 +80,7 @@ class AllocatedRequest : public Request {
 	std::string read_file_buffer;
 	std::string internal_redirect_buffer;
 	std::string pool_buffer;
+	std::string execute_buffer;
 	std::string service_buffer;
 
 public:

@@ -249,6 +249,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		pool = pool_buffer.c_str();
 		break;
 
+	case TranslationCommand::EXECUTE:
+		execute_buffer = ToString(payload);
+		execute = execute_buffer.c_str();
+		break;
+
 	case TranslationCommand::SERVICE:
 		service_buffer = ToString(payload);
 		service = service_buffer.c_str();

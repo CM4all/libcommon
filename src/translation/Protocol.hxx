@@ -827,8 +827,12 @@ enum class TranslationCommand : uint16_t {
 	STDERR_NULL = 184,
 
 	/**
-	 * Execute the specified program.  May be followed by
-	 * #APPEND packets.  This is used by Workshop/Cron.
+	 * Request: the client wants to know how to execute the
+	 * specified program; payload is a token describing the
+	 * program.
+	 *
+	 * Response: execute the specified program.  May be followed by
+	 * #APPEND packets.
 	 */
 	EXECUTE = 185,
 
