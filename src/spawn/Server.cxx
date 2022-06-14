@@ -543,6 +543,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.return_stderr = UniqueSocketDescriptor{fds.Get().Release()};
 			break;
 
+		case SpawnExecCommand::RETURN_PIDFD:
+			p.return_pidfd = UniqueSocketDescriptor{fds.Get().Release()};
+			break;
+
 		case SpawnExecCommand::CONTROL:
 			p.SetControl(fds.Get());
 			break;

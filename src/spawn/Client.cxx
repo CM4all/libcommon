@@ -325,6 +325,9 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 	s.CheckWriteFd(SpawnExecCommand::RETURN_STDERR,
 		       p.return_stderr.ToFileDescriptor());
 
+	s.CheckWriteFd(SpawnExecCommand::RETURN_PIDFD,
+		       p.return_pidfd.ToFileDescriptor());
+
 	s.WriteOptionalString(SpawnExecCommand::STDERR_PATH, p.stderr_path);
 
 	if (p.priority != 0) {

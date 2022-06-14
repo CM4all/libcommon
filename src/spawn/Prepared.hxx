@@ -91,6 +91,12 @@ struct PreparedChildProcess {
 	UniqueSocketDescriptor return_stderr;
 
 	/**
+	 * If defined, then this is a socket where the spawner shall
+	 * send a pidfd.
+	 */
+	UniqueSocketDescriptor return_pidfd;
+
+	/**
 	 * The umask for the new child process.  -1 means do not change
 	 * it.
 	 */

@@ -579,6 +579,11 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	ReadErrorPipe(error_pipe_r);
 
+	if (params.return_pidfd.IsDefined()) {
+		EasySendMessage(params.return_pidfd, pidfd);
+		params.return_pidfd.Close();
+	}
+
 	/* TODO don't return the "classic" pid_t as soon as all
 	   callers have been fully migrated to pidfd */
 	return {std::move(pidfd), pid};
