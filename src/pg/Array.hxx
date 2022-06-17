@@ -52,7 +52,7 @@ requires std::convertible_to<typename L::value_type, std::string_view> && std::f
 std::string
 EncodeArray(const L &src) noexcept
 {
-	if (src.empty())
+	if (std::empty(src))
 		return "{}";
 
 	std::string dest("{");
