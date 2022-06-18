@@ -547,6 +547,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.return_pidfd = UniqueSocketDescriptor{fds.Get().Release()};
 			break;
 
+		case SpawnExecCommand::RETURN_CGROUP:
+			p.return_cgroup = UniqueSocketDescriptor{fds.Get().Release()};
+			break;
+
 		case SpawnExecCommand::CONTROL:
 			p.SetControl(fds.Get());
 			break;

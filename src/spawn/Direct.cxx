@@ -497,9 +497,15 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			ca.flags |= CLONE_INTO_CGROUP;
 			ca.cgroup = cgroup_fd.Get();
 			params.cgroup = nullptr;
+
+			if (params.return_cgroup.IsDefined())
+				EasySendMessage(params.return_cgroup,
+						cgroup_fd);
 		}
 	}
 #endif
+
+	params.return_cgroup.Close();
 
 	if (params.cgroup != nullptr && params.cgroup->IsDefined())
 		/* postpone creating the new cgroup namespace until

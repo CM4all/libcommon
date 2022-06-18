@@ -58,6 +58,7 @@ enum class SpawnExecCommand : uint8_t {
 	STDERR_PATH,
 	RETURN_STDERR,
 	RETURN_PIDFD,
+	RETURN_CGROUP,
 	CONTROL,
 	TTY,
 	USER_NS,

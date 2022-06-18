@@ -97,6 +97,13 @@ struct PreparedChildProcess {
 	UniqueSocketDescriptor return_pidfd;
 
 	/**
+	 * If defined, then this is a socket where the spawner shall
+	 * send a cgroup O_PATH file descriptor.  This is useful for
+	 * watching resource usage.
+	 */
+	UniqueSocketDescriptor return_cgroup;
+
+	/**
 	 * The umask for the new child process.  -1 means do not change
 	 * it.
 	 */
