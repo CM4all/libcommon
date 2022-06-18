@@ -72,6 +72,11 @@ struct LaunchSpawnServerContext {
 
 #ifdef HAVE_LIBSYSTEMD
 
+#if __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
+
 static void
 Chown(const CgroupState::Mount &cgroup_mount, uid_t uid, gid_t gid) noexcept
 {
@@ -79,6 +84,10 @@ Chown(const CgroupState::Mount &cgroup_mount, uid_t uid, gid_t gid) noexcept
 	fchownat(cgroup_mount.fd.Get(), "cgroup.procs", uid, gid,
 		 AT_SYMLINK_NOFOLLOW);
 }
+
+#if __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 /**
  * chown() the specified control group and its "cgroup.procs" file in
