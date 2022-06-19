@@ -34,6 +34,7 @@ io = static_library(
   'LineParser.cxx',
   'Logger.cxx',
   'StringFile.cxx',
+  'Temp.cxx',
   io_sources,
   include_directories: inc,
 )
