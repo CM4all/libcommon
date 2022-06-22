@@ -555,8 +555,12 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 		/* expect one byte to indicate success, and then the
 		   pipe will be closed by the child */
-		if (!WaitForPipe(userns_create_pipe_r))
+		if (!WaitForPipe(userns_create_pipe_r)) {
+			/* read the error_pipe, it may have more
+			   details */
+			ReadErrorPipe(error_pipe_r);
 			throw std::runtime_error("User namespace setup failed");
+		}
 	}
 
 	if (wait_pipe_w.IsDefined()) {
