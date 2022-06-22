@@ -39,12 +39,14 @@
 #include "daemon/Client.hxx"
 #include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
+#include "io/Iovec.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "system/CoreScheduling.hxx"
 #include "system/IOPrio.hxx"
 #include "util/Exception.hxx"
 #include "util/ScopeExit.hxx"
+#include "util/SpanCast.hxx"
 
 #ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-journal.h>
@@ -64,6 +66,8 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sched.h>
+
+using std::string_view_literals::operator""sv;
 
 #ifndef CLONE_CLEAR_SIGHAND
 #define CLONE_CLEAR_SIGHAND 0x100000000ULL
@@ -374,7 +378,7 @@ std::pair<UniqueFileDescriptor, pid_t>
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool is_sys_admin)
-{
+try {
 	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
@@ -597,4 +601,16 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	/* TODO don't return the "classic" pid_t as soon as all
 	   callers have been fully migrated to pidfd */
 	return {std::move(pidfd), pid};
+} catch (...) {
+	if (params.stderr_fd.IsDefined()) {
+		const auto msg = GetFullMessage(std::current_exception());
+		const std::array v = {
+			MakeIovec(ToSpan(msg)),
+			MakeIovec(ToSpan("\n"sv)),
+		};
+
+		writev(params.stderr_fd.Get(), v.data(), v.size());
+	}
+
+	throw;
 }
