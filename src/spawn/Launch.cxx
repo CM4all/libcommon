@@ -129,6 +129,11 @@ DropCapabilities()
 	auto state = CapabilityState::Current();
 	state.SetFlag(CAP_EFFECTIVE, drop_caps, CAP_CLEAR);
 	state.SetFlag(CAP_PERMITTED, drop_caps, CAP_CLEAR);
+
+	/* don't inherit any of the remaining capabilities to spawned
+	   processes */
+	state.ClearFlag(CAP_INHERITABLE);
+
 	state.Install();
 }
 
