@@ -843,6 +843,13 @@ public:
 			return *this;
 		}
 
+		template<typename... Types>
+		auto Chdir(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::CHDIR,
+					      value...);
+			return *this;
+		}
+
 		auto StderrNull() noexcept {
 			response.Packet(TranslationCommand::STDERR_NULL);
 			return *this;

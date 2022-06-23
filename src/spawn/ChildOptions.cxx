@@ -50,6 +50,7 @@
 ChildOptions::ChildOptions(AllocatorPtr alloc,
 			   const ChildOptions &src) noexcept
 	:tag(alloc.Dup(src.tag)),
+	 chdir(alloc.CheckDup(src.chdir)),
 	 stderr_path(alloc.CheckDup(src.stderr_path)),
 	 expand_stderr_path(alloc.CheckDup(src.expand_stderr_path)),
 	 env(alloc, src.env),
@@ -103,6 +104,9 @@ ChildOptions::MakeId(char *p) const noexcept
 {
 	if (umask >= 0)
 		p += sprintf(p, ";u%o", umask);
+
+	if (chdir != nullptr)
+		p += sprintf(p, ";cd%08x", djb_hash_string(chdir));
 
 	if (stderr_path != nullptr)
 		p += sprintf(p, ";e%08x", djb_hash_string(stderr_path));
@@ -172,6 +176,8 @@ void
 ChildOptions::CopyTo(PreparedChildProcess &dest) const
 {
 	dest.umask = umask;
+
+	dest.chdir = chdir;
 
 	if (stderr_jailed) {
 		assert(stderr_path != nullptr);

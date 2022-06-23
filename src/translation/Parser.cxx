@@ -3920,6 +3920,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::CHDIR:
+		if (child_options == nullptr)
+			throw std::runtime_error("misplaced CHDIR packet");
+
+		if (!IsValidAbsolutePath(string_payload))
+			throw std::runtime_error("malformed CHDIR packet");
+
+		child_options->chdir = string_payload.data;
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

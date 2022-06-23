@@ -1168,6 +1168,11 @@ enum class TranslationCommand : uint16_t {
 	 * this request.
 	 */
 	PLAN = 241,
+
+	/**
+	 * Change the current directory.
+	 */
+	CHDIR = 242,
 };
 
 struct TranslationHeader {

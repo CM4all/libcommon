@@ -59,6 +59,8 @@ struct ChildOptions {
 	 */
 	StringView tag = nullptr;
 
+	const char *chdir = nullptr;
+
 	/**
 	 * An absolute path where STDERR output will be appended.
 	 */
@@ -117,6 +119,7 @@ struct ChildOptions {
 	constexpr ChildOptions(ShallowCopy shallow_copy,
 			       const ChildOptions &src) noexcept
 		:tag(src.tag),
+		 chdir(src.chdir),
 		 stderr_path(src.stderr_path),
 		 expand_stderr_path(src.expand_stderr_path),
 		 env(shallow_copy, src.env),
