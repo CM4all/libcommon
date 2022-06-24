@@ -609,7 +609,9 @@ try {
 			MakeIovec(ToSpan("\n"sv)),
 		};
 
-		writev(params.stderr_fd.Get(), v.data(), v.size());
+		[[maybe_unused]]
+		auto nbytes = writev(params.stderr_fd.Get(),
+				     v.data(), v.size());
 	}
 
 	throw;
