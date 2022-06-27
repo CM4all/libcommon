@@ -50,10 +50,10 @@ TEST(FNVHash, u32)
 
 TEST(FNVHash, u32Binary)
 {
-	EXPECT_EQ(FNV1aHash32(ConstBuffer<void>{nullptr}), 2166136261u);
+	EXPECT_EQ(FNV1aHash32(std::span<const std::byte>{}), 2166136261u);
 
 	static constexpr uint8_t zero_hash_challenge1[] = {0xcc, 0x24, 0x31, 0xc4};
-	EXPECT_EQ(FNV1aHash32(ConstBuffer<uint8_t>{zero_hash_challenge1}.ToVoid()), 0u);
+	EXPECT_EQ(FNV1aHash32(std::as_bytes(std::span{zero_hash_challenge1})), 0u);
 }
 
 TEST(FNVHash, u64)
@@ -71,8 +71,8 @@ TEST(FNVHash, u64)
 
 TEST(FNVHash, u64Binary)
 {
-	EXPECT_EQ(FNV1aHash64(ConstBuffer<void>{nullptr}), 14695981039346656037u);
+	EXPECT_EQ(FNV1aHash64(std::span<const std::byte>{}), 14695981039346656037u);
 
 	static constexpr uint8_t zero_hash_challenge1[] = {0xd5, 0x6b, 0xb9, 0x53, 0x42, 0x87, 0x08, 0x36};
-	EXPECT_EQ(FNV1aHash64(ConstBuffer<uint8_t>{zero_hash_challenge1}.ToVoid()), 0u);
+	EXPECT_EQ(FNV1aHash64(std::as_bytes(std::span{zero_hash_challenge1})), 0u);
 }

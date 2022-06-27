@@ -34,12 +34,10 @@
  * Implementation of the Fowler-Noll-Vo hash function.
  */
 
-#ifndef FNV_HASH_HXX
-#define FNV_HASH_HXX
-
-#include "util/ConstBuffer.hxx"
+#pragma once
 
 #include <cstdint>
+#include <span>
 
 template<typename T>
 struct FNVTraits {};
@@ -68,7 +66,7 @@ struct FNV1aAlgorithm {
 	using fast_type = typename Traits::fast_type;
 
 	[[gnu::hot]]
-	static constexpr fast_type Update(fast_type hash, uint8_t b) noexcept {
+	static constexpr fast_type Update(fast_type hash, fast_type b) noexcept {
 		return (hash ^ b) * Traits::PRIME;
 	}
 
@@ -78,25 +76,24 @@ struct FNV1aAlgorithm {
 
 		fast_type hash = Traits::OFFSET_BASIS;
 		while (*s)
-			hash = Algorithm::Update(hash, *s++);
+			/* cast to uint8_t first to avoid problems
+			   with signed char */
+			hash = Algorithm::Update(hash,
+						 static_cast<uint8_t>(*s++));
 
 		return hash;
 	}
 
 	[[gnu::pure]] [[gnu::hot]]
-	static constexpr value_type BinaryHash(ConstBuffer<uint8_t> s) noexcept {
+	static constexpr value_type BinaryHash(std::span<const std::byte> s) noexcept {
 		using Algorithm = FNV1aAlgorithm<Traits>;
 
 		fast_type hash = Traits::OFFSET_BASIS;
 		for (auto b : s)
-			hash = Algorithm::Update(hash, b);
+			hash = Algorithm::Update(hash,
+						 static_cast<fast_type>(b));
 
 		return hash;
-	}
-
-	[[gnu::pure]] [[gnu::hot]]
-	static constexpr value_type BinaryHash(ConstBuffer<void> s) noexcept {
-		return BinaryHash(ConstBuffer<uint8_t>::FromVoid(s));
 	}
 };
 
@@ -111,7 +108,7 @@ FNV1aHash32(const char *s) noexcept
 
 [[gnu::pure]] [[gnu::hot]]
 constexpr uint32_t
-FNV1aHash32(ConstBuffer<void> s) noexcept
+FNV1aHash32(std::span<const std::byte> s) noexcept
 {
 	using Traits = FNVTraits<uint32_t>;
 	using Algorithm = FNV1aAlgorithm<Traits>;
@@ -129,7 +126,7 @@ FNV1aHash64(const char *s) noexcept
 
 [[gnu::pure]] [[gnu::hot]]
 constexpr uint64_t
-FNV1aHash64(ConstBuffer<void> s) noexcept
+FNV1aHash64(std::span<const std::byte> s) noexcept
 {
 	using Traits = FNVTraits<uint64_t>;
 	using Algorithm = FNV1aAlgorithm<Traits>;
@@ -147,5 +144,3 @@ FNV1aHashFold32(const char *s) noexcept
 	const uint_fast32_t hi(h64 >> 32);
 	return lo ^ hi;
 }
-
-#endif
