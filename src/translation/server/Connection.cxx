@@ -108,7 +108,9 @@ Connection::OnReceived() noexcept
 		if (r.size() < total_size)
 			break;
 
-		if (!OnPacket(header->command, {header + 1, payload_length}))
+		const auto payload = r.subspan(sizeof(*header),
+					       payload_length);
+		if (!OnPacket(header->command, payload))
 			return false;
 
 		input.Consume(total_size);
@@ -118,7 +120,8 @@ Connection::OnReceived() noexcept
 }
 
 inline bool
-Connection::OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept
+Connection::OnPacket(TranslationCommand cmd,
+		     std::span<const std::byte> payload) noexcept
 {
 	assert(state != State::PROCESSING);
 

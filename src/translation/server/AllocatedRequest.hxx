@@ -40,7 +40,6 @@
 #include <stdint.h>
 
 enum class TranslationCommand : uint16_t;
-template<typename T> struct ConstBuffer;
 
 namespace Translation::Server {
 
@@ -88,7 +87,7 @@ public:
 	/**
 	 * Throws on error.
 	 */
-	void Parse(TranslationCommand cmd, ConstBuffer<void> payload);
+	void Parse(TranslationCommand cmd, std::span<const std::byte> payload);
 };
 
 } // namespace Translation::Server

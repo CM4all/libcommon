@@ -33,29 +33,28 @@
 #include "AllocatedRequest.hxx"
 #include "../Protocol.hxx"
 #include "util/Compiler.h"
-#include "util/ConstBuffer.hxx"
 #include "util/RuntimeError.hxx"
+#include "util/SpanCast.hxx"
 
 #include <assert.h>
 
 static std::string
-ToString(ConstBuffer<void> b) noexcept
+ToString(std::span<const std::byte> b) noexcept
 {
-	auto c = ConstBuffer<char>::FromVoid(b);
-	return {c.data, c.size};
+	return std::string{ToStringView(b)};
 }
 
 namespace Translation::Server {
 
 void
-AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
+AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> payload)
 {
 	switch (cmd) {
 	case TranslationCommand::BEGIN:
 		*this = {};
 
-		if (payload.size >= 1)
-			protocol_version = *(const uint8_t *)payload.data;
+		if (!payload.empty())
+			protocol_version = static_cast<uint8_t>(payload.front());
 
 		break;
 
@@ -75,7 +74,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 
 	case TranslationCommand::SESSION:
 		session_buffer = ToString(payload);
-		session = {session_buffer.data(), session_buffer.size()};
+		session = AsBytes(session_buffer);
 		break;
 
 	case TranslationCommand::PARAM:
@@ -94,10 +93,10 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		break;
 
 	case TranslationCommand::STATUS:
-		if (payload.size != 2)
+		if (payload.size() != 2)
 			throw std::runtime_error("size mismatch in STATUS packet");
 
-		status = http_status_t(*(const uint16_t*)payload.data);
+		status = http_status_t(*(const uint16_t*)(const void *)payload.data());
 		/* TODO enable
 		if (!http_status_is_valid(status))
 			throw FormatRuntimeError("invalid HTTP status code %u",
@@ -138,17 +137,17 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 
 	case TranslationCommand::ERROR_DOCUMENT:
 		error_document_buffer = ToString(payload);
-		error_document = {error_document_buffer.data(), error_document_buffer.size()};
+		error_document = AsBytes(error_document_buffer);
 		break;
 
 	case TranslationCommand::HTTP_AUTH:
 		http_auth_buffer = ToString(payload);
-		http_auth = {http_auth_buffer.data(), http_auth_buffer.size()};
+		http_auth = AsBytes(http_auth_buffer.data());
 		break;
 
 	case TranslationCommand::TOKEN_AUTH:
 		token_auth_buffer = ToString(payload);
-		token_auth = {token_auth_buffer.data(), token_auth_buffer.size()};
+		token_auth = AsBytes(token_auth_buffer);
 		break;
 
 	case TranslationCommand::AUTH_TOKEN:
@@ -163,7 +162,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 
 	case TranslationCommand::CHECK:
 		check_buffer = ToString(payload);
-		check = {check_buffer.data(), check_buffer.size()};
+		check = AsBytes(check_buffer);
 		break;
 
 	case TranslationCommand::CHECK_HEADER:
@@ -172,23 +171,23 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 		break;
 
 	case TranslationCommand::WANT:
-		want_buffer = std::span{ConstBuffer<TranslationCommand>::FromVoid(payload)};
-		want = std::span<const TranslationCommand>{want_buffer};
+		want_buffer = FromBytesFloor<const TranslationCommand>(payload);
+		want = want_buffer;
 		break;
 
 	case TranslationCommand::WANT_FULL_URI:
 		want_full_uri_buffer = ToString(payload);
-		want_full_uri = {want_full_uri_buffer.data(), want_full_uri_buffer.size()};
+		want_full_uri = AsBytes(want_full_uri_buffer);
 		break;
 
 	case TranslationCommand::FILE_NOT_FOUND:
 		file_not_found_buffer = ToString(payload);
-		file_not_found = {file_not_found_buffer.data(), file_not_found_buffer.size()};
+		file_not_found = AsBytes(file_not_found_buffer);
 		break;
 
 	case TranslationCommand::CONTENT_TYPE_LOOKUP:
 		content_type_lookup_buffer = ToString(payload);
-		content_type_lookup = {content_type_lookup_buffer.data(), content_type_lookup_buffer.size()};
+		content_type_lookup = AsBytes(content_type_lookup_buffer);
 		break;
 
 	case TranslationCommand::SUFFIX:
@@ -198,22 +197,22 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 
 	case TranslationCommand::DIRECTORY_INDEX:
 		directory_index_buffer = ToString(payload);
-		directory_index = {directory_index_buffer.data(), directory_index_buffer.size()};
+		directory_index = AsBytes(directory_index_buffer);
 		break;
 
 	case TranslationCommand::ENOTDIR_:
 		enotdir_buffer = ToString(payload);
-		enotdir = {enotdir_buffer.data(), enotdir_buffer.size()};
+		enotdir = AsBytes(enotdir_buffer);
 		break;
 
 	case TranslationCommand::AUTH:
 		auth_buffer = ToString(payload);
-		auth = {auth_buffer.data(), auth_buffer.size()};
+		auth = AsBytes(auth_buffer);
 		break;
 
 	case TranslationCommand::PROBE_PATH_SUFFIXES:
 		probe_path_suffixes_buffer = ToString(payload);
-		probe_path_suffixes = {probe_path_suffixes_buffer.data(), probe_path_suffixes_buffer.size()};
+		probe_path_suffixes = AsBytes(probe_path_suffixes_buffer);
 		break;
 
 	case TranslationCommand::PROBE_SUFFIX:
@@ -228,12 +227,12 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 
 	case TranslationCommand::READ_FILE:
 		read_file_buffer = ToString(payload);
-		read_file = {read_file_buffer.data(), read_file_buffer.size()};
+		read_file = AsBytes(read_file_buffer);
 		break;
 
 	case TranslationCommand::INTERNAL_REDIRECT:
 		internal_redirect_buffer = ToString(payload);
-		internal_redirect = {internal_redirect_buffer.data(), internal_redirect_buffer.size()};
+		internal_redirect = AsBytes(internal_redirect_buffer);
 		break;
 
 	case TranslationCommand::LOGIN:
@@ -261,7 +260,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 
 	case TranslationCommand::CHAIN:
 		chain_buffer = ToString(payload);
-		chain = {chain_buffer.data(), chain_buffer.size()};
+		chain = AsBytes(chain_buffer);
 		break;
 
 	case TranslationCommand::CHAIN_HEADER:
@@ -277,7 +276,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, ConstBuffer<void> payload)
 
 	case TranslationCommand::LAYOUT:
 		layout_buffer = ToString(payload);
-		layout = {layout_buffer.data(), layout_buffer.size()};
+		layout = AsBytes(layout_buffer.data());
 		break;
 
 	case TranslationCommand::BASE:

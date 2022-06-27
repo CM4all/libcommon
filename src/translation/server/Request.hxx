@@ -33,9 +33,9 @@
 #pragma once
 
 #include "http/Status.h"
-#include "util/ConstBuffer.hxx"
 
 #include <cstdint>
+#include <span>
 
 enum class TranslationCommand : uint16_t;
 
@@ -50,7 +50,7 @@ struct Request {
 
 	const char *host = nullptr;
 
-	ConstBuffer<void> session = nullptr;
+	std::span<const std::byte> session{};
 
 	const char *param = nullptr;
 
@@ -69,7 +69,7 @@ struct Request {
 	 */
 	const char *authorization = nullptr;
 
-	ConstBuffer<void> layout = nullptr;
+	std::span<const std::byte> layout{};
 
 	/**
 	 * The matching BASE/REGEX response packet for the given
@@ -77,45 +77,45 @@ struct Request {
 	 */
 	const char *base = nullptr, *regex = nullptr;
 
-	ConstBuffer<void> error_document = nullptr;
+	std::span<const std::byte> error_document{};
 
-	ConstBuffer<void> http_auth = nullptr;
+	std::span<const std::byte> http_auth{};
 
-	ConstBuffer<void> token_auth = nullptr;
+	std::span<const std::byte> token_auth{};
 	const char *auth_token = nullptr;
 
 	const char *recover_session = nullptr;
 
-	ConstBuffer<void> check = nullptr;
+	std::span<const std::byte> check{};
 
 	const char *check_header = nullptr;
 
-	ConstBuffer<TranslationCommand> want = nullptr;
-	ConstBuffer<void> want_full_uri = nullptr;
+	std::span<const TranslationCommand> want{};
+	std::span<const std::byte> want_full_uri{};
 
-	ConstBuffer<void> chain = nullptr;
+	std::span<const std::byte> chain{};
 
 	const char *chain_header = nullptr;
 
-	ConstBuffer<void> file_not_found = nullptr;
+	std::span<const std::byte> file_not_found{};
 
-	ConstBuffer<void> content_type_lookup = nullptr;
+	std::span<const std::byte> content_type_lookup{};
 
 	const char *suffix = nullptr;
 
-	ConstBuffer<void> directory_index = nullptr;
+	std::span<const std::byte> directory_index{};
 
-	ConstBuffer<void> enotdir = nullptr;
+	std::span<const std::byte> enotdir{};
 
-	ConstBuffer<void> auth = nullptr;
+	std::span<const std::byte> auth{};
 
-	ConstBuffer<void> probe_path_suffixes = nullptr;
+	std::span<const std::byte> probe_path_suffixes{};
 	const char *probe_suffix = nullptr;
 
 	const char *listener_tag = nullptr;
 
-	ConstBuffer<void> read_file = nullptr;
-	ConstBuffer<void> internal_redirect = nullptr;
+	std::span<const std::byte> read_file{};
+	std::span<const std::byte> internal_redirect{};
 
 	const char *pool = nullptr;
 

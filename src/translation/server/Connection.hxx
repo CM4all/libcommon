@@ -42,7 +42,6 @@
 #include <span>
 
 enum class TranslationCommand : uint16_t;
-template<typename T> struct ConstBuffer;
 
 namespace Translation::Server {
 
@@ -96,7 +95,8 @@ private:
 
 	bool TryRead() noexcept;
 	bool OnReceived() noexcept;
-	bool OnPacket(TranslationCommand cmd, ConstBuffer<void> payload) noexcept;
+	bool OnPacket(TranslationCommand cmd,
+		      std::span<const std::byte> payload) noexcept;
 
 	/**
 	 * @return false if this object has been destroyed
