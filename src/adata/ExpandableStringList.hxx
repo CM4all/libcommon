@@ -37,10 +37,10 @@
 #include "util/ShallowCopy.hxx"
 
 #include <iterator>
+#include <span>
 
 class AllocatorPtr;
 class MatchData;
-template<typename T> struct ConstBuffer;
 
 class ExpandableStringList final {
 	struct Item : IntrusiveForwardListHook {
@@ -153,5 +153,5 @@ public:
 #endif
 	};
 
-	ConstBuffer<const char *> ToArray(AllocatorPtr alloc) const noexcept;
+	std::span<const char *const> ToArray(AllocatorPtr alloc) const noexcept;
 };

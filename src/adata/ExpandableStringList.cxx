@@ -32,7 +32,6 @@
 
 #include "ExpandableStringList.hxx"
 #include "AllocatorPtr.hxx"
-#include "util/ConstBuffer.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
@@ -88,7 +87,7 @@ ExpandableStringList::Builder::Add(AllocatorPtr alloc,
 	tail = List::insert_after(tail, *item);
 }
 
-ConstBuffer<const char *>
+std::span<const char *const>
 ExpandableStringList::ToArray(AllocatorPtr alloc) const noexcept
 {
 	const size_t n = std::distance(begin(), end());
