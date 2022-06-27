@@ -29,10 +29,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ALLOCATOR_PTR_HXX
-#define ALLOCATOR_PTR_HXX
+#pragma once
 
-#include "util/ConstBuffer.hxx"
 #include "util/StringView.hxx"
 
 #include <forward_list>
@@ -236,5 +234,3 @@ public:
 		return allocator.DupZ(src);
 	}
 };
-
-#endif
