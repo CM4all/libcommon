@@ -60,6 +60,7 @@
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
 #include "util/RuntimeError.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StringCompare.hxx"
 #include "util/StringVerify.hxx"
 
@@ -136,16 +137,16 @@ TranslateParser::FinishAddressList() noexcept
 
 [[gnu::pure]]
 static bool
-HasNullByte(ConstBuffer<void> p) noexcept
+HasNullByte(std::span<const std::byte> p) noexcept
 {
-	return memchr(p.data, 0, p.size) != nullptr;
+	return std::find(p.begin(), p.end(), std::byte{0}) != p.end();
 }
 
 [[gnu::pure]]
 static bool
 IsValidString(StringView s) noexcept
 {
-	return !HasNullByte(s.ToVoid());
+	return !HasNullByte(AsBytes(s));
 }
 
 [[gnu::pure]]
@@ -343,36 +344,34 @@ TranslateParser::AddView(const char *name)
 
 static void
 parse_header_forward(HeaderForwardSettings *settings,
-		     ConstBuffer<void> payload)
+		     std::span<const std::byte> _payload)
 {
 	using namespace BengProxy;
-	const auto *packet =
-		(const HeaderForwardPacket *)payload.data;
 
-	if (payload.size % sizeof(*packet) != 0)
+	const auto payload =
+		FromBytesFloor<const HeaderForwardPacket>(_payload);
+
+	if (_payload.size() % sizeof(payload.front()) != 0)
 		throw std::runtime_error("malformed header forward packet");
 
-	while (payload.size > 0) {
-		if (packet->group < int(HeaderGroup::ALL) ||
-		    packet->group >= int(HeaderGroup::MAX) ||
-		    (packet->mode != unsigned(HeaderForwardMode::NO) &&
-		     packet->mode != unsigned(HeaderForwardMode::YES) &&
-		     packet->mode != unsigned(HeaderForwardMode::BOTH) &&
-		     packet->mode != unsigned(HeaderForwardMode::MANGLE)) ||
-		    packet->reserved != 0)
+	for (const auto &packet : payload) {
+		if (packet.group < int(HeaderGroup::ALL) ||
+		    packet.group >= int(HeaderGroup::MAX) ||
+		    (packet.mode != unsigned(HeaderForwardMode::NO) &&
+		     packet.mode != unsigned(HeaderForwardMode::YES) &&
+		     packet.mode != unsigned(HeaderForwardMode::BOTH) &&
+		     packet.mode != unsigned(HeaderForwardMode::MANGLE)) ||
+		    packet.reserved != 0)
 			throw std::runtime_error("malformed header forward packet");
 
-		if (HeaderGroup(packet->group) == HeaderGroup::ALL) {
+		if (HeaderGroup(packet.group) == HeaderGroup::ALL) {
 			for (unsigned i = 0; i < unsigned(HeaderGroup::MAX); ++i)
 				if (HeaderGroup(i) != HeaderGroup::SECURE &&
 				    HeaderGroup(i) != HeaderGroup::AUTH &&
 				    HeaderGroup(i) != HeaderGroup::SSL)
-					settings->modes[i] = HeaderForwardMode(packet->mode);
+					settings->modes[i] = HeaderForwardMode(packet.mode);
 		} else
-			settings->modes[packet->group] = HeaderForwardMode(packet->mode);
-
-		++packet;
-		payload.size -= sizeof(*packet);
+			settings->modes[packet.group] = HeaderForwardMode(packet.mode);
 	}
 }
 
@@ -741,7 +740,7 @@ TranslateParser::HandleWant(const TranslationCommand *payload,
 
 static void
 translate_client_file_not_found(TranslateResponse &response,
-				ConstBuffer<void> payload)
+				std::span<const std::byte> payload)
 {
 	if (response.file_not_found.data() != nullptr)
 		throw std::runtime_error("duplicate FILE_NOT_FOUND packet");
@@ -769,10 +768,10 @@ translate_client_file_not_found(TranslateResponse &response,
 }
 
 inline void
-TranslateParser::HandleContentTypeLookup(ConstBuffer<void> payload)
+TranslateParser::HandleContentTypeLookup(std::span<const std::byte> payload)
 {
 	const char *content_type;
-	ConstBuffer<void> *content_type_lookup;
+	std::span<const std::byte> *content_type_lookup;
 
 	if (file_address != nullptr) {
 		content_type = file_address->content_type;
@@ -783,7 +782,7 @@ TranslateParser::HandleContentTypeLookup(ConstBuffer<void> payload)
 	} else
 		throw std::runtime_error("misplaced CONTENT_TYPE_LOOKUP");
 
-	if (!content_type_lookup->IsNull())
+	if (content_type_lookup->data() != nullptr)
 		throw std::runtime_error("duplicate CONTENT_TYPE_LOOKUP");
 
 	if (content_type != nullptr)
@@ -794,7 +793,7 @@ TranslateParser::HandleContentTypeLookup(ConstBuffer<void> payload)
 
 static void
 translate_client_enotdir(TranslateResponse &response,
-			 ConstBuffer<void> payload)
+			 std::span<const std::byte> payload)
 {
 	if (response.enotdir.data() != nullptr)
 		throw std::runtime_error("duplicate ENOTDIR");
@@ -823,7 +822,7 @@ translate_client_enotdir(TranslateResponse &response,
 
 static void
 translate_client_directory_index(TranslateResponse &response,
-				 ConstBuffer<void> payload)
+				 std::span<const std::byte> payload)
 {
 	if (response.directory_index.data() != nullptr)
 		throw std::runtime_error("duplicate DIRECTORY_INDEX");
@@ -854,33 +853,33 @@ translate_client_directory_index(TranslateResponse &response,
 
 static void
 translate_client_expires_relative(TranslateResponse &response,
-				  ConstBuffer<void> payload)
+				  std::span<const std::byte> payload)
 {
 	if (response.expires_relative > std::chrono::seconds::zero())
 		throw std::runtime_error("duplicate EXPIRES_RELATIVE");
 
-	if (payload.size != sizeof(uint32_t))
+	if (payload.size() != sizeof(uint32_t))
 		throw std::runtime_error("malformed EXPIRES_RELATIVE");
 
-	response.expires_relative = std::chrono::seconds(*(const uint32_t *)payload.data);
+	response.expires_relative = std::chrono::seconds(*(const uint32_t *)(const void *)payload.data());
 }
 
 static void
 translate_client_expires_relative_with_query(TranslateResponse &response,
-					     ConstBuffer<void> payload)
+					     std::span<const std::byte> payload)
 {
 	if (response.expires_relative_with_query > std::chrono::seconds::zero())
 		throw std::runtime_error("duplicate EXPIRES_RELATIVE_WITH_QUERY");
 
-	if (payload.size != sizeof(uint32_t))
+	if (payload.size() != sizeof(uint32_t))
 		throw std::runtime_error("malformed EXPIRES_RELATIVE_WITH_QUERY");
 
-	response.expires_relative_with_query = std::chrono::seconds(*(const uint32_t *)payload.data);
+	response.expires_relative_with_query = std::chrono::seconds(*(const uint32_t *)(const void *)payload.data());
 }
 
 static void
 translate_client_stderr_path(ChildOptions *child_options,
-			     ConstBuffer<void> payload,
+			     std::span<const std::byte> payload,
 			     bool jailed)
 {
 	const StringView path(payload);
@@ -918,7 +917,7 @@ translate_client_expand_stderr_path(ChildOptions *child_options,
 #endif
 
 inline void
-TranslateParser::HandleUidGid(ConstBuffer<void> _payload)
+TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 {
 	if (child_options == nullptr || !child_options->uid_gid.IsEmpty())
 		throw std::runtime_error("misplaced UID_GID packet");
@@ -928,15 +927,15 @@ TranslateParser::HandleUidGid(ConstBuffer<void> _payload)
 	constexpr size_t min_size = sizeof(int) * 2;
 	const size_t max_size = min_size + sizeof(int) * uid_gid.groups.max_size();
 
-	if (_payload.size < min_size || _payload.size > max_size ||
-	    _payload.size % sizeof(int) != 0)
+	if (_payload.size() < min_size || _payload.size() > max_size ||
+	    _payload.size() % sizeof(int) != 0)
 		throw std::runtime_error("malformed UID_GID packet");
 
-	const auto payload = ConstBuffer<int>::FromVoid(_payload);
+	const auto payload = FromBytesFloor<const int>(_payload);
 	uid_gid.uid = payload[0];
 	uid_gid.gid = payload[1];
 
-	size_t n_groups = payload.size - 2;
+	size_t n_groups = payload.size() - 2;
 	std::copy(std::next(payload.begin(), 2), payload.end(),
 		  uid_gid.groups.begin());
 	if (n_groups < uid_gid.groups.max_size())
@@ -944,7 +943,7 @@ TranslateParser::HandleUidGid(ConstBuffer<void> _payload)
 }
 
 inline void
-TranslateParser::HandleUmask(ConstBuffer<void> payload)
+TranslateParser::HandleUmask(std::span<const std::byte> payload)
 {
 	typedef uint16_t value_type;
 
@@ -954,10 +953,10 @@ TranslateParser::HandleUmask(ConstBuffer<void> payload)
 	if (child_options->umask >= 0)
 		throw std::runtime_error("duplicate UMASK packet");
 
-	if (payload.size != sizeof(value_type))
+	if (payload.size() != sizeof(value_type))
 		throw std::runtime_error("malformed UMASK packet");
 
-	auto umask = *(const uint16_t *)payload.data;
+	auto umask = *(const uint16_t *)(const void *)payload.data();
 	if (umask & ~0777)
 		throw std::runtime_error("malformed UMASK packet");
 
@@ -1082,9 +1081,9 @@ TranslateParser::HandleSubstYamlFile(StringView payload)
 
 inline void
 TranslateParser::HandleRegularPacket(TranslationCommand command,
-				     const ConstBuffer<void> payload)
+				     const std::span<const std::byte> payload)
 {
-	const StringView string_payload(payload);
+	const StringView string_payload = ToStringView(payload);
 
 	switch (command) {
 	case TranslationCommand::BEGIN:
@@ -1117,17 +1116,17 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::STATUS:
-		if (payload.size != 2)
+		if (payload.size() != 2)
 			throw std::runtime_error("size mismatch in STATUS packet from translation server");
 
 #if TRANSLATION_ENABLE_HTTP
-		response.status = http_status_t(*(const uint16_t*)payload.data);
+		response.status = http_status_t(*(const uint16_t*)(const void *)payload.data());
 
 		if (!http_status_is_valid(response.status))
 			throw FormatRuntimeError("invalid HTTP status code %u",
 						 response.status);
 #else
-		response.status = *(const uint16_t *)payload.data;
+		response.status = *(const uint16_t *)(const void *)payload.data();
 #endif
 
 		return;
@@ -1272,7 +1271,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		if (resource_address == &response.address)
 #endif
-			response.site = (const char *)payload.data;
+			response.site = string_payload.data;
 #if TRANSLATION_ENABLE_RADDRESS
 		else
 			throw std::runtime_error("misplaced SITE packet");
@@ -1286,12 +1285,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed CONTENT_TYPE packet");
 
 		if (file_address != nullptr) {
-			if (!file_address->content_type_lookup.IsNull())
+			if (file_address->content_type_lookup.data() != nullptr)
 				throw std::runtime_error("CONTENT_TYPE/CONTENT_TYPE_LOOKUP conflict");
 
 			file_address->content_type = string_payload.data;
 		} else if (nfs_address != nullptr) {
-			if (!nfs_address->content_type_lookup.IsNull())
+			if (nfs_address->content_type_lookup.data() != nullptr)
 				throw std::runtime_error("CONTENT_TYPE/CONTENT_TYPE_LOOKUP conflict");
 
 			nfs_address->content_type = string_payload.data;
@@ -1789,12 +1788,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (address_list == nullptr)
 			throw std::runtime_error("misplaced ADDRESS packet");
 
-		if (payload.size < 2)
+		if (payload.size() < 2)
 			throw std::runtime_error("malformed ADDRESS packet");
 
-		address_list_builder.Add(alloc,
-					 SocketAddress((const struct sockaddr *)payload.data,
-						       payload.size));
+		address_list_builder.Add(alloc, SocketAddress{payload});
 		return;
 #else
 		break;
@@ -1834,17 +1831,17 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::MAX_AGE:
-		if (payload.size != 4)
+		if (payload.size() != 4)
 			throw std::runtime_error("malformed MAX_AGE packet");
 
 		switch (previous_command) {
 		case TranslationCommand::BEGIN:
-			response.max_age = std::chrono::seconds(*(const uint32_t *)payload.data);
+			response.max_age = std::chrono::seconds(*(const uint32_t *)(const void *)payload.data());
 			break;
 
 #if TRANSLATION_ENABLE_SESSION
 		case TranslationCommand::USER:
-			response.user_max_age = std::chrono::seconds(*(const uint32_t *)payload.data);
+			response.user_max_age = std::chrono::seconds(*(const uint32_t *)(const void *)payload.data());
 			break;
 #endif
 
@@ -1857,25 +1854,22 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::VARY:
 #if TRANSLATION_ENABLE_CACHE
 		if (payload.empty() ||
-		    payload.size % sizeof(response.vary.front()) != 0)
+		    payload.size() % sizeof(response.vary.front()) != 0)
 			throw std::runtime_error("malformed VARY packet");
 
-		response.vary = {
-			(const TranslationCommand *)payload.data,
-			payload.size / sizeof(response.vary.front()),
-		};
+		response.vary = FromBytesFloor<const TranslationCommand>(payload);
 #endif
 		return;
 
 	case TranslationCommand::INVALIDATE:
 #if TRANSLATION_ENABLE_CACHE
 		if (payload.empty() ||
-		    payload.size % sizeof(response.invalidate.front()) != 0)
+		    payload.size() % sizeof(response.invalidate.front()) != 0)
 			throw std::runtime_error("malformed INVALIDATE packet");
 
 		response.invalidate = {
-			(const TranslationCommand *)payload.data,
-			payload.size / sizeof(response.invalidate.front()),
+			(const TranslationCommand *)(const void *)payload.data(),
+			payload.size() / sizeof(response.invalidate.front()),
 		};
 #endif
 		return;
@@ -2045,7 +2039,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!HasArgs())
 			throw std::runtime_error("misplaced APPEND packet");
 
-		args_builder.Add(alloc, (const char *)payload.data, false);
+		args_builder.Add(alloc, string_payload.data, false);
 		return;
 
 	case TranslationCommand::EXPAND_APPEND:
@@ -2444,7 +2438,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			   string_payload.size - 9) != nullptr)
 			throw std::runtime_error("malformed VALIDATE_MTIME packet");
 
-		response.validate_mtime.mtime = *(const uint64_t *)payload.data;
+		response.validate_mtime.mtime = *(const uint64_t *)(const void *)payload.data();
 		response.validate_mtime.path =
 			alloc.DupZ({string_payload.data + 8, string_payload.size - 8});
 		return;
@@ -2516,13 +2510,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::CONCURRENCY:
 #if TRANSLATION_ENABLE_RADDRESS
-		if (payload.size != 2)
+		if (payload.size() != 2)
 			throw std::runtime_error("malformed CONCURRENCY packet");
 
 		if (lhttp_address != nullptr)
-			lhttp_address->concurrency = *(const uint16_t *)payload.data;
+			lhttp_address->concurrency = *(const uint16_t *)(const void *)payload.data();
 		else if (cgi_address != nullptr)
-			cgi_address->concurrency = *(const uint16_t *)payload.data;
+			cgi_address->concurrency = *(const uint16_t *)(const void *)payload.data();
 		else
 			throw std::runtime_error("misplaced CONCURRENCY packet");
 
@@ -2591,7 +2585,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::MOUNT_PROC:
-		translate_client_mount_proc(ns_options, payload.size);
+		translate_client_mount_proc(ns_options, payload.size());
 		return;
 
 	case TranslationCommand::MOUNT_HOME:
@@ -2617,7 +2611,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::WANT:
 #if TRANSLATION_ENABLE_WANT
-		HandleWant((const TranslationCommand *)payload.data, payload.size);
+		HandleWant((const TranslationCommand *)(const void *)payload.data(),
+			   payload.size());
 		return;
 #else
 		break;
@@ -3270,8 +3265,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::EXTERNAL_SESSION_KEEPALIVE: {
 #if TRANSLATION_ENABLE_SESSION
-		const uint16_t *value = (const uint16_t *)payload.data;
-		if (payload.size != sizeof(*value) || *value == 0)
+		const uint16_t *value = (const uint16_t *)(const void *)payload.data();
+		if (payload.size() != sizeof(*value) || *value == 0)
 			throw std::runtime_error("malformed EXTERNAL_SESSION_KEEPALIVE packet");
 
 		if (response.external_session_manager == nullptr)
@@ -3418,8 +3413,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.https_only != 0)
 			throw std::runtime_error("duplicate HTTPS_ONLY packet");
 
-		if (payload.size == sizeof(response.https_only)) {
-			response.https_only = *(const uint16_t *)payload.data;
+		if (payload.size() == sizeof(response.https_only)) {
+			response.https_only = *(const uint16_t *)(const void *)payload.data();
 			if (response.https_only == 0)
 				/* zero in the packet means "default port", but we
 				   change it here to 443 because in the variable, zero
@@ -3472,7 +3467,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::MOUNT_ROOT_TMPFS:
-		translate_client_mount_root_tmpfs(ns_options, payload.size);
+		translate_client_mount_root_tmpfs(ns_options, payload.size());
 		return;
 
 	case TranslationCommand::CHILD_TAG:
@@ -3882,13 +3877,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::PARALLELISM:
 #if TRANSLATION_ENABLE_RADDRESS
-		if (payload.size != 2)
+		if (payload.size() != 2)
 			throw std::runtime_error("malformed CONCURRENCY packet");
 
 		if (lhttp_address != nullptr)
-			lhttp_address->parallelism = *(const uint16_t *)payload.data;
+			lhttp_address->parallelism = *(const uint16_t *)(const void *)payload.data();
 		else if (cgi_address != nullptr)
-			cgi_address->parallelism = *(const uint16_t *)payload.data;
+			cgi_address->parallelism = *(const uint16_t *)(const void *)payload.data();
 		else
 			throw std::runtime_error("misplaced CONCURRENCY packet");
 		return;
@@ -3937,10 +3932,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 inline TranslateParser::Result
 TranslateParser::HandlePacket(TranslationCommand command,
-			      ConstBuffer<void> payload)
+			      std::span<const std::byte> payload)
 {
-	assert(payload != nullptr);
-
 	if (command == TranslationCommand::BEGIN) {
 		if (begun)
 			throw std::runtime_error("double BEGIN from translation server");
@@ -4005,8 +3998,8 @@ TranslateParser::HandlePacket(TranslationCommand command,
 		filter = nullptr;
 #endif
 
-		if (payload.size >= sizeof(uint8_t))
-			response.protocol_version = *(const uint8_t *)payload.data;
+		if (payload.size() >= sizeof(uint8_t))
+			response.protocol_version = *(const uint8_t *)payload.data();
 
 		return Result::MORE;
 

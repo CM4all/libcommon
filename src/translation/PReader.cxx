@@ -37,7 +37,7 @@
 
 std::size_t
 TranslatePacketReader::Feed(AllocatorPtr alloc,
-			    const std::byte *data, std::size_t length) noexcept
+			    std::span<const std::byte> src) noexcept
 {
 	assert(state == State::HEADER ||
 	       state == State::PAYLOAD ||
@@ -51,11 +51,11 @@ TranslatePacketReader::Feed(AllocatorPtr alloc,
 	std::size_t consumed = 0;
 
 	if (state == State::HEADER) {
-		if (length < sizeof(header))
+		if (src.size() < sizeof(header))
 			/* need more data */
 			return 0;
 
-		memcpy(&header, data, sizeof(header));
+		memcpy(&header, src.data(), sizeof(header));
 
 		if (header.length == 0) {
 			payload = nullptr;
@@ -64,8 +64,7 @@ TranslatePacketReader::Feed(AllocatorPtr alloc,
 		}
 
 		consumed += sizeof(header);
-		data += sizeof(header);
-		length -= sizeof(header);
+		src = src.subspan(sizeof(header));
 
 		state = State::PAYLOAD;
 
@@ -73,7 +72,7 @@ TranslatePacketReader::Feed(AllocatorPtr alloc,
 		payload = alloc.NewArray<std::byte>(header.length + 1);
 		payload[header.length] = std::byte{0};
 
-		if (length == 0)
+		if (src.empty())
 			return consumed;
 	}
 
@@ -82,10 +81,10 @@ TranslatePacketReader::Feed(AllocatorPtr alloc,
 	assert(payload_position < header.length);
 
 	std::size_t nbytes = header.length - payload_position;
-	if (nbytes > length)
-		nbytes = length;
+	if (nbytes > src.size())
+		nbytes = src.size();
 
-	memcpy(payload + payload_position, data, nbytes);
+	memcpy(payload + payload_position, src.data(), nbytes);
 	payload_position += nbytes;
 	if (payload_position == header.length)
 		state = State::COMPLETE;

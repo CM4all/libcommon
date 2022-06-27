@@ -198,8 +198,8 @@ public:
 	{
 	}
 
-	size_t Feed(const std::byte *data, std::size_t length) noexcept {
-		return reader.Feed(alloc, data, length);
+	std::size_t Feed(std::span<const std::byte> src) noexcept {
+		return reader.Feed(alloc, src);
 	}
 
 	enum class Result {
@@ -263,14 +263,14 @@ private:
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
-	void HandleContentTypeLookup(ConstBuffer<void> payload);
+	void HandleContentTypeLookup(std::span<const std::byte> payload);
 #endif
 
 	void HandleRegularPacket(TranslationCommand command,
-				 ConstBuffer<void> payload);
+				 std::span<const std::byte> payload);
 
-	void HandleUidGid(ConstBuffer<void> payload);
-	void HandleUmask(ConstBuffer<void> payload);
+	void HandleUidGid(std::span<const std::byte> payload);
+	void HandleUmask(std::span<const std::byte> payload);
 
 	void HandleCgroupSet(StringView payload);
 	void HandleCgroupXattr(StringView payload);
@@ -278,5 +278,5 @@ private:
 	void HandleSubstYamlFile(StringView payload);
 
 	Result HandlePacket(TranslationCommand command,
-			    ConstBuffer<void> payload);
+			    std::span<const std::byte> payload);
 };

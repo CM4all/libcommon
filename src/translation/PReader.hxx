@@ -30,14 +30,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENG_PROXY_TRANSLATE_READER_HXX
-#define BENG_PROXY_TRANSLATE_READER_HXX
+#pragma once
 
 #include "Protocol.hxx"
-#include "util/ConstBuffer.hxx"
 
 #include <cassert>
 #include <cstddef>
+#include <span>
 
 class AllocatorPtr;
 
@@ -65,7 +64,7 @@ public:
 	 * @return the number of bytes consumed
 	 */
 	std::size_t Feed(AllocatorPtr alloc,
-			 const std::byte *data, std::size_t length) noexcept;
+			 std::span<const std::byte> src) noexcept;
 
 	bool IsComplete() const noexcept {
 		return state == State::COMPLETE;
@@ -78,7 +77,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	ConstBuffer<void> GetPayload() const noexcept {
+	std::span<const std::byte> GetPayload() const noexcept {
 		assert(IsComplete());
 
 		return {
@@ -87,5 +86,3 @@ public:
 		};
 	}
 };
-
-#endif
