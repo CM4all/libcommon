@@ -33,7 +33,8 @@
 #include "Buffer.hxx"
 #include "Error.hxx"
 
-#include <stdexcept>
+#include <cstddef>
+#include <new> // for std::bad_alloc
 
 SslBuffer::SslBuffer(X509 &cert)
 {
