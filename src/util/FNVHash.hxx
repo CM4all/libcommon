@@ -46,7 +46,7 @@ struct FNVTraits {};
 
 template<>
 struct FNVTraits<uint32_t> {
-	typedef uint32_t value_type;
+	using value_type = uint32_t;
 	using fast_type = uint_fast32_t;
 
 	static constexpr value_type OFFSET_BASIS = 2166136261u;
