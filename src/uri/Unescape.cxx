@@ -31,13 +31,12 @@
  */
 
 #include "Unescape.hxx"
-#include "util/StringView.hxx"
 #include "util/HexParse.hxx"
 
 #include <algorithm>
 
 char *
-UriUnescape(char *dest, StringView _src, char escape_char) noexcept
+UriUnescape(char *dest, std::string_view _src, char escape_char) noexcept
 {
 	auto src = _src.begin();
 	const auto end = _src.end();

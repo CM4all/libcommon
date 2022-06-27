@@ -32,7 +32,7 @@
 
 #pragma once
 
-struct StringView;
+#include <string_view>
 
 /**
  * @param escape_char the character that is used to escape; use '%'
@@ -41,5 +41,5 @@ struct StringView;
  * null-terminated) or nullptr on error
  */
 char *
-UriUnescape(char *dest, StringView src,
+UriUnescape(char *dest, std::string_view src,
 	    char escape_char='%') noexcept;
