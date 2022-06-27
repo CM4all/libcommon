@@ -72,8 +72,8 @@ private:
 		fprintf(stderr, "\n");
 	}
 
-	void OnData(ConstBuffer<void> data) override {
-		write(STDOUT_FILENO, data.data, data.size);
+	void OnData(std::span<const std::byte> data) override {
+		write(STDOUT_FILENO, data.data(), data.size());
 	}
 
 	virtual void OnEnd() override;

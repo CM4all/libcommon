@@ -31,6 +31,7 @@
  */
 
 #include "CoRequest.hxx"
+#include "util/SpanCast.hxx"
 
 namespace Curl {
 
@@ -48,10 +49,9 @@ CoRequest::OnHeaders(unsigned status, Headers &&headers)
 }
 
 void
-CoRequest::OnData(ConstBuffer<void> data)
+CoRequest::OnData(std::span<const std::byte> data)
 {
-	response.body.append((const char *)data.data,
-			     data.size);
+	response.body.append(ToStringView(data));
 }
 
 void

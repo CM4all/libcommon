@@ -91,7 +91,7 @@ public:
 private:
 	/* virtual methods from CurlResponseHandler */
 	void OnHeaders(unsigned status, Headers &&headers) override;
-	void OnData(ConstBuffer<void> data) override;
+	void OnData(std::span<const std::byte> data) override;
 	void OnEnd() override;
 	void OnError(std::exception_ptr e) noexcept override;
 };
