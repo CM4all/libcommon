@@ -198,7 +198,7 @@ public:
 	{
 	}
 
-	size_t Feed(const uint8_t *data, size_t length) {
+	size_t Feed(const std::byte *data, std::size_t length) noexcept {
 		return reader.Feed(alloc, data, length);
 	}
 

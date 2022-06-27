@@ -37,7 +37,7 @@
 
 std::size_t
 TranslatePacketReader::Feed(AllocatorPtr alloc,
-			    const uint8_t *data, std::size_t length) noexcept
+			    const std::byte *data, std::size_t length) noexcept
 {
 	assert(state == State::HEADER ||
 	       state == State::PAYLOAD ||
@@ -70,8 +70,8 @@ TranslatePacketReader::Feed(AllocatorPtr alloc,
 		state = State::PAYLOAD;
 
 		payload_position = 0;
-		payload = alloc.NewArray<char>(header.length + 1);
-		payload[header.length] = 0;
+		payload = alloc.NewArray<std::byte>(header.length + 1);
+		payload[header.length] = std::byte{0};
 
 		if (length == 0)
 			return consumed;

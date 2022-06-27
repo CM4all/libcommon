@@ -38,7 +38,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 
 class AllocatorPtr;
 
@@ -56,7 +55,7 @@ class TranslatePacketReader {
 
 	TranslationHeader header;
 
-	char *payload;
+	std::byte *payload;
 	std::size_t payload_position;
 
 public:
@@ -66,7 +65,7 @@ public:
 	 * @return the number of bytes consumed
 	 */
 	std::size_t Feed(AllocatorPtr alloc,
-			 const uint8_t *data, std::size_t length) noexcept;
+			 const std::byte *data, std::size_t length) noexcept;
 
 	bool IsComplete() const noexcept {
 		return state == State::COMPLETE;
@@ -82,7 +81,10 @@ public:
 	ConstBuffer<void> GetPayload() const noexcept {
 		assert(IsComplete());
 
-		return {payload != nullptr ? payload : "", header.length};
+		return {
+			payload != nullptr ? payload : (const std::byte *)"",
+			header.length,
+		};
 	}
 };
 
