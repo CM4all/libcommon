@@ -266,19 +266,19 @@ TranslateResponse::Clear()
 	validate_mtime.path = nullptr;
 }
 
-static ConstBuffer<const char *>
-DupStringArray(AllocatorPtr alloc, ConstBuffer<const char *> src) noexcept
+static std::span<const char *const>
+DupStringArray(AllocatorPtr alloc, std::span<const char *const> src) noexcept
 {
 	if (src.empty())
-		return nullptr;
+		return {};
 
-	const char **dest = alloc.NewArray<const char *>(src.size);
+	const char **dest = alloc.NewArray<const char *>(src.size());
 
 	const char **p = dest;
 	for (const char *s : src)
 		*p++ = alloc.Dup(s);
 
-	return {dest, src.size};
+	return {dest, src.size()};
 }
 
 void
