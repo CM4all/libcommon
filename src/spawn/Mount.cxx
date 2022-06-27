@@ -36,6 +36,7 @@
 #include "system/Error.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/RuntimeError.hxx"
+#include "util/StringView.hxx"
 #include "AllocatorPtr.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
