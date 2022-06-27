@@ -66,13 +66,13 @@ public:
 	 * @return the number of bytes consumed
 	 */
 	std::size_t Feed(AllocatorPtr alloc,
-			 const uint8_t *data, std::size_t length);
+			 const uint8_t *data, std::size_t length) noexcept;
 
-	bool IsComplete() const {
+	bool IsComplete() const noexcept {
 		return state == State::COMPLETE;
 	}
 
-	TranslationCommand GetCommand() const {
+	TranslationCommand GetCommand() const noexcept {
 		assert(IsComplete());
 
 		return header.command;
