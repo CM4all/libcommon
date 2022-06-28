@@ -37,25 +37,21 @@
 std::pair<StringView, StringView>
 AnonymizeAddress(StringView value) noexcept
 {
-	if (const char *p = value.Find('.');
-	    p != nullptr && IsDigitASCII(value.front()) &&
+	if (const auto [_, rest] = value.Split('.');
+	    rest != nullptr && IsDigitASCII(value.front()) &&
 	    IsDigitASCII(value.back())) {
 		/* IPv4: zero the last octet */
-
-		auto rest = value.substr(p + 1);
 
 		const char *q = rest.FindLast('.');
 		if (q != nullptr)
 			return {StringView{value.data, q + 1}, "0"};
 	}
 
-	if (const char *p = value.Find(':');
-	    p != nullptr &&
+	if (auto [_, rest] = value.Split(':');
+	    rest != nullptr &&
 	    (IsHexDigit(value.front()) || value.front() == ':') &&
 	    (IsHexDigit(value.back()) || value.back() == ':')) {
 		/* IPv6: truncate after the first 40 bit */
-
-		auto rest = value.substr(p + 1);
 
 		for (unsigned i = 1; i < 2; ++i) {
 			const char *q = rest.Find(':');
