@@ -31,42 +31,42 @@
  */
 
 #include "net/Anonymize.hxx"
-#include "util/StringView.hxx"
 
 #include <gtest/gtest.h>
 
 #include <string>
 
-std::ostream &
-operator<<(std::ostream &os, StringView s)
-{
-	return os << std::string(s.data, s.size);
-}
+using std::string_view_literals::operator""sv;
 
 void
-PrintTo(StringView s, std::ostream* os)
+PrintTo(std::string_view s, std::ostream* os)
 {
 	*os << '"' << s << '"';
 }
 
 void
-PrintTo(std::pair<StringView, StringView> p, std::ostream* os)
+PrintTo(std::pair<std::string_view, std::string_view> p, std::ostream* os)
 {
 	*os << '"' << p.first << p.second << '"';
 }
 
+namespace std {
+
 bool
-operator==(std::pair<StringView, StringView> a, const char *b) noexcept
+operator==(pair<string_view, string_view> a,
+	   const string_view b) noexcept
 {
-	std::string c(a.first.data, a.first.size);
-	c.append(a.second.data, a.second.size);
+	string c(a.first);
+	c.append(a.second);
 	return c == b;
 }
 
+} // namespace std
+
 TEST(Anonymize, Other)
 {
-	EXPECT_EQ(AnonymizeAddress("foo"), "foo");
-	EXPECT_EQ(AnonymizeAddress("foo.example.com"), "foo.example.com");
+	EXPECT_EQ(AnonymizeAddress("foo"sv), "foo"sv);
+	EXPECT_EQ(AnonymizeAddress("foo.example.com"sv), "foo.example.com"sv);
 }
 
 TEST(Anonymize, IPv4)

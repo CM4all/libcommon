@@ -31,23 +31,25 @@
  */
 
 #include "Anonymize.hxx"
-#include "util/StringView.hxx"
 #include "util/CharUtil.hxx"
+#include "util/StringView.hxx"
 
-std::pair<StringView, StringView>
-AnonymizeAddress(StringView value) noexcept
+using std::string_view_literals::operator""sv;
+
+std::pair<std::string_view, std::string_view>
+AnonymizeAddress(std::string_view value) noexcept
 {
-	if (const auto [_, rest] = value.Split('.');
+	if (const auto [_, rest] = StringView{value}.Split('.');
 	    rest != nullptr && IsDigitASCII(value.front()) &&
 	    IsDigitASCII(value.back())) {
 		/* IPv4: zero the last octet */
 
 		const char *q = rest.FindLast('.');
 		if (q != nullptr)
-			return {StringView{value.data, q + 1}, "0"};
+			return {StringView{value.data(), q + 1}, "0"sv};
 	}
 
-	if (auto [_, rest] = value.Split(':');
+	if (auto [_, rest] = StringView{value}.Split(':');
 	    rest != nullptr &&
 	    (IsHexDigit(value.front()) || value.front() == ':') &&
 	    (IsHexDigit(value.back()) || value.back() == ':')) {
@@ -56,10 +58,10 @@ AnonymizeAddress(StringView value) noexcept
 		for (unsigned i = 1; i < 2; ++i) {
 			const char *q = rest.Find(':');
 			if (q == rest.data)
-				return {StringView{value.data, q + 1}, nullptr};
+				return {StringView{value.data(), q + 1}, {}};
 
 			if (q == nullptr)
-				return {value, nullptr};
+				return {value, {}};
 
 			rest = rest.substr(q + 1);
 		}
@@ -67,10 +69,10 @@ AnonymizeAddress(StringView value) noexcept
 		/* clear the low 8 bit of the third segment */
 		const auto third_segment = rest.Split(':').first;
 		if (third_segment.size > 2)
-			return {StringView{value.data, third_segment.end() - 2}, "00::"};
+			return {StringView{value.data(), third_segment.end() - 2}, "00::"sv};
 
-		return {StringView{value.data, rest.data}, ":"};
+		return {StringView{value.data(), rest.data}, ":"sv};
 	}
 
-	return {value, nullptr};
+	return {value, {}};
 }
