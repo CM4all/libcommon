@@ -112,19 +112,19 @@ CreateSystemdScope(const char *name, const char *description,
 				       Variant(Uint64(properties.tasks_max))))
 		.AppendOptional(properties.memory_min > 0,
 				Struct(String("MemoryMin"),
-				       Variant(Uint64(properties.memory_max))))
+				       Variant(Uint64(properties.memory_min))))
 		.AppendOptional(properties.memory_low > 0,
 				Struct(String("MemoryLow"),
-				       Variant(Uint64(properties.memory_max))))
+				       Variant(Uint64(properties.memory_low))))
 		.AppendOptional(properties.memory_high > 0,
 				Struct(String("MemoryHigh"),
-				       Variant(Uint64(properties.memory_max))))
+				       Variant(Uint64(properties.memory_high))))
 		.AppendOptional(properties.memory_max > 0,
 				Struct(String("MemoryMax"),
 				       Variant(Uint64(properties.memory_max))))
 		.AppendOptional(properties.memory_swap_max > 0,
 				Struct(String("MemorySwapMax"),
-				       Variant(Uint64(properties.memory_max))))
+				       Variant(Uint64(properties.memory_swap_max))))
 		.AppendOptional(properties.io_weight > 0,
 				Struct(String("IOWeight"),
 				       Variant(Uint64(properties.io_weight))))
