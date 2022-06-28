@@ -39,47 +39,12 @@
 #include <stdlib.h>
 
 static UniqueFileDescriptor
-OpenCgroupBase()
-{
-	return OpenPath("/sys/fs/cgroup");
-}
-
-static UniqueFileDescriptor
-OpenCgroupController(const CgroupState &state, const char *controller)
-{
-	auto c = state.controllers.find(controller);
-	if (c == state.controllers.end())
-		return {};
-
-	auto base = OpenCgroupBase();
-	if (c->second.empty())
-		return base;
-
-	return OpenPath(base, c->second.c_str());
-}
-
-static UniqueFileDescriptor
-OpenCgroupControllerGroup(const CgroupState &state, const char *controller)
-{
-	assert(!state.group_path.empty());
-	assert(state.group_path.front() == '/');
-	assert(state.group_path.length() >= 2);
-	assert(state.group_path[1] != '/');
-
-	const auto c = OpenCgroupController(state, controller);
-	if (!c.IsDefined())
-		return {};
-
-	return OpenPath(c, state.group_path.c_str() + 1);
-}
-
-static UniqueFileDescriptor
 OpenMemoryUsage(const CgroupState &state)
 {
 	if (!state.memory_v2)
 		throw std::runtime_error("Cgroup2 controller 'memory' not found");
 
-	auto group = OpenCgroupControllerGroup(state, "memory");
+	const auto group = state.GetUnifiedGroupMount();
 	if (!group.IsDefined())
 		throw std::runtime_error("Cgroup controller 'memory' not found");
 
