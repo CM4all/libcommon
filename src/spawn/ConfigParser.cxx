@@ -196,6 +196,15 @@ ParseMemorySize(const char *s)
 	return ParsePositiveBytes(s);
 }
 
+static uint64_t
+ParseMemoryLimit(const char *s)
+{
+	if (StringIsEqual(s, "infinity"))
+		return UINT64_MAX;
+
+	return ParseMemorySize(s);
+}
+
 #endif
 
 void
@@ -239,19 +248,19 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 			ParseTasksMax(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryMin")) {
 		config.systemd_scope_properties.memory_min =
-			ParseMemorySize(line.ExpectValueAndEnd());
+			ParseMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryLow")) {
 		config.systemd_scope_properties.memory_low =
-			ParseMemorySize(line.ExpectValueAndEnd());
+			ParseMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryHigh")) {
 		config.systemd_scope_properties.memory_high =
-			ParseMemorySize(line.ExpectValueAndEnd());
+			ParseMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryMax")) {
 		config.systemd_scope_properties.memory_max =
-			ParseMemorySize(line.ExpectValueAndEnd());
+			ParseMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemorySwapMax")) {
 		config.systemd_scope_properties.memory_swap_max =
-			ParseMemorySize(line.ExpectValueAndEnd());
+			ParseMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "IOWeight")) {
 		config.systemd_scope_properties.io_weight =
 			ParseIOWeight(line.ExpectValueAndEnd());
