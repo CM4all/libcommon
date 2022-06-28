@@ -33,15 +33,14 @@
 #pragma once
 
 #include <string>
-
-struct StringView;
+#include <string_view>
 
 /**
  * Check if the given service name is valid according to RFC 6335.  If
  * not, an exception with an explanatory message is thrown.
  */
 void
-CheckZeroconfServiceName(StringView name);
+CheckZeroconfServiceName(std::string_view name);
 
 /**
  * Check if the given service type is valid according to RFC 6763 and

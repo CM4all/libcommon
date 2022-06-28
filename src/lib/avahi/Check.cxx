@@ -31,7 +31,6 @@
  */
 
 #include "Check.hxx"
-#include "util/StringView.hxx"
 #include "util/CharUtil.hxx"
 
 #include <stdexcept>
@@ -41,12 +40,12 @@
 #include <stdio.h>
 
 void
-CheckZeroconfServiceName(StringView name)
+CheckZeroconfServiceName(std::string_view name)
 {
-	if (name.size < 1)
+	if (name.size() < 1)
 		throw std::runtime_error("Service name must not be empty");
 
-	if (name.size > 15)
+	if (name.size() > 15)
 		throw std::runtime_error("Service name must not be longer than 15 characters");
 
 	bool found_letter = false;
