@@ -51,12 +51,11 @@ public:
 	MyCgroupWatch(EventLoop &event_loop,
 		      const CgroupState &state)
 		:watch(event_loop, state,
-		       64ULL * 1024 * 1024,
 		       BIND_THIS_METHOD(OnCgroupWatch)) {}
 
 private:
 	void OnCgroupWatch(uint64_t value) noexcept {
-		printf("%" PRIu64 "u\n", value);
+		printf("%" PRIu64 "\n", value);
 	}
 };
 

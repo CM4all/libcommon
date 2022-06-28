@@ -32,19 +32,20 @@
 
 #pragma once
 
-#include "event/CoarseTimerEvent.hxx"
+#include "event/Chrono.hxx"
+#include "event/InotifyEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <cstdint>
 
 struct CgroupState;
 
-class CgroupMemoryWatch {
+class CgroupMemoryWatch final : InotifyHandler {
 	UniqueFileDescriptor fd;
 
-	const uint64_t threshold;
+	InotifyEvent inotify;
 
-	CoarseTimerEvent timer;
+	Event::TimePoint next_time;
 
 	BoundMethod<void(uint64_t value) noexcept> callback;
 
@@ -54,9 +55,14 @@ public:
 	 */
 	CgroupMemoryWatch(EventLoop &event_loop,
 			  const CgroupState &state,
-			  uint64_t _threshold,
 			  BoundMethod<void(uint64_t value) noexcept> _callback);
 
+	auto &GetEventLoop() const noexcept {
+		return inotify.GetEventLoop();
+	}
+
 private:
-	void OnTimer() noexcept;
+	/* virtual methods from class InotifyHandler */
+	void OnInotify(int wd, unsigned mask, const char *name) override;
+	void OnInotifyError(std::exception_ptr error) noexcept override;
 };

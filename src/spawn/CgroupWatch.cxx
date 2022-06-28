@@ -32,7 +32,9 @@
 
 #include "CgroupWatch.hxx"
 #include "CgroupState.hxx"
+#include "event/Loop.hxx"
 #include "io/Open.hxx"
+#include "io/ScopeChdir.hxx"
 #include "system/Error.hxx"
 #include "util/PrintException.hxx"
 
@@ -72,28 +74,40 @@ ReadUint64(FileDescriptor fd)
 
 CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
 				     const CgroupState &state,
-				     uint64_t _threshold,
 				     BoundMethod<void(uint64_t value) noexcept> _callback)
 	:fd(OpenMemoryUsage(state)),
-	 threshold(_threshold),
-	 timer(event_loop, BIND_THIS_METHOD(OnTimer)),
+	 inotify(event_loop, *this),
 	 callback(_callback)
 {
-	timer.Schedule(std::chrono::minutes(1));
+	{
+		const ScopeChdir scope_chdir{state.GetUnifiedGroupMount()};
+		inotify.AddModifyWatch("memory.events.local");
+	}
 }
 
 void
-CgroupMemoryWatch::OnTimer() noexcept
+CgroupMemoryWatch::OnInotify(int, unsigned, const char *)
 {
+	const auto now = GetEventLoop().SteadyNow();
+	if (now < next_time)
+		// throttle
+		return;
+
+	next_time = now + std::chrono::seconds{30};
+
+	uint64_t value = UINT64_MAX;
+
 	try {
-		uint64_t value = ReadUint64(fd);
-		if (value >= threshold) {
-			callback(value);
-			timer.Schedule(std::chrono::seconds(10));
-		} else
-			timer.Schedule(std::chrono::minutes(1));
+		value = ReadUint64(fd);
 	} catch (...) {
 		PrintException(std::current_exception());
-		timer.Schedule(std::chrono::minutes(5));
 	}
+
+	callback(value);
+}
+
+void
+CgroupMemoryWatch::OnInotifyError(std::exception_ptr error) noexcept
+{
+	PrintException(error);
 }

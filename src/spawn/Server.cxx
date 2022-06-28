@@ -275,7 +275,6 @@ public:
 		    cgroup_state.IsEnabled())
 			cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>
 				(loop, cgroup_state,
-				 config.systemd_scope_properties.memory_max * 15 / 16,
 				 BIND_THIS_METHOD(OnCgroupMemoryWarning));
 #endif
 	}
