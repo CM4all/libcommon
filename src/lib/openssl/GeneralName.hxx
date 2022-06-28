@@ -30,14 +30,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SSL_GENERAL_NAME_HXX
-#define SSL_GENERAL_NAME_HXX
-
-#include "util/StringView.hxx"
+#pragma once
 
 #include <openssl/x509v3.h>
 
 #include <cassert>
+#include <string_view>
 #include <utility>
 
 namespace OpenSSL {
@@ -80,17 +78,17 @@ public:
 		return value->type;
 	}
 
-	StringView GetDnsName() const noexcept {
+	std::string_view GetDnsName() const noexcept {
 		assert(value != nullptr);
 		assert(value->type == GEN_DNS);
 
 		const unsigned char *data = ASN1_STRING_get0_data(value->d.dNSName);
 		if (data == nullptr)
-			return nullptr;
+			return {};
 
 		int length = ASN1_STRING_length(value->d.dNSName);
 		if (length < 0)
-			return nullptr;
+			return {};
 
 		return {(const char*)data, (size_t)length};
 	}
@@ -238,5 +236,3 @@ public:
 };
 
 }
-
-#endif
