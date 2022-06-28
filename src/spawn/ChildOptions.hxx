@@ -39,7 +39,8 @@
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
 #include "util/ShallowCopy.hxx"
-#include "util/StringView.hxx"
+
+#include <string_view>
 
 struct ResourceLimits;
 struct PreparedChildProcess;
@@ -57,7 +58,7 @@ struct ChildOptions {
 	 * This field can contain multiple values separated by null
 	 * bytes.
 	 */
-	StringView tag = nullptr;
+	std::string_view tag{};
 
 	const char *chdir = nullptr;
 
