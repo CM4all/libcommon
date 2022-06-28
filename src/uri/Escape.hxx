@@ -33,9 +33,9 @@
 #pragma once
 
 #include <cstddef>
+#include <span>
 #include <string_view>
 
-template<typename T> struct ConstBuffer;
 class AllocatedString;
 
 /**
@@ -47,11 +47,11 @@ UriEscape(char *dest, std::string_view src,
 	  char escape_char='%') noexcept;
 
 std::size_t
-UriEscape(char *dest, ConstBuffer<void> src,
+UriEscape(char *dest, std::span<const std::byte> src,
 	  char escape_char='%') noexcept;
 
 AllocatedString
 UriEscape(std::string_view src, char escape_char='%') noexcept;
 
 AllocatedString
-UriEscape(ConstBuffer<void> src, char escape_char='%') noexcept;
+UriEscape(std::span<const std::byte> src, char escape_char='%') noexcept;

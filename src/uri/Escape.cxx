@@ -33,8 +33,8 @@
 #include "Escape.hxx"
 #include "uri/Chars.hxx"
 #include "util/AllocatedString.hxx"
-#include "util/StringView.hxx"
 #include "util/HexFormat.hxx"
+#include "util/SpanCast.hxx"
 
 std::size_t
 UriEscape(char *dest, std::string_view src,
@@ -56,11 +56,10 @@ UriEscape(char *dest, std::string_view src,
 }
 
 std::size_t
-UriEscape(char *dest, ConstBuffer<void> src,
+UriEscape(char *dest, std::span<const std::byte> src,
 	  char escape_char) noexcept
 {
-	return UriEscape(dest,
-			 StringView{ConstBuffer<char>::FromVoid(src)},
+	return UriEscape(dest, ToStringView(src),
 			 escape_char);
 }
 
@@ -77,8 +76,7 @@ UriEscape(std::string_view src, char escape_char) noexcept
 }
 
 AllocatedString
-UriEscape(ConstBuffer<void> src, char escape_char) noexcept
+UriEscape(std::span<const std::byte> src, char escape_char) noexcept
 {
-	return UriEscape(StringView{ConstBuffer<char>::FromVoid(src)},
-			 escape_char);
+	return UriEscape(ToStringView(src), escape_char);
 }
