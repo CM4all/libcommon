@@ -53,12 +53,11 @@ StringAttributeEquals(const char *a, const char *b) noexcept
 }
 
 static bool
-StringAttributeEquals(StringView a, StringView b) noexcept
+StringAttributeEquals(std::string_view a, std::string_view b) noexcept
 {
-	return a == nullptr
-		? b == nullptr
-		: (a.size == b.size &&
-		   memcmp(a.data, b.data, a.size) == 0);
+	return a.data() == nullptr
+		? b.data() == nullptr
+		: a == b;
 }
 
 static bool

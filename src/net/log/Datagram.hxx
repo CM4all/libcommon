@@ -36,11 +36,10 @@
 #include "Chrono.hxx"
 #include "http/Method.h"
 #include "http/Status.h"
-#include "util/StringView.hxx"
 
 #include <chrono>
-
-#include <stdint.h>
+#include <cstdint>
+#include <string_view>
 
 namespace Net {
 namespace Log {
@@ -55,7 +54,7 @@ struct Datagram {
 	const char *http_uri = nullptr, *http_referer = nullptr;
 	const char *user_agent = nullptr;
 
-	StringView message = nullptr;
+	std::string_view message{};
 
 	uint64_t length;
 
@@ -93,7 +92,7 @@ struct Datagram {
 		 valid_length(_length >= 0), valid_traffic(true),
 		 valid_duration(true) {}
 
-	explicit Datagram(StringView _message) noexcept
+	explicit constexpr Datagram(std::string_view _message) noexcept
 		:message(_message) {}
 
 	bool HasTimestamp() const noexcept {

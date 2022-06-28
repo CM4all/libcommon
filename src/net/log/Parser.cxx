@@ -70,7 +70,7 @@ public:
 		return FromBE64(ReadT<uint64_t>());
 	}
 
-	StringView ReadStringView() {
+	std::string_view ReadStringView() {
 		const char *result = (const char *)p;
 		/* buffer is null-terminated, so strlen() is legal */
 		const size_t length = strlen(result);
@@ -82,7 +82,7 @@ public:
 	}
 
 	const char *ReadString() {
-		return ReadStringView().data;
+		return ReadStringView().data();
 	}
 
 private:
@@ -109,7 +109,7 @@ FixUp(Datagram &d)
 	if (d.type == Type::UNSPECIFIED && d.http_uri != nullptr)
 		/* old clients don't send a type; attempt to guess the
 		   type */
-		d.type = d.message.IsNull()
+		d.type = d.message.data() == nullptr
 			? Type::HTTP_ACCESS
 			: Type::HTTP_ERROR;
 }

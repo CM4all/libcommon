@@ -130,7 +130,7 @@ Send(SocketDescriptor s, const Datagram &d)
 		PushString(v, d.user_agent);
 	}
 
-	if (d.message != nullptr) {
+	if (d.message.data() != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::MESSAGE>());
 		PushString(v, d.message);
 	}

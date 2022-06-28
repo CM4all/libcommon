@@ -37,6 +37,7 @@
 #include "util/ByteOrder.hxx"
 
 #include <sys/socket.h>
+#include <string.h>
 
 namespace Net {
 namespace Log {
@@ -106,9 +107,9 @@ public:
 		memcpy(WriteN(nbytes), value, nbytes);
 	}
 
-	void WriteString(StringView value) {
-		void *dest = WriteN(value.size + 1);
-		*(char *)mempcpy(dest, value.data, value.size) = 0;
+	void WriteString(std::string_view value) {
+		void *dest = WriteN(value.size() + 1);
+		*(char *)mempcpy(dest, value.data(), value.size()) = 0;
 	}
 
 	void WriteOptionalString(Attribute a, const char *value) {
@@ -148,7 +149,7 @@ Serialize(void *buffer, std::size_t size, const Datagram &d)
 	w.WriteOptionalString(Attribute::HTTP_REFERER, d.http_referer);
 	w.WriteOptionalString(Attribute::USER_AGENT, d.user_agent);
 
-	if (d.message != nullptr) {
+	if (d.message.data() != nullptr) {
 		w.WriteAttribute(Attribute::MESSAGE);
 		w.WriteString(d.message);
 	}

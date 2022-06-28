@@ -71,9 +71,9 @@ IsHarmlessChar(signed char ch) noexcept
 }
 
 static void
-AppendEscape(StringBuilder &b, StringView value)
+AppendEscape(StringBuilder &b, std::string_view value)
 {
-	if (b.GetRemainingSize() < value.size * 4)
+	if (b.GetRemainingSize() < value.size() * 4)
 		throw StringBuilder::Overflow();
 
 	char *p = b.GetTail();
@@ -199,7 +199,7 @@ FormatOneLine(char *buffer, size_t buffer_size,
 	if (d.GuessIsHttpAccess())
 		return FormatOneLineHttp(buffer, buffer_size, d,
 					 site, anonymize);
-	else if (d.message != nullptr)
+	else if (d.message.data() != nullptr)
 		return FormatOneLineMessage(buffer, buffer_size, d, site);
 	else
 		return buffer;
