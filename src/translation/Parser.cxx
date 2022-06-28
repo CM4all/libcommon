@@ -175,8 +175,7 @@ IsValidName(std::string_view s) noexcept
 static bool
 IsValidAbsolutePath(std::string_view p) noexcept
 {
-	return IsValidNonEmptyString(p) && IsValidAbsolutePath(p) &&
-		p.front() == '/';
+	return IsValidNonEmptyString(p) && p.front() == '/';
 }
 
 #if TRANSLATION_ENABLE_HTTP
