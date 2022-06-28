@@ -33,7 +33,6 @@
 #include "CgroupKill.hxx"
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
-#include "system/LinuxFD.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
@@ -42,8 +41,8 @@
 
 #include <assert.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <string.h>
-#include <sys/inotify.h>
 
 static UniqueFileDescriptor
 OpenUnifiedCgroup(const CgroupState &state, const char *name)
@@ -74,16 +73,6 @@ IsPopulated(FileDescriptor fd) noexcept
 	return strstr(buffer, "populated 0") == nullptr;
 }
 
-static int
-AddWatchOrThrow(FileDescriptor fd, const char *pathname, uint32_t mask)
-{
-	int wd = inotify_add_watch(fd.Get(), pathname, mask);
-	if (wd < 0)
-		throw FormatErrno("inotify_add_watch('%s') failed", pathname);
-
-	return wd;
-}
-
 static std::string
 MakeCgroupEventsPath(const std::string &cgroup_path) noexcept
 {
@@ -108,9 +97,7 @@ CgroupKill::CgroupKill(EventLoop &event_loop,
 		       UniqueFileDescriptor &&cgroup_fd,
 		       CgroupKillHandler &_handler)
 	:handler(_handler),
-	 inotify_fd(CreateInotify()),
-	 inotify_event(event_loop, BIND_THIS_METHOD(OnInotifyEvent),
-		       inotify_fd),
+	 inotify_event(event_loop, *this),
 	 cgroup_events_fd(OpenReadOnly(cgroup_fd, "cgroup.events")),
 	 cgroup_procs_fd(OpenReadOnly(cgroup_fd, "cgroup.procs")),
 	 cgroup_kill_fd(OpenCgroupKill(state, cgroup_fd)),
@@ -119,11 +106,8 @@ CgroupKill::CgroupKill(EventLoop &event_loop,
 	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout))
 {
 	// TODO: initialize inotify only if cgroup is populated currently
-	AddWatchOrThrow(inotify_fd,
-			MakeCgroupEventsPath(cgroup_path).c_str(),
-			IN_MODIFY);
+	inotify_event.AddModifyWatch(MakeCgroupEventsPath(cgroup_path).c_str());
 
-	inotify_event.ScheduleRead();
 	send_term_event.Schedule();
 }
 
@@ -162,21 +146,15 @@ CgroupKill::CheckPopulated() noexcept
 }
 
 void
-CgroupKill::OnInotifyEvent(unsigned) noexcept
+CgroupKill::OnInotify(int, unsigned, const char *)
 {
-	uint8_t buffer[1024];
-	ssize_t nbytes = inotify_fd.Read(buffer, sizeof(buffer));
-	if (nbytes < 0) {
-		const int e = errno;
-		if (e == EAGAIN)
-			return;
-
-		Disable();
-		handler.OnCgroupKillError(std::make_exception_ptr(MakeErrno(e, "Read from inotify failed")));
-		return;
-	}
-
 	CheckPopulated();
+}
+
+void
+CgroupKill::OnInotifyError(std::exception_ptr error) noexcept
+{
+	handler.OnCgroupKillError(std::move(error));
 }
 
 static size_t

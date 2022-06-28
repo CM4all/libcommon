@@ -33,7 +33,7 @@
 #pragma once
 
 #include "io/UniqueFileDescriptor.hxx"
-#include "event/PipeEvent.hxx"
+#include "event/InotifyEvent.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
 
@@ -55,11 +55,10 @@ public:
  * Note that this class does not traverse child cgroups.  If there are
  * populated child cgroups, this class will report an error.
  */
-class CgroupKill {
+class CgroupKill final : InotifyHandler {
 	CgroupKillHandler &handler;
 
-	UniqueFileDescriptor inotify_fd;
-	PipeEvent inotify_event;
+	InotifyEvent inotify_event;
 
 	UniqueFileDescriptor cgroup_events_fd, cgroup_procs_fd, cgroup_kill_fd;
 
@@ -82,7 +81,7 @@ public:
 
 private:
 	void Disable() noexcept {
-		inotify_event.Cancel();
+		inotify_event.Disable();
 		send_term_event.Cancel();
 		send_kill_event.Cancel();
 		timeout_event.Cancel();
@@ -90,8 +89,11 @@ private:
 
 	bool CheckPopulated() noexcept;
 
-	void OnInotifyEvent(unsigned events) noexcept;
 	void OnSendTerm() noexcept;
 	void OnSendKill() noexcept;
 	void OnTimeout() noexcept;
+
+	/* virtual methods from class InotifyHandler */
+	void OnInotify(int wd, unsigned mask, const char *name) override;
+	void OnInotifyError(std::exception_ptr error) noexcept override;
 };

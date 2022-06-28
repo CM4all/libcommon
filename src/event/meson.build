@@ -14,6 +14,7 @@ event = static_library(
   'FineTimerEvent.cxx',
   'CleanupTimer.cxx',
   'DeferEvent.cxx',
+  'InotifyEvent.cxx',
   'SocketEvent.cxx',
   'SignalEvent.cxx',
   'PipeLineReader.cxx',
