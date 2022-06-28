@@ -34,3 +34,16 @@ executable(
     util_dep,
   ],
 )
+
+executable(
+  'WatchCgroup',
+  'WatchCgroup.cxx',
+  include_directories: inc,
+  dependencies: [
+    spawn_dep,
+    event_dep,
+    net_dep,
+    system_dep,
+    util_dep,
+  ],
+)
