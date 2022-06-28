@@ -30,8 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SSL_ALT_NAME_HXX
-#define SSL_ALT_NAME_HXX
+#pragma once
 
 #include <openssl/ossl_typ.h>
 
@@ -40,6 +39,4 @@
 
 [[gnu::pure]]
 std::forward_list<std::string>
-GetSubjectAltNames(X509 &cert);
-
-#endif
+GetSubjectAltNames(X509 &cert) noexcept;

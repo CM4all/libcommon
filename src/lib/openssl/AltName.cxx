@@ -34,7 +34,8 @@
 #include "GeneralName.hxx"
 
 static void
-FillNameList(std::forward_list<std::string> &list, OpenSSL::GeneralNames src)
+FillNameList(std::forward_list<std::string> &list,
+	     OpenSSL::GeneralNames src) noexcept
 {
 	for (const OpenSSL::GeneralName name : src) {
 		if (name.GetType() == GEN_DNS) {
@@ -48,7 +49,7 @@ FillNameList(std::forward_list<std::string> &list, OpenSSL::GeneralNames src)
 }
 
 std::forward_list<std::string>
-GetSubjectAltNames(X509 &cert)
+GetSubjectAltNames(X509 &cert) noexcept
 {
 	std::forward_list<std::string> list;
 
