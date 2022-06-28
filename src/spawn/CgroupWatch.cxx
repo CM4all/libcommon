@@ -76,14 +76,14 @@ OpenCgroupControllerGroup(const CgroupState &state, const char *controller)
 static UniqueFileDescriptor
 OpenMemoryUsage(const CgroupState &state)
 {
+	if (!state.memory_v2)
+		throw std::runtime_error("Cgroup2 controller 'memory' not found");
+
 	auto group = OpenCgroupControllerGroup(state, "memory");
 	if (!group.IsDefined())
 		throw std::runtime_error("Cgroup controller 'memory' not found");
 
-	return OpenReadOnly(group,
-			    state.memory_v2
-			    ? "memory.current"
-			    : "memory.usage_in_bytes");
+	return OpenReadOnly(group, "memory.current");
 }
 
 static uint64_t
