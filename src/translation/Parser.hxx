@@ -48,6 +48,8 @@
 #include "translation/Request.hxx"
 #endif
 
+#include <string_view>
+
 struct TranslateResponse;
 struct FileAddress;
 struct CgiAddress;
@@ -60,7 +62,6 @@ struct Mount;
 struct AddressList;
 struct Transformation;
 struct FilterTransformation;
-struct StringView;
 struct WidgetView;
 
 /**
@@ -251,9 +252,9 @@ private:
 			      const char *map_path) noexcept;
 #endif
 
-	void HandleMountTmpfs(StringView payload, bool writable);
+	void HandleMountTmpfs(std::string_view payload, bool writable);
 
-	void HandleBindMount(StringView payload,
+	void HandleBindMount(std::string_view payload,
 			     bool expand, bool writable, bool exec=false,
 			     bool file=false);
 
@@ -272,10 +273,10 @@ private:
 	void HandleUidGid(std::span<const std::byte> payload);
 	void HandleUmask(std::span<const std::byte> payload);
 
-	void HandleCgroupSet(StringView payload);
-	void HandleCgroupXattr(StringView payload);
+	void HandleCgroupSet(std::string_view payload);
+	void HandleCgroupXattr(std::string_view payload);
 
-	void HandleSubstYamlFile(StringView payload);
+	void HandleSubstYamlFile(std::string_view payload);
 
 	Result HandlePacket(TranslationCommand command,
 			    std::span<const std::byte> payload);
