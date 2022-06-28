@@ -44,6 +44,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <inttypes.h>
+#include <unistd.h> // for sysconf()
 
 static uid_t
 ParseUser(const char *name)
@@ -205,6 +206,28 @@ ParseMemoryLimit(const char *s)
 	return ParseMemorySize(s);
 }
 
+static uint64_t
+ParsePhysicalMemoryLimit(const char *s)
+{
+	if (strchr(s, '%') != nullptr) {
+		char *endptr;
+		uint64_t value = strtoull(s, &endptr, 10);
+		if (endptr == s || *endptr != '%' || endptr[1] != 0)
+			throw FormatRuntimeError("Failed to parse percent number: %s", s);
+
+		if (value == 0)
+			throw std::runtime_error("Value must not be zero");
+
+		const uint64_t page_size = sysconf(_SC_PAGESIZE);
+		const uint64_t phys_pages = sysconf(_SC_PHYS_PAGES);
+
+		const uint64_t n_pages = (value * phys_pages) / 100;
+		return n_pages * page_size;
+	}
+
+	return ParseMemoryLimit(s);
+}
+
 #endif
 
 void
@@ -248,16 +271,16 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 			ParseTasksMax(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryMin")) {
 		config.systemd_scope_properties.memory_min =
-			ParseMemoryLimit(line.ExpectValueAndEnd());
+			ParsePhysicalMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryLow")) {
 		config.systemd_scope_properties.memory_low =
-			ParseMemoryLimit(line.ExpectValueAndEnd());
+			ParsePhysicalMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryHigh")) {
 		config.systemd_scope_properties.memory_high =
-			ParseMemoryLimit(line.ExpectValueAndEnd());
+			ParsePhysicalMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemoryMax")) {
 		config.systemd_scope_properties.memory_max =
-			ParseMemoryLimit(line.ExpectValueAndEnd());
+			ParsePhysicalMemoryLimit(line.ExpectValueAndEnd());
 	} else if (StringIsEqualIgnoreCase(word, "MemorySwapMax")) {
 		config.systemd_scope_properties.memory_swap_max =
 			ParseMemoryLimit(line.ExpectValueAndEnd());
