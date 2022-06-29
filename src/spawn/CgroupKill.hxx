@@ -38,7 +38,6 @@
 #include "event/CoarseTimerEvent.hxx"
 
 #include <exception>
-#include <string>
 
 struct CgroupState;
 
@@ -67,7 +66,6 @@ class CgroupKill final : InotifyHandler {
 	CoarseTimerEvent timeout_event;
 
 	CgroupKill(EventLoop &event_loop, const CgroupState &state,
-		   const std::string &cgroup_path,
 		   FileDescriptor cgroup_fd,
 		   CgroupKillHandler &_handler);
 

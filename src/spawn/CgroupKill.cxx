@@ -34,6 +34,7 @@
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
 #include "io/Open.hxx"
+#include "io/ScopeChdir.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <array>
@@ -73,12 +74,6 @@ IsPopulated(FileDescriptor fd) noexcept
 	return strstr(buffer, "populated 0") == nullptr;
 }
 
-static std::string
-MakeCgroupEventsPath(const std::string &cgroup_path) noexcept
-{
-	return cgroup_path + "/cgroup.events";
-}
-
 static UniqueFileDescriptor
 OpenCgroupKill(const CgroupState &state, FileDescriptor cgroup_fd)
 {
@@ -93,7 +88,6 @@ OpenCgroupKill(const CgroupState &state, FileDescriptor cgroup_fd)
 inline
 CgroupKill::CgroupKill(EventLoop &event_loop,
 		       const CgroupState &state,
-		       const std::string &cgroup_path,
 		       FileDescriptor cgroup_fd,
 		       CgroupKillHandler &_handler)
 	:handler(_handler),
@@ -106,29 +100,18 @@ CgroupKill::CgroupKill(EventLoop &event_loop,
 	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout))
 {
 	// TODO: initialize inotify only if cgroup is populated currently
-	inotify_event.AddModifyWatch(MakeCgroupEventsPath(cgroup_path).c_str());
-
-	send_term_event.Schedule();
-}
-
-static std::string
-MakeCgroupUnifiedPath(const CgroupState &state, const char *name,
-		      const char *session) noexcept
-{
-	auto result = state.GetUnifiedMountPath() + state.group_path + "/" + name;
-	if (session != nullptr) {
-		result.push_back('/');
-		result += session;
+	{
+		const ScopeChdir scope_chdir{cgroup_fd};
+		inotify_event.AddModifyWatch("cgroup.events");
 	}
 
-	return result;
+	send_term_event.Schedule();
 }
 
 CgroupKill::CgroupKill(EventLoop &event_loop, const CgroupState &state,
 		       const char *name, const char *session,
 		       CgroupKillHandler &_handler)
 	:CgroupKill(event_loop, state,
-		    MakeCgroupUnifiedPath(state, name, session),
 		    OpenUnifiedCgroup(state, name, session),
 		    _handler)
 {
