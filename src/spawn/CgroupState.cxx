@@ -59,22 +59,6 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 		throw FormatErrno("write('%s') failed", path);
 }
 
-std::string
-CgroupState::GetUnifiedMountPath() const noexcept
-{
-	if (mounts.empty())
-		return {};
-
-	const auto &i = mounts.front().name;
-	if (i.empty())
-		return "/sys/fs/cgroup";
-
-	if (i == "unified")
-		return "/sys/fs/cgroup/unified";
-
-	return {};
-}
-
 FileDescriptor
 CgroupState::GetUnifiedGroupMount() const noexcept
 {

@@ -109,13 +109,6 @@ struct CgroupState {
 	bool IsV2() const noexcept;
 
 	/**
-	 * Returns the absolute path where the cgroup2 is mounted or
-	 * an empty string if none was mounted.
-	 */
-	[[gnu::pure]]
-	std::string GetUnifiedMountPath() const noexcept;
-
-	/**
 	 * Returns an O_PATH file descriptor to our group in the
 	 * cgroup2 mount or FileDescriptor::Undefined() if none was
 	 * mounted.
