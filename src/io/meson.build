@@ -33,6 +33,7 @@ io = static_library(
   'BufferedReader.cxx',
   'LineParser.cxx',
   'Logger.cxx',
+  'ScopeChdir.cxx',
   'StringFile.cxx',
   'Temp.cxx',
   io_sources,
