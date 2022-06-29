@@ -58,5 +58,6 @@ ScopeChdir::ScopeChdir(FileDescriptor new_wd)
 
 ScopeChdir::~ScopeChdir() noexcept
 {
-	fchdir(old.Get());
+	[[maybe_unused]]
+	int dummy = fchdir(old.Get());
 }
