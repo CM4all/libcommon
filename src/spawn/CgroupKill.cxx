@@ -94,7 +94,7 @@ inline
 CgroupKill::CgroupKill(EventLoop &event_loop,
 		       const CgroupState &state,
 		       const std::string &cgroup_path,
-		       UniqueFileDescriptor &&cgroup_fd,
+		       FileDescriptor cgroup_fd,
 		       CgroupKillHandler &_handler)
 	:handler(_handler),
 	 inotify_event(event_loop, *this),
