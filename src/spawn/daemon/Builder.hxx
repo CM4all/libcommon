@@ -82,7 +82,7 @@ public:
 	MessageHeader Finish() noexcept {
 		CRC32State crc;
 
-		for (const auto &i : v)
+		for (const auto &i : std::span{v}.subspan(1))
 			crc.Update(ToSpan(i));
 
 		header.crc = crc.Finish();
