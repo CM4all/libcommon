@@ -105,7 +105,7 @@ try {
 		throw MakeErrno(e, "Reading inotify failed");
 	}
 
-	const std::byte *p = buffer.data(), *const end = p + buffer.size();
+	const std::byte *p = buffer.data(), *const end = p + nbytes;
 
 	while (true) {
 		const size_t remaining = end - p;
