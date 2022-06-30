@@ -40,7 +40,4 @@ CreateEventFD(unsigned initval=0);
 UniqueFileDescriptor
 CreateSignalFD(const sigset_t &mask, bool nonblock=true);
 
-UniqueFileDescriptor
-CreateInotify();
-
 #endif

@@ -32,13 +32,22 @@
 
 #include "InotifyEvent.hxx"
 #include "system/Error.hxx"
-#include "system/LinuxFD.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <array>
 
 #include <limits.h>
 #include <sys/inotify.h>
+
+static UniqueFileDescriptor
+CreateInotify()
+{
+	int fd = inotify_init1(IN_CLOEXEC|IN_NONBLOCK);
+	if (fd < 0)
+		throw MakeErrno("inotify_init1() failed");
+
+	return UniqueFileDescriptor(fd);
+}
 
 InotifyEvent::InotifyEvent(EventLoop &event_loop, InotifyHandler &_handler)
 	:event(event_loop, BIND_THIS_METHOD(OnInotifyReady),

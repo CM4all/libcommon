@@ -33,7 +33,6 @@
 
 #include <sys/eventfd.h>
 #include <sys/signalfd.h>
-#include <sys/inotify.h>
 
 UniqueFileDescriptor
 CreateEventFD(unsigned initval)
@@ -55,16 +54,6 @@ CreateSignalFD(const sigset_t &mask, bool nonblock)
 	int fd = ::signalfd(-1, &mask, flags);
 	if (fd < 0)
 		throw MakeErrno("signalfd() failed");
-
-	return UniqueFileDescriptor(fd);
-}
-
-UniqueFileDescriptor
-CreateInotify()
-{
-	int fd = inotify_init1(IN_CLOEXEC|IN_NONBLOCK);
-	if (fd < 0)
-		throw MakeErrno("inotify_init1() failed");
 
 	return UniqueFileDescriptor(fd);
 }
