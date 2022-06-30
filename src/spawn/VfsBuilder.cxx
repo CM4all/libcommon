@@ -124,7 +124,7 @@ MakeDirs(FileDescriptor fd, std::string_view suffix)
 		if (!name2.empty())
 			fd = ufd = OpenPath(fd, name2.c_str(), O_DIRECTORY);
 
-		name2.assign(name.data, name.size);
+		name2 = name;
 
 		if (mkdirat(fd.Get(), name2.c_str(), 0711) < 0) {
 			const int e = errno;
