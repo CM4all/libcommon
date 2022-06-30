@@ -7,6 +7,7 @@ test(
     'TestHashRing.cxx',
     'TestFNVHash.cxx',
     'TestMimeType.cxx',
+    'TestStringStrip.cxx',
     'TestTemplateString.cxx',
     'TestVCircularBuffer.cxx',
     include_directories: inc,
