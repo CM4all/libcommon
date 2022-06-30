@@ -1,5 +1,6 @@
 /*
  * Copyright 2017-2022 CM4all GmbH
+ * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
  *
@@ -31,12 +32,11 @@
 
 #pragma once
 
-#include "util/StringView.hxx"
-
 #include <forward_list>
 #include <functional>
 #include <new>
 #include <span>
+#include <string_view>
 
 #include <stdlib.h>
 #include <string.h>
@@ -111,20 +111,20 @@ public:
 		return p;
 	}
 
-	StringView Dup(StringView src) noexcept {
+	std::string_view Dup(std::string_view src) noexcept {
 		if (src.empty()) {
-			if (src != nullptr)
-				src.data = "";
+			if (src.data() != nullptr)
+				return {"", 0};
 			return src;
 		}
 
-		auto data = NewArray<char>(src.size);
-		std::copy_n(src.data, src.size, data);
-		return {data, src.size};
+		auto data = NewArray<char>(src.size());
+		std::copy(src.begin(), src.end(), data);
+		return {data, src.size()};
 	}
 
-	const char *DupZ(StringView src) {
-		char *p = strndup(src.data, src.size);
+	const char *DupZ(std::string_view src) {
+		char *p = strndup(src.data(), src.size());
 		if (p == nullptr)
 			throw std::bad_alloc();
 
@@ -141,10 +141,10 @@ private:
 		return sv.size();
 	}
 
-	static constexpr size_t ConcatLength(std::span<const StringView> s) noexcept {
+	static constexpr size_t ConcatLength(std::span<const std::string_view> s) noexcept {
 		size_t length = 0;
 		for (const auto &i : s)
-			length += i.size;
+			length += i.size();
 		return length;
 	}
 
@@ -161,7 +161,7 @@ private:
 		return (char *)mempcpy(p, sv.data(), sv.size());
 	}
 
-	static char *ConcatCopy(char *p, std::span<const StringView> s) noexcept {
+	static char *ConcatCopy(char *p, std::span<const std::string_view> s) noexcept {
 		for (const auto &i : s)
 			p = ConcatCopy(p, i);
 		return p;
@@ -226,11 +226,11 @@ public:
 		};
 	}
 
-	StringView Dup(StringView src) const noexcept {
+	std::string_view Dup(std::string_view src) const noexcept {
 		return allocator.Dup(src);
 	}
 
-	const char *DupZ(StringView src) const noexcept {
+	const char *DupZ(std::string_view src) const noexcept {
 		return allocator.DupZ(src);
 	}
 };

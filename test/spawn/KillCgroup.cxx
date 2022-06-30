@@ -35,6 +35,7 @@
 #include "spawn/CgroupState.hxx"
 #include "spawn/CgroupKill.hxx"
 #include "event/Loop.hxx"
+#include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
 #include "AllocatorPtr.hxx"
