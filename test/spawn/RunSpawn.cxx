@@ -37,9 +37,10 @@
 #include "spawn/Mount.hxx"
 #include "spawn/Systemd.hxx"
 #include "system/Error.hxx"
+#include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
-#include "util/StringView.hxx"
+#include "util/StringSplit.hxx"
 #include "AllocatorPtr.hxx"
 
 #include <forward_list>
@@ -101,14 +102,14 @@ try {
 		} else if (StringIsEqual(arg, "--bind-mount-pts")) {
 			p.ns.mount.bind_mount_pts = true;
 		} else if (const char *bind_mount = StringAfterPrefix(arg, "--bind-mount=")) {
-			auto s = StringView(bind_mount).Split('=');
+			auto s = Split(std::string_view{bind_mount}, '=');
 			if (s.first.empty() || s.second.empty())
 				throw "Malformed --bind-mount parameter";
 
-			strings.emplace_front(s.first.data, s.first.size);
+			strings.emplace_front(s.first);
 			const char *source = strings.front().c_str();
 
-			strings.emplace_front(s.second.data, s.second.size);
+			strings.emplace_front(s.second);
 			const char *target = strings.front().c_str();
 
 			mounts.emplace_front(source, target, false, false);
@@ -136,12 +137,11 @@ try {
 			if (p.cgroup == nullptr)
 				throw "--cgroup-set requires --cgroup";
 
-			const char *eq = strchr(cgroup_set, '=');
-			if (eq == nullptr || eq == cgroup_set)
+			const auto [name, value] = Split(std::string_view{cgroup_set}, '=');
+			if (name.empty() || value.empty())
 				throw "Malformed --cgroup-set value";
 
-			cgroup_options.Set(alloc, StringView(cgroup_set, eq),
-					   StringView(eq + 1));
+			cgroup_options.Set(alloc, name, value);
 		} else
 			throw Usage();
 	}
