@@ -87,8 +87,8 @@ VfsBuilder::FindWritableResult
 VfsBuilder::FindWritable(std::string_view path) const noexcept
 {
 	for (auto i = items.rbegin(), end = items.rend(); i != end; ++i) {
-		StringView suffix{path};
-		if (!suffix.SkipPrefix(std::string_view{i->path}))
+		auto suffix = path;
+		if (!SkipPrefix(suffix, std::string_view{i->path}))
 			/* mismatch, continue searching */
 			continue;
 
@@ -97,7 +97,7 @@ VfsBuilder::FindWritable(std::string_view path) const noexcept
 				/* mismatch, continue searching */
 				continue;
 
-			suffix.pop_front();
+			suffix.remove_prefix(1);
 		}
 
 		if (!i->IsWritable())
