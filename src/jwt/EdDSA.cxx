@@ -34,7 +34,7 @@
 #include "lib/sodium/Base64.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
-#include "util/StringView.hxx"
+#include "util/StringSplit.hxx"
 
 #include <sodium/crypto_sign.h>
 
@@ -110,8 +110,8 @@ bool
 VerifyEdDSA(const Ed25519PublicKey &key,
 	    std::string_view header_dot_payload_dot_signature_b64) noexcept
 {
-	const StringView hps(header_dot_payload_dot_signature_b64);
-	const auto [header_dot_payload_b64, signature_b64] = hps.SplitLast('.');
+	const auto [header_dot_payload_b64, signature_b64] =
+		SplitLast(header_dot_payload_dot_signature_b64, '.');
 
 	return VerifyEdDSA(key, header_dot_payload_b64, signature_b64);
 }
@@ -124,8 +124,7 @@ VerifyDecodeEdDSA(const Ed25519PublicKey &key,
 	if (!VerifyEdDSA(key, header_dot_payload_b64, signature_b64))
 		return nullptr;
 
-	const auto payload_b64 = StringView(header_dot_payload_b64)
-		.Split('.').second;
+	const auto payload_b64 = Split(header_dot_payload_b64, '.').second;
 	return DecodeUrlSafeBase64(payload_b64);
 }
 
@@ -133,8 +132,8 @@ AllocatedArray<std::byte>
 VerifyDecodeEdDSA(const Ed25519PublicKey &key,
 		  std::string_view header_dot_payload_dot_signature_b64) noexcept
 {
-	const StringView hps(header_dot_payload_dot_signature_b64);
-	const auto [header_dot_payload_b64, signature_b64] = hps.SplitLast('.');
+	const auto [header_dot_payload_b64, signature_b64] =
+		SplitLast(header_dot_payload_dot_signature_b64, '.');
 
 	return VerifyDecodeEdDSA(key, header_dot_payload_b64, signature_b64);
 }
