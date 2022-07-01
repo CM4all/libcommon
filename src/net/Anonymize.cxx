@@ -34,6 +34,8 @@
 #include "util/CharUtil.hxx"
 #include "util/StringSplit.hxx"
 
+#include <iterator> // for std::distance()
+
 using std::string_view_literals::operator""sv;
 
 std::pair<std::string_view, std::string_view>
