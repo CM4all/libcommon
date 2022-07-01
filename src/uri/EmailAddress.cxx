@@ -33,8 +33,8 @@
 #include "EmailAddress.hxx"
 #include "Verify.hxx"
 #include "util/StringListVerify.hxx"
+#include "util/StringSplit.hxx"
 #include "util/StringVerify.hxx"
-#include "util/StringView.hxx"
 
 /**
  * @see https://datatracker.ietf.org/doc/html/rfc5322#section-3.2.4
@@ -98,7 +98,7 @@ VerifyEmailLocalPart(std::string_view s) noexcept
 bool
 VerifyEmailAddress(std::string_view name) noexcept
 {
-	const auto [local_part, domain] = StringView{name}.SplitLast('@');
+	const auto [local_part, domain] = SplitLast(name, '@');
 	return VerifyEmailLocalPart(local_part) &&
 		VerifyDomainName(domain);
 }
