@@ -34,29 +34,29 @@
 #include "Unescape.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/IterableSplitString.hxx"
+#include "util/StringSplit.hxx"
 
 #include <stdexcept>
 
 std::multimap<std::string, std::string>
-MapQueryString(std::string_view _src)
+MapQueryString(std::string_view src)
 {
-	const StringView src{_src};
 	std::multimap<std::string, std::string> m;
 
 	AllocatedArray<char> unescape_buffer(256);
 
-	for (const auto i : IterableSplitString(src, '&')) {
-		const auto [name, escaped_value] = i.Split('=');
+	for (const std::string_view i : IterableSplitString(src, '&')) {
+		const auto [name, escaped_value] = Split(i, '=');
 		if (name.empty())
 			continue;
 
-		unescape_buffer.GrowDiscard(escaped_value.size);
+		unescape_buffer.GrowDiscard(escaped_value.size());
 		char *value = unescape_buffer.data();
 		const char *end_value = UriUnescape(value, escaped_value);
 		if (end_value == nullptr)
 			throw std::runtime_error("Malformed URI escape");
 
-		m.emplace(name, StringView{value, end_value});
+		m.emplace(name, std::string_view{value, std::size_t(end_value - value)});
 	}
 
 	return m;
