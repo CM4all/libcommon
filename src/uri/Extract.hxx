@@ -48,22 +48,17 @@ UriHasScheme(std::string_view uri) noexcept;
  * double slash).
  */
 [[gnu::pure]]
-const char *
-UriAfterScheme(const char *uri) noexcept;
-
-[[gnu::pure]]
 std::string_view
 UriAfterScheme(std::string_view uri) noexcept;
 
 /**
  * Does this URI have an authority part?
  */
-template<typename U>
 [[gnu::pure]]
 inline bool
-UriHasAuthority(U &&uri) noexcept
+UriHasAuthority(std::string_view uri) noexcept
 {
-	return UriAfterScheme(std::forward<U>(uri)) != nullptr;
+	return UriAfterScheme(uri).data() != nullptr;
 }
 
 [[gnu::pure]]

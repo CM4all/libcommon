@@ -73,12 +73,6 @@ UriHasScheme(const std::string_view uri) noexcept
 		rest.starts_with("//"sv);
 }
 
-const char *
-UriAfterScheme(const char *uri) noexcept
-{
-	return UriAfterScheme(std::string_view{uri}).data();
-}
-
 std::string_view
 UriAfterScheme(std::string_view uri) noexcept
 {
@@ -95,12 +89,12 @@ UriAfterScheme(std::string_view uri) noexcept
 }
 
 std::string_view
-UriHostAndPort(const char *uri) noexcept
+UriHostAndPort(const char *_uri) noexcept
 {
-	assert(uri != nullptr);
+	assert(_uri != nullptr);
 
-	uri = UriAfterScheme(uri);
-	if (uri == nullptr)
+	auto uri = UriAfterScheme(_uri);
+	if (uri.data() == nullptr)
 		return {};
 
 	if (const auto [host_and_port, rest] = Split(std::string_view{uri}, '/');
@@ -115,7 +109,7 @@ UriPathQueryFragment(const char *uri) noexcept
 {
 	assert(uri != nullptr);
 
-	const char *ap = UriAfterScheme(uri);
+	const char *ap = UriAfterScheme(uri).data();
 	if (ap != nullptr)
 		return strchr(ap, '/');
 
