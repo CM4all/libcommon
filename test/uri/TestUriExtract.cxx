@@ -61,13 +61,10 @@ TEST(UriExtractTest, HostAndPort)
 	for (auto i : uri_tests) {
 		auto result = UriHostAndPort(i.uri);
 		if (i.host_and_port == nullptr) {
-			ASSERT_EQ(i.host_and_port, result.data);
-			ASSERT_EQ(result.size, size_t(0));
+			ASSERT_EQ(result.data(), nullptr);
+			ASSERT_EQ(result.size(), size_t(0));
 		} else {
-			ASSERT_NE(result.data, nullptr);
-			ASSERT_EQ(result.size, strlen(i.host_and_port));
-			ASSERT_EQ(memcmp(i.host_and_port, result.data,
-					 result.size), 0);
+			ASSERT_EQ(result, std::string_view{i.host_and_port});
 		}
 	}
 }

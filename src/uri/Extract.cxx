@@ -31,13 +31,15 @@
  */
 
 #include "Extract.hxx"
-#include "util/StringView.hxx"
 #include "util/CharUtil.hxx"
+#include "util/StringSplit.hxx"
 
 #include <algorithm>
 
 #include <assert.h>
 #include <string.h>
+
+using std::string_view_literals::operator""sv;
 
 static constexpr bool
 IsValidSchemeStart(char ch) noexcept
@@ -63,62 +65,49 @@ IsValidScheme(std::string_view p) noexcept
 }
 
 bool
-UriHasScheme(std::string_view _uri) noexcept
+UriHasScheme(const std::string_view uri) noexcept
 {
-	const StringView uri{_uri};
-	const char *colon = uri.Find(':');
-	return colon != nullptr &&
-		IsValidScheme(StringView{uri.data, colon}) &&
-		colon < uri.data + uri.size - 2 &&
-		colon[1] == '/' && colon[2] == '/';
+	const auto [scheme, rest] = Split(uri, ':');
+	return rest.data() != nullptr &&
+		IsValidScheme(scheme) &&
+		rest.starts_with("//"sv);
 }
 
 const char *
 UriAfterScheme(const char *uri) noexcept
 {
-	if (uri[0] == '/' && uri[1] == '/' && uri[2] != '/')
-		return uri + 2;
-
-	const char *colon = strchr(uri, ':');
-	return colon != nullptr &&
-		IsValidScheme(StringView{uri, colon}) &&
-		colon[1] == '/' && colon[2] == '/'
-		? colon + 3
-		: nullptr;
+	return UriAfterScheme(std::string_view{uri}).data();
 }
 
-StringView
+std::string_view
 UriAfterScheme(std::string_view uri) noexcept
 {
 	if (uri.size() > 2 && uri[0] == '/' && uri[1] == '/' && uri[2] != '/')
 		return uri.substr(2);
 
-	auto colon = uri.find(':');
-	if (colon == std::string_view::npos ||
-	    !IsValidScheme(uri.substr(0, colon)))
-		return nullptr;
+	const auto [scheme, rest] = Split(uri, ':');
+	if (IsValidScheme(scheme) &&
+	    rest.size() > 2 && rest[0] == '/' && rest[1] == '/' &&
+	    rest[2] != '/')
+		return rest.substr(2);
 
-	uri = uri.substr(colon + 1);
-	if (uri[0] != '/' || uri[1] != '/')
-		return nullptr;
-
-	return uri.substr(2);
+	return {};
 }
 
-StringView
+std::string_view
 UriHostAndPort(const char *uri) noexcept
 {
 	assert(uri != nullptr);
 
 	uri = UriAfterScheme(uri);
 	if (uri == nullptr)
-		return nullptr;
+		return {};
 
-	const char *slash = strchr(uri, '/');
-	if (slash == nullptr)
-		return uri;
+	if (const auto [host_and_port, rest] = Split(std::string_view{uri}, '/');
+	    rest.data() != nullptr)
+		return host_and_port;
 
-	return { uri, size_t(slash - uri) };
+	return uri;
 }
 
 const char *

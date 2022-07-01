@@ -39,8 +39,6 @@
 #include <string_view>
 #include <utility>
 
-struct StringView;
-
 [[gnu::pure]]
 bool
 UriHasScheme(std::string_view uri) noexcept;
@@ -54,7 +52,7 @@ const char *
 UriAfterScheme(const char *uri) noexcept;
 
 [[gnu::pure]]
-StringView
+std::string_view
 UriAfterScheme(std::string_view uri) noexcept;
 
 /**
@@ -69,7 +67,7 @@ UriHasAuthority(U &&uri) noexcept
 }
 
 [[gnu::pure]]
-StringView
+std::string_view
 UriHostAndPort(const char *uri) noexcept;
 
 /**
