@@ -39,7 +39,6 @@
 #include "system/Error.hxx"
 #include "util/CRC32.hxx"
 #include "util/RuntimeError.hxx"
-#include "util/StringView.hxx"
 
 #include <sched.h>
 

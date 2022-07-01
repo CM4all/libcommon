@@ -36,7 +36,7 @@
 #include "system/Error.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/RuntimeError.hxx"
-#include "util/StringView.hxx"
+#include "util/StringSplit.hxx"
 #include "AllocatorPtr.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -146,9 +146,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 	} else {
 		/* target does not exist: first ensure that its parent
 		   directory exists, then create an empty target */
-		const char *slash = strrchr(target, '/');
-		assert(slash != nullptr);
-		const StringView parent{target, slash};
+		const auto parent = Split(std::string_view{target}, '/').first;
 		vfs_builder.MakeDirectory(parent);
 
 		UniqueFileDescriptor fd;
