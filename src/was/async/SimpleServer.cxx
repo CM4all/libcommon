@@ -32,8 +32,9 @@
 
 #include "SimpleServer.hxx"
 #include "Error.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StringFormat.hxx"
-#include "util/StringView.hxx"
+#include "util/StringSplit.hxx"
 
 #include <array>
 
@@ -198,8 +199,8 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
-		if (auto [name, value] = StringView{payload}.Split('=');
-		    value != nullptr) {
+		if (auto [name, value] = Split(ToStringView(payload), '=');
+		    value.data() != nullptr) {
 			request.request->headers.emplace(name, value);
 		} else {
 			AbortProtocolError("malformed HEADER packet");
@@ -214,8 +215,8 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
-		if (auto [name, value] = StringView{payload}.Split('=');
-		    value != nullptr) {
+		if (auto [name, value] = Split(ToStringView(payload), '=');
+		    value.data() != nullptr) {
 			request.request->parameters.emplace(name, value);
 		} else {
 			AbortProtocolError("malformed PARAMETER packet");
