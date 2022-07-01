@@ -31,20 +31,22 @@
  */
 
 #include "List.hxx"
-#include "util/StringView.hxx"
+#include "util/StringCompare.hxx"
+#include "util/StringSplit.hxx"
+#include "util/StringStrip.hxx"
 
-static StringView
-http_trim(StringView s) noexcept
+static std::string_view
+http_trim(std::string_view s) noexcept
 {
 	/* trim whitespace */
 
-	s.Strip();
+	s = Strip(s);
 
 	/* remove quotes from quoted-string */
 
-	if (s.size >= 2 && s.front() == '"' && s.back() == '"') {
-		s.pop_front();
-		s.pop_back();
+	if (s.size() >= 2 && s.front() == '"' && s.back() == '"') {
+		s.remove_prefix(1);
+		s.remove_suffix(1);
 	}
 
 	/* return */
@@ -55,18 +57,16 @@ http_trim(StringView s) noexcept
 static bool
 http_equals(std::string_view a, std::string_view b) noexcept
 {
-	return http_trim(a).Equals(http_trim(b));
+	return http_trim(a) == http_trim(b);
 }
 
 bool
-http_list_contains(const std::string_view _list,
+http_list_contains(std::string_view list,
 		   const std::string_view item) noexcept
 {
-	StringView list{_list};
-
 	while (!list.empty()) {
 		/* XXX what if the comma is within an quoted-string? */
-		auto c = list.Split(',');
+		auto c = Split(list, ',');
 		if (http_equals(c.first, item))
 			return true;
 
@@ -79,18 +79,16 @@ http_list_contains(const std::string_view _list,
 static bool
 http_equals_i(std::string_view a, std::string_view b) noexcept
 {
-	return http_trim(a).EqualsIgnoreCase(b);
+	return StringIsEqualIgnoreCase(http_trim(a), b);
 }
 
 bool
-http_list_contains_i(const std::string_view _list,
+http_list_contains_i(std::string_view list,
 		     const std::string_view item) noexcept
 {
-	StringView list{_list};
-
 	while (!list.empty()) {
 		/* XXX what if the comma is within an quoted-string? */
-		auto c = list.Split(',');
+		auto c = Split(list, ',');
 		if (http_equals_i(c.first, item))
 			return true;
 
