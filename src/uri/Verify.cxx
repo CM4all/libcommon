@@ -35,8 +35,8 @@
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
 #include "util/StringListVerify.hxx"
+#include "util/StringSplit.hxx"
 #include "util/StringVerify.hxx"
-#include "util/StringView.hxx"
 
 #include <algorithm>
 
@@ -54,23 +54,23 @@ IsAlphaNumericDashASCII(char ch) noexcept
 constexpr
 #endif
 static bool
-VerifyDomainLabel(StringView s) noexcept
+VerifyDomainLabel(std::string_view s) noexcept
 {
 	/* RFC 1035 2.3.4: domain labels are limited to 63 octets */
-	if (s.empty() || s.size > 63)
+	if (s.empty() || s.size() > 63)
 		return false;
 
 	if (!IsAlphaNumericASCII(s.front()))
 		return false;
 
-	s.pop_front();
+	s.remove_prefix(1);
 	if (s.empty())
 		return true;
 
 	if (!IsAlphaNumericASCII(s.back()))
 		return false;
 
-	s.pop_back();
+	s.remove_suffix(1);
 	return std::all_of(s.begin(), s.end(), IsAlphaNumericDashASCII);
 }
 
@@ -84,48 +84,46 @@ VerifyDomainName(std::string_view s) noexcept
 
 [[gnu::pure]]
 static bool
-VerifyPort(StringView s) noexcept
+VerifyPort(std::string_view s) noexcept
 {
-	return s.size <= 5 &&
+	return s.size() <= 5 &&
 		CheckCharsNonEmpty(s, IsDigitASCII);
 }
 
 [[gnu::pure]]
 static bool
-VerifyIPv6Segment(StringView s) noexcept
+VerifyIPv6Segment(std::string_view s) noexcept
 {
-	return s.size <= 4 && std::all_of(s.begin(), s.end(), IsHexDigit);
+	return s.size() <= 4 && std::all_of(s.begin(), s.end(), IsHexDigit);
 }
 
 [[gnu::pure]]
 static bool
-VerifyIPv6(StringView host) noexcept
+VerifyIPv6(std::string_view host) noexcept
 {
-	return host.size < 40 &&
+	return host.size() < 40 &&
 		IsNonEmptyListOf(host, ':', VerifyIPv6Segment);
 }
 
 [[gnu::pure]]
 static bool
-VerifyUriHost(StringView host) noexcept
+VerifyUriHost(std::string_view host) noexcept
 {
-	if (host.Find(':'))
+	if (host.find(':') != host.npos)
 		return VerifyIPv6(host);
 
 	return VerifyDomainName(host);
 }
 
 bool
-VerifyUriHostPort(std::string_view _host_port) noexcept
+VerifyUriHostPort(std::string_view host_port) noexcept
 {
-	const StringView host_port{_host_port};
-
 	if (host_port.empty())
 		return false;
 
 	if (host_port.front() == '[') {
-		auto [host, port] = host_port.substr(1).Split(']');
-		if (port == nullptr)
+		auto [host, port] = Split(host_port.substr(1), ']');
+		if (port.data() == nullptr)
 			/* syntax error: the closing bracket was not
 			   found */
 			return false;
@@ -134,22 +132,22 @@ VerifyUriHostPort(std::string_view _host_port) noexcept
 			if (port.front() != ':')
 				return false;
 
-			port.pop_front();
+			port.remove_prefix(1);
 			if (!VerifyPort(port))
 				return false;
 		}
 
 		return VerifyUriHost(host);
 	} else {
-		auto [host, port] = host_port.SplitLast(':');
-		if (host.Find(':') != nullptr)
+		auto [host, port] = SplitLast(host_port, ':');
+		if (host.find(':') != host.npos)
 			/* more than one colon: assume this is a
 			   numeric IPv6 address (without a port
 			   specification) */
 			return VerifyIPv6(host_port);
 
 		return VerifyUriHost(host) &&
-			(port == nullptr || VerifyPort(port));
+			(port.data() == nullptr || VerifyPort(port));
 	}
 }
 
@@ -167,18 +165,16 @@ uri_segment_verify(std::string_view segment) noexcept
 }
 
 bool
-uri_path_verify(std::string_view _uri) noexcept
+uri_path_verify(std::string_view uri) noexcept
 {
-	StringView uri(_uri);
-
 	if (uri.empty() || uri.front() != '/')
 		/* path must begin with slash */
 		return false;
 
-	uri.pop_front(); // strip the leading slash
+	uri.remove_prefix(1); // strip the leading slash
 
 	do {
-		auto s = uri.Split('/');
+		auto s = Split(uri, '/');
 		if (!uri_segment_verify(s.first))
 			return false;
 
