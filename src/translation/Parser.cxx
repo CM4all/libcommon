@@ -62,8 +62,8 @@
 #include "util/RuntimeError.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringCompare.hxx"
+#include "util/StringSplit.hxx"
 #include "util/StringVerify.hxx"
-#include "util/StringView.hxx"
 
 #if TRANSLATION_ENABLE_HTTP
 #include "http/HeaderName.hxx"
@@ -376,8 +376,8 @@ parse_header(AllocatorPtr alloc,
 	     KeyValueList &headers, const char *packet_name,
 	     std::string_view payload)
 {
-	const auto [_name, value] = StringView{payload}.Split(':');
-	if (_name.empty() || value == nullptr ||
+	const auto [_name, value] = Split(payload, ':');
+	if (_name.empty() || value.data() == nullptr ||
 	    !IsValidString(payload))
 		throw FormatRuntimeError("malformed %s packet", packet_name);
 
@@ -388,7 +388,7 @@ parse_header(AllocatorPtr alloc,
 	else if (http_header_is_hop_by_hop(name))
 		throw FormatRuntimeError("hop-by-hop %s packet", packet_name);
 
-	headers.Add(alloc, name, value.data);
+	headers.Add(alloc, name, value.data());
 }
 
 #endif
@@ -492,7 +492,7 @@ translate_client_check_pair(std::string_view payload) noexcept
 {
 	return !payload.empty() && payload.front() != '=' &&
 		IsValidString(payload) &&
-		StringView{payload.substr(1)}.Find('=') != nullptr;
+		payload.substr(1).find('=') != payload.npos;
 }
 
 static void
@@ -658,7 +658,7 @@ TranslateParser::HandleBindMount(std::string_view payload,
 				 bool expand, bool writable, bool exec,
 				 bool file)
 {
-	const auto [source, target] = StringView{payload}.Split('\0');
+	const auto [source, target] = Split(payload, '\0');
 	if (source.empty() || source.front() != '/' ||
 	    target.empty() || target.front() != '/')
 		throw std::runtime_error("malformed BIND_MOUNT packet");
@@ -667,9 +667,9 @@ TranslateParser::HandleBindMount(std::string_view payload,
 		throw std::runtime_error("misplaced BIND_MOUNT packet");
 
 	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
-				   source.data + 1,
-				   target.data,
-				   writable, exec);
+		source.data() + 1,
+		target.data(),
+		writable, exec);
 #if TRANSLATION_ENABLE_EXPAND
 	m->expand_source = expand;
 #else
@@ -989,12 +989,12 @@ IsValidCgroupAttributeName(std::string_view s) noexcept
 static bool
 IsValidCgroupSetName(std::string_view name) noexcept
 {
-	const auto [controller, attribute] = StringView{name}.Split('.');
+	const auto [controller, attribute] = Split(name, '.');
 	if (!IsValidCgroupName(controller) ||
 	    !IsValidCgroupAttributeName(attribute))
 		return false;
 
-	if (controller.Equals("cgroup"))
+	if (controller == "cgroup"sv)
 		/* this is not a controller, this is a core cgroup
 		   attribute */
 		return false;
@@ -1006,7 +1006,7 @@ IsValidCgroupSetName(std::string_view name) noexcept
 static bool
 IsValidCgroupSetValue(std::string_view value) noexcept
 {
-	return !value.empty() && StringView{value}.Find('/') == nullptr;
+	return !value.empty() && value.find('/') == value.npos;
 }
 
 [[gnu::pure]]
@@ -1016,7 +1016,7 @@ ParseCgroupSet(std::string_view payload)
 	if (!IsValidString(payload))
 		return {};
 
-	const auto [name, value] = StringView{payload}.Split('=');
+	const auto [name, value] = Split(payload, '=');
 	if (!IsValidCgroupSetName(name) || !IsValidCgroupSetValue(value))
 		return {};
 
@@ -1052,7 +1052,7 @@ TranslateParser::HandleCgroupXattr(std::string_view payload)
 static bool
 CheckProbeSuffix(std::string_view payload) noexcept
 {
-	return StringView{payload}.Find('/') == nullptr &&
+	return payload.find('/') == payload.npos &&
 		IsValidString(payload);
 }
 
@@ -1061,16 +1061,17 @@ CheckProbeSuffix(std::string_view payload) noexcept
 inline void
 TranslateParser::HandleSubstYamlFile(std::string_view payload)
 {
-	const auto [prefix, rest] = StringView{payload}.Split('\0');
-	if (rest == nullptr)
+	const auto [prefix, rest] = Split(payload, '\0');
+	if (rest.data() == nullptr)
 		throw std::runtime_error("malformed SUBST_YAML_FILE packet");
 
-	const auto [yaml_file, yaml_map_path] = rest.Split('\0');
-	if (yaml_map_path == nullptr ||
+	const auto [yaml_file, yaml_map_path] = Split(rest, '\0');
+	if (yaml_map_path.data() == nullptr ||
 	    !IsValidAbsolutePath(yaml_file))
 		throw std::runtime_error("malformed SUBST_YAML_FILE packet");
 
-	AddSubstYamlFile(prefix.data, yaml_file.data, yaml_map_path.data);
+	AddSubstYamlFile(prefix.data(), yaml_file.data(),
+			 yaml_map_path.data());
 }
 
 #endif
