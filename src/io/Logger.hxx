@@ -30,10 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LOGGER_HXX
-#define LOGGER_HXX
+#pragma once
 
-#include "util/StringView.hxx"
 #include "util/Compiler.h"
 
 #include <cstdint>
@@ -63,11 +61,6 @@ struct ParamWrapper<std::string_view> {
 	constexpr std::string_view GetValue() const noexcept {
 		return value;
 	}
-};
-
-template<>
-struct ParamWrapper<StringView> : ParamWrapper<std::string_view> {
-	using ParamWrapper<std::string_view>::ParamWrapper;
 };
 
 template<>
@@ -377,5 +370,3 @@ public:
 	explicit LazyDomainLogger(LoggerDomainFactory &_factory) noexcept
 		:BasicLogger(_factory) {}
 };
-
-#endif
