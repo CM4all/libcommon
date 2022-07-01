@@ -37,11 +37,15 @@
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringCompare.hxx"
+#include "util/StringSplit.hxx"
+#include "util/StringStrip.hxx"
 
 #include <cstdio>
 
 #include <fcntl.h>
 #include <sys/stat.h>
+
+using std::string_view_literals::operator""sv;
 
 CgroupState::CgroupState() noexcept {}
 CgroupState::~CgroupState() noexcept = default;
@@ -168,19 +172,19 @@ ReadProcCgroup(FILE *file)
 
 	char buffer[256];
 	while (fgets(buffer, sizeof(buffer), file) != nullptr) {
-		StringView line(buffer);
-		line.StripRight();
+		std::string_view line{buffer};
+		line = StripRight(line);
 
 		/* skip the hierarchy id */
-		line = line.Split(':').second;
+		line = Split(line, ':').second;
 
-		const auto [name, path] = line.Split(':');
-		if (path.size < 2 || path.front() != '/')
+		const auto [name, path] = Split(line, ':');
+		if (path.size() < 2 || path.front() != '/')
 			/* ignore malformed lines and lines in the
 			   root cgroup */
 			continue;
 
-		if (name.Equals("name=systemd")) {
+		if (name == "name=systemd"sv) {
 			pc.group_path = path;
 			pc.have_systemd = true;
 		} else if (name.empty()) {
@@ -260,12 +264,12 @@ CgroupState::FromProcCgroup(ProcCgroup &&proc_cgroup)
 					if (buffer[nbytes - 1] == '\n')
 						--nbytes;
 
-					const StringView contents(buffer, nbytes);
+					const std::string_view contents{buffer, std::size_t(nbytes)};
 					for (std::string_view name : IterableSplitString(contents, ' ')) {
 						if (!name.empty())
 							state.controllers.emplace(name, unified_mount);
 
-						if (name == "memory")
+						if (name == "memory"sv)
 							state.memory_v2 = true;
 					}
 				}
