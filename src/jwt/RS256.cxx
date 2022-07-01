@@ -36,7 +36,6 @@
 #include "lib/openssl/Error.hxx"
 #include "lib/openssl/UniqueEVP.hxx"
 #include "util/AllocatedString.hxx"
-#include "util/StringView.hxx"
 
 #include <openssl/rsa.h>
 
