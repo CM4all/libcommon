@@ -62,7 +62,7 @@ GzipOutputStream::SyncFlush()
 	z.avail_in = 0;
 
 	do {
-		Bytef output[4096];
+		Bytef output[16384];
 		z.next_out = output;
 		z.avail_out = sizeof(output);
 
@@ -85,7 +85,7 @@ GzipOutputStream::Finish()
 	z.avail_in = 0;
 
 	while (true) {
-		Bytef output[4096];
+		Bytef output[16384];
 		z.next_out = output;
 		z.avail_out = sizeof(output);
 
