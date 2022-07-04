@@ -89,15 +89,13 @@ UriAfterScheme(std::string_view uri) noexcept
 }
 
 std::string_view
-UriHostAndPort(const char *_uri) noexcept
+UriHostAndPort(std::string_view _uri) noexcept
 {
-	assert(_uri != nullptr);
-
 	auto uri = UriAfterScheme(_uri);
 	if (uri.data() == nullptr)
 		return {};
 
-	if (const auto [host_and_port, rest] = Split(std::string_view{uri}, '/');
+	if (const auto [host_and_port, rest] = Split(uri, '/');
 	    rest.data() != nullptr)
 		return host_and_port;
 

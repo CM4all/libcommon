@@ -63,7 +63,7 @@ UriHasAuthority(std::string_view uri) noexcept
 
 [[gnu::pure]]
 std::string_view
-UriHostAndPort(const char *uri) noexcept;
+UriHostAndPort(std::string_view uri) noexcept;
 
 /**
  * Returns the URI path (including the query and the fragment) or
