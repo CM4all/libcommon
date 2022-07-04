@@ -40,6 +40,7 @@
 #include "lib/dbus/Error.hxx"
 #include "lib/dbus/ScopeMatch.hxx"
 #include "util/ScopeExit.hxx"
+#include "util/StringAPI.hxx"
 #include "util/PrintException.hxx"
 
 #include <systemd/sd-daemon.h>
