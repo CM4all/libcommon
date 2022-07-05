@@ -38,6 +38,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <errno.h>
+#include <string.h> // for strerror()
 #include <linux/wait.h>
 #include <sys/resource.h> // for struct rusage
 #include <sys/wait.h>
