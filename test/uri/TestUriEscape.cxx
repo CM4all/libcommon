@@ -32,7 +32,6 @@
 
 #include "uri/Escape.hxx"
 #include "uri/Unescape.hxx"
-#include "util/StringView.hxx"
 
 #include <gtest/gtest.h>
 

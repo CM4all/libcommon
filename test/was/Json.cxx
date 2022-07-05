@@ -36,7 +36,6 @@
 #include "event/Loop.hxx"
 #include "uri/MapQueryString.hxx"
 #include "util/PrintException.hxx"
-#include "util/StringView.hxx"
 
 #include <boost/json.hpp>
 

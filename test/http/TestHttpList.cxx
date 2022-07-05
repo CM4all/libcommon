@@ -31,7 +31,6 @@
  */
 
 #include "http/List.hxx"
-#include "util/StringView.hxx"
 
 #include <gtest/gtest.h>
 

@@ -31,7 +31,6 @@
  */
 
 #include "uri/Verify.hxx"
-#include "util/StringView.hxx"
 
 #include <gtest/gtest.h>
 
