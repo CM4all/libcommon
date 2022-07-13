@@ -1173,6 +1173,11 @@ enum class TranslationCommand : uint16_t {
 	 * Change the current directory.
 	 */
 	CHDIR = 242,
+
+	/**
+	 * Set the "SameSite" attribute on the session cookie.
+	 */
+	SESSION_COOKIE_SAME_SITE = 243,
 };
 
 struct TranslationHeader {

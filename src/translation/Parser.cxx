@@ -3922,6 +3922,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->chdir = string_payload.data();
 		return;
+
+	case TranslationCommand::SESSION_COOKIE_SAME_SITE:
+#if TRANSLATION_ENABLE_SESSION
+		response.session_cookie_same_site = ParseCookieSameSite(string_payload);
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

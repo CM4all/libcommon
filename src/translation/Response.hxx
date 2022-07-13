@@ -54,6 +54,10 @@
 #include "http/Status.h"
 #endif
 
+#if TRANSLATION_ENABLE_SESSION
+#include "http/CookieSameSite.hxx"
+#endif
+
 #include <algorithm> // for std::find()
 #include <chrono>
 #include <span>
@@ -388,6 +392,8 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
+	CookieSameSite session_cookie_same_site;
+
 	bool stateful;
 
 	bool discard_session, discard_realm_session;

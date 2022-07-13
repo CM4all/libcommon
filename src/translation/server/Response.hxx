@@ -1524,6 +1524,11 @@ public:
 		return Packet(TranslationCommand::SECURE_COOKIE);
 	}
 
+	auto &SessionCookieSameSite(std::string_view same_site) noexcept {
+		return StringPacket(TranslationCommand::SESSION_COOKIE_SAME_SITE,
+				    same_site);
+	}
+
 	auto &RequireCsrfToken() noexcept {
 		return Packet(TranslationCommand::REQUIRE_CSRF_TOKEN);
 	}

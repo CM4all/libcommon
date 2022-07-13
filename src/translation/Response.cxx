@@ -149,6 +149,7 @@ TranslateResponse::Clear()
 	direct_addressing = false;
 #endif
 #if TRANSLATION_ENABLE_SESSION
+	session_cookie_same_site = CookieSameSite::DEFAULT;
 	stateful = false;
 	discard_session = false;
 	discard_realm_session = false;
@@ -374,6 +375,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 	direct_addressing = src.direct_addressing;
 #endif
 #if TRANSLATION_ENABLE_SESSION
+	session_cookie_same_site = src.session_cookie_same_site;
 	stateful = src.stateful;
 	require_csrf_token = src.require_csrf_token;
 	send_csrf_token = src.send_csrf_token;
