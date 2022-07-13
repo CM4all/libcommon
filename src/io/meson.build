@@ -29,6 +29,7 @@ io = static_library(
 io_dep = declare_dependency(
   link_with: io,
   dependencies: [
+    fmt_dep,
     util_dep,
     io_deps,
   ],
