@@ -146,7 +146,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 	} else {
 		/* target does not exist: first ensure that its parent
 		   directory exists, then create an empty target */
-		const auto parent = Split(std::string_view{target}, '/').first;
+		const auto parent = SplitLast(std::string_view{target}, '/').first;
 		vfs_builder.MakeDirectory(parent);
 
 		UniqueFileDescriptor fd;
