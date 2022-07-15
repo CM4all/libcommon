@@ -38,8 +38,6 @@
 #include "util/StringSplit.hxx"
 #include "util/StringVerify.hxx"
 
-#include <algorithm>
-
 static constexpr bool
 IsAlphaNumericDashASCII(char ch) noexcept
 {
@@ -71,7 +69,7 @@ VerifyDomainLabel(std::string_view s) noexcept
 		return false;
 
 	s.remove_suffix(1);
-	return std::all_of(s.begin(), s.end(), IsAlphaNumericDashASCII);
+	return CheckChars(s, IsAlphaNumericDashASCII);
 }
 
 bool
@@ -94,7 +92,7 @@ VerifyPort(std::string_view s) noexcept
 static bool
 VerifyIPv6Segment(std::string_view s) noexcept
 {
-	return s.size() <= 4 && std::all_of(s.begin(), s.end(), IsHexDigit);
+	return s.size() <= 4 && CheckChars(s, IsHexDigit);
 }
 
 [[gnu::pure]]

@@ -36,6 +36,17 @@
 #include <string_view>
 
 /**
+ * Does the given string consist only of characters allowed by the
+ * given function?
+ */
+template<typename F>
+constexpr bool
+CheckChars(std::string_view s, F &&f) noexcept
+{
+	return std::all_of(s.begin(), s.end(), std::forward<F>(f));
+}
+
+/**
  * Is the given string non-empty and consists only of characters
  * allowed by the given function?
  */
@@ -43,8 +54,7 @@ template<typename F>
 constexpr bool
 CheckCharsNonEmpty(std::string_view s, F &&f) noexcept
 {
-	return !s.empty() &&
-		std::all_of(s.begin(), s.end(), std::forward<F>(f));
+	return !s.empty() && CheckChars(s, std::forward<F>(f));
 }
 
 template<typename F>

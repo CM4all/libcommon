@@ -33,8 +33,7 @@
 #include "Extract.hxx"
 #include "util/CharUtil.hxx"
 #include "util/StringSplit.hxx"
-
-#include <algorithm>
+#include "util/StringVerify.hxx"
 
 #include <assert.h>
 #include <string.h>
@@ -61,7 +60,7 @@ IsValidScheme(std::string_view p) noexcept
 	if (p.empty() || !IsValidSchemeStart(p.front()))
 		return false;
 
-	return std::all_of(std::next(p.begin()), p.end(), IsValidSchemeChar);
+	return CheckChars(p.substr(1), IsValidSchemeChar);
 }
 
 bool

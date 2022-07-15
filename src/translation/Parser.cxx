@@ -204,7 +204,7 @@ IsValidCookieValueChar(char ch) noexcept
 static constexpr bool
 IsValidCookieValue(std::string_view s) noexcept
 {
-	return std::all_of(s.begin(), s.end(), IsValidCookieValueChar);
+	return CheckChars(s, IsValidCookieValueChar);
 }
 
 static constexpr bool
