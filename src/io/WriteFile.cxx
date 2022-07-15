@@ -29,6 +29,7 @@
 
 #include "WriteFile.hxx"
 #include "UniqueFileDescriptor.hxx"
+#include "util/SpanCast.hxx"
 
 #include <span>
 
@@ -77,6 +78,5 @@ WriteFileResult
 TryWriteExistingFile(FileDescriptor directory, const char *path,
 		     std::string_view value) noexcept
 {
-	return TryWriteExistingFile(directory, path,
-				    std::as_bytes(std::span{value}));
+	return TryWriteExistingFile(directory, path, AsBytes(value));
 }
