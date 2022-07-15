@@ -32,6 +32,7 @@
 
 #include "Logger.hxx"
 #include "Iovec.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StaticVector.hxx"
 #include "util/Exception.hxx"
 
@@ -44,10 +45,10 @@ unsigned LoggerDetail::max_level = 1;
 LoggerDetail::ParamWrapper<std::exception_ptr>::ParamWrapper(std::exception_ptr ep) noexcept
 	:ParamWrapper<std::string>(GetFullMessage(ep)) {}
 
-static constexpr struct iovec
+static struct iovec
 MakeIovec(std::string_view s) noexcept
 {
-	return MakeIovec(std::span{s});
+	return MakeIovec(AsBytes(s));
 }
 
 void
