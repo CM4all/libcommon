@@ -60,7 +60,7 @@ TryWriteExistingFile(const char *path, std::span<const std::byte> value) noexcep
 WriteFileResult
 TryWriteExistingFile(const char *path, std::string_view value) noexcept
 {
-	return TryWriteExistingFile(path, std::as_bytes(std::span{value}));
+	return TryWriteExistingFile(path, AsBytes(value));
 }
 
 static WriteFileResult
