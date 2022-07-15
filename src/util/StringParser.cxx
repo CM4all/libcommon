@@ -82,8 +82,8 @@ template<std::size_t OPERAND>
 static std::size_t
 Multiply(std::size_t value)
 {
-	static constexpr std::size_t MAX_INPUT = SIZE_MAX / OPERAND;
-	if (value > MAX_INPUT)
+	static constexpr std::size_t MAX_VALUE = SIZE_MAX / OPERAND;
+	if (value > MAX_VALUE)
 		throw std::runtime_error("Value too large");
 
 	return value * OPERAND;
