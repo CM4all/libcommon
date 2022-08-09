@@ -73,6 +73,7 @@ spawn = static_library(
   spawn_sources,
   include_directories: inc,
   dependencies: [
+    util_dep,
     libcap,
     libseccomp,
     libsystemd,
