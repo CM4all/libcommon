@@ -207,15 +207,12 @@ EventLoop::Wait(Event::Duration timeout) noexcept
 }
 
 bool
-EventLoop::Loop(int flags) noexcept
+EventLoop::Loop(const bool once, const bool nonblock) noexcept
 {
 	steady_clock_cache.flush();
 	system_clock_cache.flush();
 
 	quit = false;
-
-	const bool once = flags & EVLOOP_ONCE;
-	const bool nonblock = flags & EVLOOP_NONBLOCK;
 
 	do {
 		again = false;
