@@ -80,6 +80,12 @@ struct SpawnConfig {
 	std::set<gid_t> allowed_gids;
 
 	/**
+	 * Is a systemd scope optional?  This option is only for
+	 * debugging/development if launched by an unprivileged user.
+	 */
+	bool systemd_scope_optional = false;
+
+	/**
 	 * Ignore #allowed_uids and #allowed_gids, and allow all uids/gids
 	 * (except for root:root)?  This is a kludge for the Workshop
 	 * project for backwards compatibility with version 1.

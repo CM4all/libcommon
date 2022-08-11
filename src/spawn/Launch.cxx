@@ -200,6 +200,9 @@ RunSpawnServer2(void *p)
 		} catch (...) {
 			fprintf(stderr, "Failed to create systemd scope: ");
 			PrintException(std::current_exception());
+
+			if (!ctx.config.systemd_scope_optional)
+				return EXIT_FAILURE;
 		}
 	}
 #endif

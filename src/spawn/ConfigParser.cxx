@@ -262,6 +262,9 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 			throw std::runtime_error("Duplicate 'default_user'");
 
 		config.default_uid_gid.Lookup(s);
+	} else if (StringIsEqual(word, "systemd_scope_optional")) {
+		config.systemd_scope_optional = line.NextBool();
+		line.ExpectEnd();
 #ifdef HAVE_LIBSYSTEMD
 	} else if (StringIsEqualIgnoreCase(word, "CPUWeight")) {
 		config.systemd_scope_properties.cpu_weight =
