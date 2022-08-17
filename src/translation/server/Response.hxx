@@ -1574,6 +1574,10 @@ public:
 		return Packet(TranslationCommand::BREAK_CHAIN);
 	}
 
+	auto &NoPassword() noexcept {
+		return Packet(TranslationCommand::NO_PASSWORD);
+	}
+
 	auto &MaxAge(uint32_t seconds) noexcept {
 		return PacketT(TranslationCommand::MAX_AGE, seconds);
 	}
