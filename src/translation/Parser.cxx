@@ -3930,6 +3930,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::NO_PASSWORD:
+		if (!payload.empty())
+			throw std::runtime_error("malformed NO_PASSWORD packet");
+
+		if (response.no_password)
+			throw std::runtime_error("duplicate NO_PASSWORD packet");
+
+		response.no_password = true;
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

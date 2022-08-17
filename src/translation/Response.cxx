@@ -188,6 +188,7 @@ TranslateResponse::Clear()
 #endif
 	auto_deflate = false;
 	auto_gzip = false;
+	no_password = false;
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = false;
 
@@ -430,6 +431,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
 	auto_deflate = src.auto_deflate;
 	auto_gzip = src.auto_gzip;
+	no_password = src.no_password;
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = src.realm_from_auth_base;
 	session = {};

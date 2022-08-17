@@ -466,6 +466,11 @@ struct TranslateResponse {
 	 */
 	bool auto_gzip;
 
+	/**
+	 * @see #TranslationCommand::NO_PASSWORD
+	 */
+	bool no_password;
+
 	TranslateResponse() = default;
 	TranslateResponse(TranslateResponse &&) = default;
 	TranslateResponse &operator=(TranslateResponse &&) = default;

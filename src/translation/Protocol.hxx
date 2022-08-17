@@ -1178,6 +1178,11 @@ enum class TranslationCommand : uint16_t {
 	 * Set the "SameSite" attribute on the session cookie.
 	 */
 	SESSION_COOKIE_SAME_SITE = 243,
+
+	/**
+	 * The #LOGIN request can be approved without a password.
+	 */
+	NO_PASSWORD = 244,
 };
 
 struct TranslationHeader {
