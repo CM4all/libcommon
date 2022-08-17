@@ -3932,13 +3932,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::NO_PASSWORD:
-		if (!payload.empty())
-			throw std::runtime_error("malformed NO_PASSWORD packet");
-
-		if (response.no_password)
+		if (response.no_password != nullptr)
 			throw std::runtime_error("duplicate NO_PASSWORD packet");
 
-		response.no_password = true;
+		response.no_password = string_payload.data();
 		return;
 	}
 

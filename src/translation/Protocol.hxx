@@ -1180,7 +1180,10 @@ enum class TranslationCommand : uint16_t {
 	SESSION_COOKIE_SAME_SITE = 243,
 
 	/**
-	 * The #LOGIN request can be approved without a password.
+	 * The #LOGIN request can be approved without a password.  An
+	 * optional payload may describe a service-specific
+	 * limitation, e.g. "sftp" to limit LOGIN/SERVICE=ssh to
+	 * SERVICE=sftp.
 	 */
 	NO_PASSWORD = 244,
 };

@@ -1574,8 +1574,10 @@ public:
 		return Packet(TranslationCommand::BREAK_CHAIN);
 	}
 
-	auto &NoPassword() noexcept {
-		return Packet(TranslationCommand::NO_PASSWORD);
+	template<typename... Types>
+	auto &NoPassword(Types... payload) noexcept {
+		return StringPacket(TranslationCommand::NO_PASSWORD,
+				    payload...);
 	}
 
 	auto &MaxAge(uint32_t seconds) noexcept {

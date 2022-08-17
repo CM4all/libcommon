@@ -97,6 +97,13 @@ struct TranslateResponse {
 
 	const char *token;
 
+	/**
+	 * @see #TranslationCommand::NO_PASSWORD
+	 *
+	 * If the payload is empty, then this is an empty string.
+	 */
+	const char *no_password;
+
 #if TRANSLATION_ENABLE_EXECUTE
 	const char *shell;
 
@@ -465,11 +472,6 @@ struct TranslateResponse {
 	 * @see #TranslationCommand::AUTO_GZIP
 	 */
 	bool auto_gzip;
-
-	/**
-	 * @see #TranslationCommand::NO_PASSWORD
-	 */
-	bool no_password;
 
 	TranslateResponse() = default;
 	TranslateResponse(TranslateResponse &&) = default;
