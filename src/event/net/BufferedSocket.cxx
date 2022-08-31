@@ -691,7 +691,7 @@ BufferedSocket::WriteV(const struct iovec *v, std::size_t n) noexcept
 }
 
 ssize_t
-BufferedSocket::WriteFrom(int other_fd, FdType other_fd_type,
+BufferedSocket::WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
 			  std::size_t length) noexcept
 {
 	ssize_t nbytes = base.WriteFrom(other_fd, other_fd_type, length);

@@ -593,7 +593,7 @@ public:
 	 * @return the positive number of bytes transferred or a #write_result
 	 * code
 	 */
-	ssize_t WriteFrom(int other_fd, FdType other_fd_type,
+	ssize_t WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
 			  std::size_t length) noexcept;
 
 	[[gnu::pure]]

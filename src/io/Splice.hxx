@@ -33,6 +33,7 @@
 #pragma once
 
 #include "FdType.hxx"
+#include "FileDescriptor.hxx"
 
 #include <cassert>
 #include <cstddef>
@@ -41,16 +42,19 @@
 #include <sys/sendfile.h>
 
 static inline ssize_t
-Splice(int src_fd, int dest_fd, std::size_t max_length) noexcept
+Splice(FileDescriptor src_fd, FileDescriptor dest_fd,
+       std::size_t max_length) noexcept
 {
 	assert(src_fd != dest_fd);
 
-	return splice(src_fd, nullptr, dest_fd, nullptr, max_length,
+	return splice(src_fd.Get(), nullptr, dest_fd.Get(), nullptr,
+		      max_length,
 		      SPLICE_F_NONBLOCK | SPLICE_F_MOVE);
 }
 
 static inline ssize_t
-SpliceToPipe(int src_fd, int dest_fd, std::size_t max_length) noexcept
+SpliceToPipe(FileDescriptor src_fd, FileDescriptor dest_fd,
+	     std::size_t max_length) noexcept
 {
 	assert(src_fd != dest_fd);
 
@@ -58,8 +62,8 @@ SpliceToPipe(int src_fd, int dest_fd, std::size_t max_length) noexcept
 }
 
 static inline ssize_t
-SpliceToSocket(FdType src_type, int src_fd,
-	       int dest_fd, std::size_t max_length) noexcept
+SpliceToSocket(FdType src_type, FileDescriptor src_fd,
+	       FileDescriptor dest_fd, std::size_t max_length) noexcept
 {
 	assert(src_fd != dest_fd);
 
@@ -68,13 +72,14 @@ SpliceToSocket(FdType src_type, int src_fd,
 	} else {
 		assert(src_type == FdType::FD_FILE);
 
-		return sendfile(dest_fd, src_fd, nullptr, max_length);
+		return sendfile(dest_fd.Get(), src_fd.Get(), nullptr,
+				max_length);
 	}
 }
 
 static inline ssize_t
-SpliceTo(int src_fd, FdType src_type,
-	 int dest_fd, FdType dest_type,
+SpliceTo(FileDescriptor src_fd, FdType src_type,
+	 FileDescriptor dest_fd, FdType dest_type,
 	 std::size_t max_length) noexcept
 {
 	return IsAnySocket(dest_type)
