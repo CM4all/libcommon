@@ -692,9 +692,11 @@ BufferedSocket::WriteV(const struct iovec *v, std::size_t n) noexcept
 
 ssize_t
 BufferedSocket::WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
+			  off_t *other_offset,
 			  std::size_t length) noexcept
 {
-	ssize_t nbytes = base.WriteFrom(other_fd, other_fd_type, length);
+	ssize_t nbytes = base.WriteFrom(other_fd, other_fd_type, other_offset,
+					length);
 	if (gcc_unlikely(nbytes < 0)) {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
 			if (!IsReadyForWriting()) {
@@ -705,7 +707,9 @@ BufferedSocket::WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
 			/* try again, just in case our fd has become ready between
 			   the first socket_wrapper_write_from() call and
 			   IsReadyForWriting() */
-			nbytes = base.WriteFrom(other_fd, other_fd_type, length);
+			nbytes = base.WriteFrom(other_fd, other_fd_type,
+						other_offset,
+						length);
 		}
 	}
 

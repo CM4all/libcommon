@@ -594,6 +594,7 @@ public:
 	 * code
 	 */
 	ssize_t WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
+			  off_t *other_offset,
 			  std::size_t length) noexcept;
 
 	[[gnu::pure]]

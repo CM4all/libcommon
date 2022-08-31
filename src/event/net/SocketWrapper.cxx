@@ -179,9 +179,10 @@ SocketWrapper::WriteV(const struct iovec *v, std::size_t n) noexcept
 
 ssize_t
 SocketWrapper::WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
+			 off_t *other_offset,
 			 std::size_t length) noexcept
 {
-	return SpliceToSocket(other_fd_type, other_fd,
+	return SpliceToSocket(other_fd_type, other_fd, other_offset,
 			      GetSocket().ToFileDescriptor(),
 			      length);
 }
