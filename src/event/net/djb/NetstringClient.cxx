@@ -31,6 +31,7 @@
  */
 
 #include "NetstringClient.hxx"
+#include "net/SocketProtocolError.hxx"
 
 #include <stdexcept>
 
@@ -102,7 +103,7 @@ try {
 			break;
 
 		case NetstringInput::Result::CLOSED:
-			throw std::runtime_error("Connection closed prematurely");
+			throw SocketClosedPrematurelyError{};
 
 		case NetstringInput::Result::FINISHED:
 			event.Cancel();
