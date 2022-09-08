@@ -39,6 +39,21 @@
 #include <string_view>
 
 /**
+ * Is this a valid domain label (i.e. host name segment) according to
+ * RFC 1034 3.5?
+ */
+[[gnu::pure]]
+bool
+VerifyDomainLabel(std::string_view s) noexcept;
+
+/**
+ * Like VerifyDomainLabel(), but don't allow upper case letters.
+ */
+[[gnu::pure]]
+bool
+VerifyLowerDomainLabel(std::string_view s) noexcept;
+
+/**
  * Is this a valid domain name (i.e. host name) according to RFC 1034
  * 3.5?
  */
