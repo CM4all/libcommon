@@ -44,6 +44,12 @@ IsAlphaNumericDashASCII(char ch) noexcept
     return IsAlphaNumericASCII(ch) || ch == '-';
 }
 
+static constexpr bool
+IsLowerAlphaNumericDashASCII(char ch) noexcept
+{
+    return IsLowerAlphaNumericASCII(ch) || ch == '-';
+}
+
 /**
  * Is this a valid domain label (i.e. host name segment) according to
  * RFC 1034 3.5?
@@ -72,12 +78,48 @@ VerifyDomainLabel(std::string_view s) noexcept
 	return CheckChars(s, IsAlphaNumericDashASCII);
 }
 
+/**
+ * Like VerifyDomainLabel(), but don't allow upper case letters.
+ */
+#if !GCC_OLDER_THAN(10,0)
+constexpr
+#endif
+static bool
+VerifyLowerDomainLabel(std::string_view s) noexcept
+{
+	/* RFC 1035 2.3.4: domain labels are limited to 63 octets */
+	if (s.empty() || s.size() > 63)
+		return false;
+
+	if (!IsLowerAlphaNumericASCII(s.front()))
+		return false;
+
+	s.remove_prefix(1);
+	if (s.empty())
+		return true;
+
+	if (!IsLowerAlphaNumericASCII(s.back()))
+		return false;
+
+	s.remove_suffix(1);
+	return CheckChars(s, IsLowerAlphaNumericDashASCII);
+}
+
 bool
 VerifyDomainName(std::string_view s) noexcept
 {
 	/* RFC 1035 2.3.4: domain names are limited to 255 octets */
 
 	return s.size() <= 255 && IsNonEmptyListOf(s, '.', VerifyDomainLabel);
+}
+
+bool
+VerifyLowerDomainName(std::string_view s) noexcept
+{
+	/* RFC 1035 2.3.4: domain names are limited to 255 octets */
+
+	return s.size() <= 255 &&
+		IsNonEmptyListOf(s, '.', VerifyLowerDomainLabel);
 }
 
 [[gnu::pure]]

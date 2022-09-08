@@ -47,6 +47,13 @@ bool
 VerifyDomainName(std::string_view name) noexcept;
 
 /**
+ * Like VerifyDomainName(), but don't allow upper case letters.
+ */
+[[gnu::pure]]
+bool
+VerifyLowerDomainName(std::string_view name) noexcept;
+
+/**
  * Is this a valid "host:port" string (or "Host:" request header)
  * according to RFC 2616 3.2.2 / 14.23?
  */

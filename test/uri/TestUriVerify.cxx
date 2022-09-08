@@ -57,6 +57,15 @@ TEST(UriVerifyTest, VerifyDomainName)
 	ASSERT_FALSE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890a"));
 }
 
+TEST(UriVerifyTest, VerifyLowerDomainName)
+{
+	ASSERT_TRUE(VerifyLowerDomainName("a"));
+	ASSERT_FALSE(VerifyLowerDomainName("A"));
+	ASSERT_TRUE(VerifyLowerDomainName("a-b"));
+	ASSERT_TRUE(VerifyLowerDomainName("a.b"));
+	ASSERT_TRUE(VerifyLowerDomainName("a.b.c.d.efghi.jkl"));
+}
+
 TEST(UriVerifyTest, VerifyUriHostPort)
 {
 	ASSERT_FALSE(VerifyUriHostPort(""));
