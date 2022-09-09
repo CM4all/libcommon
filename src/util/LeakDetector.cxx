@@ -71,4 +71,9 @@ LeakDetector::~LeakDetector() noexcept
 	state = State::DESTRUCTED;
 }
 
+void
+LeakDetector::Dummy() noexcept
+{
+}
+
 #endif

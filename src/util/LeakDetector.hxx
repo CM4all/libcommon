@@ -53,12 +53,14 @@ protected:
 	LeakDetector() noexcept;
 	LeakDetector(const LeakDetector &) noexcept:LeakDetector() {}
 
+	~LeakDetector() noexcept;
+
 	/**
-	 * This destructor is virtual only to force RTTI on the
-	 * derived class, so we can identify the object type in a
+	 * This is an arbitrary virtual method only to force RTTI on
+	 * the derived class, so we can identify the object type in a
 	 * crash dump.
 	 */
-	virtual ~LeakDetector() noexcept;
+	virtual void Dummy() noexcept;
 };
 
 #else
