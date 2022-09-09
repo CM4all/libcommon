@@ -49,7 +49,7 @@ struct MyStockItem final : StockItem {
 	explicit MyStockItem(CreateStockItem c, StockRequest _request) noexcept
 		:StockItem(c), request(std::move(_request)) {}
 
-	~MyStockItem() noexcept;
+	~MyStockItem() noexcept override;
 
 	/* virtual methods from class StockItem */
 	bool Borrow() noexcept override {
