@@ -18,6 +18,9 @@ if compiler.get_id() == 'clang'
     # suppress clang 13 warning on the defaulted
     # boost::json::const_stream copy constructor
     '-Wno-deprecated-copy',
+
+    # boost::json doesn't use the "override" keywords for destructors
+    '-Wno-inconsistent-missing-destructor-override',
   ]
 endif
 

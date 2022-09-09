@@ -81,7 +81,7 @@ test_cxxflags = test_common_flags + [
   # clang specific warning options:
   '-Wcomma',
   '-Wheader-hygiene',
-  #'-Winconsistent-missing-destructor-override', (disabled due to boost::json)
+  '-Winconsistent-missing-destructor-override',
 ]
 
 if compiler.get_id() == 'gcc' and compiler.version().version_compare('>=11')
