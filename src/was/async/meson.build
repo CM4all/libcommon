@@ -39,7 +39,12 @@ was_async_dep = declare_dependency(
 )
 
 was_server_async_sources = []
-if get_option('coroutines')
+
+if not is_variable('coroutines_dep')
+  coroutines_dep = dependency('', required: false)
+endif
+
+if coroutines_dep.found()
   was_server_async_sources += [
     'CoHandler.cxx',
     'CoRun.cxx',
@@ -60,6 +65,7 @@ was_server_async = static_library(
     libwas_protocol,
     libsystemd,
     event_net_dep,
+    coroutines_dep,
   ],
 )
 
@@ -67,5 +73,6 @@ was_server_async_dep = declare_dependency(
   link_with: was_server_async,
   dependencies: [
     was_async_dep,
+    coroutines_dep,
   ],
 )

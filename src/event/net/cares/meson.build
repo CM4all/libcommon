@@ -2,7 +2,11 @@ libcares = dependency('libcares')
 
 event_net_cares_sources = []
 
-if get_option('coroutines')
+if not is_variable('coroutines_dep')
+  coroutines_dep = dependency('', required: false)
+endif
+
+if coroutines_dep.found()
   event_net_cares_sources += 'CoLookup.cxx'
 endif
 
@@ -15,6 +19,7 @@ event_net_cares = static_library(
   include_directories: inc,
   dependencies: [
     libcares,
+    coroutines_dep,
   ],
 )
 
@@ -24,5 +29,6 @@ event_net_cares_dep = declare_dependency(
     event_dep,
     net_dep,
     util_dep,
+    coroutines_dep,
   ],
 )

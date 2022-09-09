@@ -5,7 +5,13 @@ curl_sources = [
   'Init.cxx',
 ]
 
-curl_deps = []
+if not is_variable('coroutines_dep')
+  coroutines_dep = dependency('', required: false)
+endif
+
+curl_deps = [
+  coroutines_dep,
+]
 
 if get_variable('libcommon_enable_event', true)
   curl_sources += [
@@ -16,7 +22,7 @@ if get_variable('libcommon_enable_event', true)
   ]
   curl_deps += event_dep
 
-  if get_option('coroutines')
+  if coroutines_dep.found()
     curl_sources += 'CoRequest.cxx'
   endif
 endif
@@ -27,6 +33,7 @@ curl = static_library(
   include_directories: inc,
   dependencies: [
     libcurl,
+    coroutines_dep,
   ],
 )
 

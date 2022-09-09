@@ -7,7 +7,7 @@ executable(
   ],
 )
 
-if get_option('coroutines')
+if coroutines_dep.found()
   executable(
     'RunCoHttpGet',
     'RunCoHttpGet.cxx',

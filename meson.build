@@ -110,15 +110,6 @@ if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'c')
 endif
 
-if get_option('coroutines')
-  if compiler.get_id() == 'clang'
-    add_global_arguments('-fcoroutines-ts', '-stdlib=libc++', language: 'cpp')
-    add_global_link_arguments('-stdlib=libc++', language: 'cpp')
-  else
-    add_global_arguments('-fcoroutines', language: 'cpp')
-  endif
-endif
-
 if compiler.get_id() == 'clang'
   gtest_sub = subproject('gtest')
 endif
@@ -129,6 +120,10 @@ subdir('src/util')
 subdir('src/uri')
 subdir('src/time')
 subdir('src/http')
+
+if get_option('coroutines')
+  subdir('src/co')
+endif
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
   # this library checks __cpp_constinit and requires

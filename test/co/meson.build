@@ -4,6 +4,7 @@ executable(
   include_directories: inc,
   dependencies: [
     pg_dep, stock_dep,
+    coroutines_dep,
   ],
 )
 
