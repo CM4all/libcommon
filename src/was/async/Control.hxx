@@ -74,6 +74,8 @@ public:
  * close the socket.  To do that manually, call the Close() method.
  */
 class Control final : BufferedSocketHandler {
+	static constexpr Event::Duration write_timeout = std::chrono::minutes{1};
+
 	BufferedSocket socket;
 
 	bool done = false;

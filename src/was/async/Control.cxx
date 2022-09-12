@@ -43,14 +43,12 @@
 
 namespace Was {
 
-static constexpr auto was_control_timeout = std::chrono::minutes(2);
-
 Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 		 ControlHandler &_handler) noexcept
 	:socket(event_loop), handler(_handler)
 {
 	socket.Init(_fd, FD_SOCKET,
-		    Event::Duration{-1}, was_control_timeout,
+		    Event::Duration{-1}, write_timeout,
 		    *this);
 
 	socket.ScheduleReadNoTimeout(true);
