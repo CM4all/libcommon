@@ -91,14 +91,13 @@ class SocketWrapper {
 	FdType fd_type;
 
 	SocketEvent socket_event;
-	CoarseTimerEvent read_timeout_event, write_timeout_event;
+	CoarseTimerEvent write_timeout_event;
 
 	SocketHandler &handler;
 
 public:
 	SocketWrapper(EventLoop &event_loop, SocketHandler &_handler) noexcept
 		:socket_event(event_loop, BIND_THIS_METHOD(SocketEventCallback)),
-		 read_timeout_event(event_loop, BIND_THIS_METHOD(TimeoutCallback)),
 		 write_timeout_event(event_loop, BIND_THIS_METHOD(TimeoutCallback)),
 		 handler(_handler) {}
 
@@ -145,24 +144,14 @@ public:
 		return fd_type;
 	}
 
-	/**
-	 * @param timeout the read timeout; a negative value disables
-	 * the timeout
-	 */
-	void ScheduleRead(Event::Duration timeout) noexcept {
+	void ScheduleRead() noexcept {
 		assert(IsValid());
 
 		socket_event.ScheduleRead();
-
-		if (timeout < timeout.zero())
-			read_timeout_event.Cancel();
-		else
-			read_timeout_event.Schedule(timeout);
 	}
 
 	void UnscheduleRead() noexcept {
 		socket_event.CancelRead();
-		read_timeout_event.Cancel();
 	}
 
 	/**

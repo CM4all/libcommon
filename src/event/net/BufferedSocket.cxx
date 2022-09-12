@@ -253,7 +253,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 
 			/* try to refill the buffer, now that it's
 			   become empty */
-			base.ScheduleRead(Event::Duration{-1});
+			base.ScheduleRead();
 		} else {
 			if (!IsConnected())
 				return false;
@@ -279,7 +279,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		/* reschedule the read event just in case the buffer
 		   was full before and some data has now been
 		   consumed */
-		base.ScheduleRead(Event::Duration{-1});
+		base.ScheduleRead();
 
 		return true;
 
@@ -333,7 +333,7 @@ BufferedSocket::SubmitDirect() noexcept
 	switch (result) {
 	case DirectResult::OK:
 		/* some data was transferred: refresh the read timeout */
-		base.ScheduleRead(Event::Duration{-1});
+		base.ScheduleRead();
 		return true;
 
 	case DirectResult::BLOCKING:
@@ -342,7 +342,7 @@ BufferedSocket::SubmitDirect() noexcept
 		return false;
 
 	case DirectResult::EMPTY:
-		base.ScheduleRead(Event::Duration{-1});
+		base.ScheduleRead();
 		return true;
 
 	case DirectResult::END:
@@ -391,7 +391,7 @@ BufferedSocket::FillBuffer() noexcept
 
 	if (nbytes == -1) {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
-			base.ScheduleRead(Event::Duration{-1});
+			base.ScheduleRead();
 			return true;
 		} else {
 			handler->OnBufferedError(std::make_exception_ptr(MakeErrno(e, "recv() failed")));
@@ -444,7 +444,7 @@ BufferedSocket::TryRead2() noexcept
 			return false;
 
 		if (got_data)
-			base.ScheduleRead(Event::Duration{-1});
+			base.ScheduleRead();
 		return true;
 	}
 }
@@ -766,5 +766,5 @@ BufferedSocket::ScheduleRead(bool _expect_more) noexcept
 	else
 		/* the input buffer is empty: wait for more data from the
 		   socket */
-		base.ScheduleRead(Event::Duration{-1});
+		base.ScheduleRead();
 }

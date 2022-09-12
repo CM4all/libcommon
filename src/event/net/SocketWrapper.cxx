@@ -61,9 +61,6 @@ SocketWrapper::SocketEventCallback(unsigned events) noexcept
 		events &= socket_event.GetScheduledFlags();
 	}
 
-	if (events & SocketEvent::READ)
-		read_timeout_event.Cancel();
-
 	if (events & SocketEvent::WRITE)
 		write_timeout_event.Cancel();
 
@@ -117,7 +114,6 @@ SocketWrapper::Close() noexcept
 		return;
 
 	socket_event.Close();
-	read_timeout_event.Cancel();
 	write_timeout_event.Cancel();
 }
 
@@ -127,7 +123,6 @@ SocketWrapper::Abandon() noexcept
 	assert(IsValid());
 
 	socket_event.Cancel();
-	read_timeout_event.Cancel();
 	write_timeout_event.Cancel();
 
 	socket_event.ReleaseSocket();
