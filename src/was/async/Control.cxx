@@ -50,7 +50,7 @@ Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 	:socket(event_loop), handler(_handler)
 {
 	socket.Init(_fd, FD_SOCKET,
-		    was_control_timeout, was_control_timeout,
+		    Event::Duration{-1}, was_control_timeout,
 		    *this);
 
 	socket.ScheduleReadNoTimeout(true);
