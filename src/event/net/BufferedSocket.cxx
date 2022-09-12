@@ -152,6 +152,7 @@ BufferedSocket::InvokeData() noexcept
 	assert(!IsEmpty());
 	assert(!in_data_handler);
 
+	bool consumed_some = false;
 	bool local_expect_more = false;
 
 	while (true) {
@@ -190,6 +191,31 @@ BufferedSocket::InvokeData() noexcept
 		if (result != BufferedResult::CLOSED) {
 			assert(in_data_handler);
 			in_data_handler = false;
+		}
+
+		switch (result) {
+		case BufferedResult::OK:
+		case BufferedResult::MORE:
+		case BufferedResult::AGAIN_OPTIONAL:
+		case BufferedResult::AGAIN_EXPECT:
+			/* at least one byte was consumed by our
+			   handler */
+			consumed_some = true;
+			break;
+
+		case BufferedResult::BLOCKING:
+			/* if the handler blocks, but has consumed at
+			   least one byte in a previous loop
+			   iteration, translate to OK/MORE */
+			if (consumed_some)
+				return expect_more || local_expect_more
+					? BufferedResult::MORE
+					: BufferedResult::OK;
+
+			break;
+
+		case BufferedResult::CLOSED:
+			break;
 		}
 
 		if (result == BufferedResult::AGAIN_EXPECT)
