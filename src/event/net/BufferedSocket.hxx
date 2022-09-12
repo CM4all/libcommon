@@ -357,6 +357,13 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	 */
 	bool got_data;
 
+	/**
+	 * Set to true while we are inside
+	 * BufferedSocketHandler::OnBufferedData().  This is used to
+	 * optimize ScheduleReadTimeout() from inside.
+	 */
+	bool in_data_handler;
+
 	bool destroyed = true;
 
 #ifndef NDEBUG

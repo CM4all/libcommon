@@ -150,6 +150,7 @@ inline BufferedResult
 BufferedSocket::InvokeData() noexcept
 {
 	assert(!IsEmpty());
+	assert(!in_data_handler);
 
 	bool local_expect_more = false;
 
@@ -164,6 +165,9 @@ BufferedSocket::InvokeData() noexcept
 #endif
 
 		BufferedResult result;
+
+		assert(!in_data_handler);
+		in_data_handler = true;
 
 		try {
 			result = handler->OnBufferedData();
@@ -182,6 +186,11 @@ BufferedSocket::InvokeData() noexcept
 			assert((result == BufferedResult::CLOSED) || IsValid());
 		}
 #endif
+
+		if (result != BufferedResult::CLOSED) {
+			assert(in_data_handler);
+			in_data_handler = false;
+		}
 
 		if (result == BufferedResult::AGAIN_EXPECT)
 			local_expect_more = true;
@@ -566,6 +575,7 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 	handler = nullptr;
 	direct = false;
 	expect_more = false;
+	in_data_handler = false;
 	destroyed = false;
 
 #ifndef NDEBUG
@@ -591,6 +601,7 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 	handler = &_handler;
 	direct = false;
 	expect_more = false;
+	in_data_handler = false;
 	destroyed = false;
 
 #ifndef NDEBUG
@@ -740,7 +751,7 @@ BufferedSocket::ScheduleReadTimeout(bool _expect_more,
 
 	read_timeout = timeout;
 
-	if (!input.empty())
+	if (!in_data_handler && !input.empty())
 		/* deferred call to Read() to deliver data from the buffer */
 		defer_read.Schedule();
 	else
