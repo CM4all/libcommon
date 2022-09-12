@@ -652,6 +652,7 @@ BufferedSocket::Reinit(Event::Duration _read_timeout,
 	handler = &_handler;
 
 	direct = false;
+	in_data_handler = false;
 }
 
 void
