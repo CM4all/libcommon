@@ -141,7 +141,6 @@ private:
 	void *Start(enum was_command cmd, size_t payload_length) noexcept;
 	void Finish(size_t payload_length) noexcept;
 
-	void ScheduleRead() noexcept;
 	void ScheduleWrite() noexcept;
 
 public:

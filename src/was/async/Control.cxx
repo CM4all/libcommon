@@ -57,15 +57,6 @@ Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 }
 
 void
-Control::ScheduleRead() noexcept
-{
-	socket.ScheduleReadTimeout(true,
-				   socket.IsEmpty()
-				   ? Event::Duration(-1)
-				   : was_control_timeout);
-}
-
-void
 Control::ScheduleWrite() noexcept
 {
 	socket.ScheduleWrite();
