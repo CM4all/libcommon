@@ -19,6 +19,7 @@ pg = static_library(
   'Stock.cxx',
   include_directories: inc,
   dependencies: [
+    coroutines_dep,
     libpq,
   ],
 )
@@ -26,6 +27,7 @@ pg = static_library(
 pg_dep = declare_dependency(
   link_with: pg,
   dependencies: [
+    coroutines_dep,
     event_dep,
     util_dep,
     libpq,
