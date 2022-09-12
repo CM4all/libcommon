@@ -251,11 +251,9 @@ BufferedSocket::SubmitFromBuffer() noexcept
 				return false;
 			}
 
-			if (!base.IsReadPending())
-				/* try to refill the buffer, now that
-				   it's become empty (but don't
-				   refresh the pending timeout) */
-				base.ScheduleRead(read_timeout);
+			/* try to refill the buffer, now that it's
+			   become empty */
+			base.ScheduleRead(Event::Duration{-1});
 		} else {
 			if (!IsConnected())
 				return false;
@@ -278,11 +276,10 @@ BufferedSocket::SubmitFromBuffer() noexcept
 
 		input.FreeIfEmpty();
 
-		if (!base.IsReadPending())
-			/* reschedule the read event just in case the buffer was
-			   full before and some data has now been consumed (but
-			   don't refresh the pending timeout) */
-			base.ScheduleRead(read_timeout);
+		/* reschedule the read event just in case the buffer
+		   was full before and some data has now been
+		   consumed */
+		base.ScheduleRead(Event::Duration{-1});
 
 		return true;
 
@@ -336,7 +333,7 @@ BufferedSocket::SubmitDirect() noexcept
 	switch (result) {
 	case DirectResult::OK:
 		/* some data was transferred: refresh the read timeout */
-		base.ScheduleRead(read_timeout);
+		base.ScheduleRead(Event::Duration{-1});
 		return true;
 
 	case DirectResult::BLOCKING:
@@ -345,10 +342,7 @@ BufferedSocket::SubmitDirect() noexcept
 		return false;
 
 	case DirectResult::EMPTY:
-		/* schedule read, but don't refresh timeout of old scheduled
-		   read */
-		if (!base.IsReadPending())
-			base.ScheduleRead(read_timeout);
+		base.ScheduleRead(Event::Duration{-1});
 		return true;
 
 	case DirectResult::END:
@@ -397,10 +391,7 @@ BufferedSocket::FillBuffer() noexcept
 
 	if (nbytes == -1) {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
-			/* schedule read, but don't refresh timeout of old
-			   scheduled read */
-			if (!base.IsReadPending())
-				base.ScheduleRead(read_timeout);
+			base.ScheduleRead(Event::Duration{-1});
 			return true;
 		} else {
 			handler->OnBufferedError(std::make_exception_ptr(MakeErrno(e, "recv() failed")));
@@ -453,8 +444,7 @@ BufferedSocket::TryRead2() noexcept
 			return false;
 
 		if (got_data)
-			/* refresh the timeout each time data was received */
-			base.ScheduleRead(read_timeout);
+			base.ScheduleRead(Event::Duration{-1});
 		return true;
 	}
 }
@@ -595,7 +585,6 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 {
 	base.Init(_fd, _fd_type);
 
-	read_timeout = Event::Duration(-1);
 	write_timeout = Event::Duration(-1);
 
 	handler = nullptr;
@@ -613,7 +602,6 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 
 void
 BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
-		     Event::Duration _read_timeout,
 		     Event::Duration _write_timeout,
 		     BufferedSocketHandler &_handler) noexcept
 {
@@ -621,7 +609,6 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 
 	base.Init(_fd, _fd_type);
 
-	read_timeout = _read_timeout;
 	write_timeout = _write_timeout;
 
 	handler = &_handler;
@@ -638,15 +625,13 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 }
 
 void
-BufferedSocket::Reinit(Event::Duration _read_timeout,
-		       Event::Duration _write_timeout,
+BufferedSocket::Reinit(Event::Duration _write_timeout,
 		       BufferedSocketHandler &_handler) noexcept
 {
 	assert(IsValid());
 	assert(IsConnected());
 	assert(!expect_more);
 
-	read_timeout = _read_timeout;
 	write_timeout = _write_timeout;
 
 	handler = &_handler;
@@ -767,8 +752,7 @@ BufferedSocket::DeferRead(bool _expect_more) noexcept
 }
 
 void
-BufferedSocket::ScheduleReadTimeout(bool _expect_more,
-				    Event::Duration timeout) noexcept
+BufferedSocket::ScheduleRead(bool _expect_more) noexcept
 {
 	assert(!ended);
 	assert(!destroyed);
@@ -776,13 +760,11 @@ BufferedSocket::ScheduleReadTimeout(bool _expect_more,
 	if (_expect_more)
 		expect_more = true;
 
-	read_timeout = timeout;
-
 	if (!in_data_handler && !input.empty())
 		/* deferred call to Read() to deliver data from the buffer */
 		defer_read.Schedule();
 	else
 		/* the input buffer is empty: wait for more data from the
 		   socket */
-		base.ScheduleRead(timeout);
+		base.ScheduleRead(Event::Duration{-1});
 }

@@ -47,11 +47,9 @@ Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 		 ControlHandler &_handler) noexcept
 	:socket(event_loop), handler(_handler)
 {
-	socket.Init(_fd, FD_SOCKET,
-		    Event::Duration{-1}, write_timeout,
-		    *this);
+	socket.Init(_fd, FD_SOCKET, write_timeout, *this);
 
-	socket.ScheduleReadNoTimeout(true);
+	socket.ScheduleRead(true);
 }
 
 void

@@ -319,10 +319,9 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	SocketWrapper base;
 
 	/**
-	 * The read/write timeouts; a negative value disables the
-	 * timeout.
+	 * The write timeout; a negative value disables the timeout.
 	 */
-	Event::Duration read_timeout, write_timeout;
+	Event::Duration write_timeout;
 
 	/**
 	 * Postpone ScheduleRead(), calls Read().
@@ -360,7 +359,7 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	/**
 	 * Set to true while we are inside
 	 * BufferedSocketHandler::OnBufferedData().  This is used to
-	 * optimize ScheduleReadTimeout() from inside.
+	 * optimize ScheduleRead() from inside.
 	 */
 	bool in_data_handler;
 
@@ -388,12 +387,10 @@ public:
 	void Init(SocketDescriptor _fd, FdType _fd_type) noexcept;
 
 	void Init(SocketDescriptor _fd, FdType _fd_type,
-		  Event::Duration _read_timeout,
 		  Event::Duration _write_timeout,
 		  BufferedSocketHandler &_handler) noexcept;
 
-	void Reinit(Event::Duration _read_timeout,
-		    Event::Duration _write_timeout,
+	void Reinit(Event::Duration _write_timeout,
 		    BufferedSocketHandler &_handler) noexcept;
 
 	void Shutdown() noexcept {
@@ -433,9 +430,7 @@ public:
 	 */
 	void Destroy() noexcept;
 
-	void SetTimeouts(Event::Duration _read_timeout,
-			 Event::Duration _write_timeout) noexcept {
-		read_timeout = _read_timeout;
+	void SetWriteTimeout(Event::Duration _write_timeout) noexcept {
 		write_timeout = _write_timeout;
 	}
 
@@ -616,20 +611,7 @@ public:
 	 */
 	void DeferRead(bool _expect_more) noexcept;
 
-	void ScheduleReadTimeout(bool _expect_more,
-				 Event::Duration timeout) noexcept;
-
-	/**
-	 * Schedules reading on the socket with timeout disabled, to indicate
-	 * that you are willing to read, but do not expect it yet.  No direct
-	 * action is taken.  Use this to enable reading when you are still
-	 * sending the request.  When you are finished sending the request,
-	 * you should call BufferedSocket::Read() to enable the read timeout.
-	 */
-	void ScheduleReadNoTimeout(bool _expect_more) noexcept {
-		ScheduleReadTimeout(_expect_more,
-				    Event::Duration(-1));
-	}
+	void ScheduleRead(bool _expect_more) noexcept;
 
 	void UnscheduleRead() noexcept {
 		base.UnscheduleRead();
