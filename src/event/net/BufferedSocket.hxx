@@ -64,7 +64,7 @@ enum class BufferedResult {
 	 * can be used to simplify the handler code.
 	 *
 	 * If the input buffer is empty, this return value behaves like
-	 * #OK or #PARTIAL.
+	 * #OK.
 	 */
 	AGAIN_OPTIONAL,
 
