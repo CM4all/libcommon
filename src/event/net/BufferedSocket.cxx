@@ -76,11 +76,6 @@ BufferedSocket::Ended() noexcept
 bool
 BufferedSocket::ClosedByPeer() noexcept
 {
-	if (expect_more) {
-		ClosedPrematurely();
-		return false;
-	}
-
 	const std::size_t remaining = input.GetAvailable();
 
 	if (!handler->OnBufferedClosed() ||
@@ -144,7 +139,7 @@ BufferedSocket::KeepConsumed(std::size_t nbytes) noexcept
 
 /**
  * Invokes the data handler, and takes care for
- * #BufferedResult::AGAIN_OPTIONAL and #BufferedResult::AGAIN_EXPECT.
+ * #BufferedResult::AGAIN.
  */
 inline BufferedResult
 BufferedSocket::InvokeData() noexcept
@@ -153,13 +148,10 @@ BufferedSocket::InvokeData() noexcept
 	assert(!in_data_handler);
 
 	bool consumed_some = false;
-	bool local_expect_more = false;
 
 	while (true) {
 		if (input.empty())
-			return expect_more || local_expect_more
-				? BufferedResult::MORE
-				: BufferedResult::OK;
+			return BufferedResult::OK;
 
 #ifndef NDEBUG
 		DestructObserver destructed(*this);
@@ -196,8 +188,7 @@ BufferedSocket::InvokeData() noexcept
 		switch (result) {
 		case BufferedResult::OK:
 		case BufferedResult::MORE:
-		case BufferedResult::AGAIN_OPTIONAL:
-		case BufferedResult::AGAIN_EXPECT:
+		case BufferedResult::AGAIN:
 			/* at least one byte was consumed by our
 			   handler */
 			consumed_some = true;
@@ -206,11 +197,9 @@ BufferedSocket::InvokeData() noexcept
 		case BufferedResult::BLOCKING:
 			/* if the handler blocks, but has consumed at
 			   least one byte in a previous loop
-			   iteration, translate to OK/MORE */
+			   iteration, translate to OK */
 			if (consumed_some)
-				return expect_more || local_expect_more
-					? BufferedResult::MORE
-					: BufferedResult::OK;
+				return BufferedResult::OK;
 
 			break;
 
@@ -218,11 +207,7 @@ BufferedSocket::InvokeData() noexcept
 			break;
 		}
 
-		if (result == BufferedResult::AGAIN_EXPECT)
-			local_expect_more = true;
-		else if (result == BufferedResult::AGAIN_OPTIONAL)
-			local_expect_more = false;
-		else
+		if (result != BufferedResult::AGAIN)
 			return result;
 	}
 }
@@ -233,16 +218,11 @@ BufferedSocket::SubmitFromBuffer() noexcept
 	if (IsEmpty())
 		return true;
 
-	const bool old_expect_more = expect_more;
-	expect_more = false;
-
 	BufferedResult result = InvokeData();
 	assert((result == BufferedResult::CLOSED) || IsValid());
 
 	switch (result) {
 	case BufferedResult::OK:
-		assert(!expect_more);
-
 		if (input.empty()) {
 			input.FreeIfDefined();
 
@@ -262,8 +242,6 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		return true;
 
 	case BufferedResult::MORE:
-		expect_more = true;
-
 		if (!IsConnected()) {
 			ClosedPrematurely();
 			return false;
@@ -283,15 +261,12 @@ BufferedSocket::SubmitFromBuffer() noexcept
 
 		return true;
 
-	case BufferedResult::AGAIN_OPTIONAL:
-	case BufferedResult::AGAIN_EXPECT:
+	case BufferedResult::AGAIN:
 		/* unreachable, has been handled by InvokeData() */
 		assert(false);
 		gcc_unreachable();
 
 	case BufferedResult::BLOCKING:
-		expect_more = old_expect_more;
-
 		if (input.IsFull())
 			/* our input buffer is still full - unschedule all reads,
 			   and wait for somebody to request more data */
@@ -318,9 +293,6 @@ BufferedSocket::SubmitDirect() noexcept
 	assert(IsConnected());
 	assert(IsEmpty());
 
-	const bool old_expect_more = expect_more;
-	expect_more = false;
-
 	DirectResult result;
 
 	try {
@@ -337,7 +309,6 @@ BufferedSocket::SubmitDirect() noexcept
 		return true;
 
 	case DirectResult::BLOCKING:
-		expect_more = old_expect_more;
 		UnscheduleRead();
 		return false;
 
@@ -371,7 +342,6 @@ BufferedSocket::FillBuffer() noexcept
 	ssize_t nbytes = base.ReadToBuffer(input);
 	if (gcc_likely(nbytes > 0)) {
 		/* success: data was added to the buffer */
-		expect_more = false;
 		got_data = true;
 
 		return true;
@@ -596,7 +566,6 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 
 	handler = nullptr;
 	direct = false;
-	expect_more = false;
 	in_data_handler = false;
 	destroyed = false;
 
@@ -620,7 +589,6 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 
 	handler = &_handler;
 	direct = false;
-	expect_more = false;
 	in_data_handler = false;
 	destroyed = false;
 
@@ -637,7 +605,6 @@ BufferedSocket::Reinit(Event::Duration _write_timeout,
 {
 	assert(IsValid());
 	assert(IsConnected());
-	assert(!expect_more);
 
 	write_timeout = _write_timeout;
 
@@ -659,20 +626,11 @@ BufferedSocket::Destroy() noexcept
 }
 
 bool
-BufferedSocket::Read(bool _expect_more) noexcept
+BufferedSocket::Read() noexcept
 {
 	assert(!reading);
 	assert(!destroyed);
 	assert(!ended);
-
-	if (_expect_more) {
-		if (!IsConnected() && IsEmpty()) {
-			ClosedPrematurely();
-			return false;
-		}
-
-		expect_more = true;
-	}
 
 	return TryRead();
 }
@@ -747,25 +705,19 @@ BufferedSocket::WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
 }
 
 void
-BufferedSocket::DeferRead(bool _expect_more) noexcept
+BufferedSocket::DeferRead() noexcept
 {
 	assert(!ended);
 	assert(!destroyed);
-
-	if (_expect_more)
-		expect_more = true;
 
 	defer_read.Schedule();
 }
 
 void
-BufferedSocket::ScheduleRead(bool _expect_more) noexcept
+BufferedSocket::ScheduleRead() noexcept
 {
 	assert(!ended);
 	assert(!destroyed);
-
-	if (_expect_more)
-		expect_more = true;
 
 	if (!in_data_handler && !input.empty())
 		/* deferred call to Read() to deliver data from the buffer */

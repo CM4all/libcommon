@@ -65,17 +65,7 @@ enum class BufferedResult {
 	 * If the input buffer is empty, this return value behaves like
 	 * #OK.
 	 */
-	AGAIN_OPTIONAL,
-
-	/**
-	 * The handler wants to be called again immediately, without
-	 * attempting to read more data from the socket.  This result code
-	 * can be used to simplify the handler code.
-	 *
-	 * If the input buffer is empty, this return value behaves like
-	 * #MORE.
-	 */
-	AGAIN_EXPECT,
+	AGAIN,
 
 	/**
 	 * The handler blocks.  The handler is responsible for calling
@@ -347,12 +337,6 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	bool direct;
 
 	/**
-	 * Does the handler expect more data?  It announced this by
-	 * returning BUFFERED_MORE.
-	 */
-	bool expect_more;
-
-	/**
 	 * Set to true each time data was received from the socket.
 	 */
 	bool got_data;
@@ -558,7 +542,7 @@ public:
 		/* defer a read call which will check for "ended"; we
 		   can't do that here because this method is not
 		   allowed to fail */
-		DeferRead(false);
+		DeferRead();
 	}
 
 	/**
@@ -584,12 +568,8 @@ public:
 	 * BufferedSocketHandler::OnBufferedError() or (if there is no
 	 * data available yet) an event gets scheduled and the
 	 * function returns immediately.
-	 *
-	 * @param expect_more if true, generates an error if no more data can
-	 * be read (socket already shut down, buffer empty); if false, the
-	 * existing expect_more state is unmodified
 	 */
-	bool Read(bool expect_more) noexcept;
+	bool Read() noexcept;
 
 	/**
 	 * Variant of Write() which does not touch events and does not
@@ -632,9 +612,9 @@ public:
 	/**
 	 * Defer a call to Read().
 	 */
-	void DeferRead(bool _expect_more) noexcept;
+	void DeferRead() noexcept;
 
-	void ScheduleRead(bool _expect_more) noexcept;
+	void ScheduleRead() noexcept;
 
 	void UnscheduleRead() noexcept {
 		base.UnscheduleRead();
@@ -681,7 +661,7 @@ private:
 	static bool OnTimeout(void *ctx) noexcept;
 
 	void DeferReadCallback() noexcept {
-		Read(false);
+		Read();
 	}
 
 	void DeferWriteCallback() noexcept;
