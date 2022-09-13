@@ -51,10 +51,9 @@ enum class BufferedResult {
 
 	/**
 	 * The handler needs more data to finish the operation.  If no
-	 * more data can be obtained (because the socket has been closed
-	 * already), the caller is responsible for generating an error.
-	 * If the input buffer is already full, an error will be
-	 * generated, too.
+	 * more data can be obtained (because the socket has been
+	 * closed or the input buffer is full), the caller is
+	 * responsible for generating an error.
 	 */
 	MORE,
 
@@ -207,9 +206,10 @@ public:
 	 * method must close/abandon the socket.  There may still be data
 	 * in the input buffer, so don't give up on this object yet.
 	 *
-	 * At this time, it may be unknown how much data remains in the
-	 * input buffer.  As soon as that becomes known, the method
-	 * #remaining is called (even if it's 0 bytes).
+	 * At this time, it may be unknown how much data remains in
+	 * the input buffer.  As soon as that becomes known, the
+	 * method OnBufferedRemaining() is called (even if it's 0
+	 * bytes).
 	 *
 	 * @return false if no more data shall be delivered to the
 	 * handler; the methods OnBufferedRemaining() and
@@ -218,14 +218,15 @@ public:
 	virtual bool OnBufferedClosed() noexcept = 0;
 
 	/**
-	 * This method gets called after #closed, as soon as the remaining
-	 * amount of data is known (even if it's 0 bytes).
+	 * This method gets called after OnBufferedClosed(), as soon
+	 * as the remaining amount of data is known (even if it's 0
+	 * bytes).
 	 *
 	 * @param remaining the remaining number of bytes in the input
 	 * buffer (may be used by the method to see if there's not enough
 	 * / too much data in the buffer)
 	 * @return false if no more data shall be delivered to the
-	 * handler; the #end method will also not be invoked
+	 * handler; the OnBufferedEnd() method will also not be invoked
 	 */
 	virtual bool OnBufferedRemaining([[maybe_unused]] std::size_t remaining) noexcept {
 		return true;
