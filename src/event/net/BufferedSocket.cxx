@@ -147,8 +147,6 @@ BufferedSocket::InvokeData() noexcept
 	assert(!IsEmpty());
 	assert(!in_data_handler);
 
-	bool consumed_some = false;
-
 	while (true) {
 		if (input.empty())
 			return BufferedResult::OK;
@@ -185,28 +183,6 @@ BufferedSocket::InvokeData() noexcept
 			in_data_handler = false;
 		}
 
-		switch (result) {
-		case BufferedResult::OK:
-		case BufferedResult::MORE:
-		case BufferedResult::AGAIN:
-			/* at least one byte was consumed by our
-			   handler */
-			consumed_some = true;
-			break;
-
-		case BufferedResult::BLOCKING:
-			/* if the handler blocks, but has consumed at
-			   least one byte in a previous loop
-			   iteration, translate to OK */
-			if (consumed_some)
-				return BufferedResult::OK;
-
-			break;
-
-		case BufferedResult::CLOSED:
-			break;
-		}
-
 		if (result != BufferedResult::AGAIN)
 			return result;
 	}
@@ -234,6 +210,9 @@ BufferedSocket::SubmitFromBuffer() noexcept
 			/* try to refill the buffer, now that it's
 			   become empty */
 			base.ScheduleRead();
+		} else if (IsFull()) {
+			if (IsConnected())
+				UnscheduleRead();
 		} else {
 			if (!IsConnected())
 				return false;
@@ -265,14 +244,6 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		/* unreachable, has been handled by InvokeData() */
 		assert(false);
 		gcc_unreachable();
-
-	case BufferedResult::BLOCKING:
-		if (input.IsFull())
-			/* our input buffer is still full - unschedule all reads,
-			   and wait for somebody to request more data */
-			UnscheduleRead();
-
-		return false;
 
 	case BufferedResult::CLOSED:
 		/* the BufferedSocket object has been destroyed by the

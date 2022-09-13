@@ -44,8 +44,8 @@
 
 enum class BufferedResult {
 	/**
-	 * The handler has consumed at least one byte, and is willing
-	 * to receive more data.
+	 * The handler was successful.  It may or may not have
+	 * consumed some data from the buffer.
 	 */
 	OK,
 
@@ -66,12 +66,6 @@ enum class BufferedResult {
 	 * #OK.
 	 */
 	AGAIN,
-
-	/**
-	 * The handler blocks.  The handler is responsible for calling
-	 * BufferedSocket::Read() as soon as it's ready for more data.
-	 */
-	BLOCKING,
 
 	/**
 	 * The #BufferedSocket object has been closed by the handler.
