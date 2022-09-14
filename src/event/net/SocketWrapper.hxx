@@ -37,11 +37,10 @@
 #include "event/CoarseTimerEvent.hxx"
 #include "net/SocketDescriptor.hxx"
 
+#include <cassert>
 #include <cstddef>
 
-#include <sys/types.h>
-#include <assert.h>
-#include <stdint.h>
+#include <sys/types.h> // for ssize_t
 
 template<typename T> class ForeignFifoBuffer;
 class UniqueSocketDescriptor;
