@@ -210,7 +210,7 @@ Stock::RetryWaiting() noexcept
 		if (!GetIdle(w.request, w.handler)) {
 			/* didn't work (probably because borrowing the item has
 			   failed) - re-add to "waiting" list */
-			waiting.push_front(w);
+			waiting.push_back(w);
 			break;
 		}
 
@@ -395,7 +395,7 @@ Stock::Get(StockRequest request,
 		/* item limit reached: wait for an item to return */
 		auto w = new Waiting(*this, std::move(request),
 				     get_handler, cancel_ptr);
-		waiting.push_front(*w);
+		waiting.push_back(*w);
 		return;
 	}
 
