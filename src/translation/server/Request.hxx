@@ -51,6 +51,7 @@ struct Request {
 	const char *host = nullptr;
 
 	std::span<const std::byte> session{};
+	std::span<const std::byte> realm_session{};
 
 	const char *param = nullptr;
 

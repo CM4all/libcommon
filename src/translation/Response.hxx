@@ -174,6 +174,7 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_SESSION
 	std::span<const std::byte> session;
+	std::span<const std::byte> realm_session;
 	std::span<const std::byte> attach_session;
 #endif
 

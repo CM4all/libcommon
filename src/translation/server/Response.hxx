@@ -465,6 +465,12 @@ public:
 	}
 
 	template<typename... Types>
+	auto &RealmSession(Types... value) noexcept {
+		return StringPacket(TranslationCommand::REALM_SESSION,
+				    value...);
+	}
+
+	template<typename... Types>
 	auto &AttachSession(Types... value) noexcept {
 		return StringPacket(TranslationCommand::ATTACH_SESSION,
 				    value...);

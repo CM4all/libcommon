@@ -193,6 +193,7 @@ TranslateResponse::Clear()
 	realm_from_auth_base = false;
 
 	session = {};
+	realm_session = {};
 	attach_session = {};
 #endif
 	pool = nullptr;
@@ -435,6 +436,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = src.realm_from_auth_base;
 	session = {};
+	realm_session = {};
 	attach_session = {};
 #endif
 

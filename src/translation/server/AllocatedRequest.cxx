@@ -77,6 +77,11 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		session = AsBytes(session_buffer);
 		break;
 
+	case TranslationCommand::REALM_SESSION:
+		realm_session_buffer = ToString(payload);
+		realm_session = AsBytes(realm_session_buffer);
+		break;
+
 	case TranslationCommand::PARAM:
 		param_buffer = ToString(payload);
 		param = param_buffer.c_str();

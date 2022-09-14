@@ -3937,6 +3937,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.no_password = string_payload.data();
 		return;
+
+	case TranslationCommand::REALM_SESSION:
+#if TRANSLATION_ENABLE_SESSION
+		response.realm_session = payload;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

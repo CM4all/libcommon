@@ -46,6 +46,7 @@ namespace Translation::Server {
 class AllocatedRequest : public Request {
 	std::string uri_buffer, host_buffer;
 	std::string session_buffer;
+	std::string realm_session_buffer;
 	std::string param_buffer;
 	std::string user_buffer;
 	std::string password_buffer;

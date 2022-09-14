@@ -1186,6 +1186,14 @@ enum class TranslationCommand : uint16_t {
 	 * SERVICE=sftp.
 	 */
 	NO_PASSWORD = 244,
+
+	/**
+	 * Like #SESSION, but realm-local.  Unlike #SESSION, it is
+	 * only sent under certain conditions (e.g. in #TOKEN_AUTH
+	 * requests), because the realm is only known after the
+	 * regular translation response has been applied already.
+	 */
+	REALM_SESSION = 245,
 };
 
 struct TranslationHeader {
