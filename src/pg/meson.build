@@ -5,6 +5,10 @@ if not libpq.found()
   subdir_done()
 endif
 
+if not is_variable('coroutines_dep')
+  coroutines_dep = dependency('', required: false)
+endif
+
 pg = static_library(
   'pg',
   'Serial.cxx',
