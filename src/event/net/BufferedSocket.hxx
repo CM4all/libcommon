@@ -528,6 +528,11 @@ public:
 	 * Dispose the specified number of bytes from the input
 	 * buffer.  Call this after ReadBuffer().  It may be called
 	 * repeatedly.
+	 *
+	 * If you call this outside of the
+	 * BufferedSocketHandler::OnBufferedData() callback, you need
+	 * to call AfterConsumed() when you are done, to update the
+	 * internals.
 	 */
 	void DisposeConsumed(std::size_t nbytes) noexcept;
 
@@ -536,8 +541,25 @@ public:
 	 * "consumed".  Call this after ReadBuffer().  Note that
 	 * this method does not invalidate the buffer obtained from
 	 * ReadBuffer().  It may be called repeatedly.
+	 *
+	 * If you call this outside of the
+	 * BufferedSocketHandler::OnBufferedData() callback, you need
+	 * to call AfterConsumed() when you are done, to update the
+	 * internals.
 	 */
 	void KeepConsumed(std::size_t nbytes) noexcept;
+
+	/**
+	 * Update internals after DisposeConsumed() or KeepConsumed()
+	 * has been called outside of
+	 * BufferedSocketHandler::OnBufferedData().
+	 */
+	void AfterConsumed() noexcept {
+		/* defer a read call which will check for "ended"; we
+		   can't do that here because this method is not
+		   allowed to fail */
+		DeferRead(false);
+	}
 
 	/**
 	 * Provides direct access to the input buffer.  The caller may

@@ -411,7 +411,14 @@ BufferedSocket::TryRead2() noexcept
 	assert(reading);
 
 	if (!IsConnected()) {
-		assert(!IsEmpty());
+		if (IsEmpty()) {
+			/* this can only happen if
+			   DisposeConsumed()/KeepConsumed() was called
+			   outside of the OnBufferedData() callback;
+			   now's the time for the "ended" check */
+			Ended();
+			return false;
+		}
 
 		SubmitFromBuffer();
 		return false;
