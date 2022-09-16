@@ -73,6 +73,13 @@ public:
 
 	/**
 	 * Make sure the specified directory exists inside a writable
+	 * mount.  Throws if that fails.  Returns false if the mount
+	 * point above the given path is not writable.
+	 */
+	bool MakeOptionalDirectory(std::string_view path);
+
+	/**
+	 * Make sure the specified directory exists inside a writable
 	 * mount.  Throws if that fails.
 	 */
 	void MakeDirectory(std::string_view path);
