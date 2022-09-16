@@ -796,6 +796,15 @@ public:
 			return *this;
 		}
 
+		template<typename P, typename C>
+		auto WriteFile(P &&path, C &&contents) noexcept {
+			response.StringPacket(TranslationCommand::WRITE_FILE,
+					      std::forward<P>(path),
+					      std::string_view{"", 1},
+					      std::forward<C>(contents));
+			return *this;
+		}
+
 		auto Optional() noexcept {
 			response.Optional();
 			return *this;

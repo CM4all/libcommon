@@ -258,6 +258,8 @@ private:
 			     bool expand, bool writable, bool exec=false,
 			     bool file=false);
 
+	void HandleWriteFile(std::string_view payload);
+
 #if TRANSLATION_ENABLE_WANT
 	void HandleWant(const TranslationCommand *payload,
 			size_t payload_length);

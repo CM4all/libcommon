@@ -1194,6 +1194,12 @@ enum class TranslationCommand : uint16_t {
 	 * regular translation response has been applied already.
 	 */
 	REALM_SESSION = 245,
+
+	/**
+	 * Write a file in a mount namespace.  Payload is the absolute
+	 * path and the file contents separated by a null byte.
+	 */
+	WRITE_FILE = 246,
 };
 
 struct TranslationHeader {

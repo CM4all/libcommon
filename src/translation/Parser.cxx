@@ -682,6 +682,23 @@ TranslateParser::HandleBindMount(std::string_view payload,
 	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
 }
 
+inline void
+TranslateParser::HandleWriteFile(std::string_view payload)
+{
+	if (mount_list == IntrusiveForwardList<Mount>::end())
+		throw std::runtime_error("misplaced WRITE_FILE packet");
+
+	const auto [path, contents] = Split(payload, '\0');
+	if (!IsValidAbsolutePath(path) || !IsValidString(contents))
+		throw std::runtime_error("malformed WRITE_FILE packet");
+
+	auto *m = alloc.New<Mount>(Mount::WriteFile{},
+				   path.data(),
+				   contents.data());
+
+	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
+}
+
 static void
 translate_client_uts_namespace(NamespaceOptions *ns,
 			       std::string_view payload)
@@ -3760,6 +3777,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		case TranslationCommand::BIND_MOUNT_EXEC:
 		case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
 		case TranslationCommand::BIND_MOUNT_FILE:
+		case TranslationCommand::WRITE_FILE:
 			if (mount_list != IntrusiveForwardList<Mount>::end()) {
 				mount_list->optional = true;
 				return;
@@ -3945,6 +3963,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::WRITE_FILE:
+		previous_command = command;
+		HandleWriteFile(string_payload);
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
