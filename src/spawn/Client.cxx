@@ -261,6 +261,7 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			s.WriteString(SpawnExecCommand::WRITE_FILE,
 				      i.target);
 			s.WriteString(i.source);
+			s.WriteBool(i.optional);
 			break;
 		}
 	}

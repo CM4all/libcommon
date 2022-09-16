@@ -669,6 +669,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				const char *contents = payload.ReadString();
 				mounts.emplace_front(Mount::WriteFile{},
 						     path, contents);
+				mounts.front().optional = payload.ReadBool();
 			}
 
 			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
