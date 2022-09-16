@@ -201,15 +201,21 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			     "newinstance");
 	}
 
-	if (mount_root_tmpfs) {
-		rmdir(put_old);
+	if (mount_tmp_tmpfs != nullptr) {
+		const char *options = "size=16M,nr_inodes=256,mode=1777";
+		char buffer[256];
+		if (*mount_tmp_tmpfs != 0) {
+			snprintf(buffer, sizeof(buffer), "%s,%s", options, mount_tmp_tmpfs);
+			options = buffer;
+		}
 
-		/* make the root tmpfs read-only */
+		vfs_builder.Add("/tmp");
 
-		if (mount(nullptr, "/", nullptr,
-			  MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
-			  nullptr) < 0)
-			throw MakeErrno("Failed to remount read-only");
+		MountOrThrow("none", "/tmp", "tmpfs",
+			     MS_NODEV|MS_NOEXEC|MS_NOSUID,
+			     options);
+
+		vfs_builder.MakeWritable();
 	}
 
 	if (HasBindMount()) {
@@ -242,21 +248,15 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 	    umount2(put_old, MNT_DETACH) < 0)
 		throw FormatErrno("umount('%s') failed", put_old);
 
-	if (mount_tmp_tmpfs != nullptr) {
-		const char *options = "size=16M,nr_inodes=256,mode=1777";
-		char buffer[256];
-		if (*mount_tmp_tmpfs != 0) {
-			snprintf(buffer, sizeof(buffer), "%s,%s", options, mount_tmp_tmpfs);
-			options = buffer;
-		}
+	if (mount_root_tmpfs) {
+		rmdir(put_old);
 
-		vfs_builder.Add("/tmp");
+		/* make the root tmpfs read-only */
 
-		MountOrThrow("none", "/tmp", "tmpfs",
-			     MS_NODEV|MS_NOEXEC|MS_NOSUID,
-			     options);
-
-		vfs_builder.MakeWritable();
+		if (mount(nullptr, "/", nullptr,
+			  MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
+			  nullptr) < 0)
+			throw MakeErrno("Failed to remount read-only");
 	}
 
 	vfs_builder.Finish();
