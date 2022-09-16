@@ -256,6 +256,12 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 				      i.target);
 			s.WriteBool(i.writable);
 			break;
+
+		case Mount::Type::WRITE_FILE:
+			s.WriteString(SpawnExecCommand::WRITE_FILE,
+				      i.target);
+			s.WriteString(i.source);
+			break;
 		}
 	}
 

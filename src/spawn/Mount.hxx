@@ -49,6 +49,15 @@ struct Mount : IntrusiveForwardListHook {
 		BIND,
 		BIND_FILE,
 		TMPFS,
+
+		/**
+		 * Write #source to the read-only file #target.  This
+		 * either creates a new file in tmpfs (if #target is
+		 * located in a tmpfs) or bind-mounts a tmpfs file to
+		 * the given #target (which must already exist as a
+		 * regular file).
+		 */
+		WRITE_FILE,
 	} type = Type::BIND;
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -81,6 +90,14 @@ struct Mount : IntrusiveForwardListHook {
 		 type(Type::TMPFS),
 		 writable(_writable), exec(false) {}
 
+	struct WriteFile {};
+
+	constexpr Mount(WriteFile, const char *path,
+			const char *contents) noexcept
+		:source(contents), target(path),
+		 type(Type::WRITE_FILE),
+		 writable(false), exec(false) {}
+
 	Mount(AllocatorPtr alloc, const Mount &src) noexcept;
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -107,6 +124,7 @@ private:
 	void ApplyBindMount(VfsBuilder &vfs_builder) const;
 	void ApplyBindMountFile(VfsBuilder &vfs_builder) const;
 	void ApplyTmpfs(VfsBuilder &vfs_builder) const;
+	void ApplyWriteFile(VfsBuilder &vfs_builder) const;
 
 public:
 	/**

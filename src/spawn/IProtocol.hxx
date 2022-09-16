@@ -80,6 +80,7 @@ enum class SpawnExecCommand : uint8_t {
 	MOUNT_TMPFS,
 	BIND_MOUNT,
 	BIND_MOUNT_FILE,
+	WRITE_FILE,
 	HOSTNAME,
 	RLIMIT,
 	UID_GID,

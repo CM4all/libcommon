@@ -34,8 +34,10 @@
 #include "VfsBuilder.hxx"
 #include "system/BindMount.hxx"
 #include "system/Error.hxx"
+#include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/RuntimeError.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StringSplit.hxx"
 #include "AllocatorPtr.hxx"
 
@@ -185,6 +187,81 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 		vfs_builder.ScheduleRemount(flags | MS_RDONLY);
 }
 
+[[gnu::pure]]
+static std::string_view
+DirName(const char *path) noexcept
+{
+	const char *slash = strrchr(path, '/');
+	if (slash == nullptr)
+		return {};
+
+	return {path, std::size_t(slash - path)};
+}
+
+static const char *
+WriteToTempFile(char *buffer, std::span<const std::byte> contents)
+{
+	unsigned long n = time(nullptr);
+
+	while (true) {
+		sprintf(buffer, "/tmp/%lx", n);
+
+		UniqueFileDescriptor fd;
+		if (fd.Open(buffer, O_CREAT|O_EXCL|O_WRONLY, 0644)) {
+			fd.Write(contents.data(), contents.size());
+			return buffer;
+		}
+
+		switch (const int e = errno) {
+		case EEXIST:
+			/* try again with new name */
+			++n;
+			continue;
+
+		default:
+			throw MakeErrno(e, "Failed to create file");
+		}
+	}
+}
+
+[[gnu::pure]]
+static bool
+PathExists(const char *path) noexcept
+{
+	struct stat st;
+	return lstat(path, &st) == 0;
+}
+
+inline void
+Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
+{
+	assert(type == Type::WRITE_FILE);
+	assert(source != nullptr);
+	assert(target != nullptr);
+
+	const auto contents = AsBytes(std::string_view{source});
+
+	if (const auto dir = DirName(target);
+	    vfs_builder.MakeOptionalDirectory(dir)) {
+		/* inside a tmpfs: create the file here */
+		auto fd = OpenWriteOnly(target, O_CREAT|O_TRUNC);
+		fd.Write(contents.data(), contents.size());
+	} else {
+		/* inside a read-only mount: create the file in /tmp
+		   and bind-mount it over the existing (read-only)
+		   file */
+
+		if (optional && !PathExists(target))
+			return;
+
+		char buffer[64];
+		const char *tmp_path = WriteToTempFile(buffer, contents);
+
+		constexpr int flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
+		BindMount(tmp_path, target, flags);
+	}
+}
+
 inline void
 Mount::Apply(VfsBuilder &vfs_builder) const
 {
@@ -199,6 +276,10 @@ Mount::Apply(VfsBuilder &vfs_builder) const
 
 	case Type::TMPFS:
 		ApplyTmpfs(vfs_builder);
+		break;
+
+	case Type::WRITE_FILE:
+		ApplyWriteFile(vfs_builder);
 		break;
 	}
 }
@@ -228,6 +309,14 @@ Mount::MakeId(char *p) const noexcept
 	case Type::TMPFS:
 		p = (char *)mempcpy(p, ";t:", 3);
 		p = stpcpy(p, target);
+		return p;
+
+	case Type::WRITE_FILE:
+		p = (char *)mempcpy(p, ";wf:", 4);
+		p = stpcpy(p, target);
+		*p++ = '=';
+		p = stpcpy(p, source);
+		*p++ = ';';
 		return p;
 	}
 
