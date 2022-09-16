@@ -201,6 +201,17 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			     "newinstance");
 	}
 
+	if (mount_root_tmpfs) {
+		rmdir(put_old);
+
+		/* make the root tmpfs read-only */
+
+		if (mount(nullptr, "/", nullptr,
+			  MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
+			  nullptr) < 0)
+			throw MakeErrno("Failed to remount read-only");
+	}
+
 	if (HasBindMount()) {
 		/* go to /mnt so we can refer to the old directories with a
 		   relative path */
@@ -246,17 +257,6 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			     options);
 
 		vfs_builder.MakeWritable();
-	}
-
-	if (mount_root_tmpfs) {
-		rmdir(put_old);
-
-		/* make the root tmpfs read-only */
-
-		if (mount(nullptr, "/", nullptr,
-			  MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
-			  nullptr) < 0)
-			throw MakeErrno("Failed to remount read-only");
 	}
 
 	vfs_builder.Finish();
