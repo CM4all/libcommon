@@ -659,8 +659,8 @@ TranslateParser::HandleBindMount(std::string_view payload,
 				 bool file)
 {
 	const auto [source, target] = Split(payload, '\0');
-	if (source.empty() || source.front() != '/' ||
-	    target.empty() || target.front() != '/')
+	if (!IsValidAbsolutePath(source) ||
+	    !IsValidAbsolutePath(target))
 		throw std::runtime_error("malformed BIND_MOUNT packet");
 
 	if (mount_list == IntrusiveForwardList<Mount>::end())
