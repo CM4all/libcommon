@@ -49,8 +49,7 @@ EventLoop::~EventLoop() noexcept
 void
 EventLoop::Reinit() noexcept
 {
-	steady_clock_cache.flush();
-	system_clock_cache.flush();
+	FlushClockCaches();
 
 	epoll = {};
 
@@ -209,8 +208,7 @@ EventLoop::Wait(Event::Duration timeout) noexcept
 bool
 EventLoop::Loop(const bool once, const bool nonblock) noexcept
 {
-	steady_clock_cache.flush();
-	system_clock_cache.flush();
+	FlushClockCaches();
 
 	quit = false;
 
@@ -255,8 +253,7 @@ EventLoop::Loop(const bool once, const bool nonblock) noexcept
 		if (!ready && nonblock)
 			quit = true;
 
-		steady_clock_cache.flush();
-		system_clock_cache.flush();
+		FlushClockCaches();
 
 		/* invoke sockets */
 		while (!ready_sockets.empty() && !quit) {

@@ -197,6 +197,11 @@ public:
 		return system_clock_cache.now();
 	}
 
+	void FlushClockCaches() noexcept {
+		steady_clock_cache.flush();
+		system_clock_cache.flush();
+	}
+
 private:
 	/**
 	 * @return false if there are no registered events
