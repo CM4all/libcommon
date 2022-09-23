@@ -63,8 +63,7 @@ TimerWheel::Insert(CoarseTimerEvent &t,
 }
 
 void
-TimerWheel::Run(List &list, Event::TimePoint now,
-		bool &invoked) noexcept
+TimerWheel::Run(List &list, Event::TimePoint now) noexcept
 {
 	/* move all timers to a temporary list to avoid problems with
 	   canceled timers while we traverse the list */
@@ -73,7 +72,6 @@ TimerWheel::Run(List &list, Event::TimePoint now,
 	tmp.clear_and_dispose([&](auto *t){
 		if (t->GetDue() <= now) {
 			/* this timer is due: run it */
-			invoked = true;
 			t->Run();
 		} else {
 			/* not yet due: move it back to the given
@@ -125,11 +123,10 @@ TimerWheel::GetSleep(Event::TimePoint now) const noexcept
 }
 
 Event::Duration
-TimerWheel::Run(const Event::TimePoint now, bool &invoked) noexcept
+TimerWheel::Run(const Event::TimePoint now) noexcept
 {
 	/* invoke the "ready" list unconditionally */
 	ready.clear_and_dispose([&](auto *t){
-		invoked = true;
 		t->Run();
 	});
 
@@ -164,7 +161,7 @@ TimerWheel::Run(const Event::TimePoint now, bool &invoked) noexcept
 	/* run those buckets */
 
 	for (std::size_t i = start_bucket;;) {
-		Run(buckets[i], now, invoked);
+		Run(buckets[i], now);
 
 		i = NextBucketIndex(i);
 		if (i == end_bucket)

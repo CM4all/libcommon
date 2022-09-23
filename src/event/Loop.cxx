@@ -112,8 +112,8 @@ EventLoop::HandleTimers() noexcept
 {
 	const auto now = SteadyNow();
 
-	auto fine_timeout = timers.Run(now, invoked);
-	auto coarse_timeout = coarse_timers.Run(now, invoked);
+	auto fine_timeout = timers.Run(now);
+	auto coarse_timeout = coarse_timers.Run(now);
 
 	return fine_timeout.count() < 0 ||
 		(coarse_timeout.count() >= 0 && coarse_timeout < fine_timeout)
@@ -137,7 +137,6 @@ bool
 EventLoop::RunDeferred() noexcept
 {
 	while (!defer.empty()) {
-		invoked = true;
 		defer.pop_front_and_dispose([](DeferEvent *e){
 			e->Run();
 		});
@@ -152,7 +151,6 @@ EventLoop::RunOneIdle() noexcept
 	if (idle.empty())
 		return false;
 
-	invoked = true;
 	idle.pop_front_and_dispose([](DeferEvent *e){
 		e->Run();
 	});
@@ -206,7 +204,7 @@ EventLoop::Wait(Event::Duration timeout) noexcept
 }
 
 bool
-EventLoop::Loop(const bool once, const bool nonblock) noexcept
+EventLoop::Loop(const bool nonblock) noexcept
 {
 	FlushClockCaches();
 
@@ -214,7 +212,6 @@ EventLoop::Loop(const bool once, const bool nonblock) noexcept
 
 	do {
 		again = false;
-		invoked = false;
 
 		/* invoke timers */
 
@@ -237,9 +234,6 @@ EventLoop::Loop(const bool once, const bool nonblock) noexcept
 			/* re-evaluate timers because one of the
 			   DeferEvents may have added a new timeout */
 			continue;
-
-		if (once && invoked)
-			break;
 
 		/* wait for new event */
 
@@ -267,7 +261,7 @@ EventLoop::Loop(const bool once, const bool nonblock) noexcept
 		}
 
 		RunPost();
-	} while (!quit && !once);
+	} while (!quit);
 
 	return true;
 }

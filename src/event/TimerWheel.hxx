@@ -109,8 +109,7 @@ public:
 	 * the duration until the next timer expires.  Returns a
 	 * negative duration if there is no timeout.
 	 */
-	Event::Duration Run(Event::TimePoint now,
-			    bool &invoked) noexcept;
+	Event::Duration Run(Event::TimePoint now) noexcept;
 
 private:
 	static constexpr std::size_t NextBucketIndex(std::size_t i) noexcept {
@@ -142,6 +141,5 @@ private:
 	/**
 	 * Run all due timers in this bucket.
 	 */
-	static void Run(List &list, Event::TimePoint now,
-			bool &invoked) noexcept;
+	static void Run(List &list, Event::TimePoint now) noexcept;
 };

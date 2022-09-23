@@ -81,6 +81,5 @@ public:
 	 * duration until the next timer expires.  Returns a negative
 	 * duration if there is no timeout.
 	 */
-	Event::Duration Run(Event::TimePoint now,
-			    bool &invoked) noexcept;
+	Event::Duration Run(Event::TimePoint now) noexcept;
 };

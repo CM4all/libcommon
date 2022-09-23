@@ -93,14 +93,6 @@ class EventLoop final
 	 */
 	bool again;
 
-	/**
-	 * This flag keeps track whether a TimerEvent or a DeferEvent
-	 * has been invoked.  This is used to implement the "once"
-	 * parameter to avoid calling epoll_wait() after something has
-	 * been done already.
-	 */
-	bool invoked;
-
 	ClockCache<std::chrono::steady_clock> steady_clock_cache;
 	ClockCache<std::chrono::system_clock> system_clock_cache;
 
@@ -125,19 +117,11 @@ public:
 #endif
 
 	void Dispatch() noexcept {
-		Loop(false, false);
+		Loop(false);
 	}
 
 	bool LoopNonBlock() noexcept {
-		return Loop(false, true);
-	}
-
-	bool LoopOnce() noexcept {
-		return Loop(true, false);
-	}
-
-	bool LoopOnceNonBlock() noexcept {
-		return Loop(true, true);
+		return Loop(true);
 	}
 
 	void Break() noexcept {
@@ -206,7 +190,7 @@ private:
 	/**
 	 * @return false if there are no registered events
 	 */
-	bool Loop(bool once, bool non_block) noexcept;
+	bool Loop(bool non_block) noexcept;
 
 	bool RunDeferred() noexcept;
 

@@ -66,8 +66,7 @@ TimerList::Insert(FineTimerEvent &t) noexcept
 }
 
 Event::Duration
-TimerList::Run(const Event::TimePoint now,
-	       bool &invoked) noexcept
+TimerList::Run(const Event::TimePoint now) noexcept
 {
 	while (true) {
 		auto i = timers.begin();
@@ -78,8 +77,6 @@ TimerList::Run(const Event::TimePoint now,
 		const auto timeout = t.due - now;
 		if (timeout > timeout.zero())
 			return timeout;
-
-		invoked = true;
 
 #ifdef NO_BOOST
 		t.Cancel();
