@@ -203,8 +203,8 @@ EventLoop::Wait(Event::Duration timeout) noexcept
 	return ret > 0;
 }
 
-bool
-EventLoop::Loop(const bool nonblock) noexcept
+void
+EventLoop::Dispatch() noexcept
 {
 	FlushClockCaches();
 
@@ -237,17 +237,13 @@ EventLoop::Loop(const bool nonblock) noexcept
 
 		/* wait for new event */
 
-		if (nonblock)
-			timeout = timeout.zero();
-
 		if (IsEmpty())
-			return false;
+			return;
 
-		const bool ready = !ready_sockets.empty() || Wait(timeout);
-		if (!ready && nonblock)
-			quit = true;
-
-		FlushClockCaches();
+		if (ready_sockets.empty()) {
+			Wait(timeout);
+			FlushClockCaches();
+		}
 
 		/* invoke sockets */
 		while (!ready_sockets.empty() && !quit) {
@@ -262,6 +258,4 @@ EventLoop::Loop(const bool nonblock) noexcept
 
 		RunPost();
 	} while (!quit);
-
-	return true;
 }

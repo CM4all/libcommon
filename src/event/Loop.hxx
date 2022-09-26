@@ -116,13 +116,7 @@ public:
 	}
 #endif
 
-	void Dispatch() noexcept {
-		Loop(false);
-	}
-
-	bool LoopNonBlock() noexcept {
-		return Loop(true);
-	}
+	void Dispatch() noexcept;
 
 	void Break() noexcept {
 		quit = true;
@@ -187,11 +181,6 @@ public:
 	}
 
 private:
-	/**
-	 * @return false if there are no registered events
-	 */
-	bool Loop(bool non_block) noexcept;
-
 	bool RunDeferred() noexcept;
 
 	/**
