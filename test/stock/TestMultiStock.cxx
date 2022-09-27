@@ -122,6 +122,8 @@ public:
 struct Instance {
 	EventLoop event_loop;
 
+	DeferEvent break_event{event_loop, BIND_THIS_METHOD(OnBreakEvent)};
+
 	MyStockClass stock_class;
 	MultiStock multi_stock;
 
@@ -130,8 +132,13 @@ struct Instance {
 			     stock_class) {}
 
 	void RunSome() noexcept {
-		for (unsigned i = 0; i < 8; ++i)
-			event_loop.LoopNonBlock();
+		break_event.ScheduleIdle();
+		event_loop.Dispatch();
+	}
+
+private:
+	void OnBreakEvent() noexcept {
+		event_loop.Break();
 	}
 };
 

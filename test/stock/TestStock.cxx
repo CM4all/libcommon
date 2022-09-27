@@ -123,6 +123,22 @@ public:
 	}
 };
 
+struct Instance {
+	EventLoop event_loop;
+
+	DeferEvent break_event{event_loop, BIND_THIS_METHOD(OnBreakEvent)};
+
+	void RunSome() noexcept {
+		break_event.ScheduleIdle();
+		event_loop.Dispatch();
+	}
+
+private:
+	void OnBreakEvent() noexcept {
+		event_loop.Break();
+	}
+};
+
 } // anonymous namespace
 
 TEST(Stock, Basic)
@@ -130,10 +146,10 @@ TEST(Stock, Basic)
 	CancellablePointer cancel_ptr;
 	StockItem *item, *second, *third;
 
-	EventLoop event_loop;
+	Instance instance;
 
 	MyStockClass cls;
-	Stock stock(event_loop, cls, "test", 3, 8,
+	Stock stock(instance.event_loop, cls, "test", 3, 8,
 		    Event::Duration::zero());
 
 	MyStockGetHandler handler;
@@ -153,7 +169,7 @@ TEST(Stock, Basic)
 	/* release first item */
 
 	stock.Put(*item, false);
-	event_loop.LoopNonBlock();
+	instance.RunSome();
 	ASSERT_EQ(num_create, 1);
 	ASSERT_EQ(num_fail, 0);
 	ASSERT_EQ(num_borrow, 0);
@@ -242,7 +258,7 @@ TEST(Stock, Basic)
 	/* return third item */
 
 	stock.Put(*third, false);
-	event_loop.LoopNonBlock();
+	instance.RunSome();
 	ASSERT_EQ(num_create, 3);
 	ASSERT_EQ(num_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
@@ -256,7 +272,7 @@ TEST(Stock, Basic)
 	got_item = false;
 	last_item = nullptr;
 	stock.Put(*second, true);
-	event_loop.LoopNonBlock();
+	instance.RunSome();
 	ASSERT_EQ(num_create, 4);
 	ASSERT_EQ(num_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
