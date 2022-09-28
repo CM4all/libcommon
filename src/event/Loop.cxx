@@ -136,7 +136,7 @@ EventLoop::AddIdle(DeferEvent &e) noexcept
 void
 EventLoop::RunDeferred() noexcept
 {
-	while (!defer.empty()) {
+	while (!defer.empty() && !quit) {
 		defer.pop_front_and_dispose([](DeferEvent *e){
 			e->Run();
 		});
