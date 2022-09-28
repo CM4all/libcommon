@@ -124,13 +124,13 @@ EventLoop::HandleTimers() noexcept
 void
 EventLoop::AddDefer(DeferEvent &e) noexcept
 {
-	defer.push_front(e);
+	defer.push_back(e);
 }
 
 void
 EventLoop::AddIdle(DeferEvent &e) noexcept
 {
-	idle.push_front(e);
+	idle.push_back(e);
 }
 
 void
