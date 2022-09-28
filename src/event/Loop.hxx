@@ -181,7 +181,7 @@ public:
 	}
 
 private:
-	bool RunDeferred() noexcept;
+	void RunDeferred() noexcept;
 
 	/**
 	 * Invoke one "idle" #DeferEvent.

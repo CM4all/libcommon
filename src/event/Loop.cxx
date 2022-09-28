@@ -133,7 +133,7 @@ EventLoop::AddIdle(DeferEvent &e) noexcept
 	idle.push_front(e);
 }
 
-bool
+void
 EventLoop::RunDeferred() noexcept
 {
 	while (!defer.empty()) {
@@ -141,8 +141,6 @@ EventLoop::RunDeferred() noexcept
 			e->Run();
 		});
 	}
-
-	return true;
 }
 
 bool
