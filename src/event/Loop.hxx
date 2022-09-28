@@ -116,35 +116,6 @@ public:
 	}
 #endif
 
-	void Dispatch() noexcept;
-
-	void Break() noexcept {
-		quit = true;
-	}
-
-	bool IsEmpty() const noexcept {
-		return coarse_timers.IsEmpty() && timers.IsEmpty() &&
-			defer.empty() && idle.empty() &&
-			sockets.empty() && ready_sockets.empty();
-	}
-
-	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept;
-	bool ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept;
-	bool RemoveFD(int fd, SocketEvent &event) noexcept;
-
-	/**
-	 * Remove the given #SocketEvent after the file descriptor
-	 * has been closed.  This is like RemoveFD(), but does not
-	 * attempt to use #EPOLL_CTL_DEL.
-	 */
-	void AbandonFD(SocketEvent &event) noexcept;
-
-	void Insert(CoarseTimerEvent &t) noexcept;
-	void Insert(FineTimerEvent &t) noexcept;
-
-	void AddDefer(DeferEvent &e) noexcept;
-	void AddIdle(DeferEvent &e) noexcept;
-
 	const auto &GetSteadyClockCache() const noexcept {
 		return steady_clock_cache;
 	}
@@ -179,6 +150,35 @@ public:
 		steady_clock_cache.flush();
 		system_clock_cache.flush();
 	}
+
+	void Break() noexcept {
+		quit = true;
+	}
+
+	bool IsEmpty() const noexcept {
+		return coarse_timers.IsEmpty() && timers.IsEmpty() &&
+			defer.empty() && idle.empty() &&
+			sockets.empty() && ready_sockets.empty();
+	}
+
+	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept;
+	bool ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept;
+	bool RemoveFD(int fd, SocketEvent &event) noexcept;
+
+	/**
+	 * Remove the given #SocketEvent after the file descriptor
+	 * has been closed.  This is like RemoveFD(), but does not
+	 * attempt to use #EPOLL_CTL_DEL.
+	 */
+	void AbandonFD(SocketEvent &event) noexcept;
+
+	void Insert(CoarseTimerEvent &t) noexcept;
+	void Insert(FineTimerEvent &t) noexcept;
+
+	void AddDefer(DeferEvent &e) noexcept;
+	void AddIdle(DeferEvent &e) noexcept;
+
+	void Dispatch() noexcept;
 
 private:
 	void RunDeferred() noexcept;
