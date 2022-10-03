@@ -38,10 +38,10 @@
 
 TEST(TestDummyCert, RSA)
 {
-	const auto key1 = GenerateRsaKey();
+	const auto key1 = GenerateRsaKey(1024);
 	const auto cert1 = MakeSelfSignedDummyCert(*key1, "foo");
 
-	const auto key2 = GenerateRsaKey();
+	const auto key2 = GenerateRsaKey(1024);
 	const auto cert2 = MakeSelfSignedDummyCert(*key2, "foo");
 
 	EXPECT_TRUE(MatchModulus(*cert1, *key1));
