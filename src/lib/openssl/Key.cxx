@@ -39,7 +39,7 @@
 #include <openssl/err.h>
 
 UniqueEVP_PKEY
-GenerateRsaKey()
+GenerateRsaKey(unsigned bits)
 {
 	const UniqueEVP_PKEY_CTX ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr));
 	if (!ctx)
@@ -48,7 +48,7 @@ GenerateRsaKey()
 	if (EVP_PKEY_keygen_init(ctx.get()) <= 0)
 		throw SslError("EVP_PKEY_keygen_init() failed");
 
-	if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx.get(), 4096) <= 0)
+	if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx.get(), bits) <= 0)
 		throw SslError("EVP_PKEY_CTX_set_rsa_keygen_bits() failed");
 
 	EVP_PKEY *pkey = nullptr;

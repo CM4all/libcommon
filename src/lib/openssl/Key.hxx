@@ -43,7 +43,7 @@
 #include <span>
 
 UniqueEVP_PKEY
-GenerateRsaKey();
+GenerateRsaKey(unsigned bits=4096);
 
 /**
  * Generate a new elliptic curve key.
