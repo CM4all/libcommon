@@ -205,12 +205,11 @@ private:
 	 */
 	bool Wait(Event::Duration timeout) noexcept;
 
-	bool RunPost() noexcept {
+	void RunPost() noexcept {
 #ifndef NDEBUG
 		if (post_callback)
 			post_callback();
 #endif
-		return true;
 	}
 };
 
