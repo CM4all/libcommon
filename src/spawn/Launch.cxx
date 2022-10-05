@@ -36,6 +36,7 @@
 #include "CgroupState.hxx"
 #include "Server.hxx"
 #include "system/CapabilityState.hxx"
+#include "system/clone3.h"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
@@ -244,23 +245,25 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 			std::move(post_clone),
 			read_pipe, write_pipe, true};
 
-	char stack[32768];
+	int _pidfd;
+
+	struct clone_args ca{};
+	ca.flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_PIDFD;
+	ca.pidfd = (intptr_t)&_pidfd;
+	ca.exit_signal = SIGCHLD;
 
 	/* try to run the spawner in a new PID namespace; to be able to
 	   mount a new /proc for this namespace, we need a mount namespace
 	   (CLONE_NEWNS) as well */
-	int _pidfd;
-	int pid = clone(RunSpawnServer2, stack + sizeof(stack),
-			CLONE_NEWPID | CLONE_NEWNS | CLONE_PIDFD,
-			&ctx, &_pidfd);
+	int pid = clone3(&ca, sizeof(ca));
 	if (pid < 0) {
 		/* try again without CLONE_NEWPID */
 		fprintf(stderr, "Failed to create spawner PID namespace (%s), trying without\n",
-			strerror(errno));
+			strerror(-pid));
 		ctx.pid_namespace = false;
-		pid = clone(RunSpawnServer2, stack + sizeof(stack),
-			    CLONE_PIDFD,
-			    &ctx, &_pidfd);
+
+		ca.flags &= ~(CLONE_NEWPID | CLONE_NEWNS);
+		pid = clone3(&ca, sizeof(ca));
 	}
 
 	/* note: CLONE_IO cannot be used here because it conflicts
@@ -269,7 +272,11 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	   the Linux kernel sources (5.11 as of this writing) */
 
 	if (pid < 0)
-		throw MakeErrno("clone() failed");
+		throw MakeErrno(-pid, "clone() failed");
+
+	if (pid == 0) {
+		_exit(RunSpawnServer2(&ctx));
+	}
 
 	UniqueFileDescriptor pidfd{_pidfd};
 
