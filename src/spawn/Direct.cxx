@@ -42,6 +42,7 @@
 #include "io/Iovec.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
+#include "system/clone3.h"
 #include "system/CoreScheduling.hxx"
 #include "system/IOPrio.hxx"
 #include "util/Exception.hxx"
@@ -58,8 +59,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <linux/sched.h>
-#include <sys/syscall.h>
 #include <sys/prctl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -69,19 +68,9 @@
 
 using std::string_view_literals::operator""sv;
 
-#ifndef CLONE_CLEAR_SIGHAND
-#define CLONE_CLEAR_SIGHAND 0x100000000ULL
-#endif
-
 #ifndef PR_SET_NO_NEW_PRIVS
 #define PR_SET_NO_NEW_PRIVS 38
 #endif
-
-static long
-clone3(const struct clone_args *cl_args, size_t size) noexcept
-{
-	return syscall(__NR_clone3, cl_args, size);
-}
 
 static void
 CheckedDup2(FileDescriptor oldfd, FileDescriptor newfd) noexcept

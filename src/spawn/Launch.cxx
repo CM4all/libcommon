@@ -36,6 +36,7 @@
 #include "CgroupState.hxx"
 #include "Server.hxx"
 #include "system/CapabilityState.hxx"
+#include "system/clone3.h"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
@@ -49,26 +50,6 @@
 #include <string.h>
 #include <sys/signal.h>
 #include <sys/mount.h>
-
-struct LaunchSpawnServerContext {
-	const SpawnConfig &config;
-
-	SpawnHook *hook;
-
-	UniqueSocketDescriptor socket;
-
-	std::function<void()> post_clone;
-
-	/**
-	 * A pipe which is used to copy the "real" PID to the spawner
-	 * (which doesn't know its own PID because it lives in a new PID
-	 * namespace).  The "real" PID is necessary because we need to
-	 * send it to systemd.
-	 */
-	FileDescriptor read_pipe, write_pipe;
-
-	bool pid_namespace;
-};
 
 #ifdef HAVE_LIBSYSTEMD
 
@@ -138,25 +119,22 @@ DropCapabilities()
 }
 
 static int
-RunSpawnServer2(void *p)
+RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
+		UniqueSocketDescriptor socket,
+		FileDescriptor read_pipe,
+		const bool pid_namespace) noexcept
 {
-	auto &ctx = *(LaunchSpawnServerContext *)p;
-
-	ctx.post_clone();
-
-	ctx.write_pipe.Close();
-
 	/* receive our "real" PID from the parent process; we have no way
 	   to obtain it, because we're in a PID namespace and getpid()
 	   returns 1 */
 	int real_pid;
-	if (ctx.read_pipe.Read(&real_pid, sizeof(real_pid)) != sizeof(real_pid))
+	if (read_pipe.Read(&real_pid, sizeof(real_pid)) != sizeof(real_pid))
 		real_pid = getpid();
-	ctx.read_pipe.Close();
+	read_pipe.Close();
 
 	SetProcessName("spawn");
 
-	if (ctx.pid_namespace) {
+	if (pid_namespace) {
 		/* if the spawner runs in its own PID namespace, we need to
 		   mount a new /proc for that namespace; first make the
 		   existing /proc a "slave" mount (to avoid propagating the
@@ -168,7 +146,7 @@ RunSpawnServer2(void *p)
 	}
 
 	try {
-		ctx.config.spawner_uid_gid.Apply();
+		config.spawner_uid_gid.Apply();
 	} catch (...) {
 		PrintException(std::current_exception());
 		return EXIT_FAILURE;
@@ -186,22 +164,22 @@ RunSpawnServer2(void *p)
 	CgroupState cgroup_state;
 
 #ifdef HAVE_LIBSYSTEMD
-	if (!ctx.config.systemd_scope.empty()) {
+	if (!config.systemd_scope.empty()) {
 		try {
 			cgroup_state =
-				CreateSystemdScope(ctx.config.systemd_scope.c_str(),
-						   ctx.config.systemd_scope_description.c_str(),
-						   ctx.config.systemd_scope_properties,
+				CreateSystemdScope(config.systemd_scope.c_str(),
+						   config.systemd_scope_description.c_str(),
+						   config.systemd_scope_properties,
 						   real_pid, true,
-						   ctx.config.systemd_slice.empty() ? nullptr : ctx.config.systemd_slice.c_str());
+						   config.systemd_slice.empty() ? nullptr : config.systemd_slice.c_str());
 
-			Chown(cgroup_state, ctx.config.spawner_uid_gid.uid,
-			      ctx.config.spawner_uid_gid.gid);
+			Chown(cgroup_state, config.spawner_uid_gid.uid,
+			      config.spawner_uid_gid.gid);
 		} catch (...) {
 			fprintf(stderr, "Failed to create systemd scope: ");
 			PrintException(std::current_exception());
 
-			if (!ctx.config.systemd_scope_optional)
+			if (!config.systemd_scope_optional)
 				return EXIT_FAILURE;
 		}
 	}
@@ -223,7 +201,7 @@ RunSpawnServer2(void *p)
 	}
 
 	try {
-		RunSpawnServer(ctx.config, cgroup_state, ctx.hook, std::move(ctx.socket));
+		RunSpawnServer(config, cgroup_state, hook, std::move(socket));
 		return EXIT_SUCCESS;
 	} catch (...) {
 		PrintException(std::current_exception());
@@ -236,31 +214,37 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 		  UniqueSocketDescriptor socket,
 		  std::function<void()> post_clone)
 {
+	/**
+	 * A pipe which is used to copy the "real" PID to the spawner
+	 * (which doesn't know its own PID because it lives in a new PID
+	 * namespace).  The "real" PID is necessary because we need to
+	 * send it to systemd.
+	 */
 	UniqueFileDescriptor read_pipe, write_pipe;
 	if (!UniqueFileDescriptor::CreatePipe(read_pipe, write_pipe))
 		throw MakeErrno("pipe() failed");
 
-	LaunchSpawnServerContext ctx{config, hook, std::move(socket),
-			std::move(post_clone),
-			read_pipe, write_pipe, true};
+	bool pid_namespace = true;
 
-	char stack[32768];
+	int _pidfd;
+
+	struct clone_args ca{};
+	ca.flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_PIDFD;
+	ca.pidfd = (intptr_t)&_pidfd;
+	ca.exit_signal = SIGCHLD;
 
 	/* try to run the spawner in a new PID namespace; to be able to
 	   mount a new /proc for this namespace, we need a mount namespace
 	   (CLONE_NEWNS) as well */
-	int _pidfd;
-	int pid = clone(RunSpawnServer2, stack + sizeof(stack),
-			CLONE_NEWPID | CLONE_NEWNS | CLONE_PIDFD,
-			&ctx, &_pidfd);
+	int pid = clone3(&ca, sizeof(ca));
 	if (pid < 0) {
 		/* try again without CLONE_NEWPID */
 		fprintf(stderr, "Failed to create spawner PID namespace (%s), trying without\n",
-			strerror(errno));
-		ctx.pid_namespace = false;
-		pid = clone(RunSpawnServer2, stack + sizeof(stack),
-			    CLONE_PIDFD,
-			    &ctx, &_pidfd);
+			strerror(-pid));
+		pid_namespace = false;
+
+		ca.flags &= ~(CLONE_NEWPID | CLONE_NEWNS);
+		pid = clone3(&ca, sizeof(ca));
 	}
 
 	/* note: CLONE_IO cannot be used here because it conflicts
@@ -269,7 +253,16 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	   the Linux kernel sources (5.11 as of this writing) */
 
 	if (pid < 0)
-		throw MakeErrno("clone() failed");
+		throw MakeErrno(-pid, "clone() failed");
+
+	if (pid == 0) {
+		post_clone();
+
+		write_pipe.Close();
+
+		_exit(RunSpawnServer2(config, hook, std::move(socket),
+				      read_pipe, pid_namespace));
+	}
 
 	UniqueFileDescriptor pidfd{_pidfd};
 
