@@ -30,32 +30,27 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Read.hxx"
-#include "was/ExceptionResponse.hxx"
-#include "was/ExpectRequestBody.hxx"
-#include "was/Reader.hxx"
-#include "was/SimpleResponse.hxx"
-#include "json/Parse.hxx"
-#include "json/Error.hxx"
+#pragma once
 
 #include <boost/json.hpp>
 
-using namespace Was;
+namespace Json {
 
-boost::json::value
-ReadJsonRequestBody(struct was_simple *w)
+[[gnu::const]]
+static inline const std::error_category &
+ErrorCategory() noexcept
 {
-	ExpectRequestBody(w, "application/json");
-	WasReader r{w};
-
-	try {
-		return Json::Parse(r);
-	} catch (const boost::json::system_error &e) {
-		if (Json::IsJsonError(e)) {
-			SendBadRequest(w, e.what());
-			throw AbortResponse{};
-		}
-
-		throw;
-	}
+	/* the error_category is a local static variable in
+	   make_error_code(), so we have no choice but to call this
+	   function in order to obtain the error_category reference*/
+	return boost::json::make_error_code(boost::json::error::syntax).category();
 }
+
+[[gnu::pure]]
+static bool
+IsJsonError(const boost::json::system_error &e) noexcept
+{
+	return e.code().category() == ErrorCategory();
+}
+
+} // namespace Json
