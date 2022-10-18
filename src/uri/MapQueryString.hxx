@@ -39,7 +39,7 @@
  * Parse a query string (or "application/x-www-form-urlencoded") into
  * a multimap.
  *
- * Throws if a value has a bad escape.
+ * Throws std::invalid_argument if a value has a bad escape.
  */
 std::multimap<std::string, std::string>
 MapQueryString(std::string_view src);
