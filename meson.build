@@ -129,6 +129,7 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
   # this library checks __cpp_constinit and requires
   # std::memory_resource, so disable it with older GCC
   subdir('src/json')
+  libcommon_enable_json = true
 endif
 
 subdir('src/adata')
