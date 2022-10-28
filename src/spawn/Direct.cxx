@@ -303,7 +303,7 @@ try {
 
 	if (!stderr_fd.IsDefined() && p.stderr_path != nullptr &&
 	    !stderr_fd.Open(p.stderr_path,
-			    O_CREAT|O_WRONLY|O_APPEND|O_CLOEXEC|O_NOCTTY,
+			    O_CREAT|O_WRONLY|O_APPEND,
 			    0600))
 		throw MakeErrno("Failed to open STDERR_PATH");
 
