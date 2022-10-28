@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2021 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,11 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LUA_PUSH_CLOSURE_HXX
-#define LUA_PUSH_CLOSURE_HXX
+#pragma once
 
 #include "Assert.hxx"
-#include "util/Compiler.h"
 
 extern "C" {
 #include <lua.h>
@@ -57,7 +55,7 @@ MakeCClosure(lua_CFunction fn, T&&... values)
 }
 
 template<typename... T>
-gcc_nonnull_all
+[[gnu::nonnull]]
 void
 PushAll(lua_State *L, const std::tuple<T...> &t)
 {
@@ -69,7 +67,7 @@ PushAll(lua_State *L, const std::tuple<T...> &t)
 }
 
 template<typename... T>
-gcc_nonnull_all
+[[gnu::nonnull]]
 void
 Push(lua_State *L, const CClosure<T...> &value) noexcept
 {
@@ -78,5 +76,3 @@ Push(lua_State *L, const CClosure<T...> &value) noexcept
 }
 
 } // namespace Lua
-
-#endif

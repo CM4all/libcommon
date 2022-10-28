@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2021 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2015-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,11 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LUA_PUSH_LAMBDA_HXX
-#define LUA_PUSH_LAMBDA_HXX
+#pragma once
 
 #include "Assert.hxx"
-#include "util/Compiler.h"
 
 extern "C" {
 #include <lua.h>
@@ -67,7 +65,7 @@ Lambda(T &&t)
  * detour with struct _Lambda and Lambda().
  */
 template<typename T>
-gcc_nonnull_all
+[[gnu::nonnull]]
 static inline void
 Push(lua_State *L, _Lambda<T> l)
 {
@@ -77,5 +75,3 @@ Push(lua_State *L, _Lambda<T> l)
 }
 
 } // namespace Lua
-
-#endif
