@@ -39,6 +39,10 @@ class FileDescriptor;
  * Symlinks are copied as-is, i.e. they are not rewritten.
  *
  * Throws on error.
+ *
+ * @param dst_filename the path within #dst_parent; if empty, copies
+ * right into the given #dst_parent directory (only possible if the
+ * source also refers to a directory)
  */
 void
 RecursiveCopy(FileDescriptor src_parent, const char *src_filename,

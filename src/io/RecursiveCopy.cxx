@@ -190,8 +190,11 @@ static void
 RecursiveCopyDirectory(DirectoryReader &&src,
 		       FileDescriptor dst_parent, const char *dst_filename)
 {
-	RecursiveCopyDirectory(std::move(src),
-			       MakeDirectory(dst_parent, dst_filename));
+	if (*dst_filename == 0)
+		RecursiveCopyDirectory(std::move(src), dst_parent);
+	else
+		RecursiveCopyDirectory(std::move(src),
+				       MakeDirectory(dst_parent, dst_filename));
 }
 
 static void
