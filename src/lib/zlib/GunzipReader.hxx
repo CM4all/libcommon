@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2014-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,8 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GUNZIP_READER_HXX
-#define GUNZIP_READER_HXX
+#pragma once
 
 #include "io/Reader.hxx"
 #include "util/StaticFifoBuffer.hxx"
@@ -45,7 +44,7 @@ class GunzipReader final : public Reader {
 
 	z_stream z;
 
-	StaticFifoBuffer<Bytef, 4096> buffer;
+	StaticFifoBuffer<Bytef, 65536> buffer;
 
 public:
 	/**
@@ -65,5 +64,3 @@ public:
 private:
 	bool FillBuffer();
 };
-
-#endif
