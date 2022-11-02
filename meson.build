@@ -83,11 +83,6 @@ test_cxxflags = test_common_flags + [
   '-Winconsistent-missing-destructor-override',
 ]
 
-if compiler.get_id() == 'gcc' and compiler.version().version_compare('>=11')
-  # too many bogus warnings, e.g. for std::array::size()
-  test_cxxflags += '-Wno-maybe-uninitialized'
-endif
-
 test_cflags = test_common_flags + [
   '-Waggregate-return',
   '-Wbad-function-cast',

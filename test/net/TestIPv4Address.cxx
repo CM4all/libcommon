@@ -31,8 +31,14 @@
  */
 
 #include "net/IPv4Address.hxx"
+#include "util/Compiler.h"
 
 #include <gtest/gtest.h>
+
+#if GCC_CHECK_VERSION(11,0)
+/* suppress warning for calling GetSize() on uninitialized object */
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
 TEST(IPv4AddressTest, Basic)
 {
