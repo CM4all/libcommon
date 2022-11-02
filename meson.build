@@ -31,7 +31,6 @@ test_common_flags = [
   '-Wmissing-noreturn',
   '-Wredundant-decls',
   '-Wshadow',
-  '-Wsign-compare',
   '-Wundef',
   '-Wunused',
   '-Wvla',
