@@ -30,35 +30,22 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "lua/RunFile.hxx"
-#include "lua/mariadb/Init.hxx"
-#include "util/PrintException.hxx"
-#include "util/ScopeExit.hxx"
+#include "Init.hxx"
+#include "Connection.hxx"
+#include "Result.hxx"
+#include "lua/Util.hxx"
 
-extern "C" {
-#include <lauxlib.h>
-#include <lualib.h>
+namespace Lua::MariaDB {
+
+void
+Init(lua_State *L)
+{
+	InitConnection(L);
+	InitResult(L);
+
+	lua_newtable(L);
+	SetTable(L, RelativeStackIndex{-1}, "new", NewConnection);
+	lua_setglobal(L, "mariadb");
 }
 
-#include <stdio.h>
-#include <stdlib.h>
-
-int main(int argc, char **argv)
-try {
-	if (argc != 2)
-		throw "Usage: RunLua FILE.lua";
-
-	const char *path = argv[1];
-
-	const auto L = luaL_newstate();
-	AtScopeExit(L) { lua_close(L); };
-
-	luaL_openlibs(L);
-	Lua::MariaDB::Init(L);
-
-	Lua::RunFile(L, path);
-	return EXIT_SUCCESS;
-} catch (...) {
-	PrintException(std::current_exception());
-	return EXIT_FAILURE;
-}
+} // namespace Lua::MariaDB

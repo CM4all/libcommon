@@ -166,6 +166,7 @@ subdir('src/was/async')
 
 subdir('src/lua/event')
 subdir('src/lua/pg')
+subdir('src/lua/mariadb')
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   subdir('src/translation/server')
