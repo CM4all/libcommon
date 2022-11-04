@@ -132,6 +132,7 @@ TranslateResponse::Clear()
 #if TRANSLATION_ENABLE_RADDRESS
 	unsafe_base = false;
 	easy_base = false;
+	path_exists = false;
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -358,6 +359,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #if TRANSLATION_ENABLE_RADDRESS
 	unsafe_base = src.unsafe_base;
 	easy_base = src.easy_base;
+	path_exists = src.path_exists;
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND

@@ -126,6 +126,8 @@ struct Request {
 
 	const char *plan = nullptr;
 
+	bool path_exists = false;
+
 	bool login = false;
 
 	bool cron = false;

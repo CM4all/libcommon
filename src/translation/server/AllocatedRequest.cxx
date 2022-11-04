@@ -299,6 +299,10 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		plan = plan_buffer.c_str();
 		break;
 
+	case TranslationCommand::PATH_EXISTS:
+		path_exists = true;
+		break;
+
 	default:
 		throw FormatRuntimeError("unknown translation packet: %u",
 					 unsigned(cmd));

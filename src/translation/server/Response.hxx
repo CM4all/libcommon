@@ -459,6 +459,11 @@ public:
 		return Packet(TranslationCommand::FILE_NOT_FOUND, payload);
 	}
 
+	template<typename P>
+	auto &PathExists() noexcept {
+		return Packet(TranslationCommand::PATH_EXISTS);
+	}
+
 	template<typename... Types>
 	auto &Session(Types... value) noexcept {
 		return StringPacket(TranslationCommand::SESSION, value...);

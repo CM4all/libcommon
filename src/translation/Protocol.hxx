@@ -1200,6 +1200,12 @@ enum class TranslationCommand : uint16_t {
 	 * path and the file contents separated by a null byte.
 	 */
 	WRITE_FILE = 246,
+
+	/**
+	 * Resubmit the translation with this packet and a #STATUS
+	 * packet describing whether the path (from #PATH) exists.
+	 */
+	PATH_EXISTS = 247,
 };
 
 struct TranslationHeader {

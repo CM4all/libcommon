@@ -380,6 +380,8 @@ struct TranslateResponse {
 	bool unsafe_base;
 
 	bool easy_base;
+
+	bool path_exists;
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND

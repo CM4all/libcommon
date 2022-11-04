@@ -3968,6 +3968,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		previous_command = command;
 		HandleWriteFile(string_payload);
 		return;
+
+	case TranslationCommand::PATH_EXISTS:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (!payload.empty())
+			throw std::runtime_error("malformed PATH_EXISTS packet");
+
+		if (response.path_exists)
+			throw std::runtime_error("duplicate PATH_EXISTS packet");
+
+		response.path_exists = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);
