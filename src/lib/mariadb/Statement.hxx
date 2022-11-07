@@ -117,4 +117,11 @@ public:
 						 mysql_stmt_error(stmt));
 		}
 	}
+
+	void FetchColumn(MYSQL_BIND &bind, unsigned int column,
+			 unsigned long offset=0) {
+		if (mysql_stmt_fetch_column(stmt, &bind, column, offset) != 0)
+			throw FormatRuntimeError("mysql_stmt_fetch_column() failed: %s",
+						 mysql_stmt_error(stmt));
+	}
 };
