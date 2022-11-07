@@ -52,6 +52,8 @@ try {
 	const auto L = luaL_newstate();
 	AtScopeExit(L) { lua_close(L); };
 
+	luaL_openlibs(L);
+
 	Lua::RunFile(L, path);
 	return EXIT_SUCCESS;
 } catch (...) {
