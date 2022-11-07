@@ -56,4 +56,8 @@ public:
 		swap(result, src.result);
 		return *this;
 	}
+
+	const auto *operator->() const noexcept {
+		return result;
+	}
 };
