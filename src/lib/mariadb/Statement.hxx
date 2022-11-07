@@ -107,6 +107,7 @@ public:
 	bool Fetch() {
 		switch (mysql_stmt_fetch(stmt)) {
 		case 0:
+		case MYSQL_DATA_TRUNCATED:
 			return true;
 
 		case MYSQL_NO_DATA:
