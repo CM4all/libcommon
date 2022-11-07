@@ -73,6 +73,11 @@ public:
 						 mysql_stmt_error(stmt));
 	}
 
+	[[gnu::pure]]
+	unsigned GetFieldCount() const noexcept {
+		return mysql_stmt_field_count(stmt);
+	}
+
 	void BindParam(MYSQL_BIND *bnd) {
 		if (mysql_stmt_bind_param(stmt, bnd) != 0)
 			throw FormatRuntimeError("mysql_stmt_bind_param() failed: %s",
