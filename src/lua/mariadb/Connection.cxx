@@ -128,9 +128,52 @@ BindTable(lua_State *L, auto table_idx,
 }
 
 static int
+Execute(lua_State *L, MysqlConnection &c, std::string_view sql)
+{
+	auto stmt = c.Prepare(sql);
+
+	if (stmt.GetParamCount() > 0)
+		return luaL_error(L, "Not enough parameters");
+
+	stmt.Execute();
+	if (stmt.GetFieldCount() == 0)
+		return 0;
+
+	return NewSResult(L, std::move(stmt));
+}
+
+static int
+Execute(lua_State *L, MysqlConnection &c, std::string_view sql, int params_idx)
+{
+	auto stmt = c.Prepare(sql);
+
+	const std::size_t n = stmt.GetParamCount();
+	MysqlBindVector bind{n};
+	std::unique_ptr<long long[]> long_longs{new long long[n]};
+
+	if (!lua_istable(L, params_idx))
+		luaL_argerror(L, params_idx, "table expected");
+
+	try {
+		BindTable(L, params_idx, bind, long_longs.get(), n);
+	} catch (const ArgError &e) {
+		luaL_argerror(L, params_idx, e.extramsg);
+	}
+
+	stmt.BindParam(bind.binds.get());
+	stmt.Execute();
+
+	if (stmt.GetFieldCount() == 0)
+		return 0;
+
+	return NewSResult(L, std::move(stmt));
+}
+
+static int
 Execute(lua_State *L)
 {
-	if (lua_gettop(L) < 2)
+	const auto top = lua_gettop(L);
+	if (top < 2)
 		return luaL_error(L, "Not enough parameters");
 
 	auto &c = LuaConnection::Cast(L, 1);
@@ -140,39 +183,21 @@ Execute(lua_State *L)
 
 	const auto sql = ToStringView(L, 2);
 
-	try {
-		auto stmt = c.Prepare(sql);
+	if (top >= 3) {
+		if (top > 3)
+			return luaL_error(L, "Too many parameters");
 
-		const std::size_t n = stmt.GetParamCount();
-		MysqlBindVector bind{n};
-		std::unique_ptr<long long[]> long_longs{new long long[n]};
-		if (n > 0) {
-			if (lua_gettop(L) < 3)
-				return luaL_error(L, "Not enough parameters");
-
-			if (!lua_istable(L, 3))
-				luaL_argerror(L, 3, "table expected");
-
-			try {
-				BindTable(L, 3, bind, long_longs.get(), n);
-			} catch (const ArgError &e) {
-				luaL_argerror(L, 3, e.extramsg);
-			}
-
-			stmt.BindParam(bind.binds.get());
-		} else {
-			if (lua_gettop(L) > 2)
-				return luaL_error(L, "Too many parameters");
+		try {
+			return Execute(L, c, sql, 3);
+		} catch (...) {
+			RaiseCurrent(L);
 		}
-
-		stmt.Execute();
-
-		if (stmt.GetFieldCount() == 0)
-			return 0;
-
-		return NewSResult(L, std::move(stmt));
-	} catch (...) {
-		RaiseCurrent(L);
+	} else {
+		try {
+			return Execute(L, c, sql);
+		} catch (...) {
+			RaiseCurrent(L);
+		}
 	}
 }
 
