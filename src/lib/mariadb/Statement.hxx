@@ -46,6 +46,8 @@ class MysqlStatement {
 	MYSQL_STMT *stmt = nullptr;
 
 public:
+	MysqlStatement() noexcept = default;
+
 	explicit MysqlStatement(MYSQL &mysql)
 		:stmt(mysql_stmt_init(&mysql))
 	{
@@ -65,6 +67,10 @@ public:
 		using std::swap;
 		swap(stmt, src.stmt);
 		return *this;
+	}
+
+	operator bool() const noexcept {
+		return stmt != nullptr;
 	}
 
 	void Prepare(std::string_view sql) {

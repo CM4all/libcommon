@@ -59,9 +59,22 @@ static constexpr char lua_result[] = "MariaDB_SResult";
 using LuaSResult = Lua::Class<SResult, lua_result>;
 
 static int
+Close(lua_State *L)
+{
+	if (lua_gettop(L) > 1)
+		return luaL_error(L, "Too many parameters");
+
+	auto &result = LuaSResult::Cast(L, 1);
+	result.stmt = {};
+	return 0;
+}
+
+static int
 Fetch(lua_State *L)
 try {
 	auto &result = LuaSResult::Cast(L, 1);
+	if (!result.stmt)
+		throw std::runtime_error{"Result was already closed"};
 
 	bool numerical = true;
 	const char *mode = luaL_optstring(L, 3, "a");
@@ -114,6 +127,7 @@ try {
 }
 
 static constexpr struct luaL_Reg sresult_methods[] = {
+	{"close", Close},
 	{"fetch", Fetch},
 	{nullptr, nullptr}
 };
