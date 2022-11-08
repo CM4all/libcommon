@@ -2,6 +2,7 @@ lua_mariadb = static_library(
   'lua_mariadb',
   'Init.cxx',
   'Connection.cxx',
+  'Result.cxx',
   'SResult.cxx',
   include_directories: inc,
   dependencies: [

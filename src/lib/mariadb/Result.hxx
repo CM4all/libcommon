@@ -40,6 +40,8 @@ class MysqlResult {
 	MYSQL_RES *result = nullptr;
 
 public:
+	MysqlResult() noexcept = default;
+
 	explicit MysqlResult(MYSQL_RES *_result) noexcept
 		:result(_result) {}
 
@@ -67,5 +69,9 @@ public:
 
 	MYSQL_ROW FetchRow() const noexcept {
 		return mysql_fetch_row(result);
+	}
+
+	const unsigned long *FetchLengths() const noexcept {
+		return mysql_fetch_lengths(result);
 	}
 };

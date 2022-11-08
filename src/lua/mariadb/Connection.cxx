@@ -31,6 +31,7 @@
  */
 
 #include "Connection.hxx"
+#include "Result.hxx"
 #include "SResult.hxx"
 #include "lua/Assert.hxx"
 #include "lua/Class.hxx"
@@ -130,16 +131,9 @@ BindTable(lua_State *L, auto table_idx,
 static int
 Execute(lua_State *L, MysqlConnection &c, std::string_view sql)
 {
-	auto stmt = c.Prepare(sql);
-
-	if (stmt.GetParamCount() > 0)
-		return luaL_error(L, "Not enough parameters");
-
-	stmt.Execute();
-	if (stmt.GetFieldCount() == 0)
-		return 0;
-
-	return NewSResult(L, std::move(stmt));
+	c.Query(sql);
+	auto result = c.StoreResult();
+	return NewResult(L, std::move(result));
 }
 
 static int

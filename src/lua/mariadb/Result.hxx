@@ -30,24 +30,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Init.hxx"
-#include "Connection.hxx"
-#include "Result.hxx"
-#include "SResult.hxx"
-#include "lua/Util.hxx"
+#pragma once
+
+struct lua_State;
+class MysqlResult;
 
 namespace Lua::MariaDB {
 
 void
-Init(lua_State *L)
-{
-	InitConnection(L);
-	InitResult(L);
-	InitSResult(L);
+InitResult(lua_State *L);
 
-	lua_newtable(L);
-	SetTable(L, RelativeStackIndex{-1}, "new", NewConnection);
-	lua_setglobal(L, "mariadb");
-}
+int
+NewResult(lua_State *L, MysqlResult &&result);
 
 } // namespace Lua::MariaDB
