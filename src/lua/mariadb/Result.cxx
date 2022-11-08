@@ -77,7 +77,7 @@ try {
 	else
 		lua_newtable(L);
 
-	const auto &metadata = result.stmt.ResultMetadata();
+	const auto metadata = result.stmt.ResultMetadata();
 
 	AllocatedArray<char> buffer;
 

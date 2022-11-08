@@ -37,6 +37,7 @@
 #include <string_view>
 
 class MysqlStatement;
+class MysqlResult;
 
 class MysqlConnection {
 	MYSQL mysql;
