@@ -74,7 +74,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	unsigned GetFieldCount() const noexcept {
+	std::size_t GetFieldCount() const noexcept {
 		return mysql_stmt_field_count(stmt);
 	}
 
