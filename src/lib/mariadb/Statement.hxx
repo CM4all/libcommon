@@ -74,6 +74,11 @@ public:
 	}
 
 	[[gnu::pure]]
+	std::size_t GetParamCount() const noexcept {
+		return mysql_stmt_param_count(stmt);
+	}
+
+	[[gnu::pure]]
 	std::size_t GetFieldCount() const noexcept {
 		return mysql_stmt_field_count(stmt);
 	}
