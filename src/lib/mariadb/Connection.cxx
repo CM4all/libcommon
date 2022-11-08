@@ -67,6 +67,17 @@ MysqlConnection::StoreResult()
 	return MysqlResult{r};
 }
 
+bool
+MysqlConnection::NextResult()
+{
+	int r = mysql_next_result(&mysql);
+	if (r > 0)
+		throw FormatRuntimeError("mysql_next_result() failed: %s",
+					 mysql_error(&mysql));
+
+	return r == 0;
+}
+
 MysqlStatement
 MysqlConnection::Prepare(std::string_view sql)
 {

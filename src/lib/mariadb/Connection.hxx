@@ -67,5 +67,12 @@ public:
 
 	MysqlResult StoreResult();
 
+	[[gnu::pure]]
+	bool HasMoreResults() noexcept {
+		return mysql_more_results(&mysql);
+	}
+
+	bool NextResult();
+
 	MysqlStatement Prepare(std::string_view sql);
 };
