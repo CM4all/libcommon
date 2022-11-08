@@ -51,6 +51,7 @@ struct SResult {
 		:stmt(std::move(_stmt)),
 		 bind(stmt.GetFieldCount()) {
 		stmt.BindResult(bind);
+		stmt.StoreResult();
 	}
 };
 
