@@ -50,6 +50,8 @@ extern "C" {
 
 namespace Lua::MariaDB {
 
+struct ArgError { const char *extramsg; };
+
 static constexpr char lua_connection[] = "MariaDB_Connection";
 using LuaConnection = Lua::Class<MysqlConnection, lua_connection>;
 
@@ -101,8 +103,6 @@ struct Params {
 	const char *db = nullptr;
 	const char *unix_socket = nullptr;
 	unsigned port = 3306;
-
-	struct ArgError { const char *extramsg; };
 
 	void Apply(lua_State *L, const char *name, int value_idx);
 	void Apply(lua_State *L, int key_idx, int value_idx);
@@ -184,7 +184,7 @@ NewConnection(lua_State *L)
 	Params params;
 	try {
 		params.ApplyTable(L, 2);
-	} catch (const Params::ArgError &e) {
+	} catch (const ArgError &e) {
 		luaL_argerror(L, 2, e.extramsg);
 	}
 
