@@ -51,6 +51,18 @@ struct RelativeStackIndex : StackIndex {
 	using StackIndex::StackIndex;
 };
 
+static constexpr int
+GetStackIndex(int idx) noexcept
+{
+	return idx;
+}
+
+static constexpr int
+GetStackIndex(StackIndex idx) noexcept
+{
+	return idx.idx;
+}
+
 template<typename T>
 void
 StackPushed(T &, int=1) noexcept
