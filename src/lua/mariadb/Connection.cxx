@@ -35,6 +35,7 @@
 #include "lua/Assert.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
+#include "lua/ForEach.hxx"
 #include "lua/StackIndex.hxx"
 #include "lua/StringView.hxx"
 #include "lua/Util.hxx"
@@ -105,7 +106,7 @@ struct Params {
 
 	void Apply(lua_State *L, const char *name, int value_idx);
 	void Apply(lua_State *L, int key_idx, int value_idx);
-	void ApplyTable(lua_State *L, int table_idx);
+	void ApplyTable(lua_State *L, auto table_idx);
 };
 
 inline void
@@ -164,29 +165,11 @@ Params::Apply(lua_State *L, int key_idx, int value_idx)
 }
 
 inline void
-Params::ApplyTable(lua_State *L, int table_idx)
+Params::ApplyTable(lua_State *L, auto table_idx)
 {
-	const ScopeCheckStack check_stack{L};
-
-	lua_pushvalue(L, table_idx);
-	AtScopeExit(L) { lua_pop(L, 1); };
-
-	lua_pushnil(L);
-
-	// stack: [-2] = table; [-1] = nil
-
-	while (lua_next(L, -2)) {
-		// stack: [-3] = table; [-2] = key; [-1] = value
-
-		try {
-			Apply(L, -2, -1);
-		} catch (...) {
-			lua_pop(L, 2);
-			throw;
-		}
-
-		lua_pop(L, 1);
-	}
+	ForEach(L, table_idx, [this, L](auto key_idx, auto value_idx){
+		Apply(L, GetStackIndex(key_idx), GetStackIndex(value_idx));
+	});
 }
 
 int
