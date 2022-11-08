@@ -38,9 +38,9 @@ class MysqlStatement;
 namespace Lua::MariaDB {
 
 void
-InitResult(lua_State *L);
+InitSResult(lua_State *L);
 
 int
-NewResult(lua_State *L, MysqlStatement &&stmt);
+NewSResult(lua_State *L, MysqlStatement &&stmt);
 
 } // namespace Lua::MariaDB

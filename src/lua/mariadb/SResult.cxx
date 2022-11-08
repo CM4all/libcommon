@@ -30,7 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Result.hxx"
+#include "SResult.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
 #include "lib/mariadb/BindVector.hxx"
@@ -42,25 +42,25 @@
 
 namespace Lua::MariaDB {
 
-struct Result {
+struct SResult {
 	MysqlStatement stmt;
 
 	MysqlBindVector bind;
 
-	explicit Result(MysqlStatement &&_stmt)
+	explicit SResult(MysqlStatement &&_stmt)
 		:stmt(std::move(_stmt)),
 		 bind(stmt.GetFieldCount()) {
 		stmt.BindResult(bind);
 	}
 };
 
-static constexpr char lua_result[] = "MariaDB_Result";
-using LuaResult = Lua::Class<Result, lua_result>;
+static constexpr char lua_result[] = "MariaDB_SResult";
+using LuaSResult = Lua::Class<SResult, lua_result>;
 
 static int
 Fetch(lua_State *L)
 try {
-	auto &result = LuaResult::Cast(L, 1);
+	auto &result = LuaSResult::Cast(L, 1);
 
 	bool numerical = true;
 	const char *mode = luaL_optstring(L, 3, "a");
@@ -112,27 +112,27 @@ try {
 	RaiseCurrent(L);
 }
 
-static constexpr struct luaL_Reg result_methods[] = {
+static constexpr struct luaL_Reg sresult_methods[] = {
 	{"fetch", Fetch},
 	{nullptr, nullptr}
 };
 
 void
-InitResult(lua_State *L)
+InitSResult(lua_State *L)
 {
 	const ScopeCheckStack check_stack{L};
 
-	LuaResult::Register(L);
-	luaL_newlib(L, result_methods);
+	LuaSResult::Register(L);
+	luaL_newlib(L, sresult_methods);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 }
 
 int
-NewResult(lua_State *L, MysqlStatement &&stmt)
+NewSResult(lua_State *L, MysqlStatement &&stmt)
 {
 	try {
-		LuaResult::New(L, std::move(stmt));
+		LuaSResult::New(L, std::move(stmt));
 		return 1;
 	} catch (...) {
 		RaiseCurrent(L);

@@ -31,7 +31,7 @@
  */
 
 #include "Connection.hxx"
-#include "Result.hxx"
+#include "SResult.hxx"
 #include "lua/Assert.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
@@ -170,7 +170,7 @@ Execute(lua_State *L)
 		if (stmt.GetFieldCount() == 0)
 			return 0;
 
-		return NewResult(L, std::move(stmt));
+		return NewSResult(L, std::move(stmt));
 	} catch (...) {
 		RaiseCurrent(L);
 	}
