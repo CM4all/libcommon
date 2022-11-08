@@ -197,6 +197,7 @@ struct Params {
 	const char *db = nullptr;
 	const char *unix_socket = nullptr;
 	unsigned port = 3306;
+	unsigned long clientflag = 0;
 
 	void Apply(lua_State *L, const char *name, int value_idx);
 	void Apply(lua_State *L, int key_idx, int value_idx);
@@ -242,6 +243,12 @@ Params::Apply(lua_State *L, const char *name, int value_idx)
 			throw ArgError{"Bad port value"};
 
 		port = (unsigned)_port;
+	} else if (StringIsEqual(name, "multi_statements")) {
+		if (!lua_isboolean(L, value_idx))
+			throw ArgError{"Bad multi_statements value"};
+
+		if (lua_toboolean(L, value_idx))
+			clientflag |= CLIENT_MULTI_STATEMENTS;
 	} else
 		throw ArgError{name};
 }
@@ -287,7 +294,8 @@ NewConnection(lua_State *L)
 	try {
 		c->Connect(params.host, params.user, params.passwd,
 			   params.db, params.port,
-			   params.unix_socket);
+			   params.unix_socket,
+			   params.clientflag);
 	} catch (...) {
 		lua_pop(L, 1);
 		RaiseCurrent(L);
