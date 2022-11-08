@@ -63,5 +63,9 @@ public:
 		     const char *unix_socket=nullptr,
 		     unsigned long clientflag=0);
 
+	void Query(std::string_view sql);
+
+	MysqlResult StoreResult();
+
 	MysqlStatement Prepare(std::string_view sql);
 };

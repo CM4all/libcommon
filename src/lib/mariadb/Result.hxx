@@ -57,7 +57,15 @@ public:
 		return *this;
 	}
 
+	operator bool() const noexcept {
+		return result != nullptr;
+	}
+
 	const auto *operator->() const noexcept {
 		return result;
+	}
+
+	MYSQL_ROW FetchRow() const noexcept {
+		return mysql_fetch_row(result);
 	}
 };

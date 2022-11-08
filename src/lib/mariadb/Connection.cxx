@@ -32,6 +32,7 @@
 
 #include "Connection.hxx"
 #include "Statement.hxx"
+#include "util/RuntimeError.hxx"
 
 #include <stdexcept>
 
@@ -45,6 +46,25 @@ MysqlConnection::Connect(const char *host,
 	if (!mysql_real_connect(&mysql, host, user, passwd, db, port,
 				unix_socket, clientflag))
 		throw std::runtime_error{mysql_error(&mysql)};
+}
+
+void
+MysqlConnection::Query(std::string_view sql)
+{
+	if (mysql_real_query(&mysql, sql.data(), sql.size()) != 0)
+		throw FormatRuntimeError("mysql_real_query() failed: %s",
+					 mysql_error(&mysql));
+}
+
+MysqlResult
+MysqlConnection::StoreResult()
+{
+	auto *r = mysql_store_result(&mysql);
+	if (r == nullptr && mysql_errno(&mysql) != 0)
+		throw FormatRuntimeError("mysql_store_result() failed: %s",
+					 mysql_error(&mysql));
+
+	return MysqlResult{r};
 }
 
 MysqlStatement
