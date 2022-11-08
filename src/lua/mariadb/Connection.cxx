@@ -132,8 +132,33 @@ static int
 Execute(lua_State *L, MysqlConnection &c, std::string_view sql)
 {
 	c.Query(sql);
+
 	auto result = c.StoreResult();
-	return NewResult(L, std::move(result));
+
+	if (c.NextResult()) {
+		/* there is more than one result - return all results
+		   in a Lua array */
+		int n = 0;
+		lua_newtable(L);
+
+		NewResult(L, std::move(result));
+		lua_rawseti(L, -2, ++n);
+
+		try {
+			do {
+				NewResult(L, c.StoreResult());
+				lua_rawseti(L, -2, ++n);
+			} while (c.NextResult());
+		} catch (...) {
+			lua_pop(L, 1);
+			throw;
+		}
+
+		return 1;
+	} else {
+		/* only one result: return it directly */
+		return NewResult(L, std::move(result));
+	}
 }
 
 static int
