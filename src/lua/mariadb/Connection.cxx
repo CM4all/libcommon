@@ -39,6 +39,7 @@
 #include "lua/StackIndex.hxx"
 #include "lua/StringView.hxx"
 #include "lua/Util.hxx"
+#include "lib/mariadb/BindVector.hxx"
 #include "lib/mariadb/Connection.hxx"
 #include "lib/mariadb/Statement.hxx"
 #include "util/ScopeExit.hxx"
@@ -55,6 +56,77 @@ struct ArgError { const char *extramsg; };
 static constexpr char lua_connection[] = "MariaDB_Connection";
 using LuaConnection = Lua::Class<MysqlConnection, lua_connection>;
 
+static void
+BindStringValue(lua_State *L, int value_idx,
+		MYSQL_BIND &bind, unsigned long &length, my_bool &is_null)
+{
+	size_t _length;
+	const char *s = lua_tolstring(L, value_idx, &_length);
+	bind.buffer_type = MYSQL_TYPE_STRING;
+	bind.buffer = const_cast<char *>(s);
+	length = _length;
+	is_null = false;
+}
+
+static void
+BindIntegerValue(lua_State *L, int value_idx,
+		 MYSQL_BIND &bind, unsigned long &length, my_bool &is_null,
+		 long long &long_long)
+{
+	long_long = lua_tointeger(L, value_idx);
+	bind.buffer_type = MYSQL_TYPE_LONGLONG;
+	bind.buffer = (char *)&long_long;
+	length = sizeof(long_long);
+	is_null = false;
+}
+
+static void
+BindValue(lua_State *L, int value_idx,
+	  MYSQL_BIND &bind, unsigned long &length, my_bool &is_null,
+	  long long &long_long)
+{
+	switch (lua_type(L, value_idx)) {
+	case LUA_TNIL:
+		break;
+
+	case LUA_TSTRING:
+		BindStringValue(L, value_idx, bind, length, is_null);
+		break;
+
+	case LUA_TNUMBER:
+		// TODO what about floating point?
+		BindIntegerValue(L, value_idx, bind, length, is_null,
+				 long_long);
+		break;
+
+	default:
+		throw ArgError{"Unsupported query parameter type"};
+	}
+}
+
+static void
+BindTable(lua_State *L, auto table_idx,
+	  MysqlBindVector &bind, long long *long_longs,
+	  const std::size_t n)
+{
+	std::fill_n(bind.lengths.get(), n, 0);
+	std::fill_n(bind.is_nulls.get(), n, true);
+
+	ForEach(L, table_idx, [L, &bind, long_longs, n](auto key_idx, auto value_idx){
+		if (!lua_isnumber(L, GetStackIndex(key_idx)))
+			throw ArgError{"Bad key type"};
+
+		const int key = lua_tointeger(L, GetStackIndex(key_idx));
+		const std::size_t i = std::size_t(key) - 1;
+		if (key < 1 || i >= n)
+			throw ArgError{"Bad key value"};
+
+		BindValue(L, GetStackIndex(value_idx),
+			  bind.binds[i], bind.lengths[i], bind.is_nulls[i],
+			  long_longs[i]);
+	});
+}
+
 static int
 Execute(lua_State *L)
 {
@@ -70,7 +142,29 @@ Execute(lua_State *L)
 
 	try {
 		auto stmt = c.Prepare(sql);
-		// TODO bind
+
+		const std::size_t n = stmt.GetParamCount();
+		MysqlBindVector bind{n};
+		std::unique_ptr<long long[]> long_longs{new long long[n]};
+		if (n > 0) {
+			if (lua_gettop(L) < 3)
+				return luaL_error(L, "Not enough parameters");
+
+			if (!lua_istable(L, 3))
+				luaL_argerror(L, 3, "table expected");
+
+			try {
+				BindTable(L, 3, bind, long_longs.get(), n);
+			} catch (const ArgError &e) {
+				luaL_argerror(L, 3, e.extramsg);
+			}
+
+			stmt.BindParam(bind.binds.get());
+		} else {
+			if (lua_gettop(L) > 2)
+				return luaL_error(L, "Too many parameters");
+		}
+
 		stmt.Execute();
 
 		if (stmt.GetFieldCount() == 0)
