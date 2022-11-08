@@ -33,6 +33,7 @@
 #include "Result.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
+#include "lib/mariadb/BindVector.hxx"
 #include "lib/mariadb/Statement.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/StringAPI.hxx"
@@ -44,26 +45,12 @@ namespace Lua::MariaDB {
 struct Result {
 	MysqlStatement stmt;
 
-	std::unique_ptr<MYSQL_BIND[]> binds;
-	std::unique_ptr<unsigned long[]> lengths;
-	std::unique_ptr<my_bool[]> is_nulls;
+	MysqlBindVector bind;
 
 	explicit Result(MysqlStatement &&_stmt)
-		:stmt(std::move(_stmt)) {
-		const std::size_t n_fields = stmt.GetFieldCount();
-		assert(n_fields > 0);
-
-		binds.reset(new MYSQL_BIND[n_fields]);
-		lengths.reset(new unsigned long[n_fields]);
-		is_nulls.reset(new my_bool[n_fields]);
-
-		for (std::size_t i = 0; i < n_fields; ++i)
-			binds[i] = {
-				.length = &lengths[i],
-				.is_null = &is_nulls[i],
-			};
-
-		stmt.BindResult(binds.get());
+		:stmt(std::move(_stmt)),
+		 bind(stmt.GetFieldCount()) {
+		stmt.BindResult(bind);
 	}
 };
 
@@ -101,9 +88,9 @@ try {
 		else
 			Push(L, metadata->fields[i].name);
 
-		if (result.is_nulls[i]) {
+		if (result.bind.is_nulls[i]) {
 			Push(L, nullptr);
-		} else if (const std::size_t length = result.lengths[i];
+		} else if (const std::size_t length = result.bind.lengths[i];
 			   length == 0) {
 			Push(L, std::string_view{});
 		} else {
