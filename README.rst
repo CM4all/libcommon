@@ -77,7 +77,7 @@ external libraries:
 - ``lib/dbus``: `libdbus
   <https://www.freedesktop.org/wiki/Software/dbus/>`__ C++ wrappers
 - ``lib/mariadb``: C++ wrappers for the `MariaDB
-   <https://mariadb.org/>`__ client library
+  <https://mariadb.org/>`__ client library
 - ``lib/openssl``: `OpenSSL <https://www.openssl.org/>`__ C++ wrappers
 - ``lib/pcre``: `PCRE <https://www.pcre.org/>`__ C++ wrappers
 - ``lib/sodium``: `libsodium <https://github.com/jedisct1/libsodium/>`__
