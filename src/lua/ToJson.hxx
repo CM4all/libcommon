@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 CM4all GmbH
+ * Copyright 2022 CM4all GmbH
  * All rights reserved.
  *
  * author: Max Kellermann <mk@cm4all.com>
@@ -30,37 +30,19 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "lua/RunFile.hxx"
-#include "lua/ToJson.hxx"
-#include "lua/mariadb/Init.hxx"
-#include "util/PrintException.hxx"
-#include "util/ScopeExit.hxx"
+#pragma once
 
-extern "C" {
-#include <lauxlib.h>
-#include <lualib.h>
-}
+#include <boost/json/fwd.hpp>
 
-#include <stdio.h>
-#include <stdlib.h>
+struct lua_State;
 
-int main(int argc, char **argv)
-try {
-	if (argc != 2)
-		throw "Usage: RunLua FILE.lua";
+namespace Lua {
 
-	const char *path = argv[1];
+void
+InitToJson(lua_State *L) noexcept;
 
-	const auto L = luaL_newstate();
-	AtScopeExit(L) { lua_close(L); };
+[[gnu::pure]]
+boost::json::value
+ToJson(lua_State *L, int idx) noexcept;
 
-	luaL_openlibs(L);
-	Lua::InitToJson(L);
-	Lua::MariaDB::Init(L);
-
-	Lua::RunFile(L, path);
-	return EXIT_SUCCESS;
-} catch (...) {
-	PrintException(std::current_exception());
-	return EXIT_FAILURE;
-}
+} // namespace Lua

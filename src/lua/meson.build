@@ -12,7 +12,10 @@ lua_sources = [
 lua_dependencies = [liblua]
 
 if get_variable('libcommon_enable_json', false)
-  lua_sources += 'Json.cxx'
+  lua_sources += [
+    'Json.cxx',
+    'ToJson.cxx',
+  ]
   lua_dependencies += boost_json_dep
 endif
 
@@ -25,5 +28,5 @@ lua = static_library(
 
 lua_dep = declare_dependency(
   link_with: lua,
-  dependencies: liblua,
+  dependencies: lua_dependencies,
 )
