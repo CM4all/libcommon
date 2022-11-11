@@ -6,6 +6,7 @@ test(
     'TestException.cxx',
     'TestHashRing.cxx',
     'TestIntrusiveList.cxx',
+    'TestIntrusiveForwardList.cxx',
     'TestFNVHash.cxx',
     'TestMimeType.cxx',
     'TestStringStrip.cxx',
