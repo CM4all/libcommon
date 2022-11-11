@@ -5,6 +5,7 @@ test(
     'TestCRC32.cxx',
     'TestException.cxx',
     'TestHashRing.cxx',
+    'TestIntrusiveList.cxx',
     'TestFNVHash.cxx',
     'TestMimeType.cxx',
     'TestStringStrip.cxx',
