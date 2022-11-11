@@ -557,6 +557,6 @@ public:
 	 */
 	void splice(iterator position, IntrusiveList &from) noexcept {
 		splice(position, from, from.begin(), from.end(),
-		       from.constant_time_size ? from.size() : 1);
+		       constant_time_size ? from.size() : 1);
 	}
 };
