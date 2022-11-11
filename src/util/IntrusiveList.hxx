@@ -393,17 +393,17 @@ public:
 			return Cast(cursor);
 		}
 
-		iterator &operator++() noexcept {
+		auto &operator++() noexcept {
 			cursor = cursor->next;
 			return *this;
 		}
 
-		iterator &operator--() noexcept {
+		auto &operator--() noexcept {
 			cursor = cursor->prev;
 			return *this;
 		}
 
-		iterator &operator--(int) noexcept {
+		auto operator--(int) noexcept {
 			auto old = *this;
 			cursor = cursor->prev;
 			return old;
@@ -458,17 +458,17 @@ public:
 			return Cast(cursor);
 		}
 
-		const_iterator &operator++() noexcept {
+		auto &operator++() noexcept {
 			cursor = cursor->next;
 			return *this;
 		}
 
-		iterator &operator--() noexcept {
+		auto &operator--() noexcept {
 			cursor = cursor->prev;
 			return *this;
 		}
 
-		iterator &operator--(int) noexcept {
+		auto operator--(int) noexcept {
 			auto old = *this;
 			cursor = cursor->prev;
 			return old;
