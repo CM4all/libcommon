@@ -55,6 +55,8 @@ WasLoop(F &&f) noexcept
 	while ((uri = was_simple_accept(was)) != nullptr) {
 		try {
 			f(was, uri);
+		} catch (const Was::EndResponse &) {
+			was_simple_end(was);
 		} catch (const Was::AbortResponse &) {
 			was_simple_abort(was);
 		} catch (const Was::NotFound &e) {

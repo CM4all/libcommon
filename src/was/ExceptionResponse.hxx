@@ -46,6 +46,13 @@ namespace Was {
 struct Exception {};
 
 /**
+ * Indicates that was_simple_end() shall be called.  This can be used
+ * to bail out of a handler function after a response has been
+ * submitted.
+ */
+struct EndResponse : Exception {};
+
+/**
  * Indicates that was_simple_abort() shall be called.  This can also
  * be used after an I/O or protocol error to bail out.
  */
