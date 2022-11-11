@@ -45,7 +45,6 @@
 #include <memory>
 #include <utility>
 
-#include <linux/wait.h>
 #include <signal.h>
 #include <sys/wait.h>
 

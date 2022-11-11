@@ -39,9 +39,12 @@
 
 #include <errno.h>
 #include <string.h> // for strerror()
-#include <linux/wait.h>
 #include <sys/resource.h> // for struct rusage
 #include <sys/wait.h>
+
+#if defined(__GLIBC__) && __GLIBC__+0 == 2 && __GLIBC_MINOR__+0 < 36
+#include <linux/wait.h> // for P_PIDFD on glibc < 2.36
+#endif
 
 /**
  * A custom waitid() system call wrapper which, unlike the glibc
