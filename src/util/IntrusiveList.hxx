@@ -369,7 +369,7 @@ public:
 			:cursor(_cursor) {}
 
 	public:
-		using iterator_category = std::forward_iterator_tag;
+		using iterator_category = std::bidirectional_iterator_tag;
 		using value_type = T;
 		using difference_type = std::ptrdiff_t;
 		using pointer = value_type *;
@@ -397,6 +397,17 @@ public:
 			cursor = cursor->next;
 			return *this;
 		}
+
+		iterator &operator--() noexcept {
+			cursor = cursor->prev;
+			return *this;
+		}
+
+		iterator &operator--(int) noexcept {
+			auto old = *this;
+			cursor = cursor->prev;
+			return old;
+		}
 	};
 
 	constexpr iterator begin() noexcept {
@@ -420,7 +431,7 @@ public:
 			:cursor(_cursor) {}
 
 	public:
-		using iterator_category = std::forward_iterator_tag;
+		using iterator_category = std::bidirectional_iterator_tag;
 		using value_type = const T;
 		using difference_type = std::ptrdiff_t;
 		using pointer = value_type *;
@@ -450,6 +461,17 @@ public:
 		const_iterator &operator++() noexcept {
 			cursor = cursor->next;
 			return *this;
+		}
+
+		iterator &operator--() noexcept {
+			cursor = cursor->prev;
+			return *this;
+		}
+
+		iterator &operator--(int) noexcept {
+			auto old = *this;
+			cursor = cursor->prev;
+			return old;
 		}
 	};
 
