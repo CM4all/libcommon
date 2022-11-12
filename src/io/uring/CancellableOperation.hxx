@@ -40,7 +40,8 @@
 
 namespace Uring {
 
-class CancellableOperation : public IntrusiveListHook
+class CancellableOperation
+	: public IntrusiveListHook<IntrusiveHookMode::NORMAL>
 {
 	Operation *operation;
 

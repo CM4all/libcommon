@@ -65,7 +65,7 @@ struct CreateStockItem {
 class StockItem
 	: LeakDetector
 {
-	IntrusiveListHook stock_item_siblings;
+	IntrusiveListHook<IntrusiveHookMode::NORMAL> stock_item_siblings;
 
 	AbstractStock &stock;
 

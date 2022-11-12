@@ -47,7 +47,10 @@
 
 struct Instance;
 
-class Request final : public IntrusiveListHook, CurlResponseHandler {
+class Request final
+	: public IntrusiveListHook<IntrusiveHookMode::NORMAL>,
+	  CurlResponseHandler
+{
 	Instance &instance;
 
 	CurlRequest r;

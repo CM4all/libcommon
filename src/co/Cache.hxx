@@ -75,7 +75,7 @@ class Cache : Factory {
 
 	struct Request;
 
-	struct Handler : IntrusiveListHook {
+	struct Handler : IntrusiveListHook<IntrusiveHookMode::NORMAL> {
 		Request *request = nullptr;
 
 		std::coroutine_handle<> continuation;

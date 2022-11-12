@@ -164,7 +164,7 @@ public:
 };
 
 class SpawnServerConnection final
-	: public IntrusiveListHook
+	: public IntrusiveListHook<IntrusiveHookMode::NORMAL>
 {
 	SpawnServerProcess &process;
 	UniqueSocketDescriptor socket;

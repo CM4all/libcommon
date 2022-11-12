@@ -71,7 +71,7 @@ class MultiStock {
 	 * multiple clients.
 	 */
 	class OuterItem final
-		: IntrusiveListHook,
+		: IntrusiveListHook<IntrusiveHookMode::NORMAL>,
 		  AbstractStock
 	{
 		friend struct IntrusiveListBaseHookTraits<OuterItem>;

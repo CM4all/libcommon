@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,42 +29,28 @@
 
 #pragma once
 
-#ifndef NDEBUG
-
-#include "IntrusiveList.hxx"
-
 /**
- * Derive from this class to verify that its destructor gets called
- * before the process exits.
+ * Specifies the mode in which a hook for intrusive containers
+ * operates.  This is meant to be used as a template argument to the
+ * hook class (e.g. #IntrusiveListHook).
  */
-class LeakDetector {
-	friend class LeakDetectorContainer;
-	template<auto member> friend struct IntrusiveListMemberHookTraits;
-
-	IntrusiveListHook<IntrusiveHookMode::NORMAL> leak_detector_siblings;
-
-	enum class State {
-		INITIAL,
-		REGISTERED,
-		DESTRUCTED,
-	} state = State::INITIAL;
-
-protected:
-	LeakDetector() noexcept;
-	LeakDetector(const LeakDetector &) noexcept:LeakDetector() {}
-
-	~LeakDetector() noexcept;
+enum class IntrusiveHookMode {
+	/**
+	 * No implicit initialization.
+	 */
+	NORMAL,
 
 	/**
-	 * This is an arbitrary virtual method only to force RTTI on
-	 * the derived class, so we can identify the object type in a
-	 * crash dump.
+	 * Keep track of whether the item is currently linked, allows
+	 * using method is_linked().  This requires implicit
+	 * initialization and requires iterating all items when
+	 * deleting them which adds a considerable amount of overhead.
 	 */
-	virtual void Dummy() noexcept;
+	TRACK,
+
+	/**
+	 * Automatically unlinks the item in the destructor.  This
+	 * implies #TRACK and adds code to the destructor.
+	 */
+	AUTO_UNLINK,
 };
-
-#else
-
-class LeakDetector {};
-
-#endif

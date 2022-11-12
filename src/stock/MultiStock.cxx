@@ -272,7 +272,7 @@ MultiStock::OuterItem::ItemUncleanFlagCleared() noexcept
 }
 
 struct MultiStock::MapItem::Waiting final
-	: IntrusiveListHook, Cancellable
+	: IntrusiveListHook<IntrusiveHookMode::NORMAL>, Cancellable
 {
 	MapItem &parent;
 	StockRequest request;

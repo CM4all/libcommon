@@ -38,7 +38,7 @@
 #include <cassert>
 
 struct Stock::Waiting final
-	: IntrusiveListHook, Cancellable
+	: IntrusiveListHook<IntrusiveHookMode::NORMAL>, Cancellable
 {
 	Stock &stock;
 
