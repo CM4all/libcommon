@@ -34,9 +34,12 @@
 #include "Chars.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
+#include "util/StringCompare.hxx"
 #include "util/StringListVerify.hxx"
 #include "util/StringSplit.hxx"
 #include "util/StringVerify.hxx"
+
+using std::string_view_literals::operator""sv;
 
 static constexpr bool
 IsAlphaNumericDashASCII(char ch) noexcept
@@ -300,4 +303,29 @@ uri_path_verify_quick(const char *uri) noexcept
 			return false;
 
 	return true;
+}
+
+bool
+VerifyUriQuery(std::string_view query) noexcept
+{
+	return CheckChars(query, IsUricChar);
+}
+
+bool
+VerifyHttpUrl(std::string_view url) noexcept
+{
+	if (!SkipPrefix(url, "http://"sv) && !SkipPrefix(url, "https://"sv))
+		return false;
+
+	const auto slash = url.find('/');
+	if (slash == url.npos)
+		return false;
+
+	const auto [host_port, path_query] = Partition(url, slash);
+
+	if (!VerifyUriHostPort(host_port))
+		return false;
+
+	const auto [path, query] = Split(path_query, '?');
+	return uri_path_verify(path) && VerifyUriQuery(query);
 }

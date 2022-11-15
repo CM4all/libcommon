@@ -38,6 +38,16 @@
 
 #include "util/CharUtil.hxx"
 
+/**
+ * @see RFC 2396 2.2
+ */
+constexpr bool
+IsUriReservedChar(char ch) noexcept
+{
+	return ch == ';' || ch == '/' || ch == '?' || ch == ':' || ch == '@' ||
+		ch == '&' || ch == '=' || ch == '+' || ch == '$' || ch == ',';
+}
+
 constexpr bool
 IsUriMarkChar(char ch) noexcept
 {
@@ -52,6 +62,25 @@ constexpr bool
 IsUriUnreservedChar(char ch) noexcept
 {
 	return IsAlphaNumericASCII(ch) || IsUriMarkChar(ch);
+}
+
+/**
+ * @see RFC 2396 2.4.1
+ */
+constexpr bool
+IsUriEscapedChar(char ch) noexcept
+{
+	return ch == '%' || IsHexDigit(ch);
+}
+
+/**
+ * @see RFC 2396 2
+ */
+constexpr bool
+IsUricChar(char ch) noexcept
+{
+	return IsUriReservedChar(ch) || IsUriUnreservedChar(ch) ||
+		IsUriEscapedChar(ch);
 }
 
 /**
