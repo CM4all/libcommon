@@ -114,3 +114,20 @@ uri_path_verify_paranoid(const char *uri) noexcept;
 [[gnu::pure]]
 bool
 uri_path_verify_quick(const char *uri) noexcept;
+
+/**
+ * Verify whether the given string is a valid query according to RFC
+ * 2396 3.4.
+ */
+[[gnu::pure]]
+bool
+VerifyUriQuery(std::string_view query) noexcept;
+
+/**
+ * Verify whether the given string is a (syntactically) valid absolute
+ * "http://" or "https://" URL.  It does not allow a fragment
+ * identifier.
+ */
+[[gnu::pure]]
+bool
+VerifyHttpUrl(std::string_view url) noexcept;

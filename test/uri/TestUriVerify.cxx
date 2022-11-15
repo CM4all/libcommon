@@ -123,3 +123,20 @@ TEST(UriVerifyTest, Paranoid)
 	ASSERT_TRUE(uri_path_verify_paranoid("f%20"));
 	ASSERT_TRUE(uri_path_verify_paranoid("index%2ehtml"));
 }
+
+TEST(UriVerifyTest, VerifyHttpUrl)
+{
+	ASSERT_FALSE(VerifyHttpUrl(""));
+	ASSERT_FALSE(VerifyHttpUrl("http://"));
+	ASSERT_FALSE(VerifyHttpUrl("http:///"));
+	ASSERT_FALSE(VerifyHttpUrl("http://a"));
+	ASSERT_TRUE(VerifyHttpUrl("http://a/"));
+	ASSERT_TRUE(VerifyHttpUrl("http://a/b/c/"));
+	ASSERT_TRUE(VerifyHttpUrl("http://a/b/c/?"));
+	ASSERT_TRUE(VerifyHttpUrl("http://a/b/c/?d"));
+	ASSERT_FALSE(VerifyHttpUrl("http://a/b/c/?d\""));
+	ASSERT_FALSE(VerifyHttpUrl("http://a/b/c/#"));
+	ASSERT_TRUE(VerifyHttpUrl("http://[1234::5678]/"));
+	ASSERT_TRUE(VerifyHttpUrl("http://[1234::5678]:80/"));
+	ASSERT_TRUE(VerifyHttpUrl("http://foo.example.com/"));
+}
