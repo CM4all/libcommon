@@ -313,7 +313,9 @@ inline void
 Params::ApplyTable(lua_State *L, auto table_idx)
 {
 	ForEach(L, table_idx, [this, L](auto key_idx, auto value_idx){
-		Apply(L, GetStackIndex(key_idx), GetStackIndex(value_idx));
+		/* explicitly using "this->" to work around bogus
+		   clang16 -Wunused-lambda-capture warning */
+		this->Apply(L, GetStackIndex(key_idx), GetStackIndex(value_idx));
 	});
 }
 
