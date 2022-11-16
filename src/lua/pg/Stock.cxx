@@ -136,7 +136,7 @@ private:
 	void SendQuery(Pg::AsyncConnection &connection);
 
 	void OnDeferredResume() noexcept {
-		item->Put(true);
+		item->Put(false);
 		item = nullptr;
 
 		if (!result.IsDefined()) {
