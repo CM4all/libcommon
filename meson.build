@@ -164,6 +164,7 @@ subdir('src/was')
 subdir('src/was/json')
 subdir('src/was/async')
 
+subdir('src/lua/net')
 subdir('src/lua/event')
 subdir('src/lua/pg')
 subdir('src/lua/mariadb')
