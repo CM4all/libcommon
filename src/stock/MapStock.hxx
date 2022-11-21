@@ -36,6 +36,7 @@
 #include "event/Chrono.hxx"
 #include "io/Logger.hxx"
 #include "util/Cast.hxx"
+#include "util/StringAPI.hxx"
 
 #include <boost/intrusive/unordered_set.hpp>
 
@@ -76,7 +77,7 @@ class StockMap : StockHandler {
 		static bool KeyValueEqual(const char *a, const Item &b) noexcept {
 			assert(a != nullptr);
 
-			return strcmp(a, b.GetKey()) == 0;
+			return StringIsEqual(a, b.GetKey());
 		}
 
 		struct Hash {
