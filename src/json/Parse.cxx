@@ -43,8 +43,18 @@ Parse(Reader &r)
 	boost::json::stream_parser p;
 
 	while (true) {
-		char buffer[BOOST_JSON_STACK_BUFFER_SIZE];
-		const std::size_t nbytes = r.Read(buffer, sizeof(buffer));
+		/* reserve one more byte to work around assertion
+		   failure because
+		   boost::json::basic_parser_impl::sentinel() can
+		   return a non-unique pointer to the end of the
+		   buffer which causes a crash due to assertion
+		   failure; see
+		   https://github.com/boostorg/json/pull/814 for the
+		   proposed upstream fix */
+		char buffer[BOOST_JSON_STACK_BUFFER_SIZE + 1];
+
+		const std::size_t nbytes = r.Read(buffer,
+						  BOOST_JSON_STACK_BUFFER_SIZE);
 		if (nbytes == 0)
 			break;
 
