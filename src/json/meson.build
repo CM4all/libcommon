@@ -2,6 +2,11 @@ boost_json_inc = include_directories('../../boost/json/include', is_system: true
 
 boost_json_compile_args = [
   '-DBOOST_JSON_STANDALONE',
+
+  # Use a larger stack buffer size to save some CPU and system call
+  # overhead; Boost.Json defaults to 4 kB (Intel) / 256 Bytes
+  # (non-Intel).
+  '-DBOOST_JSON_STACK_BUFFER_SIZE=16384',
 ]
 
 boost_json_dep = declare_dependency(
