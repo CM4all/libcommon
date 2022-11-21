@@ -555,8 +555,7 @@ MultiStock::MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
 		       MultiStockClass &_inner_class) noexcept
 	:event_loop(_event_loop), outer_class(_outer_cls),
 	 limit(_limit), max_idle(_max_idle),
-	 inner_class(_inner_class),
-	 map(Map::bucket_traits(buckets, N_BUCKETS))
+	 inner_class(_inner_class)
 {
 }
 
@@ -571,30 +570,23 @@ MultiStock::~MultiStock() noexcept
 void
 MultiStock::DiscardUnused() noexcept
 {
-	for (auto i = map.begin(), end = map.end(); i != end;) {
-		auto next = std::next(i);
-
-		i->DiscardUnused();
-		if (i->IsEmpty())
-			map.erase_and_dispose(i, DeleteDisposer{});
-
-		i = next;
-	}
+	map.remove_and_dispose_if([](auto &i){
+		i.DiscardUnused();
+		return i.IsEmpty();
+	}, DeleteDisposer{});
 }
 
 MultiStock::MapItem &
 MultiStock::MakeMapItem(const char *uri, void *request) noexcept
 {
-	Map::insert_commit_data hint;
-	auto [i, inserted] =
-		map.insert_check(uri, map.hash_function(), map.key_eq(), hint);
+	auto [i, inserted] = map.insert_check(uri);
 	if (inserted) {
 		auto *item = new MapItem(GetEventLoop(), outer_class, uri,
 					 inner_class.GetLimit(request, limit),
 					 max_idle,
 					 inner_class.GetClearInterval(request),
 					 inner_class);
-		map.insert_commit(*item, hint);
+		map.insert(i, *item);
 		return *item;
 	} else
 		return *i;

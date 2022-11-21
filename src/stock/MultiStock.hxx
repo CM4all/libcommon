@@ -39,8 +39,7 @@
 #include "event/DeferEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "util/Cancellable.hxx"
-
-#include <boost/intrusive/unordered_set.hpp>
+#include "util/IntrusiveHashSet.hxx"
 
 class CancellablePointer;
 class StockClass;
@@ -173,7 +172,7 @@ class MultiStock {
 	};
 
 	class MapItem final
-		: public boost::intrusive::unordered_set_base_hook<boost::intrusive::link_mode<boost::intrusive::auto_unlink>>,
+		: public IntrusiveHashSetHook<IntrusiveHookMode::AUTO_UNLINK>,
 		  Stock,
 		  StockGetHandler
 	{
@@ -294,14 +293,9 @@ class MultiStock {
 
 	MultiStockClass &inner_class;
 
-	using Map =
-		boost::intrusive::unordered_set<MapItem,
-						boost::intrusive::hash<MapItem::Hash>,
-						boost::intrusive::equal<MapItem::Equal>,
-						boost::intrusive::constant_time_size<false>>;
-
 	static constexpr size_t N_BUCKETS = 251;
-	Map::bucket_type buckets[N_BUCKETS];
+	using Map = IntrusiveHashSet<MapItem, N_BUCKETS,
+				     MapItem::Hash, MapItem::Equal>;
 
 	Map map;
 
@@ -328,8 +322,9 @@ public:
 	 * @see Stock::FadeAll()
 	 */
 	void FadeAll() noexcept {
-		for (auto &i : map)
+		map.for_each([](auto &i){
 			i.FadeAll();
+		});
 	}
 
 	/**
@@ -337,8 +332,9 @@ public:
 	 */
 	template<typename P>
 	void FadeIf(P &&predicate) noexcept {
-		for (auto &i : map)
+		map.for_each([&predicate](auto &i){
 			i.FadeIf(predicate);
+		});
 	}
 
 	void Get(const char *uri, StockRequest request,
