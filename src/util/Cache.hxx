@@ -296,18 +296,15 @@ public:
 	 */
 	template<typename K, typename U>
 	Data &PutOrReplace(K &&key, U &&data) {
-		typename KeyMap::insert_commit_data icd;
-		auto i = map.insert_check(key,
-					  map.hash_function(), map.key_eq(),
-					  icd);
-		if (i.second) {
+		auto [position, inserted] = map.insert_check(key);
+		if (inserted) {
 			Item &item = Make(std::forward<K>(key), std::forward<U>(data));
 			chronological_list.push_front(item);
-			map.insert_commit(item, icd);
+			map.insert(position, item);
 			return item.GetData();
 		} else {
-			i.first->ReplaceData(std::forward<U>(data));
-			return i.first->GetData();
+			position->ReplaceData(std::forward<U>(data));
+			return position->GetData();
 		}
 	}
 
