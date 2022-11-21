@@ -47,8 +47,7 @@ StockMap::StockMap(EventLoop &_event_loop, StockClass &_cls,
 		   Event::Duration _clear_interval) noexcept
 	:event_loop(_event_loop), cls(_cls),
 	 limit(_limit), max_idle(_max_idle),
-	 clear_interval(_clear_interval),
-	 map(Map::bucket_traits(buckets, N_BUCKETS))
+	 clear_interval(_clear_interval)
 {
 }
 
@@ -80,19 +79,18 @@ StockMap::OnStockEmpty(Stock &stock) noexcept
 Stock &
 StockMap::GetStock(const char *uri, void *request) noexcept
 {
-	Map::insert_commit_data hint;
-	auto i = map.insert_check(uri, Item::KeyHasher, Item::KeyValueEqual, hint);
-	if (i.second) {
+	auto [position, inserted] = map.insert_check(uri);
+	if (inserted) {
 		auto *item = new Item(event_loop, cls,
 				      uri,
 				      GetLimit(request, limit),
 				      max_idle,
 				      GetClearInterval(request),
 				      this);
-		map.insert_commit(*item, hint);
+		map.insert(position, *item);
 		return item->stock;
 	} else
-		return i.first->stock;
+		return position->stock;
 }
 
 void

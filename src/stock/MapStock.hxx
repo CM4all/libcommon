@@ -36,9 +36,8 @@
 #include "event/Chrono.hxx"
 #include "io/Logger.hxx"
 #include "util/Cast.hxx"
+#include "util/IntrusiveHashSet.hxx"
 #include "util/StringAPI.hxx"
-
-#include <boost/intrusive/unordered_set.hpp>
 
 #include <cassert>
 #include <cstddef>
@@ -48,8 +47,7 @@
  * URI.
  */
 class StockMap : StockHandler {
-	struct Item
-		: boost::intrusive::unordered_set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
+	struct Item : IntrusiveHashSetHook<IntrusiveHookMode::NORMAL> {
 		Stock stock;
 
 		bool sticky = false;
@@ -82,6 +80,11 @@ class StockMap : StockHandler {
 
 		struct Hash {
 			[[gnu::pure]]
+			size_t operator()(const char *key) const noexcept {
+				return KeyHasher(key);
+			}
+
+			[[gnu::pure]]
 			size_t operator()(const Item &value) const noexcept {
 				return ValueHasher(value);
 			}
@@ -89,17 +92,19 @@ class StockMap : StockHandler {
 
 		struct Equal {
 			[[gnu::pure]]
+			bool operator()(const char *a, const Item &b) const noexcept {
+				return KeyValueEqual(a, b);
+			}
+
+			[[gnu::pure]]
 			bool operator()(const Item &a, const Item &b) const noexcept {
 				return KeyValueEqual(a.GetKey(), b);
 			}
 		};
 	};
 
-	using Map =
-		boost::intrusive::unordered_set<Item,
-						boost::intrusive::hash<Item::Hash>,
-						boost::intrusive::equal<Item::Equal>,
-						boost::intrusive::constant_time_size<false>>;
+	static constexpr size_t N_BUCKETS = 251;
+	using Map = IntrusiveHashSet<Item, N_BUCKETS, Item::Hash, Item::Equal>;
 
 	const Logger logger;
 
@@ -120,9 +125,6 @@ class StockMap : StockHandler {
 	const Event::Duration clear_interval;
 
 	Map map;
-
-	static constexpr size_t N_BUCKETS = 251;
-	Map::bucket_type buckets[N_BUCKETS];
 
 public:
 	StockMap(EventLoop &_event_loop, StockClass &_cls,
@@ -146,16 +148,18 @@ public:
 	 * while.
 	 */
 	void DiscardUnused() noexcept {
-		for (auto &i : map)
+		map.for_each([](auto &i){
 			i.stock.DiscardUnused();
+		});
 	}
 
 	/**
 	 * @see Stock::FadeAll()
 	 */
 	void FadeAll() noexcept {
-		for (auto &i : map)
+		map.for_each([](auto &i){
 			i.stock.FadeAll();
+		});
 	}
 
 	/**
@@ -163,16 +167,18 @@ public:
 	 */
 	template<typename P>
 	void FadeIf(P &&predicate) noexcept {
-		for (auto &i : map)
+		map.for_each([&predicate](auto &i){
 			i.stock.FadeIf(predicate);
+		});
 	}
 
 	/**
 	 * Obtain statistics.
 	 */
 	void AddStats(StockStats &data) const noexcept {
-		for (const auto &i : map)
+		map.for_each([&data](auto &i){
 			i.stock.AddStats(data);
+		});
 	}
 
 	[[gnu::pure]]
