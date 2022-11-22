@@ -222,7 +222,7 @@ EventLoop::Run() noexcept
 
 		/* invoke timers */
 
-		auto timeout = HandleTimers();
+		const auto timeout = HandleTimers();
 		if (quit)
 			break;
 
