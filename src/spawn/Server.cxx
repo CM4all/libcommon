@@ -317,7 +317,9 @@ public:
 			Quit();
 	}
 
-	void Run() noexcept;
+	void Run() noexcept {
+		loop.Run();
+	}
 
 private:
 	void Quit() noexcept {
@@ -897,12 +899,6 @@ try {
 } catch (...) {
 	logger(2, std::current_exception());
 	RemoveConnection();
-}
-
-inline void
-SpawnServerProcess::Run() noexcept
-{
-	loop.Dispatch();
 }
 
 static void

@@ -157,7 +157,7 @@ try {
 	for (int i = 1; i < argc; ++i)
 		instance.AddRequest(argv[i]);
 
-	instance.event_loop.Dispatch();
+	instance.event_loop.Run();
 
 	if (instance.error)
 		std::rethrow_exception(instance.error);

@@ -90,7 +90,7 @@ try {
 	instance.task = Run(instance.curl_global, argv[1]);
 	instance.task.Start(BIND_METHOD(instance, &Instance::OnCompletion));
 
-	instance.event_loop.Dispatch();
+	instance.event_loop.Run();
 
 	if (instance.error)
 		std::rethrow_exception(instance.error);

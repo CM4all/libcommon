@@ -89,7 +89,7 @@ RunSingle(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 			    connection_handler,
 			    request_handler);
 
-	event_loop.Dispatch();
+	event_loop.Run();
 	connection_handler.CheckRethrowError();
 }
 
@@ -189,7 +189,7 @@ RunMulti(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 {
 	MultiRunServer server{event_loop, UniqueSocketDescriptor{STDIN_FILENO},
 		request_handler};
-	event_loop.Dispatch();
+	event_loop.Run();
 	server.CheckRethrowError();
 }
 
@@ -296,7 +296,7 @@ RunSystemd(EventLoop &event_loop, unsigned n,
 
 	sd_notify(0, "READY=1");
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	for (auto &i : listeners)
 		i.CheckRethrowError();

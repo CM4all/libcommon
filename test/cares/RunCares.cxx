@@ -115,7 +115,7 @@ try {
 	channel.Lookup(hostname, handler, cancel_ptr);
 
 	if (!handler.IsDone())
-		event_loop.Dispatch();
+		event_loop.Run();
 
 	return EXIT_SUCCESS;
 } catch (const char *msg) {

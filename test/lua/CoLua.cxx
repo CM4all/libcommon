@@ -146,7 +146,7 @@ try {
 
 	Thread thread(L, event_loop, path);
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	thread.CheckRethrow();
 

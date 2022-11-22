@@ -190,7 +190,7 @@ public:
 	void AddDefer(DeferEvent &e) noexcept;
 	void AddIdle(DeferEvent &e) noexcept;
 
-	void Dispatch() noexcept;
+	void Run() noexcept;
 
 private:
 	void RunDeferred() noexcept;

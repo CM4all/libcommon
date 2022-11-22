@@ -56,8 +56,8 @@ public:
 		shutdown_listener.Enable();
 	}
 
-	void Dispatch() {
-		event_loop.Dispatch();
+	void Run() noexcept {
+		event_loop.Run();
 	}
 
 private:
@@ -96,7 +96,7 @@ try {
 	const auto service_type = MakeZeroconfServiceType(argv[1], "_tcp");
 
 	Instance instance(service_type.c_str());
-	instance.Dispatch();
+	instance.Run();
 
 	return EXIT_SUCCESS;
 } catch (const std::exception &e) {

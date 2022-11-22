@@ -133,7 +133,7 @@ struct Instance {
 
 	void RunSome() noexcept {
 		break_event.ScheduleIdle();
-		event_loop.Dispatch();
+		event_loop.Run();
 	}
 
 private:

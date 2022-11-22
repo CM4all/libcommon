@@ -210,7 +210,7 @@ EventLoop::Wait(Event::Duration timeout) noexcept
 }
 
 void
-EventLoop::Dispatch() noexcept
+EventLoop::Run() noexcept
 {
 	FlushClockCaches();
 

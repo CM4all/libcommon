@@ -84,7 +84,7 @@ try {
 	CgroupKill cgroup_kill(event_loop, cgroup_state, name, session,
 			       handler);
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	handler.CheckRethrow();
 	return EXIT_SUCCESS;

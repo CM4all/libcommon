@@ -171,7 +171,7 @@ TEST(CoCache, Sleep)
 	ASSERT_EQ(cache.GetIfCached(42), nullptr);
 	ASSERT_EQ(cache.GetIfCached(3), nullptr);
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	ASSERT_EQ(w1.value, 42);
 	ASSERT_EQ(w2.value, 3);
@@ -183,7 +183,7 @@ TEST(CoCache, Sleep)
 
 	w4.Start(42);
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	ASSERT_EQ(w4.value, 42);
 	ASSERT_EQ(n_started, 2u);
@@ -208,7 +208,7 @@ TEST(CoCache, Sleep)
 		ASSERT_EQ(cache.GetIfCached(5), nullptr);
 		ASSERT_EQ(cache.GetIfCached(3), nullptr);
 
-		event_loop.Dispatch();
+		event_loop.Run();
 
 		ASSERT_EQ(w5.value, 5);
 		ASSERT_EQ(w6.value, 3);
@@ -228,7 +228,7 @@ TEST(CoCache, Sleep)
 		ASSERT_EQ(n_started, 2u);
 		ASSERT_EQ(n_finished, 0u);
 
-		event_loop.Dispatch();
+		event_loop.Run();
 
 		ASSERT_EQ(w5.value, 5);
 		ASSERT_EQ(w6.value, 3);
@@ -261,7 +261,7 @@ TEST(CoCache, CancelSingle)
 		w.Start(42);
 	}
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	ASSERT_EQ(n_started, 1u);
 	ASSERT_EQ(n_finished, 0u);
@@ -288,7 +288,7 @@ TEST(CoCache, CancelOne)
 	ASSERT_EQ(n_started, 1u);
 	ASSERT_EQ(n_finished, 0u);
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	ASSERT_EQ(w1.value, 42);
 	ASSERT_EQ(n_started, 1u);
@@ -318,7 +318,7 @@ TEST(CoCache, CancelBothSingle)
 	ASSERT_EQ(n_started, 2u);
 	ASSERT_EQ(n_finished, 0u);
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	ASSERT_EQ(n_started, 2u);
 	ASSERT_EQ(n_finished, 0u);
@@ -340,7 +340,7 @@ TEST(CoCache, CancelAll)
 		w2.Start(42);
 	}
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	ASSERT_EQ(n_started, 1u);
 	ASSERT_EQ(n_finished, 0u);
@@ -390,7 +390,7 @@ TEST(CoCache, ThrowSleep)
 	ASSERT_EQ(n_started, 2u);
 	ASSERT_EQ(n_finished, 0u);
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	ASSERT_EQ(n_started, 2u);
 	ASSERT_EQ(n_finished, 2u);

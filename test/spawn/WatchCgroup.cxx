@@ -79,7 +79,7 @@ try {
 
 	MyCgroupWatch watch{event_loop, cgroup_state};
 
-	event_loop.Dispatch();
+	event_loop.Run();
 
 	return EXIT_SUCCESS;
 } catch (Usage) {

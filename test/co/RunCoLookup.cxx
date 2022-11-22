@@ -98,7 +98,7 @@ try {
 	instance.task = Run(instance.channel, name);
 	instance.task.Start(BIND_METHOD(instance, &Instance::OnCompletion));
 
-	instance.event_loop.Dispatch();
+	instance.event_loop.Run();
 
 	if (instance.error)
 		std::rethrow_exception(instance.error);
