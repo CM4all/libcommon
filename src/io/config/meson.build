@@ -11,6 +11,7 @@ io_config = static_library(
   'LineParser.cxx',
   'FileLineParser.cxx',
   'ConfigParser.cxx',
+  'IniParser.cxx',
   include_directories: inc,
   dependencies: [
     std_filesystem_dep,
