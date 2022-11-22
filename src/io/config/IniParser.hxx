@@ -44,6 +44,13 @@ class IniSectionParser {
 public:
 	virtual ~IniSectionParser() noexcept = default;
 
+	/**
+	 * A property was found.
+	 *
+	 * @param name the name of the property
+	 * @param value a #FileLineParser instance which may be fetch
+	 * to obtain the value
+	 */
 	virtual void Property(std::string_view name,
 			      FileLineParser &value) = 0;
 
