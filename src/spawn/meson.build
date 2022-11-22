@@ -85,6 +85,7 @@ spawn_dep = declare_dependency(
   dependencies: spawn_dependencies + [
     system_dep,
     io_dep,
+    io_config_dep,
     net_dep,
     time_dep,
     libsystemd,

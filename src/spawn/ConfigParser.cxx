@@ -32,7 +32,7 @@
 
 #include "ConfigParser.hxx"
 #include "Config.hxx"
-#include "io/FileLineParser.hxx"
+#include "io/config/FileLineParser.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/CharUtil.hxx"
 #include "util/StringAPI.hxx"

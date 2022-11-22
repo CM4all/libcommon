@@ -30,8 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "io/ConfigParser.hxx"
-#include "io/FileLineParser.hxx"
+#include "io/config/ConfigParser.hxx"
+#include "io/config/FileLineParser.hxx"
 #include "util/ScopeExit.hxx"
 
 #include <gtest/gtest.h>

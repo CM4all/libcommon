@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "io/ConfigParser.hxx"
+#include "io/config/ConfigParser.hxx"
 
 struct SpawnConfig;
 

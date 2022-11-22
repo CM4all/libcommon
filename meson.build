@@ -129,6 +129,7 @@ endif
 subdir('src/adata')
 subdir('src/lua')
 subdir('src/io')
+subdir('src/io/config')
 subdir('src/io/uring')
 subdir('src/system')
 subdir('src/lib/openssl')
