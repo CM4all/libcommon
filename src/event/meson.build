@@ -4,14 +4,22 @@ else
   event_boost_dep = dependency('', required: false)
 endif
 
+event_sources = []
+
+if get_variable('libcommon_enable_FineTimerEvent', true)
+  event_sources += [
+    'FineTimerEvent.cxx',
+    'TimerList.cxx',
+  ]
+endif
+
 event = static_library(
   'event',
+  event_sources,
   'Loop.cxx',
   'ShutdownListener.cxx',
   'TimerWheel.cxx',
-  'TimerList.cxx',
   'CoarseTimerEvent.cxx',
-  'FineTimerEvent.cxx',
   'CleanupTimer.cxx',
   'DeferEvent.cxx',
   'InotifyEvent.cxx',

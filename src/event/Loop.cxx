@@ -100,6 +100,8 @@ EventLoop::Insert(CoarseTimerEvent &t) noexcept
 	again = true;
 }
 
+#ifndef NO_FINE_TIMER_EVENT
+
 void
 EventLoop::Insert(FineTimerEvent &t) noexcept
 {
@@ -107,12 +109,18 @@ EventLoop::Insert(FineTimerEvent &t) noexcept
 	again = true;
 }
 
+#endif // NO_FINE_TIMER_EVENT
+
 inline Event::Duration
 EventLoop::HandleTimers() noexcept
 {
 	const auto now = SteadyNow();
 
+#ifndef NO_FINE_TIMER_EVENT
 	auto fine_timeout = timers.Run(now);
+#else
+	const Event::Duration fine_timeout{-1};
+#endif // NO_FINE_TIMER_EVENT
 	auto coarse_timeout = coarse_timers.Run(now);
 
 	return fine_timeout.count() < 0 ||

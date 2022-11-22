@@ -35,10 +35,13 @@
 
 #include "Chrono.hxx"
 #include "TimerWheel.hxx"
-#include "TimerList.hxx"
 #include "system/EpollFD.hxx"
 #include "time/ClockCache.hxx"
 #include "util/IntrusiveList.hxx"
+
+#ifndef NO_FINE_TIMER_EVENT
+#include "TimerList.hxx"
+#endif // NO_FINE_TIMER_EVENT
 
 #ifndef NDEBUG
 #include "util/BindMethod.hxx"
@@ -55,7 +58,10 @@ class EventLoop final
 	EpollFD epoll;
 
 	TimerWheel coarse_timers;
+
+#ifndef NO_FINE_TIMER_EVENT
 	TimerList timers;
+#endif // NO_FINE_TIMER_EVENT
 
 	using DeferList = IntrusiveList<DeferEvent>;
 
@@ -156,7 +162,10 @@ public:
 	}
 
 	bool IsEmpty() const noexcept {
-		return coarse_timers.IsEmpty() && timers.IsEmpty() &&
+		return coarse_timers.IsEmpty() &&
+#ifndef NO_FINE_TIMER_EVENT
+			timers.IsEmpty() &&
+#endif // NO_FINE_TIMER_EVENT
 			defer.empty() && idle.empty() &&
 			sockets.empty() && ready_sockets.empty();
 	}
@@ -173,7 +182,10 @@ public:
 	void AbandonFD(SocketEvent &event) noexcept;
 
 	void Insert(CoarseTimerEvent &t) noexcept;
+
+#ifndef NO_FINE_TIMER_EVENT
 	void Insert(FineTimerEvent &t) noexcept;
+#endif // NO_FINE_TIMER_EVENT
 
 	void AddDefer(DeferEvent &e) noexcept;
 	void AddIdle(DeferEvent &e) noexcept;
