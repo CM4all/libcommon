@@ -51,12 +51,13 @@ EventLoop::Reinit() noexcept
 {
 	FlushClockCaches();
 
-	epoll = {};
+	poll_backend = {};
 
 	for (auto &i : sockets) {
 		assert(i.GetScheduledFlags() != 0);
 
-		epoll.Add(i.GetSocket().Get(), i.GetScheduledFlags(), &i);
+		poll_backend.Add(i.GetSocket().Get(),
+				 i.GetScheduledFlags(), &i);
 	}
 }
 
@@ -65,7 +66,7 @@ EventLoop::AddFD(int fd, unsigned events, SocketEvent &event) noexcept
 {
 	assert(events != 0);
 
-	if (!epoll.Add(fd, events, &event))
+	if (!poll_backend.Add(fd, events, &event))
 		return false;
 
 	sockets.push_back(event);
@@ -77,14 +78,14 @@ EventLoop::ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept
 {
 	assert(events != 0);
 
-	return epoll.Modify(fd, events, &event);
+	return poll_backend.Modify(fd, events, &event);
 }
 
 bool
 EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 {
 	event.unlink();
-	return epoll.Remove(fd);
+	return poll_backend.Remove(fd);
 }
 
 void
@@ -193,9 +194,9 @@ inline bool
 EventLoop::Wait(Event::Duration timeout) noexcept
 {
 	std::array<struct epoll_event, 256> received_events;
-	int ret = epoll.Wait(received_events.data(),
-			     received_events.size(),
-			     ExportTimeoutMS(timeout));
+	int ret = poll_backend.Wait(received_events.data(),
+				    received_events.size(),
+				    ExportTimeoutMS(timeout));
 	for (int i = 0; i < ret; ++i) {
 		const auto &e = received_events[i];
 		auto &socket_event = *(SocketEvent *)e.data.ptr;

@@ -55,7 +55,7 @@ class SocketEvent;
  */
 class EventLoop final
 {
-	EpollFD epoll;
+	EpollFD poll_backend;
 
 	TimerWheel coarse_timers;
 
