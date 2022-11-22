@@ -42,6 +42,8 @@
  */
 class IniSectionParser {
 public:
+	virtual ~IniSectionParser() noexcept = default;
+
 	virtual void Property(std::string_view name,
 			      FileLineParser &value) = 0;
 
