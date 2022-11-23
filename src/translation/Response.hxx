@@ -97,12 +97,14 @@ struct TranslateResponse {
 
 	const char *token;
 
+#if TRANSLATION_ENABLE_LOGIN
 	/**
 	 * @see #TranslationCommand::NO_PASSWORD
 	 *
 	 * If the payload is empty, then this is an empty string.
 	 */
 	const char *no_password;
+#endif
 
 #if TRANSLATION_ENABLE_EXECUTE
 	const char *shell;

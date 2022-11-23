@@ -67,7 +67,10 @@ TranslateResponse::Clear()
 #endif
 
 	token = nullptr;
+
+#if TRANSLATION_ENABLE_LOGIN
 	no_password = nullptr;
+#endif
 
 #if TRANSLATION_ENABLE_EXECUTE
 	shell = nullptr;
@@ -301,7 +304,10 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 #endif
 
 	token = alloc.CheckDup(src.token);
+
+#if TRANSLATION_ENABLE_LOGIN
 	no_password = alloc.CheckDup(src.no_password);
+#endif
 
 #if TRANSLATION_ENABLE_EXECUTE
 	shell = alloc.CheckDup(src.shell);

@@ -3950,11 +3950,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::NO_PASSWORD:
+#if TRANSLATION_ENABLE_LOGIN
 		if (response.no_password != nullptr)
 			throw std::runtime_error("duplicate NO_PASSWORD packet");
 
 		response.no_password = string_payload.data();
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::REALM_SESSION:
 #if TRANSLATION_ENABLE_SESSION
