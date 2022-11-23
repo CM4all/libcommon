@@ -104,6 +104,8 @@ struct TranslateResponse {
 	 * If the payload is empty, then this is an empty string.
 	 */
 	const char *no_password;
+
+	const char *authorized_keys;
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE

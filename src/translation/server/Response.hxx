@@ -1599,6 +1599,12 @@ public:
 				    payload...);
 	}
 
+	template<typename... Types>
+	auto &AuthorizedKeys(Types... payload) noexcept {
+		return StringPacket(TranslationCommand::AUTHORIZED_KEYS,
+				    payload...);
+	}
+
 	auto &MaxAge(uint32_t seconds) noexcept {
 		return PacketT(TranslationCommand::MAX_AGE, seconds);
 	}

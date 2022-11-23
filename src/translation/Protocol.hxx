@@ -1206,6 +1206,11 @@ enum class TranslationCommand : uint16_t {
 	 * packet describing whether the path (from #PATH) exists.
 	 */
 	PATH_EXISTS = 247,
+
+	/**
+	 * The contents of an OpenSSH authorized_keys file.
+	 */
+	AUTHORIZED_KEYS = 248,
 };
 
 struct TranslationHeader {

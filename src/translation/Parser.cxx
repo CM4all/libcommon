@@ -3986,6 +3986,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::AUTHORIZED_KEYS:
+#if TRANSLATION_ENABLE_LOGIN
+		if (!IsValidNonEmptyString(string_payload))
+			throw std::runtime_error("malformed AUTHORIZED_KEYS packet");
+
+		if (response.authorized_keys != nullptr)
+			throw std::runtime_error("duplicate AUTHORIZED_KEYS packet");
+
+		response.authorized_keys = string_payload.data();
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

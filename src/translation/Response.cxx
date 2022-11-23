@@ -70,6 +70,7 @@ TranslateResponse::Clear()
 
 #if TRANSLATION_ENABLE_LOGIN
 	no_password = nullptr;
+	authorized_keys = nullptr;
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
@@ -307,6 +308,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
 
 #if TRANSLATION_ENABLE_LOGIN
 	no_password = alloc.CheckDup(src.no_password);
+	authorized_keys = alloc.CheckDup(src.authorized_keys);
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
