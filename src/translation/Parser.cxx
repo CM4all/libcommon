@@ -623,17 +623,30 @@ translate_client_mount_tmp_tmpfs(NamespaceOptions *ns,
 		: "";
 }
 
-static void
-translate_client_mount_home(NamespaceOptions *ns, std::string_view payload)
+inline void
+TranslateParser::HandleMountHome(std::string_view payload)
 {
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed MOUNT_HOME packet");
 
-	if (ns == nullptr || ns->mount.home == nullptr ||
-	    ns->mount.mount_home != nullptr)
+	if (ns_options == nullptr || ns_options->mount.home == nullptr)
 		throw std::runtime_error("misplaced MOUNT_HOME packet");
 
-	ns->mount.mount_home = payload.data();
+	if (ns_options->mount.HasMountHome())
+		throw std::runtime_error{"duplicate MOUNT_HOME packet"};
+
+	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
+		ns_options->mount.home + 1,
+		payload.data(),
+		true, true);
+
+#if TRANSLATION_ENABLE_EXPAND
+	m->expand_source = ns_options->mount.expand_home;
+#endif
+
+	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
+
+	assert(ns_options->mount.HasMountHome());
 }
 
 inline void
@@ -2602,7 +2615,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::MOUNT_HOME:
-		translate_client_mount_home(ns_options, string_payload);
+		HandleMountHome(string_payload);
 		return;
 
 	case TranslationCommand::BIND_MOUNT:

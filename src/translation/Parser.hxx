@@ -254,6 +254,8 @@ private:
 
 	void HandleMountTmpfs(std::string_view payload, bool writable);
 
+	void HandleMountHome(std::string_view payload);
+
 	void HandleBindMount(std::string_view payload,
 			     bool expand, bool writable, bool exec=false,
 			     bool file=false);

@@ -224,12 +224,6 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 	s.WriteOptional(SpawnExecCommand::MOUNT_ROOT_TMPFS,
 			ns.mount.mount_root_tmpfs);
 
-	if (ns.mount.mount_home != nullptr) {
-		s.Write(SpawnExecCommand::MOUNT_HOME);
-		s.WriteString(ns.mount.mount_home);
-		s.WriteString(ns.mount.home);
-	}
-
 	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMP_TMPFS,
 			      ns.mount.mount_tmp_tmpfs);
 

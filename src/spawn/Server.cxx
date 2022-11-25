@@ -616,11 +616,6 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.ns.mount.mount_root_tmpfs = true;
 			break;
 
-		case SpawnExecCommand::MOUNT_HOME:
-			p.ns.mount.mount_home = payload.ReadString();
-			p.ns.mount.home = payload.ReadString();
-			break;
-
 		case SpawnExecCommand::MOUNT_TMP_TMPFS:
 			p.ns.mount.mount_tmp_tmpfs = payload.ReadString();
 			break;

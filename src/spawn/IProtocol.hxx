@@ -75,7 +75,6 @@ enum class SpawnExecCommand : uint8_t {
 	BIND_MOUNT_PTS,
 	PIVOT_ROOT,
 	MOUNT_ROOT_TMPFS,
-	MOUNT_HOME,
 	MOUNT_TMP_TMPFS,
 	MOUNT_TMPFS,
 	BIND_MOUNT,

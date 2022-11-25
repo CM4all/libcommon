@@ -39,6 +39,7 @@
 #include "system/BindMount.hxx"
 #include "system/Error.hxx"
 #include "util/ScopeExit.hxx"
+#include "util/StringAPI.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
@@ -69,7 +70,6 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 #endif
 	 pivot_root(alloc.CheckDup(src.pivot_root)),
 	 home(alloc.CheckDup(src.home)),
-	 mount_home(alloc.CheckDup(src.mount_home)),
 	 mount_tmp_tmpfs(alloc.CheckDup(src.mount_tmp_tmpfs)),
 	 mounts(Mount::CloneAll(alloc, src.mounts))
 {
@@ -230,14 +230,6 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			BindMount("dev/pts", "/dev/pts", MS_NOSUID|MS_NOEXEC);
 		}
 
-		if (mount_home != nullptr) {
-			assert(home != nullptr);
-			assert(*home == '/');
-
-			vfs_builder.Add(mount_home);
-			BindMount(home + 1, mount_home, MS_NOSUID|MS_NODEV);
-		}
-
 		Mount::ApplyAll(mounts, vfs_builder);
 
 		if (new_root != nullptr)
@@ -292,13 +284,6 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 	if (bind_mount_pts)
 		p = (char *)mempcpy(p, ";bpts", 4);
 
-	if (mount_home != nullptr) {
-		p = (char *)mempcpy(p, ";h:", 3);
-		p = stpcpy(p, home);
-		*p++ = '=';
-		p = stpcpy(p, mount_home);
-	}
-
 	if (mount_tmp_tmpfs != nullptr) {
 		p = (char *)mempcpy(p, ";tt:", 3);
 		p = stpcpy(p, mount_tmp_tmpfs);
@@ -307,4 +292,40 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 	p = Mount::MakeIdAll(p, mounts);
 
 	return p;
+}
+
+const Mount *
+MountNamespaceOptions::FindMountHome() const noexcept
+{
+	assert(home != nullptr);
+	assert(*home == '/');
+
+	/* skip the leading slash which is also skipped in
+	   Mount::Source */
+	const char *const source = home + 1;
+
+	for (const auto &i : mounts)
+		if (i.type == Mount::Type::BIND &&
+		    StringIsEqual(i.source, source))
+			return &i;
+
+	return nullptr;
+}
+
+const char *
+MountNamespaceOptions::GetMountHome() const noexcept
+{
+	if (const auto *m = FindMountHome())
+		return m->target;
+	else
+		return nullptr;
+}
+
+const char *
+MountNamespaceOptions::GetJailedHome() const noexcept
+{
+	if (const auto *m = FindMountHome())
+		return m->target;
+
+	return home;
 }

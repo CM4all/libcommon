@@ -85,11 +85,6 @@ struct MountNamespaceOptions {
 	const char *home = nullptr;
 
 	/**
-	 * Mount the given home directory?  Value is the mount point.
-	 */
-	const char *mount_home = nullptr;
-
-	/**
 	 * Mount a new tmpfs on /tmp?  A non-empty string specifies
 	 * additional mount options, such as "size=64M".
 	 */
@@ -112,7 +107,6 @@ struct MountNamespaceOptions {
 #endif
 		 pivot_root(src.pivot_root),
 		 home(src.home),
-		 mount_home(src.mount_home),
 		 mount_tmp_tmpfs(src.mount_tmp_tmpfs),
 		 mounts(shallow_copy, src.mounts) {}
 
@@ -123,7 +117,6 @@ struct MountNamespaceOptions {
 		return mount_root_tmpfs || mount_proc || mount_dev ||
 			mount_pts || bind_mount_pts ||
 			pivot_root != nullptr ||
-			mount_home != nullptr ||
 			mount_tmp_tmpfs != nullptr ||
 			!mounts.empty();
 	}
@@ -147,15 +140,22 @@ struct MountNamespaceOptions {
 
 	char *MakeId(char *p) const noexcept;
 
-	const char *GetJailedHome() const noexcept {
-		return mount_home != nullptr
-			? mount_home
-			: home;
+	[[gnu::pure]]
+	bool HasMountHome() const noexcept {
+		return FindMountHome() != nullptr;
 	}
+
+	[[gnu::pure]]
+	const char *GetMountHome() const noexcept;
+
+	[[gnu::pure]]
+	const char *GetJailedHome() const noexcept;
 
 private:
 	constexpr bool HasBindMount() const noexcept {
-		return bind_mount_pts || mount_home != nullptr ||
-			!mounts.empty();
+		return bind_mount_pts || !mounts.empty();
 	}
+
+	[[gnu::pure]]
+	const Mount *FindMountHome() const noexcept;
 };
