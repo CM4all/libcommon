@@ -64,11 +64,11 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 	 mount_dev(src.mount_dev),
 	 mount_pts(src.mount_pts),
 	 bind_mount_pts(src.bind_mount_pts),
+#if TRANSLATION_ENABLE_EXPAND
+	 expand_home(src.expand_home),
+#endif
 	 pivot_root(alloc.CheckDup(src.pivot_root)),
 	 home(alloc.CheckDup(src.home)),
-#if TRANSLATION_ENABLE_EXPAND
-	 expand_home(alloc.CheckDup(src.expand_home)),
-#endif
 	 mount_home(alloc.CheckDup(src.mount_home)),
 	 mount_tmp_tmpfs(alloc.CheckDup(src.mount_tmp_tmpfs)),
 	 mounts(Mount::CloneAll(alloc, src.mounts))
@@ -80,14 +80,16 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 bool
 MountNamespaceOptions::IsExpandable() const noexcept
 {
-	return expand_home != nullptr || Mount::IsAnyExpandable(mounts);
+	return expand_home || Mount::IsAnyExpandable(mounts);
 }
 
 void
 MountNamespaceOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 {
-	if (expand_home != nullptr)
-		home = expand_string_unescaped(alloc, expand_home, match_data);
+	if (expand_home) {
+		expand_home = false;
+		home = expand_string_unescaped(alloc, home, match_data);
+	}
 
 	Mount::ExpandAll(alloc, mounts, match_data);
 }

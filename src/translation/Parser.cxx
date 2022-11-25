@@ -583,15 +583,14 @@ translate_client_expand_home(NamespaceOptions *ns,
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed EXPAND_HOME packet");
 
-	bool ok = false;
+	if (ns == nullptr)
+		throw std::runtime_error{"misplaced EXPAND_HOME packet"};
 
-	if (ns != nullptr && ns->mount.expand_home == nullptr) {
-		ns->mount.expand_home = payload.data();
-		ok = true;
-	}
+	if (ns->mount.expand_home)
+		throw std::runtime_error{"duplicate EXPAND_HOME packet"};
 
-	if (!ok)
-		throw std::runtime_error("misplaced EXPAND_HOME packet");
+	ns->mount.expand_home = true;
+	ns->mount.home = payload.data();
 }
 
 #endif

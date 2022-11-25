@@ -76,13 +76,13 @@ struct MountNamespaceOptions {
 	 */
 	bool bind_mount_pts = false;
 
+#if TRANSLATION_ENABLE_EXPAND
+	bool expand_home = false;
+#endif
+
 	const char *pivot_root = nullptr;
 
 	const char *home = nullptr;
-
-#if TRANSLATION_ENABLE_EXPAND
-	const char *expand_home = nullptr;
-#endif
 
 	/**
 	 * Mount the given home directory?  Value is the mount point.
@@ -107,11 +107,11 @@ struct MountNamespaceOptions {
 		 mount_dev(src.mount_dev),
 		 mount_pts(src.mount_pts),
 		 bind_mount_pts(src.bind_mount_pts),
-		 pivot_root(src.pivot_root),
-		 home(src.home),
 #if TRANSLATION_ENABLE_EXPAND
 		 expand_home(src.expand_home),
 #endif
+		 pivot_root(src.pivot_root),
+		 home(src.home),
 		 mount_home(src.mount_home),
 		 mount_tmp_tmpfs(src.mount_tmp_tmpfs),
 		 mounts(shallow_copy, src.mounts) {}
