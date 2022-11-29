@@ -154,6 +154,8 @@ try {
 
 	if (d.valid_length)
 		AppendFormat(b, "%llu", (unsigned long long)d.length);
+	else
+		b.Append('-');
 
 	b.Append(" \"");
 	AppendEscape(b, OptionalString(d.http_referer));
