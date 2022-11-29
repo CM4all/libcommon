@@ -145,7 +145,7 @@ try {
 
 	b.Append(" HTTP/1.1\" ");
 
-	if (d.http_status != http_status_t{})
+	if (d.HasHttpStatus())
 		AppendFormat(b, "%u", d.http_status);
 	else
 		b.Append('-');
