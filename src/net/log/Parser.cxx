@@ -63,11 +63,11 @@ public:
 	}
 
 	uint16_t ReadU16() {
-		return FromBE16(ReadT<uint16_t>());
+		return ReadT<PackedBE16>();
 	}
 
 	uint64_t ReadU64() {
-		return FromBE64(ReadT<uint64_t>());
+		return ReadT<PackedBE64>();
 	}
 
 	std::string_view ReadStringView() {
@@ -96,10 +96,9 @@ private:
 	}
 
 	template<typename T>
-	T ReadT() {
-		T value;
-		memcpy(&value, ReadRaw(sizeof(value)), sizeof(value));
-		return value;
+	requires(alignof(T) == 1)
+	const T &ReadT() {
+		return *reinterpret_cast<const T *>(ReadRaw(sizeof(T)));
 	}
 };
 
