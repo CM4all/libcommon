@@ -56,9 +56,9 @@ struct Datagram {
 
 	std::string_view message{};
 
-	uint64_t length;
+	uint_least64_t length;
 
-	uint64_t traffic_received, traffic_sent;
+	uint_least64_t traffic_received, traffic_sent;
 
 	Duration duration;
 
@@ -79,7 +79,8 @@ struct Datagram {
 		 const char *_host, const char *_site,
 		 const char *_referer, const char *_user_agent,
 		 http_status_t _status, int64_t _length,
-		 uint64_t _traffic_received, uint64_t _traffic_sent,
+		 uint_least64_t _traffic_received,
+		 uint_least64_t _traffic_sent,
 		 Duration _duration) noexcept
 		:timestamp(_timestamp),
 		 remote_host(_remote_host), host(_host), site(_site),
