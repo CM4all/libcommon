@@ -93,8 +93,8 @@ struct Datagram {
 		 valid_length(_length >= 0), valid_traffic(true),
 		 valid_duration(true) {}
 
-	explicit constexpr Datagram(std::string_view _message) noexcept
-		:message(_message) {}
+	constexpr Datagram(Type _type, std::string_view _message) noexcept
+		:message(_message), type(_type) {}
 
 	bool HasTimestamp() const noexcept {
 		return timestamp != TimePoint();
