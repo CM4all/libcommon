@@ -126,6 +126,11 @@ struct Datagram {
 			   traffic) */
 			(HasHttpStatus() || valid_traffic);
 	}
+
+	bool IsHttpAccess() const noexcept {
+		return type == Type::HTTP_ACCESS ||
+			(type == Type::UNSPECIFIED && GuessIsHttpAccess());
+	}
 };
 
 }}

@@ -203,7 +203,7 @@ char *
 FormatOneLine(char *buffer, size_t buffer_size,
 	      const Net::Log::Datagram &d, bool site, bool anonymize) noexcept
 {
-	if (d.GuessIsHttpAccess())
+	if (d.IsHttpAccess())
 		return FormatOneLineHttp(buffer, buffer_size, d,
 					 site, anonymize);
 	else if (d.message.data() != nullptr)
