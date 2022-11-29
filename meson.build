@@ -99,6 +99,13 @@ add_global_arguments(c_compiler.get_supported_arguments(test_global_cflags), lan
 add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language: 'cpp')
 add_project_arguments(c_compiler.get_supported_arguments(test_cflags), language: 'c')
 
+if get_option('fuzzer')
+  fuzzer_flags = ['-fsanitize=fuzzer']
+  add_global_arguments(fuzzer_flags, language: 'cpp')
+  add_global_arguments(fuzzer_flags, language: 'c')
+  add_global_link_arguments(fuzzer_flags, language: 'cpp')
+endif
+
 if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'cpp')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'c')
@@ -144,9 +151,6 @@ subdir('src/event/systemd')
 subdir('src/event/uring')
 
 subdir('src/lib/avahi')
-if avahi_dep.found()
-  subdir('demo/avahi')
-endif
 
 subdir('src/lib/curl')
 subdir('src/lib/zlib')
@@ -170,4 +174,12 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   subdir('src/translation/server')
 endif
 
-subdir('test')
+if get_option('fuzzer')
+  subdir('fuzzer')
+else
+  subdir('test')
+
+  if avahi_dep.found()
+    subdir('demo/avahi')
+  endif
+endif
