@@ -89,6 +89,7 @@ struct Datagram {
 		 duration(_duration),
 		 http_method(_method),
 		 http_status(_status),
+		 type(Type::HTTP_ACCESS),
 		 valid_length(_length >= 0), valid_traffic(true),
 		 valid_duration(true) {}
 
