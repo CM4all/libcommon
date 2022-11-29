@@ -116,7 +116,13 @@ struct Datagram {
 	}
 
 	bool GuessIsHttpAccess() const noexcept {
-		return http_uri != nullptr && HasHttpStatus();
+		return http_uri != nullptr && HasHttpMethod() &&
+			/* the following matches cancelled HTTP
+			   requests (that have no HTTP status), but
+			   rejects HTTP error messages (via
+			   #valid_traffic; HTTP error messages have no
+			   traffic) */
+			(HasHttpStatus() || valid_traffic);
 	}
 };
 
