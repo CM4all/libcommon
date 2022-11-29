@@ -58,8 +58,8 @@ public:
 		return p == end;
 	}
 
-	uint8_t ReadByte() {
-		return *(const uint8_t *)ReadRaw(1);
+	std::byte ReadByte() {
+		return ReadT<std::byte>();
 	}
 
 	uint16_t ReadU16() {
