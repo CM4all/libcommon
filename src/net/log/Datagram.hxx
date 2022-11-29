@@ -73,6 +73,9 @@ struct Datagram {
 
 	Datagram() = default;
 
+	explicit constexpr Datagram(Type _type) noexcept
+		:type(_type) {}
+
 	Datagram(TimePoint _timestamp,
 		 http_method_t _method, const char *_uri,
 		 const char *_remote_host,
