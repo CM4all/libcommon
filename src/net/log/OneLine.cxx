@@ -73,7 +73,7 @@ IsHarmlessChar(signed char ch) noexcept
 static void
 AppendEscape(StringBuilder &b, std::string_view value)
 {
-	if (b.GetRemainingSize() < value.size() * 4)
+	if (b.GetRemainingSize() <= value.size() * 4)
 		throw StringBuilder::Overflow();
 
 	char *p = b.GetTail();
