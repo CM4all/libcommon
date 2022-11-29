@@ -143,12 +143,17 @@ try {
 
 	AppendEscape(b, d.http_uri);
 
-	AppendFormat(b, " HTTP/1.1\" %u ", d.http_status);
+	b.Append(" HTTP/1.1\" ");
+
+	if (d.http_status != http_status_t{})
+		AppendFormat(b, "%u", d.http_status);
+	else
+		b.Append('-');
+
+	b.Append(' ');
 
 	if (d.valid_length)
 		AppendFormat(b, "%llu", (unsigned long long)d.length);
-	else
-		b.Append('-');
 
 	b.Append(" \"");
 	AppendEscape(b, OptionalString(d.http_referer));
