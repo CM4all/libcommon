@@ -104,10 +104,6 @@ if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'c')
 endif
 
-if compiler.get_id() == 'clang'
-  gtest_sub = subproject('gtest')
-endif
-
 inc = include_directories('src', 'fake', '.')
 
 subdir('src/util')
