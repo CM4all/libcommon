@@ -57,6 +57,9 @@ ToString(Type type) noexcept
 
 	case Type::SSH:
 		return "ssh";
+
+	case Type::JOB:
+		return "job";
 	}
 
 	return nullptr;
@@ -75,6 +78,8 @@ ParseType(const char *s)
 		return Type::SUBMISSION;
 	if (StringIsEqual(s, "ssh"))
 		return Type::SSH;
+	if (StringIsEqual(s, "job"))
+		return Type::JOB;
 	throw std::invalid_argument("Invalid log record type");
 }
 

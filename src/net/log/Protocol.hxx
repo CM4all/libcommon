@@ -200,6 +200,13 @@ enum class Type : uint8_t {
 	 * #Attribute::REMOTE_HOST and #Attribute::SITE.
 	 */
 	SSH = 4,
+
+	/**
+	 * A log message from a job process (e.g. Workshop).  The
+	 * record usually also contains #Attribute::MESSAGE, and may
+	 * contain #Attribute::SITE.
+	 */
+	JOB = 5,
 };
 
 }}
