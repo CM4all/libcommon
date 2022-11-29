@@ -72,11 +72,13 @@ public:
 
 	std::string_view ReadStringView() {
 		const char *result = (const char *)p;
-		/* buffer is null-terminated, so strlen() is legal */
-		const size_t length = strlen(result);
-		const std::byte *after = (const std::byte *)(result + length + 1);
-		if (after > end)
+		const std::size_t remaining = (const char *)end - result;
+		const size_t length = strnlen(result, remaining);
+		if (length >= remaining)
+			/* null terminator not found */
 			throw ProtocolError();
+
+		const std::byte *after = (const std::byte *)(result + length + 1);
 		p = after;
 		return {result, length};
 	}
