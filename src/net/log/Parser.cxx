@@ -86,7 +86,7 @@ public:
 	}
 
 private:
-	const void *ReadRaw(size_t size) {
+	const std::byte *ReadRaw(size_t size) {
 		const std::byte *result = p;
 		if (result + size > end)
 			throw ProtocolError();
