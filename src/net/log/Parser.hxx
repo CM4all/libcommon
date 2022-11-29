@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <cstddef> // for std::byte
 #include <span>
 
 namespace Net {
