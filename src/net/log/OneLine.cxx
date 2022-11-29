@@ -141,7 +141,7 @@ try {
 
 	AppendFormat(b, "] \"%s ", method);
 
-	AppendEscape(b, d.http_uri);
+	AppendEscape(b, OptionalString(d.http_uri));
 
 	b.Append(" HTTP/1.1\" ");
 
