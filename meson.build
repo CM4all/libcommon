@@ -117,10 +117,7 @@ subdir('src/util')
 subdir('src/uri')
 subdir('src/time')
 subdir('src/http')
-
-if get_option('coroutines')
-  subdir('src/co')
-endif
+subdir('src/co')
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
   # this library checks __cpp_constinit and requires

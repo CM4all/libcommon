@@ -1,6 +1,3 @@
-option('coroutines', type: 'boolean', value: false,
-  description: 'Enable C++20 coroutines')
-
 option('fuzzer', type: 'boolean', value: false,
        description: 'Build fuzzers')
 
