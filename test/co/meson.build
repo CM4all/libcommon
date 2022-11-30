@@ -33,6 +33,10 @@ test(
     'TestEagerTask.cxx',
     'TestCoCache.cxx',
     include_directories: inc,
-    dependencies: [gtest, event_dep],
+    dependencies: [
+      gtest,
+      event_dep,
+      coroutines_dep,
+    ],
   ),
 )
