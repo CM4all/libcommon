@@ -34,6 +34,7 @@
 
 #include "InvokeTask.hxx"
 #include "util/Cache.hxx"
+#include "util/Concepts.hxx"
 #include "util/IntrusiveList.hxx"
 
 #include <memory>
@@ -318,13 +319,12 @@ public:
 		cache.Remove(std::forward<K>(key));
 	}
 
-	template<typename P>
-	void RemoveIf(P &&p) noexcept {
+	void RemoveIf(Predicate<const Key &, const Data &> auto p) noexcept {
 		/* note: this method is unable to check pending
 		   requests, so unfortunately, pending requests may
 		   result in stale cache items */
 
-		cache.RemoveIf(std::forward<P>(p));
+		cache.RemoveIf(p);
 	}
 };
 
