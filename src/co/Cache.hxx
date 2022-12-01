@@ -209,11 +209,12 @@ class Cache : Factory {
 		}
 
 		void Resume() noexcept {
-			handlers.remove_and_dispose_if([](Handler &handler){
+			handlers.remove_and_dispose_if([](const Handler &handler){
 				assert(handler.request != nullptr);
-				handler.request = nullptr;
 				return !!handler.continuation;
 			}, [](Handler *handler) {
+				assert(handler->request != nullptr);
+				handler->request = nullptr;
 				handler->Resume();
 			});
 		}
