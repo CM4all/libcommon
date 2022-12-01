@@ -39,6 +39,7 @@
 #include "system/Error.hxx"
 #include "util/CRC32.hxx"
 #include "util/RuntimeError.hxx"
+#include "util/SpanCast.hxx"
 
 #include <sched.h>
 
@@ -77,7 +78,7 @@ SendPidNamespaceRequest(SocketDescriptor s, std::string_view name)
 
 	const RequestHeader name_header{uint16_t(name.size()), RequestCommand::NAME};
 	b.Append(name_header);
-	b.AppendPadded(std::span{name});
+	b.AppendPadded(AsBytes(name));
 
 	static constexpr RequestHeader pid_namespace_header{0, RequestCommand::PID_NAMESPACE};
 	b.Append(pid_namespace_header);

@@ -40,6 +40,7 @@
 #include "system/Error.hxx"
 #include "io/FileDescriptor.hxx"
 #include "io/Iovec.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StaticVector.hxx"
 
 #include <array>
@@ -117,7 +118,7 @@ public:
 	}
 
 	void WriteString(std::string_view value) {
-		Write(std::span{value});
+		Write(AsBytes(value));
 		WriteU8(0);
 	}
 
