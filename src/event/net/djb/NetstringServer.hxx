@@ -37,6 +37,7 @@
 #include "net/djb/NetstringGenerator.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
+#include "util/SpanCast.hxx"
 
 #include <exception>
 #include <cstddef>
@@ -71,7 +72,7 @@ protected:
 	bool SendResponse(std::span<const std::byte> response) noexcept;
 
 	bool SendResponse(std::string_view response) noexcept {
-		return SendResponse(std::as_bytes(std::span{response}));
+		return SendResponse(AsBytes(response));
 	}
 
 	/**

@@ -38,6 +38,7 @@
 #include "net/SendMessage.hxx"
 #include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StaticVector.hxx"
 
 #include <string.h>
@@ -52,7 +53,7 @@ PushString(auto &v, const char *s) noexcept
 static void
 PushString(auto &v, std::string_view s) noexcept
 {
-	v.push_back(MakeIovec(std::span{s}));
+	v.push_back(MakeIovec(AsBytes(s)));
 	v.push_back(MakeIovecStatic<char, 0>());
 }
 
