@@ -46,21 +46,6 @@ EventLoop::~EventLoop() noexcept
 	assert(ready_sockets.empty());
 }
 
-void
-EventLoop::Reinit() noexcept
-{
-	FlushClockCaches();
-
-	poll_backend = {};
-
-	for (auto &i : sockets) {
-		assert(i.GetScheduledFlags() != 0);
-
-		poll_backend.Add(i.GetSocket().Get(),
-				 i.GetScheduledFlags(), &i);
-	}
-}
-
 bool
 EventLoop::AddFD(int fd, unsigned events, SocketEvent &event) noexcept
 {

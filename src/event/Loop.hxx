@@ -109,8 +109,6 @@ public:
 	EventLoop(const EventLoop &other) = delete;
 	EventLoop &operator=(const EventLoop &other) = delete;
 
-	void Reinit() noexcept;
-
 #ifndef NDEBUG
 	/**
 	 * Set a callback function which will be invoked each time an even
