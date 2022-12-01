@@ -4,10 +4,6 @@ event_net_sources = [
   'UdpListener.cxx',
   'MultiUdpListener.cxx',
   'SocketWrapper.cxx',
-  'djb/NetstringServer.cxx',
-  'djb/NetstringClient.cxx',
-  'djb/QmqpClient.cxx',
-  'log/PipeAdapter.cxx',
 ]
 
 if get_variable('libcommon_enable_DefaultFifoBuffer', true)

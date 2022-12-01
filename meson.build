@@ -141,9 +141,13 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
 endif
 
 subdir('src/net')
+subdir('src/net/djb')
+subdir('src/net/log')
 subdir('src/event')
 subdir('src/event/net')
 subdir('src/event/net/cares')
+subdir('src/event/net/djb')
+subdir('src/event/net/log')
 subdir('src/event/systemd')
 subdir('src/event/uring')
 

@@ -20,6 +20,7 @@ event_net_cares = static_library(
   dependencies: [
     libcares,
     coroutines_dep,
+    time_dep,
   ],
 )
 
