@@ -25,6 +25,7 @@ pg = static_library(
   dependencies: [
     coroutines_dep,
     fmt_dep,
+    time_dep,
     libpq,
   ],
 )
