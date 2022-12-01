@@ -55,16 +55,7 @@ crypto_dep = declare_dependency(
   ],
 )
 
-ssl = static_library(
-  'ssl',
-  include_directories: inc,
-  dependencies: [
-    libssl,
-  ],
-)
-
 ssl_dep = declare_dependency(
-  link_with: ssl,
   dependencies: [
     crypto_dep,
     util_dep,
