@@ -31,6 +31,7 @@
  */
 
 #include "QmqpClient.hxx"
+#include "util/SpanCast.hxx"
 
 #include <string> // TODO: migrate to std::string_view
 
@@ -41,9 +42,9 @@ QmqpClient::AppendNetstring(std::string_view value) noexcept
 {
 	netstring_headers.emplace_front();
 	auto &g = netstring_headers.front();
-	request.emplace_back(std::as_bytes(std::span{g(value.size())}));
-	request.emplace_back(std::as_bytes(std::span{value}));
-	request.emplace_back(std::as_bytes(std::span{","sv}));
+	request.emplace_back(AsBytes(g(value.size())));
+	request.emplace_back(AsBytes(value));
+	request.emplace_back(AsBytes(","sv));
 }
 
 void
