@@ -206,7 +206,7 @@ class MultiStock {
 			MultiStockClass &_inner_class) noexcept;
 		~MapItem() noexcept;
 
-		bool IsEmpty() noexcept {
+		bool IsEmpty() const noexcept {
 			return items.empty() && waiting.empty();
 		}
 
