@@ -47,7 +47,6 @@ if get_variable('libcommon_enable_AllocatorPtr', true)
     'ChildOptions.cxx',
     'Client.cxx',
     'Direct.cxx',
-    'Glue.cxx',
     'Launch.cxx',
     'Local.cxx',
     'Mount.cxx',
