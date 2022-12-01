@@ -571,7 +571,11 @@ void
 MultiStock::DiscardUnused() noexcept
 {
 	map.remove_and_dispose_if([](auto &i){
-		i.DiscardUnused();
+		/* TODO this const_cast is an ugly kludge because the
+		   predicate gets only a const reference */
+		auto &j = const_cast<MapItem &>(i);
+		j.DiscardUnused();
+
 		return i.IsEmpty();
 	}, DeleteDisposer{});
 }
