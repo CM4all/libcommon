@@ -49,6 +49,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/signal.h>
+#include <sys/socket.h> // for AF_LOCAL
 #include <sys/mount.h>
 
 #ifdef HAVE_LIBSYSTEMD
@@ -271,4 +272,18 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	write_pipe.Write(&pid, sizeof(pid));
 
 	return pidfd;
+}
+
+UniqueSocketDescriptor
+LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook)
+{
+	UniqueSocketDescriptor s1, s2;
+	if (!UniqueSocketDescriptor::CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET, 0,
+							      s1, s2))
+		throw MakeErrno("socketpair() failed");
+
+	LaunchSpawnServer(config, hook, std::move(s1),
+			  [&s2](){ s2.Close(); });
+
+	return s2;
 }
