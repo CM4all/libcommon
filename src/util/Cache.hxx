@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2011-2022 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,11 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CACHE_HXX
-#define CACHE_HXX
+#pragma once
 
-#include "Manual.hxx"
 #include "Cast.hxx"
+#include "Concepts.hxx"
+#include "Manual.hxx"
 #include "IntrusiveHashSet.hxx"
 #include "IntrusiveList.hxx"
 
@@ -344,8 +344,7 @@ public:
 	 * Iterates over all items and remove all those which match
 	 * the given predicate.
 	 */
-	template<typename P>
-	void RemoveIf(P &&p) noexcept {
+	void RemoveIf(Predicate<const Key &, const Data &> auto p) noexcept {
 		chronological_list.remove_and_dispose_if([&p](const Item &item){
 				return p(item.GetKey(), item.GetData());
 			},
@@ -361,11 +360,8 @@ public:
 	 * given function.  The cache must not be modified from within
 	 * that function.
 	 */
-	template<typename F>
-	void ForEach(F &&f) const {
+	void ForEach(Invocable<const Key &, const Data &> auto f) const {
 		for (const auto &i : chronological_list)
 			f(i.GetKey(), i.GetData());
 	}
 };
-
-#endif
