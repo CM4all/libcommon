@@ -1,19 +1,10 @@
-stock_sources = [
+stock = static_library(
+  'stock',
   'Item.cxx',
   'AbstractStock.cxx',
   'Stock.cxx',
-]
-
-if get_variable('libcommon_enable_boost', true)
-  stock_sources += [
-    'MapStock.cxx',
-    'MultiStock.cxx',
-  ]
-endif
-
-stock = static_library(
-  'stock',
-  stock_sources,
+  'MapStock.cxx',
+  'MultiStock.cxx',
   include_directories: inc,
 )
 
