@@ -25,6 +25,7 @@ You need:
 - `meson 0.56 <http://mesonbuild.com/>`__
 - `Boost <http://boost.org/>`__
 - `libcurl <https://curl.haxx.se/>`__
+- `libfmt <https://fmt.dev/>`__
 - `libpq <https://www.postgresql.org/>`__
 - `libsystemd <https://www.freedesktop.org/wiki/Software/systemd/>`__
 - `libdbus <https://www.freedesktop.org/wiki/Software/dbus/>`__
@@ -76,6 +77,7 @@ external libraries:
 - ``lib/curl``: `libcurl <https://curl.haxx.se/>`__ C++ wrappers
 - ``lib/dbus``: `libdbus
   <https://www.freedesktop.org/wiki/Software/dbus/>`__ C++ wrappers
+- ``lib/fmt``: `libfmt <https://fmt.dev/>`__ helpers
 - ``lib/mariadb``: C++ wrappers for the `MariaDB
   <https://mariadb.org/>`__ client library
 - ``lib/openssl``: `OpenSSL <https://www.openssl.org/>`__ C++ wrappers

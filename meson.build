@@ -114,6 +114,7 @@ endif
 inc = include_directories('src', 'fake', '.')
 
 subdir('src/util')
+subdir('src/lib/fmt')
 subdir('src/uri')
 subdir('src/time')
 subdir('src/http')
