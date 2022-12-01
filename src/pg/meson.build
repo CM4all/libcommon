@@ -24,6 +24,7 @@ pg = static_library(
   include_directories: inc,
   dependencies: [
     coroutines_dep,
+    fmt_dep,
     libpq,
   ],
 )
@@ -34,6 +35,7 @@ pg_dep = declare_dependency(
     coroutines_dep,
     event_dep,
     util_dep,
+    fmt_dep,
     libpq,
   ],
 )

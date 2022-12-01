@@ -36,15 +36,16 @@
 #include "BinaryValue.hxx"
 #include "Array.hxx"
 
+#include <fmt/format.h>
+
 #include <array>
 #include <concepts>
-#include <cinttypes>
-#include <cstdio>
 #include <cstddef>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <type_traits>
 
 namespace Pg {
 
@@ -66,16 +67,37 @@ struct ParamWrapper {
 	size_t GetSize() const noexcept;
 };
 
-template<>
-struct ParamWrapper<Serial> {
-	char buffer[16];
+template<typename T>
+requires std::is_integral_v<T>
+struct ParamWrapper<T> {
+	fmt::format_int buffer;
 
-	ParamWrapper(Serial s) noexcept {
-		sprintf(buffer, "%" PRIpgserial, s.get());
-	}
+	constexpr ParamWrapper(T value) noexcept
+		:buffer(value) {}
 
 	const char *GetValue() const noexcept {
-		return buffer;
+		return buffer.c_str();
+	}
+
+	static constexpr bool IsBinary() noexcept {
+		return false;
+	}
+
+	size_t GetSize() const noexcept {
+		/* ignored for text columns */
+		return 0;
+	}
+};
+
+template<>
+struct ParamWrapper<Serial> {
+	fmt::format_int buffer;
+
+	ParamWrapper(Serial s) noexcept
+		:buffer(s.get()) {}
+
+	const char *GetValue() const noexcept {
+		return buffer.c_str();
 	}
 
 	static constexpr bool IsBinary() noexcept {
@@ -117,94 +139,6 @@ struct ParamWrapper<const char *> {
 
 	constexpr const char *GetValue() const noexcept {
 		return value;
-	}
-
-	static constexpr bool IsBinary() noexcept {
-		return false;
-	}
-
-	size_t GetSize() const noexcept {
-		/* ignored for text columns */
-		return 0;
-	}
-};
-
-template<>
-struct ParamWrapper<int> {
-	char buffer[16];
-
-	ParamWrapper(int i) noexcept {
-		sprintf(buffer, "%i", i);
-	}
-
-	const char *GetValue() const noexcept {
-		return buffer;
-	}
-
-	static constexpr bool IsBinary() noexcept {
-		return false;
-	}
-
-	size_t GetSize() const noexcept {
-		/* ignored for text columns */
-		return 0;
-	}
-};
-
-template<>
-struct ParamWrapper<int64_t> {
-	char buffer[32];
-
-	ParamWrapper(int64_t i) noexcept {
-		sprintf(buffer, "%" PRId64, i);
-	}
-
-	const char *GetValue() const noexcept {
-		return buffer;
-	}
-
-	static constexpr bool IsBinary() noexcept {
-		return false;
-	}
-
-	size_t GetSize() const noexcept {
-		/* ignored for text columns */
-		return 0;
-	}
-};
-
-template<>
-struct ParamWrapper<unsigned> {
-	char buffer[16];
-
-	ParamWrapper(unsigned i) noexcept {
-		sprintf(buffer, "%u", i);
-	}
-
-	const char *GetValue() const noexcept {
-		return buffer;
-	}
-
-	static constexpr bool IsBinary() noexcept {
-		return false;
-	}
-
-	size_t GetSize() const noexcept {
-		/* ignored for text columns */
-		return 0;
-	}
-};
-
-template<>
-struct ParamWrapper<uint64_t> {
-	char buffer[32];
-
-	ParamWrapper(int64_t i) noexcept {
-		sprintf(buffer, "%" PRIu64, i);
-	}
-
-	const char *GetValue() const noexcept {
-		return buffer;
 	}
 
 	static constexpr bool IsBinary() noexcept {
