@@ -46,7 +46,13 @@
 #include <sys/stat.h>
 
 struct RecursiveCopyContext {
-	constexpr RecursiveCopyContext([[maybe_unused]] unsigned options) noexcept {}
+	/**
+	 * @see RECURSIVE_COPY_NO_OVERWRITE
+	 */
+	const bool overwrite;
+
+	constexpr RecursiveCopyContext(unsigned options) noexcept
+		:overwrite(!(options & RECURSIVE_COPY_NO_OVERWRITE)) {}
 };
 
 static void
@@ -138,7 +144,7 @@ CopyRegularFile(FileDescriptor src, FileDescriptor dst, off_t size)
  * Create a regular file.  If one already exists, it is deleted.
  */
 static UniqueFileDescriptor
-CreateRegularFile(FileDescriptor parent, const char *filename)
+CreateRegularFile(FileDescriptor parent, const char *filename, bool overwrite)
 {
 	UniqueFileDescriptor dst;
 
@@ -148,6 +154,9 @@ CreateRegularFile(FileDescriptor parent, const char *filename)
 
 	if (const int e = errno; e != EEXIST)
 		throw FormatErrno(e, "Failed to create '%s'", filename);
+
+	if (!overwrite)
+		return {};
 
 	/* already exists: delete it (so we create a new inode for the
 	   new file) */
@@ -165,9 +174,14 @@ CreateRegularFile(FileDescriptor parent, const char *filename)
 static void
 CopyRegularFile(FileDescriptor src,
 		FileDescriptor dst_parent, const char *dst_filename,
-		off_t size)
+		off_t size,
+		bool overwrite)
 {
-	const auto dst = CreateRegularFile(dst_parent, dst_filename);
+	const auto dst = CreateRegularFile(dst_parent, dst_filename,
+					   overwrite);
+	if (!dst.IsDefined())
+		return;
+
 	CopyRegularFile(src, dst, size);
 }
 
@@ -220,14 +234,16 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 				       dst_parent, dst_filename);
 	else if (S_ISREG(st.st_mode))
 		CopyRegularFile(src, dst_parent, dst_filename,
-				st.st_size);
+				st.st_size,
+				ctx.overwrite);
 	else {
 		// TODO
 	}
 }
 
 static void
-CreateSymlink(FileDescriptor parent, const char *filename, const char *target)
+CreateSymlink(FileDescriptor parent, const char *filename, const char *target,
+	      bool overwrite)
 {
 	if (symlinkat(target, parent.Get(), filename) == 0)
 		return;
@@ -235,6 +251,9 @@ CreateSymlink(FileDescriptor parent, const char *filename, const char *target)
 	if (const int e = errno; e != EEXIST)
 		throw FormatErrno(e, "Failed to create '%s'",
 				  filename);
+
+	if (!overwrite)
+		return;
 
 	if (unlinkat(parent.Get(), filename, 0) < 0)
 		if (const int e = errno; e != ENOENT)
@@ -247,7 +266,8 @@ CreateSymlink(FileDescriptor parent, const char *filename, const char *target)
 
 static void
 CopySymlink(FileDescriptor src_parent, const char *src_filename,
-	    FileDescriptor dst_parent, const char *dst_filename)
+	    FileDescriptor dst_parent, const char *dst_filename,
+	    bool overwrite)
 {
 	char buffer[4096];
 
@@ -262,7 +282,7 @@ CopySymlink(FileDescriptor src_parent, const char *src_filename,
 
 	buffer[length] = 0;
 
-	CreateSymlink(dst_parent, dst_filename, buffer);
+	CreateSymlink(dst_parent, dst_filename, buffer, overwrite);
 }
 
 static void
@@ -280,7 +300,8 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 			/* due to O_NOFOLLOW, symlinks fail with
 			   ELOOP, so copy the symlink */
 			CopySymlink(src_parent, src_filename,
-				    dst_parent, dst_filename);
+				    dst_parent, dst_filename,
+				    ctx.overwrite);
 			return;
 
 		default:

@@ -33,6 +33,10 @@
 #pragma once
 
 enum RecursiveCopyOptions : unsigned {
+	/**
+	 * Do not overwrite existing files.
+	 */
+	RECURSIVE_COPY_NO_OVERWRITE = 0x1U,
 };
 
 class FileDescriptor;
