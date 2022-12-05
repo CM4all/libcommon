@@ -46,7 +46,8 @@
 constexpr bool
 IsUriGenericDelimiter(char ch) noexcept
 {
-	return ch == ':' || ch == '/' || ch == '?' || ch == '@';
+	return ch == ':' || ch == '/' || ch == '?' || ch == '#' ||
+		ch == '[' || ch == ']' ||ch == '@';
 }
 
 /**
@@ -57,9 +58,10 @@ IsUriGenericDelimiter(char ch) noexcept
 constexpr bool
 IsUriSubcomponentDelimiter(char ch) noexcept
 {
-	return ch == '$' || ch == '&' ||
-		ch == '+' || ch == ',' ||
-		ch == ';' || ch == '=';
+	return ch == '!' || ch == '$' || ch == '&' || ch == '\'' ||
+		ch == '(' || ch == ')' ||
+		ch == '*' || ch == '+' ||
+		ch == ',' || ch == ';' || ch == '=';
 }
 
 /**
