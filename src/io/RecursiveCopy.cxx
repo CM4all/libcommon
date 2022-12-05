@@ -46,13 +46,20 @@
 #include <sys/stat.h>
 
 struct RecursiveCopyContext {
+	dev_t device = 0;
+
 	/**
 	 * @see RECURSIVE_COPY_NO_OVERWRITE
 	 */
 	const bool overwrite;
 
+	const bool one_filesystem;
+
 	constexpr RecursiveCopyContext(unsigned options) noexcept
-		:overwrite(!(options & RECURSIVE_COPY_NO_OVERWRITE)) {}
+		:overwrite(!(options & RECURSIVE_COPY_NO_OVERWRITE)),
+		 one_filesystem(options & RECURSIVE_COPY_ONE_FILESYSTEM)
+	{
+	}
 };
 
 static void
@@ -313,6 +320,17 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 	struct stat st;
 	if (fstat(src.Get(), &st) < 0)
 		throw FormatErrno("Failed to stat '%s'", src_filename);
+
+	if (ctx.one_filesystem) {
+		if (ctx.device == 0)
+			/* this is the top-level call - initialize the
+			   "device" field */
+			ctx.device = st.st_dev;
+		else if (st.st_dev != ctx.device)
+			/* this is on a different device (filesystem);
+			   ignore it */
+			return;
+	}
 
 	RecursiveCopy(ctx, std::move(src), st, dst_parent, dst_filename);
 }

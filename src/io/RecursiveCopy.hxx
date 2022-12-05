@@ -37,6 +37,14 @@ enum RecursiveCopyOptions : unsigned {
 	 * Do not overwrite existing files.
 	 */
 	RECURSIVE_COPY_NO_OVERWRITE = 0x1U,
+
+	/**
+	 * Stay in the initial filesystem, don't cross mount points
+	 * (like the `--one-file-system` option of `cp`).
+	 *
+	 * This is implemented by comparing `stat.st_dev`.
+	 */
+	RECURSIVE_COPY_ONE_FILESYSTEM = 0x2U,
 };
 
 class FileDescriptor;
