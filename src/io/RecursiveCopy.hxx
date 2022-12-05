@@ -32,6 +32,9 @@
 
 #pragma once
 
+enum RecursiveCopyOptions : unsigned {
+};
+
 class FileDescriptor;
 
 /**
@@ -43,7 +46,10 @@ class FileDescriptor;
  * @param dst_filename the path within #dst_parent; if empty, copies
  * right into the given #dst_parent directory (only possible if the
  * source also refers to a directory)
+ *
+ * @param options one or more of #RecursiveCopyOptions
  */
 void
 RecursiveCopy(FileDescriptor src_parent, const char *src_filename,
-	      FileDescriptor dst_parent, const char *dst_filename);
+	      FileDescriptor dst_parent, const char *dst_filename,
+	      unsigned options=0);

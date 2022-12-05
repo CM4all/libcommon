@@ -46,6 +46,7 @@
 #include <sys/stat.h>
 
 struct RecursiveCopyContext {
+	constexpr RecursiveCopyContext([[maybe_unused]] unsigned options) noexcept {}
 };
 
 static void
@@ -297,9 +298,10 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 
 void
 RecursiveCopy(FileDescriptor src_parent, const char *src_filename,
-	      FileDescriptor dst_parent, const char *dst_filename)
+	      FileDescriptor dst_parent, const char *dst_filename,
+	      unsigned options)
 {
-	RecursiveCopyContext ctx;
+	RecursiveCopyContext ctx{options};
 	RecursiveCopy(ctx,
 		      src_parent, src_filename,
 		      dst_parent, dst_filename);
