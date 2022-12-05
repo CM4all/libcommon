@@ -41,19 +41,52 @@ endif
 spawn_dependencies = [
 ]
 
-if get_variable('libcommon_enable_AllocatorPtr', true)
+if get_variable('libcommon_enable_spawn_server', true)
+  # Enable the dedicated spawner process with client/server protocol
+  # (IProtocol.hxx) between original process and spawner process.
+
+  spawn_sources += [
+    'Client.cxx',
+    'Launch.cxx',
+    'Server.cxx',
+  ]
+
+  libcommon_enable_spawn_direct = true
+endif
+
+if get_variable('libcommon_enable_spawn_local', true)
+  # Enable the "LocalSpawnService" class (which nobody really uses
+  # anymore, and remains here only for debugging purposes).
+
+  spawn_sources += [
+    'Local.cxx',
+  ]
+
+  libcommon_enable_spawn_direct = true
+endif
+
+if get_variable('libcommon_enable_spawn_direct', false)
+  # Enable the SpawnChildProcess() which spawns the
+  # child process directly (without the #SpawnService interface).
+
+  spawn_sources += [
+    'Direct.cxx',
+  ]
+
+  libcommon_enable_spawn_options = true
+endif
+
+if get_variable('libcommon_enable_spawn_options', false)
+  # Enable the structs ChildOptions and PreparedChildProcess (which in
+  # turn need an AllocatorPtr implementation).
+
   spawn_sources += [
     'CgroupOptions.cxx',
     'ChildOptions.cxx',
-    'Client.cxx',
-    'Direct.cxx',
-    'Launch.cxx',
-    'Local.cxx',
     'Mount.cxx',
     'MountNamespaceOptions.cxx',
     'NamespaceOptions.cxx',
     'Prepared.cxx',
-    'Server.cxx',
   ]
 
   spawn_dependencies += [
