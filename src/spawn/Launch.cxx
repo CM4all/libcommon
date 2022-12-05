@@ -35,7 +35,7 @@
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
 #include "Server.hxx"
-#include "system/CapabilityState.hxx"
+#include "lib/cap/State.hxx"
 #include "system/clone3.h"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"

@@ -30,10 +30,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CapabilityState.hxx"
-#include "Error.hxx"
+#include "State.hxx"
+#include "system/Error.hxx"
 
-#include <assert.h>
+#include <cassert>
 
 CapabilityState
 CapabilityState::Current()

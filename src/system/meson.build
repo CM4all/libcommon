@@ -12,15 +12,6 @@ system_sources = [
 system_dependencies = [
 ]
 
-if get_variable('libcommon_enable_libcap', true)
-  libcap = dependency('libcap')
-  system_sources += [
-    'CapabilityState.cxx',
-    'CapabilityGlue.cxx',
-  ]
-  system_dependencies += libcap
-endif
-
 if compiler.has_header('sys/random.h')
   system_dependencies += declare_dependency(
     compile_args: ['-DHAVE_SYS_RANDOM_H'],

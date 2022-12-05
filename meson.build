@@ -153,7 +153,7 @@ subdir('src/event/systemd')
 subdir('src/event/uring')
 
 subdir('src/lib/avahi')
-
+subdir('src/lib/cap')
 subdir('src/lib/curl')
 subdir('src/lib/zlib')
 subdir('src/lib/pcre')

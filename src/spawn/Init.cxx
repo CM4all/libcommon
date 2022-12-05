@@ -32,11 +32,11 @@
 
 #include "Init.hxx"
 #include "SeccompFilter.hxx"
+#include "lib/cap/State.hxx"
 #include "system/CloseRange.hxx"
 #include "system/Error.hxx"
 #include "system/KernelVersion.hxx"
 #include "system/ProcessName.hxx"
-#include "system/CapabilityState.hxx"
 #include "system/LinuxFD.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"

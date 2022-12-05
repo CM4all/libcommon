@@ -30,8 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CapabilityGlue.hxx"
-#include "CapabilityState.hxx"
+#include "Glue.hxx"
+#include "State.hxx"
 
 bool
 IsSysAdmin() noexcept
