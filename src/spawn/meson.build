@@ -11,17 +11,10 @@ else
   libsystemd = dependency('', required: false)
 endif
 
-libseccomp = dependency('libseccomp')
-
 spawn_sources = [
   'CgroupKill.cxx',
   'CgroupState.cxx',
-  'Init.cxx',
-  'PidfdEvent.cxx',
-  'Registry.cxx',
-  'SeccompFilter.cxx',
   'ZombieReaper.cxx',
-  'daemon/Client.cxx',
 ]
 
 spawn_dependencies = [
@@ -38,6 +31,7 @@ if get_variable('libcommon_enable_spawn_server', true)
     'Server.cxx',
   ]
 
+  libcommon_enable_spawn_registry = true
   libcommon_enable_spawn_direct = true
   libcommon_enable_spawn_config = true
 endif
@@ -50,8 +44,24 @@ if get_variable('libcommon_enable_spawn_local', true)
     'Local.cxx',
   ]
 
+  libcommon_enable_spawn_registry = true
   libcommon_enable_spawn_direct = true
   libcommon_enable_spawn_config = true
+endif
+
+if get_variable('libcommon_enable_spawn_registry', false)
+  # Enable the ChildProcessRegistry class.
+
+  spawn_sources += [
+    'PidfdEvent.cxx',
+    'Registry.cxx',
+  ]
+
+  spawn_dependencies += [
+    time_dep,
+  ]
+
+  libcommon_enable_spawn_options = true
 endif
 
 if get_variable('libcommon_enable_spawn_direct', false)
@@ -63,7 +73,31 @@ if get_variable('libcommon_enable_spawn_direct', false)
     'SyscallFilter.cxx',
   ]
 
+  libcommon_enable_spawn_daemon = true
+  libcommon_enable_spawn_init = true
   libcommon_enable_spawn_options = true
+endif
+
+if get_variable('libcommon_enable_spawn_daemon', false)
+  # Enable the client implementation for the spawn daemon (package
+  # "cm4all-spawn").
+
+  spawn_sources += [
+    'daemon/Client.cxx',
+  ]
+endif
+
+if get_variable('libcommon_enable_spawn_init', false)
+  # Enable the "init" implementation (for PID namespaces).
+
+  spawn_sources += [
+    'Init.cxx',
+    'SeccompFilter.cxx',
+  ]
+
+  spawn_dependencies += [
+    dependency('libseccomp')
+  ]
 endif
 
 if get_variable('libcommon_enable_spawn_options', false)
@@ -118,7 +152,6 @@ spawn = static_library(
   dependencies: [
     util_dep,
     libcap,
-    libseccomp,
     libsystemd,
   ],
 )
@@ -129,7 +162,6 @@ spawn_dep = declare_dependency(
     system_dep,
     io_dep,
     net_dep,
-    time_dep,
     libsystemd,
   ],
 )
