@@ -17,7 +17,6 @@ spawn_sources = [
   'CgroupKill.cxx',
   'CgroupState.cxx',
   'CgroupWatch.cxx',
-  'Config.cxx',
   'Init.cxx',
   'NetworkNamespace.cxx',
   'PidNamespace.cxx',
@@ -33,11 +32,6 @@ spawn_sources = [
   'daemon/Client.cxx',
 ]
 
-if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
-  # the C++17 Filesystem TS is implemented in GCC>=8
-  spawn_sources += 'ConfigParser.cxx'
-endif
-
 spawn_dependencies = [
 ]
 
@@ -52,6 +46,7 @@ if get_variable('libcommon_enable_spawn_server', true)
   ]
 
   libcommon_enable_spawn_direct = true
+  libcommon_enable_spawn_config = true
 endif
 
 if get_variable('libcommon_enable_spawn_local', true)
@@ -63,6 +58,7 @@ if get_variable('libcommon_enable_spawn_local', true)
   ]
 
   libcommon_enable_spawn_direct = true
+  libcommon_enable_spawn_config = true
 endif
 
 if get_variable('libcommon_enable_spawn_direct', false)
@@ -94,6 +90,17 @@ if get_variable('libcommon_enable_spawn_options', false)
   ]
 endif
 
+if get_variable('libcommon_enable_spawn_config', false)
+  spawn_sources += [
+    'Config.cxx',
+    'ConfigParser.cxx',
+  ]
+
+  spawn_dependencies += [
+    io_config_dep,
+  ]
+endif
+
 if libsystemd.found()
   spawn_sources += [
     'Systemd.cxx',
@@ -117,7 +124,6 @@ spawn_dep = declare_dependency(
   dependencies: spawn_dependencies + [
     system_dep,
     io_dep,
-    io_config_dep,
     net_dep,
     time_dep,
     libsystemd,
