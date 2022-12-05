@@ -48,20 +48,16 @@ IsUriReservedChar(char ch) noexcept
 		ch == '&' || ch == '=' || ch == '+' || ch == '$' || ch == ',';
 }
 
-constexpr bool
-IsUriMarkChar(char ch) noexcept
-{
-	return ch == '-' || ch == '_' || ch == '.' || ch == '!' || ch == '~' ||
-		ch == '*' || ch == '\'' || ch == '(' || ch == ')';
-}
-
 /**
+ * "Characters that are allowed in a URI but do not have a reserved
+ * purpose are called unreserved."
+ *
  * See RFC 2396 2.3.
  */
 constexpr bool
 IsUriUnreservedChar(char ch) noexcept
 {
-	return IsAlphaNumericASCII(ch) || IsUriMarkChar(ch);
+	return IsAlphaNumericASCII(ch) || ch == '-' || ch == '.' || ch == '_' || ch == '~';
 }
 
 /**
