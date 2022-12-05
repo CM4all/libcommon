@@ -45,6 +45,14 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+struct RecursiveCopyContext {
+};
+
+static void
+RecursiveCopy(RecursiveCopyContext &ctx,
+	      FileDescriptor src_parent, const char *src_filename,
+	      FileDescriptor dst_parent, const char *dst_filename);
+
 /**
  * Attempt to use copy_file_range() to copy all data from one file to
  * the other.
@@ -174,11 +182,13 @@ IsSpecialFilename(const char *s) noexcept
  * destination directory.
  */
 static void
-RecursiveCopyDirectory(DirectoryReader &&src, FileDescriptor dst)
+RecursiveCopyDirectory(RecursiveCopyContext &ctx,
+		       DirectoryReader &&src, FileDescriptor dst)
 {
 	while (auto *name = src.Read())
 		if (!IsSpecialFilename(name))
-			RecursiveCopy(src.GetFileDescriptor(), name,
+			RecursiveCopy(ctx,
+				      src.GetFileDescriptor(), name,
 				      dst, name);
 }
 
@@ -187,22 +197,25 @@ RecursiveCopyDirectory(DirectoryReader &&src, FileDescriptor dst)
  * directory.
  */
 static void
-RecursiveCopyDirectory(DirectoryReader &&src,
+RecursiveCopyDirectory(RecursiveCopyContext &ctx,
+		       DirectoryReader &&src,
 		       FileDescriptor dst_parent, const char *dst_filename)
 {
 	if (*dst_filename == 0)
-		RecursiveCopyDirectory(std::move(src), dst_parent);
+		RecursiveCopyDirectory(ctx, std::move(src), dst_parent);
 	else
-		RecursiveCopyDirectory(std::move(src),
+		RecursiveCopyDirectory(ctx, std::move(src),
 				       MakeDirectory(dst_parent, dst_filename));
 }
 
 static void
-RecursiveCopy(UniqueFileDescriptor &&src, const struct stat &st,
+RecursiveCopy(RecursiveCopyContext &ctx,
+	      UniqueFileDescriptor &&src, const struct stat &st,
 	      FileDescriptor dst_parent, const char *dst_filename)
 {
 	if (S_ISDIR(st.st_mode))
-		RecursiveCopyDirectory(DirectoryReader{std::move(src)},
+		RecursiveCopyDirectory(ctx,
+				       DirectoryReader{std::move(src)},
 				       dst_parent, dst_filename);
 	else if (S_ISREG(st.st_mode))
 		CopyRegularFile(src, dst_parent, dst_filename,
@@ -251,8 +264,9 @@ CopySymlink(FileDescriptor src_parent, const char *src_filename,
 	CreateSymlink(dst_parent, dst_filename, buffer);
 }
 
-void
-RecursiveCopy(FileDescriptor src_parent, const char *src_filename,
+static void
+RecursiveCopy(RecursiveCopyContext &ctx,
+	      FileDescriptor src_parent, const char *src_filename,
 	      FileDescriptor dst_parent, const char *dst_filename)
 {
 	UniqueFileDescriptor src;
@@ -278,5 +292,15 @@ RecursiveCopy(FileDescriptor src_parent, const char *src_filename,
 	if (fstat(src.Get(), &st) < 0)
 		throw FormatErrno("Failed to stat '%s'", src_filename);
 
-	RecursiveCopy(std::move(src), st, dst_parent, dst_filename);
+	RecursiveCopy(ctx, std::move(src), st, dst_parent, dst_filename);
+}
+
+void
+RecursiveCopy(FileDescriptor src_parent, const char *src_filename,
+	      FileDescriptor dst_parent, const char *dst_filename)
+{
+	RecursiveCopyContext ctx;
+	RecursiveCopy(ctx,
+		      src_parent, src_filename,
+		      dst_parent, dst_filename);
 }
