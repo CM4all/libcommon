@@ -16,18 +16,10 @@ libseccomp = dependency('libseccomp')
 spawn_sources = [
   'CgroupKill.cxx',
   'CgroupState.cxx',
-  'CgroupWatch.cxx',
   'Init.cxx',
-  'NetworkNamespace.cxx',
-  'PidNamespace.cxx',
   'PidfdEvent.cxx',
   'Registry.cxx',
-  'ResourceLimits.cxx',
   'SeccompFilter.cxx',
-  'SyscallFilter.cxx',
-  'UidGid.cxx',
-  'UserNamespace.cxx',
-  'VfsBuilder.cxx',
   'ZombieReaper.cxx',
   'daemon/Client.cxx',
 ]
@@ -41,6 +33,7 @@ if get_variable('libcommon_enable_spawn_server', true)
 
   spawn_sources += [
     'Client.cxx',
+    'CgroupWatch.cxx',
     'Launch.cxx',
     'Server.cxx',
   ]
@@ -67,6 +60,7 @@ if get_variable('libcommon_enable_spawn_direct', false)
 
   spawn_sources += [
     'Direct.cxx',
+    'SyscallFilter.cxx',
   ]
 
   libcommon_enable_spawn_options = true
@@ -83,6 +77,16 @@ if get_variable('libcommon_enable_spawn_options', false)
     'MountNamespaceOptions.cxx',
     'NamespaceOptions.cxx',
     'Prepared.cxx',
+
+    # These are really depended on up libcommon_enable_spawn_direct,
+    # but the functions are called from ChildOptions/NamespaceOptions
+    # etc.
+    'NetworkNamespace.cxx',
+    'PidNamespace.cxx',
+    'ResourceLimits.cxx',
+    'UidGid.cxx',
+    'UserNamespace.cxx',
+    'VfsBuilder.cxx',
   ]
 
   spawn_dependencies += [
