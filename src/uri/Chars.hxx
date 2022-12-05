@@ -39,13 +39,36 @@
 #include "util/CharUtil.hxx"
 
 /**
+ * Is this a "delimiter of the generic URI components"?
+ *
+ * @see RFC 2396 2.2
+ */
+constexpr bool
+IsUriGenericDelimiter(char ch) noexcept
+{
+	return ch == ':' || ch == '/' || ch == '?' || ch == '@';
+}
+
+/**
+ * Is this a "subcomponent delimiter"?
+ *
+ * @see RFC 2396 2.2
+ */
+constexpr bool
+IsUriSubcomponentDelimiter(char ch) noexcept
+{
+	return ch == '$' || ch == '&' ||
+		ch == '+' || ch == ',' ||
+		ch == ';' || ch == '=';
+}
+
+/**
  * @see RFC 2396 2.2
  */
 constexpr bool
 IsUriReservedChar(char ch) noexcept
 {
-	return ch == ';' || ch == '/' || ch == '?' || ch == ':' || ch == '@' ||
-		ch == '&' || ch == '=' || ch == '+' || ch == '$' || ch == ',';
+	return IsUriGenericDelimiter(ch) || IsUriSubcomponentDelimiter(ch);
 }
 
 /**
