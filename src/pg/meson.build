@@ -22,13 +22,17 @@ if is_variable('stock_dep')
   pg_dependencies += stock_dep
 endif
 
+if is_variable('event_dep')
+  pg_sources += 'AsyncConnection.cxx'
+  pg_dependencies += event_dep
+endif
+
 pg = static_library(
   'pg',
   'Serial.cxx',
   'Array.cxx',
   'Interval.cxx',
   'Connection.cxx',
-  'AsyncConnection.cxx',
   'Result.cxx',
   'Error.cxx',
   'Reflection.cxx',
@@ -45,9 +49,8 @@ pg_dep = declare_dependency(
   link_with: pg,
   dependencies: [
     coroutines_dep,
-    event_dep,
     util_dep,
     fmt_dep,
     libpq,
-  ],
+  ] + pg_dependencies,
 )
