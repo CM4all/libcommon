@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "Serial.hxx"
 #include "BinaryValue.hxx"
 #include "Array.hxx"
 
@@ -73,6 +74,27 @@ struct ParamWrapper<T> {
 
 	constexpr ParamWrapper(T value) noexcept
 		:buffer(value) {}
+
+	const char *GetValue() const noexcept {
+		return buffer.c_str();
+	}
+
+	static constexpr bool IsBinary() noexcept {
+		return false;
+	}
+
+	size_t GetSize() const noexcept {
+		/* ignored for text columns */
+		return 0;
+	}
+};
+
+template<>
+struct ParamWrapper<Serial> {
+	fmt::format_int buffer;
+
+	ParamWrapper(Serial s) noexcept
+		:buffer(s.get()) {}
 
 	const char *GetValue() const noexcept {
 		return buffer.c_str();

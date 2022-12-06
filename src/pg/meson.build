@@ -24,6 +24,7 @@ endif
 
 pg = static_library(
   'pg',
+  'Serial.cxx',
   'Array.cxx',
   'Interval.cxx',
   'Connection.cxx',
