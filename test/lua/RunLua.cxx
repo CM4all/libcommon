@@ -31,7 +31,7 @@
  */
 
 #include "lua/RunFile.hxx"
-#include "lua/ToJson.hxx"
+#include "lua/json/ToJson.hxx"
 #include "lua/mariadb/Init.hxx"
 #include "util/PrintException.hxx"
 #include "util/ScopeExit.hxx"

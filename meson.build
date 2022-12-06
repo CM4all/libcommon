@@ -120,13 +120,6 @@ subdir('src/time')
 subdir('src/http')
 subdir('src/co')
 
-if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
-  # this library checks __cpp_constinit and requires
-  # std::memory_resource, so disable it with older GCC
-  subdir('src/json')
-  libcommon_enable_json = true
-endif
-
 subdir('src/adata')
 subdir('src/lua')
 subdir('src/io')
@@ -134,6 +127,13 @@ subdir('src/io/config')
 subdir('src/io/uring')
 subdir('src/system')
 subdir('src/lib/openssl')
+
+if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
+  # this library checks __cpp_constinit and requires
+  # std::memory_resource, so disable it with older GCC
+  subdir('src/json')
+  subdir('src/lua/json')
+endif
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   # this library needs std::byte

@@ -30,8 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Json.hxx"
-#include "Util.hxx"
+#include "Push.hxx"
+#include "lua/Util.hxx"
 
 #include <boost/json/value.hpp>
 

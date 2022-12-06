@@ -31,8 +31,8 @@
  */
 
 #include "ToJson.hxx"
-#include "ForEach.hxx"
-#include "StringView.hxx"
+#include "lua/ForEach.hxx"
+#include "lua/StringView.hxx"
 #include "util/ScopeExit.hxx"
 
 #include <boost/json/value.hpp>

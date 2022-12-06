@@ -4,6 +4,7 @@ executable(
   include_directories: inc,
   dependencies: [
     lua_dep,
+    lua_json_dep,
     lua_mariadb_dep,
     util_dep,
   ],
