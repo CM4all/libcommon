@@ -13,7 +13,7 @@ curl_deps = [
   coroutines_dep,
 ]
 
-if get_variable('libcommon_enable_event', true)
+if is_variable('event_dep')
   curl_sources += [
     'Adapter.cxx',
     'Request.cxx',
