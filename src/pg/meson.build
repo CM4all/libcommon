@@ -17,6 +17,11 @@ if is_variable('time_dep')
   pg_dependencies += time_dep
 endif
 
+if is_variable('stock_dep')
+  pg_sources += 'Stock.cxx'
+  pg_dependencies += stock_dep
+endif
+
 pg = static_library(
   'pg',
   'Array.cxx',
@@ -26,7 +31,6 @@ pg = static_library(
   'Result.cxx',
   'Error.cxx',
   'Reflection.cxx',
-  'Stock.cxx',
   pg_sources,
   include_directories: inc,
   dependencies: [
