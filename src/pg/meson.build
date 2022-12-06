@@ -9,25 +9,32 @@ if not is_variable('coroutines_dep')
   coroutines_dep = dependency('', required: false)
 endif
 
+pg_sources = []
+pg_dependencies = []
+
+if is_variable('time_dep')
+  pg_sources += 'Timestamp.cxx'
+  pg_dependencies += time_dep
+endif
+
 pg = static_library(
   'pg',
   'Serial.cxx',
   'Array.cxx',
   'Interval.cxx',
-  'Timestamp.cxx',
   'Connection.cxx',
   'AsyncConnection.cxx',
   'Result.cxx',
   'Error.cxx',
   'Reflection.cxx',
   'Stock.cxx',
+  pg_sources,
   include_directories: inc,
   dependencies: [
     coroutines_dep,
     fmt_dep,
-    time_dep,
     libpq,
-  ],
+  ] + pg_dependencies,
 )
 
 pg_dep = declare_dependency(
