@@ -63,4 +63,31 @@ public:
 	static Serial Parse(const char *s);
 };
 
+/**
+ * C++ representation of a PostgreSQL "bigserial" value.
+ */
+class BigSerial {
+	using value_type = uint_least64_t;
+	value_type value;
+
+public:
+	BigSerial() = default;
+	explicit constexpr BigSerial(value_type _value) noexcept:value(_value) {}
+
+	constexpr value_type get() const noexcept {
+		return value;
+	}
+
+	constexpr operator bool() const noexcept {
+		return value != 0;
+	}
+
+	/**
+	 * Convert a string to a #BigSerial instance.  Throws
+	 * std::invalid_argument on error.
+	 */
+	[[nodiscard]]
+	static BigSerial Parse(const char *s);
+};
+
 }

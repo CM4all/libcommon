@@ -111,6 +111,27 @@ struct ParamWrapper<Serial> {
 };
 
 template<>
+struct ParamWrapper<BigSerial> {
+	fmt::format_int buffer;
+
+	ParamWrapper(BigSerial s) noexcept
+		:buffer(s.get()) {}
+
+	const char *GetValue() const noexcept {
+		return buffer.c_str();
+	}
+
+	static constexpr bool IsBinary() noexcept {
+		return false;
+	}
+
+	size_t GetSize() const noexcept {
+		/* ignored for text columns */
+		return 0;
+	}
+};
+
+template<>
 struct ParamWrapper<BinaryValue> {
 	BinaryValue value;
 
