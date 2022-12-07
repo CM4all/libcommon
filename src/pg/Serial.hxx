@@ -34,8 +34,6 @@
 
 #include <cstdint>
 
-#define PRIpgserial PRId32
-
 namespace Pg {
 
 /**
