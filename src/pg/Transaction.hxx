@@ -34,6 +34,7 @@
 
 #include "Connection.hxx"
 #include "Error.hxx"
+#include "util/Concepts.hxx"
 
 namespace Pg {
 
@@ -41,10 +42,9 @@ namespace Pg {
  * Like Connection::DoSerializable(), but retry on
  * "serialization_failure" (Error::IsSerializationFailure()).
  */
-template<typename F>
 void
 DoSerializableRepeat(Pg::Connection &connection, unsigned retries,
-		     F &&f)
+		     Invocable<> auto f)
 {
 	while (true) {
 		try {
@@ -65,10 +65,9 @@ DoSerializableRepeat(Pg::Connection &connection, unsigned retries,
  * Like Connection::DoRepeatableRead(), but retry on
  * "serialization_failure" (Error::IsSerializationFailure()).
  */
-template<typename F>
 void
 DoRepeatableReadRepeat(Pg::Connection &connection, unsigned retries,
-		       F &&f)
+		       Invocable<> auto f)
 {
 	while (true) {
 		try {
