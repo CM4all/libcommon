@@ -42,8 +42,10 @@ namespace Pg {
  * "serialization_failure" (Error::IsSerializationFailure()).
  */
 template<typename F>
-void DoSerializableRepeat(Pg::Connection &connection, unsigned retries,
-			  F &&f) {
+void
+DoSerializableRepeat(Pg::Connection &connection, unsigned retries,
+		     F &&f)
+{
 	while (true) {
 		try {
 			connection.DoSerializable(f);
@@ -64,8 +66,10 @@ void DoSerializableRepeat(Pg::Connection &connection, unsigned retries,
  * "serialization_failure" (Error::IsSerializationFailure()).
  */
 template<typename F>
-void DoRepeatableReadRepeat(Pg::Connection &connection, unsigned retries,
-			  F &&f) {
+void
+DoRepeatableReadRepeat(Pg::Connection &connection, unsigned retries,
+		       F &&f)
+{
 	while (true) {
 		try {
 			connection.DoRepeatableRead(f);
