@@ -61,6 +61,9 @@ struct MountInfo {
  * path (exact match required).
  *
  * Throws std::runtime_error on error.
+ *
+ * @param pid a process id or 0 to obtain information about the
+ * current process
  */
 MountInfo
 ReadProcessMount(unsigned pid, const char *mountpoint);

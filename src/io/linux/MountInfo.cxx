@@ -67,7 +67,9 @@ Open(const char *path, const char *mode)
 static FILE *
 OpenMountInfo(unsigned pid)
 {
-	return Open(FmtBuffer<64>("/proc/{}/mountinfo", pid), "r");
+	return pid > 0
+		? Open(FmtBuffer<64>("/proc/{}/mountinfo", pid), "r")
+		: Open("/proc/self/mountinfo", "r");
 }
 
 MountInfo
