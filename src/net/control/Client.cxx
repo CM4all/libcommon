@@ -40,10 +40,6 @@
 #include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
 
-inline
-BengControlClient::BengControlClient(UniqueSocketDescriptor _socket) noexcept
-	:socket(std::move(_socket)) {}
-
 BengControlClient::BengControlClient(const char *host_and_port)
 	:BengControlClient(ResolveConnectDatagramSocket(host_and_port,
 							5478)) {}

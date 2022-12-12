@@ -45,7 +45,9 @@ class BengControlClient {
 	UniqueSocketDescriptor socket;
 
 public:
-	explicit BengControlClient(UniqueSocketDescriptor _socket) noexcept;
+	explicit BengControlClient(UniqueSocketDescriptor _socket) noexcept
+		:socket(std::move(_socket)) {}
+
 	explicit BengControlClient(const char *host_and_port);
 
 	void AutoBind() const noexcept {
