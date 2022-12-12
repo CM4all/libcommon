@@ -54,14 +54,26 @@ SplitFill(std::array<std::string_view, N> &dest, std::string_view s, char separa
 	std::fill(std::next(dest.begin(), i), dest.end(), std::string_view{});
 }
 
-MountInfo
-ReadProcessMount(unsigned pid, const char *_mountpoint)
+static FILE *
+Open(const char *path, const char *mode)
 {
-	const auto path = FmtBuffer<64>("/proc/{}/mountinfo", pid);
-	FILE *file = fopen(path, "r");
+	FILE *file = fopen(path, mode);
 	if (file == nullptr)
 		throw FmtErrno("Failed to open {}", path);
 
+	return file;
+}
+
+static FILE *
+OpenMountInfo(unsigned pid)
+{
+	return Open(FmtBuffer<64>("/proc/{}/mountinfo", pid), "r");
+}
+
+MountInfo
+ReadProcessMount(unsigned pid, const char *_mountpoint)
+{
+	FILE *const file = OpenMountInfo(pid);
 	AtScopeExit(file) { fclose(file); };
 
 	const std::string_view mountpoint(_mountpoint);
