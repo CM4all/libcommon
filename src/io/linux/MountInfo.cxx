@@ -164,6 +164,5 @@ ReadProcessMount(unsigned pid, const char *_mountpoint)
 		if (i.mount_point == mountpoint)
 			return i;
 
-	/* not found: return empty string */
-	return {{}, {}, {}};
+	return {};
 }
