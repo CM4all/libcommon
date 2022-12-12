@@ -72,6 +72,86 @@ OpenMountInfo(unsigned pid)
 		: Open("/proc/self/mountinfo", "r");
 }
 
+struct MountInfoView {
+	std::string_view root;
+	std::string_view mount_point;
+	std::string_view filesystem;
+	std::string_view source;
+
+	operator MountInfo() const noexcept {
+		return {
+			std::string{root},
+			std::string{filesystem},
+			std::string{source},
+		};
+	}
+};
+
+class MountInfoReader {
+	FILE *const file;
+
+	char line[4096];
+
+public:
+	explicit MountInfoReader(unsigned pid)
+		:file(OpenMountInfo(pid)) {}
+
+	bool ReadLine() noexcept {
+		return fgets(line, sizeof(line), file) != nullptr;
+	}
+
+	MountInfoView GetLine() const noexcept {
+		std::array<std::string_view, 10> columns;
+		SplitFill(columns, line, ' ');
+
+		/* skip the optional tagged fields */
+		size_t i = 6;
+		while (i < columns.size() && columns[i] != "-"sv)
+			++i;
+
+		if (i + 2 >= columns.size())
+			return {};
+
+		return {
+			columns[3],
+			columns[4],
+			columns[i + 1],
+			columns[i + 2],
+		};
+	}
+
+	class iterator {
+		MountInfoReader &reader;
+
+		bool more;
+
+	public:
+		iterator(MountInfoReader &_reader, bool _more) noexcept
+			:reader(_reader), more(_more) {}
+
+		auto &operator++() noexcept {
+			more = reader.ReadLine();
+			return *this;
+		}
+
+		auto operator*() const noexcept {
+			return reader.GetLine();
+		}
+
+		bool operator!=(const iterator &other) const noexcept {
+			return more || other.more;
+		}
+	};
+
+	iterator begin() noexcept {
+		return {*this, ReadLine()};
+	}
+
+	iterator end() noexcept {
+		return {*this, false};
+	}
+};
+
 MountInfo
 ReadProcessMount(unsigned pid, const char *_mountpoint)
 {
@@ -80,25 +160,9 @@ ReadProcessMount(unsigned pid, const char *_mountpoint)
 
 	const std::string_view mountpoint(_mountpoint);
 
-	char line[4096];
-	while (fgets(line, sizeof(line), file) != nullptr) {
-		std::array<std::string_view, 10> columns;
-		SplitFill(columns, line, ' ');
-
-		if (columns[4] == mountpoint) {
-			/* skip the optional tagged fields */
-			size_t i = 6;
-			while (i < columns.size() && columns[i] != "-"sv)
-				++i;
-
-			if (i + 2 < columns.size())
-				return MountInfo{
-					std::string{columns[3]},
-					std::string{columns[i + 1]},
-					std::string{columns[i + 2]},
-				};
-		}
-	}
+	for (const auto &i : MountInfoReader{pid})
+		if (i.mount_point == mountpoint)
+			return i;
 
 	/* not found: return empty string */
 	return {{}, {}, {}};
