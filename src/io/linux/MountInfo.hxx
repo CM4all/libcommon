@@ -67,3 +67,17 @@ struct MountInfo {
  */
 MountInfo
 ReadProcessMount(unsigned pid, const char *mountpoint);
+
+/**
+ * Find a mounted device.
+ *
+ * Throws std::runtime_error on error.
+ *
+ * @param pid a process id or 0 to obtain information about the
+ * current process
+ *
+ * @param major_minor a device specification using major and minor
+ * number in the form "MAJOR:MINOR"
+ */
+MountInfo
+FindMountInfoByDevice(unsigned pid, const char *major_minor);

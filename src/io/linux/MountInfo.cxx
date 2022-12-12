@@ -73,6 +73,7 @@ OpenMountInfo(unsigned pid)
 }
 
 struct MountInfoView {
+	std::string_view device;
 	std::string_view root;
 	std::string_view mount_point;
 	std::string_view filesystem;
@@ -113,6 +114,7 @@ public:
 			return {};
 
 		return {
+			columns[2],
 			columns[3],
 			columns[4],
 			columns[i + 1],
@@ -162,6 +164,21 @@ ReadProcessMount(unsigned pid, const char *_mountpoint)
 
 	for (const auto &i : MountInfoReader{pid})
 		if (i.mount_point == mountpoint)
+			return i;
+
+	return {};
+}
+
+MountInfo
+FindMountInfoByDevice(unsigned pid, const char *_device)
+{
+	FILE *const file = OpenMountInfo(pid);
+	AtScopeExit(file) { fclose(file); };
+
+	const std::string_view device{_device};
+
+	for (const auto &i : MountInfoReader{pid})
+		if (i.device == device)
 			return i;
 
 	return {};
