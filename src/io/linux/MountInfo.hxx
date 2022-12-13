@@ -32,9 +32,15 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 struct MountInfo {
+	/**
+	 * Unique identifier of the mount.
+	 */
+	uint_least64_t mnt_id;
+
 	/**
 	 * The relative path inside the file system which was mounted on
 	 * the given mount point.  This is relevant for bind mounts.
@@ -51,8 +57,8 @@ struct MountInfo {
 	 */
 	std::string source;
 
-	bool IsDefined() const {
-		return !root.empty() || !source.empty();
+	bool IsDefined() const noexcept {
+		return mnt_id != 0;
 	}
 };
 
@@ -81,3 +87,16 @@ ReadProcessMount(unsigned pid, const char *mountpoint);
  */
 MountInfo
 FindMountInfoByDevice(unsigned pid, const char *major_minor);
+
+/**
+ * Find a mounted device by its id.
+ *
+ * Throws std::runtime_error on error.
+ *
+ * @param pid a process id or 0 to obtain information about the
+ * current process
+ *
+ * @param mnt_id a mount id
+ */
+MountInfo
+FindMountInfoById(unsigned pid, const uint_least64_t mnt_id);

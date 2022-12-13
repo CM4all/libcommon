@@ -36,6 +36,8 @@
 #include "util/ScopeExit.hxx"
 #include "util/IterableSplitString.hxx"
 
+#include <fmt/format.h>
+
 #include <array>
 
 using std::string_view_literals::operator""sv;
@@ -73,6 +75,7 @@ OpenMountInfo(unsigned pid)
 }
 
 struct MountInfoView {
+	std::string_view mnt_id;
 	std::string_view device;
 	std::string_view root;
 	std::string_view mount_point;
@@ -81,6 +84,10 @@ struct MountInfoView {
 
 	operator MountInfo() const noexcept {
 		return {
+			/* the string_view is not null-terminated, but
+			   we know it's followed by a space, so this
+			   dirty code line is "okayish" */
+			strtoull(mnt_id.data(), nullptr, 10),
 			std::string{root},
 			std::string{filesystem},
 			std::string{source},
@@ -114,6 +121,7 @@ public:
 			return {};
 
 		return {
+			columns[0],
 			columns[2],
 			columns[3],
 			columns[4],
@@ -179,6 +187,22 @@ FindMountInfoByDevice(unsigned pid, const char *_device)
 
 	for (const auto &i : MountInfoReader{pid})
 		if (i.device == device)
+			return i;
+
+	return {};
+}
+
+MountInfo
+FindMountInfoById(unsigned pid, const uint_least64_t mnt_id)
+{
+	const fmt::format_int mnt_id_buffer{mnt_id};
+	const std::string_view mnt_id_s{
+		mnt_id_buffer.data(),
+		mnt_id_buffer.size(),
+	};
+
+	for (const auto &i : MountInfoReader{pid})
+		if (i.mnt_id == mnt_id_s)
 			return i;
 
 	return {};
