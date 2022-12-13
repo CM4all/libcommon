@@ -110,3 +110,6 @@ FindMountInfoById(unsigned pid, const uint_least64_t mnt_id);
  */
 MountInfo
 FindMountInfoByPath(FileAt path);
+
+MountInfo
+FindMountInfoByPath(const char *path);

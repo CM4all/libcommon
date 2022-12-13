@@ -223,3 +223,9 @@ FindMountInfoByPath(FileAt path)
 
 	return FindMountInfoById(0, stx.stx_mnt_id);
 }
+
+MountInfo
+FindMountInfoByPath(const char *path)
+{
+	return FindMountInfoByPath(FileAt{FileDescriptor{AT_FDCWD}, path});
+}
