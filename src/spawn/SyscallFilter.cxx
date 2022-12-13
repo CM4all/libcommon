@@ -91,7 +91,6 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(ptrace),
 
 	SCMP_SYS(query_module),
-	SCMP_SYS(quotactl),
 	SCMP_SYS(reboot),
 	SCMP_SYS(request_key),
 	SCMP_SYS(set_mempolicy),
@@ -112,6 +111,12 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(ustat),
 	SCMP_SYS(vm86),
 	SCMP_SYS(vm86old),
+
+	/* we used to forbid quotactl(), but on one hand, we need it
+	   for certain internal services, and on the other hand,
+	   allowing it doesn't cause any harm; users can check their
+	   own quotas (which is OK), but they can't modify them */
+	//SCMP_SYS(quotactl),
 };
 
 /* using a std::set to make sure the list is sorted; now if only there
