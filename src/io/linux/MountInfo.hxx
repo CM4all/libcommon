@@ -35,6 +35,8 @@
 #include <cstdint>
 #include <string>
 
+class FileDescriptor;
+
 struct MountInfo {
 	/**
 	 * Unique identifier of the mount.
@@ -100,3 +102,11 @@ FindMountInfoByDevice(unsigned pid, const char *major_minor);
  */
 MountInfo
 FindMountInfoById(unsigned pid, const uint_least64_t mnt_id);
+
+/**
+ * In which mount is the given path?
+ *
+ * Throws std::runtime_error on error.
+ */
+MountInfo
+FindMountInfoByPath(FileDescriptor directory, const char *name);

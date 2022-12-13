@@ -33,12 +33,16 @@
 #include "MountInfo.hxx"
 #include "lib/fmt/ToBuffer.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "io/FileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/IterableSplitString.hxx"
 
 #include <fmt/format.h>
 
 #include <array>
+
+#include <fcntl.h> // for AT_*
+#include <sys/stat.h> // for statx()
 
 using std::string_view_literals::operator""sv;
 
@@ -206,4 +210,16 @@ FindMountInfoById(unsigned pid, const uint_least64_t mnt_id)
 			return i;
 
 	return {};
+}
+
+MountInfo
+FindMountInfoByPath(FileDescriptor directory, const char *name)
+{
+	struct statx stx;
+	if (statx(directory.Get(), name,
+		  AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_STATX_SYNC_AS_STAT,
+		  STATX_MNT_ID, &stx) < 0)
+		throw FmtErrno("Failed to stat '{}'", name);
+
+	return FindMountInfoById(0, stx.stx_mnt_id);
 }
