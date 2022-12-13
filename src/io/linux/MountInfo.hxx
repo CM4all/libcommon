@@ -35,7 +35,7 @@
 #include <cstdint>
 #include <string>
 
-class FileDescriptor;
+struct FileAt;
 
 struct MountInfo {
 	/**
@@ -109,4 +109,4 @@ FindMountInfoById(unsigned pid, const uint_least64_t mnt_id);
  * Throws std::runtime_error on error.
  */
 MountInfo
-FindMountInfoByPath(FileDescriptor directory, const char *name);
+FindMountInfoByPath(FileAt path);

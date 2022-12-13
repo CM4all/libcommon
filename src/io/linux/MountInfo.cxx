@@ -33,7 +33,7 @@
 #include "MountInfo.hxx"
 #include "lib/fmt/ToBuffer.hxx"
 #include "lib/fmt/SystemError.hxx"
-#include "io/FileDescriptor.hxx"
+#include "io/FileAt.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/IterableSplitString.hxx"
 
@@ -213,13 +213,13 @@ FindMountInfoById(unsigned pid, const uint_least64_t mnt_id)
 }
 
 MountInfo
-FindMountInfoByPath(FileDescriptor directory, const char *name)
+FindMountInfoByPath(FileAt path)
 {
 	struct statx stx;
-	if (statx(directory.Get(), name,
+	if (statx(path.directory.Get(), path.name,
 		  AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_STATX_SYNC_AS_STAT,
 		  STATX_MNT_ID, &stx) < 0)
-		throw FmtErrno("Failed to stat '{}'", name);
+		throw FmtErrno("Failed to stat '{}'", path.name);
 
 	return FindMountInfoById(0, stx.stx_mnt_id);
 }
