@@ -36,6 +36,7 @@
 #include "net/log/Datagram.hxx"
 #include "net/SocketError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
+#include "http/Status.hxx"
 
 #include <gtest/gtest.h>
 

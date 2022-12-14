@@ -64,9 +64,9 @@ public:
 
 private:
 	/* virtual methods from CurlResponseHandler */
-	void OnHeaders(unsigned status,
+	void OnHeaders(HttpStatus status,
 		       Curl::Headers &&headers) override {
-		fprintf(stderr, "status %u\n", status);
+		fprintf(stderr, "status %u\n", static_cast<unsigned>(status));
 
 		for (const auto &i : headers)
 			fprintf(stderr, "%s: %s\n",

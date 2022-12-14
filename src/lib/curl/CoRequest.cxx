@@ -42,7 +42,7 @@ CoRequest::CoRequest(CurlGlobal &global, CurlEasy easy)
 }
 
 void
-CoRequest::OnHeaders(unsigned status, Headers &&headers)
+CoRequest::OnHeaders(HttpStatus status, Headers &&headers)
 {
 	response.status = status;
 	response.headers = std::move(headers);

@@ -71,7 +71,7 @@ Run(CurlGlobal &global, const char *url)
 {
 	const auto response = co_await Curl::CoRequest(global, CurlEasy(url));
 
-	printf("status=%u\n", response.status);
+	printf("status=%u\n", static_cast<unsigned>(response.status));
 	for (const auto &[key, value] : response.headers)
 		printf("%s: %s\n", key.c_str(), value.c_str());
 	printf("\n");

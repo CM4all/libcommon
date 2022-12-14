@@ -69,7 +69,7 @@ CurlResponseHandlerAdapter::FinishHeaders()
 	long status = 0;
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
 
-	handler.OnHeaders(status, std::move(headers));
+	handler.OnHeaders(static_cast<HttpStatus>(status), std::move(headers));
 }
 
 void

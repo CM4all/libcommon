@@ -41,7 +41,7 @@
 namespace Curl {
 
 struct CoResponse {
-	unsigned status = 0;
+	HttpStatus status = {};
 
 	Headers headers;
 
@@ -90,7 +90,7 @@ public:
 
 private:
 	/* virtual methods from CurlResponseHandler */
-	void OnHeaders(unsigned status, Headers &&headers) override;
+	void OnHeaders(HttpStatus status, Headers &&headers) override;
 	void OnData(std::span<const std::byte> data) override;
 	void OnEnd() override;
 	void OnError(std::exception_ptr e) noexcept override;

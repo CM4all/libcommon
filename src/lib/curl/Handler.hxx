@@ -32,8 +32,11 @@
 #include "Headers.hxx"
 
 #include <cstddef>
+#include <cstdint>
 #include <exception>
 #include <span>
+
+enum class HttpStatus : uint_least16_t;
 
 /**
  * Asynchronous response handler for a #CurlRequest.
@@ -55,7 +58,7 @@ public:
 	 * Exceptions thrown by this method will be passed to
 	 * OnError(), aborting the request.
 	 */
-	virtual void OnHeaders(unsigned status, Curl::Headers &&headers) = 0;
+	virtual void OnHeaders(HttpStatus status, Curl::Headers &&headers) = 0;
 
 	/**
 	 * Response body data has been received.
