@@ -34,6 +34,7 @@
 #include "Datagram.hxx"
 #include "Protocol.hxx"
 #include "Crc.hxx"
+#include "http/Status.hxx"
 #include "util/ByteOrder.hxx"
 
 #include <assert.h>
@@ -171,7 +172,7 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::HTTP_STATUS:
-			datagram.http_status = http_status_t(d.ReadU16());
+			datagram.http_status = static_cast<HttpStatus>(d.ReadU16());
 			if (!http_status_is_valid(datagram.http_status))
 				throw ProtocolError();
 

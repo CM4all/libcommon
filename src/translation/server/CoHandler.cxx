@@ -100,7 +100,7 @@ private:
 			result = connection.SendResponse(co_await std::move(task));
 		} catch (...) {
 			Response response;
-			response.Status(HTTP_STATUS_INTERNAL_SERVER_ERROR);
+			response.Status(HttpStatus::INTERNAL_SERVER_ERROR);
 			result = connection.SendResponse(std::move(response));
 		}
 	}

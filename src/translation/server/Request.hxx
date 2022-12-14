@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "http/Status.h"
+#include "http/Status.hxx"
 
 #include <cstdint>
 #include <span>
@@ -44,7 +44,7 @@ namespace Translation::Server {
 struct Request {
 	unsigned protocol_version = 0;
 
-	http_status_t status = http_status_t(0);
+	HttpStatus status = HttpStatus{};
 
 	const char *uri = nullptr;
 

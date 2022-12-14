@@ -38,6 +38,7 @@
 #include "uri/Base.hxx"
 #include "uri/Compare.hxx"
 #include "uri/PEscape.hxx"
+#include "http/Status.hxx"
 #include "HttpMessageResponse.hxx"
 #endif
 #include "AllocatorPtr.hxx"
@@ -60,11 +61,7 @@ TranslateResponse::Clear()
 	max_age = std::chrono::seconds(-1);
 	expires_relative = std::chrono::seconds::zero();
 	expires_relative_with_query = std::chrono::seconds::zero();
-#if TRANSLATION_ENABLE_HTTP
-	status = (http_status_t)0;
-#else
-	status = 0;
-#endif
+	status = HttpStatus{};
 
 	token = nullptr;
 
@@ -564,7 +561,7 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 					   fatal, because it
 					   invalidates a required
 					   attribute */
-					throw HttpMessageResponse(HTTP_STATUS_BAD_GATEWAY,
+					throw HttpMessageResponse(HttpStatus::BAD_GATEWAY,
 								  "Base mismatch");
 			}
 
@@ -609,7 +606,8 @@ TranslateResponse::CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
 		if (test_path != nullptr) {
 			char *unescaped = uri_unescape_dup(alloc, tail);
 			if (unescaped == nullptr)
-				throw HttpMessageResponse(HTTP_STATUS_BAD_REQUEST, "Malformed URI tail");
+				throw HttpMessageResponse(HttpStatus::BAD_REQUEST,
+							  "Malformed URI tail");
 
 			test_path = alloc.Concat(test_path, unescaped);
 		}

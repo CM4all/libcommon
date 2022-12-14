@@ -101,7 +101,8 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		if (payload.size() != 2)
 			throw std::runtime_error("size mismatch in STATUS packet");
 
-		status = http_status_t(*(const uint16_t*)(const void *)payload.data());
+		static_assert(sizeof(HttpStatus) == 2);
+		status = *(const HttpStatus *)(const void *)payload.data();
 		/* TODO enable
 		if (!http_status_is_valid(status))
 			throw FormatRuntimeError("invalid HTTP status code %u",

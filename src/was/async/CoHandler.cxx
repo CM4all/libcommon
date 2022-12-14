@@ -88,17 +88,17 @@ private:
 			result = server.SendResponse(co_await std::move(task));
 		} catch (const Was::NotFound &e) {
 			SimpleResponse response;
-			response.status = HTTP_STATUS_NOT_FOUND;
+			response.status = HttpStatus::NOT_FOUND;
 			response.SetTextPlain(e.body);
 			result = server.SendResponse(std::move(response));
 		} catch (const Was::BadRequest &e) {
 			SimpleResponse response;
-			response.status = HTTP_STATUS_BAD_REQUEST;
+			response.status = HttpStatus::BAD_REQUEST;
 			response.SetTextPlain(e.body);
 			result = server.SendResponse(std::move(response));
 		} catch (...) {
 			SimpleResponse response;
-			response.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+			response.status = HttpStatus::INTERNAL_SERVER_ERROR;
 			result = server.SendResponse(std::move(response));
 		}
 	}
@@ -127,12 +127,12 @@ CoSimpleRequestHandler::OnRequest(SimpleServer &server,
 		return r->Start(cancel_ptr);
 	} catch (const Was::NotFound &e) {
 		SimpleResponse response;
-		response.status = HTTP_STATUS_NOT_FOUND;
+		response.status = HttpStatus::NOT_FOUND;
 		response.SetTextPlain(e.body);
 		return server.SendResponse(std::move(response));
 	} catch (const Was::BadRequest &e) {
 		SimpleResponse response;
-		response.status = HTTP_STATUS_BAD_REQUEST;
+		response.status = HttpStatus::BAD_REQUEST;
 		response.SetTextPlain(e.body);
 		return server.SendResponse(std::move(response));
 	}

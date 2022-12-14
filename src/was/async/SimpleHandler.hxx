@@ -33,7 +33,7 @@
 #pragma once
 
 #include "http/Method.h"
-#include "http/Status.h"
+#include "http/Status.hxx"
 #include "util/DisposableBuffer.hxx"
 
 #include <map>
@@ -61,7 +61,7 @@ struct SimpleRequest {
 };
 
 struct SimpleResponse {
-	http_status_t status = HTTP_STATUS_OK;
+	HttpStatus status = HttpStatus::OK;
 	std::multimap<std::string, std::string, std::less<>> headers;
 	DisposableBuffer body;
 
@@ -72,7 +72,7 @@ struct SimpleResponse {
 
 	static SimpleResponse MethodNotAllowed(std::string allow) noexcept {
 		return {
-			HTTP_STATUS_METHOD_NOT_ALLOWED,
+			HttpStatus::METHOD_NOT_ALLOWED,
 			std::multimap<std::string, std::string, std::less<>>{
 				{"allow", std::move(allow)},
 			},

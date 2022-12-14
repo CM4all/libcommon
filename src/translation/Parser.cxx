@@ -56,6 +56,7 @@
 #include "net/AllocatedSocketAddress.hxx"
 #include "net/AddressInfo.hxx"
 #include "net/Parser.hxx"
+#include "http/Status.hxx"
 #endif
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
@@ -1145,14 +1146,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (payload.size() != 2)
 			throw std::runtime_error("size mismatch in STATUS packet from translation server");
 
-#if TRANSLATION_ENABLE_HTTP
-		response.status = http_status_t(*(const uint16_t*)(const void *)payload.data());
+		static_assert(sizeof(HttpStatus) == 2);
+		response.status = *(const HttpStatus *)(const void *)payload.data();
 
+#if TRANSLATION_ENABLE_HTTP
 		if (!http_status_is_valid(response.status))
 			throw FormatRuntimeError("invalid HTTP status code %u",
 						 response.status);
-#else
-		response.status = *(const uint16_t *)(const void *)payload.data();
 #endif
 
 		return;

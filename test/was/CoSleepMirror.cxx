@@ -41,7 +41,7 @@ MyHandler(EventLoop &event_loop, Was::SimpleRequest request)
 	co_await Co::Sleep(event_loop, std::chrono::seconds{1});
 
 	co_return Was::SimpleResponse{
-		HTTP_STATUS_OK,
+		HttpStatus::OK,
 		std::move(request.headers),
 		std::move(request.body),
 	};

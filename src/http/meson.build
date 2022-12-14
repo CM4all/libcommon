@@ -3,12 +3,12 @@ http_sources = [
   'List.cxx',
   'Date.cxx',
   'Range.cxx',
+  'Status.cxx',
 ]
 
 if get_variable('libcommon_enable_c', true)
   http_sources += [
     'Method.c',
-    'Status.c',
   ]
 endif
 

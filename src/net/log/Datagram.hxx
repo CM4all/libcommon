@@ -35,11 +35,12 @@
 #include "Protocol.hxx"
 #include "Chrono.hxx"
 #include "http/Method.h"
-#include "http/Status.h"
 
 #include <chrono>
 #include <cstdint>
 #include <string_view>
+
+enum class HttpStatus : uint_least16_t;
 
 namespace Net {
 namespace Log {
@@ -64,7 +65,7 @@ struct Datagram {
 
 	http_method_t http_method = HTTP_METHOD_NULL;
 
-	http_status_t http_status = http_status_t(0);
+	HttpStatus http_status = {};
 
 	Type type = Type::UNSPECIFIED;
 
@@ -81,7 +82,7 @@ struct Datagram {
 		 const char *_remote_host,
 		 const char *_host, const char *_site,
 		 const char *_referer, const char *_user_agent,
-		 http_status_t _status, int64_t _length,
+		 HttpStatus _status, int64_t _length,
 		 uint_least64_t _traffic_received,
 		 uint_least64_t _traffic_sent,
 		 Duration _duration) noexcept
@@ -117,7 +118,7 @@ struct Datagram {
 	}
 
 	bool HasHttpStatus() const noexcept {
-		return http_status != http_status_t(0);
+		return http_status != HttpStatus{};
 	}
 
 	bool GuessIsHttpAccess() const noexcept {

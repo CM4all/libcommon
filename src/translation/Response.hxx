@@ -50,10 +50,6 @@
 #include "spawn/ChildOptions.hxx"
 #endif
 
-#if TRANSLATION_ENABLE_HTTP
-#include "http/Status.h"
-#endif
-
 #if TRANSLATION_ENABLE_SESSION
 #include "http/CookieSameSite.hxx"
 #endif
@@ -65,6 +61,7 @@
 #include <assert.h>
 #include <stdint.h>
 
+enum class HttpStatus : uint_least16_t;
 enum class TranslationCommand : uint16_t;
 struct WidgetView;
 class AllocatorPtr;
@@ -89,11 +86,7 @@ struct TranslateResponse {
 	 */
 	std::chrono::duration<uint32_t> expires_relative_with_query;
 
-#if TRANSLATION_ENABLE_HTTP
-	http_status_t status;
-#else
-	int status;
-#endif
+	HttpStatus status;
 
 	const char *token;
 

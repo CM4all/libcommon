@@ -38,7 +38,7 @@ static Co::Task<Was::SimpleResponse>
 MyHandler(Was::SimpleRequest request)
 {
 	co_return Was::SimpleResponse{
-		HTTP_STATUS_OK,
+		HttpStatus::OK,
 		std::move(request.headers),
 		std::move(request.body),
 	};

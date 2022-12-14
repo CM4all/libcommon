@@ -111,7 +111,7 @@ TEST(Log, Serializer)
 	d.http_referer = "e";
 	d.user_agent = "f";
 	d.http_method = HTTP_METHOD_POST;
-	d.http_status = HTTP_STATUS_NO_CONTENT;
+	d.http_status = HttpStatus::NO_CONTENT;
 	d.type = Net::Log::Type::SSH;
 	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
 	size = Net::Log::Serialize(buffer.data(), buffer.size(), d);
@@ -164,7 +164,7 @@ TEST(Log, Send)
 	d.http_referer = "e";
 	d.user_agent = "f";
 	d.http_method = HTTP_METHOD_POST;
-	d.http_status = HTTP_STATUS_NO_CONTENT;
+	d.http_status = HttpStatus::NO_CONTENT;
 	d.type = Net::Log::Type::SSH;
 	EXPECT_TRUE(SendReceive(d) == d);
 

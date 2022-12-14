@@ -41,7 +41,7 @@ public:
 			  Was::SimpleRequest &&request,
 			  CancellablePointer &) noexcept override {
 		return server.SendResponse({
-				HTTP_STATUS_OK,
+				HttpStatus::OK,
 				std::move(request.headers),
 				std::move(request.body),
 			});
