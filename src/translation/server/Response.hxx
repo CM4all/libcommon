@@ -336,6 +336,10 @@ public:
 		return Packet(TranslationCommand::AUTO_GZIP);
 	}
 
+	auto &AutoBrotli() noexcept {
+		return Packet(TranslationCommand::AUTO_BROTLI);
+	}
+
 	template<typename... Types>
 	auto &ListenerTag(Types... value) noexcept {
 		return StringPacket(TranslationCommand::LISTENER_TAG, value...);

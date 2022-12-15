@@ -4012,6 +4012,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::AUTO_BROTLI:
+		if (!payload.empty())
+			throw std::runtime_error("malformed AUTO_BROTLI packet");
+
+		if (response.auto_brotli)
+			throw std::runtime_error("misplaced AUTO_BROTLI packet");
+
+		response.auto_brotli = true;
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

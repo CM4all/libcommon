@@ -1211,6 +1211,12 @@ enum class TranslationCommand : uint16_t {
 	 * The contents of an OpenSSH authorized_keys file.
 	 */
 	AUTHORIZED_KEYS = 248,
+
+	/**
+	 * Compress the response the-fly with Brotli if the client
+	 * accepts it.
+	 */
+	AUTO_BROTLI = 249,
 };
 
 struct TranslationHeader {

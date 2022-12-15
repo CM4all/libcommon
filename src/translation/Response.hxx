@@ -473,6 +473,11 @@ struct TranslateResponse {
 	 */
 	bool auto_gzip;
 
+	/**
+	 * @see #TranslationCommand::AUTO_BROTLI
+	 */
+	bool auto_brotli;
+
 	TranslateResponse() = default;
 	TranslateResponse(TranslateResponse &&) = default;
 	TranslateResponse &operator=(TranslateResponse &&) = default;
