@@ -34,6 +34,7 @@
 #include "Datagram.hxx"
 #include "Protocol.hxx"
 #include "Crc.hxx"
+#include "http/Method.hxx"
 #include "http/Status.hxx"
 #include "util/ByteOrder.hxx"
 
@@ -149,7 +150,7 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::HTTP_METHOD:
-			datagram.http_method = http_method_t(d.ReadByte());
+			datagram.http_method = static_cast<HttpMethod>(d.ReadByte());
 			if (!http_method_is_valid(datagram.http_method))
 				throw ProtocolError();
 

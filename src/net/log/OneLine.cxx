@@ -32,6 +32,7 @@
 
 #include "OneLine.hxx"
 #include "Datagram.hxx"
+#include "http/Method.hxx"
 #include "net/Anonymize.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/StringBuffer.hxx"

@@ -6,12 +6,6 @@ http_sources = [
   'Status.cxx',
 ]
 
-if get_variable('libcommon_enable_c', true)
-  http_sources += [
-    'Method.c',
-  ]
-endif
-
 http = static_library(
   'http',
   http_sources,

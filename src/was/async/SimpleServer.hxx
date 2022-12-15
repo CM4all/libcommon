@@ -37,6 +37,7 @@
 #include "Socket.hxx"
 #include "SimpleInput.hxx"
 #include "SimpleOutput.hxx"
+#include "http/Method.hxx"
 #include "util/Cancellable.hxx"
 #include "util/DisposableBuffer.hxx"
 
@@ -65,7 +66,7 @@ class SimpleServer final
 	SimpleRequestHandler &request_handler;
 
 	struct Request {
-		http_method_t method = HTTP_METHOD_GET;
+		HttpMethod method = HttpMethod::GET;
 		std::optional<SimpleRequest> request;
 
 		CancellablePointer cancel_ptr{nullptr};

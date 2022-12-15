@@ -36,6 +36,7 @@
 #include "net/log/Datagram.hxx"
 #include "net/SocketError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
+#include "http/Method.hxx"
 #include "http/Status.hxx"
 
 #include <gtest/gtest.h>
@@ -111,7 +112,7 @@ TEST(Log, Serializer)
 	d.http_uri = "d";
 	d.http_referer = "e";
 	d.user_agent = "f";
-	d.http_method = HTTP_METHOD_POST;
+	d.http_method = HttpMethod::POST;
 	d.http_status = HttpStatus::NO_CONTENT;
 	d.type = Net::Log::Type::SSH;
 	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
@@ -164,7 +165,7 @@ TEST(Log, Send)
 	d.http_uri = "d";
 	d.http_referer = "e";
 	d.user_agent = "f";
-	d.http_method = HTTP_METHOD_POST;
+	d.http_method = HttpMethod::POST;
 	d.http_status = HttpStatus::NO_CONTENT;
 	d.type = Net::Log::Type::SSH;
 	EXPECT_TRUE(SendReceive(d) == d);

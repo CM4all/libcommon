@@ -34,12 +34,12 @@
 
 #include "Protocol.hxx"
 #include "Chrono.hxx"
-#include "http/Method.h"
 
 #include <chrono>
 #include <cstdint>
 #include <string_view>
 
+enum class HttpMethod : uint_least8_t;
 enum class HttpStatus : uint_least16_t;
 
 namespace Net {
@@ -63,7 +63,7 @@ struct Datagram {
 
 	Duration duration;
 
-	http_method_t http_method = HTTP_METHOD_NULL;
+	HttpMethod http_method = {};
 
 	HttpStatus http_status = {};
 
@@ -78,7 +78,7 @@ struct Datagram {
 		:type(_type) {}
 
 	Datagram(TimePoint _timestamp,
-		 http_method_t _method, const char *_uri,
+		 HttpMethod _method, const char *_uri,
 		 const char *_remote_host,
 		 const char *_host, const char *_site,
 		 const char *_referer, const char *_user_agent,
@@ -114,7 +114,7 @@ struct Datagram {
 	}
 
 	bool HasHttpMethod() const noexcept {
-		return http_method != HTTP_METHOD_NULL;
+		return http_method != HttpMethod{};
 	}
 
 	bool HasHttpStatus() const noexcept {

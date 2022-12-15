@@ -122,7 +122,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 
 		assert(!request.request);
 		request.request.emplace();
-		request.method = request.request->method = HTTP_METHOD_GET;
+		request.method = request.request->method = HttpMethod::GET;
 		request.state = Request::State::HEADERS;
 		//response.body = nullptr;
 		output.ResetPosition();
@@ -134,14 +134,14 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
-		if (payload.size() != sizeof(request.request->method)) {
+		if (payload.size() != sizeof(uint32_t)) {
 			AbortProtocolError("malformed METHOD packet");
 			return false;
 		}
 
 		{
-			auto method = *(const http_method_t *)(const void *)payload.data();
-			if (request.request->method != HTTP_METHOD_GET &&
+			auto method = static_cast<HttpMethod>(*(const uint32_t *)(const void *)payload.data());
+			if (request.request->method != HttpMethod::GET &&
 			    method != request.request->method) {
 				/* sending that packet twice is illegal */
 				AbortProtocolError("misplaced METHOD packet");
@@ -381,7 +381,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 		return false;
 
 	if (response.body && http_method_is_empty(request.method)) {
-		if (request.method == HTTP_METHOD_HEAD)
+		if (request.method == HttpMethod::HEAD)
 			response.headers.emplace("content-length",
 						 StringFormat<64>("%zu", response.body.size()).c_str());
 

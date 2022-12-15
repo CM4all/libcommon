@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "http/Method.h"
+#include "http/Method.hxx"
 #include "http/Status.hxx"
 #include "util/DisposableBuffer.hxx"
 
@@ -46,7 +46,7 @@ namespace Was {
 struct SimpleRequest {
 	std::string remote_host;
 	std::map<std::string, std::string, std::less<>> parameters;
-	http_method_t method;
+	HttpMethod method;
 	std::string uri;
 	std::string script_name, path_info, query_string;
 	std::multimap<std::string, std::string, std::less<>> headers;
