@@ -144,6 +144,9 @@ SocketConfig::Create(int type) const
 
 		if (tcp_user_timeout > 0)
 			fd.SetTcpUserTimeout(tcp_user_timeout);
+
+		if (tcp_no_delay)
+			fd.SetNoDelay();
 	}
 
 	if (keepalive)

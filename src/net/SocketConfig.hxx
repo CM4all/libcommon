@@ -80,6 +80,13 @@ struct SocketConfig {
 	bool pass_cred = false;
 
 	/**
+	 * If true, then disable Nagle's algorithm.
+	 *
+	 * @see TCP_NODELAY
+	 */
+	bool tcp_no_delay = false;
+
+	/**
 	 * @see SO_KEEPALIVE
 	 */
 	bool keepalive = false;
