@@ -102,7 +102,7 @@ SocketConfig::Create(int type) const
 		/* use fchmod() on the unbound socket to limit the
 		   mode, in order to avoid a race condition; later we
 		   need to call chmod() on the socket path because the
-		   bind() aplies the umask */
+		   bind() applies the umask */
 		fchmod(fd.Get(), mode);
 
 	if (!fd.Bind(bind_address)) {
