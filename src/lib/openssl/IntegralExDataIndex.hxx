@@ -44,9 +44,8 @@ namespace OpenSSL {
  * containing an integral/enum value, defaulting to zero.
  */
 template<typename T>
+requires std::is_integral_v<T> || std::is_enum_v<T>
 class IntegralExDataIndex {
-	static_assert(std::is_integral_v<T> ||
-		      std::is_enum_v<T>);
 	static_assert(sizeof(T) <= sizeof(void *));
 
 	TrivialExDataIndex idx;
