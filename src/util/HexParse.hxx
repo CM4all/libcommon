@@ -35,6 +35,7 @@
 #include "CharUtil.hxx"
 
 #include <array>
+#include <cstdint>
 #include <string_view>
 #include <type_traits>
 
@@ -91,7 +92,7 @@ ParseLowerHexFixed(const char *input, T &output) noexcept
 inline const char *
 ParseLowerHexFixed(const char *input, std::byte &_output) noexcept
 {
-	auto &output = (std::uint8_t &)_output;
+	auto &output = (uint8_t &)_output;
 	return ParseLowerHexFixed(input, output);
 }
 
