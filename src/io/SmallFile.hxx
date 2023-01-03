@@ -45,12 +45,10 @@ void
 ReadSmallFile(const char *path, std::span<std::byte> dest);
 
 template<typename T>
+requires std::is_trivially_copyable_v<T> && std::is_standard_layout_v<T>
 void
 ReadSmallFile(const char *path, std::span<T> dest)
 {
-	static_assert(std::is_trivially_copyable_v<T>);
-	static_assert(std::is_standard_layout_v<T>);
-
 	ReadSmallFile(path, std::as_writable_bytes(dest));
 }
 
