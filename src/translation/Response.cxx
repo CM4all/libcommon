@@ -55,7 +55,7 @@
 #endif
 
 void
-TranslateResponse::Clear()
+TranslateResponse::Clear() noexcept
 {
 	protocol_version = 0;
 	max_age = std::chrono::seconds(-1);
@@ -288,7 +288,7 @@ DupStringArray(AllocatorPtr alloc, std::span<const char *const> src) noexcept
 }
 
 void
-TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src)
+TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) noexcept
 {
 	protocol_version = src.protocol_version;
 
@@ -637,7 +637,7 @@ TranslateResponse::CompileInverseRegex() const
 }
 
 bool
-TranslateResponse::IsExpandable() const
+TranslateResponse::IsExpandable() const noexcept
 {
 	return regex != nullptr &&
 		(expand_redirect ||

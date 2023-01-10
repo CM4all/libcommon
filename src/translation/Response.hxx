@@ -478,14 +478,14 @@ struct TranslateResponse {
 	 */
 	bool auto_brotli;
 
-	TranslateResponse() = default;
+	TranslateResponse() noexcept = default;
 	TranslateResponse(TranslateResponse &&) = default;
 	TranslateResponse &operator=(TranslateResponse &&) = default;
 
-	void Clear();
+	void Clear() noexcept;
 
 #if TRANSLATION_ENABLE_WANT
-	bool Wants(TranslationCommand cmd) const {
+	bool Wants(TranslationCommand cmd) const noexcept {
 		assert(protocol_version >= 1);
 
 		return std::find(want.begin(), want.end(), cmd) != want.end();
@@ -494,19 +494,19 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_CACHE
 	[[gnu::pure]]
-	bool VaryContains(TranslationCommand cmd) const {
+	bool VaryContains(TranslationCommand cmd) const noexcept {
 		return std::find(vary.begin(), vary.end(), cmd) != vary.end();
 	}
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
 	[[gnu::pure]]
-	bool HasAuth() const {
+	bool HasAuth() const noexcept {
 		return auth.data() != nullptr ||
 			auth_file != nullptr;
 	}
 
-	bool HasUntrusted() const {
+	bool HasUntrusted() const noexcept {
 		return untrusted != nullptr || untrusted_prefix != nullptr ||
 			untrusted_site_suffix != nullptr ||
 			untrusted_raw_site_suffix != nullptr;
@@ -520,7 +520,7 @@ struct TranslateResponse {
 	}
 
 
-	void CopyFrom(AllocatorPtr alloc, const TranslateResponse &src);
+	void CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) noexcept;
 
 #if TRANSLATION_ENABLE_CACHE
 	/**
@@ -551,7 +551,7 @@ struct TranslateResponse {
 	 * translate_response_expand()?
 	 */
 	[[gnu::pure]]
-	bool IsExpandable() const;
+	bool IsExpandable() const noexcept;
 
 	/**
 	 * Expand the strings in this response with the specified regex
