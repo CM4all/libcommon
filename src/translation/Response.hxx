@@ -522,6 +522,12 @@ struct TranslateResponse {
 
 	void CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) noexcept;
 
+	/**
+	 * Like CopyFrom(), but also copy fields that are excluded
+	 * there.
+	 */
+	void FullCopyFrom(AllocatorPtr alloc, const TranslateResponse &src) noexcept;
+
 #if TRANSLATION_ENABLE_CACHE
 	/**
 	 * Copy data from #src for storing in the translation cache.

@@ -523,6 +523,19 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	validate_mtime.path = alloc.CheckDup(src.validate_mtime.path);
 }
 
+void
+TranslateResponse::FullCopyFrom(AllocatorPtr alloc, const TranslateResponse &src) noexcept
+{
+	CopyFrom(alloc, src);
+	max_age = src.max_age;
+#if TRANSLATION_ENABLE_RADDRESS
+	address.CopyFrom(alloc, src.address);
+#endif
+#if TRANSLATION_ENABLE_SESSION
+	user = alloc.CheckDup(src.user);
+#endif
+}
+
 #if TRANSLATION_ENABLE_CACHE
 
 void
