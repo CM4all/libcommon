@@ -1912,7 +1912,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.layout.data() != nullptr) {
 			assert(layout_items_builder);
 
-			layout_items_builder->emplace_back(TranslationLayoutItem::Type::BASE,
+			layout_items_builder->emplace_back(TranslationLayoutItem::Base{},
 							   string_payload.data());
 			return;
 		}
@@ -1974,7 +1974,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.layout.data() != nullptr) {
 			assert(layout_items_builder);
 
-			layout_items_builder->emplace_back(TranslationLayoutItem::Type::REGEX,
+			layout_items_builder->emplace_back(TranslationLayoutItem::Regex{},
 							   string_payload.data());
 			return;
 		}
