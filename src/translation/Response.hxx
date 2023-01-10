@@ -43,7 +43,6 @@
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
-#include "translation/Layout.hxx"
 #include <memory>
 #include <vector>
 #endif
@@ -66,6 +65,7 @@
 enum class HttpStatus : uint_least16_t;
 enum class TranslationCommand : uint16_t;
 struct WidgetView;
+struct TranslationLayoutItem;
 class AllocatorPtr;
 class UniqueRegex;
 class MatchData;
