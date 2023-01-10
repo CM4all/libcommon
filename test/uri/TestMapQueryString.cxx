@@ -92,6 +92,17 @@ TEST(TestMapQueryString, Escaped)
 	EXPECT_STREQ(m.find("foo")->second.c_str(), "a b\xff");
 }
 
+TEST(TestMapQueryString, PlusEscaped)
+{
+	const auto m = MapQueryString("foo=+a+b+&bar=++");
+	EXPECT_FALSE(m.empty());
+	EXPECT_EQ(std::distance(m.begin(), m.end()), std::size_t(2));
+	EXPECT_NE(m.find("foo"), m.end());
+	EXPECT_STREQ(m.find("foo")->second.c_str(), " a b ");
+	EXPECT_NE(m.find("bar"), m.end());
+	EXPECT_STREQ(m.find("bar")->second.c_str(), "  ");
+}
+
 TEST(TestMapQueryString, BadEscape)
 {
 	EXPECT_ANY_THROW(MapQueryString("foo=a%"));

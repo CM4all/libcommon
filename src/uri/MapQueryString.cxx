@@ -38,6 +38,26 @@
 
 #include <stdexcept>
 
+/**
+ * Unescape a form value according to RFC 1866 8.2.1.  This uses
+ * UriUnescape(), but also supports space encoded as "+".
+ */
+static char *
+FormUnescape(char *dest, std::string_view src) noexcept
+{
+	while (true) {
+		const auto [segment, rest] = Split(src, '+');
+		dest = UriUnescape(dest, segment);
+
+		if (rest.data() == nullptr)
+			return dest;
+
+		*dest++ = ' ';
+
+		src = rest;
+	}
+}
+
 std::multimap<std::string, std::string>
 MapQueryString(std::string_view src)
 {
@@ -52,7 +72,7 @@ MapQueryString(std::string_view src)
 
 		unescape_buffer.GrowDiscard(escaped_value.size());
 		char *value = unescape_buffer.data();
-		const char *end_value = UriUnescape(value, escaped_value);
+		const char *end_value = FormUnescape(value, escaped_value);
 		if (end_value == nullptr)
 			throw std::invalid_argument{"Malformed URI escape"};
 
