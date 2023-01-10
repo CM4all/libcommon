@@ -1913,7 +1913,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			assert(layout_items_builder);
 
 			layout_items_builder->emplace_back(TranslationLayoutItem::Base{},
-							   string_payload.data());
+							   string_payload);
 			return;
 		}
 
@@ -1975,7 +1975,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			assert(layout_items_builder);
 
 			layout_items_builder->emplace_back(TranslationLayoutItem::Regex{},
-							   string_payload.data());
+							   string_payload);
 			return;
 		}
 
