@@ -44,6 +44,8 @@
 #if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
 #include "translation/Layout.hxx"
+#include <memory>
+#include <vector>
 #endif
 #if TRANSLATION_ENABLE_EXECUTE
 #include "adata/ExpandableStringList.hxx"
@@ -120,7 +122,7 @@ struct TranslateResponse {
 	const char *base;
 
 	std::span<const std::byte> layout;
-	std::span<const TranslationLayoutItem> layout_items;
+	std::shared_ptr<std::vector<TranslationLayoutItem>> layout_items;
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND

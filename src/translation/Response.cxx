@@ -88,7 +88,7 @@ TranslateResponse::Clear() noexcept
 #if TRANSLATION_ENABLE_RADDRESS
 	base = nullptr;
 	layout = {};
-	layout_items = {};
+	layout_items.reset();
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -324,7 +324,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 #if TRANSLATION_ENABLE_RADDRESS
 	base = alloc.CheckDup(src.base);
 	layout = alloc.Dup(src.layout);
-	layout_items = alloc.CloneArray(src.layout_items);
+	layout_items = src.layout_items;
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND

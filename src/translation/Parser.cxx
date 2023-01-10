@@ -41,6 +41,7 @@
 #include "widget/Class.hxx"
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
+#include "translation/Layout.hxx"
 #include "file/Address.hxx"
 #include "delegate/Address.hxx"
 #include "http/local/Address.hxx"
@@ -403,7 +404,7 @@ static void
 FinishTranslateResponse(AllocatorPtr alloc,
 #if TRANSLATION_ENABLE_RADDRESS
 			const char *base_suffix,
-			std::span<const TranslationLayoutItem> layout_items,
+			std::shared_ptr<std::vector<TranslationLayoutItem>> &&layout_items,
 #endif
 			TranslateResponse &response,
 			std::span<const char *const> probe_suffixes)
@@ -447,10 +448,12 @@ FinishTranslateResponse(AllocatorPtr alloc,
 	response.address.Check();
 
 	if (response.layout.data() != nullptr) {
-		if (layout_items.empty())
-		throw std::runtime_error("empty LAYOUT");
+		assert(layout_items);
 
-		response.layout_items = alloc.CloneArray(layout_items);
+		if (layout_items->empty())
+			throw std::runtime_error("empty LAYOUT");
+
+		response.layout_items = std::move(layout_items);
 	}
 
 	/* the ResourceAddress::IsValidBase() check works only after
@@ -1907,11 +1910,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed BASE packet");
 
 		if (response.layout.data() != nullptr) {
-			if (layout_items_builder.full())
-				throw std::runtime_error("too many BASE packets");
+			assert(layout_items_builder);
 
-			layout_items_builder.emplace_back(TranslationLayoutItem::Type::BASE,
-							  string_payload.data());
+			layout_items_builder->emplace_back(TranslationLayoutItem::Type::BASE,
+							   string_payload.data());
 			return;
 		}
 
@@ -1970,11 +1972,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed REGEX packet");
 
 		if (response.layout.data() != nullptr) {
-			if (layout_items_builder.full())
-				throw std::runtime_error("too many REGEX packets");
+			assert(layout_items_builder);
 
-			layout_items_builder.emplace_back(TranslationLayoutItem::Type::REGEX,
-							  string_payload.data());
+			layout_items_builder->emplace_back(TranslationLayoutItem::Type::REGEX,
+							   string_payload.data());
 			return;
 		}
 
@@ -3756,7 +3757,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("duplicate LAYOUT packet");
 
 		response.layout = payload;
-		layout_items_builder.clear();
+		layout_items_builder = std::make_shared<std::vector<TranslationLayoutItem>>();
 		return;
 #else
 		break;
@@ -4048,7 +4049,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 		FinishTranslateResponse(alloc,
 #if TRANSLATION_ENABLE_RADDRESS
 					base_suffix,
-					layout_items_builder,
+					std::move(layout_items_builder),
 #endif
 					response,
 					{probe_suffixes_builder.data(),
