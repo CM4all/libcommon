@@ -49,6 +49,11 @@ public:
 		AppendT(magic);
 	}
 
+	bool empty() const noexcept {
+		// this object is empty if it contains only the "magic"
+		return size() <= 4;
+	}
+
 	void reset() noexcept {
 		// erase everything but the 4 "magic" bytes
 		data.erase(4);
