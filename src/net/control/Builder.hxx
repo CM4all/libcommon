@@ -60,6 +60,10 @@ public:
 		Add(cmd, AsBytes(payload));
 	}
 
+	std::size_t size() const noexcept {
+		return data.size();
+	}
+
 	operator std::span<const std::byte>() const noexcept {
 		return AsBytes(data);
 	}
