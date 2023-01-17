@@ -198,6 +198,10 @@ log_server_apply_attributes(Deserializer d)
 		case Attribute::TYPE:
 			datagram.type = Type(d.ReadByte());
 			break;
+
+		case Attribute::JSON:
+			datagram.json = d.ReadString();
+			break;
 		}
 	}
 

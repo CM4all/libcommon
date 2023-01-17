@@ -163,6 +163,12 @@ enum class Attribute : uint8_t {
 	 * are present.
 	 */
 	TYPE = 15,
+
+	/**
+	 * An opaque JSON value.  The structure is specific to the
+	 * record type.
+	 */
+	JSON = 16,
 };
 
 /**

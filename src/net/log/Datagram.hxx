@@ -57,6 +57,8 @@ struct Datagram {
 
 	std::string_view message{};
 
+	std::string_view json{};
+
 	uint_least64_t length;
 
 	uint_least64_t traffic_received, traffic_sent;
