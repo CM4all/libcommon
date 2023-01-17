@@ -49,6 +49,11 @@ public:
 		AppendT(magic);
 	}
 
+	void reset() noexcept {
+		// erase everything but the 4 "magic" bytes
+		data.erase(4);
+	}
+
 	void Add(BengProxy::ControlCommand cmd,
 		 std::span<const std::byte> payload) noexcept {
 		AppendT(BengProxy::ControlHeader{ToBE16(payload.size()), ToBE16(uint16_t(cmd))});
