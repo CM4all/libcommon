@@ -2,6 +2,9 @@ io_linux = static_library(
   'io',
   'MountInfo.cxx',
   include_directories: inc,
+  dependencies: [
+    fmt_dep,
+  ],
 )
 
 io_linux_dep = declare_dependency(
