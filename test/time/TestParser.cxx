@@ -61,3 +61,38 @@ TEST(Parser, Today)
 	EXPECT_EQ(result.second,
 		  std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::hours(24)));
 }
+
+TEST(Parser, Relative)
+{
+	constexpr double error = std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::seconds{5}).count();
+
+	EXPECT_NEAR(ParseTimePoint("+1h").first.time_since_epoch().count(),
+		    (std::chrono::system_clock::now() + std::chrono::hours{1}).time_since_epoch().count(),
+		    error);
+	EXPECT_EQ(ParseTimePoint("+1h").second, std::chrono::hours{1});
+
+	EXPECT_NEAR(ParseTimePoint("-1h").first.time_since_epoch().count(),
+		    (std::chrono::system_clock::now() - std::chrono::hours{1}).time_since_epoch().count(),
+		    error);
+	EXPECT_EQ(ParseTimePoint("-1h").second, std::chrono::hours{1});
+
+	EXPECT_NEAR(ParseTimePoint("-60m").first.time_since_epoch().count(),
+		    (std::chrono::system_clock::now() - std::chrono::hours{1}).time_since_epoch().count(),
+		    error);
+	EXPECT_EQ(ParseTimePoint("-60m").second, std::chrono::minutes{1});
+
+	EXPECT_NEAR(ParseTimePoint("-60s").first.time_since_epoch().count(),
+		    (std::chrono::system_clock::now() - std::chrono::minutes{1}).time_since_epoch().count(),
+		    error);
+	EXPECT_EQ(ParseTimePoint("-60s").second, std::chrono::seconds{1});
+
+	EXPECT_NEAR(ParseTimePoint("+20s").first.time_since_epoch().count(),
+		    (std::chrono::system_clock::now() + std::chrono::seconds{20}).time_since_epoch().count(),
+		    error);
+	EXPECT_EQ(ParseTimePoint("+20s").second, std::chrono::seconds{1});
+
+	EXPECT_NEAR(ParseTimePoint("-7d").first.time_since_epoch().count(),
+		    (std::chrono::system_clock::now() - std::chrono::hours{24 * 7}).time_since_epoch().count(),
+		    error);
+	EXPECT_EQ(ParseTimePoint("-7d").second, std::chrono::hours{24});
+}
