@@ -191,9 +191,19 @@ try {
 		AppendTimestamp(b, d.timestamp);
 	else
 		b.Append('-');
+	b.Append(']');
 
-	b.Append("] ");
-	AppendEscape(b, d.message);
+	if (d.message.data() != nullptr) {
+		b.Append(' ');
+		AppendEscape(b, d.message);
+	}
+
+	if (d.json.data() != nullptr) {
+		b.Append(' ');
+
+		// TODO escape?  reformat to one line?
+		b.Append(d.json);
+	}
 
 	return b.GetTail();
 } catch (StringBuilder::Overflow) {
@@ -207,7 +217,7 @@ FormatOneLine(char *buffer, size_t buffer_size,
 	if (d.IsHttpAccess())
 		return FormatOneLineHttp(buffer, buffer_size, d,
 					 site, anonymize);
-	else if (d.message.data() != nullptr)
+	else if (d.message.data() != nullptr || d.json.data() != nullptr)
 		return FormatOneLineMessage(buffer, buffer_size, d, site);
 	else
 		return buffer;
