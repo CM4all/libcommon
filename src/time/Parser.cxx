@@ -36,6 +36,7 @@
 #include "util/StringAPI.hxx"
 
 #include <cstdlib> // for strtoll()
+#include <stdexcept>
 
 static std::pair<std::chrono::system_clock::duration,
 		 std::chrono::system_clock::duration>
