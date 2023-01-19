@@ -60,6 +60,9 @@ ToString(Type type) noexcept
 
 	case Type::JOB:
 		return "job";
+
+	case Type::HISTORY:
+		return "history";
 	}
 
 	return nullptr;
@@ -80,6 +83,8 @@ ParseType(const char *s)
 		return Type::SSH;
 	if (StringIsEqual(s, "job"))
 		return Type::JOB;
+	else if (StringIsEqual(s, "history"))
+		return Type::HISTORY;
 	throw std::invalid_argument("Invalid log record type");
 }
 

@@ -213,6 +213,12 @@ enum class Type : uint8_t {
 	 * contain #Attribute::SITE.
 	 */
 	JOB = 5,
+
+	/**
+	 * A "history" event (application usage tracking).  The record
+	 * usually also contains #Attribute::JSON.
+	 */
+	HISTORY = 6,
 };
 
 }}
