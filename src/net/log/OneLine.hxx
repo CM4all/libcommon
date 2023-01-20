@@ -61,6 +61,16 @@ struct OneLineOptions {
 	 * to?
 	 */
 	bool show_forwarded_to = false;
+
+	/**
+	 * Show the HTTP "Referer" header?
+	 */
+	bool show_http_referer = true;
+
+	/**
+	 * Show the HTTP "User-Agent" header?
+	 */
+	bool show_user_agent = true;
 };
 
 /**

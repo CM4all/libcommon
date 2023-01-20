@@ -187,11 +187,15 @@ try {
 	else
 		b.Append('-');
 
-	b.Append(' ');
-	AppendOptionalQuoted(b, d.http_referer);
+	if (options.show_http_referer) {
+		b.Append(' ');
+		AppendOptionalQuoted(b, d.http_referer);
+	}
 
-	b.Append(' ');
-	AppendOptionalQuoted(b, d.user_agent);
+	if (options.show_user_agent) {
+		b.Append(' ');
+		AppendOptionalQuoted(b, d.user_agent);
+	}
 
 	b.Append(' ');
 	if (d.valid_duration)
