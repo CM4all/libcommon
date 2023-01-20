@@ -42,6 +42,11 @@ struct Datagram;
 
 struct OneLineOptions {
 	/**
+	 * Show the time stamp in ISO8601 format?
+	 */
+	bool iso8601 = false;
+
+	/**
 	 * Show the site name?
 	 */
 	bool show_site = false;

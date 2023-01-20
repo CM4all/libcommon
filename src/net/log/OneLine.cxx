@@ -35,6 +35,7 @@
 #include "http/Method.hxx"
 #include "net/Anonymize.hxx"
 #include "io/FileDescriptor.hxx"
+#include "time/ISO8601.hxx"
 #include "util/StringBuffer.hxx"
 #include "util/StringBuilder.hxx"
 
@@ -135,6 +136,14 @@ FormatOneLineHttp(char *buffer, size_t buffer_size,
 try {
 	StringBuilder b(buffer, buffer_size);
 
+	if (options.iso8601) {
+		if (d.HasTimestamp())
+			b.Append(FormatISO8601(ToSystem(d.timestamp)).c_str());
+		else
+			b.Append('-');
+		b.Append(' ');
+	}
+
 	if (options.show_site) {
 		b.Append(OptionalString(d.site));
 		b.Append(' ');
@@ -157,19 +166,23 @@ try {
 		b.Append(OptionalString(d.forwarded_to));
 	}
 
-	b.Append(" - - [");
+	if (!options.iso8601) {
+		b.Append(" - - [");
 
-	if (d.HasTimestamp())
-		AppendTimestamp(b, d.timestamp);
-	else
-		b.Append('-');
+		if (d.HasTimestamp())
+			AppendTimestamp(b, d.timestamp);
+		else
+			b.Append('-');
+
+		b.Append(']');
+	}
 
 	const char *method = d.HasHttpMethod() &&
 		http_method_is_valid(d.http_method)
 		? http_method_to_string(d.http_method)
 		: "?";
 
-	AppendFormat(b, "] \"%s ", method);
+	AppendFormat(b, " \"%s ", method);
 
 	AppendEscape(b, OptionalString(d.http_uri));
 
