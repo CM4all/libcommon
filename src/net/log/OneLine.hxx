@@ -34,8 +34,11 @@
 
 #include <cstddef>
 
-namespace Net { namespace Log { struct Datagram; }}
 class FileDescriptor;
+
+namespace Net::Log {
+
+struct Datagram;
 
 /**
  * Convert the given datagram to a text line (without a trailing
@@ -49,17 +52,19 @@ class FileDescriptor;
  */
 char *
 FormatOneLine(char *buffer, std::size_t buffer_size,
-	      const Net::Log::Datagram &d, bool site,
+	      const Datagram &d, bool site,
 	      bool anonymize=false, bool host=false) noexcept;
 
 /**
- * Print the #Net::Log::Datagram in one line, similar to Apache's
- * "combined" log format.
+ * Print the #Datagram in one line, similar to Apache's "combined" log
+ * format.
  *
  * @param site log the site name?
  * @param host log the Host header?
  * @return true on success, false on error (errno set)
  */
 bool
-LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d,
+LogOneLine(FileDescriptor fd, const Datagram &d,
 	   bool site=true, bool host=false) noexcept;
+
+} // namespace Net::Log

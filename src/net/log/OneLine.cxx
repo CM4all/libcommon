@@ -41,8 +41,10 @@
 #include <stdio.h>
 #include <time.h>
 
+namespace Net::Log {
+
 static void
-AppendTimestamp(StringBuilder &b, Net::Log::TimePoint value)
+AppendTimestamp(StringBuilder &b, TimePoint value)
 {
 	using namespace std::chrono;
 	time_t t = duration_cast<seconds>(value.time_since_epoch()).count();
@@ -111,7 +113,7 @@ AppendFormat(StringBuilder &b, const char *fmt, Args&&... args)
 
 static char *
 FormatOneLineHttp(char *buffer, size_t buffer_size,
-		  const Net::Log::Datagram &d,
+		  const Datagram &d,
 		  bool site, bool anonymize, bool host) noexcept
 try {
 	StringBuilder b(buffer, buffer_size);
@@ -181,7 +183,7 @@ try {
 
 static char *
 FormatOneLineMessage(char *buffer, size_t buffer_size,
-		     const Net::Log::Datagram &d,
+		     const Datagram &d,
 		     bool site, bool host) noexcept
 try {
 	StringBuilder b(buffer, buffer_size);
@@ -222,7 +224,7 @@ try {
 
 char *
 FormatOneLine(char *buffer, size_t buffer_size,
-	      const Net::Log::Datagram &d,
+	      const Datagram &d,
 	      bool site, bool anonymize, bool host) noexcept
 {
 	if (d.IsHttpAccess())
@@ -235,7 +237,7 @@ FormatOneLine(char *buffer, size_t buffer_size,
 }
 
 bool
-LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d,
+LogOneLine(FileDescriptor fd, const Datagram &d,
 	   bool site, bool host) noexcept
 {
 	char buffer[16384];
@@ -246,3 +248,5 @@ LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d,
 	*end++ = '\n';
 	return fd.Write(buffer, end - buffer) >= 0;
 }
+
+} // namespace Net::Log
