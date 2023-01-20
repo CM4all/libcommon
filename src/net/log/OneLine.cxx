@@ -93,6 +93,23 @@ AppendEscape(StringBuilder &b, std::string_view value)
 }
 
 static void
+AppendQuoted(StringBuilder &b, std::string_view value)
+{
+	b.Append('"');
+	AppendEscape(b, value);
+	b.Append('"');
+}
+
+static void
+AppendOptionalQuoted(StringBuilder &b, const char *value)
+{
+	if (value != nullptr)
+		AppendQuoted(b, value);
+	else
+		b.Append('-');
+}
+
+static void
 AppendAnonymize(StringBuilder &b, const char *value)
 {
 	auto result = AnonymizeAddress(value);
@@ -170,12 +187,13 @@ try {
 	else
 		b.Append('-');
 
-	b.Append(" \"");
-	AppendEscape(b, OptionalString(d.http_referer));
-	b.Append("\" \"");
-	AppendEscape(b, OptionalString(d.user_agent));
-	b.Append("\" ");
+	b.Append(' ');
+	AppendOptionalQuoted(b, d.http_referer);
 
+	b.Append(' ');
+	AppendOptionalQuoted(b, d.user_agent);
+
+	b.Append(' ');
 	if (d.valid_duration)
 		AppendFormat(b, "%llu", (unsigned long long)d.duration.count());
 	else
