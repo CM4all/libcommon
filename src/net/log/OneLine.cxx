@@ -114,23 +114,23 @@ AppendFormat(StringBuilder &b, const char *fmt, Args&&... args)
 static char *
 FormatOneLineHttp(char *buffer, size_t buffer_size,
 		  const Datagram &d,
-		  bool site, bool anonymize, bool host) noexcept
+		  const OneLineOptions options) noexcept
 try {
 	StringBuilder b(buffer, buffer_size);
 
-	if (site) {
+	if (options.show_site) {
 		b.Append(OptionalString(d.site));
 		b.Append(' ');
 	}
 
-	if (host) {
+	if (options.show_host) {
 		AppendEscape(b, OptionalString(d.host));
 		b.Append(' ');
 	}
 
 	if (d.remote_host == nullptr)
 		b.Append('-');
-	else if (anonymize)
+	else if (options.anonymize)
 		AppendAnonymize(b, d.remote_host);
 	else
 		b.Append(d.remote_host);
@@ -184,16 +184,16 @@ try {
 static char *
 FormatOneLineMessage(char *buffer, size_t buffer_size,
 		     const Datagram &d,
-		     bool site, bool host) noexcept
+		     const OneLineOptions options) noexcept
 try {
 	StringBuilder b(buffer, buffer_size);
 
-	if (site) {
+	if (options.show_site) {
 		b.Append(OptionalString(d.site));
 		b.Append(' ');
 	}
 
-	if (host) {
+	if (options.show_host) {
 		AppendEscape(b, OptionalString(d.host));
 		b.Append(' ');
 	}
@@ -225,23 +225,23 @@ try {
 char *
 FormatOneLine(char *buffer, size_t buffer_size,
 	      const Datagram &d,
-	      bool site, bool anonymize, bool host) noexcept
+	      const OneLineOptions options) noexcept
 {
 	if (d.IsHttpAccess())
 		return FormatOneLineHttp(buffer, buffer_size, d,
-					 site, anonymize, host);
+					 options);
 	else if (d.message.data() != nullptr || d.json.data() != nullptr)
-		return FormatOneLineMessage(buffer, buffer_size, d, site, host);
+		return FormatOneLineMessage(buffer, buffer_size, d, options);
 	else
 		return buffer;
 }
 
 bool
 LogOneLine(FileDescriptor fd, const Datagram &d,
-	   bool site, bool host) noexcept
+	   const OneLineOptions options) noexcept
 {
 	char buffer[16384];
-	char *end = FormatOneLine(buffer, sizeof(buffer) - 1, d, site, host);
+	char *end = FormatOneLine(buffer, sizeof(buffer) - 1, d, options);
 	if (end == buffer)
 		return true;
 

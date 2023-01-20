@@ -40,31 +40,41 @@ namespace Net::Log {
 
 struct Datagram;
 
+struct OneLineOptions {
+	/**
+	 * Show the site name?
+	 */
+	bool show_site = false;
+
+	/**
+	 * Show the HTTP "Host" header?
+	 */
+	bool show_host = false;
+
+	/**
+	 * anonymize IP addresses by zeroing a portion at the end?
+	 */
+	bool anonymize = false;
+};
+
 /**
  * Convert the given datagram to a text line (without a trailing
  * newline character and without a null terminator).
  *
- * @param site log the site name?
- * @param anonymize anonymize IP addresses by zeroing a portion at the
- * end?
- * @param host log the Host header?
  * @return a pointer to the end of the line
  */
 char *
 FormatOneLine(char *buffer, std::size_t buffer_size,
-	      const Datagram &d, bool site,
-	      bool anonymize=false, bool host=false) noexcept;
+	      const Datagram &d, OneLineOptions options) noexcept;
 
 /**
  * Print the #Datagram in one line, similar to Apache's "combined" log
  * format.
  *
- * @param site log the site name?
- * @param host log the Host header?
  * @return true on success, false on error (errno set)
  */
 bool
 LogOneLine(FileDescriptor fd, const Datagram &d,
-	   bool site=true, bool host=false) noexcept;
+	   OneLineOptions options) noexcept;
 
 } // namespace Net::Log
