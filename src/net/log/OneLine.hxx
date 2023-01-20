@@ -55,6 +55,12 @@ struct OneLineOptions {
 	 * anonymize IP addresses by zeroing a portion at the end?
 	 */
 	bool anonymize = false;
+
+	/**
+	 * Show the address of the server this request was forwarded
+	 * to?
+	 */
+	bool show_forwarded_to = false;
 };
 
 /**

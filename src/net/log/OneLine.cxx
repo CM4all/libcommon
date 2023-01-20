@@ -171,6 +171,11 @@ try {
 	AppendEscape(b, OptionalString(d.user_agent));
 	b.Append("\" ");
 
+	if (options.show_forwarded_to) {
+		b.Append(OptionalString(d.forwarded_to));
+		b.Append(' ');
+	}
+
 	if (d.valid_duration)
 		AppendFormat(b, "%llu", (unsigned long long)d.duration.count());
 	else
