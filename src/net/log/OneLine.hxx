@@ -44,20 +44,22 @@ class FileDescriptor;
  * @param site log the site name?
  * @param anonymize anonymize IP addresses by zeroing a portion at the
  * end?
+ * @param host log the Host header?
  * @return a pointer to the end of the line
  */
 char *
 FormatOneLine(char *buffer, std::size_t buffer_size,
 	      const Net::Log::Datagram &d, bool site,
-	      bool anonymize=false) noexcept;
+	      bool anonymize=false, bool host=false) noexcept;
 
 /**
  * Print the #Net::Log::Datagram in one line, similar to Apache's
  * "combined" log format.
  *
  * @param site log the site name?
+ * @param host log the Host header?
  * @return true on success, false on error (errno set)
  */
 bool
 LogOneLine(FileDescriptor fd, const Net::Log::Datagram &d,
-	   bool site=true) noexcept;
+	   bool site=true, bool host=false) noexcept;
