@@ -135,6 +135,11 @@ try {
 	else
 		b.Append(d.remote_host);
 
+	if (options.show_forwarded_to) {
+		b.Append(' ');
+		b.Append(OptionalString(d.forwarded_to));
+	}
+
 	b.Append(" - - [");
 
 	if (d.HasTimestamp())
@@ -170,11 +175,6 @@ try {
 	b.Append("\" \"");
 	AppendEscape(b, OptionalString(d.user_agent));
 	b.Append("\" ");
-
-	if (options.show_forwarded_to) {
-		b.Append(OptionalString(d.forwarded_to));
-		b.Append(' ');
-	}
 
 	if (d.valid_duration)
 		AppendFormat(b, "%llu", (unsigned long long)d.duration.count());
