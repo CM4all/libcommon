@@ -13,7 +13,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	try {
 		const auto d = Net::Log::ParseDatagram(input);
 		char output[256];
-		FormatOneLine(output, sizeof(output), d, true);
+		FormatOneLine(output, sizeof(output), d, {});
 	} catch (Net::Log::ProtocolError) {
 	}
 
