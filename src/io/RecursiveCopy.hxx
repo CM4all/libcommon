@@ -45,6 +45,16 @@ enum RecursiveCopyOptions : unsigned {
 	 * This is implemented by comparing the mount id.
 	 */
 	RECURSIVE_COPY_ONE_FILESYSTEM = 0x2U,
+
+	/**
+	 * Preserve file modes (permissions).
+	 */
+	RECURSIVE_COPY_PRESERVE_MODE = 0x4U,
+
+	/**
+	 * Preserve the modification time stamp.
+	 */
+	RECURSIVE_COPY_PRESERVE_TIME = 0x8U,
 };
 
 class FileDescriptor;
