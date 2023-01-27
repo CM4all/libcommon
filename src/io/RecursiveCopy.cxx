@@ -40,13 +40,25 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
+static constexpr int
+RecursiveCopyOptionsToStatxMask(unsigned options) noexcept
+{
+	int mask = STATX_TYPE|STATX_SIZE;
+	if (options & RECURSIVE_COPY_ONE_FILESYSTEM)
+		mask |= STATX_MNT_ID;
+	return mask;
+}
+
 struct RecursiveCopyContext {
-	dev_t device = 0;
+	uint_least64_t mnt_id{};
+
+	const int statx_mask;
 
 	/**
 	 * @see RECURSIVE_COPY_NO_OVERWRITE
@@ -56,7 +68,8 @@ struct RecursiveCopyContext {
 	const bool one_filesystem;
 
 	constexpr RecursiveCopyContext(unsigned options) noexcept
-		:overwrite(!(options & RECURSIVE_COPY_NO_OVERWRITE)),
+		:statx_mask(RecursiveCopyOptionsToStatxMask(options)),
+		 overwrite(!(options & RECURSIVE_COPY_NO_OVERWRITE)),
 		 one_filesystem(options & RECURSIVE_COPY_ONE_FILESYSTEM)
 	{
 	}
@@ -232,16 +245,16 @@ RecursiveCopyDirectory(RecursiveCopyContext &ctx,
 
 static void
 RecursiveCopy(RecursiveCopyContext &ctx,
-	      UniqueFileDescriptor &&src, const struct stat &st,
+	      UniqueFileDescriptor &&src, const struct statx &stx,
 	      FileDescriptor dst_parent, const char *dst_filename)
 {
-	if (S_ISDIR(st.st_mode))
+	if (S_ISDIR(stx.stx_mode))
 		RecursiveCopyDirectory(ctx,
 				       DirectoryReader{std::move(src)},
 				       dst_parent, dst_filename);
-	else if (S_ISREG(st.st_mode))
+	else if (S_ISREG(stx.stx_mode))
 		CopyRegularFile(src, dst_parent, dst_filename,
-				st.st_size,
+				stx.stx_size,
 				ctx.overwrite);
 	else {
 		// TODO
@@ -317,22 +330,24 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 		}
 	}
 
-	struct stat st;
-	if (fstat(src.Get(), &st) < 0)
+	struct statx stx;
+	if (statx(src.Get(), "",
+		  AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_STATX_SYNC_AS_STAT,
+		  ctx.statx_mask, &stx) < 0)
 		throw FormatErrno("Failed to stat '%s'", src_filename);
 
 	if (ctx.one_filesystem) {
-		if (ctx.device == 0)
+		if (ctx.mnt_id == 0)
 			/* this is the top-level call - initialize the
 			   "device" field */
-			ctx.device = st.st_dev;
-		else if (st.st_dev != ctx.device)
+			ctx.mnt_id = stx.stx_mnt_id;
+		else if (stx.stx_mnt_id != ctx.mnt_id)
 			/* this is on a different device (filesystem);
 			   ignore it */
 			return;
 	}
 
-	RecursiveCopy(ctx, std::move(src), st, dst_parent, dst_filename);
+	RecursiveCopy(ctx, std::move(src), stx, dst_parent, dst_filename);
 }
 
 void

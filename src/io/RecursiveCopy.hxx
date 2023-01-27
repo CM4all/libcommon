@@ -42,7 +42,7 @@ enum RecursiveCopyOptions : unsigned {
 	 * Stay in the initial filesystem, don't cross mount points
 	 * (like the `--one-file-system` option of `cp`).
 	 *
-	 * This is implemented by comparing `stat.st_dev`.
+	 * This is implemented by comparing the mount id.
 	 */
 	RECURSIVE_COPY_ONE_FILESYSTEM = 0x2U,
 };
