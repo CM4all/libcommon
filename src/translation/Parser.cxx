@@ -4023,6 +4023,22 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.auto_brotli = true;
 		return;
+
+	case TranslationCommand::DISPOSABLE:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (!payload.empty())
+			throw std::runtime_error("malformed DISPOSABLE packet");
+
+		if (cgi_address != nullptr &&
+		    resource_address->type == ResourceAddress::Type::WAS &&
+		    cgi_address->concurrency == 0)
+			cgi_address->disposable = true;
+		else
+			throw std::runtime_error("misplaced DISPOSABLE packet");
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

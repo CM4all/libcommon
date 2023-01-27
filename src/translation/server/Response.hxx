@@ -1196,6 +1196,11 @@ public:
 					 value);
 			return *this;
 		}
+
+		auto Disposable() noexcept {
+			response.Packet(TranslationCommand::DISPOSABLE);
+			return *this;
+		}
 	};
 
 	template<typename... Types>

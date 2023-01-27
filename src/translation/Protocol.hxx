@@ -1217,6 +1217,13 @@ enum class TranslationCommand : uint16_t {
 	 * accepts it.
 	 */
 	AUTO_BROTLI = 249,
+
+	/**
+	 * Mark the child process as "disposable", which may give it a
+	 * very short idle timeout (or none at all).  To be used for
+	 * processes that will likely only be used once.
+	 */
+	DISPOSABLE = 250,
 };
 
 struct TranslationHeader {
