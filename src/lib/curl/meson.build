@@ -3,6 +3,7 @@ libcurl = dependency('libcurl', version: '>= 7.38')
 curl_sources = [
   'Version.cxx',
   'Init.cxx',
+  'StringGlue.cxx',
 ]
 
 if not is_variable('coroutines_dep')
