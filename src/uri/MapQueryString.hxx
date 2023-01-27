@@ -41,5 +41,5 @@
  *
  * Throws std::invalid_argument if a value has a bad escape.
  */
-std::multimap<std::string, std::string>
+std::multimap<std::string, std::string, std::less<>>
 MapQueryString(std::string_view src);

@@ -37,7 +37,7 @@
 
 namespace Was {
 
-std::multimap<std::string, std::string>
+std::multimap<std::string, std::string, std::less<>>
 FormRequestBodyToMap(was_simple *w, std::string::size_type limit)
 {
 	ExpectRequestBody(w, "application/x-www-form-urlencoded");

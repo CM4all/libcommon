@@ -58,10 +58,10 @@ FormUnescape(char *dest, std::string_view src) noexcept
 	}
 }
 
-std::multimap<std::string, std::string>
+std::multimap<std::string, std::string, std::less<>>
 MapQueryString(std::string_view src)
 {
-	std::multimap<std::string, std::string> m;
+	std::multimap<std::string, std::string, std::less<>> m;
 
 	AllocatedArray<char> unescape_buffer(256);
 
