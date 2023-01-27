@@ -3,6 +3,6 @@ executable(
   'FuzzNetLogParser.cxx',
   include_directories: inc,
   dependencies: [
-    net_dep,
+    net_log_dep,
   ],
 )
