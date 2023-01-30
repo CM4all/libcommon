@@ -45,6 +45,8 @@ StringCurlRequest(CurlEasy easy)
 	CURLcode code = curl_easy_perform(easy.Get());
 	adapter.Done(code);
 
+	handler.CheckRethrowError();
+
 	if (code != CURLE_OK)
 		throw std::runtime_error(curl_easy_strerror(code));
 
