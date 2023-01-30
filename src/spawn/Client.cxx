@@ -56,11 +56,11 @@ struct SpawnServerClient::ChildProcess final
 {
 	SpawnServerClient &client;
 
-	const int pid;
+	const unsigned pid;
 
 	ExitListener *listener = nullptr;
 
-	ChildProcess(SpawnServerClient &_client, int _pid) noexcept
+	ChildProcess(SpawnServerClient &_client, unsigned _pid) noexcept
 		:client(_client), pid(_pid) {}
 
 	~ChildProcess() noexcept override {
@@ -90,13 +90,13 @@ SpawnServerClient::CompareChildProcess::operator()(const ChildProcess &a,
 
 inline bool
 SpawnServerClient::CompareChildProcess::operator()(const ChildProcess &a,
-						   int b) const noexcept
+						   unsigned b) const noexcept
 {
 	return a.pid < b;
 }
 
 inline bool
-SpawnServerClient::CompareChildProcess::operator()(int a,
+SpawnServerClient::CompareChildProcess::operator()(unsigned a,
 						   const ChildProcess &b) const noexcept
 {
 	return a < b.pid;
@@ -385,12 +385,12 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 
 	CheckOrAbort();
 
-	const int pid = MakePid();
+	const unsigned pid = MakePid();
 
 	SpawnSerializer s(SpawnRequestCommand::EXEC);
 
 	try {
-		s.WriteInt(pid);
+		s.WriteUnsigned(pid);
 		s.WriteString(name);
 
 		Serialize(s, p);
@@ -420,7 +420,7 @@ SpawnServerClient::Kill(ChildProcess &child, int signo)
 	try {
 
 		SpawnSerializer s(SpawnRequestCommand::KILL);
-		s.WriteInt(child.pid);
+		s.WriteUnsigned(child.pid);
 		s.WriteInt(signo);
 
 		try {
@@ -438,7 +438,7 @@ SpawnServerClient::Kill(ChildProcess &child, int signo)
 				throw;
 		}
 	} catch (const std::runtime_error &e) {
-		fprintf(stderr, "failed to send KILL(%d) to spawner: %s\n",
+		fprintf(stderr, "failed to send KILL(%u) to spawner: %s\n",
 			child.pid, e.what());
 	}
 
@@ -449,8 +449,9 @@ SpawnServerClient::Kill(ChildProcess &child, int signo)
 inline void
 SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 {
-	int pid, status;
-	payload.ReadInt(pid);
+	unsigned pid;
+	int status;
+	payload.ReadUnsigned(pid);
 	payload.ReadInt(status);
 	if (!payload.IsEmpty())
 		throw MalformedSpawnPayloadError();
@@ -502,7 +503,7 @@ SpawnServerClient::FlushKillQueue()
 		const auto &i = kill_queue.front();
 
 		SpawnSerializer s(SpawnRequestCommand::KILL);
-		s.WriteInt(i.pid);
+		s.WriteUnsigned(i.pid);
 		s.WriteInt(i.signo);
 
 		try {

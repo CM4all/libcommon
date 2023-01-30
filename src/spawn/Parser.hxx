@@ -82,6 +82,10 @@ public:
 		ReadT(value_r);
 	}
 
+	void ReadUnsigned(unsigned &value_r) {
+		ReadT(value_r);
+	}
+
 	const char *ReadString() {
 		auto n = std::find(begin, end, std::byte{0});
 		if (n == end)

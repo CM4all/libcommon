@@ -108,7 +108,7 @@ class SpawnServerConnection;
 class SpawnServerChild final : public ExitListener {
 	SpawnServerConnection &connection;
 
-	const int id;
+	const unsigned id;
 
 	std::unique_ptr<PidfdEvent> pidfd;
 
@@ -117,7 +117,7 @@ class SpawnServerChild final : public ExitListener {
 public:
 	explicit SpawnServerChild(EventLoop &event_loop,
 				  SpawnServerConnection &_connection,
-				  int _id, UniqueFileDescriptor _pidfd,
+				  unsigned _id, UniqueFileDescriptor _pidfd,
 				  const char *_name) noexcept
 		:connection(_connection), id(_id),
 		 pidfd(std::make_unique<PidfdEvent>(event_loop,
@@ -151,13 +151,13 @@ public:
 			return a.id < b.id;
 		}
 
-		bool operator()(int a,
+		bool operator()(unsigned a,
 				const SpawnServerChild &b) const noexcept {
 			return a < b.id;
 		}
 
 		bool operator()(const SpawnServerChild &a,
-				int b) const noexcept {
+				unsigned b) const noexcept {
 			return a.id < b;
 		}
 	};
@@ -181,7 +181,7 @@ class SpawnServerConnection final
 	ChildIdMap children;
 
 	struct ExitQueueItem {
-		int id;
+		unsigned id;
 		int status;
 	};
 
@@ -199,7 +199,7 @@ public:
 		return event.GetEventLoop();
 	}
 
-	void OnChildProcessExit(int id, int status,
+	void OnChildProcessExit(unsigned id, int status,
 				SpawnServerChild *child) noexcept;
 
 #ifdef HAVE_LIBSYSTEMD
@@ -210,8 +210,8 @@ public:
 private:
 	void RemoveConnection() noexcept;
 
-	void SendExit(int id, int status) noexcept;
-	void SpawnChild(int id, const char *name,
+	void SendExit(unsigned id, int status) noexcept;
+	void SpawnChild(unsigned id, const char *name,
 			PreparedChildProcess &&p) noexcept;
 
 	void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
@@ -232,7 +232,7 @@ SpawnServerChild::OnChildProcessExit(int status) noexcept
 }
 
 void
-SpawnServerConnection::OnChildProcessExit(int id, int status,
+SpawnServerConnection::OnChildProcessExit(unsigned id, int status,
 					  SpawnServerChild *child) noexcept
 {
 	children.erase(children.iterator_to(*child));
@@ -388,10 +388,10 @@ SpawnServerConnection::SendMemoryWarning(uint64_t memory_usage,
 #endif
 
 void
-SpawnServerConnection::SendExit(int id, int status) noexcept
+SpawnServerConnection::SendExit(unsigned id, int status) noexcept
 {
 	SpawnSerializer s(SpawnResponseCommand::EXIT);
-	s.WriteInt(id);
+	s.WriteUnsigned(id);
 	s.WriteInt(status);
 
 	try {
@@ -412,7 +412,7 @@ SpawnServerConnection::SendExit(int id, int status) noexcept
 }
 
 inline void
-SpawnServerConnection::SpawnChild(int id, const char *name,
+SpawnServerConnection::SpawnChild(unsigned id, const char *name,
 				  PreparedChildProcess &&p) noexcept
 {
 	const auto &config = process.GetConfig();
@@ -485,8 +485,8 @@ inline void
 SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 					 SpawnFdList &&fds)
 {
-	int id;
-	payload.ReadInt(id);
+	unsigned id;
+	payload.ReadUnsigned(id);
 	const char *name = payload.ReadString();
 
 	PreparedChildProcess p;
@@ -785,8 +785,9 @@ SpawnServerConnection::HandleKillMessage(SpawnPayload payload,
 	if (!fds.IsEmpty())
 		throw MalformedSpawnPayloadError();
 
-	int id, signo;
-	payload.ReadInt(id);
+	unsigned id;
+	int signo;
+	payload.ReadUnsigned(id);
 	payload.ReadInt(signo);
 	if (!payload.IsEmpty())
 		throw MalformedSpawnPayloadError();
@@ -858,7 +859,7 @@ SpawnServerConnection::FlushExitQueue()
 		const auto &i = exit_queue.front();
 
 		SpawnSerializer s(SpawnResponseCommand::EXIT);
-		s.WriteInt(i.id);
+		s.WriteUnsigned(i.id);
 		s.WriteInt(i.status);
 
 		try {

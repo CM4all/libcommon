@@ -58,14 +58,14 @@ class SpawnServerClient final : public SpawnService {
 				const ChildProcess &b) const noexcept;
 
 		[[gnu::pure]]
-		bool operator()(const ChildProcess &a, int b) const noexcept;
+		bool operator()(const ChildProcess &a, unsigned b) const noexcept;
 
 		[[gnu::pure]]
-		bool operator()(int a, const ChildProcess &b) const noexcept;
+		bool operator()(unsigned a, const ChildProcess &b) const noexcept;
 	};
 
 	struct KillQueueItem {
-		int pid;
+		unsigned pid;
 		int signo;
 	};
 
@@ -130,7 +130,7 @@ public:
 	UniqueSocketDescriptor Connect();
 
 private:
-	int MakePid() noexcept {
+	unsigned MakePid() noexcept {
 		++last_pid;
 		if (last_pid >= 0x40000000)
 			last_pid = 1;

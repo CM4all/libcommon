@@ -117,6 +117,10 @@ public:
 		WriteT(value);
 	}
 
+	void WriteUnsigned(unsigned value) {
+		WriteT(value);
+	}
+
 	void WriteString(std::string_view value) {
 		Write(AsBytes(value));
 		WriteU8(0);
