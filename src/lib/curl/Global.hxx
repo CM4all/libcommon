@@ -69,6 +69,8 @@ public:
 private:
 	/**
 	 * Check for finished HTTP responses.
+	 *
+	 * Runs in the I/O thread.  The caller must not hold locks.
 	 */
 	void ReadInfo() noexcept;
 
@@ -76,6 +78,7 @@ private:
 	static int TimerFunction(CURLM *multi, long timeout_ms,
 				 void *userp) noexcept;
 
+	/* callback for #timeout_event */
 	void OnTimeout() noexcept;
 };
 
