@@ -53,11 +53,10 @@
 #include "net/ReceiveMessage.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/DeleteDisposer.hxx"
+#include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
-
-#include <boost/intrusive/set.hpp>
 
 #include <forward_list>
 #include <memory>
@@ -105,7 +104,9 @@ public:
 
 class SpawnServerConnection;
 
-class SpawnServerChild final : public ExitListener {
+class SpawnServerChild final : public ExitListener,
+			       public IntrusiveHashSetHook<IntrusiveHookMode::NORMAL>
+{
 	SpawnServerConnection &connection;
 
 	const unsigned id;
@@ -141,24 +142,20 @@ public:
 	/* virtual methods from ExitListener */
 	void OnChildProcessExit(int status) noexcept override;
 
-	/* boost::instrusive::set hooks */
-	using IdHook = boost::intrusive::set_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>;
-	IdHook id_hook;
-
-	struct CompareId {
-		bool operator()(const SpawnServerChild &a,
-				const SpawnServerChild &b) const noexcept {
-			return a.id < b.id;
+	struct Hash {
+		constexpr std::size_t operator()(unsigned i) const noexcept {
+			return i;
 		}
 
-		bool operator()(unsigned a,
-				const SpawnServerChild &b) const noexcept {
-			return a < b.id;
+		std::size_t operator()(const SpawnServerChild &i) const noexcept {
+			return i.id;
 		}
+	};
 
-		bool operator()(const SpawnServerChild &a,
-				unsigned b) const noexcept {
-			return a.id < b;
+	struct Equal {
+		bool operator()(const unsigned a,
+				const SpawnServerChild &b) const noexcept {
+			return a == b.id;
 		}
 	};
 };
@@ -173,11 +170,9 @@ class SpawnServerConnection final
 
 	SocketEvent event;
 
-	using ChildIdMap = boost::intrusive::set<SpawnServerChild,
-						 boost::intrusive::member_hook<SpawnServerChild,
-									       SpawnServerChild::IdHook,
-									       &SpawnServerChild::id_hook>,
-						 boost::intrusive::compare<SpawnServerChild::CompareId>>;
+	using ChildIdMap = IntrusiveHashSet<SpawnServerChild, 1021,
+					    SpawnServerChild::Hash,
+					    SpawnServerChild::Equal>;
 	ChildIdMap children;
 
 	struct ExitQueueItem {
@@ -792,7 +787,7 @@ SpawnServerConnection::HandleKillMessage(SpawnPayload payload,
 	if (!payload.IsEmpty())
 		throw MalformedSpawnPayloadError();
 
-	auto i = children.find(id, SpawnServerChild::CompareId());
+	auto i = children.find(id);
 	if (i == children.end())
 		return;
 

@@ -52,7 +52,7 @@
 static constexpr size_t MAX_FDS = 8;
 
 struct SpawnServerClient::ChildProcess final
-	: ChildProcessHandle, boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>>
+	: ChildProcessHandle, IntrusiveHashSetHook<IntrusiveHookMode::TRACK>
 {
 	SpawnServerClient &client;
 
@@ -81,25 +81,17 @@ struct SpawnServerClient::ChildProcess final
 	}
 };
 
-inline bool
-SpawnServerClient::CompareChildProcess::operator()(const ChildProcess &a,
-						   const ChildProcess &b) const noexcept
+inline std::size_t
+SpawnServerClient::ChildProcessHash::operator()(const ChildProcess &i) const noexcept
 {
-	return a.pid < b.pid;
+	return operator()(i.pid);
 }
 
 inline bool
-SpawnServerClient::CompareChildProcess::operator()(const ChildProcess &a,
-						   unsigned b) const noexcept
+SpawnServerClient::ChildProcessEqual::operator()(const unsigned a,
+						 const ChildProcess &b) const noexcept
 {
-	return a.pid < b;
-}
-
-inline bool
-SpawnServerClient::CompareChildProcess::operator()(unsigned a,
-						   const ChildProcess &b) const noexcept
-{
-	return a < b.pid;
+	return a == b.pid;
 }
 
 SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
@@ -456,7 +448,7 @@ SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 	if (!payload.IsEmpty())
 		throw MalformedSpawnPayloadError();
 
-	auto i = processes.find(pid, processes.key_comp());
+	auto i = processes.find(pid);
 	if (i == processes.end())
 		return;
 

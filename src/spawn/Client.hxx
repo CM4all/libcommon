@@ -37,8 +37,7 @@
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
-
-#include <boost/intrusive/set.hpp>
+#include "util/IntrusiveHashSet.hxx"
 
 #include <forward_list>
 #include <map>
@@ -52,16 +51,19 @@ class SpawnServerClientHandler;
 class SpawnServerClient final : public SpawnService {
 	struct ChildProcess;
 
-	struct CompareChildProcess {
+	struct ChildProcessHash {
+		constexpr std::size_t operator()(unsigned i) const noexcept {
+			return i;
+		}
+
 		[[gnu::pure]]
-		bool operator()(const ChildProcess &a,
+		std::size_t operator()(const ChildProcess &i) const noexcept;
+	};
+
+	struct ChildProcessEqual{
+		[[gnu::pure]]
+		bool operator()(const unsigned a,
 				const ChildProcess &b) const noexcept;
-
-		[[gnu::pure]]
-		bool operator()(const ChildProcess &a, unsigned b) const noexcept;
-
-		[[gnu::pure]]
-		bool operator()(unsigned a, const ChildProcess &b) const noexcept;
 	};
 
 	struct KillQueueItem {
@@ -74,10 +76,8 @@ class SpawnServerClient final : public SpawnService {
 	unsigned last_pid = 0;
 
 	using ChildProcessSet =
-		boost::intrusive::set<ChildProcess,
-				      boost::intrusive::base_hook<boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::safe_link>>>,
-				      boost::intrusive::compare<CompareChildProcess>,
-				      boost::intrusive::constant_time_size<false>>;
+		IntrusiveHashSet<ChildProcess, 1021,
+				 ChildProcessHash, ChildProcessEqual>;
 
 	ChildProcessSet processes;
 
