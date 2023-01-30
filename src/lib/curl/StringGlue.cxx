@@ -48,7 +48,7 @@ StringCurlRequest(CurlEasy easy)
 	handler.CheckRethrowError();
 
 	if (code != CURLE_OK)
-		throw std::runtime_error(curl_easy_strerror(code));
+		throw Curl::MakeError(code, "CURL error");
 
 	return std::move(handler).GetResponse();
 }
