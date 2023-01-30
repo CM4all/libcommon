@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2016-2023 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -101,7 +101,7 @@ public:
 			throw std::runtime_error(curl_multi_strerror(code));
 	}
 
-	CURLMsg *InfoRead() {
+	CURLMsg *InfoRead() noexcept {
 		int msgs_in_queue;
 		return curl_multi_info_read(handle, &msgs_in_queue);
 	}
