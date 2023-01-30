@@ -46,9 +46,13 @@ class StringCurlResponseHandler : public CurlResponseHandler {
 	std::exception_ptr error;
 
 public:
-	StringCurlResponse GetResponse() && {
+	void CheckRethrowError() const {
 		if (error)
 			std::rethrow_exception(error);
+	}
+
+	StringCurlResponse GetResponse() && {
+		CheckRethrowError();
 
 		return std::move(response);
 	}
