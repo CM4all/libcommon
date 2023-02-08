@@ -319,9 +319,18 @@ MultiStock::MapItem::~MapItem() noexcept
 MultiStock::OuterItem *
 MultiStock::MapItem::FindUsable() noexcept
 {
-	for (auto &i : items)
-		if (i.CanUse())
-			return &i;
+	for (auto i = items.begin(), end = items.end(); i != end;) {
+		if (i->CanUse())
+			return &*i;
+
+		if (i->IsFading() && !i->IsBusy())
+			/* as a kludge, this method disposes items
+			   that have been marked "fading" somewhere
+			   else without us noticing it */
+			i = items.erase_and_dispose(i, DeleteDisposer{});
+		else
+			++i;
+	}
 
 	return nullptr;
 }
