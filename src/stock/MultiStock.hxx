@@ -105,6 +105,10 @@ class MultiStock {
 			return &other == &shared_item;
 		}
 
+		bool IsFading() const noexcept {
+			return shared_item.IsFading();
+		}
+
 		bool IsFull() const noexcept {
 			return busy.size() >= limit;
 		}
