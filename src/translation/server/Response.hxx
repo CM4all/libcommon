@@ -340,6 +340,20 @@ public:
 		return Packet(TranslationCommand::AUTO_BROTLI);
 	}
 
+	/**
+	 * Only for CONTENT_TYPE_LOOKUP responses.
+	 */
+	auto &AutoGzipped() noexcept {
+		return Packet(TranslationCommand::AUTO_GZIPPED);
+	}
+
+	/**
+	 * Only for CONTENT_TYPE_LOOKUP responses.
+	 */
+	auto &AutoBrotliPath() noexcept {
+		return Packet(TranslationCommand::AUTO_BROTLI_PATH);
+	}
+
 	template<typename... Types>
 	auto &ListenerTag(Types... value) noexcept {
 		return StringPacket(TranslationCommand::LISTENER_TAG, value...);
