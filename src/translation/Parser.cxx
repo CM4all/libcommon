@@ -2826,7 +2826,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::AUTO_GZIPPED:
-#if TRANSLATION_ENABLE_EXPAND
+#if TRANSLATION_ENABLE_RADDRESS
 		if (!payload.empty())
 			throw std::runtime_error("malformed AUTO_GZIPPED packet");
 
@@ -2838,6 +2838,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			file_address->auto_gzipped = true;
 		} else if (nfs_address != nullptr) {
 			/* ignore for now */
+		} else if (from_request.content_type_lookup) {
+			if (response.auto_gzipped)
+				throw std::runtime_error("duplicate AUTO_GZIPPED packet");
+
+			response.auto_gzipped = true;
 		} else
 			throw std::runtime_error("misplaced AUTO_GZIPPED packet");
 #endif
@@ -3813,7 +3818,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		throw std::runtime_error("misplaced OPTIONAL packet");
 
 	case TranslationCommand::AUTO_BROTLI_PATH:
-#if TRANSLATION_ENABLE_EXPAND
+#if TRANSLATION_ENABLE_RADDRESS
 		if (!payload.empty())
 			throw std::runtime_error("malformed AUTO_BROTLI_PATH packet");
 
@@ -3824,6 +3829,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			file_address->auto_brotli_path = true;
 		} else if (nfs_address != nullptr) {
 			/* ignore for now */
+		} else if (from_request.content_type_lookup) {
+			if (response.auto_brotli_path)
+				throw std::runtime_error("duplicate AUTO_BROTLI_PATH packet");
+
+			response.auto_brotli_path = true;
 		} else
 			throw std::runtime_error("misplaced AUTO_BROTLI_PATH packet");
 #endif

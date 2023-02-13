@@ -480,6 +480,16 @@ struct TranslateResponse {
 	 * @see #TranslationCommand::AUTO_BROTLI
 	 */
 	bool auto_brotli;
+
+	/**
+	 * @see #TranslationCommand::AUTO_GZIPPED
+	 */
+	bool auto_gzipped;
+
+	/**
+	 * @see #TranslationCommand::AUTO_BROTLI_PATH
+	 */
+	bool auto_brotli_path;
 #endif
 
 	TranslateResponse() noexcept = default;
