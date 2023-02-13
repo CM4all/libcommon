@@ -32,6 +32,7 @@ test(
     'TestCo',
     'TestEagerTask.cxx',
     'TestCoCache.cxx',
+    'TestMultiAwaitable.cxx',
     include_directories: inc,
     dependencies: [
       gtest,
