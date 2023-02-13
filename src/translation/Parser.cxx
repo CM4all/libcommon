@@ -3053,6 +3053,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::AUTO_DEFLATE:
+#if TRANSLATION_ENABLE_RADDRESS
 		if (!payload.empty())
 			throw std::runtime_error("malformed AUTO_DEFLATE packet");
 
@@ -3061,6 +3062,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.auto_deflate = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::EXPAND_HOME:
 #if TRANSLATION_ENABLE_EXPAND
@@ -3099,6 +3103,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::AUTO_GZIP:
+#if TRANSLATION_ENABLE_RADDRESS
 		if (!payload.empty())
 			throw std::runtime_error("malformed AUTO_GZIP packet");
 
@@ -3107,6 +3112,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.auto_gzip = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::INTERNAL_REDIRECT:
 #if TRANSLATION_ENABLE_HTTP
@@ -4015,6 +4023,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::AUTO_BROTLI:
+#if TRANSLATION_ENABLE_RADDRESS
 		if (!payload.empty())
 			throw std::runtime_error("malformed AUTO_BROTLI packet");
 
@@ -4023,6 +4032,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.auto_brotli = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::DISPOSABLE:
 #if TRANSLATION_ENABLE_RADDRESS

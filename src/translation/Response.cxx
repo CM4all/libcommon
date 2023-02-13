@@ -189,9 +189,11 @@ TranslateResponse::Clear() noexcept
 	regex_on_host_uri = false;
 	regex_on_user_uri = false;
 #endif
+#if TRANSLATION_ENABLE_RADDRESS
 	auto_deflate = false;
 	auto_gzip = false;
 	auto_brotli = false;
+#endif
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = false;
 
@@ -439,9 +441,11 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	regex_on_host_uri = src.regex_on_host_uri;
 	regex_on_user_uri = src.regex_on_user_uri;
 #endif
+#if TRANSLATION_ENABLE_RADDRESS
 	auto_deflate = src.auto_deflate;
 	auto_gzip = src.auto_gzip;
 	auto_brotli = src.auto_brotli;
+#endif
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = src.realm_from_auth_base;
 	session = {};

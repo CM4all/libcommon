@@ -465,6 +465,7 @@ struct TranslateResponse {
 	bool regex_on_user_uri;
 #endif
 
+#if TRANSLATION_ENABLE_RADDRESS
 	/**
 	 * @see #TranslationCommand::AUTO_DEFLATE
 	 */
@@ -479,6 +480,7 @@ struct TranslateResponse {
 	 * @see #TranslationCommand::AUTO_BROTLI
 	 */
 	bool auto_brotli;
+#endif
 
 	TranslateResponse() noexcept = default;
 	TranslateResponse(TranslateResponse &&) = default;
