@@ -1,5 +1,4 @@
-Copyright 2017-2022 CM4all GmbH
-All rights reserved.
+Copyright CM4all GmbH
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
