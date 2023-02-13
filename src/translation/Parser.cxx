@@ -1277,7 +1277,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (file_address != nullptr) {
 			if (file_address->auto_gzipped ||
 			    file_address->gzipped != nullptr)
-				throw std::runtime_error("misplaced GZIPPED packet");
+				throw std::runtime_error("duplicate GZIPPED packet");
 
 			file_address->gzipped = string_payload.data();
 			return;
@@ -2833,7 +2833,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (file_address != nullptr) {
 			if (file_address->auto_gzipped ||
 			    file_address->gzipped != nullptr)
-				throw std::runtime_error("misplaced AUTO_GZIPPED packet");
+				throw std::runtime_error("duplicate AUTO_GZIPPED packet");
 
 			file_address->auto_gzipped = true;
 		} else if (nfs_address != nullptr) {
@@ -3811,7 +3811,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		if (file_address != nullptr) {
 			if (file_address->auto_brotli_path)
-				throw std::runtime_error("misplaced AUTO_BROTLI_PATH packet");
+				throw std::runtime_error("duplicate AUTO_BROTLI_PATH packet");
 
 			file_address->auto_brotli_path = true;
 		} else if (nfs_address != nullptr) {
