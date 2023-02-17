@@ -181,3 +181,56 @@ TEST(MultiAwaitable, CancelAll)
 	ASSERT_FALSE(complete[1]);
 	ASSERT_FALSE(complete[2]);
 }
+
+TEST(MultiAwaitable, Reuse)
+{
+	Co::MultiAwaitable m;
+	ASSERT_FALSE(m.IsActive());
+
+	/* complete one */
+	{
+		PauseTask pause;
+		m.Start(MyTask(pause));
+		ASSERT_TRUE(m.IsActive());
+
+		bool complete = false;
+		auto w = Waiter(m, complete);
+		ASSERT_FALSE(complete);
+		ASSERT_TRUE(pause.IsAwaited());
+
+		pause.Resume();
+		ASSERT_TRUE(complete);
+		ASSERT_FALSE(m.IsActive());
+	}
+
+	/* cancel */
+	{
+		PauseTask pause;
+		m.Start(MyTask(pause));
+		ASSERT_TRUE(m.IsActive());
+
+		bool complete = false;
+		std::optional w = Waiter(m, complete);
+		ASSERT_TRUE(m.IsActive());
+		ASSERT_TRUE(pause.IsAwaited());
+
+		w.reset();
+		ASSERT_FALSE(complete);
+		ASSERT_FALSE(m.IsActive());
+	}
+
+	/* complete another one */
+	{
+		PauseTask pause;
+		m.Start(MyTask(pause));
+		ASSERT_TRUE(m.IsActive());
+
+		bool complete = false;
+		auto w = Waiter(m, complete);
+		ASSERT_FALSE(complete);
+		ASSERT_TRUE(pause.IsAwaited());
+
+		pause.Resume();
+		ASSERT_TRUE(complete);
+	}
+}

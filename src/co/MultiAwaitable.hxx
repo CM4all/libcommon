@@ -82,9 +82,36 @@ class MultiAwaitable final {
 	EagerTask<void> task;
 
 public:
+	/**
+	 * Construct an instance without a task.  Call Start() to
+	 * start a task.
+	 */
+	MultiAwaitable() noexcept
+		:ready(true) {}
+
+	/**
+	 * Construct an instance with a task.
+	 */
 	template<typename T>
 	explicit MultiAwaitable(T &&_task) noexcept
 		:task(Wait(std::forward<T>(_task))) {}
+
+	bool IsActive() const noexcept {
+		return !ready;
+	}
+
+	/**
+	 * Start a task.  This is only possible if no task is
+	 * currently running.
+	 */
+	template<typename T>
+	void Start(T &&_task) noexcept {
+		assert(!IsActive());
+		assert(requests.empty());
+
+		ready = false;
+		task = Wait(std::forward<T>(_task));
+	}
 
 	/**
 	 * Creates a new awaitable
@@ -116,6 +143,8 @@ private:
 	 * all waiters.
 	 */
 	EagerTask<void> Wait(auto _task) noexcept {
+		assert(!ready);
+
 		co_await _task;
 		SetReady();
 	}
@@ -129,9 +158,11 @@ private:
 	void CheckCancel() noexcept {
 		assert(!ready);
 
-		if (requests.empty())
+		if (requests.empty()) {
 			/* cancel the task */
+			ready = true;
 			task = {};
+		}
 	}
 };
 
