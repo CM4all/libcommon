@@ -22,13 +22,17 @@ class MultiAwaitable final {
 
 		std::coroutine_handle<> continuation;
 
+		bool ready;
+
 		explicit Awaitable(MultiAwaitable &_multi) noexcept
-			:multi(_multi) {}
+			:multi(_multi), ready(multi.ready) {}
 
 		~Awaitable() noexcept {
 			if (is_linked()) {
 				unlink();
-				multi.CheckCancel();
+
+				if (!ready)
+					multi.CheckCancel();
 			}
 		}
 
@@ -39,7 +43,7 @@ class MultiAwaitable final {
 			assert(!is_linked());
 			assert(!continuation);
 
-			return multi.IsReady();
+			return ready;
 		}
 
 		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
@@ -54,6 +58,7 @@ class MultiAwaitable final {
 
 		void await_resume() noexcept {
 			assert(!is_linked());
+			assert(ready);
 		}
 	};
 
@@ -71,13 +76,14 @@ public:
 	}
 
 private:
-	bool IsReady() const noexcept {
-		return ready;
-	}
-
 	void SetReady() noexcept {
 		assert(!ready);
 		ready = true;
+
+		for (auto &i : requests) {
+			assert(!i.ready);
+			i.ready = true;
+		}
 
 		requests.clear_and_dispose([](Awaitable *r){
 			r->continuation.resume();
@@ -90,10 +96,14 @@ private:
 	}
 
 	void AddRequest(Awaitable &r) noexcept {
+		assert(!ready);
+
 		requests.push_back(r);
 	}
 
 	void CheckCancel() noexcept {
+		assert(!ready);
+
 		if (requests.empty())
 			/* cancel the task */
 			task = {};
