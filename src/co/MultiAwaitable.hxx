@@ -13,6 +13,8 @@ namespace Co {
 
 /**
  * A task that can be awaited on by multiple waiters.
+ *
+ * This object must remain valid until all waiters have been resumed.
  */
 class MultiAwaitable final {
 	bool ready = false;
@@ -62,8 +64,15 @@ class MultiAwaitable final {
 		}
 	};
 
+	/**
+	 * A list of suspended waiters.
+	 */
 	IntrusiveList<Awaitable> requests;
 
+	/**
+	 * This refers to coroutine Wait() which executes the actual
+	 * task.
+	 */
 	EagerTask<void> task;
 
 public:
@@ -71,6 +80,9 @@ public:
 	explicit MultiAwaitable(T &&_task) noexcept
 		:task(Wait(std::forward<T>(_task))) {}
 
+	/**
+	 * Creates a new awaitable
+	 */
 	auto operator co_await() noexcept {
 		return Awaitable{*this};
 	}
@@ -90,6 +102,10 @@ private:
 		});
 	}
 
+	/**
+	 * A coroutine which executes the actual task and then resumes
+	 * all waiters.
+	 */
 	EagerTask<void> Wait(auto _task) noexcept {
 		co_await _task;
 		SetReady();
