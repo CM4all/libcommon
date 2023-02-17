@@ -7,7 +7,7 @@
 #include "Task.hxx"
 #include "util/IntrusiveList.hxx"
 
-#include <memory>
+#include <cassert>
 
 namespace Co {
 
@@ -17,47 +17,45 @@ namespace Co {
 class MultiAwaitable final {
 	bool ready = false;
 
-	struct Request final : IntrusiveListHook<IntrusiveHookMode::TRACK> {
+	struct Awaitable final : IntrusiveListHook<IntrusiveHookMode::TRACK> {
 		MultiAwaitable &multi;
 
 		std::coroutine_handle<> continuation;
 
-		explicit Request(MultiAwaitable &_multi) noexcept
-			:multi(_multi)
-		{
-			multi.AddRequest(*this);
-		}
+		explicit Awaitable(MultiAwaitable &_multi) noexcept
+			:multi(_multi) {}
 
-		~Request() noexcept {
+		~Awaitable() noexcept {
 			if (is_linked())
 				multi.RemoveRequest(*this);
 		}
 
-		bool IsReady() const noexcept {
-			return multi.IsReady();
-		}
-	};
-
-	struct Awaitable final {
-		std::unique_ptr<Request> request;
-
-		Awaitable(MultiAwaitable &multi) noexcept
-			:request(multi.IsReady() ? nullptr : new Request(multi)) {}
+		Awaitable(const Awaitable &) = delete;
+		Awaitable &operator=(const Awaitable &) = delete;
 
 		bool await_ready() const noexcept {
-			return !request || request->IsReady();
+			assert(!is_linked());
+			assert(!continuation);
+
+			return multi.IsReady();
 		}
 
 		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
-			request->continuation = _continuation;
+			assert(!is_linked());
+
+			continuation = _continuation;
+
+			multi.AddRequest(*this);
+
 			return std::noop_coroutine();
 		}
 
 		void await_resume() noexcept {
+			assert(!is_linked());
 		}
 	};
 
-	IntrusiveList<Request> requests;
+	IntrusiveList<Awaitable> requests;
 
 	EagerTask<void> task;
 
@@ -79,7 +77,7 @@ private:
 		assert(!ready);
 		ready = true;
 
-		requests.clear_and_dispose([](Request *r){
+		requests.clear_and_dispose([](Awaitable *r){
 			r->continuation.resume();
 		});
 	}
@@ -89,11 +87,11 @@ private:
 		SetReady();
 	}
 
-	void AddRequest(Request &r) noexcept {
+	void AddRequest(Awaitable &r) noexcept {
 		requests.push_back(r);
 	}
 
-	void RemoveRequest(Request &r) noexcept {
+	void RemoveRequest(Awaitable &r) noexcept {
 		requests.erase(requests.iterator_to(r));
 
 		if (requests.empty())
