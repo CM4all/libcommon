@@ -47,3 +47,32 @@ TEST(Task, EagerTask)
 	ASSERT_FALSE(error);
 	ASSERT_EQ(value, 42);
 }
+
+static const int foo = 42;
+
+static Co::EagerTask<const int &>
+ReferenceTask()
+{
+	co_return foo;
+}
+
+static Co::InvokeTask
+RunReferenceTask(const int *&result)
+{
+	result = &co_await ReferenceTask();
+}
+
+TEST(Task, Reference)
+{
+	const int *result = nullptr;
+	std::exception_ptr error;
+
+	auto task = RunReferenceTask(result);
+	task.Start({&error, [](void *error_p, std::exception_ptr _error) noexcept {
+		auto &error_r = *(std::exception_ptr *)error_p;
+		error_r = std::move(_error);
+	}});
+
+	ASSERT_FALSE(error);
+	ASSERT_EQ(result, &foo);
+}
