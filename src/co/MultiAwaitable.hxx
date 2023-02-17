@@ -26,8 +26,10 @@ class MultiAwaitable final {
 			:multi(_multi) {}
 
 		~Awaitable() noexcept {
-			if (is_linked())
-				multi.RemoveRequest(*this);
+			if (is_linked()) {
+				unlink();
+				multi.CheckCancel();
+			}
 		}
 
 		Awaitable(const Awaitable &) = delete;
@@ -91,9 +93,7 @@ private:
 		requests.push_back(r);
 	}
 
-	void RemoveRequest(Awaitable &r) noexcept {
-		r.unlink();
-
+	void CheckCancel() noexcept {
 		if (requests.empty())
 			/* cancel the task */
 			task = {};
