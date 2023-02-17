@@ -116,6 +116,12 @@ TEST(MultiAwaitable, CompleteLate)
 	ASSERT_TRUE(complete[0]);
 	ASSERT_TRUE(complete[1]);
 	ASSERT_TRUE(complete[2]);
+
+	/* add another waiter which doesn't suspend because the
+	   MultiAwaitable is ready already */
+	bool complete3 = false;
+	auto waiter3 = Waiter(m, complete3);
+	ASSERT_TRUE(complete3);
 }
 
 TEST(MultiAwaitable, CancelOne)
