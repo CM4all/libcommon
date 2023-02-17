@@ -42,10 +42,10 @@ class MultiAwaitable final {
 		std::unique_ptr<Request> request;
 
 		Awaitable(MultiAwaitable &multi) noexcept
-			:request(new Request(multi)) {}
+			:request(multi.IsReady() ? nullptr : new Request(multi)) {}
 
 		bool await_ready() const noexcept {
-			return request->IsReady();
+			return !request || request->IsReady();
 		}
 
 		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
