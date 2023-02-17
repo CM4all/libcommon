@@ -92,7 +92,7 @@ private:
 	}
 
 	void RemoveRequest(Awaitable &r) noexcept {
-		requests.erase(requests.iterator_to(r));
+		r.unlink();
 
 		if (requests.empty())
 			/* cancel the task */
