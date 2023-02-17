@@ -49,6 +49,10 @@ private:
 public:
 	SimpleTask() = default;
 
+	bool IsDefined() const noexcept {
+		return coroutine;
+	}
+
 	operator std::coroutine_handle<>() const noexcept {
 		return coroutine.get();
 	}
