@@ -31,6 +31,9 @@ class MultiAwaitable final {
 
 		~Awaitable() noexcept {
 			if (is_linked()) {
+				assert(continuation);
+				assert(!continuation.done());
+
 				unlink();
 
 				if (!ready)
@@ -50,6 +53,9 @@ class MultiAwaitable final {
 
 		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
 			assert(!is_linked());
+			assert(!continuation);
+			assert(_continuation);
+			assert(!_continuation.done());
 
 			continuation = _continuation;
 
@@ -94,6 +100,9 @@ private:
 
 		for (auto &i : requests) {
 			assert(!i.ready);
+			assert(i.continuation);
+			assert(!i.continuation.done());
+
 			i.ready = true;
 		}
 
