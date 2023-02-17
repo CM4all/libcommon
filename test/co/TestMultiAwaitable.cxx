@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "co/MultiAwaitable.hxx"
+#include "co/Task.hxx"
 
 #include <gtest/gtest.h>
 
