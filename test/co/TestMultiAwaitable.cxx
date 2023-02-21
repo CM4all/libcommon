@@ -2,59 +2,11 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
+#include "PauseTask.hxx"
 #include "co/MultiAwaitable.hxx"
 #include "co/Task.hxx"
 
 #include <gtest/gtest.h>
-
-class PauseTask {
-	std::coroutine_handle<> continuation;
-
-	bool resumed = false;
-
-	struct Awaitable final {
-		PauseTask &task;
-
-		Awaitable(PauseTask &_task) noexcept:task(_task) {}
-
-		~Awaitable() noexcept {
-			task.continuation = {};
-		}
-
-		Awaitable(const Awaitable &) = delete;
-		Awaitable &operator=(const Awaitable &) = delete;
-
-		bool await_ready() const noexcept {
-			return task.resumed;
-		}
-
-		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
-			task.continuation = _continuation;
-			return std::noop_coroutine();
-		}
-
-		void await_resume() noexcept {
-		}
-	};
-
-public:
-	Awaitable operator co_await() noexcept {
-		return {*this};
-	}
-
-	bool IsAwaited() const noexcept {
-		return (bool)continuation;
-	}
-
-	void Resume() noexcept {
-		assert(!resumed);
-
-		resumed = true;
-
-		if (continuation)
-			continuation.resume();
-	}
-};
 
 static Co::Task<void>
 NoTask()
@@ -95,7 +47,7 @@ TEST(MultiAwaitable, CompleteEarly)
 
 TEST(MultiAwaitable, CompleteLate)
 {
-	PauseTask pause;
+	Co::PauseTask pause;
 	Co::MultiAwaitable m{MyTask(pause)};
 
 	ASSERT_TRUE(pause.IsAwaited());
@@ -127,7 +79,7 @@ TEST(MultiAwaitable, CompleteLate)
 
 TEST(MultiAwaitable, CancelOne)
 {
-	PauseTask pause;
+	Co::PauseTask pause;
 	Co::MultiAwaitable m{MyTask(pause)};
 
 	ASSERT_TRUE(pause.IsAwaited());
@@ -154,7 +106,7 @@ TEST(MultiAwaitable, CancelOne)
 
 TEST(MultiAwaitable, CancelAll)
 {
-	PauseTask pause;
+	Co::PauseTask pause;
 	Co::MultiAwaitable m{MyTask(pause)};
 
 	ASSERT_TRUE(pause.IsAwaited());
@@ -189,7 +141,7 @@ TEST(MultiAwaitable, Reuse)
 
 	/* complete one */
 	{
-		PauseTask pause;
+		Co::PauseTask pause;
 		m.Start(MyTask(pause));
 		ASSERT_TRUE(m.IsActive());
 
@@ -205,7 +157,7 @@ TEST(MultiAwaitable, Reuse)
 
 	/* cancel */
 	{
-		PauseTask pause;
+		Co::PauseTask pause;
 		m.Start(MyTask(pause));
 		ASSERT_TRUE(m.IsActive());
 
@@ -221,7 +173,7 @@ TEST(MultiAwaitable, Reuse)
 
 	/* complete another one */
 	{
-		PauseTask pause;
+		Co::PauseTask pause;
 		m.Start(MyTask(pause));
 		ASSERT_TRUE(m.IsActive());
 
