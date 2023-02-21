@@ -30,6 +30,7 @@ test(
   'TestCo',
   executable(
     'TestCo',
+    'TestInvokeTask.cxx',
     'TestEagerTask.cxx',
     'TestCoCache.cxx',
     'TestMultiAwaitable.cxx',
