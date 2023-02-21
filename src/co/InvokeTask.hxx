@@ -87,6 +87,12 @@ public:
 		return coroutine;
 	}
 
+	bool done() const noexcept {
+		assert(coroutine);
+
+		return coroutine->done();
+	}
+
 	void Start(Callback callback) noexcept {
 		assert(callback);
 		assert(coroutine);
