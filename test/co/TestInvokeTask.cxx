@@ -61,7 +61,7 @@ MakeInvokeTask(int &i, auto &task) noexcept
 static Co::Task<void>
 ThrowTask(int &i)
 {
-	if (false)
+	if constexpr (false)
 		/* force this to be a coroutine */
 		co_return;
 
