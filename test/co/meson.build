@@ -32,6 +32,7 @@ test(
     'TestCo',
     'TestInvokeTask.cxx',
     'TestEagerTask.cxx',
+    'TestAll.cxx',
     'TestCoCache.cxx',
     'TestMultiAwaitable.cxx',
     include_directories: inc,
