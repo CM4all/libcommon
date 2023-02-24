@@ -51,7 +51,7 @@ class MultiStock {
 
 		StockItem &shared_item;
 
-		std::size_t limit;
+		const std::size_t limit;
 
 		/**
 		 * This timer periodically deletes one third of all
