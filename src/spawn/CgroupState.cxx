@@ -95,6 +95,13 @@ CgroupState::EnableAllControllers() const
 	});
 
 	WriteFile(group_fd, "cgroup.subtree_control", subtree_control);
+
+	/* attempt to give the spawner the highest possible CPU and
+	   I/O weight; the spawner is more important than its child
+	   processes */
+	TryWriteExistingFile(leaf_group, "cpu.weight", "10000");
+	TryWriteExistingFile(leaf_group, "io.weight", "10000");
+	TryWriteExistingFile(leaf_group, "io.bfq.weight", "1000");
 }
 
 static FILE *
