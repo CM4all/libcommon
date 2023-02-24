@@ -11,7 +11,6 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "util/StringAPI.hxx"
-#include "util/RuntimeError.hxx"
 
 #include <assert.h>
 #include <stdio.h>
