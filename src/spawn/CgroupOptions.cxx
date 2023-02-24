@@ -6,6 +6,7 @@
 #include "CgroupState.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
+#include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
@@ -65,43 +66,6 @@ WriteCgroupFile(const CgroupState &state, FileDescriptor group_fd,
 	WriteFile(group_fd, filename, value);
 }
 
-/**
- * Create a new cgroup and return an O_PATH file descriptor to it.
- */
-static UniqueFileDescriptor
-MakeCgroup(const FileDescriptor group_fd, const char *sub_group)
-{
-	if (mkdirat(group_fd.Get(), sub_group, 0777) < 0) {
-		switch (const int e = errno) {
-		case EEXIST:
-			break;
-
-		default:
-			throw FormatErrno(e, "mkdir('%s') failed", sub_group);
-		}
-	}
-
-	return OpenPath(group_fd, sub_group);
-}
-
-static UniqueFileDescriptor
-MkdirOpenPath(const FileDescriptor parent_fd,
-	      const char *name, mode_t mode=0777)
-{
-	if (mkdirat(parent_fd.Get(), name, mode) < 0) {
-		switch (errno) {
-		case EEXIST:
-			break;
-
-		default:
-			throw FormatErrno("mkdir('%s') failed",
-					  name);
-		}
-	}
-
-	return OpenPath(parent_fd, name);
-}
-
 UniqueFileDescriptor
 CgroupOptions::Create2(const CgroupState &state) const
 {
@@ -116,7 +80,7 @@ CgroupOptions::Create2(const CgroupState &state) const
 
 	assert(state.memory_v2);
 
-	auto fd = MakeCgroup(state.mounts.front().fd, name);
+	auto fd = MakeDirectory(state.mounts.front().fd, name);
 
 	if (!xattr.empty()) {
 		/* reopen the directory because fsetxattr() refuses to
@@ -134,7 +98,7 @@ CgroupOptions::Create2(const CgroupState &state) const
 		WriteCgroupFile(state, fd, s.name, s.value);
 
 	if (session != nullptr)
-		return MkdirOpenPath(fd, session);
+		return MakeDirectory(fd, session);
 	else
 		return fd;
 }
@@ -144,10 +108,10 @@ MoveToNewCgroup(const FileDescriptor group_fd,
 		const char *sub_group, const char *session_group,
 		std::string_view pid)
 {
-	auto fd = MakeCgroup(group_fd, sub_group);
+	auto fd = MakeDirectory(group_fd, sub_group);
 
 	if (session_group != nullptr) {
-		auto session_fd = MkdirOpenPath(fd, session_group);
+		auto session_fd = MakeDirectory(fd, session_group);
 		WriteFile(session_fd, "cgroup.procs", pid);
 	} else
 		WriteFile(fd, "cgroup.procs", pid);
