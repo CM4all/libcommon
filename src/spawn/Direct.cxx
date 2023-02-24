@@ -65,6 +65,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sched.h>
+#include <poll.h> // for POLLIN
 
 using std::string_view_literals::operator""sv;
 
@@ -355,6 +356,15 @@ try {
 static void
 ReadErrorPipe(FileDescriptor error_pipe_r)
 {
+	if (int p = error_pipe_r.WaitReadable(250);
+	    p <= 0 || (p & POLLIN) == 0)
+		/* this can time out if the execve() takes a long time
+		   to finish (maybe because the shrinker runs) and the
+		   other side of the pipe doesn't get closed early
+		   enough through O_CLOEXEC */
+		// TODO find a better solution
+		return;
+
 	char buffer[1024];
 	ssize_t nbytes = error_pipe_r.Read(buffer, sizeof(buffer) - 1);
 	if (nbytes > 0) {
