@@ -381,39 +381,20 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 }
 
 void
-SpawnServerClient::Kill(ChildProcess &child, int signo)
+SpawnServerClient::Kill(ChildProcess &child, int signo) noexcept
 {
 	CheckOrAbort();
 
 	assert(child.is_linked());
 	processes.erase(processes.iterator_to(child));
 
-	try {
+	if (ShutdownComplete())
+		return;
 
-		SpawnSerializer s(SpawnRequestCommand::KILL);
-		s.WriteUnsigned(child.pid);
-		s.WriteInt(signo);
+	if (kill_queue.empty())
+		event.ScheduleWrite();
 
-		try {
-			Send(s.GetPayload(), s.GetFds());
-		} catch (const std::system_error &e) {
-			/* if the server is getting flooded with a
-			   large number of KILL comands, the
-			   /proc/sys/net/unix/max_dgram_qlen limit may
-			   be reached; wait a little bit before giving
-			   up */
-			if (IsErrno(e, EAGAIN)) {
-				kill_queue.push_front({child.pid, signo});
-				event.ScheduleWrite();
-			} else
-				throw;
-		}
-	} catch (const std::runtime_error &e) {
-		fprintf(stderr, "failed to send KILL(%u) to spawner: %s\n",
-			child.pid, e.what());
-	}
-
-	ShutdownComplete();
+	kill_queue.push_front({child.pid, signo});
 }
 
 inline void
@@ -468,25 +449,21 @@ SpawnServerClient::HandleMessage(std::span<const std::byte> payload)
 inline void
 SpawnServerClient::FlushKillQueue()
 {
-	while (!kill_queue.empty()) {
+	if (kill_queue.empty())
+		return;
+
+	SpawnSerializer s{SpawnRequestCommand::KILL};
+
+	for (std::size_t n = 0; n < 256 && !kill_queue.empty(); ++n) {
 		const auto &i = kill_queue.front();
 
-		SpawnSerializer s(SpawnRequestCommand::KILL);
 		s.WriteUnsigned(i.pid);
 		s.WriteInt(i.signo);
-
-		try {
-			Send(s.GetPayload(), s.GetFds());
-		} catch (const std::system_error &e) {
-			if (IsErrno(e, EAGAIN))
-				return;
-			throw;
-		}
 
 		kill_queue.pop_front();
 	}
 
-	event.CancelWrite();
+	Send(s.GetPayload(), s.GetFds());
 }
 
 inline void
@@ -522,8 +499,12 @@ try {
 	if (events & event.HANGUP)
 		throw std::runtime_error("Spawner hung up");
 
-	if (events & event.WRITE)
+	if (events & event.WRITE) {
 		FlushKillQueue();
+
+		if (kill_queue.empty())
+			event.CancelWrite();
+	}
 
 	if (events & event.READ)
 		ReceiveAndHandle();

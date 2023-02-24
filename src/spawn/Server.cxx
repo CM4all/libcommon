@@ -182,6 +182,7 @@ private:
 			PreparedChildProcess &&p) noexcept;
 
 	void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
+	void HandleOneKill(SpawnPayload &payload);
 	void HandleKillMessage(SpawnPayload payload, SpawnFdList &&fds);
 	void HandleMessage(std::span<const std::byte> payload, SpawnFdList &&fds);
 	void HandleMessage(ReceiveMessageResult &&result);
@@ -746,18 +747,12 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 }
 
 inline void
-SpawnServerConnection::HandleKillMessage(SpawnPayload payload,
-					 SpawnFdList &&fds)
+SpawnServerConnection::HandleOneKill(SpawnPayload &payload)
 {
-	if (!fds.IsEmpty())
-		throw MalformedSpawnPayloadError();
-
 	unsigned id;
 	int signo;
 	payload.ReadUnsigned(id);
 	payload.ReadInt(signo);
-	if (!payload.empty())
-		throw MalformedSpawnPayloadError();
 
 	auto i = children.find(id);
 	if (i == children.end())
@@ -768,6 +763,17 @@ SpawnServerConnection::HandleKillMessage(SpawnPayload payload,
 
 	child->Kill(process.GetChildProcessRegistry(), signo);
 	delete child;
+}
+
+inline void
+SpawnServerConnection::HandleKillMessage(SpawnPayload payload,
+					 SpawnFdList &&fds)
+{
+	if (!fds.IsEmpty())
+		throw MalformedSpawnPayloadError();
+
+	while (!payload.empty())
+		HandleOneKill(payload);
 }
 
 inline void

@@ -54,7 +54,8 @@ class SpawnServerClient final : public SpawnService {
 	ChildProcessSet processes;
 
 	/**
-	 * Filled by KillChildProcess() if sendmsg()==EAGAIN.
+	 * Filled by KillChildProcess(), consumed by OnSocketEvent()
+	 * and FlushKillQueue().
 	 */
 	std::forward_list<KillQueueItem> kill_queue;
 
@@ -145,10 +146,7 @@ private:
 
 	void OnSocketEvent(unsigned events) noexcept;
 
-	/**
-	 * Throws on error.
-	 */
-	void Kill(ChildProcess &child_process, int signo);
+	void Kill(ChildProcess &child_process, int signo) noexcept;
 
 public:
 	/* virtual methods from class SpawnService */
