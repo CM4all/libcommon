@@ -375,11 +375,10 @@ MultiStock::MapItem::DeleteEmptyItems(const OuterItem *except) noexcept
 	}, DeleteDisposer{});
 }
 
-
-void
+std::size_t
 MultiStock::MapItem::DiscardUnused() noexcept
 {
-	items.remove_and_dispose_if([](const auto &item){
+	return items.remove_and_dispose_if([](const auto &item){
 		return !item.IsBusy();
 	}, DeleteDisposer{});
 }
@@ -548,17 +547,21 @@ MultiStock::~MultiStock() noexcept
 	assert(map.empty());
 }
 
-void
+std::size_t
 MultiStock::DiscardUnused() noexcept
 {
-	map.remove_and_dispose_if([](auto &i){
+	std::size_t n = 0;
+
+	map.remove_and_dispose_if([&n](auto &i){
 		/* TODO this const_cast is an ugly kludge because the
 		   predicate gets only a const reference */
 		auto &j = const_cast<MapItem &>(i);
-		j.DiscardUnused();
+		n += j.DiscardUnused();
 
 		return i.IsEmpty();
 	}, DeleteDisposer{});
+
+	return n;
 }
 
 MultiStock::MapItem &

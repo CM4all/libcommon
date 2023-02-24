@@ -195,7 +195,10 @@ class MultiStock {
 		void RemoveItem(OuterItem &item) noexcept;
 		void OnLeaseReleased(OuterItem &item) noexcept;
 
-		void DiscardUnused() noexcept;
+		/**
+		 * @return the number of items that have been discarded
+		 */
+		std::size_t DiscardUnused() noexcept;
 
 		void FadeAll() noexcept {
 			for (auto &i : items)
@@ -291,8 +294,10 @@ public:
 	/**
 	 * Discard all items which are idle and havn't been used in a
 	 * while.
+	 *
+	 * @return the number of items that have been discarded
 	 */
-	void DiscardUnused() noexcept;
+	std::size_t DiscardUnused() noexcept;
 
 	/**
 	 * @see Stock::FadeAll()
