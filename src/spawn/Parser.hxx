@@ -53,7 +53,7 @@ public:
 	}
 
 	constexpr std::size_t GetSize() const noexcept {
-		return begin - end;
+		return end - begin;
 	}
 
 	std::byte ReadByte() noexcept {
