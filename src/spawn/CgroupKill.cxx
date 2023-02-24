@@ -22,7 +22,7 @@ OpenUnifiedCgroup(const CgroupState &state, const char *name)
 {
 	assert(state.IsEnabled());
 
-	return OpenPath(state.GetUnifiedGroupMount(), name);
+	return OpenPath(state.group_fd, name);
 }
 
 static UniqueFileDescriptor

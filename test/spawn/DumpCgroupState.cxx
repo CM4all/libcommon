@@ -19,13 +19,6 @@ try {
 
 	printf("group_path = '%s'\n", state.group_path.c_str());
 
-	for (const auto &i : state.mounts)
-		printf("mount = '%s'\n", i.name.c_str());
-
-	for (const auto &[name, mount] : state.controllers)
-		printf("controller '%s' = '%s'\n",
-		       name.c_str(), mount.c_str());
-
 	return EXIT_SUCCESS;
 } catch (...) {
 	PrintException(std::current_exception());

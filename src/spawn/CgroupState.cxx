@@ -5,6 +5,7 @@
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
 #include "io/Open.hxx"
+#include "io/WithFile.hxx"
 #include "io/WriteFile.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
@@ -13,6 +14,7 @@
 #include "util/StringStrip.hxx"
 
 #include <cstdio>
+#include <span>
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -22,10 +24,22 @@ using std::string_view_literals::operator""sv;
 CgroupState::CgroupState() noexcept {}
 CgroupState::~CgroupState() noexcept = default;
 
-bool
-CgroupState::IsV2() const noexcept
+static std::size_t
+ReadFile(FileAt file, std::span<std::byte> dest)
 {
-	return !mounts.empty() && mounts.front().name.empty();
+	return WithReadOnly(file, [dest](auto fd){
+		auto nbytes = fd.Read(dest.data(), dest.size());
+		if (nbytes < 0)
+			throw MakeErrno("Failed to read");
+		return static_cast<std::size_t>(nbytes);
+	});
+}
+
+static std::string_view
+ReadTextFile(FileAt file, std::span<char> dest)
+{
+	const auto size = ReadFile(file, std::as_writable_bytes(dest));
+	return {dest.data(), size};
 }
 
 static void
@@ -35,59 +49,58 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 		throw FormatErrno("write('%s') failed", path);
 }
 
-FileDescriptor
-CgroupState::GetUnifiedGroupMount() const noexcept
+static void
+ForEachController(FileDescriptor group_fd, auto &&callback)
 {
-	if (mounts.empty())
-		return FileDescriptor::Undefined();
+	char buffer[1024];
 
-	if (const auto &m = mounts.front();
-	    m.name.empty() || m.name == "unified")
-		return m.fd;
+	auto contents = ReadTextFile({group_fd, "cgroup.controllers"}, buffer);
+	if (contents.empty())
+		return;
 
-	return FileDescriptor::Undefined();
+	if (contents.back() == '\n')
+		contents.remove_suffix(1);
+
+	for (const auto name : IterableSplitString(contents, ' '))
+		if (!name.empty())
+			callback(name);
 }
 
 void
 CgroupState::EnableAllControllers() const
 {
-	assert(IsV2());
-
-	const FileDescriptor spawn_group = mounts.front().fd;
+	assert(IsEnabled());
 
 	/* create a leaf cgroup and move this process into it, or else
 	   we can't enable other controllers */
 
 	const char *leaf_name = "_";
-	if (mkdirat(spawn_group.Get(), leaf_name, 0700) < 0)
+	if (mkdirat(group_fd.Get(), leaf_name, 0700) < 0)
 		throw MakeErrno("Failed to create spawner leaf cgroup");
 
 	{
-		auto leaf_group = OpenPath(spawn_group, leaf_name);
+		auto leaf_group = OpenPath(group_fd, leaf_name);
 		WriteFile(leaf_group, "cgroup.procs", "0");
 	}
 
 	/* now enable all other controllers in subtree_control */
 
 	std::string subtree_control;
-	for (const auto &[controller, mount] : controllers) {
-		if (!mount.empty())
-			continue;
-
+	ForEachController(group_fd, [&subtree_control](const auto controller){
 		if (controller == "cpuset")
 			/* ignoring the "cpuset" controller because we
 			   never used it and its cpuset_css_online()
 			   function adds 70ms delay */
 			// TODO make this a runtime configuration
-			continue;
+			return;
 
 		if (!subtree_control.empty())
 			subtree_control.push_back(' ');
 		subtree_control.push_back('+');
 		subtree_control += controller;
-	}
+	});
 
-	WriteFile(spawn_group, "cgroup.subtree_control", subtree_control);
+	WriteFile(group_fd, "cgroup.subtree_control", subtree_control);
 }
 
 static FILE *
@@ -101,21 +114,8 @@ OpenOrThrow(const char *path, const char *mode)
 }
 
 struct ProcCgroup {
-	struct ControllerAssignment {
-		std::string name;
-		std::string path;
-
-		std::forward_list<std::string> controllers;
-
-		ControllerAssignment(std::string_view _name,
-				     std::string_view _path) noexcept
-			:name(_name), path(_path) {}
-	};
-
-	std::forward_list<ControllerAssignment> assignments;
-
 	std::string group_path;
-	bool have_unified = false, have_systemd = false;
+	bool have_unified = false, have_systemd = false, have_v1 = false;
 
 	bool IsDefined() const noexcept {
 		return !group_path.empty();
@@ -154,17 +154,12 @@ ReadProcCgroup(FILE *file)
 			continue;
 
 		if (name == "name=systemd"sv) {
-			pc.group_path = path;
 			pc.have_systemd = true;
 		} else if (name.empty()) {
 			pc.group_path = path;
 			pc.have_unified = true;
 		} else {
-			pc.assignments.emplace_front(name, path);
-
-			auto &controllers = pc.assignments.front().controllers;
-			for (std::string_view i : IterableSplitString(name, ','))
-				controllers.emplace_front(i);
+			pc.have_v1 = true;
 		}
 	}
 
@@ -200,57 +195,8 @@ CgroupState::FromProcCgroup(ProcCgroup &&proc_cgroup)
 
 	auto sys_fs_cgroup = OpenPath("/sys/fs/cgroup");
 
-	for (auto &i : proc_cgroup.assignments) {
-		if (i.path == proc_cgroup.group_path) {
-			for (auto &controller : i.controllers)
-				state.controllers.emplace(std::move(controller), i.name);
-
-			auto controller_fd = OpenPath(sys_fs_cgroup,
-						      i.name.c_str());
-			state.mounts.emplace_front(std::move(i.name),
-						   OpenPath(controller_fd,
-							    proc_cgroup.group_path.c_str() + 1));
-		}
-	}
-
-	if (proc_cgroup.have_systemd)
-		state.mounts.emplace_front("systemd",
-					   OpenPath(sys_fs_cgroup, "systemd"));
-
-	if (proc_cgroup.have_unified) {
-		std::string_view unified_mount = "unified";
-		if (state.mounts.empty()) {
-			UniqueFileDescriptor fd;
-			if (!fd.OpenReadOnly(sys_fs_cgroup, "unified/cgroup.subtree_control")) {
-				unified_mount = {};
-				fd.OpenReadOnly(sys_fs_cgroup, "cgroup.subtree_control");
-			}
-
-			if (fd.IsDefined()) {
-				char buffer[1024];
-				ssize_t nbytes = fd.Read(buffer, sizeof(buffer));
-				if (nbytes > 0) {
-					if (buffer[nbytes - 1] == '\n')
-						--nbytes;
-
-					const std::string_view contents{buffer, std::size_t(nbytes)};
-					for (std::string_view name : IterableSplitString(contents, ' ')) {
-						if (!name.empty())
-							state.controllers.emplace(name, unified_mount);
-
-						if (name == "memory"sv)
-							state.memory_v2 = true;
-					}
-				}
-			}
-		}
-
-		auto &mount = state.mounts.emplace_front(std::string{unified_mount},
-							 OpenPath(sys_fs_cgroup,
-								  proc_cgroup.group_path.c_str() + 1));
-
-		state.cgroup_kill = HasCgroupKill(mount.fd);
-	}
+	state.group_fd = OpenPath(sys_fs_cgroup, proc_cgroup.group_path.c_str() + 1);
+	state.cgroup_kill = HasCgroupKill(state.group_fd);
 
 	state.group_path = std::move(proc_cgroup.group_path);
 

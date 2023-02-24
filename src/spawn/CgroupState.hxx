@@ -6,9 +6,7 @@
 
 #include "io/UniqueFileDescriptor.hxx"
 
-#include <forward_list>
 #include <string>
-#include <map>
 
 struct ProcCgroup;
 
@@ -19,48 +17,10 @@ struct CgroupState {
 	std::string group_path;
 
 	/**
-	 * A cgroup controller mount point below /sys/fs/cgroup.  A
-	 * mount point may contain several controllers.
+	 * An O_PATH file descriptor of the group managed by us
+	 * (delegated from systemd).
 	 */
-	struct Mount {
-		/**
-		 * An empty string means this is a cgroup2 "unified"
-		 * mount on /sys/fs/cgroup.
-		 */
-		std::string name;
-
-		/**
-		 * An O_PATH file descriptor of the group managed by
-		 * us (delegated from systemd).
-		 */
-		UniqueFileDescriptor fd;
-
-#ifdef __clang__
-		template<typename N>
-		Mount(N &&_name, UniqueFileDescriptor &&_fd) noexcept
-			:name(std::forward<N>(_name)), fd(std::move(_fd)) {}
-#endif
-	};
-
-	/**
-	 * The controller mount points below /sys/fs/cgroup which are
-	 * managed by us (delegated from systemd).
-	 *
-	 * A single item with an empty name means there is a cgroup2 "unified"
-	 * mount on /sys/fs/cgroup.
-	 */
-	std::forward_list<Mount> mounts;
-
-	/**
-	 * A mapping from controller name to mount point name.  More than
-	 * one controller may be mounted at one mount point.
-	 */
-	std::map<std::string, std::string, std::less<>> controllers;
-
-	/**
-	 * Is the "memory" cgroup controller using the cgroup2 interface?
-	 */
-	bool memory_v2 = false;
+	UniqueFileDescriptor group_fd;
 
 	/**
 	 * Does the kernel support "cgroup.kill"?
@@ -76,16 +36,6 @@ struct CgroupState {
 	bool IsEnabled() const noexcept {
 		return !group_path.empty();
 	}
-
-	[[gnu::pure]]
-	bool IsV2() const noexcept;
-
-	/**
-	 * Returns an O_PATH file descriptor to our group in the
-	 * cgroup2 mount or FileDescriptor::Undefined() if none was
-	 * mounted.
-	 */
-	FileDescriptor GetUnifiedGroupMount() const noexcept;
 
 	/**
 	 * Enable all controllers for newly created groups by writing

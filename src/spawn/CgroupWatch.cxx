@@ -15,14 +15,7 @@
 static UniqueFileDescriptor
 OpenMemoryUsage(const CgroupState &state)
 {
-	if (!state.memory_v2)
-		throw std::runtime_error("Cgroup2 controller 'memory' not found");
-
-	const auto group = state.GetUnifiedGroupMount();
-	if (!group.IsDefined())
-		throw std::runtime_error("Cgroup controller 'memory' not found");
-
-	return OpenReadOnly(group, "memory.current");
+	return OpenReadOnly(state.group_fd, "memory.current");
 }
 
 static uint64_t
@@ -52,7 +45,7 @@ CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
 	 callback(_callback)
 {
 	{
-		const ScopeChdir scope_chdir{state.GetUnifiedGroupMount()};
+		const ScopeChdir scope_chdir{state.group_fd};
 		inotify.AddModifyWatch("memory.events.local");
 	}
 }

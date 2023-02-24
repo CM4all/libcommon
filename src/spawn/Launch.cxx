@@ -32,10 +32,10 @@
 #endif
 
 static void
-Chown(const CgroupState::Mount &cgroup_mount, uid_t uid, gid_t gid) noexcept
+Chown(FileDescriptor mount, uid_t uid, gid_t gid) noexcept
 {
-	fchownat(cgroup_mount.fd.Get(), ".", uid, gid, AT_SYMLINK_NOFOLLOW);
-	fchownat(cgroup_mount.fd.Get(), "cgroup.procs", uid, gid,
+	fchownat(mount.Get(), ".", uid, gid, AT_SYMLINK_NOFOLLOW);
+	fchownat(mount.Get(), "cgroup.procs", uid, gid,
 		 AT_SYMLINK_NOFOLLOW);
 }
 
@@ -58,8 +58,7 @@ Chown(const CgroupState::Mount &cgroup_mount, uid_t uid, gid_t gid) noexcept
 static void
 Chown(const CgroupState &cgroup_state, uid_t uid, gid_t gid) noexcept
 {
-	for (const auto &mount : cgroup_state.mounts)
-		Chown(mount, uid, gid);
+	Chown(cgroup_state.group_fd, uid, gid);
 }
 
 #endif // HAVE_LIBSYSTEMD
@@ -158,7 +157,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	}
 #endif
 
-	if (cgroup_state.IsV2()) {
+	if (cgroup_state.IsEnabled()) {
 		try {
 			cgroup_state.EnableAllControllers();
 		} catch (...) {

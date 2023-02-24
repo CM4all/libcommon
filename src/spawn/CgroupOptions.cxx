@@ -15,11 +15,9 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/xattr.h>
-#include <limits.h>
 
 #ifndef __linux__
 #error This library requires Linux
@@ -55,12 +53,11 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 }
 
 static void
-WriteCgroupFile(const CgroupState &state, FileDescriptor group_fd,
+WriteCgroupFile(FileDescriptor group_fd,
 		const char *filename, std::string_view value)
 {
 	/* emulate cgroup1 for old translation servers */
-	if (state.memory_v2 &&
-	    StringIsEqual(filename, "memory.limit_in_bytes"))
+	if (StringIsEqual(filename, "memory.limit_in_bytes"))
 		filename = "memory.max";
 
 	WriteFile(group_fd, filename, value);
@@ -75,12 +72,7 @@ CgroupOptions::Create2(const CgroupState &state) const
 	if (!state.IsEnabled())
 		throw std::runtime_error("Control groups are disabled");
 
-	if (!state.IsV2())
-		return {};
-
-	assert(state.memory_v2);
-
-	auto fd = MakeDirectory(state.mounts.front().fd, name);
+	auto fd = MakeDirectory(state.group_fd, name);
 
 	if (!xattr.empty()) {
 		/* reopen the directory because fsetxattr() refuses to
@@ -95,7 +87,7 @@ CgroupOptions::Create2(const CgroupState &state) const
 	}
 
 	for (const auto &s : set)
-		WriteCgroupFile(state, fd, s.name, s.value);
+		WriteCgroupFile(fd, s.name, s.value);
 
 	if (session != nullptr)
 		return MakeDirectory(fd, session);
@@ -135,31 +127,10 @@ CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 	/* TODO drop support for cgroup1 and hybrid, use only
 	   Create2() and CLONE_INTO_CGROUP */
 
-	std::map<std::string, UniqueFileDescriptor> fds;
-	for (const auto &mount : state.mounts)
-		fds[mount.name] =
-			MoveToNewCgroup(mount.fd, name, session, pid);
+	auto fd = MoveToNewCgroup(state.group_fd, name, session, pid);
 
-	for (const auto &s : set) {
-		const char *filename = s.name;
-
-		const char *dot = strchr(filename, '.');
-		assert(dot != nullptr);
-
-		const std::string_view controller{filename, dot};
-		const auto i = state.controllers.find(controller);
-		if (i == state.controllers.end())
-			throw FormatRuntimeError("cgroup controller '%.*s' is unavailable",
-						 int(controller.size()),
-						 controller.data());
-
-		const std::string &mount_point = i->second;
-
-		const auto j = fds.find(mount_point);
-		assert(j != fds.end());
-
-		WriteCgroupFile(state, j->second, filename, s.value);
-	}
+	for (const auto &s : set)
+		WriteCgroupFile(fd, s.name, s.value);
 }
 
 char *
