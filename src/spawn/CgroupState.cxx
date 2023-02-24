@@ -4,6 +4,7 @@
 
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
+#include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/WithFile.hxx"
 #include "io/WriteFile.hxx"
@@ -73,14 +74,8 @@ CgroupState::EnableAllControllers() const
 	/* create a leaf cgroup and move this process into it, or else
 	   we can't enable other controllers */
 
-	const char *leaf_name = "_";
-	if (mkdirat(group_fd.Get(), leaf_name, 0700) < 0)
-		throw MakeErrno("Failed to create spawner leaf cgroup");
-
-	{
-		auto leaf_group = OpenPath(group_fd, leaf_name);
-		WriteFile(leaf_group, "cgroup.procs", "0");
-	}
+	const auto leaf_group = MakeDirectory(group_fd, "_", 0700);
+	WriteFile(leaf_group, "cgroup.procs", "0");
 
 	/* now enable all other controllers in subtree_control */
 
