@@ -470,7 +470,8 @@ try {
 	}
 #endif
 
-	params.return_cgroup.Close();
+	if (params.return_cgroup.IsDefined())
+		params.return_cgroup.Close();
 
 	if (params.cgroup != nullptr && params.cgroup->IsDefined())
 		/* postpone creating the new cgroup namespace until
