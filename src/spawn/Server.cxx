@@ -465,7 +465,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 	std::forward_list<std::string> strings;
 	std::forward_list<AssignmentList::Item> assignments;
 
-	while (!payload.IsEmpty()) {
+	while (!payload.empty()) {
 		const SpawnExecCommand cmd = (SpawnExecCommand)payload.ReadByte();
 		switch (cmd) {
 		case SpawnExecCommand::ARG:
@@ -756,7 +756,7 @@ SpawnServerConnection::HandleKillMessage(SpawnPayload payload,
 	int signo;
 	payload.ReadUnsigned(id);
 	payload.ReadInt(signo);
-	if (!payload.IsEmpty())
+	if (!payload.empty())
 		throw MalformedSpawnPayloadError();
 
 	auto i = children.find(id);

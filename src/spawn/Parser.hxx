@@ -20,7 +20,7 @@ public:
 	explicit constexpr SpawnPayload(std::span<const std::byte> _payload) noexcept
 		:begin(_payload.data()), end(begin + _payload.size()) {}
 
-	constexpr bool IsEmpty() const noexcept {
+	constexpr bool empty() const noexcept {
 		return begin == end;
 	}
 
@@ -29,7 +29,7 @@ public:
 	}
 
 	std::byte ReadByte() noexcept {
-		assert(!IsEmpty());
+		assert(!empty());
 		return *begin++;
 	}
 

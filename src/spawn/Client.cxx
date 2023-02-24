@@ -417,7 +417,7 @@ SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 	int status;
 	payload.ReadUnsigned(pid);
 	payload.ReadInt(status);
-	if (!payload.IsEmpty())
+	if (!payload.empty())
 		throw MalformedSpawnPayloadError();
 
 	auto i = processes.find(pid);
