@@ -112,6 +112,12 @@ private:
 	void Close() noexcept;
 
 	/**
+	 * If #shutting_down is set and all I/O is complete, close the
+	 * connection and return true.
+	 */
+	bool ShutdownComplete() noexcept;
+
+	/**
 	 * Check if the spawner is alive, and if not, commit suicide, and
 	 * hope this daemon gets restarted automatically with a fresh
 	 * spawner; there's not much else we can do without a spawner.

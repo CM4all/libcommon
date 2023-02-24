@@ -94,9 +94,16 @@ void
 SpawnServerClient::Shutdown() noexcept
 {
 	shutting_down = true;
+	ShutdownComplete();
+}
 
-	if (processes.empty() && event.IsDefined())
+bool
+SpawnServerClient::ShutdownComplete() noexcept
+{
+	bool complete = shutting_down && processes.empty() && event.IsDefined();
+	if (complete)
 		Close();
+	return complete;
 }
 
 void
@@ -406,8 +413,7 @@ SpawnServerClient::Kill(ChildProcess &child, int signo)
 			child.pid, e.what());
 	}
 
-	if (shutting_down && processes.empty())
-		Close();
+	ShutdownComplete();
 }
 
 inline void
@@ -429,8 +435,7 @@ SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 	if (i->listener != nullptr)
 		i->listener->OnChildProcessExit(status);
 
-	if (shutting_down && processes.empty())
-		Close();
+	ShutdownComplete();
 }
 
 inline void
