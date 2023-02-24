@@ -840,3 +840,90 @@ TEST(MultiStock, ConsumedRequest)
 	ASSERT_EQ(foo.ready, 4);
 	ASSERT_EQ(foo.failed, 0);
 }
+
+TEST(MultiStock, DiscardOldestIdle)
+{
+	Instance instance{4};
+
+	Partition foo{instance, "foo"};
+	Partition bar{instance, "bar"};
+
+	foo.Get(8);
+	bar.Get(8);
+	ASSERT_FALSE(instance.multi_stock.DiscardOldestIdle());
+
+	ASSERT_EQ(foo.factory_created, 4);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 8);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 8);
+	ASSERT_EQ(foo.failed, 0);
+
+	ASSERT_EQ(bar.factory_created, 4);
+	ASSERT_EQ(bar.factory_failed, 0);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 8);
+	ASSERT_EQ(bar.waiting, 0);
+	ASSERT_EQ(bar.ready, 8);
+	ASSERT_EQ(bar.failed, 0);
+
+	ASSERT_FALSE(instance.multi_stock.DiscardOldestIdle());
+
+	foo.PutReady(4);
+	bar.PutReady(4);
+
+	ASSERT_EQ(foo.factory_created, 4);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 4);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 4);
+	ASSERT_EQ(foo.failed, 0);
+
+	ASSERT_EQ(bar.factory_created, 4);
+	ASSERT_EQ(bar.factory_failed, 0);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 4);
+	ASSERT_EQ(bar.waiting, 0);
+	ASSERT_EQ(bar.ready, 4);
+	ASSERT_EQ(bar.failed, 0);
+
+	ASSERT_TRUE(instance.multi_stock.DiscardOldestIdle());
+
+	ASSERT_EQ(foo.factory_created, 4);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 4);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 4);
+	ASSERT_EQ(foo.failed, 0);
+
+	ASSERT_EQ(bar.factory_created, 4);
+	ASSERT_EQ(bar.factory_failed, 0);
+	ASSERT_EQ(bar.destroyed, 2);
+	ASSERT_EQ(bar.total, 4);
+	ASSERT_EQ(bar.waiting, 0);
+	ASSERT_EQ(bar.ready, 4);
+	ASSERT_EQ(bar.failed, 0);
+
+	ASSERT_TRUE(instance.multi_stock.DiscardOldestIdle());
+
+	ASSERT_EQ(foo.factory_created, 4);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 2);
+	ASSERT_EQ(foo.total, 4);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 4);
+	ASSERT_EQ(foo.failed, 0);
+
+	ASSERT_EQ(bar.factory_created, 4);
+	ASSERT_EQ(bar.factory_failed, 0);
+	ASSERT_EQ(bar.destroyed, 2);
+	ASSERT_EQ(bar.total, 4);
+	ASSERT_EQ(bar.waiting, 0);
+	ASSERT_EQ(bar.ready, 4);
+	ASSERT_EQ(bar.failed, 0);
+
+	ASSERT_FALSE(instance.multi_stock.DiscardOldestIdle());
+}

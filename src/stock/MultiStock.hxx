@@ -12,6 +12,7 @@
 #include "event/TimerEvent.hxx"
 #include "util/Cancellable.hxx"
 #include "util/IntrusiveHashSet.hxx"
+#include "util/IntrusiveList.hxx"
 
 class CancellablePointer;
 class StockClass;
@@ -175,6 +176,11 @@ class MultiStock {
 		std::size_t get_concurrency;
 
 	public:
+		/**
+		 * For MultiStock::chronological_list.
+		 */
+		IntrusiveListHook<IntrusiveHookMode::AUTO_UNLINK> chronological_siblings;
+
 		MapItem(EventLoop &event_loop, StockClass &_outer_class,
 			const char *_name,
 			std::size_t _limit, std::size_t _max_idle,
@@ -278,6 +284,15 @@ class MultiStock {
 
 	Map map;
 
+	/**
+	 * A list that contains the most recently used items at the
+	 * back and the least recently used items at the front.
+	 *
+	 * This is used by DiscardOldestIdle().
+	 */
+	IntrusiveList<MapItem,
+		      IntrusiveListMemberHookTraits<&MapItem::chronological_siblings>> chronological_list;
+
 public:
 	MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
 		   std::size_t _limit, std::size_t _max_idle,
@@ -298,6 +313,14 @@ public:
 	 * @return the number of items that have been discarded
 	 */
 	std::size_t DiscardUnused() noexcept;
+
+	/**
+	 * Discard the least recently used item that is idle.
+	 *
+	 * @return true if an item has been discarded, false if there
+	 * is no idle item
+	 */
+	bool DiscardOldestIdle() noexcept;
 
 	/**
 	 * @see Stock::FadeAll()

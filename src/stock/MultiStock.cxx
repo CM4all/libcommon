@@ -564,6 +564,16 @@ MultiStock::DiscardUnused() noexcept
 	return n;
 }
 
+bool
+MultiStock::DiscardOldestIdle() noexcept
+{
+	for (auto &i : chronological_list)
+		if (i.DiscardUnused() > 0)
+			return true;
+
+	return false;
+}
+
 MultiStock::MapItem &
 MultiStock::MakeMapItem(const char *uri, void *request) noexcept
 {
@@ -575,9 +585,15 @@ MultiStock::MakeMapItem(const char *uri, void *request) noexcept
 					 inner_class.GetClearInterval(request),
 					 inner_class);
 		map.insert(i, *item);
+		chronological_list.push_back(*item);
 		return *item;
-	} else
+	} else {
+		/* move to the back of chronological_list */
+		i->chronological_siblings.unlink();
+		chronological_list.push_front(*i);
+
 		return *i;
+	}
 
 }
 
