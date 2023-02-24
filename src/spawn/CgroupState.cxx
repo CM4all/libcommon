@@ -51,10 +51,7 @@ CgroupState::GetUnifiedGroupMount() const noexcept
 void
 CgroupState::EnableAllControllers() const
 {
-	if (!IsV2())
-		/* this is only relevant if only V2 is mounted (not
-		   cgroup1 and not hybrid) */
-		return;
+	assert(IsV2());
 
 	const FileDescriptor spawn_group = mounts.front().fd;
 

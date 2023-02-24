@@ -158,12 +158,14 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	}
 #endif
 
-	try {
-		cgroup_state.EnableAllControllers();
-	} catch (...) {
-		fprintf(stderr, "Failed to setup cgroup2: ");
-		PrintException(std::current_exception());
-		return EXIT_FAILURE;
+	if (cgroup_state.IsV2()) {
+		try {
+			cgroup_state.EnableAllControllers();
+		} catch (...) {
+			fprintf(stderr, "Failed to setup cgroup2: ");
+			PrintException(std::current_exception());
+			return EXIT_FAILURE;
+		}
 	}
 
 	try {
