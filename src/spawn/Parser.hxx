@@ -17,23 +17,23 @@ class SpawnPayload {
 	const std::byte *begin, *const end;
 
 public:
-	explicit SpawnPayload(std::span<const std::byte> _payload)
+	explicit constexpr SpawnPayload(std::span<const std::byte> _payload) noexcept
 		:begin(_payload.data()), end(begin + _payload.size()) {}
 
-	bool IsEmpty() const {
+	constexpr bool IsEmpty() const noexcept {
 		return begin == end;
 	}
 
-	size_t GetSize() const {
+	constexpr std::size_t GetSize() const noexcept {
 		return begin - end;
 	}
 
-	std::byte ReadByte() {
+	std::byte ReadByte() noexcept {
 		assert(!IsEmpty());
 		return *begin++;
 	}
 
-	bool ReadBool() {
+	bool ReadBool() noexcept {
 		return (bool)ReadByte();
 	}
 
