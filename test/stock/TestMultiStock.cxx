@@ -3,7 +3,6 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "stock/MultiStock.hxx"
-#include "stock/MapStock.hxx"
 #include "stock/Class.hxx"
 #include "event/Loop.hxx"
 
@@ -317,7 +316,7 @@ void
 MyStockClass::Create(CreateStockItem c,
 		     StockRequest request,
 		     StockGetHandler &handler,
-		     gcc_unused CancellablePointer &cancel_ptr)
+		     CancellablePointer &cancel_ptr)
 {
 	auto &partition = *(Partition *)request.get();
 

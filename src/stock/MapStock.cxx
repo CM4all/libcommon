@@ -42,9 +42,6 @@ StockMap::OnStockEmpty(BasicStock &stock) noexcept
 	if (item.sticky)
 		return;
 
-	logger.Format(5, "hstock(%p) remove empty stock(%p, '%s')",
-		      (const void *)this, (const void *)&stock, stock.GetName());
-
 	Erase(item);
 }
 

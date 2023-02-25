@@ -6,7 +6,6 @@
 
 #include "Stock.hxx"
 #include "event/Chrono.hxx"
-#include "io/Logger.hxx"
 #include "util/Cast.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/StringAPI.hxx"
@@ -77,8 +76,6 @@ class StockMap : StockHandler {
 
 	static constexpr size_t N_BUCKETS = 251;
 	using Map = IntrusiveHashSet<Item, N_BUCKETS, Item::Hash, Item::Equal>;
-
-	const Logger logger;
 
 	EventLoop &event_loop;
 
