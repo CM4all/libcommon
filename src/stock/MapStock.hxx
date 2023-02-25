@@ -202,5 +202,5 @@ protected:
 
 private:
 	/* virtual methods from class StockHandler */
-	void OnStockEmpty(Stock &stock) noexcept override;
+	void OnStockEmpty(BasicStock &stock) noexcept override;
 };

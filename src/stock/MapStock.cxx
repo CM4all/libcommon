@@ -36,9 +36,9 @@ StockMap::Erase(Item &item) noexcept
 }
 
 void
-StockMap::OnStockEmpty(Stock &stock) noexcept
+StockMap::OnStockEmpty(BasicStock &stock) noexcept
 {
-	auto &item = Item::Cast(stock);
+	auto &item = Item::Cast(static_cast<Stock &>(stock));
 	if (item.sticky)
 		return;
 

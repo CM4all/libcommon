@@ -2,6 +2,7 @@ stock = static_library(
   'stock',
   'Item.cxx',
   'AbstractStock.cxx',
+  'BasicStock.cxx',
   'Stock.cxx',
   'MapStock.cxx',
   'MultiStock.cxx',
