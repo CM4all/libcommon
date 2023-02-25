@@ -893,7 +893,7 @@ TEST(MultiStock, DiscardOldestIdle)
 
 	ASSERT_EQ(foo.factory_created, 4);
 	ASSERT_EQ(foo.factory_failed, 0);
-	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.destroyed, 2);
 	ASSERT_EQ(foo.total, 4);
 	ASSERT_EQ(foo.waiting, 0);
 	ASSERT_EQ(foo.ready, 4);
@@ -901,7 +901,7 @@ TEST(MultiStock, DiscardOldestIdle)
 
 	ASSERT_EQ(bar.factory_created, 4);
 	ASSERT_EQ(bar.factory_failed, 0);
-	ASSERT_EQ(bar.destroyed, 2);
+	ASSERT_EQ(bar.destroyed, 0);
 	ASSERT_EQ(bar.total, 4);
 	ASSERT_EQ(bar.waiting, 0);
 	ASSERT_EQ(bar.ready, 4);

@@ -590,7 +590,7 @@ MultiStock::MakeMapItem(const char *uri, void *request) noexcept
 	} else {
 		/* move to the back of chronological_list */
 		i->chronological_siblings.unlink();
-		chronological_list.push_front(*i);
+		chronological_list.push_back(*i);
 
 		return *i;
 	}
