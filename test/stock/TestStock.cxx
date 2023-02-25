@@ -62,7 +62,7 @@ void
 MyStockClass::Create(CreateStockItem c,
 		     StockRequest request,
 		     StockGetHandler &handler,
-		     gcc_unused CancellablePointer &cancel_ptr)
+		     CancellablePointer &)
 {
 	auto *item = new MyStockItem(c);
 	item->request = std::move(request);

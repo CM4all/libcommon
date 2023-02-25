@@ -10,7 +10,6 @@
 #include "Stats.hxx"
 #include "event/CoarseTimerEvent.hxx"
 #include "event/DeferEvent.hxx"
-#include "io/Logger.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveList.hxx"
 
@@ -53,8 +52,6 @@ private:
 	const Event::Duration clear_interval;
 
 	StockHandler *const handler;
-
-	const Logger logger;
 
 	/**
 	 * This event is used to move the "empty" check out of the current

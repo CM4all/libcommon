@@ -81,9 +81,6 @@ BasicStock::CleanupEventCallback() noexcept
 void
 BasicStock::ClearIdle() noexcept
 {
-	logger.Format(5, "ClearIdle num_idle=%zu num_busy=%zu",
-		      idle.size(), busy.size());
-
 	if (idle.size() > max_idle)
 		UnscheduleCleanup();
 
@@ -93,8 +90,6 @@ BasicStock::ClearIdle() noexcept
 void
 BasicStock::ClearEventCallback() noexcept
 {
-	logger.Format(6, "ClearEvent may_clear=%d", may_clear);
-
 	if (may_clear)
 		ClearIdle();
 
@@ -118,7 +113,6 @@ BasicStock::BasicStock(EventLoop &event_loop, StockClass &_cls,
 	 max_idle(_max_idle),
 	 clear_interval(_clear_interval),
 	 handler(_handler),
-	 logger(name),
 	 empty_event(event_loop, BIND_THIS_METHOD(CheckEmpty)),
 	 cleanup_event(event_loop, BIND_THIS_METHOD(CleanupEventCallback)),
 	 clear_event(event_loop, BIND_THIS_METHOD(ClearEventCallback))
