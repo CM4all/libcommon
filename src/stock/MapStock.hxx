@@ -116,16 +116,6 @@ public:
 	void Erase(Item &item) noexcept;
 
 	/**
-	 * Discard all items which are idle and havn't been used in a
-	 * while.
-	 */
-	void DiscardUnused() noexcept {
-		map.for_each([](auto &i){
-			i.stock.DiscardUnused();
-		});
-	}
-
-	/**
 	 * @see Stock::FadeAll()
 	 */
 	void FadeAll() noexcept {

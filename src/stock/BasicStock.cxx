@@ -10,19 +10,6 @@
 #include <cassert>
 
 void
-BasicStock::DiscardUnused() noexcept
-{
-	if (clear_interval > Event::Duration::zero() && !may_clear)
-		return;
-
-	ClearIdle();
-
-	may_clear = true;
-	ScheduleClear();
-	ScheduleCheckEmpty();
-}
-
-void
 BasicStock::FadeAll() noexcept
 {
 	for (auto &i : busy)
