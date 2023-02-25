@@ -61,13 +61,16 @@ class MultiStock {
 		 */
 		TimerEvent cleanup_timer;
 
+		const Event::Duration cleanup_interval;
+
 		using ItemList = StockItem::List;
 
 		ItemList idle, busy;
 
 	public:
 		OuterItem(MapItem &_parent, StockItem &_item,
-			  std::size_t _limit) noexcept;
+			  std::size_t _limit,
+			  Event::Duration _cleanup_interval) noexcept;
 
 		OuterItem(const OuterItem &) = delete;
 		OuterItem &operator=(const OuterItem &) = delete;
@@ -121,7 +124,7 @@ class MultiStock {
 		void OnCleanupTimer() noexcept;
 
 		void ScheduleCleanupTimer() noexcept {
-			cleanup_timer.Schedule(std::chrono::minutes{5});
+			cleanup_timer.Schedule(cleanup_interval);
 		}
 
 		void ScheduleCleanupNow() noexcept {
@@ -166,6 +169,8 @@ class MultiStock {
 		 * is called.
 		 */
 		const std::size_t limit;
+
+		const Event::Duration clear_interval;
 
 		struct Waiting;
 		using WaitingList = IntrusiveList<Waiting>;

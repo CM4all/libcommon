@@ -13,11 +13,13 @@
 #include <cassert>
 
 MultiStock::OuterItem::OuterItem(MapItem &_parent, StockItem &_item,
-				 std::size_t _limit) noexcept
+				 std::size_t _limit,
+				 Event::Duration _cleanup_interval) noexcept
 	:parent(_parent), shared_item(_item),
 	 limit(_limit),
 	 cleanup_timer(shared_item.GetStock().GetEventLoop(),
-		       BIND_THIS_METHOD(OnCleanupTimer))
+		       BIND_THIS_METHOD(OnCleanupTimer)),
+	 cleanup_interval(_cleanup_interval)
 {
 }
 
@@ -276,6 +278,7 @@ MultiStock::MapItem::MapItem(EventLoop &_event_loop, StockClass &_outer_class,
 		    _clear_interval),
 	 inner_class(_inner_class),
 	 limit(_limit),
+	 clear_interval(_clear_interval),
 	 retry_event(_event_loop, BIND_THIS_METHOD(RetryWaiting))
 {
 }
@@ -319,7 +322,8 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 	}
 
 	if (auto *stock_item = GetIdle()) {
-		auto *i = new OuterItem(*this, *stock_item, concurrency);
+		auto *i = new OuterItem(*this, *stock_item, concurrency,
+					clear_interval);
 		items.push_back(*i);
 		i->CreateLease(inner_class, get_handler);
 		return;
@@ -444,7 +448,8 @@ MultiStock::MapItem::OnStockItemReady(StockItem &stock_item) noexcept
 
 	retry_event.Cancel();
 
-	auto *item = new OuterItem(*this, stock_item, get_concurrency);
+	auto *item = new OuterItem(*this, stock_item, get_concurrency,
+				   clear_interval);
 	items.push_back(*item);
 
 	FinishWaiting(*item);
