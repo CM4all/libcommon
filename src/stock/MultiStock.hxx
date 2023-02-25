@@ -7,7 +7,7 @@
 #include "Request.hxx"
 #include "GetHandler.hxx"
 #include "AbstractStock.hxx"
-#include "BasicStock.hxx"
+#include "Item.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "util/Cancellable.hxx"
@@ -153,12 +153,18 @@ class MultiStock {
 
 	class MapItem final
 		: public IntrusiveHashSetHook<IntrusiveHookMode::AUTO_UNLINK>,
-		  BasicStock,
+		  AbstractStock,
 		  StockGetHandler
 	{
+		StockClass &outer_class;
 		MultiStockClass &inner_class;
 
-		using OuterItemList = IntrusiveList<OuterItem>;
+		const std::string name;
+
+		using OuterItemList =
+			IntrusiveList<OuterItem,
+				      IntrusiveListBaseHookTraits<OuterItem>,
+				      true>;
 
 		OuterItemList items;
 
@@ -196,13 +202,17 @@ class MultiStock {
 
 		MapItem(EventLoop &event_loop, StockClass &_outer_class,
 			const char *_name,
-			std::size_t _limit, std::size_t _max_idle,
+			std::size_t _limit,
 			Event::Duration _clear_interval,
 			MultiStockClass &_inner_class) noexcept;
 		~MapItem() noexcept;
 
 		bool IsEmpty() const noexcept {
 			return items.empty() && waiting.empty();
+		}
+
+		std::size_t GetActiveCount() const noexcept {
+			return items.size() + (bool)get_cancel_ptr;
 		}
 
 		/**
@@ -260,12 +270,29 @@ class MultiStock {
 		void RetryWaiting() noexcept;
 		bool ScheduleRetryWaiting() noexcept;
 
+		void Create(StockRequest request) noexcept;
+
 		/* virtual methods from class StockGetHandler */
 		void OnStockItemReady(StockItem &item) noexcept override;
 		void OnStockItemError(std::exception_ptr error) noexcept override;
 
 		/* virtual methods from class AbstractStock */
+		const char *GetName() const noexcept override {
+			return name.c_str();
+		}
+
+		EventLoop &GetEventLoop() const noexcept override {
+			return retry_event.GetEventLoop();
+		}
+
+		void Put(StockItem &item, bool destroy) noexcept override;
+		void ItemIdleDisconnect(StockItem &item) noexcept override;
 		void ItemBusyDisconnect(StockItem &item) noexcept override;
+		void ItemCreateSuccess(StockGetHandler &get_handler,
+				       StockItem &item) noexcept override;
+		void ItemCreateError(StockGetHandler &get_handler,
+				     std::exception_ptr ep) noexcept override;
+		void ItemCreateAborted() noexcept override;
 
 	public:
 		struct Hash {
@@ -294,11 +321,6 @@ class MultiStock {
 	 */
 	const std::size_t limit;
 
-	/**
-	 * The maximum number of permanent idle items in each stock.
-	 */
-	const std::size_t max_idle;
-
 	MultiStockClass &inner_class;
 
 	static constexpr size_t N_BUCKETS = 251;
@@ -318,7 +340,7 @@ class MultiStock {
 
 public:
 	MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
-		   std::size_t _limit, std::size_t _max_idle,
+		   std::size_t _limit,
 		   MultiStockClass &_inner_class) noexcept;
 	~MultiStock() noexcept;
 

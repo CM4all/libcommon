@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "MultiStock.hxx"
-#include "MapStock.hxx"
+#include "Class.hxx"
 #include "GetHandler.hxx"
 #include "Item.hxx"
 #include "util/djbhash.h"
@@ -271,12 +271,12 @@ struct MultiStock::MapItem::Waiting final
 
 MultiStock::MapItem::MapItem(EventLoop &_event_loop, StockClass &_outer_class,
 			     const char *_name,
-			     std::size_t _limit, std::size_t _max_idle,
+			     std::size_t _limit,
 			     Event::Duration _clear_interval,
 			     MultiStockClass &_inner_class) noexcept
-	:BasicStock(_event_loop, _outer_class, _name, _max_idle,
-		    _clear_interval),
+	:outer_class(_outer_class),
 	 inner_class(_inner_class),
+	 name(_name),
 	 limit(_limit),
 	 clear_interval(_clear_interval),
 	 retry_event(_event_loop, BIND_THIS_METHOD(RetryWaiting))
@@ -312,20 +312,25 @@ MultiStock::MapItem::FindUsable() noexcept
 }
 
 inline void
+MultiStock::MapItem::Create(StockRequest request) noexcept
+{
+	assert(!get_cancel_ptr);
+
+	try {
+		outer_class.Create({*this}, std::move(request),
+				   *this, get_cancel_ptr);
+	} catch (...) {
+		ItemCreateError(*this, std::current_exception());
+	}
+}
+
+inline void
 MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 			 StockGetHandler &get_handler,
 			 CancellablePointer &cancel_ptr) noexcept
 {
 	if (auto *i = FindUsable()) {
 		i->GetLease(inner_class, get_handler);
-		return;
-	}
-
-	if (auto *stock_item = GetIdle()) {
-		auto *i = new OuterItem(*this, *stock_item, concurrency,
-					clear_interval);
-		items.push_back(*i);
-		i->CreateLease(inner_class, get_handler);
 		return;
 	}
 
@@ -338,7 +343,7 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 	waiting.push_back(*w);
 
 	if (waiting_empty && !IsFull() && !get_cancel_ptr)
-		GetCreate(std::move(w->request), *this, get_cancel_ptr);
+		Create(std::move(w->request));
 }
 
 inline void
@@ -427,7 +432,7 @@ MultiStock::MapItem::RetryWaiting() noexcept
 	assert(w.request);
 
 	if (!IsFull() && !get_cancel_ptr)
-		GetCreate(std::move(w.request), *this, get_cancel_ptr);
+		Create(std::move(w.request));
 }
 
 bool
@@ -485,14 +490,57 @@ MultiStock::MapItem::ToOuterItem(StockItem &shared_item) noexcept
 }
 
 void
-MultiStock::MapItem::ItemBusyDisconnect(StockItem &item) noexcept
+MultiStock::MapItem::Put(StockItem &item, bool) noexcept
 {
-	BasicStock::ItemBusyDisconnect(item);
+	assert(!item.is_idle);
+	assert(&item.GetStock() == this);
 
-	auto &outer_item = ToOuterItem(item);
+	delete &item;
+}
 
-	if (!outer_item.IsBusy())
-		RemoveItem(outer_item);
+void
+MultiStock::MapItem::ItemIdleDisconnect(StockItem &item) noexcept
+{
+	// should be unreachable because there are no idle items
+
+	assert(item.is_idle);
+
+	delete &item;
+}
+
+void
+MultiStock::MapItem::ItemBusyDisconnect(StockItem &_item) noexcept
+{
+	assert(!_item.is_idle);
+
+	/* this item will be destroyed by Put() */
+	_item.Fade();
+
+	auto &item = ToOuterItem(_item);
+
+	if (!item.IsBusy())
+		RemoveItem(item);
+}
+
+
+void
+MultiStock::MapItem::ItemCreateSuccess(StockGetHandler &get_handler,
+				       StockItem &item) noexcept
+{
+	get_handler.OnStockItemReady(item);
+}
+
+void
+MultiStock::MapItem::ItemCreateError(StockGetHandler &get_handler,
+				     std::exception_ptr ep) noexcept
+{
+	get_handler.OnStockItemError(ep);
+}
+
+void
+MultiStock::MapItem::ItemCreateAborted() noexcept
+{
+	assert(!get_cancel_ptr);
 }
 
 inline void
@@ -537,10 +585,10 @@ MultiStock::MapItem::Equal::operator()(const MapItem &a, const MapItem &b) const
 }
 
 MultiStock::MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
-		       std::size_t _limit, std::size_t _max_idle,
+		       std::size_t _limit,
 		       MultiStockClass &_inner_class) noexcept
 	:event_loop(_event_loop), outer_class(_outer_cls),
-	 limit(_limit), max_idle(_max_idle),
+	 limit(_limit),
 	 inner_class(_inner_class)
 {
 }
@@ -587,7 +635,6 @@ MultiStock::MakeMapItem(const char *uri, void *request) noexcept
 	if (inserted) {
 		auto *item = new MapItem(GetEventLoop(), outer_class, uri,
 					 inner_class.GetLimit(request, limit),
-					 max_idle,
 					 inner_class.GetClearInterval(request),
 					 inner_class);
 		map.insert(i, *item);
