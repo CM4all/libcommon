@@ -2,7 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#include "Stock.hxx"
+#include "BasicStock.hxx"
 #include "Class.hxx"
 #include "GetHandler.hxx"
 #include "util/Cancellable.hxx"
