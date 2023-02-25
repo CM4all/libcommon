@@ -471,8 +471,6 @@ Stock::Put(StockItem &item, bool destroy) noexcept
 	} else {
 		InjectIdle(item);
 	}
-
-	ScheduleRetryWaiting();
 }
 
 void
