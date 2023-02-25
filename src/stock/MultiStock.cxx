@@ -618,14 +618,18 @@ MultiStock::DiscardUnused() noexcept
 	return n;
 }
 
-bool
-MultiStock::DiscardOldestIdle() noexcept
+std::size_t
+MultiStock::DiscardOldestIdle(std::size_t n_requested) noexcept
 {
-	for (auto &i : chronological_list)
-		if (i.DiscardUnused() > 0)
-			return true;
+	std::size_t n_removed = 0;
 
-	return false;
+	for (auto &i : chronological_list) {
+		n_removed += i.DiscardUnused();
+		if (n_removed >= n_requested)
+			break;
+	}
+
+	return n_removed;
 }
 
 MultiStock::MapItem &

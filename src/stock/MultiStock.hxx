@@ -360,12 +360,15 @@ public:
 	std::size_t DiscardUnused() noexcept;
 
 	/**
-	 * Discard the least recently used item that is idle.
+	 * Discard a number of least recently used items which are
+	 * idle.
 	 *
-	 * @return true if an item has been discarded, false if there
-	 * is no idle item
+	 * @param n the number of items to be removed
+	 * @return the number of items actually discarded; this number
+	 * can be slightly larger than #n because this method does not
+	 * limit the number of clones removed
 	 */
-	bool DiscardOldestIdle() noexcept;
+	std::size_t DiscardOldestIdle(std::size_t n) noexcept;
 
 	/**
 	 * @see Stock::FadeAll()

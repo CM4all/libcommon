@@ -849,7 +849,7 @@ TEST(MultiStock, DiscardOldestIdle)
 
 	foo.Get(8);
 	bar.Get(8);
-	ASSERT_FALSE(instance.multi_stock.DiscardOldestIdle());
+	ASSERT_EQ(instance.multi_stock.DiscardOldestIdle(1000), 0U);
 
 	ASSERT_EQ(foo.factory_created, 4);
 	ASSERT_EQ(foo.factory_failed, 0);
@@ -867,7 +867,7 @@ TEST(MultiStock, DiscardOldestIdle)
 	ASSERT_EQ(bar.ready, 8);
 	ASSERT_EQ(bar.failed, 0);
 
-	ASSERT_FALSE(instance.multi_stock.DiscardOldestIdle());
+	ASSERT_EQ(instance.multi_stock.DiscardOldestIdle(1), 0U);
 
 	foo.PutReady(4);
 	bar.PutReady(4);
@@ -888,7 +888,7 @@ TEST(MultiStock, DiscardOldestIdle)
 	ASSERT_EQ(bar.ready, 4);
 	ASSERT_EQ(bar.failed, 0);
 
-	ASSERT_TRUE(instance.multi_stock.DiscardOldestIdle());
+	ASSERT_EQ(instance.multi_stock.DiscardOldestIdle(1), 2U);
 
 	ASSERT_EQ(foo.factory_created, 4);
 	ASSERT_EQ(foo.factory_failed, 0);
@@ -906,7 +906,7 @@ TEST(MultiStock, DiscardOldestIdle)
 	ASSERT_EQ(bar.ready, 4);
 	ASSERT_EQ(bar.failed, 0);
 
-	ASSERT_TRUE(instance.multi_stock.DiscardOldestIdle());
+	ASSERT_EQ(instance.multi_stock.DiscardOldestIdle(1000), 2U);
 
 	ASSERT_EQ(foo.factory_created, 4);
 	ASSERT_EQ(foo.factory_failed, 0);
@@ -924,5 +924,44 @@ TEST(MultiStock, DiscardOldestIdle)
 	ASSERT_EQ(bar.ready, 4);
 	ASSERT_EQ(bar.failed, 0);
 
-	ASSERT_FALSE(instance.multi_stock.DiscardOldestIdle());
+	ASSERT_EQ(instance.multi_stock.DiscardOldestIdle(1000), 0U);
+
+	/* discard more than one */
+
+	foo.PutReady(4);
+	bar.PutReady(4);
+
+	ASSERT_EQ(foo.factory_created, 4);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 2);
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
+
+	ASSERT_EQ(bar.factory_created, 4);
+	ASSERT_EQ(bar.factory_failed, 0);
+	ASSERT_EQ(bar.destroyed, 2);
+	ASSERT_EQ(bar.total, 0);
+	ASSERT_EQ(bar.waiting, 0);
+	ASSERT_EQ(bar.ready, 0);
+	ASSERT_EQ(bar.failed, 0);
+
+	ASSERT_EQ(instance.multi_stock.DiscardOldestIdle(1000), 4U);
+
+	ASSERT_EQ(foo.factory_created, 4);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 4);
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
+
+	ASSERT_EQ(bar.factory_created, 4);
+	ASSERT_EQ(bar.factory_failed, 0);
+	ASSERT_EQ(bar.destroyed, 4);
+	ASSERT_EQ(bar.total, 0);
+	ASSERT_EQ(bar.waiting, 0);
+	ASSERT_EQ(bar.ready, 0);
+	ASSERT_EQ(bar.failed, 0);
 }
