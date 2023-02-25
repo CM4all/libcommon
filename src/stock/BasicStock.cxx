@@ -194,7 +194,7 @@ BasicStock::GetIdle() noexcept
 
 bool
 BasicStock::GetIdle(StockRequest &request,
-	       StockGetHandler &get_handler) noexcept
+		    StockGetHandler &get_handler) noexcept
 {
 	auto *item = GetIdle();
 	if (item == nullptr)
@@ -212,8 +212,8 @@ BasicStock::GetIdle(StockRequest &request,
 
 void
 BasicStock::GetCreate(StockRequest request,
-		 StockGetHandler &get_handler,
-		 CancellablePointer &cancel_ptr) noexcept
+		      StockGetHandler &get_handler,
+		      CancellablePointer &cancel_ptr) noexcept
 {
 	++num_create;
 
@@ -227,7 +227,7 @@ BasicStock::GetCreate(StockRequest request,
 
 void
 BasicStock::ItemCreateSuccess(StockGetHandler &get_handler,
-			 StockItem &item) noexcept
+			      StockItem &item) noexcept
 {
 	assert(num_create > 0);
 	--num_create;
@@ -239,7 +239,7 @@ BasicStock::ItemCreateSuccess(StockGetHandler &get_handler,
 
 void
 BasicStock::ItemCreateError(StockGetHandler &get_handler,
-		       std::exception_ptr ep) noexcept
+			    std::exception_ptr ep) noexcept
 {
 	assert(num_create > 0);
 	--num_create;
