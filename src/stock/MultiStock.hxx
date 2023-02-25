@@ -7,7 +7,7 @@
 #include "Request.hxx"
 #include "GetHandler.hxx"
 #include "AbstractStock.hxx"
-#include "Stock.hxx"
+#include "BasicStock.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/TimerEvent.hxx"
 #include "util/Cancellable.hxx"
@@ -150,7 +150,7 @@ class MultiStock {
 
 	class MapItem final
 		: public IntrusiveHashSetHook<IntrusiveHookMode::AUTO_UNLINK>,
-		  Stock,
+		  BasicStock,
 		  StockGetHandler
 	{
 		MultiStockClass &inner_class;
@@ -158,6 +158,14 @@ class MultiStock {
 		using OuterItemList = IntrusiveList<OuterItem>;
 
 		OuterItemList items;
+
+		/**
+		 * The maximum number of items in this stock.  If any
+		 * more items are requested, they are put into the
+		 * #waiting list, which gets checked as soon as Put()
+		 * is called.
+		 */
+		const std::size_t limit;
 
 		struct Waiting;
 		using WaitingList = IntrusiveList<Waiting>;
@@ -190,6 +198,16 @@ class MultiStock {
 
 		bool IsEmpty() const noexcept {
 			return items.empty() && waiting.empty();
+		}
+
+		/**
+		 * @return true if the configured stock limit has been reached
+		 * and no more items can be created, false if this stock is
+		 * unlimited
+		 */
+		[[gnu::pure]]
+		bool IsFull() const noexcept {
+			return limit > 0 && GetActiveCount() >= limit;
 		}
 
 		void Get(StockRequest request, std::size_t concurrency,

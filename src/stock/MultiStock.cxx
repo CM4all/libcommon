@@ -272,9 +272,10 @@ MultiStock::MapItem::MapItem(EventLoop &_event_loop, StockClass &_outer_class,
 			     std::size_t _limit, std::size_t _max_idle,
 			     Event::Duration _clear_interval,
 			     MultiStockClass &_inner_class) noexcept
-	:Stock(_event_loop, _outer_class, _name, _limit, _max_idle,
-	       _clear_interval),
+	:BasicStock(_event_loop, _outer_class, _name, _max_idle,
+		    _clear_interval),
 	 inner_class(_inner_class),
+	 limit(_limit),
 	 retry_event(_event_loop, BIND_THIS_METHOD(RetryWaiting))
 {
 }
@@ -481,7 +482,7 @@ MultiStock::MapItem::ToOuterItem(StockItem &shared_item) noexcept
 void
 MultiStock::MapItem::ItemBusyDisconnect(StockItem &item) noexcept
 {
-	Stock::ItemBusyDisconnect(item);
+	BasicStock::ItemBusyDisconnect(item);
 
 	auto &outer_item = ToOuterItem(item);
 
