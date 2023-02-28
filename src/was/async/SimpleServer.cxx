@@ -278,6 +278,10 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		request.request->remote_host.assign((const char *)payload.data(),
 						    payload.size());
 		break;
+
+	case WAS_COMMAND_METRIC:
+		// TODO implemnet
+		break;
 	}
 
 	return true;
