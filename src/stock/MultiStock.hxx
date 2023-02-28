@@ -14,6 +14,8 @@
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
 
+#include <string>
+
 class CancellablePointer;
 class StockClass;
 struct CreateStockItem;
