@@ -61,7 +61,7 @@ class SpawnServerClient final : public SpawnService {
 
 	SocketEvent event;
 
-	MultiReceiveMessage receive{64, 24};
+	MultiReceiveMessage receive{16, 1024};
 
 	SpawnServerClientHandler *handler = nullptr;
 
@@ -131,6 +131,7 @@ private:
 		  std::span<const FileDescriptor> fds);
 	void Send(const SpawnSerializer &s);
 
+	void HandleOneExit(SpawnPayload &payload);
 	void HandleExitMessage(SpawnPayload payload);
 	void HandleMessage(std::span<const std::byte> payload);
 

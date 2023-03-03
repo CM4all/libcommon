@@ -398,14 +398,12 @@ SpawnServerClient::Kill(ChildProcess &child, int signo) noexcept
 }
 
 inline void
-SpawnServerClient::HandleExitMessage(SpawnPayload payload)
+SpawnServerClient::HandleOneExit(SpawnPayload &payload)
 {
 	unsigned pid;
 	int status;
 	payload.ReadUnsigned(pid);
 	payload.ReadInt(status);
-	if (!payload.empty())
-		throw MalformedSpawnPayloadError();
 
 	auto i = processes.find(pid);
 	if (i == processes.end())
@@ -415,6 +413,13 @@ SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 
 	if (i->listener != nullptr)
 		i->listener->OnChildProcessExit(status);
+}
+
+inline void
+SpawnServerClient::HandleExitMessage(SpawnPayload payload)
+{
+	while (!payload.empty())
+		HandleOneExit(payload);
 
 	ShutdownComplete();
 }

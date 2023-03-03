@@ -358,25 +358,10 @@ SpawnServerConnection::SendMemoryWarning(uint64_t memory_usage,
 void
 SpawnServerConnection::SendExit(unsigned id, int status) noexcept
 {
-	SpawnSerializer s(SpawnResponseCommand::EXIT);
-	s.WriteUnsigned(id);
-	s.WriteInt(status);
+	if (exit_queue.empty())
+		event.ScheduleWrite();
 
-	try {
-		try {
-			::Send<1>(socket, s);
-		} catch (const std::system_error &e) {
-			if (IsErrno(e, EAGAIN)) {
-				exit_queue.push_front({id, status});
-				event.ScheduleWrite();
-			} else
-				throw;
-		}
-	} catch (...) {
-		logger(1, "Failed to send EXIT to worker: ",
-		       GetFullMessage(std::current_exception()).c_str());
-		RemoveConnection();
-	}
+	exit_queue.push_front({id, status});
 }
 
 inline void
@@ -828,25 +813,21 @@ SpawnServerConnection::ReceiveAndHandle()
 inline void
 SpawnServerConnection::FlushExitQueue()
 {
-	while (!exit_queue.empty()) {
+	if (exit_queue.empty())
+		return;
+
+	SpawnSerializer s(SpawnResponseCommand::EXIT);
+
+	for (std::size_t n = 0; n < 64 && !exit_queue.empty(); ++n) {
 		const auto &i = exit_queue.front();
 
-		SpawnSerializer s(SpawnResponseCommand::EXIT);
 		s.WriteUnsigned(i.id);
 		s.WriteInt(i.status);
-
-		try {
-			::Send<1>(socket, s);
-		} catch (const std::system_error &e) {
-			if (IsErrno(e, EAGAIN))
-				return;
-			throw;
-		}
 
 		exit_queue.pop_front();
 	}
 
-	event.CancelWrite();
+	::Send<1>(socket, s);
 }
 
 inline void
@@ -860,8 +841,12 @@ try {
 		return;
 	}
 
-	if (events & event.WRITE)
+	if (events & event.WRITE) {
 		FlushExitQueue();
+
+		if (exit_queue.empty())
+			event.CancelWrite();
+	}
 
 	if (events & event.READ)
 		ReceiveAndHandle();
