@@ -17,6 +17,7 @@ pcre = static_library(
   include_directories: inc,
   dependencies: [
     libpcre,
+    fmt_dep,
   ],
 )
 
