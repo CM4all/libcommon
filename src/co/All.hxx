@@ -33,6 +33,7 @@ class All final {
 		struct promise_type final {
 			std::coroutine_handle<> continuation;
 
+			[[nodiscard]]
 			auto initial_suspend() noexcept {
 				return std::suspend_always{};
 			}
@@ -41,11 +42,13 @@ class All final {
 			}
 
 			struct final_awaitable {
+				[[nodiscard]]
 				bool await_ready() const noexcept {
 					return false;
 				}
 
 				template<typename PROMISE>
+				[[nodiscard]]
 				std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
 					const auto &promise = coro.promise();
 					return promise.continuation;
@@ -55,10 +58,12 @@ class All final {
 				}
 			};
 
+			[[nodiscard]]
 			auto final_suspend() noexcept {
 				return final_awaitable{};
 			}
 
+			[[nodiscard]]
 			auto get_return_object() noexcept {
 				return CompletionTask(std::coroutine_handle<promise_type>::from_promise(*this));
 			}
@@ -71,10 +76,12 @@ class All final {
 	private:
 		UniqueHandle<promise_type> coroutine;
 
+		[[nodiscard]]
 		explicit CompletionTask(std::coroutine_handle<promise_type> _coroutine) noexcept
 			:coroutine(_coroutine) {}
 
 	public:
+		[[nodiscard]]
 		CompletionTask() = default;
 
 		operator std::coroutine_handle<>() const noexcept {
@@ -117,6 +124,7 @@ class All final {
 			parent = &_parent;
 		}
 
+		[[nodiscard]]
 		bool await_ready() const noexcept {
 			return ready;
 		}
@@ -139,6 +147,7 @@ class All final {
 		 * All::OnReady() to obtain a continuation that will
 		 * be resumed by CompletionTask::final_suspend().
 		 */
+		[[nodiscard]]
 		CompletionTask OnReady() noexcept {
 			assert(!ready);
 
@@ -155,6 +164,7 @@ class All final {
 
 public:
 	template<typename... Args>
+	[[nodiscard]]
 	All(Tasks&... tasks) noexcept
 		:awaitables(tasks.operator co_await()...) {
 
@@ -165,6 +175,7 @@ public:
 		}, awaitables);
 	}
 
+	[[nodiscard]]
 	bool await_ready() const noexcept {
 		/* this task is ready when all given tasks are
 		   ready */
@@ -173,6 +184,7 @@ public:
 		}, awaitables);
 	}
 
+	[[nodiscard]]
 	std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
 		/* at least one task is not yet ready - call
 		   await_suspend() on not-yet-ready tasks to install
@@ -191,6 +203,7 @@ public:
 	}
 
 private:
+	[[nodiscard]]
 	std::coroutine_handle<> OnReady() noexcept {
 		assert(continuation);
 

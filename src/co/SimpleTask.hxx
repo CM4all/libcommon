@@ -18,6 +18,7 @@ namespace Co {
 class SimpleTask final {
 public:
 	struct promise_type final {
+		[[nodiscard]]
 		auto initial_suspend() noexcept {
 			return std::suspend_always{};
 		}
@@ -25,10 +26,12 @@ public:
 		void return_void() noexcept {
 		}
 
+		[[nodiscard]]
 		auto final_suspend() noexcept {
 			return std::suspend_always{};
 		}
 
+		[[nodiscard]]
 		auto get_return_object() noexcept {
 			return SimpleTask(std::coroutine_handle<promise_type>::from_promise(*this));
 		}
@@ -41,18 +44,21 @@ public:
 private:
 	UniqueHandle<promise_type> coroutine;
 
+	[[nodiscard]]
 	explicit SimpleTask(std::coroutine_handle<promise_type> _coroutine) noexcept
 		:coroutine(_coroutine)
 	{
 	}
 
 public:
+	[[nodiscard]]
 	SimpleTask() = default;
 
 	bool IsDefined() const noexcept {
 		return coroutine;
 	}
 
+	[[nodiscard]]
 	operator std::coroutine_handle<>() const noexcept {
 		return coroutine.get();
 	}

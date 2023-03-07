@@ -26,6 +26,7 @@ class MultiAwaitable final {
 
 		bool ready;
 
+		[[nodiscard]]
 		explicit Awaitable(MultiAwaitable &_multi) noexcept
 			:multi(_multi), ready(multi.ready) {}
 
@@ -44,6 +45,7 @@ class MultiAwaitable final {
 		Awaitable(const Awaitable &) = delete;
 		Awaitable &operator=(const Awaitable &) = delete;
 
+		[[nodiscard]]
 		bool await_ready() const noexcept {
 			assert(!is_linked());
 			assert(!continuation);
@@ -51,6 +53,7 @@ class MultiAwaitable final {
 			return ready;
 		}
 
+		[[nodiscard]]
 		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
 			assert(!is_linked());
 			assert(!continuation);
@@ -86,6 +89,7 @@ public:
 	 * Construct an instance without a task.  Call Start() to
 	 * start a task.
 	 */
+	[[nodiscard]]
 	MultiAwaitable() noexcept
 		:ready(true) {}
 
@@ -93,6 +97,7 @@ public:
 	 * Construct an instance with a task.
 	 */
 	template<typename T>
+	[[nodiscard]]
 	explicit MultiAwaitable(T &&_task) noexcept
 		:task(Wait(std::forward<T>(_task))) {}
 
@@ -116,6 +121,7 @@ public:
 	/**
 	 * Creates a new awaitable
 	 */
+	[[nodiscard]]
 	auto operator co_await() noexcept {
 		return Awaitable{*this};
 	}
@@ -142,6 +148,7 @@ private:
 	 * A coroutine which executes the actual task and then resumes
 	 * all waiters.
 	 */
+	[[nodiscard]]
 	EagerTask<void> Wait(auto _task) noexcept {
 		assert(!ready);
 

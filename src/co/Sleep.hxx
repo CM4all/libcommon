@@ -19,20 +19,24 @@ class Sleep final {
 	std::coroutine_handle<> continuation;
 
 public:
+	[[nodiscard]]
 	Sleep(EventLoop &event_loop, Event::Duration d) noexcept
 		:event(event_loop, BIND_THIS_METHOD(OnTimer))
 	{
 		event.Schedule(d);
 	}
 
+	[[nodiscard]]
 	auto operator co_await() noexcept {
 		struct Awaitable final {
 			Sleep &sleep;
 
+			[[nodiscard]]
 			bool await_ready() const noexcept {
 				return !sleep.event.IsPending();
 			}
 
+			[[nodiscard]]
 			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
 				sleep.continuation = _continuation;
 				return std::noop_coroutine();
