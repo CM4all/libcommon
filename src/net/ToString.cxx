@@ -44,7 +44,7 @@ bool
 ToString(char *buffer, std::size_t buffer_size,
 	 SocketAddress address) noexcept
 {
-	if (address.IsNull())
+	if (address.IsNull() || address.GetSize() == 0)
 		return false;
 
 	if (address.GetFamily() == AF_LOCAL)
