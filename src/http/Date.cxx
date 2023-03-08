@@ -38,14 +38,14 @@ static constexpr char months[13][5] = {
 	"???,",
 };
 
-static gcc_always_inline const char *
+static const char *
 wday_name(int wday) noexcept
 {
 	return wdays[wday >= 0 && wday < 7
 		     ? wday : 7];
 }
 
-static gcc_always_inline const char *
+static const char *
 month_name(int month) noexcept
 {
 	return months[month >= 0 && month < 12
