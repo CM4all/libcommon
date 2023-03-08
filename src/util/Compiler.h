@@ -49,63 +49,17 @@
 	 GCC_VERSION < GCC_MAKE_VERSION(major, minor, 0))
 
 #if CLANG_OR_GCC_VERSION(3,0)
-#  define gcc_packed __attribute__((packed))
 #  define gcc_unused __attribute__((unused))
-#  define gcc_warn_unused_result __attribute__((warn_unused_result))
-#  define gcc_deprecated __attribute__((deprecated))
-#  define gcc_noreturn __attribute__((noreturn))
 #  define gcc_always_inline inline __attribute__((always_inline))
-#  define gcc_noinline __attribute__((noinline))
-#  define gcc_nonnull(...) __attribute__((nonnull(__VA_ARGS__)))
-#  define gcc_nonnull_all __attribute__((nonnull))
-#  define gcc_returns_nonnull __attribute__((returns_nonnull))
-#  define gcc_returns_twice __attribute__((returns_twice))
-#  define gcc_malloc __attribute__((malloc))
 #  define gcc_pure __attribute__((pure))
 #  define gcc_const __attribute__((const))
-#  define gcc_sentinel(n) __attribute__((sentinel(n)))
 #  define gcc_printf(string_index, first_to_check) __attribute__((format(printf, string_index, first_to_check)))
-#  define gcc_likely(x) __builtin_expect(!!(x), 1)
-#  define gcc_unlikely(x) __builtin_expect(!!(x), 0)
-#  define gcc_aligned(n) __attribute__((aligned(n)))
-#  define gcc_visibility_hidden __attribute__((visibility("hidden")))
-#  define gcc_visibility_default __attribute__((visibility("default")))
 #else
-#  define gcc_packed
 #  define gcc_unused
-#  define gcc_warn_unused_result
-#  define gcc_deprecated
-#  define gcc_noreturn
 #  define gcc_always_inline
-#  define gcc_noinline
-#  define gcc_nonnull(...)
-#  define gcc_nonnull_all
-#  define gcc_returns_nonnull
-#  define gcc_returns_twice
-#  define gcc_malloc
 #  define gcc_pure
 #  define gcc_const
-#  define gcc_sentinel(n)
 #  define gcc_printf(string_index, first_to_check)
-#  define gcc_likely(x)
-#  define gcc_unlikely(x)
-#  define gcc_aligned(n)
-#  define gcc_visibility_hidden
-#  define gcc_visibility_default
-#endif
-
-#if CLANG_OR_GCC_VERSION(4,3)
-#define gcc_hot __attribute__((hot))
-#define gcc_cold __attribute__((cold))
-#else
-#define gcc_hot
-#define gcc_cold
-#endif
-
-#if GCC_CHECK_VERSION(4,6)
-#define gcc_flatten __attribute__((flatten))
-#else
-#define gcc_flatten
 #endif
 
 #ifndef __cplusplus
@@ -117,22 +71,6 @@
 #else
 /* disable it on other compilers */
 #define gcc_restrict
-#endif
-
-#ifdef __cplusplus
-
-/* support for C++11 "override" and "final" was added in gcc 4.7 */
-#if GCC_OLDER_THAN(4,7)
-#define override
-#define final
-#endif
-
-#if CLANG_OR_GCC_VERSION(4,8)
-#define gcc_alignas(T, fallback) alignas(T)
-#else
-#define gcc_alignas(T, fallback) gcc_aligned(fallback)
-#endif
-
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
