@@ -969,10 +969,7 @@ IsValidCgroupNameChar(char ch) noexcept
 	return IsLowerAlphaASCII(ch) || ch == '_';
 }
 
-#if !GCC_OLDER_THAN(10,0)
-constexpr
-#endif
-static bool
+static constexpr bool
 IsValidCgroupName(std::string_view s) noexcept
 {
 	return CheckCharsNonEmpty(s, IsValidCgroupNameChar);
