@@ -47,7 +47,7 @@ Connection::TryRead() noexcept
 
 	ssize_t nbytes = recv(event.GetSocket().Get(), r.data(), r.size(),
 			      MSG_DONTWAIT);
-	if (gcc_likely(nbytes > 0)) {
+	if (nbytes > 0) [[likely]] {
 		input.Append(nbytes);
 		return OnReceived();
 	}
@@ -120,7 +120,7 @@ Connection::OnPacket(TranslationCommand cmd,
 		return false;
 	}
 
-	if (gcc_unlikely(cmd == TranslationCommand::END)) {
+	if (cmd == TranslationCommand::END) [[unlikely]] {
 		state = State::PROCESSING;
 		return handler.OnTranslationRequest(*this, request, cancel_ptr);
 	}
@@ -145,7 +145,7 @@ Connection::TryWrite() noexcept
 			      output.data(), output.size(),
 			      MSG_DONTWAIT|MSG_NOSIGNAL);
 	if (nbytes < 0) {
-		if (gcc_likely(errno == EAGAIN)) {
+		if (errno == EAGAIN) [[likely]] {
 			event.ScheduleWrite();
 			return true;
 		}

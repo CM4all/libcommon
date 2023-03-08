@@ -41,14 +41,14 @@ static constexpr char months[13][5] = {
 static gcc_always_inline const char *
 wday_name(int wday) noexcept
 {
-	return wdays[gcc_likely(wday >= 0 && wday < 7)
+	return wdays[wday >= 0 && wday < 7
 		     ? wday : 7];
 }
 
 static gcc_always_inline const char *
 month_name(int month) noexcept
 {
-	return months[gcc_likely(month >= 0 && month < 12)
+	return months[month >= 0 && month < 12
 		      ? month : 12];
 }
 

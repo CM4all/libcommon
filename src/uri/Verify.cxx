@@ -5,7 +5,6 @@
 #include "Verify.hxx"
 #include "Chars.hxx"
 #include "util/CharUtil.hxx"
-#include "util/Compiler.h"
 #include "util/StringCompare.hxx"
 #include "util/StringListVerify.hxx"
 #include "util/StringSplit.hxx"

@@ -6,7 +6,6 @@
 #include "UdpHandler.hxx"
 #include "system/Error.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "util/Compiler.h"
 
 #include <assert.h>
 
@@ -69,9 +68,9 @@ MultiUdpListener::Reply(SocketAddress address,
 	ssize_t nbytes = sendto(event.GetSocket().Get(), data, data_length,
 				MSG_DONTWAIT|MSG_NOSIGNAL,
 				address.GetAddress(), address.GetSize());
-	if (gcc_unlikely(nbytes < 0))
+	if (nbytes < 0) [[unlikely]]
 		throw MakeErrno("Failed to send UDP packet");
 
-	if ((std::size_t)nbytes != data_length)
+	if ((std::size_t)nbytes != data_length) [[unlikely]]
 		throw std::runtime_error("Short send");
 }

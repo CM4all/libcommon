@@ -283,7 +283,7 @@ BufferedSocket::FillBuffer() noexcept
 		input.Allocate();
 
 	ssize_t nbytes = base.ReadToBuffer(input);
-	if (gcc_likely(nbytes > 0)) {
+	if (nbytes > 0) [[likely]] {
 		/* success: data was added to the buffer */
 		got_data = true;
 
@@ -583,7 +583,7 @@ BufferedSocket::Write(const void *data, std::size_t length) noexcept
 {
 	ssize_t nbytes = base.Write(data, length);
 
-	if (gcc_unlikely(nbytes < 0)) {
+	if (nbytes < 0) [[unlikely]] {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
 			ScheduleWrite();
 			return WRITE_BLOCKING;
@@ -605,7 +605,7 @@ BufferedSocket::WriteV(const struct iovec *v, std::size_t n) noexcept
 {
 	ssize_t nbytes = base.WriteV(v, n);
 
-	if (gcc_unlikely(nbytes < 0)) {
+	if (nbytes < 0) [[unlikely]] {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
 			ScheduleWrite();
 			return WRITE_BLOCKING;
@@ -628,7 +628,7 @@ BufferedSocket::WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
 {
 	ssize_t nbytes = base.WriteFrom(other_fd, other_fd_type, other_offset,
 					length);
-	if (gcc_unlikely(nbytes < 0)) {
+	if (nbytes < 0) [[unlikely]] {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
 			if (!IsReadyForWriting()) {
 				ScheduleWrite();
