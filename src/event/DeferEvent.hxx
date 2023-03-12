@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
-// Copyright CM4all GmbH
-// author: Max Kellermann <mk@cm4all.com>
+// author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef DEFER_EVENT_HXX
-#define DEFER_EVENT_HXX
+#pragma once
 
 #include "util/BindMethod.hxx"
 #include "util/IntrusiveList.hxx"
@@ -58,5 +56,3 @@ private:
 		callback();
 	}
 };
-
-#endif
