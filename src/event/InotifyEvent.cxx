@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "InotifyEvent.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <array>
@@ -40,7 +40,7 @@ InotifyEvent::AddWatch(const char *pathname, uint32_t mask)
 	int wd = inotify_add_watch(event.GetFileDescriptor().Get(),
 				   pathname, mask);
 	if (wd < 0)
-		throw FormatErrno("inotify_add_watch('%s') failed", pathname);
+		throw FmtErrno("inotify_add_watch('{}') failed", pathname);
 
 	return wd;
 }

@@ -3,6 +3,7 @@ control_server = static_library(
   'Server.cxx',
   include_directories: inc,
   dependencies: [
+    fmt_dep,
     event_net_dep,
   ],
 )

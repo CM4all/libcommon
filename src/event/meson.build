@@ -28,6 +28,7 @@ event = static_library(
   'PipeLineReader.cxx',
   include_directories: inc,
   dependencies: [
+    fmt_dep,
     event_boost_dep,
   ],
 )

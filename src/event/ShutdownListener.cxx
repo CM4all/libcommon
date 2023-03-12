@@ -4,14 +4,16 @@
 
 #include "ShutdownListener.hxx"
 
+#include <fmt/core.h>
+
 #include <signal.h>
 #include <stdio.h>
 
 inline void
 ShutdownListener::SignalCallback(int signo) noexcept
 {
-	fprintf(stderr, "caught signal %d, shutting down (pid=%d)\n",
-		signo, (int)getpid());
+	fmt::print(stderr, "caught signal {}, shutting down (pid={})\n",
+		   signo, getpid());
 
 	Disable();
 	callback();

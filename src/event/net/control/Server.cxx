@@ -4,6 +4,7 @@
 
 #include "Server.hxx"
 #include "Handler.hxx"
+#include "lib/fmt/RuntimeError.hxx"
 #include "net/control/Padding.hxx"
 #include "net/SocketConfig.hxx"
 #include "net/SocketAddress.hxx"
@@ -11,7 +12,6 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
-#include "util/RuntimeError.hxx"
 
 ControlServer::ControlServer(EventLoop &event_loop, UniqueSocketDescriptor s,
 			     ControlHandler &_handler) noexcept
@@ -43,15 +43,15 @@ control_server_decode(ControlServer &control_server,
 	length -= sizeof(*magic);
 
 	if (!BengProxy::IsControlSizePadded(length))
-		throw FormatRuntimeError("odd control packet (length=%zu)", length);
+		throw FmtRuntimeError("odd control packet (length={})", length);
 
 	/* now decode all commands */
 
 	while (length > 0) {
 		const auto *header = (const BengProxy::ControlHeader *)data;
 		if (length < sizeof(*header))
-			throw FormatRuntimeError("partial header (length=%zu)",
-						 length);
+			throw FmtRuntimeError("partial header (length={})",
+					      length);
 
 		size_t payload_length = FromBE16(header->length);
 		const auto command = (BengProxy::ControlCommand)
@@ -62,8 +62,8 @@ control_server_decode(ControlServer &control_server,
 
 		const std::byte *payload = (const std::byte *)data;
 		if (length < payload_length)
-			throw FormatRuntimeError("partial payload (length=%zu, expected=%zu)",
-						 length, payload_length);
+			throw FmtRuntimeError("partial payload (length={}, expected={})",
+					      length, payload_length);
 
 		/* this command is ok, pass it to the callback */
 

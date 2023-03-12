@@ -19,6 +19,7 @@ event_net_cares = static_library(
   include_directories: inc,
   dependencies: [
     libcares,
+    fmt_dep,
     coroutines_dep,
     time_dep,
   ],
