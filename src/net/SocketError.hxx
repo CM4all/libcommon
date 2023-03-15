@@ -190,27 +190,3 @@ MakeSocketError(const char *msg) noexcept
 {
 	return MakeSocketError(GetSocketError(), msg);
 }
-
-template<typename... Args>
-[[gnu::pure]]
-static inline auto
-FormatSocketError(socket_error_t code, const char *fmt, Args... args) noexcept
-{
-#ifdef _WIN32
-	return FormatLastError(code, fmt, args...);
-#else
-	return FormatErrno(code, fmt, args...);
-#endif
-}
-
-template<typename... Args>
-[[gnu::pure]]
-static inline auto
-FormatSocketError(const char *fmt, Args... args) noexcept
-{
-#ifdef _WIN32
-	return FormatLastError(fmt, args...);
-#else
-	return FormatErrno(fmt, args...);
-#endif
-}
