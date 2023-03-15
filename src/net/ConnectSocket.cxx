@@ -6,7 +6,8 @@
 #include "UniqueSocketDescriptor.hxx"
 #include "SocketAddress.hxx"
 #include "SocketError.hxx"
-#include "ToString.hxx"
+#include "lib/fmt/SocketError.hxx"
+#include "lib/fmt/SocketAddressFormatter.hxx"
 
 UniqueSocketDescriptor
 CreateConnectSocket(const SocketAddress address, int type)
@@ -15,12 +16,8 @@ CreateConnectSocket(const SocketAddress address, int type)
 	if (!fd.CreateNonBlock(address.GetFamily(), type, 0))
 		throw MakeSocketError("Failed to create socket");
 
-	if (!fd.Connect(address)) {
-		const auto code = GetSocketError();
-		char buffer[256];
-		ToString(buffer, sizeof(buffer), address);
-		throw FormatSocketError(code, "Failed to connect to %s", buffer);
-	}
+	if (!fd.Connect(address))
+		throw FmtSocketError("Failed to connect to {}", address);
 
 	return fd;
 }

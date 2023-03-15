@@ -35,6 +35,7 @@ net = static_library(
   net_sources,
   include_directories: inc,
   dependencies: [
+    fmt_dep,
   ],
 )
 
