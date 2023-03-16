@@ -1196,6 +1196,13 @@ enum class TranslationCommand : uint16_t {
 	 * processes that will likely only be used once.
 	 */
 	DISPOSABLE = 250,
+
+	/**
+	 * Discard the query string from the request URI.  This can be
+	 * combined with #EAGER_CACHE to prevent cache-busting with
+	 * random query strings.
+	 */
+	DISCARD_QUERY_STRING = 251,
 };
 
 struct TranslationHeader {

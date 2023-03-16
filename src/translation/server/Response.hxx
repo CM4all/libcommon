@@ -353,6 +353,10 @@ public:
 				    value...);
 	}
 
+	auto &DiscardQueryString() noexcept {
+		return Packet(TranslationCommand::DISCARD_QUERY_STRING);
+	}
+
 	struct RedirectContext {
 		Response &response;
 
