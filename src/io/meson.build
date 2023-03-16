@@ -24,6 +24,9 @@ io = static_library(
   'Temp.cxx',
   io_sources,
   include_directories: inc,
+  dependencies: [
+    fmt_dep,
+  ],
 )
 
 io_dep = declare_dependency(
