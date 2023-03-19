@@ -5,7 +5,7 @@
 #pragma once
 
 #include "InvokeTask.hxx"
-#include "util/Cache.hxx"
+#include "util/StaticCache.hxx"
 #include "util/Concepts.hxx"
 #include "util/IntrusiveList.hxx"
 
@@ -43,7 +43,7 @@ class Cache : Factory {
 		}
 	};
 
-	using Cache_ = ::Cache<Key, Data, max_size, table_size, Hash, Equal>;
+	using Cache_ = StaticCache<Key, Data, max_size, table_size, Hash, Equal>;
 	Cache_ cache;
 
 	struct Request;
