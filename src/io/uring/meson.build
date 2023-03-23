@@ -21,6 +21,7 @@ uring = static_library(
   'Queue.cxx',
   'Operation.cxx',
   'OpenStat.cxx',
+  'Close.cxx',
   uring_sources,
   include_directories: inc,
   dependencies: [
