@@ -11,6 +11,12 @@ class UniqueFileDescriptor;
 
 namespace Uring {
 
+class OpenHandler {
+public:
+	virtual void OnOpen(UniqueFileDescriptor fd) noexcept = 0;
+	virtual void OnOpenError(std::exception_ptr e) noexcept = 0;
+};
+
 class OpenStatHandler {
 public:
 	virtual void OnOpenStat(UniqueFileDescriptor fd,

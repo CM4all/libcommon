@@ -20,6 +20,7 @@ uring = static_library(
   'Ring.cxx',
   'Queue.cxx',
   'Operation.cxx',
+  'Open.cxx',
   'OpenStat.cxx',
   'Close.cxx',
   uring_sources,
