@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "OpenStat.hxx"
+#include "Close.hxx"
 #include "Handler.hxx"
 #include "Queue.hxx"
 #include "system/Error.hxx"
@@ -85,7 +86,7 @@ OpenStat::OnUringCompletion(int res) noexcept
 try {
 	if (canceled) {
 		if (!fd.IsDefined() && res >= 0)
-			close(res);
+			Close(&queue, FileDescriptor{res});
 
 		delete this;
 		return;
