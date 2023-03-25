@@ -113,7 +113,7 @@ constexpr bool
 IsUriPchar(char ch) noexcept
 {
 	return IsUriUnreservedChar(ch) ||
-		ch == '%' || /* "escaped" */
+		IsUriEscapedChar(ch) ||
 		ch == ':' || ch == '@' || ch == '&' || ch == '=' || ch == '+' ||
 		ch == '$' || ch == ',';
 }
