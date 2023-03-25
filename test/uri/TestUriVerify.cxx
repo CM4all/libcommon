@@ -34,6 +34,8 @@
 
 #include <gtest/gtest.h>
 
+using std::string_view_literals::operator""sv;
+
 TEST(UriVerify, VerifyDomainName)
 {
 	EXPECT_TRUE(VerifyDomainName("a"));
@@ -97,6 +99,36 @@ TEST(UriVerify, VerifyUriHostPort)
 	EXPECT_FALSE(VerifyUriHostPort("[::1]:a"));
 }
 
+TEST(UriVerify, Segment)
+{
+	EXPECT_TRUE(uri_segment_verify(""sv));
+	EXPECT_TRUE(uri_segment_verify("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz%01234567890-.ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ_~!$&'()*+,;=:@"sv));
+
+	EXPECT_FALSE(uri_segment_verify("/"sv));
+	EXPECT_FALSE(uri_segment_verify("\0"sv));
+	EXPECT_FALSE(uri_segment_verify("\""sv));
+	EXPECT_FALSE(uri_segment_verify("`"sv));
+	EXPECT_FALSE(uri_segment_verify("["sv));
+	EXPECT_FALSE(uri_segment_verify("]"sv));
+	EXPECT_FALSE(uri_segment_verify("{"sv));
+	EXPECT_FALSE(uri_segment_verify("}"sv));
+	EXPECT_FALSE(uri_segment_verify("?"sv));
+	EXPECT_FALSE(uri_segment_verify("^"sv));
+}
+
+TEST(UriVerify, Path)
+{
+	EXPECT_FALSE(uri_path_verify(""sv));
+	EXPECT_FALSE(uri_path_verify("a"sv));
+	EXPECT_FALSE(uri_path_verify("*"sv));
+	EXPECT_TRUE(uri_path_verify("/"sv));
+	EXPECT_TRUE(uri_path_verify("//"sv));
+	EXPECT_TRUE(uri_path_verify("///"sv));
+	EXPECT_TRUE(uri_path_verify("///a"sv));
+	EXPECT_TRUE(uri_path_verify("/a/a/a"sv));
+	EXPECT_FALSE(uri_path_verify("/a/a/a?"sv));
+}
+
 TEST(UriVerify, Paranoid)
 {
 	EXPECT_TRUE(uri_path_verify_paranoid(""));
@@ -122,6 +154,21 @@ TEST(UriVerify, Paranoid)
 	EXPECT_FALSE(uri_path_verify_paranoid("f%00"));
 	EXPECT_TRUE(uri_path_verify_paranoid("f%20"));
 	EXPECT_TRUE(uri_path_verify_paranoid("index%2ehtml"));
+}
+
+TEST(UriVerify, Query)
+{
+	EXPECT_TRUE(VerifyUriQuery(""sv));
+	EXPECT_TRUE(VerifyUriQuery("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz%01234567890-.ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ_~!$&'()*+,;=:@?/"sv));
+
+	EXPECT_FALSE(VerifyUriQuery("\0"sv));
+	EXPECT_FALSE(VerifyUriQuery("\""sv));
+	EXPECT_FALSE(VerifyUriQuery("`"sv));
+	EXPECT_FALSE(VerifyUriQuery("["sv));
+	EXPECT_FALSE(VerifyUriQuery("]"sv));
+	EXPECT_FALSE(VerifyUriQuery("{"sv));
+	EXPECT_FALSE(VerifyUriQuery("}"sv));
+	EXPECT_FALSE(VerifyUriQuery("^"sv));
 }
 
 TEST(UriVerify, VerifyHttpUrl)
