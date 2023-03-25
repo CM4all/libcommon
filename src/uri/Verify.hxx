@@ -49,14 +49,16 @@ bool
 VerifyUriHostPort(std::string_view host_port) noexcept;
 
 /**
- * Verifies one path segment of an URI according to RFC 2396.
+ * Verifies one path segment of an URI according to RFC 3986,
+ * "segment".
  */
 [[gnu::pure]]
 bool
 uri_segment_verify(std::string_view segment) noexcept;
 
 /**
- * Verifies the path portion of an URI according to RFC 2396.
+ * Verifies the path portion of an URI according to RFC 3986 3.3,
+ * "path-absolute".
  */
 [[gnu::pure]]
 bool
@@ -89,7 +91,7 @@ uri_path_verify_quick(const char *uri) noexcept;
 
 /**
  * Verify whether the given string is a valid query according to RFC
- * 2396 3.4.
+ * 3986 3.4, "query".
  */
 [[gnu::pure]]
 bool

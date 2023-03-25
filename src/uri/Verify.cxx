@@ -279,7 +279,7 @@ uri_path_verify_quick(const char *uri) noexcept
 bool
 VerifyUriQuery(std::string_view query) noexcept
 {
-	return CheckChars(query, IsUricChar);
+	return CheckChars(query, IsUriQueryChar);
 }
 
 bool
