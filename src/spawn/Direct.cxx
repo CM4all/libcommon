@@ -259,6 +259,15 @@ try {
 			_exit(SpawnInit(pid, false));
 	}
 
+	/* if this is a jailed process, we assume it's unprivileged
+	   and should not share a HT core with a process for a
+	   different user to avoid cross-HT attacks, so create a new
+	   core scheduling cookie */
+	/* failure to do so will be ignored silently, because the
+	   Linux kernel may not have that feature yet */
+	if (p.ns.mount.pivot_root != nullptr)
+		CoreScheduling::Create(0);
+
 	if (p.no_new_privs)
 		prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
 
@@ -576,15 +585,6 @@ try {
 		   the child has lost all root namespace capabilities by
 		   entering a new user namespace */
 		params.rlimits.Apply(pid);
-
-		/* if this is a jailed process, we assume it's
-		   unprivileged and should not share a HT core with a
-		   process for a different user to avoid cross-HT
-		   attacks, so create a new core scheduling cookie */
-		/* failure to do so will be ignored silently, because
-		   the Linux kernel may not have that feature yet */
-		if (params.ns.mount.pivot_root != nullptr)
-			CoreScheduling::Create(pid);
 
 		/* after success (no exception was thrown), wake up
 		   the child */
