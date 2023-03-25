@@ -34,109 +34,109 @@
 
 #include <gtest/gtest.h>
 
-TEST(UriVerifyTest, VerifyDomainName)
+TEST(UriVerify, VerifyDomainName)
 {
-	ASSERT_TRUE(VerifyDomainName("a"));
-	ASSERT_TRUE(VerifyDomainName("A"));
-	ASSERT_TRUE(VerifyDomainName("a-b"));
-	ASSERT_TRUE(VerifyDomainName("a.b"));
-	ASSERT_TRUE(VerifyDomainName("a.b.c.d.efghi.jkl"));
-	ASSERT_FALSE(VerifyDomainName(""));
-	ASSERT_FALSE(VerifyDomainName("-"));
-	ASSERT_FALSE(VerifyDomainName("-b"));
-	ASSERT_FALSE(VerifyDomainName("a-"));
-	ASSERT_FALSE(VerifyDomainName("a:"));
-	ASSERT_FALSE(VerifyDomainName("a:80"));
-	ASSERT_TRUE(VerifyDomainName("a.a-b"));
-	ASSERT_FALSE(VerifyDomainName("a.-b"));
-	ASSERT_FALSE(VerifyDomainName("a..b"));
-	ASSERT_FALSE(VerifyDomainName("a."));
-	ASSERT_FALSE(VerifyDomainName(".b"));
-	ASSERT_TRUE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890"));
-	ASSERT_TRUE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890.abcdefghijklmnopqrstuvwxyz"));
-	ASSERT_FALSE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890a"));
+	EXPECT_TRUE(VerifyDomainName("a"));
+	EXPECT_TRUE(VerifyDomainName("A"));
+	EXPECT_TRUE(VerifyDomainName("a-b"));
+	EXPECT_TRUE(VerifyDomainName("a.b"));
+	EXPECT_TRUE(VerifyDomainName("a.b.c.d.efghi.jkl"));
+	EXPECT_FALSE(VerifyDomainName(""));
+	EXPECT_FALSE(VerifyDomainName("-"));
+	EXPECT_FALSE(VerifyDomainName("-b"));
+	EXPECT_FALSE(VerifyDomainName("a-"));
+	EXPECT_FALSE(VerifyDomainName("a:"));
+	EXPECT_FALSE(VerifyDomainName("a:80"));
+	EXPECT_TRUE(VerifyDomainName("a.a-b"));
+	EXPECT_FALSE(VerifyDomainName("a.-b"));
+	EXPECT_FALSE(VerifyDomainName("a..b"));
+	EXPECT_FALSE(VerifyDomainName("a."));
+	EXPECT_FALSE(VerifyDomainName(".b"));
+	EXPECT_TRUE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890"));
+	EXPECT_TRUE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890.abcdefghijklmnopqrstuvwxyz"));
+	EXPECT_FALSE(VerifyDomainName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz01234567890a"));
 }
 
-TEST(UriVerifyTest, VerifyLowerDomainName)
+TEST(UriVerify, VerifyLowerDomainName)
 {
-	ASSERT_TRUE(VerifyLowerDomainName("a"));
-	ASSERT_FALSE(VerifyLowerDomainName("A"));
-	ASSERT_TRUE(VerifyLowerDomainName("a-b"));
-	ASSERT_TRUE(VerifyLowerDomainName("a.b"));
-	ASSERT_TRUE(VerifyLowerDomainName("a.b.c.d.efghi.jkl"));
+	EXPECT_TRUE(VerifyLowerDomainName("a"));
+	EXPECT_FALSE(VerifyLowerDomainName("A"));
+	EXPECT_TRUE(VerifyLowerDomainName("a-b"));
+	EXPECT_TRUE(VerifyLowerDomainName("a.b"));
+	EXPECT_TRUE(VerifyLowerDomainName("a.b.c.d.efghi.jkl"));
 }
 
-TEST(UriVerifyTest, VerifyUriHostPort)
+TEST(UriVerify, VerifyUriHostPort)
 {
-	ASSERT_FALSE(VerifyUriHostPort(""));
-	ASSERT_FALSE(VerifyUriHostPort(":80"));
-	ASSERT_TRUE(VerifyUriHostPort("a"));
-	ASSERT_TRUE(VerifyUriHostPort("a.b"));
-	ASSERT_TRUE(VerifyUriHostPort("a.b:8080"));
-	ASSERT_FALSE(VerifyUriHostPort("a.b:8080:1"));
-	ASSERT_TRUE(VerifyUriHostPort("localhost"));
-	ASSERT_TRUE(VerifyUriHostPort("localhost:80"));
+	EXPECT_FALSE(VerifyUriHostPort(""));
+	EXPECT_FALSE(VerifyUriHostPort(":80"));
+	EXPECT_TRUE(VerifyUriHostPort("a"));
+	EXPECT_TRUE(VerifyUriHostPort("a.b"));
+	EXPECT_TRUE(VerifyUriHostPort("a.b:8080"));
+	EXPECT_FALSE(VerifyUriHostPort("a.b:8080:1"));
+	EXPECT_TRUE(VerifyUriHostPort("localhost"));
+	EXPECT_TRUE(VerifyUriHostPort("localhost:80"));
 
 	/* IPv4 */
-	ASSERT_TRUE(VerifyUriHostPort("1.2.3.4:8080"));
-	ASSERT_TRUE(VerifyUriHostPort("1.2.3.4:65535"));
-	ASSERT_FALSE(VerifyUriHostPort("1.2.3.4:123456"));
-	ASSERT_FALSE(VerifyUriHostPort("1.2.3.4:a"));
-	ASSERT_FALSE(VerifyUriHostPort("1.2.3.4:1a2"));
+	EXPECT_TRUE(VerifyUriHostPort("1.2.3.4:8080"));
+	EXPECT_TRUE(VerifyUriHostPort("1.2.3.4:65535"));
+	EXPECT_FALSE(VerifyUriHostPort("1.2.3.4:123456"));
+	EXPECT_FALSE(VerifyUriHostPort("1.2.3.4:a"));
+	EXPECT_FALSE(VerifyUriHostPort("1.2.3.4:1a2"));
 
 	/* IPv6 */
-	ASSERT_TRUE(VerifyUriHostPort("::"));
-	ASSERT_TRUE(VerifyUriHostPort("::1"));
-	ASSERT_TRUE(VerifyUriHostPort("2001::1"));
-	ASSERT_FALSE(VerifyUriHostPort("20010::1"));
-	ASSERT_TRUE(VerifyUriHostPort("abcd:ef::1"));
-	ASSERT_FALSE(VerifyUriHostPort("abcd:efg::1"));
-	ASSERT_TRUE(VerifyUriHostPort("[::1]:8080"));
-	ASSERT_TRUE(VerifyUriHostPort("[::1]:65535"));
-	ASSERT_FALSE(VerifyUriHostPort("[::1]:123456"));
-	ASSERT_FALSE(VerifyUriHostPort("[::1]:a"));
+	EXPECT_TRUE(VerifyUriHostPort("::"));
+	EXPECT_TRUE(VerifyUriHostPort("::1"));
+	EXPECT_TRUE(VerifyUriHostPort("2001::1"));
+	EXPECT_FALSE(VerifyUriHostPort("20010::1"));
+	EXPECT_TRUE(VerifyUriHostPort("abcd:ef::1"));
+	EXPECT_FALSE(VerifyUriHostPort("abcd:efg::1"));
+	EXPECT_TRUE(VerifyUriHostPort("[::1]:8080"));
+	EXPECT_TRUE(VerifyUriHostPort("[::1]:65535"));
+	EXPECT_FALSE(VerifyUriHostPort("[::1]:123456"));
+	EXPECT_FALSE(VerifyUriHostPort("[::1]:a"));
 }
 
-TEST(UriVerifyTest, Paranoid)
+TEST(UriVerify, Paranoid)
 {
-	ASSERT_TRUE(uri_path_verify_paranoid(""));
-	ASSERT_TRUE(uri_path_verify_paranoid("/"));
-	ASSERT_TRUE(uri_path_verify_paranoid(" "));
-	ASSERT_FALSE(uri_path_verify_paranoid("."));
-	ASSERT_FALSE(uri_path_verify_paranoid("./"));
-	ASSERT_FALSE(uri_path_verify_paranoid("./foo"));
-	ASSERT_FALSE(uri_path_verify_paranoid(".."));
-	ASSERT_FALSE(uri_path_verify_paranoid("../"));
-	ASSERT_FALSE(uri_path_verify_paranoid("../foo"));
-	ASSERT_FALSE(uri_path_verify_paranoid(".%2e/foo"));
-	ASSERT_TRUE(uri_path_verify_paranoid("foo/bar"));
-	ASSERT_FALSE(uri_path_verify_paranoid("foo%2fbar"));
-	ASSERT_FALSE(uri_path_verify_paranoid("/foo/bar?A%2fB%00C%"));
-	ASSERT_FALSE(uri_path_verify_paranoid("foo/./bar"));
-	ASSERT_TRUE(uri_path_verify_paranoid("foo//bar"));
-	ASSERT_FALSE(uri_path_verify_paranoid("foo/%2ebar"));
-	ASSERT_FALSE(uri_path_verify_paranoid("foo/.%2e/bar"));
-	ASSERT_FALSE(uri_path_verify_paranoid("foo/.%2e"));
-	ASSERT_FALSE(uri_path_verify_paranoid("foo/bar/.."));
-	ASSERT_FALSE(uri_path_verify_paranoid("foo/bar/../bar"));
-	ASSERT_FALSE(uri_path_verify_paranoid("f%00"));
-	ASSERT_TRUE(uri_path_verify_paranoid("f%20"));
-	ASSERT_TRUE(uri_path_verify_paranoid("index%2ehtml"));
+	EXPECT_TRUE(uri_path_verify_paranoid(""));
+	EXPECT_TRUE(uri_path_verify_paranoid("/"));
+	EXPECT_TRUE(uri_path_verify_paranoid(" "));
+	EXPECT_FALSE(uri_path_verify_paranoid("."));
+	EXPECT_FALSE(uri_path_verify_paranoid("./"));
+	EXPECT_FALSE(uri_path_verify_paranoid("./foo"));
+	EXPECT_FALSE(uri_path_verify_paranoid(".."));
+	EXPECT_FALSE(uri_path_verify_paranoid("../"));
+	EXPECT_FALSE(uri_path_verify_paranoid("../foo"));
+	EXPECT_FALSE(uri_path_verify_paranoid(".%2e/foo"));
+	EXPECT_TRUE(uri_path_verify_paranoid("foo/bar"));
+	EXPECT_FALSE(uri_path_verify_paranoid("foo%2fbar"));
+	EXPECT_FALSE(uri_path_verify_paranoid("/foo/bar?A%2fB%00C%"));
+	EXPECT_FALSE(uri_path_verify_paranoid("foo/./bar"));
+	EXPECT_TRUE(uri_path_verify_paranoid("foo//bar"));
+	EXPECT_FALSE(uri_path_verify_paranoid("foo/%2ebar"));
+	EXPECT_FALSE(uri_path_verify_paranoid("foo/.%2e/bar"));
+	EXPECT_FALSE(uri_path_verify_paranoid("foo/.%2e"));
+	EXPECT_FALSE(uri_path_verify_paranoid("foo/bar/.."));
+	EXPECT_FALSE(uri_path_verify_paranoid("foo/bar/../bar"));
+	EXPECT_FALSE(uri_path_verify_paranoid("f%00"));
+	EXPECT_TRUE(uri_path_verify_paranoid("f%20"));
+	EXPECT_TRUE(uri_path_verify_paranoid("index%2ehtml"));
 }
 
-TEST(UriVerifyTest, VerifyHttpUrl)
+TEST(UriVerify, VerifyHttpUrl)
 {
-	ASSERT_FALSE(VerifyHttpUrl(""));
-	ASSERT_FALSE(VerifyHttpUrl("http://"));
-	ASSERT_FALSE(VerifyHttpUrl("http:///"));
-	ASSERT_FALSE(VerifyHttpUrl("http://a"));
-	ASSERT_TRUE(VerifyHttpUrl("http://a/"));
-	ASSERT_TRUE(VerifyHttpUrl("http://a/b/c/"));
-	ASSERT_TRUE(VerifyHttpUrl("http://a/b/c/?"));
-	ASSERT_TRUE(VerifyHttpUrl("http://a/b/c/?d"));
-	ASSERT_FALSE(VerifyHttpUrl("http://a/b/c/?d\""));
-	ASSERT_FALSE(VerifyHttpUrl("http://a/b/c/#"));
-	ASSERT_TRUE(VerifyHttpUrl("http://[1234::5678]/"));
-	ASSERT_TRUE(VerifyHttpUrl("http://[1234::5678]:80/"));
-	ASSERT_TRUE(VerifyHttpUrl("http://foo.example.com/"));
+	EXPECT_FALSE(VerifyHttpUrl(""));
+	EXPECT_FALSE(VerifyHttpUrl("http://"));
+	EXPECT_FALSE(VerifyHttpUrl("http:///"));
+	EXPECT_FALSE(VerifyHttpUrl("http://a"));
+	EXPECT_TRUE(VerifyHttpUrl("http://a/"));
+	EXPECT_TRUE(VerifyHttpUrl("http://a/b/c/"));
+	EXPECT_TRUE(VerifyHttpUrl("http://a/b/c/?"));
+	EXPECT_TRUE(VerifyHttpUrl("http://a/b/c/?d"));
+	EXPECT_FALSE(VerifyHttpUrl("http://a/b/c/?d\""));
+	EXPECT_FALSE(VerifyHttpUrl("http://a/b/c/#"));
+	EXPECT_TRUE(VerifyHttpUrl("http://[1234::5678]/"));
+	EXPECT_TRUE(VerifyHttpUrl("http://[1234::5678]:80/"));
+	EXPECT_TRUE(VerifyHttpUrl("http://foo.example.com/"));
 }
