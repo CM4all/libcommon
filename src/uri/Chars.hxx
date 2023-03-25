@@ -97,16 +97,6 @@ IsUriEscapedChar(char ch) noexcept
 }
 
 /**
- * @see RFC 2396 2
- */
-constexpr bool
-IsUricChar(char ch) noexcept
-{
-	return IsUriReservedChar(ch) || IsUriUnreservedChar(ch) ||
-		IsUriEscapedChar(ch);
-}
-
-/**
  * See RFC 3986 3.3, "pchar"
  */
 constexpr bool
@@ -116,4 +106,13 @@ IsUriPchar(char ch) noexcept
 		IsUriEscapedChar(ch) ||
 		IsUriSubcomponentDelimiter(ch) ||
 		ch == ':' || ch == '@';
+}
+
+/**
+ * @see RFC 2396 3.4, "query"
+ */
+constexpr bool
+IsUriQueryChar(char ch) noexcept
+{
+	return IsUriPchar(ch) || ch == '/' || ch == '?';
 }
