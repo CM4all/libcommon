@@ -31,7 +31,7 @@
  */
 
 /*
- * URI character classification according to RFC 2396.
+ * URI character classification according to RFC 3986.
  */
 
 #pragma once
@@ -41,7 +41,7 @@
 /**
  * Is this a "delimiter of the generic URI components"?
  *
- * @see RFC 2396 2.2
+ * @see RFC 3986 2.2, "gen-delims"
  */
 constexpr bool
 IsUriGenericDelimiter(char ch) noexcept
@@ -53,7 +53,7 @@ IsUriGenericDelimiter(char ch) noexcept
 /**
  * Is this a "subcomponent delimiter"?
  *
- * @see RFC 2396 2.2
+ * @see RFC 3986 2.2, "sub-delims"
  */
 constexpr bool
 IsUriSubcomponentDelimiter(char ch) noexcept
@@ -65,7 +65,9 @@ IsUriSubcomponentDelimiter(char ch) noexcept
 }
 
 /**
- * @see RFC 2396 2.2
+ * Is this a "reserved character"?
+ *
+ * @see RFC 3986 2.2, "reserved"
  */
 constexpr bool
 IsUriReservedChar(char ch) noexcept
@@ -77,7 +79,7 @@ IsUriReservedChar(char ch) noexcept
  * "Characters that are allowed in a URI but do not have a reserved
  * purpose are called unreserved."
  *
- * See RFC 2396 2.3.
+ * See RFC 3986 2.3, "unreserved"
  */
 constexpr bool
 IsUriUnreservedChar(char ch) noexcept
@@ -86,7 +88,7 @@ IsUriUnreservedChar(char ch) noexcept
 }
 
 /**
- * @see RFC 2396 2.4.1
+ * @see RFC 3986 2.1, "escaped" and "pct-encoded"
  */
 constexpr bool
 IsUriEscapedChar(char ch) noexcept
@@ -105,7 +107,7 @@ IsUricChar(char ch) noexcept
 }
 
 /**
- * See RFC 2396 3.3.
+ * See RFC 3986 3.3, "pchar"
  */
 constexpr bool
 IsUriPchar(char ch) noexcept
