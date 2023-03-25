@@ -114,6 +114,6 @@ IsUriPchar(char ch) noexcept
 {
 	return IsUriUnreservedChar(ch) ||
 		IsUriEscapedChar(ch) ||
-		ch == ':' || ch == '@' || ch == '&' || ch == '=' || ch == '+' ||
-		ch == '$' || ch == ',';
+		IsUriSubcomponentDelimiter(ch) ||
+		ch == ':' || ch == '@';
 }
