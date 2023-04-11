@@ -4,9 +4,7 @@
 
 #pragma once
 
-#include "Value.hxx"
-
-struct lua_State;
+#include "Thread.hxx"
 
 namespace Lua {
 
@@ -19,7 +17,7 @@ class CoRunner {
 	/**
 	 * The Lua thread where the function runs.
 	 */
-	Lua::Value thread;
+	Thread thread;
 
 public:
 	explicit CoRunner(lua_State *L) noexcept
@@ -30,7 +28,7 @@ public:
 	void Cancel();
 
 	lua_State *GetMainState() const noexcept {
-		return thread.GetState();
+		return thread.GetMainState();
 	}
 };
 
