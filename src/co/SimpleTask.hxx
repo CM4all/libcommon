@@ -36,6 +36,7 @@ public:
 			return SimpleTask(std::coroutine_handle<promise_type>::from_promise(*this));
 		}
 
+		[[noreturn]]
 		void unhandled_exception() noexcept {
 			std::terminate();
 		}
