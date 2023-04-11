@@ -62,6 +62,11 @@ public:
 	operator std::coroutine_handle<>() const noexcept {
 		return coroutine.get();
 	}
+
+	[[nodiscard]]
+	operator UniqueHandle<>() && noexcept {
+		return std::move(coroutine);
+	}
 };
 
 } // namespace Co
