@@ -1,5 +1,17 @@
 liblua = dependency('luajit')
 
+lua_sources = []
+
+if not is_variable('coroutines_dep')
+  coroutines_dep = dependency('', required: false)
+endif
+
+if coroutines_dep.found()
+  lua_sources += [
+    'CoAwaitable.cxx',
+  ]
+endif
+
 lua = static_library(
   'lua',
   'CoRunner.cxx',
@@ -8,6 +20,7 @@ lua = static_library(
   'Resume.cxx',
   'RunFile.cxx',
   'State.cxx',
+  lua_sources,
   include_directories: inc,
   dependencies: liblua,
 )
