@@ -1,3 +1,17 @@
+test(
+  'TestLua',
+  executable(
+    'TestLua',
+    'TestCoAwaitable.cxx',
+    include_directories: inc,
+    dependencies: [
+      gtest,
+      lua_dep,
+      lua_event_dep,
+    ],
+  ),
+)
+
 executable(
   'RunLua',
   'RunLua.cxx',
