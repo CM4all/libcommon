@@ -1,9 +1,16 @@
+test_lua_sources = [
+  'TestCoRunner.cxx',
+]
+
+if coroutines_dep.found()
+  test_lua_sources += 'TestCoAwaitable.cxx'
+endif
+
 test(
   'TestLua',
   executable(
     'TestLua',
-    'TestCoRunner.cxx',
-    'TestCoAwaitable.cxx',
+    test_lua_sources,
     include_directories: inc,
     dependencies: [
       gtest,

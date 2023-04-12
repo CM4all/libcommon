@@ -22,10 +22,16 @@ lua = static_library(
   'State.cxx',
   lua_sources,
   include_directories: inc,
-  dependencies: liblua,
+  dependencies: [
+    coroutines_dep,
+    liblua,
+  ],
 )
 
 lua_dep = declare_dependency(
   link_with: lua,
-  dependencies: liblua,
+  dependencies: [
+    coroutines_dep,
+    liblua,
+  ],
 )
