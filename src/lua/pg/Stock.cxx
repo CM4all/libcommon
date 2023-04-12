@@ -88,12 +88,17 @@ public:
 	}
 
 	~PgRequest() noexcept {
+		Cancel();
+	}
+
+	void Cancel() noexcept {
 		if (cancel_ptr)
 			cancel_ptr.Cancel();
 		else if (item != nullptr) {
 			auto &connection = Pg::Stock::GetConnection(*item);
 			connection.DiscardRequest();
 			item->Put(false);
+			item = nullptr;
 		}
 	}
 
@@ -258,6 +263,13 @@ InitPgStock(lua_State *L) noexcept
 	lua_pop(L, 1);
 
 	PgRequestClass::Register(L);
+
+	SetField(L, RelativeStackIndex{-1}, "__close", [](auto _L){
+		auto &request = PgRequestClass::Cast(_L, 1);
+		request.Cancel();
+		return 0;
+	});
+
 	lua_pop(L, 1);
 }
 

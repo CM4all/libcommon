@@ -14,6 +14,7 @@ endif
 
 lua = static_library(
   'lua',
+  'CoCancel.cxx',
   'CoRunner.cxx',
   'Error.cxx',
   'Panic.cxx',

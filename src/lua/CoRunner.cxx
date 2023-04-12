@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "CoRunner.hxx"
+#include "CoCancel.hxx"
 #include "Resume.hxx"
 
 namespace Lua {
@@ -28,16 +29,10 @@ CoRunner::Cancel()
 	const auto main_L = GetMainState();
 	const ScopeCheckStack check_main_stack(main_L);
 
-	bool need_gc = false;
-	thread.Dispose(main_L, [&need_gc](auto *L){
-		need_gc = UnsetResumeListener(L) != nullptr;
+	thread.Dispose(main_L, [](auto *L){
+		if (UnsetResumeListener(L) != nullptr)
+			CoCancel(L);
 	});
-
-	if (need_gc)
-		/* force a full GC so all pending operations are
-		   cancelled */
-		// TODO: is there a more elegant way without forcing a full GC?
-		lua_gc(main_L, LUA_GCCOLLECT, 0);
 }
 
 } // namespace Lua

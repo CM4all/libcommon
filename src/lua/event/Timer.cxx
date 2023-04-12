@@ -30,6 +30,10 @@ public:
 		timer_event.Schedule(duration);
 	}
 
+	void Cancel() noexcept {
+		timer_event.Cancel();
+	}
+
 private:
 	void OnTimer() noexcept {
 		Resume(L, 0);
@@ -64,6 +68,13 @@ InitTimer(lua_State *L, EventLoop &event_loop) noexcept
 	const ScopeCheckStack check_stack{L};
 
 	TimerClass::Register(L);
+
+	SetField(L, RelativeStackIndex{-1}, "__close", [](auto _L){
+		auto &timer = TimerClass::Cast(_L, 1);
+		timer.Cancel();
+		return 0;
+	});
+
 	lua_pop(L, 1);
 
 	SetGlobal(L, "sleep",

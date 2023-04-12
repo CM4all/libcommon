@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "CoAwaitable.hxx"
+#include "CoCancel.hxx"
 #include "Thread.hxx"
 
 namespace Lua {
@@ -24,16 +25,10 @@ CoAwaitable::~CoAwaitable() noexcept
 	const auto main_L = thread.GetMainState();
 	const ScopeCheckStack check_main_stack{main_L};
 
-	bool need_gc = false;
-	thread.Dispose(main_L, [&need_gc](auto *L){
-		need_gc = UnsetResumeListener(L) != nullptr;
+	thread.Dispose(main_L, [](auto *L){
+		if (UnsetResumeListener(L) != nullptr)
+			CoCancel(L);
 	});
-
-	if (need_gc)
-		/* force a full GC so all pending operations are
-		   cancelled */
-		// TODO: is there a more elegant way without forcing a full GC?
-		lua_gc(main_L, LUA_GCCOLLECT, 0);
 }
 
 void
