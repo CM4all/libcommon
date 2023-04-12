@@ -26,7 +26,6 @@ struct Completion {
 	void Start(Co::InvokeTask &invoke) noexcept {
 		assert(invoke);
 		invoke.Start(BIND_THIS_METHOD(Callback));
-		assert(invoke);
 	}
 };
 
@@ -76,7 +75,6 @@ TEST(All, Basic)
 
 	auto invoke = AwaitAll(k, task1, task2);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(i, 0);
 	ASSERT_EQ(j, 0);
 	ASSERT_EQ(k, 0);
@@ -84,7 +82,7 @@ TEST(All, Basic)
 	Completion c;
 	c.Start(invoke);
 
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_FALSE(c.error);
 	ASSERT_EQ(i, 1);
@@ -101,7 +99,6 @@ TEST(All, Cancel)
 
 	auto invoke = AwaitAll(k, task1, task2);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(i, 0);
 	ASSERT_EQ(j, 0);
 	ASSERT_EQ(k, 0);
@@ -117,7 +114,6 @@ TEST(All, FirstBlocks)
 
 	auto invoke = AwaitAll(k, task1, task2);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(i, 0);
 	ASSERT_EQ(j, 0);
 	ASSERT_EQ(k, 0);
@@ -125,7 +121,7 @@ TEST(All, FirstBlocks)
 	Completion c;
 	c.Start(invoke);
 
-	ASSERT_FALSE(invoke.done());
+	ASSERT_TRUE(invoke);
 	ASSERT_FALSE(c.done);
 	ASSERT_EQ(i, 1);
 	ASSERT_EQ(j, 1);
@@ -133,7 +129,7 @@ TEST(All, FirstBlocks)
 
 	pause.Resume();
 
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_FALSE(c.error);
 	ASSERT_EQ(i, 2);
@@ -151,7 +147,6 @@ TEST(All, SecondBlocks)
 
 	auto invoke = AwaitAll(k, task1, task2);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(i, 0);
 	ASSERT_EQ(j, 0);
 	ASSERT_EQ(k, 0);
@@ -159,7 +154,7 @@ TEST(All, SecondBlocks)
 	Completion c;
 	c.Start(invoke);
 
-	ASSERT_FALSE(invoke.done());
+	ASSERT_TRUE(invoke);
 	ASSERT_FALSE(c.done);
 	ASSERT_EQ(i, 1);
 	ASSERT_EQ(j, 1);
@@ -167,7 +162,7 @@ TEST(All, SecondBlocks)
 
 	pause.Resume();
 
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_FALSE(c.error);
 	ASSERT_EQ(i, 1);
@@ -186,7 +181,6 @@ TEST(All, CancelBlocking)
 
 	auto invoke = AwaitAll(k, task1, task2);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(i, 0);
 	ASSERT_EQ(j, 0);
 	ASSERT_EQ(k, 0);
@@ -194,7 +188,7 @@ TEST(All, CancelBlocking)
 	Completion c;
 	c.Start(invoke);
 
-	ASSERT_FALSE(invoke.done());
+	ASSERT_TRUE(invoke);
 	ASSERT_FALSE(c.done);
 	ASSERT_EQ(i, 1);
 	ASSERT_EQ(j, 1);
@@ -210,7 +204,6 @@ TEST(All, FirstThrows)
 
 	auto invoke = AwaitAll(k, task1, task2);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(i, 0);
 	ASSERT_EQ(j, 0);
 	ASSERT_EQ(k, 0);
@@ -218,7 +211,7 @@ TEST(All, FirstThrows)
 	Completion c;
 	c.Start(invoke);
 
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_TRUE(c.error);
 	ASSERT_EQ(i, 1);

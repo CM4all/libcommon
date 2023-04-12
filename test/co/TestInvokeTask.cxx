@@ -25,7 +25,6 @@ struct Completion {
 	void Start(Co::InvokeTask &invoke) noexcept {
 		assert(invoke);
 		invoke.Start(BIND_THIS_METHOD(Callback));
-		assert(invoke);
 	}
 };
 
@@ -91,13 +90,12 @@ TEST(InvokeTask, Basic)
 
 	auto invoke = IncInvokeTask(i);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(i, 0);
 
 	Completion c;
 	c.Start(invoke);
 
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_FALSE(c.error);
 	ASSERT_EQ(i, 1);
@@ -111,13 +109,12 @@ TEST(InvokeTask, Task)
 
 	auto invoke = MakeInvokeTask(invoke_i, task);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(invoke_i, 0);
 	ASSERT_EQ(task_i, 0);
 
 	Completion c;
 	c.Start(invoke);
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_FALSE(c.error);
 
@@ -133,13 +130,12 @@ TEST(InvokeTask, EagerTask)
 
 	auto invoke = MakeInvokeTask(invoke_i, task);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(invoke_i, 0);
 	ASSERT_EQ(task_i, 1);
 
 	Completion c;
 	c.Start(invoke);
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_FALSE(c.error);
 
@@ -155,13 +151,12 @@ TEST(InvokeTask, Throw)
 
 	auto invoke = MakeInvokeTask(invoke_i, task);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(invoke_i, 0);
 	ASSERT_EQ(task_i, 0);
 
 	Completion c;
 	c.Start(invoke);
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_TRUE(c.error);
 
@@ -178,13 +173,12 @@ TEST(InvokeTask, Pause)
 
 	auto invoke = MakeInvokeTask(invoke_i, task);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(invoke_i, 0);
 	ASSERT_EQ(task_i, 0);
 
 	Completion c;
 	c.Start(invoke);
-	ASSERT_FALSE(invoke.done());
+	ASSERT_TRUE(invoke);
 	ASSERT_FALSE(c.done);
 	ASSERT_FALSE(c.error);
 
@@ -193,7 +187,7 @@ TEST(InvokeTask, Pause)
 
 	pause.Resume();
 
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_FALSE(c.error);
 	ASSERT_EQ(invoke_i, 2);
@@ -209,13 +203,12 @@ TEST(InvokeTask, PauseEager)
 
 	auto invoke = MakeInvokeTask(invoke_i, task);
 	ASSERT_TRUE(invoke);
-	ASSERT_FALSE(invoke.done());
 	ASSERT_EQ(invoke_i, 0);
 	ASSERT_EQ(task_i, 1);
 
 	Completion c;
 	c.Start(invoke);
-	ASSERT_FALSE(invoke.done());
+	ASSERT_TRUE(invoke);
 	ASSERT_FALSE(c.done);
 	ASSERT_FALSE(c.error);
 
@@ -224,7 +217,7 @@ TEST(InvokeTask, PauseEager)
 
 	pause.Resume();
 
-	ASSERT_TRUE(invoke.done());
+	ASSERT_FALSE(invoke);
 	ASSERT_TRUE(c.done);
 	ASSERT_FALSE(c.error);
 	ASSERT_EQ(invoke_i, 2);

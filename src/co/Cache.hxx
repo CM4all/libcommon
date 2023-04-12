@@ -172,7 +172,7 @@ class Cache : Factory {
 			:cache(_cache), key(std::forward<K>(_key)) {}
 
 		bool IsDone() const noexcept {
-			return task.done();
+			return !task;
 		}
 
 		bool IsAbandoned() const noexcept {
@@ -192,7 +192,6 @@ class Cache : Factory {
 
 		Co::InvokeTask Run(Factory &factory) {
 			assert(task);
-			assert(!task.done());
 
 			const Key &c_key = key;
 			auto value = co_await factory(c_key);
@@ -216,8 +215,7 @@ class Cache : Factory {
 		}
 
 		void OnCompletion(std::exception_ptr error) noexcept {
-			assert(task);
-			assert(task.done());
+			assert(!task);
 
 			if (error)
 				for (auto &i : handlers)
