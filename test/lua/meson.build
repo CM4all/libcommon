@@ -2,6 +2,7 @@ test(
   'TestLua',
   executable(
     'TestLua',
+    'TestCoRunner.cxx',
     'TestCoAwaitable.cxx',
     include_directories: inc,
     dependencies: [
