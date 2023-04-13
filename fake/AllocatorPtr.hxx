@@ -50,10 +50,10 @@ public:
 	}
 
 	template<typename... Args>
-	char *Concat(Args... args) noexcept {
+	char *Concat(Args&&... args) noexcept {
 		const size_t length = (ConcatLength(args) + ...);
 		char *result = NewArray<char>(length + 1);
-		*ConcatCopyAll(result, args...) = 0;
+		*ConcatCopyAll(result, std::forward<Args>(args)...) = 0;
 		return result;
 	}
 
@@ -62,10 +62,10 @@ public:
 	 * std::string_view.
 	 */
 	template<typename... Args>
-	std::string_view ConcatView(Args... args) noexcept {
+	std::string_view ConcatView(Args&&... args) noexcept {
 		const size_t length = (ConcatLength(args) + ...);
 		char *result = NewArray<char>(length);
-		ConcatCopyAll(result, args...);
+		ConcatCopyAll(result, std::forward<Args>(args)...);
 		return {result, length};
 	}
 
@@ -140,7 +140,7 @@ private:
 	}
 
 	template<typename... Args>
-	static char *ConcatCopyAll(char *p, Args... args) noexcept {
+	static char *ConcatCopyAll(char *p, Args&&... args) noexcept {
 		((p = ConcatCopy(p, args)), ...);
 		return p;
 	}
