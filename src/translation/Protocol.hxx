@@ -63,7 +63,10 @@ enum class TranslationCommand : uint16_t {
 	SCHEME = 47,
 	REQUEST_HEADER_FORWARD = 48,
 	RESPONSE_HEADER_FORWARD = 49,
+
+	/** deprecated */
 	DEFLATED = 50,
+
 	GZIPPED = 51,
 	PAIR = 52,
 	UNTRUSTED = 53,

@@ -440,11 +440,6 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_RADDRESS
 	/**
-	 * @see #TranslationCommand::AUTO_DEFLATE
-	 */
-	bool auto_deflate;
-
-	/**
 	 * @see #TranslationCommand::AUTO_GZIP
 	 */
 	bool auto_gzip;

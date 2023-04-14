@@ -163,7 +163,6 @@ TranslateResponse::Clear() noexcept
 	regex_on_user_uri = false;
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
-	auto_deflate = false;
 	auto_gzip = false;
 	auto_brotli = false;
 	auto_gzipped = false;
@@ -418,7 +417,6 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	regex_on_user_uri = src.regex_on_user_uri;
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
-	auto_deflate = src.auto_deflate;
 	auto_gzip = src.auto_gzip;
 	auto_brotli = src.auto_brotli;
 	auto_gzipped = src.auto_gzipped;

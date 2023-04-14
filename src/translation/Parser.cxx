@@ -1222,21 +1222,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::DEFLATED:
-#if TRANSLATION_ENABLE_RADDRESS
-		if (!IsValidAbsolutePath(string_payload))
-			throw std::runtime_error("malformed DEFLATED packet");
-
-		if (file_address != nullptr) {
-			file_address->deflated = string_payload.data();
-			return;
-		} else if (nfs_address != nullptr) {
-			/* ignore for now */
-		} else
-			throw std::runtime_error("misplaced DEFLATED packet");
+		/* deprecated */
 		return;
-#else
-		break;
-#endif
 
 	case TranslationCommand::GZIPPED:
 #if TRANSLATION_ENABLE_RADDRESS
@@ -3027,18 +3014,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::AUTO_DEFLATE:
-#if TRANSLATION_ENABLE_RADDRESS
-		if (!payload.empty())
-			throw std::runtime_error("malformed AUTO_DEFLATE packet");
-
-		if (response.auto_deflate)
-			throw std::runtime_error("misplaced AUTO_DEFLATE packet");
-
-		response.auto_deflate = true;
+		/* deprecated */
 		return;
-#else
-		break;
-#endif
 
 	case TranslationCommand::EXPAND_HOME:
 #if TRANSLATION_ENABLE_EXPAND

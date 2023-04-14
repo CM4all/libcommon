@@ -1375,12 +1375,6 @@ public:
 		}
 
 		template<typename... Types>
-		auto Deflated(std::string_view path) noexcept {
-			response.StringPacket(TranslationCommand::DEFLATED, path);
-			return *this;
-		}
-
-		template<typename... Types>
 		auto Gzipped(std::string_view path) noexcept {
 			response.StringPacket(TranslationCommand::GZIPPED, path);
 			return *this;
