@@ -6,6 +6,8 @@
 
 #include <sys/resource.h>
 
+#include <cstddef>
+
 struct ResourceLimit : rlimit {
 	static constexpr rlim_t UNDEFINED = rlim_t(-2);
 
@@ -48,7 +50,7 @@ struct ResourceLimits {
 	bool IsEmpty() const noexcept;
 
 	[[gnu::pure]]
-	unsigned GetHash() const noexcept;
+	std::size_t GetHash() const noexcept;
 
 	char *MakeId(char *p) const noexcept;
 

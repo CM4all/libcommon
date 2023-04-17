@@ -66,7 +66,7 @@ ResourceLimits::IsEmpty() const noexcept
 }
 
 [[gnu::pure]]
-inline unsigned
+inline std::size_t
 ResourceLimits::GetHash() const noexcept
 {
 	return djb_hash(std::as_bytes(std::span{this, 1}));

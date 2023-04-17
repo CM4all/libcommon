@@ -13,9 +13,9 @@
 #include <span>
 
 [[gnu::pure]]
-uint32_t
+std::size_t
 djb_hash(std::span<const std::byte> src) noexcept;
 
 [[gnu::pure]]
-uint32_t
+std::size_t
 djb_hash_string(const char *p) noexcept;

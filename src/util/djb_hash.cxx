@@ -7,16 +7,16 @@
 #include <cassert>
 
 [[gnu::always_inline]]
-static constexpr uint_fast32_t
-djb_hash_update(uint_fast32_t hash, std::byte b) noexcept
+static constexpr std::size_t
+djb_hash_update(std::size_t hash, std::byte b) noexcept
 {
 	return (hash * 33) ^ static_cast<uint_fast8_t>(b);
 }
 
-uint32_t
+std::size_t
 djb_hash(std::span<const std::byte> src) noexcept
 {
-	uint_fast32_t hash = 5381;
+	std::size_t hash = 5381;
 
 	for (const auto i : src)
 		hash = djb_hash_update(hash, i);
@@ -24,12 +24,12 @@ djb_hash(std::span<const std::byte> src) noexcept
 	return hash;
 }
 
-uint32_t
+std::size_t
 djb_hash_string(const char *p) noexcept
 {
 	assert(p != nullptr);
 
-	uint_fast32_t hash = 5381;
+	std::size_t hash = 5381;
 
 	while (*p != 0)
 		hash = djb_hash_update(hash, static_cast<std::byte>(*p++));
