@@ -326,7 +326,7 @@ try {
 		throw FormatErrno("Failed to execute '%s'", path);
 	}
 } catch (...) {
-	WriteErrorPipe(error_pipe_w, std::current_exception());
+	WriteErrorPipe(error_pipe_w, {}, std::current_exception());
 	_exit(EXIT_FAILURE);
 }
 

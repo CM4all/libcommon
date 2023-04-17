@@ -4,15 +4,26 @@
 
 #include "ErrorPipe.hxx"
 #include "io/FileDescriptor.hxx"
+#include "io/Iovec.hxx"
 #include "util/Exception.hxx"
+#include "util/SpanCast.hxx"
 
+#include <array>
 #include <stdexcept>
 
 void
-WriteErrorPipe(FileDescriptor p, std::exception_ptr e) noexcept
+WriteErrorPipe(FileDescriptor p, std::string_view prefix,
+	       std::exception_ptr e) noexcept
 {
 	const auto msg = GetFullMessage(e);
-	p.Write(msg.data(), msg.size());
+
+	const std::array v{
+		MakeIovec(AsBytes(prefix)),
+		MakeIovec(AsBytes(msg)),
+	};
+
+	[[maybe_unused]]
+	auto nbytes = writev(p.Get(), v.data(), v.size());
 }
 
 void

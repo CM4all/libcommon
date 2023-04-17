@@ -5,6 +5,7 @@
 #pragma once
 
 #include <exception>
+#include <string_view>
 
 class FileDescriptor;
 
@@ -12,7 +13,8 @@ class FileDescriptor;
  * Write a C++ exception into the pipe.
  */
 void
-WriteErrorPipe(FileDescriptor p, std::exception_ptr e) noexcept;
+WriteErrorPipe(FileDescriptor p, std::string_view prefix,
+	       std::exception_ptr e) noexcept;
 
 /**
  * Read an error message from the pipe and if there is one, throw it
