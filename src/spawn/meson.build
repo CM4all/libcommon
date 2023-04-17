@@ -70,6 +70,7 @@ if get_variable('libcommon_enable_spawn_direct', false)
 
   spawn_sources += [
     'Direct.cxx',
+    'ErrorPipe.cxx',
     'SyscallFilter.cxx',
   ]
 

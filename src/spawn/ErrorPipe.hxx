@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright CM4all GmbH
+// author: Max Kellermann <mk@cm4all.com>
+
+#pragma once
+
+#include <exception>
+
+class FileDescriptor;
+
+/**
+ * Write a C++ exception into the pipe.
+ */
+void
+WriteErrorPipe(FileDescriptor p, std::exception_ptr e) noexcept;
+
+/**
+ * Read an error message from the pipe and if there is one, throw it
+ * as a C++ exception.
+ */
+void
+ReadErrorPipe(FileDescriptor p);

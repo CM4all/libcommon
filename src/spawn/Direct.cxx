@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Direct.hxx"
+#include "ErrorPipe.hxx"
 #include "Prepared.hxx"
 #include "CgroupOptions.hxx"
 #include "SeccompFilter.hxx"
@@ -325,8 +326,7 @@ try {
 		throw FormatErrno("Failed to execute '%s'", path);
 	}
 } catch (...) {
-	const auto msg = GetFullMessage(std::current_exception());
-	error_pipe_w.Write(msg.data(), msg.size());
+	WriteErrorPipe(error_pipe_w, std::current_exception());
 	_exit(EXIT_FAILURE);
 }
 
@@ -335,7 +335,7 @@ try {
  * as a C++ exception.
  */
 static void
-ReadErrorPipe(FileDescriptor error_pipe_r)
+ReadErrorPipeTimeout(FileDescriptor error_pipe_r)
 {
 	if (int p = error_pipe_r.WaitReadable(250);
 	    p <= 0 || (p & POLLIN) == 0)
@@ -346,12 +346,7 @@ ReadErrorPipe(FileDescriptor error_pipe_r)
 		// TODO find a better solution
 		return;
 
-	char buffer[1024];
-	ssize_t nbytes = error_pipe_r.Read(buffer, sizeof(buffer) - 1);
-	if (nbytes > 0) {
-		buffer[nbytes] = 0;
-		throw std::runtime_error(buffer);
-	}
+	ReadErrorPipeTimeout(error_pipe_r);
 }
 
 std::pair<UniqueFileDescriptor, pid_t>
@@ -543,7 +538,7 @@ try {
 		if (!WaitForPipe(userns_create_pipe_r)) {
 			/* read the error_pipe, it may have more
 			   details */
-			ReadErrorPipe(error_pipe_r);
+			ReadErrorPipeTimeout(error_pipe_r);
 			throw std::runtime_error("User namespace setup failed");
 		}
 	}
@@ -563,7 +558,7 @@ try {
 		WakeUpPipe(std::move(wait_pipe_w));
 	}
 
-	ReadErrorPipe(error_pipe_r);
+	ReadErrorPipeTimeout(error_pipe_r);
 
 	if (params.return_pidfd.IsDefined()) {
 		EasySendMessage(params.return_pidfd, pidfd);
