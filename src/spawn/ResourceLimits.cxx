@@ -4,12 +4,12 @@
 
 #include "ResourceLimits.hxx"
 #include "system/Error.hxx"
+#include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Sanitizer.hxx"
 
-#include <assert.h>
-#include <stdio.h>
+#include <cassert>
 
 /**
  * glibc has a "__rlimit_resource_t" typedef which maps to "int" in
@@ -80,8 +80,7 @@ ResourceLimits::MakeId(char *p) const noexcept
 
 	*p++ = ';';
 	*p++ = 'r';
-	p += sprintf(p, "%08x", GetHash());
-	return p;
+	return FormatIntBase32(p, GetHash());
 }
 
 /**

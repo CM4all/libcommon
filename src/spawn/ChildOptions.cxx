@@ -8,6 +8,7 @@
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -77,11 +78,18 @@ ChildOptions::MakeId(char *p) const noexcept
 	if (umask >= 0)
 		p += sprintf(p, ";u%o", umask);
 
-	if (chdir != nullptr)
-		p += sprintf(p, ";cd%08x", djb_hash_string(chdir));
+	if (chdir != nullptr) {
+		*p++ = ';';
+		*p++ = 'c';
+		*p++ = 'd';
+		p = FormatIntBase32(p, djb_hash_string(chdir));
+	}
 
-	if (stderr_path != nullptr)
-		p += sprintf(p, ";e%08x", djb_hash_string(stderr_path));
+	if (stderr_path != nullptr) {
+		*p++ = ';';
+		*p++ = 'e';
+		p = FormatIntBase32(p, djb_hash_string(stderr_path));
+	}
 
 	if (stderr_jailed)
 		*p++ = 'j';
