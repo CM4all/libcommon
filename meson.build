@@ -78,22 +78,18 @@ test_cxxflags = test_common_flags + [
   '-Winconsistent-missing-destructor-override',
 ]
 
-add_global_arguments(common_flags, language: 'c')
 add_global_arguments(common_flags, language: 'cpp')
-
 add_global_arguments(compiler.get_supported_arguments(test_global_cxxflags), language: 'cpp')
 add_project_arguments(compiler.get_supported_arguments(test_cxxflags), language: 'cpp')
 
 if get_option('fuzzer')
   fuzzer_flags = ['-fsanitize=fuzzer']
   add_global_arguments(fuzzer_flags, language: 'cpp')
-  add_global_arguments(fuzzer_flags, language: 'c')
   add_global_link_arguments(fuzzer_flags, language: 'cpp')
 endif
 
 if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'cpp')
-  add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'c')
 endif
 
 inc = include_directories('src', 'fake', '.')
