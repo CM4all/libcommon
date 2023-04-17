@@ -2,22 +2,21 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef BENG_PROXY_RESOURCE_LIMITS_HXX
-#define BENG_PROXY_RESOURCE_LIMITS_HXX
+#pragma once
 
 #include <sys/resource.h>
 
 struct ResourceLimit : rlimit {
 	static constexpr rlim_t UNDEFINED = rlim_t(-2);
 
-	constexpr ResourceLimit()
-	:rlimit{UNDEFINED, UNDEFINED} {}
+	constexpr ResourceLimit() noexcept
+		:rlimit{UNDEFINED, UNDEFINED} {}
 
-	constexpr bool IsEmpty() const {
+	constexpr bool IsEmpty() const noexcept {
 		return rlim_cur == UNDEFINED && rlim_max == UNDEFINED;
 	}
 
-	constexpr bool IsFull() const {
+	constexpr bool IsFull() const noexcept {
 		return rlim_cur != UNDEFINED && rlim_max != UNDEFINED;
 	}
 
@@ -31,7 +30,7 @@ struct ResourceLimit : rlimit {
 	 */
 	void Set(int pid, int resource) const;
 
-	void OverrideFrom(const ResourceLimit &src);
+	void OverrideFrom(const ResourceLimit &src) noexcept;
 
 	/**
 	 * Throws std::system_error on error.
@@ -45,18 +44,18 @@ struct ResourceLimit : rlimit {
 struct ResourceLimits {
 	ResourceLimit values[RLIM_NLIMITS];
 
-	bool IsEmpty() const;
+	[[gnu::pure]]
+	bool IsEmpty() const noexcept;
 
-	unsigned GetHash() const;
+	[[gnu::pure]]
+	unsigned GetHash() const noexcept;
 
-	char *MakeId(char *p) const;
+	char *MakeId(char *p) const noexcept;
 
 	/**
 	 * Throws std::system_error on error.
 	 */
 	void Apply(int pid) const;
 
-	bool Parse(const char *s);
+	bool Parse(const char *s) noexcept;
 };
-
-#endif

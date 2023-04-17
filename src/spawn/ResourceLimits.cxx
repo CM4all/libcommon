@@ -38,7 +38,7 @@ ResourceLimit::Set(int pid, int resource) const
 }
 
 inline void
-ResourceLimit::OverrideFrom(const ResourceLimit &src)
+ResourceLimit::OverrideFrom(const ResourceLimit &src) noexcept
 {
 	if (src.rlim_cur != UNDEFINED)
 		rlim_cur = src.rlim_cur;
@@ -56,7 +56,7 @@ ResourceLimit::CompleteFrom(int pid, int resource, const ResourceLimit &src)
 
 [[gnu::pure]]
 inline bool
-ResourceLimits::IsEmpty() const
+ResourceLimits::IsEmpty() const noexcept
 {
 	for (const auto &i : values)
 		if (!i.IsEmpty())
@@ -67,13 +67,13 @@ ResourceLimits::IsEmpty() const
 
 [[gnu::pure]]
 inline unsigned
-ResourceLimits::GetHash() const
+ResourceLimits::GetHash() const noexcept
 {
 	return djb_hash(std::as_bytes(std::span{this, 1}));
 }
 
 char *
-ResourceLimits::MakeId(char *p) const
+ResourceLimits::MakeId(char *p) const noexcept
 {
 	if (IsEmpty())
 		return p;
@@ -124,7 +124,7 @@ ResourceLimits::Apply(int pid) const
 }
 
 bool
-ResourceLimits::Parse(const char *s)
+ResourceLimits::Parse(const char *s) noexcept
 {
 	enum {
 		BOTH,
