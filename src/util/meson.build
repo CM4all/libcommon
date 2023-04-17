@@ -1,6 +1,7 @@
 util_sources = [
   'AllocatedString.cxx',
   'DisposableBuffer.cxx',
+  'djb_hash.cxx',
   'Exception.cxx',
   'LeakDetector.cxx',
   'MimeType.cxx',
@@ -11,12 +12,6 @@ util_sources = [
   'StringStrip.cxx',
   'UTF8.cxx',
 ]
-
-if get_variable('libcommon_enable_c', true)
-  util_sources += [
-    'djbhash.c',
-  ]
-endif
 
 util = static_library(
   'util',

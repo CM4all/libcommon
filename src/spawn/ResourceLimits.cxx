@@ -4,7 +4,7 @@
 
 #include "ResourceLimits.hxx"
 #include "system/Error.hxx"
-#include "util/djbhash.h"
+#include "util/djb_hash.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Sanitizer.hxx"
 
@@ -69,7 +69,7 @@ ResourceLimits::IsEmpty() const
 inline unsigned
 ResourceLimits::GetHash() const
 {
-	return djb_hash(this, sizeof(*this));
+	return djb_hash(std::as_bytes(std::span{this, 1}));
 }
 
 char *

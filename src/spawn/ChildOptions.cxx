@@ -8,7 +8,7 @@
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "util/djbhash.h"
+#include "util/djb_hash.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"

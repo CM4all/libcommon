@@ -6,7 +6,7 @@
 #include "Class.hxx"
 #include "GetHandler.hxx"
 #include "Item.hxx"
-#include "util/djbhash.h"
+#include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/StringAPI.hxx"
 

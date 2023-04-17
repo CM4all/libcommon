@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "MapStock.hxx"
-#include "util/djbhash.h"
+#include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
 
 inline size_t
