@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Launch.hxx"
+#include "ErrorPipe.hxx"
 #include "Config.hxx"
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
@@ -93,6 +94,7 @@ DropCapabilities()
 static int
 RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		UniqueSocketDescriptor socket,
+		FileDescriptor error_pipe_w,
 		FileDescriptor read_pipe,
 		const bool pid_namespace) noexcept
 {
@@ -120,7 +122,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	try {
 		config.spawner_uid_gid.Apply();
 	} catch (...) {
-		PrintException(std::current_exception());
+		WriteErrorPipe(error_pipe_w, {}, std::current_exception());
 		return EXIT_FAILURE;
 	}
 
@@ -148,11 +150,15 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 			Chown(cgroup_state, config.spawner_uid_gid.uid,
 			      config.spawner_uid_gid.gid);
 		} catch (...) {
-			fprintf(stderr, "Failed to create systemd scope: ");
-			PrintException(std::current_exception());
-
-			if (!config.systemd_scope_optional)
+			if (config.systemd_scope_optional) {
+				fprintf(stderr, "Failed to create systemd scope: ");
+				PrintException(std::current_exception());
+			} else {
+				WriteErrorPipe(error_pipe_w,
+					       "Failed to create systemd scope: ",
+					       std::current_exception());
 				return EXIT_FAILURE;
+			}
 		}
 	}
 #endif
@@ -161,8 +167,9 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		try {
 			cgroup_state.EnableAllControllers();
 		} catch (...) {
-			fprintf(stderr, "Failed to setup cgroup2: ");
-			PrintException(std::current_exception());
+			WriteErrorPipe(error_pipe_w,
+				       "Failed to setup cgroup2: ",
+				       std::current_exception());
 			return EXIT_FAILURE;
 		}
 	}
@@ -173,6 +180,8 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		fprintf(stderr, "Failed to drop capabilities: ");
 		PrintException(std::current_exception());
 	}
+
+	error_pipe_w.Close();
 
 	try {
 		RunSpawnServer(config, cgroup_state, hook, std::move(socket));
@@ -188,6 +197,14 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 		  UniqueSocketDescriptor socket,
 		  std::function<void()> post_clone)
 {
+	/**
+	 * If an error occurs during setup, the child process will
+	 * write an error message to this pipe.
+	 */
+	UniqueFileDescriptor error_pipe_r, error_pipe_w;
+	if (!UniqueFileDescriptor::CreatePipe(error_pipe_r, error_pipe_w))
+		throw MakeErrno("pipe() failed");
+
 	/**
 	 * A pipe which is used to copy the "real" PID to the spawner
 	 * (which doesn't know its own PID because it lives in a new PID
@@ -232,17 +249,24 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	if (pid == 0) {
 		post_clone();
 
+		error_pipe_r.Close();
 		write_pipe.Close();
 
 		_exit(RunSpawnServer2(config, hook, std::move(socket),
-				      read_pipe, pid_namespace));
+				      error_pipe_w,
+				      read_pipe,
+				      pid_namespace));
 	}
+
+	error_pipe_w.Close();
 
 	UniqueFileDescriptor pidfd{_pidfd};
 
 	/* send its "real" PID to the spawner */
 	read_pipe.Close();
 	write_pipe.Write(&pid, sizeof(pid));
+
+	ReadErrorPipe(error_pipe_r);
 
 	return pidfd;
 }
