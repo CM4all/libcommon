@@ -49,15 +49,11 @@
 	 GCC_VERSION < GCC_MAKE_VERSION(major, minor, 0))
 
 #if CLANG_OR_GCC_VERSION(3,0)
-#  define gcc_unused __attribute__((unused))
 #  define gcc_always_inline inline __attribute__((always_inline))
-#  define gcc_pure __attribute__((pure))
 #  define gcc_const __attribute__((const))
 #  define gcc_printf(string_index, first_to_check) __attribute__((format(printf, string_index, first_to_check)))
 #else
-#  define gcc_unused
 #  define gcc_always_inline
-#  define gcc_pure
 #  define gcc_const
 #  define gcc_printf(string_index, first_to_check)
 #endif
