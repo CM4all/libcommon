@@ -4,8 +4,9 @@
 
 #include "Date.hxx"
 #include "time/gmtime.hxx"
+#include "util/Compiler.h"
 #include "util/CharUtil.hxx"
-#include "util/DecimalFormat.h"
+#include "util/DecimalFormat.hxx"
 
 #include <cstdint>
 
