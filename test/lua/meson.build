@@ -1,4 +1,5 @@
 test_lua_sources = [
+  'TestClass.cxx',
   'TestCoRunner.cxx',
   'TestForEach.cxx',
 ]
