@@ -9,6 +9,10 @@
 
 #include <concepts>
 
+#ifdef LUA_LJDIR
+#include <exception>
+#endif
+
 struct lua_State;
 
 namespace Lua {
@@ -29,7 +33,24 @@ ForEach(lua_State *L, auto table_idx, auto f)
 			f(RelativeStackIndex{-2}, RelativeStackIndex{-1});
 		} catch (...) {
 			/* pop key and value */
-			lua_pop(L, 2);
+
+#ifdef LUA_LJDIR
+			if (std::current_exception()) {
+#endif
+				/* this is a C++ exception */
+				lua_pop(L, 2);
+#ifdef LUA_LJDIR
+			} else {
+				/* this is a lua_error() (only
+				   supported on LuaJit) and the error
+				   is on the top of the Lua stack; we
+				   need to use lua_remove() to remove
+				   key and value behind it */
+				lua_remove(L, -2);
+				lua_remove(L, -2);
+			}
+#endif
+
 			throw;
 		}
 
