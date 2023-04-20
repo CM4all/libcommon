@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Init.hxx"
+#include "Array.hxx"
 #include "Stock.hxx"
 #include "Result.hxx"
 #include "lua/Util.hxx"
@@ -42,6 +43,8 @@ InitPg(lua_State *L, EventLoop &event_loop)
 	SetTable(L, RelativeStackIndex{-1}, "new",
 		 Lua::MakeCClosure(NewPg,
 				   Lua::LightUserData(&event_loop)));
+	SetTable(L, RelativeStackIndex{-1}, "encode_array", EncodeArray);
+	SetTable(L, RelativeStackIndex{-1}, "decode_array", DecodeArray);
 	lua_setglobal(L, "pg");
 }
 

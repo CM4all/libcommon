@@ -1,6 +1,7 @@
 lua_pg = static_library(
   'lua_pg',
   'Init.cxx',
+  'Array.cxx',
   'Stock.cxx',
   'Result.cxx',
   include_directories: inc,
