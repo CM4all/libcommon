@@ -1,5 +1,6 @@
 test_lua_sources = [
   'TestCoRunner.cxx',
+  'TestForEach.cxx',
 ]
 
 if coroutines_dep.found()
