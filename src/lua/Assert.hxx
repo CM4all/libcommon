@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef LUA_ASSERT_HXX
-#define LUA_ASSERT_HXX
+#pragma once
 
 extern "C" {
 #include <lua.h>
@@ -10,6 +9,9 @@ extern "C" {
 
 #ifndef NDEBUG
 #include <cassert>
+#ifdef LUA_LJDIR
+#include <exception>
+#endif
 #endif
 
 namespace Lua {
@@ -28,7 +30,23 @@ public:
 		:L(_L), expected_top(lua_gettop(L) + offset) {}
 
 	~ScopeCheckStack() noexcept {
-		assert(lua_gettop(L) == expected_top);
+#ifdef LUA_LJDIR
+		if (std::uncaught_exceptions() == 0) {
+#endif
+			assert(lua_gettop(L) == expected_top);
+#ifdef LUA_LJDIR
+		} else {
+			/* if we are unwinding the stack due to
+			   lua_error() (LuaJit only), then the error
+			   was put on the Lua stack, but if this is a
+			   C++ exception, there is no error on the Lua
+			   stack; since std::current_exception() does
+			   not work here, we can't know the
+			   difference, so this assert() allows both */
+			assert(lua_gettop(L) == expected_top ||
+			       lua_gettop(L) == expected_top + 1);
+		}
+#endif
 	}
 
 #else
@@ -42,5 +60,3 @@ public:
 };
 
 }
-
-#endif
