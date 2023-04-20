@@ -346,7 +346,7 @@ ReadErrorPipeTimeout(FileDescriptor error_pipe_r)
 		// TODO find a better solution
 		return;
 
-	ReadErrorPipeTimeout(error_pipe_r);
+	ReadErrorPipe(error_pipe_r);
 }
 
 std::pair<UniqueFileDescriptor, pid_t>
