@@ -6,8 +6,7 @@
 
 #include "Assert.hxx"
 #include "StackIndex.hxx"
-
-#include <concepts>
+#include "util/Concepts.hxx"
 
 #ifdef LUA_LJDIR
 #include <exception>
@@ -21,7 +20,8 @@ namespace Lua {
  * Call the given lambda for each entry in the table.
  */
 inline void
-ForEach(lua_State *L, auto table_idx, auto f)
+ForEach(lua_State *L, auto table_idx,
+	Invocable<RelativeStackIndex, RelativeStackIndex> auto f)
 {
 	const ScopeCheckStack check_stack{L};
 
