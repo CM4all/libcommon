@@ -30,7 +30,7 @@ EncodeArray(const L &src) noexcept
 	std::string dest("{");
 
 	bool first = true;
-	for (const auto &i : src) {
+	for (const std::string_view i : src) {
 		if (first)
 			first = false;
 		else
