@@ -43,9 +43,11 @@ template<typename T>
 static inline void
 Push(lua_State *L, _Lambda<T> l)
 {
-	const ScopeCheckStack check_stack(L, 1);
+	ScopeCheckStack check_stack{L};
 
 	l();
+
+	++check_stack;
 }
 
 } // namespace Lua
