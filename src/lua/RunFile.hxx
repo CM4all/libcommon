@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef LUA_RUN_FILE_HXX
-#define LUA_RUN_FILE_HXX
+#pragma once
 
 struct lua_State;
 
@@ -17,5 +16,3 @@ void
 RunFile(lua_State *L, const char *path);
 
 }
-
-#endif
