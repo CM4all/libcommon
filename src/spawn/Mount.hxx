@@ -25,7 +25,7 @@ struct Mount : IntrusiveForwardListHook {
 	 * descriptor is owned by the caller.
 	 *
 	 * This is only supported by the following types: BIND,
-	 * BIND_FILE.
+	 * BIND_FILE, NAMED_TMPFS.
 	 */
 	FileDescriptor source_fd = FileDescriptor::Undefined();
 
@@ -44,6 +44,15 @@ struct Mount : IntrusiveForwardListHook {
 		 * Mount an empty tmpfs on #target.
 		 */
 		TMPFS,
+
+		/**
+		 * Mount the tmpfs with the gviven name (#source) on
+		 * #target.  If a tmpfs with that name does not exist,
+		 * an empty one is created and will remain for some
+		 * time even after the last child process using it
+		 * exits.
+		 */
+		NAMED_TMPFS,
 
 		/**
 		 * Write #source to the read-only file #target.  This
@@ -85,6 +94,14 @@ struct Mount : IntrusiveForwardListHook {
 		 type(Type::TMPFS),
 		 writable(_writable), exec(false) {}
 
+	struct NamedTmpfs {};
+
+	constexpr Mount(NamedTmpfs, const char *_name, const char *_target,
+			bool _writable) noexcept
+		:source(_name), target(_target),
+		 type(Type::NAMED_TMPFS),
+		 writable(_writable), exec(false) {}
+
 	struct WriteFile {};
 
 	constexpr Mount(WriteFile, const char *path,
@@ -119,6 +136,7 @@ private:
 	void ApplyBindMount(VfsBuilder &vfs_builder) const;
 	void ApplyBindMountFile(VfsBuilder &vfs_builder) const;
 	void ApplyTmpfs(VfsBuilder &vfs_builder) const;
+	void ApplyNamedTmpfs(VfsBuilder &vfs_builder) const;
 	void ApplyWriteFile(VfsBuilder &vfs_builder) const;
 
 public:

@@ -93,6 +93,21 @@ try {
 			mounts.emplace_front(Mount::Tmpfs{}, mount_tmpfs, true);
 			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
 								    mounts.front());
+		} else if (const char *mount_named_tmpfs = StringAfterPrefix(arg, "--mount-named-tmpfs=")) {
+			auto s = Split(std::string_view{mount_named_tmpfs}, '=');
+			if (s.first.empty() || s.second.empty())
+				throw "Malformed --mount-named-tmpfs parameter";
+
+			strings.emplace_front(s.first);
+			const char *name = strings.front().c_str();
+
+			strings.emplace_front(s.second);
+			const char *target = strings.front().c_str();
+
+			mounts.emplace_front(Mount::NamedTmpfs{},
+					     name, target, true);
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
 		} else if (const char *scope = StringAfterPrefix(arg, "--scope=")) {
 			scope_name = scope;
 		} else if (const char *cgroup = StringAfterPrefix(arg, "--cgroup=")) {
@@ -175,6 +190,7 @@ try {
 		" [--mount-pts] [--bind-mount-pts]"
 		" [--bind-mount=SOURCE=TARGET]"
 		" [--mount-tmpfs=TARGET]"
+		" [--mount-named-tmpfs=NAME=TARGET]"
 		" [--scope=NAME] [--cgroup=NAME] [--cgroup-session=ID] [--cgroup-set=NAME=VALUE]"
 		" [PROGRAM ARGS...]\n");
 	return EXIT_FAILURE;

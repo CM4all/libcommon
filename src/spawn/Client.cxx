@@ -222,6 +222,13 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			s.WriteBool(i.writable);
 			break;
 
+		case Mount::Type::NAMED_TMPFS:
+			s.Write(SpawnExecCommand::MOUNT_NAMED_TMPFS);
+			s.WriteString(i.source);
+			s.WriteString(i.target);
+			s.WriteBool(i.writable);
+			break;
+
 		case Mount::Type::WRITE_FILE:
 			s.WriteString(SpawnExecCommand::WRITE_FILE,
 				      i.target);
