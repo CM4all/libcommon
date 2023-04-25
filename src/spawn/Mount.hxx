@@ -18,8 +18,19 @@ struct Mount : IntrusiveForwardListHook {
 	const char *target;
 
 	enum class Type : uint8_t {
+		/**
+		 * Bind-mount the directory #source onto #target.
+		 */
 		BIND,
+
+		/**
+		 * Bind-mount the file #source onto #target.
+		 */
 		BIND_FILE,
+
+		/**
+		 * Mount an empty tmpfs on #target.
+		 */
 		TMPFS,
 
 		/**
