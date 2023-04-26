@@ -83,11 +83,6 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
 	for (unsigned i = 0; uid_gid.groups[i] != 0; ++i)
 		gids.emplace(uid_gid.groups[i]);
 
-	/* always map the "root" group or else file operations may fail
-	   with EOVERFLOW (and this method will only be called if we're
-	   root) */
-	gids.emplace(0);
-
 	SetupGidMap(pid, gids);
 	SetupUidMap(pid, uid_gid.uid, false);
 }
