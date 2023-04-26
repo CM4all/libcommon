@@ -8,6 +8,7 @@
 #include "CgroupOptions.hxx"
 #include "SeccompFilter.hxx"
 #include "SyscallFilter.hxx"
+#include "UserNamespace.hxx"
 #include "Init.hxx"
 #include "daemon/Client.hxx"
 #include "net/EasyMessage.hxx"
@@ -521,6 +522,7 @@ try {
 	if (userns_map_pipe_w.IsDefined()) {
 		/* set up the child's uid/gid mapping and wake it
 		   up */
+		DenySetGroups(pid);
 		params.ns.SetupUidGidMap(params.uid_gid, pid);
 
 		/* now the right process is ready to set up its mount
