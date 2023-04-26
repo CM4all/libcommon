@@ -164,6 +164,8 @@ try {
 		" [--pidns[=NAME]] [--netns[=NAME]]"
 		" [--root-tmpfs] [--root=PATH] [--mount-proc]"
 		" [--mount-pts] [--bind-mount-pts]"
+		" [--bind-mount=SOURCE=TARGET]"
+		" [--mount-tmpfs=TARGET]"
 		" [--scope=NAME] [--cgroup=NAME] [--cgroup-session=ID] [--cgroup-set=NAME=VALUE]"
 		"\n");
 	return EXIT_FAILURE;
