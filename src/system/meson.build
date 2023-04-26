@@ -12,12 +12,6 @@ system_sources = [
 system_dependencies = [
 ]
 
-if compiler.has_header('sys/random.h')
-  system_dependencies += declare_dependency(
-    compile_args: ['-DHAVE_SYS_RANDOM_H'],
-  )
-endif
-
 system = static_library(
   'system',
   system_sources,
