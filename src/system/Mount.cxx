@@ -2,8 +2,8 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#include "BindMount.hxx"
-#include "system/Error.hxx"
+#include "Mount.hxx"
+#include "Error.hxx"
 
 #include <sys/mount.h>
 #include <errno.h>

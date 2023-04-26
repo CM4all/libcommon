@@ -4,7 +4,7 @@
 
 #include "Mount.hxx"
 #include "VfsBuilder.hxx"
-#include "system/BindMount.hxx"
+#include "system/Mount.hxx"
 #include "system/Error.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"

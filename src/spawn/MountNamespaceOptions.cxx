@@ -8,7 +8,7 @@
 #include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/pivot_root.h"
-#include "system/BindMount.hxx"
+#include "system/Mount.hxx"
 #include "system/Error.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"
