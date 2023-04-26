@@ -44,8 +44,6 @@ try {
 
 	auto mount_tail = p.ns.mount.mounts.before_begin();
 
-	p.exec_path = "/bin/bash";
-	p.args.emplace_back("bash");
 	p.stdin_fd = FileDescriptor{dup(STDIN_FILENO)};
 	p.stdout_fd = FileDescriptor{dup(STDOUT_FILENO)};
 	p.stderr_fd = FileDescriptor{dup(STDERR_FILENO)};
@@ -121,6 +119,17 @@ try {
 			throw Usage();
 	}
 
+	if (args.empty()) {
+		p.exec_path = "/bin/bash";
+		p.args.emplace_back("bash");
+	} else {
+		p.exec_path = args.front();
+		p.args.emplace_back(args.shift());
+
+		while (!args.empty())
+			p.args.emplace_back(args.shift());
+	}
+
 	const CgroupState cgroup_state = scope_name != nullptr
 		? CreateSystemdScope(scope_name, scope_name,
 				     {},
@@ -167,7 +176,7 @@ try {
 		" [--bind-mount=SOURCE=TARGET]"
 		" [--mount-tmpfs=TARGET]"
 		" [--scope=NAME] [--cgroup=NAME] [--cgroup-session=ID] [--cgroup-set=NAME=VALUE]"
-		"\n");
+		" [PROGRAM ARGS...]\n");
 	return EXIT_FAILURE;
 } catch (...) {
 	PrintException(std::current_exception());
