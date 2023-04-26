@@ -9,7 +9,7 @@
 #include <errno.h>
 
 void
-BindMount(const char *source, const char *target, int flags)
+BindMount(const char *source, const char *target, unsigned long flags)
 {
 	if (mount(source, target, nullptr, MS_BIND, nullptr) < 0)
 		throw FormatErrno("bind_mount('%s', '%s') failed", source, target);
