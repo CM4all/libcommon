@@ -12,7 +12,7 @@
  * 9cc4651 and 66d2f33 for details.
  */
 void
-DenySetGroups();
+DenySetGroups(unsigned pid);
 
 /**
  * Set up a uid mapping for a user namespace.

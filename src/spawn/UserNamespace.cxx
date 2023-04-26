@@ -11,9 +11,17 @@
 #include <stdio.h>
 
 void
-DenySetGroups()
+DenySetGroups(unsigned pid)
 {
-	TryWriteExistingFile("/proc/self/setgroups", "deny");
+	char path_buffer[64];
+
+	const char *path = "/proc/self/setgroups";
+	if (pid > 0) {
+		sprintf(path_buffer, "/proc/%u/setgroups", pid);
+		path = path_buffer;
+	}
+
+	TryWriteExistingFile(path, "deny");
 }
 
 static void

@@ -113,7 +113,7 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 {
 	/* set up UID/GID mapping in the old /proc */
 	if (enable_user) {
-		DenySetGroups();
+		DenySetGroups(0);
 
 		if (uid_gid.gid != 0)
 			SetupGidMap(0, uid_gid.gid, false);
