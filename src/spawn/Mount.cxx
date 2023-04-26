@@ -4,6 +4,7 @@
 
 #include "Mount.hxx"
 #include "VfsBuilder.hxx"
+#include "lib/fmt/ToBuffer.hxx"
 #include "system/Mount.hxx"
 #include "system/Error.hxx"
 #include "system/Mount.hxx"
@@ -17,8 +18,6 @@
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
 #endif
-
-#include <cinttypes>
 
 #include <fcntl.h>
 #include <sys/mount.h>
@@ -134,11 +133,10 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 		flags |= MS_NOEXEC;
 
 	const char *options = "size=16M,nr_inodes=256,mode=711";
-	char options_buffer[64];
+	StringBuffer<64> options_buffer;
 	if (writable) {
-		snprintf(options_buffer, sizeof(options_buffer),
-			 "%s,uid=%" PRIuLEAST32 ",gid=%" PRIuLEAST32,
-			 options, vfs_builder.uid, vfs_builder.gid);
+		options_buffer = FmtBuffer<64>("{},uid={},gid={}",
+					       options, vfs_builder.uid, vfs_builder.gid);
 		options = options_buffer;
 	}
 

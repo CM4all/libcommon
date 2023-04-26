@@ -153,6 +153,7 @@ spawn = static_library(
   dependencies: [
     util_dep,
     cap_dep,
+    fmt_dep,
     libsystemd,
   ],
 )

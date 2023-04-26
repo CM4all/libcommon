@@ -7,6 +7,7 @@
 #include "VfsBuilder.hxx"
 #include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
+#include "lib/fmt/ToBuffer.hxx"
 #include "system/pivot_root.h"
 #include "system/Mount.hxx"
 #include "system/Error.hxx"
@@ -19,7 +20,6 @@
 
 #include <assert.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
@@ -168,9 +168,10 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	if (mount_tmp_tmpfs != nullptr) {
 		const char *options = "size=16M,nr_inodes=256,mode=1777";
-		char buffer[256];
+		StringBuffer<256> buffer;
 		if (*mount_tmp_tmpfs != 0) {
-			snprintf(buffer, sizeof(buffer), "%s,%s", options, mount_tmp_tmpfs);
+			buffer = FmtBuffer<256>("{},{}",
+						options, mount_tmp_tmpfs);
 			options = buffer;
 		}
 

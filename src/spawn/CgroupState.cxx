@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "CgroupState.hxx"
+#include "lib/fmt/ToBuffer.hxx"
 #include "system/Error.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
@@ -13,7 +14,6 @@
 #include "util/StringSplit.hxx"
 #include "util/StringStrip.hxx"
 
-#include <cstdio>
 #include <span>
 
 #include <fcntl.h>
@@ -126,11 +126,10 @@ struct ProcCgroup {
 static FILE *
 OpenProcCgroup(unsigned pid)
 {
-	if (pid > 0) {
-		char buffer[256];
-		sprintf(buffer, "/proc/%u/cgroup", pid);
-		return OpenOrThrow(buffer, "r");
-	} else
+	if (pid > 0)
+		return OpenOrThrow(FmtBuffer<64>("/proc/{}/cgroup", pid),
+				   "r");
+	else
 		return OpenOrThrow("/proc/self/cgroup", "r");
 
 }

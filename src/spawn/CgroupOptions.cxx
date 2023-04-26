@@ -12,8 +12,9 @@
 #include "io/WriteFile.hxx"
 #include "util/StringAPI.hxx"
 
+#include <fmt/format.h>
+
 #include <assert.h>
-#include <stdio.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/xattr.h>
@@ -119,9 +120,8 @@ CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
 	if (!state.IsEnabled())
 		throw std::runtime_error("Control groups are disabled");
 
-	char pid_buffer[32];
-	const std::string_view pid(pid_buffer,
-				   sprintf(pid_buffer, "%u", _pid));
+	const fmt::format_int pid_buffer{_pid};
+	const std::string_view pid{pid_buffer.data(), pid_buffer.size()};
 
 	/* TODO drop support for cgroup1 and hybrid, use only
 	   Create2() and CLONE_INTO_CGROUP */
