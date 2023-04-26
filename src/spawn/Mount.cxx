@@ -6,6 +6,7 @@
 #include "VfsBuilder.hxx"
 #include "system/Mount.hxx"
 #include "system/Error.hxx"
+#include "system/Mount.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/RuntimeError.hxx"
@@ -70,15 +71,6 @@ Mount::ExpandAll(AllocatorPtr alloc,
 }
 
 #endif
-
-static void
-MountOrThrow(const char *source, const char *target,
-	     const char *filesystemtype, unsigned long mountflags,
-	     const void *data)
-{
-	if (mount(source, target, filesystemtype, mountflags, data) < 0)
-		throw FormatErrno("mount('%s') failed", target);
-}
 
 inline void
 Mount::ApplyBindMount(VfsBuilder &vfs_builder) const

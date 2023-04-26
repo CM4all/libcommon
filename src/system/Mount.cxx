@@ -9,6 +9,15 @@
 #include <errno.h>
 
 void
+MountOrThrow(const char *source, const char *target,
+	     const char *filesystemtype, unsigned long mountflags,
+	     const void *data)
+{
+	if (mount(source, target, filesystemtype, mountflags, data) < 0)
+		throw FormatErrno("mount('%s') failed", target);
+}
+
+void
 BindMount(const char *source, const char *target, unsigned long flags)
 {
 	if (mount(source, target, nullptr, MS_BIND, nullptr) < 0)

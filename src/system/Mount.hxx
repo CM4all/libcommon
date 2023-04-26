@@ -4,6 +4,11 @@
 
 #pragma once
 
+void
+MountOrThrow(const char *source, const char *target,
+	     const char *filesystemtype, unsigned long mountflags,
+	     const void *data);
+
 /**
  * Throws std::system_error on error.
  */

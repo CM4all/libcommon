@@ -75,15 +75,6 @@ ChdirOrThrow(const char *path)
 		throw FormatErrno("chdir('%s') failed", path);
 }
 
-static void
-MountOrThrow(const char *source, const char *target,
-	     const char *filesystemtype, unsigned long mountflags,
-	     const void *data)
-{
-	if (mount(source, target, filesystemtype, mountflags, data) < 0)
-		throw FormatErrno("mount('%s') failed", target);
-}
-
 void
 MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 {
