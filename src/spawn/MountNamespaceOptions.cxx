@@ -147,8 +147,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		// TODO no bind-mount, just create /dev/null etc.
 		const char *source = "dev";
 		const char *target = "/dev";
-		if (mount(source, target, nullptr, MS_BIND|MS_REC, nullptr) < 0)
-			throw FormatErrno("bind_mount('%s', '%s') failed", source, target);
+		MountOrThrow(source, target, nullptr, MS_BIND|MS_REC, nullptr);
 
 		if (new_root != nullptr)
 			/* back to the new root */
@@ -211,10 +210,9 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 		/* make the root tmpfs read-only */
 
-		if (mount(nullptr, "/", nullptr,
-			  MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
-			  nullptr) < 0)
-			throw MakeErrno("Failed to remount read-only");
+		MountOrThrow(nullptr, "/", nullptr,
+			     MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
+			     nullptr);
 	}
 
 	vfs_builder.Finish();
