@@ -190,7 +190,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 		if (bind_mount_pts) {
 			vfs_builder.Add("/dev/pts");
-			BindMount("dev/pts", "/dev/pts", MS_NOSUID|MS_NOEXEC);
+			MountOrThrow("dev/pts", "/dev/pts", nullptr, MS_BIND, nullptr);
 		}
 
 		Mount::ApplyAll(mounts, vfs_builder);
