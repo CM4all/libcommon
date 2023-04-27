@@ -11,6 +11,7 @@
 #include "lib/cap/State.hxx"
 #include "system/clone3.h"
 #include "system/Error.hxx"
+#include "system/Mount.hxx"
 #include "system/ProcessName.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Open.hxx"
@@ -23,7 +24,6 @@
 #include <string.h>
 #include <sys/signal.h>
 #include <sys/socket.h> // for AF_LOCAL
-#include <sys/mount.h>
 
 #ifdef HAVE_LIBSYSTEMD
 
