@@ -13,4 +13,10 @@ MountOrThrow(const char *source, const char *target,
  * Throws std::system_error on error.
  */
 void
+BindMount(const char *source, const char *target);
+
+/**
+ * Throws std::system_error on error.
+ */
+void
 BindMount(const char *source, const char *target, unsigned long flags);

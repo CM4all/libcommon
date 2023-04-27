@@ -18,10 +18,16 @@ MountOrThrow(const char *source, const char *target,
 }
 
 void
-BindMount(const char *source, const char *target, unsigned long flags)
+BindMount(const char *source, const char *target)
 {
 	if (mount(source, target, nullptr, MS_BIND, nullptr) < 0)
 		throw FormatErrno("bind_mount('%s', '%s') failed", source, target);
+}
+
+void
+BindMount(const char *source, const char *target, unsigned long flags)
+{
+	BindMount(source, target);
 
 	/* wish we could just pass additional flags to the first mount
 	   call, but unfortunately that doesn't work, the kernel ignores
