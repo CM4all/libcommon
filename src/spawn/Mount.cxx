@@ -82,13 +82,15 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 
 	vfs_builder.Add(target);
 
-	int flags = MS_NOSUID|MS_NODEV;
+	uint_least64_t flags = MS_NOSUID|MS_NODEV;
 	if (!writable)
 		flags |= MS_RDONLY;
 	if (!exec)
 		flags |= MS_NOEXEC;
 
-	BindMount(source, target, flags);
+	BindMount(source, target);
+	MountSetAttr(FileDescriptor::Undefined(), target,
+		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, flags, 0);
 }
 
 inline void
@@ -119,8 +121,10 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 			throw FormatErrno("Failed to create %s", target);
 	}
 
-	constexpr int flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
-	BindMount(source, target, flags);
+	constexpr uint_least64_t flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
+	BindMount(source, target);
+	MountSetAttr(FileDescriptor::Undefined(), target,
+		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, flags, 0);
 }
 
 inline void
@@ -146,7 +150,7 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	vfs_builder.MakeWritable();
 
 	if (!writable)
-		vfs_builder.ScheduleRemount(flags | MS_RDONLY);
+		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
 }
 
 [[gnu::pure]]
@@ -219,8 +223,10 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
 		char buffer[64];
 		const char *tmp_path = WriteToTempFile(buffer, contents);
 
-		constexpr int flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
-		BindMount(tmp_path, target, flags);
+		constexpr uint_least64_t flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
+		BindMount(tmp_path, target);
+		MountSetAttr(FileDescriptor::Undefined(), target,
+			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, flags, 0);
 	}
 }
 

@@ -6,6 +6,7 @@
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
+#include "system/Mount.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/RuntimeError.hxx"
 #include "util/StringCompare.hxx"
@@ -21,7 +22,7 @@ struct VfsBuilder::Item {
 
 	UniqueFileDescriptor fd;
 
-	int remount_flags = 0;
+	uint_least64_t attr_set = 0, attr_clr = 0;
 
 	template<typename P>
 	explicit Item(P &&_path) noexcept
@@ -144,14 +145,19 @@ VfsBuilder::MakeWritable()
 }
 
 void
-VfsBuilder::ScheduleRemount(int flags) noexcept
+VfsBuilder::ScheduleRemount(uint_least64_t attr_set,
+			    uint_least64_t attr_clr) noexcept
 {
 	assert(!items.empty());
+	assert(attr_set != 0 || attr_clr != 0);
 
 	auto &item = items.back();
-	assert(item.remount_flags == 0);
+	assert(item.fd.IsDefined());
+	assert(item.attr_set == 0);
+	assert(item.attr_clr == 0);
 
-	item.remount_flags = MS_REMOUNT|flags;
+	item.attr_set = attr_set;
+	item.attr_clr = attr_clr;
 }
 
 bool
@@ -180,10 +186,9 @@ void
 VfsBuilder::Finish()
 {
 	for (const auto &i : items) {
-		if (i.remount_flags != 0 &&
-		    mount(nullptr, i.path.c_str(), nullptr, i.remount_flags,
-			  nullptr) < 0)
-			throw FormatErrno("Failed to remount %s",
-					  i.path.c_str());
+		if (i.attr_set != 0 || i.attr_clr != 0)
+			MountSetAttr(i.fd, "",
+				     AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+				     i.attr_set, i.attr_clr);
 	}
 }

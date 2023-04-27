@@ -41,7 +41,8 @@ public:
 	/**
 	 * Schedule a remount of the most recently added mount point.
 	 */
-	void ScheduleRemount(int flags) noexcept;
+	void ScheduleRemount(uint_least64_t attr_set,
+			     uint_least64_t attr_clr) noexcept;
 
 	/**
 	 * Make sure the specified directory exists inside a writable

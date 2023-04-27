@@ -11,6 +11,7 @@
 #include "system/pivot_root.h"
 #include "system/Mount.hxx"
 #include "system/Error.hxx"
+#include "io/FileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"
 
@@ -82,7 +83,9 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		return;
 
 	/* convert all "shared" mounts to "private" mounts */
-	mount(nullptr, "/", nullptr, MS_PRIVATE|MS_REC, nullptr);
+	MountSetAttr(FileDescriptor::Undefined(), "/",
+		     AT_RECURSIVE|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+		     0, 0, MS_PRIVATE);
 
 	const char *const put_old = "/mnt";
 
@@ -97,7 +100,14 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		   process to pivot_root to it */
 
 		new_root = pivot_root;
-		BindMount(new_root, new_root, MS_NOSUID|MS_RDONLY);
+		BindMount(new_root, new_root);
+
+		/* make it read-only and nosuid, but allow executables
+		   and device nodes */
+		MountSetAttr(FileDescriptor::Undefined(), new_root,
+			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+			     MS_NOSUID|MS_RDONLY,
+			     MS_NOEXEC|MS_NODEV);
 
 		/* release a reference to the old root */
 		ChdirOrThrow(new_root);
@@ -111,6 +121,8 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		ChdirOrThrow(new_root);
 
 		vfs_builder.AddWritableRoot(new_root);
+		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
+
 		vfs_builder.Add(put_old);
 	}
 
@@ -207,12 +219,6 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	if (mount_root_tmpfs) {
 		rmdir(put_old);
-
-		/* make the root tmpfs read-only */
-
-		MountOrThrow(nullptr, "/", nullptr,
-			     MS_REMOUNT|MS_BIND|MS_NODEV|MS_NOEXEC|MS_NOSUID|MS_RDONLY,
-			     nullptr);
 	}
 
 	vfs_builder.Finish();

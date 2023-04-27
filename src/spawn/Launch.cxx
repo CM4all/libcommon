@@ -114,7 +114,9 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		   existing /proc a "slave" mount (to avoid propagating the
 		   new /proc into the parent namespace), and mount the new
 		   /proc */
-		mount(nullptr, "/", nullptr, MS_SLAVE|MS_REC, nullptr);
+		MountSetAttr(FileDescriptor::Undefined(), "/",
+			     AT_RECURSIVE|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+			     0, 0, MS_SLAVE);
 		umount2("/proc", MNT_DETACH);
 		mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV, nullptr);
 	}
