@@ -91,43 +91,6 @@ CgroupOptions::Create2(const CgroupState &state) const
 		return fd;
 }
 
-static UniqueFileDescriptor
-MoveToNewCgroup(const FileDescriptor group_fd,
-		const char *sub_group, const char *session_group,
-		std::string_view pid)
-{
-	auto fd = MakeDirectory(group_fd, sub_group);
-
-	if (session_group != nullptr) {
-		auto session_fd = MakeDirectory(fd, session_group);
-		WriteFile(session_fd, "cgroup.procs", pid);
-	} else
-		WriteFile(fd, "cgroup.procs", pid);
-
-	return fd;
-}
-
-void
-CgroupOptions::Apply(const CgroupState &state, unsigned _pid) const
-{
-	if (name == nullptr)
-		return;
-
-	if (!state.IsEnabled())
-		throw std::runtime_error("Control groups are disabled");
-
-	const fmt::format_int pid_buffer{_pid};
-	const std::string_view pid{pid_buffer.data(), pid_buffer.size()};
-
-	/* TODO drop support for cgroup1 and hybrid, use only
-	   Create2() and CLONE_INTO_CGROUP */
-
-	auto fd = MoveToNewCgroup(state.group_fd, name, session, pid);
-
-	for (const auto &s : set)
-		WriteCgroupFile(fd, s.name, s.value);
-}
-
 char *
 CgroupOptions::MakeId(char *p) const noexcept
 {
