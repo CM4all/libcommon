@@ -26,10 +26,6 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 
-#ifndef __linux__
-#error This library requires Linux
-#endif
-
 MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 					     const MountNamespaceOptions &src) noexcept
 	:mount_root_tmpfs(src.mount_root_tmpfs),

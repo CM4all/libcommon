@@ -19,10 +19,6 @@
 #include <sys/stat.h>
 #include <sys/xattr.h>
 
-#ifndef __linux__
-#error This library requires Linux
-#endif
-
 CgroupOptions::CgroupOptions(AllocatorPtr alloc,
 			     const CgroupOptions &src) noexcept
 	:name(alloc.CheckDup(src.name)),

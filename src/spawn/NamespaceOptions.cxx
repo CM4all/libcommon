@@ -17,10 +17,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#ifndef __linux__
-#error This library requires Linux
-#endif
-
 NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 				   const NamespaceOptions &src)
 	:enable_user(src.enable_user),
