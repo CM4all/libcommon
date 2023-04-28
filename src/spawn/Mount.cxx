@@ -153,7 +153,7 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 
 	MoveMount(FSMount(fs, flags), "",
-		  FileDescriptor{AT_FDCWD}, target,
+		  FileDescriptor::Undefined(), target,
 		  MOVE_MOUNT_F_EMPTY_PATH);
 
 	vfs_builder.MakeWritable();
