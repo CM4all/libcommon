@@ -19,6 +19,8 @@
 #include "pexpand.hxx"
 #endif
 
+#include <fmt/format.h>
+
 #include <fcntl.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
@@ -136,16 +138,23 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	if (!exec)
 		flags |= MS_NOEXEC;
 
-	const char *options = "size=16M,nr_inodes=256,mode=711";
-	StringBuffer<64> options_buffer;
+	auto fs = FSOpen("tmpfs");
+	FSConfig(fs, FSCONFIG_SET_STRING, "size", "16M");
+	FSConfig(fs, FSCONFIG_SET_STRING, "nr_inodes", "256");
+	FSConfig(fs, FSCONFIG_SET_STRING, "mode", "711");
+
 	if (writable) {
-		options_buffer = FmtBuffer<64>("{},uid={},gid={}",
-					       options, vfs_builder.uid, vfs_builder.gid);
-		options = options_buffer;
+		FSConfig(fs, FSCONFIG_SET_STRING, "uid",
+			 fmt::format_int(vfs_builder.uid).c_str());
+		FSConfig(fs, FSCONFIG_SET_STRING, "gid",
+			 fmt::format_int(vfs_builder.gid).c_str());
 	}
 
-	MountOrThrow("none", target, "tmpfs", flags,
-		     options);
+	FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
+
+	MoveMount(FSMount(fs, flags), "",
+		  FileDescriptor{AT_FDCWD}, target,
+		  MOVE_MOUNT_F_EMPTY_PATH);
 
 	vfs_builder.MakeWritable();
 
