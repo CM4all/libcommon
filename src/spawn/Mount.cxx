@@ -77,7 +77,8 @@ inline void
 Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 {
 	if (struct stat st;
-	    optional && lstat(source, &st) < 0 && errno == ENOENT)
+	    optional && !source_fd.IsDefined() &&
+	    lstat(source, &st) < 0 && errno == ENOENT)
 		/* the source directory doesn't exist, but this is
 		   optional, so just ignore it */
 		return;
@@ -90,7 +91,13 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 	if (!exec)
 		flags |= MS_NOEXEC;
 
-	BindMount(source, target);
+	if (source_fd.IsDefined())
+		MoveMount(source_fd, "",
+			  FileDescriptor::Undefined(), target,
+			  MOVE_MOUNT_F_EMPTY_PATH);
+	else
+		BindMount(source, target);
+
 	MountSetAttr(FileDescriptor::Undefined(), target,
 		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, flags, 0);
 }
@@ -99,7 +106,8 @@ inline void
 Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 {
 	if (struct stat st;
-	    optional && lstat(source, &st) < 0 && errno == ENOENT)
+	    optional && !source_fd.IsDefined() &&
+	    lstat(source, &st) < 0 && errno == ENOENT)
 		/* the source file doesn't exist, but this is
 		   optional, so just ignore it */
 		return;
@@ -124,7 +132,14 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 	}
 
 	constexpr uint_least64_t flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
-	BindMount(source, target);
+
+	if (source_fd.IsDefined())
+		MoveMount(source_fd, "",
+			  FileDescriptor::Undefined(), target,
+			  MOVE_MOUNT_F_EMPTY_PATH);
+	else
+		BindMount(source, target);
+
 	MountSetAttr(FileDescriptor::Undefined(), target,
 		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, flags, 0);
 }

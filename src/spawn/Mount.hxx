@@ -5,6 +5,7 @@
 #pragma once
 
 #include "translation/Features.hxx"
+#include "io/FileDescriptor.hxx"
 #include "util/IntrusiveForwardList.hxx"
 
 #include <cstdint>
@@ -16,6 +17,17 @@ class VfsBuilder;
 struct Mount : IntrusiveForwardListHook {
 	const char *source;
 	const char *target;
+
+	/**
+	 * If this is defined, then it is used instead of #source.
+	 * This is useful for instances inside #PreparedChildProcess
+	 * where the caller may want to prepare mounting.  The file
+	 * descriptor is owned by the caller.
+	 *
+	 * This is only supported by the following types: BIND,
+	 * BIND_FILE.
+	 */
+	FileDescriptor source_fd = FileDescriptor::Undefined();
 
 	enum class Type : uint_least8_t {
 		/**
