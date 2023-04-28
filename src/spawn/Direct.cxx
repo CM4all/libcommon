@@ -117,8 +117,7 @@ Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_map_pipe_r,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
-     UniqueFileDescriptor &&error_pipe_w,
-     const CgroupState &cgroup_state) noexcept
+     UniqueFileDescriptor &&error_pipe_w) noexcept
 try {
 	assert(error_pipe_w.IsDefined());
 
@@ -150,19 +149,6 @@ try {
 			stderr_fd = FileDescriptor{journal_fd};
 	}
 #endif
-
-	if (p.cgroup != nullptr)
-		p.cgroup->Apply(cgroup_state, 0);
-
-	if (p.ns.enable_cgroup &&
-	    p.cgroup != nullptr && p.cgroup->IsDefined()) {
-		/* if the process was just moved to another cgroup, we need to
-		   unshare the cgroup namespace to hide our new cgroup
-		   membership */
-
-		if (unshare(CLONE_NEWCGROUP) < 0)
-			throw MakeErrno("Failed to unshare cgroup namespace");
-	}
 
 	if (userns_map_pipe_r.IsDefined() && !WaitForPipe(userns_map_pipe_r))
 		_exit(EXIT_FAILURE);
@@ -462,39 +448,26 @@ try {
 	ca.exit_signal = SIGCHLD;
 
 	/* if a cgroup name is specified, it is used as the name for
-	   the "init" process; we need to extract it now, because the
-	   CLONE_INTO_CGROUP code below will clear the CgroupOptions
-	   pointer */
+	   the "init" process */
 	const char *const name = params.cgroup != nullptr
 		? params.cgroup->name
 		: nullptr;
 
-#ifdef CLONE_INTO_CGROUP
 	UniqueFileDescriptor cgroup_fd;
 	if (params.cgroup != nullptr) {
 		cgroup_fd = params.cgroup->Create2(cgroup_state);
 		if (cgroup_fd.IsDefined()) {
 			ca.flags |= CLONE_INTO_CGROUP;
 			ca.cgroup = cgroup_fd.Get();
-			params.cgroup = nullptr;
 
 			if (params.return_cgroup.IsDefined())
 				EasySendMessage(params.return_cgroup,
 						cgroup_fd);
 		}
 	}
-#endif
 
 	if (params.return_cgroup.IsDefined())
 		params.return_cgroup.Close();
-
-	if (params.cgroup != nullptr && params.cgroup->IsDefined())
-		/* postpone creating the new cgroup namespace until
-		   after this process has been moved to the new
-		   cgroup, or else it won't have the required
-		   permissions to do so, because the destination
-		   cgroup won't be visible from his namespace */
-		ca.flags &= ~CLONE_NEWCGROUP;
 
 	long pid = clone3(&ca, sizeof(ca));
 	if (pid < 0)
@@ -511,8 +484,7 @@ try {
 		     std::move(userns_map_pipe_r),
 		     std::move(userns_create_pipe_w),
 		     std::move(wait_pipe_r),
-		     std::move(error_pipe_w),
-		     cgroup_state);
+		     std::move(error_pipe_w));
 	}
 
 	error_pipe_w.Close();
