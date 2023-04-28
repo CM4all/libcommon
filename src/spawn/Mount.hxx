@@ -17,7 +17,7 @@ struct Mount : IntrusiveForwardListHook {
 	const char *source;
 	const char *target;
 
-	enum class Type : uint8_t {
+	enum class Type : uint_least8_t {
 		/**
 		 * Bind-mount the directory #source onto #target.
 		 */
