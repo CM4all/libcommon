@@ -15,22 +15,27 @@
 #include "CgroupState.hxx"
 #include "Direct.hxx"
 #include "Registry.hxx"
+#include "TmpfsManager.hxx"
 #include "ZombieReaper.hxx"
 #include "ExitListener.hxx"
 #include "PidfdEvent.hxx"
 #include "lib/cap/Glue.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/Loop.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/ReceiveMessage.hxx"
+#include "io/MakeDirectory.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
+#include "util/SharedLease.hxx"
 
 #include <forward_list>
+#include <optional>
 #include <memory>
 
 #include <unistd.h>
@@ -81,6 +86,8 @@ class SpawnServerChild final : public ExitListener,
 {
 	SpawnServerConnection &connection;
 
+	const std::forward_list<SharedLease> leases;
+
 	const unsigned id;
 
 	std::unique_ptr<PidfdEvent> pidfd;
@@ -88,9 +95,12 @@ class SpawnServerChild final : public ExitListener,
 public:
 	explicit SpawnServerChild(EventLoop &event_loop,
 				  SpawnServerConnection &_connection,
+				  std::forward_list<SharedLease> &&_leases,
 				  unsigned _id, UniqueFileDescriptor _pidfd,
 				  const char *_name) noexcept
-		:connection(_connection), id(_id),
+		:connection(_connection),
+		 leases(std::move(_leases)),
+		 id(_id),
 		 pidfd(std::make_unique<PidfdEvent>(event_loop,
 						    std::move(_pidfd),
 						    _name,
@@ -202,6 +212,13 @@ SpawnServerConnection::OnChildProcessExit(unsigned id, int status,
 	SendExit(id, status);
 }
 
+static UniqueFileDescriptor
+MakeTmpfsMountRoot()
+{
+	// TODO hard-coded path
+	return MakeDirectory(FileDescriptor::Undefined(), "/tmp/tmpfs", 0100);
+}
+
 class SpawnServerProcess {
 	const SpawnConfig config;
 	const CgroupState &cgroup_state;
@@ -210,6 +227,10 @@ class SpawnServerProcess {
 	const LLogger logger;
 
 	EventLoop loop;
+
+	CoarseTimerEvent expire_timer{loop, BIND_THIS_METHOD(OnExpireTimer)};
+
+	std::optional<TmpfsManager> tmpfs_manager;
 
 	ChildProcessRegistry child_process_registry;
 
@@ -227,10 +248,17 @@ class SpawnServerProcess {
 public:
 	SpawnServerProcess(const SpawnConfig &_config,
 			   const CgroupState &_cgroup_state,
+			   bool has_mount_namespace,
 			   SpawnHook *_hook)
 		:config(_config), cgroup_state(_cgroup_state), hook(_hook),
 		 logger("spawn")
 	{
+		if (has_mount_namespace) {
+			tmpfs_manager.emplace(MakeTmpfsMountRoot());
+
+			ScheduleExpireTimer();
+		}
+
 #ifdef HAVE_LIBSYSTEMD
 		if (config.systemd_scope_properties.memory_max > 0 &&
 		    cgroup_state.IsEnabled())
@@ -246,6 +274,10 @@ public:
 
 	const CgroupState &GetCgroupState() const noexcept {
 		return cgroup_state;
+	}
+
+	auto &GetTmpfsManager() noexcept {
+		return tmpfs_manager;
 	}
 
 	bool IsSysAdmin() const noexcept {
@@ -283,6 +315,17 @@ public:
 	}
 
 private:
+	void ScheduleExpireTimer() noexcept {
+		expire_timer.Schedule(std::chrono::minutes{2});
+	}
+
+	void OnExpireTimer() noexcept {
+		assert(tmpfs_manager);
+		tmpfs_manager->Expire();
+
+		ScheduleExpireTimer();
+	}
+
 	void Quit() noexcept {
 		assert(connections.empty());
 
@@ -291,6 +334,7 @@ private:
 #endif
 
 		zombie_reaper.Disable();
+		expire_timer.Cancel();
 	}
 
 #ifdef HAVE_LIBSYSTEMD
@@ -357,6 +401,26 @@ SpawnServerConnection::SendExit(unsigned id, int status) noexcept
 	exit_queue.push_front({id, status});
 }
 
+/**
+ * Resolve all NAMED_TMPFS using the TmpfsManager.
+ */
+static void
+PrepareNamedTmpfs(TmpfsManager &tmpfs_manager,
+		  MountNamespaceOptions &options,
+		  std::forward_list<SharedLease> &leases,
+		  std::forward_list<UniqueFileDescriptor> &fds)
+{
+	for (auto &i : options.mounts) {
+		if (i.type == Mount::Type::NAMED_TMPFS &&
+		    !i.source_fd.IsDefined()) {
+			auto tmpfs = tmpfs_manager.MakeTmpfs(i.source, i.exec);
+			fds.emplace_front(std::move(tmpfs.first));
+			i.source_fd = fds.front();
+			leases.emplace_front(std::move(tmpfs.second));
+		}
+	}
+}
+
 inline void
 SpawnServerConnection::SpawnChild(unsigned id, const char *name,
 				  PreparedChildProcess &&p) noexcept
@@ -384,9 +448,16 @@ SpawnServerConnection::SpawnChild(unsigned id, const char *name,
 		p.uid_gid = config.default_uid_gid;
 	}
 
+	std::forward_list<SharedLease> leases;
+
 	UniqueFileDescriptor pid;
 
 	try {
+		std::forward_list<UniqueFileDescriptor> fds;
+		if (auto &tmpfs_manager = process.GetTmpfsManager())
+			PrepareNamedTmpfs(*tmpfs_manager,
+					  p.ns.mount, leases, fds);
+
 		pid = SpawnChildProcess(std::move(p),
 					process.GetCgroupState(),
 					process.IsSysAdmin()).first;
@@ -397,7 +468,9 @@ SpawnServerConnection::SpawnChild(unsigned id, const char *name,
 		return;
 	}
 
-	auto *child = new SpawnServerChild(GetEventLoop(), *this, id,
+	auto *child = new SpawnServerChild(GetEventLoop(), *this,
+					   std::move(leases),
+					   id,
 					   std::move(pid), name);
 	children.insert(*child);
 }
@@ -871,6 +944,7 @@ AnnounceCgroup(SocketDescriptor s) noexcept
 
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
+	       bool has_mount_namespace,
 	       SpawnHook *hook,
 	       UniqueSocketDescriptor socket)
 {
@@ -881,7 +955,7 @@ RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 		AnnounceCgroup(socket);
 	}
 
-	SpawnServerProcess process(config, cgroup_state, hook);
+	SpawnServerProcess process(config, cgroup_state, has_mount_namespace, hook);
 	process.AddConnection(std::move(socket));
 	process.Run();
 }

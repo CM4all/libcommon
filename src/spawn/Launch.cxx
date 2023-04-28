@@ -201,7 +201,8 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	error_pipe_w.Close();
 
 	try {
-		RunSpawnServer(config, cgroup_state, hook, std::move(socket));
+		RunSpawnServer(config, cgroup_state, pid_namespace,
+			       hook, std::move(socket));
 		return EXIT_SUCCESS;
 	} catch (...) {
 		PrintException(std::current_exception());

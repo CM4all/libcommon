@@ -29,6 +29,7 @@ if get_variable('libcommon_enable_spawn_server', true)
     'CgroupWatch.cxx',
     'Launch.cxx',
     'Server.cxx',
+    'TmpfsManager.cxx',
   ]
 
   libcommon_enable_spawn_registry = true

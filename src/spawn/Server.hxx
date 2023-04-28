@@ -14,5 +14,6 @@ class UniqueSocketDescriptor;
  */
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
+	       bool has_mount_namespace,
 	       SpawnHook *hook,
 	       UniqueSocketDescriptor fd);
