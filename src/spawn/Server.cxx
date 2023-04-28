@@ -85,8 +85,6 @@ class SpawnServerChild final : public ExitListener,
 
 	std::unique_ptr<PidfdEvent> pidfd;
 
-	const std::string name;
-
 public:
 	explicit SpawnServerChild(EventLoop &event_loop,
 				  SpawnServerConnection &_connection,
@@ -96,15 +94,10 @@ public:
 		 pidfd(std::make_unique<PidfdEvent>(event_loop,
 						    std::move(_pidfd),
 						    _name,
-						    (ExitListener &)*this)),
-		 name(_name) {}
+						    (ExitListener &)*this)) {}
 
 	SpawnServerChild(const SpawnServerChild &) = delete;
 	SpawnServerChild &operator=(const SpawnServerChild &) = delete;
-
-	const char *GetName() const noexcept {
-		return name.c_str();
-	}
 
 	void Kill(ChildProcessRegistry &child_process_registry,
 		  int signo) noexcept {
