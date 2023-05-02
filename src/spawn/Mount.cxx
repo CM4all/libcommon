@@ -85,10 +85,14 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 
 	vfs_builder.Add(target);
 
-	uint_least64_t attr_set = MS_NOSUID|MS_NODEV;
-	if (!writable)
+	uint_least64_t attr_set = MS_NOSUID|MS_NODEV, attr_clr = 0;
+	if (writable)
+		attr_clr |= MS_RDONLY;
+	else
 		attr_set |= MS_RDONLY;
-	if (!exec)
+	if (exec)
+		attr_clr |= MS_NOEXEC;
+	else
 		attr_set |= MS_NOEXEC;
 
 	if (source_fd.IsDefined())
@@ -100,7 +104,7 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 
 	MountSetAttr(FileDescriptor::Undefined(), target,
 		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
-		     attr_set, 0);
+		     attr_set, attr_clr);
 }
 
 inline void
