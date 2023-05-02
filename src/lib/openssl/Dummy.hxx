@@ -2,15 +2,14 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef SSL_DUMMY_HXX
-#define SSL_DUMMY_HXX
+#pragma once
 
 #include "UniqueX509.hxx"
 
-UniqueX509
-MakeSelfIssuedDummyCert(const char *common_name);
+#include <string_view>
 
 UniqueX509
-MakeSelfSignedDummyCert(EVP_PKEY &key, const char *common_name);
+MakeSelfIssuedDummyCert(std::string_view common_name);
 
-#endif
+UniqueX509
+MakeSelfSignedDummyCert(EVP_PKEY &key, std::string_view common_name);

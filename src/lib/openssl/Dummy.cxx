@@ -7,7 +7,7 @@
 #include "Error.hxx"
 
 UniqueX509
-MakeSelfIssuedDummyCert(const char *common_name)
+MakeSelfIssuedDummyCert(std::string_view common_name)
 {
 	UniqueX509 cert(X509_new());
 	if (cert == nullptr)
@@ -16,8 +16,8 @@ MakeSelfIssuedDummyCert(const char *common_name)
 	auto *name = X509_get_subject_name(cert.get());
 
 	if (!X509_NAME_add_entry_by_NID(name, NID_commonName, MBSTRING_ASC,
-					reinterpret_cast<const unsigned char *>(common_name),
-					-1, -1, 0))
+					reinterpret_cast<const unsigned char *>(common_name.data()),
+					common_name.size(), -1, 0))
 		throw SslError("X509_NAME_add_entry_by_NID() failed");
 
 	X509_set_issuer_name(cert.get(), name);
@@ -34,7 +34,7 @@ MakeSelfIssuedDummyCert(const char *common_name)
 }
 
 UniqueX509
-MakeSelfSignedDummyCert(EVP_PKEY &key, const char *common_name)
+MakeSelfSignedDummyCert(EVP_PKEY &key, std::string_view common_name)
 {
 	auto cert = MakeSelfIssuedDummyCert(common_name);
 	X509_set_pubkey(cert.get(), &key);
