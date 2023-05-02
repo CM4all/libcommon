@@ -85,11 +85,11 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 
 	vfs_builder.Add(target);
 
-	uint_least64_t flags = MS_NOSUID|MS_NODEV;
+	uint_least64_t attr_set = MS_NOSUID|MS_NODEV;
 	if (!writable)
-		flags |= MS_RDONLY;
+		attr_set |= MS_RDONLY;
 	if (!exec)
-		flags |= MS_NOEXEC;
+		attr_set |= MS_NOEXEC;
 
 	if (source_fd.IsDefined())
 		MoveMount(source_fd, "",
@@ -99,7 +99,8 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 		BindMount(source, target);
 
 	MountSetAttr(FileDescriptor::Undefined(), target,
-		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, flags, 0);
+		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+		     attr_set, 0);
 }
 
 inline void
@@ -131,7 +132,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 			throw FormatErrno("Failed to create %s", target);
 	}
 
-	constexpr uint_least64_t flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
+	constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
 
 	if (source_fd.IsDefined())
 		MoveMount(source_fd, "",
@@ -141,7 +142,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 		BindMount(source, target);
 
 	MountSetAttr(FileDescriptor::Undefined(), target,
-		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, flags, 0);
+		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, attr_set, 0);
 }
 
 inline void
@@ -281,10 +282,10 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
 		char buffer[64];
 		const char *tmp_path = WriteToTempFile(buffer, contents);
 
-		constexpr uint_least64_t flags = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
+		constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
 		BindMount(tmp_path, target);
 		MountSetAttr(FileDescriptor::Undefined(), target,
-			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, flags, 0);
+			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, attr_set, 0);
 	}
 }
 
