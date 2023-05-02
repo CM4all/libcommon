@@ -16,7 +16,7 @@ MakeSelfIssuedDummyCert(const char *common_name)
 	auto *name = X509_get_subject_name(cert.get());
 
 	if (!X509_NAME_add_entry_by_NID(name, NID_commonName, MBSTRING_ASC,
-					const_cast<unsigned char *>((const unsigned char *)common_name),
+					reinterpret_cast<const unsigned char *>(common_name),
 					-1, -1, 0))
 		throw SslError("X509_NAME_add_entry_by_NID() failed");
 
