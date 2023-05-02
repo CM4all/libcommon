@@ -87,6 +87,10 @@ struct mount_attr
 
 #define MOUNT_ATTR_SIZE_VER0 32
 
+#ifndef __NR_mount_setattr
+#define __NR_mount_setattr 442
+#endif
+
 static int
 mount_setattr(int __dfd, const char *__path, unsigned int __flags,
 	      struct mount_attr *__uattr, std::size_t __usize)
