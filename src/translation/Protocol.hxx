@@ -1206,6 +1206,13 @@ enum class TranslationCommand : uint16_t {
 	 * random query strings.
 	 */
 	DISCARD_QUERY_STRING = 251,
+
+	/**
+	 * Mount a shared (writable) tmpfs on the given path.  Payload
+	 * is the name of the tmpfs and the target path separated by a
+	 * null byte.
+	 */
+	MOUNT_NAMED_TMPFS = 252,
 };
 
 struct TranslationHeader {

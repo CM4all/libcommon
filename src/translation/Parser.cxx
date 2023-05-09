@@ -642,6 +642,25 @@ TranslateParser::HandleMountTmpfs(std::string_view payload, bool writable)
 }
 
 inline void
+TranslateParser::HandleMountNamedTmpfs(std::string_view payload)
+{
+	const auto [source, target] = Split(payload, '\0');
+	if (!IsValidNonEmptyString(source) ||
+	    !IsValidAbsolutePath(target))
+		throw std::runtime_error("malformed MOUNT_NAMED_TMPFS packet");
+
+	if (mount_list == IntrusiveForwardList<Mount>::end())
+		throw std::runtime_error("misplaced MOUNT_NAMED_TMPFS packet");
+
+	auto *m = alloc.New<Mount>(Mount::NamedTmpfs{},
+				   source.data(),
+				   target.data(),
+				   true);
+
+	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
+}
+
+inline void
 TranslateParser::HandleBindMount(std::string_view payload,
 				 bool expand, bool writable, bool exec,
 				 bool file)
@@ -4021,6 +4040,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::MOUNT_NAMED_TMPFS:
+		HandleMountNamedTmpfs(string_payload);
+		return;
 	}
 
 	throw FormatRuntimeError("unknown translation packet: %u", command);

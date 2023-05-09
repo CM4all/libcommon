@@ -228,6 +228,8 @@ private:
 
 	void HandleMountTmpfs(std::string_view payload, bool writable);
 
+	void HandleMountNamedTmpfs(std::string_view payload);
+
 	void HandleMountHome(std::string_view payload);
 
 	void HandleBindMount(std::string_view payload,
