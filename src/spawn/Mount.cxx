@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Mount.hxx"
+#include "TmpfsCreate.hxx"
 #include "VfsBuilder.hxx"
 #include "lib/fmt/ToBuffer.hxx"
 #include "system/Mount.hxx"
@@ -195,17 +196,8 @@ Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder) const
 		/* we didn't get a "source_fd", so just create a new
 		   one (which will not be shared with anybody, just a
 		   fallback) */
-		auto fs = FSOpen("tmpfs");
-		FSConfig(fs, FSCONFIG_SET_STRING, "size", "64M");
-		FSConfig(fs, FSCONFIG_SET_STRING, "nr_inodes", "65536");
-		FSConfig(fs, FSCONFIG_SET_STRING, "mode", "1777");
-		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 
-		unsigned flags = MOUNT_ATTR_NOSUID|MOUNT_ATTR_NODEV;
-		if (!exec)
-			flags |= MOUNT_ATTR_NOEXEC;
-
-		MoveMount(FSMount(fs, flags), "",
+		MoveMount(CreateTmpfs(exec), "",
 			  FileDescriptor::Undefined(), target,
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	}

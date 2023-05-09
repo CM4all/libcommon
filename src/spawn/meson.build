@@ -112,6 +112,7 @@ if get_variable('libcommon_enable_spawn_options', false)
     'MountNamespaceOptions.cxx',
     'NamespaceOptions.cxx',
     'Prepared.cxx',
+    'TmpfsCreate.cxx',
 
     # These are really depended on up libcommon_enable_spawn_direct,
     # but the functions are called from ChildOptions/NamespaceOptions
