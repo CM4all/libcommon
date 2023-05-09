@@ -720,6 +720,15 @@ public:
 			return *this;
 		}
 
+		template<typename N, typename T>
+		auto MountNamedTmpfs(N &&name, T &&target) noexcept {
+			response.StringPacket(TranslationCommand::MOUNT_NAMED_TMPFS,
+					      std::forward<N>(name),
+					      std::string_view{"", 1},
+					      std::forward<T>(target));
+			return *this;
+		}
+
 		template<typename... Types>
 		auto MountEmpty(Types... path) noexcept {
 			response.StringPacket(TranslationCommand::MOUNT_EMPTY,
