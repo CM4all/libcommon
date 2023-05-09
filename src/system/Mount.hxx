@@ -18,6 +18,7 @@
 #define FSCONFIG_SET_STRING 1
 #define FSCONFIG_CMD_CREATE 6
 #define MOVE_MOUNT_F_EMPTY_PATH 0x00000004
+#define OPEN_TREE_CLONE 1
 #endif
 
 #ifndef AT_SYMLINK_NOFOLLOW
@@ -58,6 +59,9 @@ void
 MountSetAttr(FileDescriptor directory, const char *path, unsigned flags,
 	     uint_least64_t attr_set, uint_least64_t attr_clr,
 	     uint_least64_t propagation=0);
+
+UniqueFileDescriptor
+OpenTree(FileDescriptor directory, const char *path, unsigned flags);
 
 void
 MountOrThrow(const char *source, const char *target,

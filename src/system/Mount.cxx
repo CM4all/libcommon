@@ -108,6 +108,36 @@ mount_setattr(int __dfd, const char *__path, unsigned int __flags,
 
 #endif // MOUNT_ATTR_SIZE_VER0
 
+#ifndef OPEN_TREE_CLOEXEC
+/* fallback definitions for glibc < 2.36 */
+
+#include <fcntl.h> // for O_CLOEXEC
+#define OPEN_TREE_CLOEXEC O_CLOEXEC
+
+static int
+open_tree(int __dfd, const char *__filename, unsigned int __flags) noexcept
+{
+	long result = syscall(__NR_open_tree, __dfd, __filename, __flags);
+	if (result < 0) {
+		errno = -result;
+		return -1;
+	}
+
+	return result;
+}
+
+#endif
+
+UniqueFileDescriptor
+OpenTree(FileDescriptor directory, const char *path, unsigned flags)
+{
+	int fd = open_tree(directory.Get(), path, flags|OPEN_TREE_CLOEXEC);
+	if (fd < 0)
+		throw MakeErrno("open_tree() failed");
+
+	return UniqueFileDescriptor{fd};
+}
+
 UniqueFileDescriptor
 FSOpen(const char *fsname)
 {
