@@ -16,7 +16,7 @@
 #define FSOPEN_CLOEXEC 0x00000001
 
 static int
-fsopen(const char *__fs_name, unsigned int __flags)
+fsopen(const char *__fs_name, unsigned int __flags) noexcept
 {
 	long result = syscall(__NR_fsopen, __fs_name, __flags);
 	if (result < 0) {
@@ -30,7 +30,7 @@ fsopen(const char *__fs_name, unsigned int __flags)
 #define FSMOUNT_CLOEXEC 0x00000001
 
 static int
-fsmount(int __fd, unsigned int __flags, unsigned int __ms_flags)
+fsmount(int __fd, unsigned int __flags, unsigned int __ms_flags) noexcept
 {
 	long result = syscall(__NR_fsmount, __fd, __flags, __ms_flags);
 	if (result < 0) {
@@ -43,7 +43,7 @@ fsmount(int __fd, unsigned int __flags, unsigned int __ms_flags)
 
 static int
 fsconfig(int __fd, unsigned int __cmd, const char *__key,
-	 const void *__value, int __aux)
+	 const void *__value, int __aux) noexcept
 {
 	long result = syscall(__NR_fsconfig, __fd, __cmd,
 			      __key, __value, __aux);
@@ -58,7 +58,7 @@ fsconfig(int __fd, unsigned int __cmd, const char *__key,
 static int
 move_mount(int __from_dfd, const char *__from_pathname,
 	   int __to_dfd, const char *__to_pathname,
-	   unsigned int flags)
+	   unsigned int flags) noexcept
 {
 	long result = syscall(__NR_move_mount,
 			      __from_dfd, __from_pathname,
@@ -93,7 +93,7 @@ struct mount_attr
 
 static int
 mount_setattr(int __dfd, const char *__path, unsigned int __flags,
-	      struct mount_attr *__uattr, std::size_t __usize)
+	      struct mount_attr *__uattr, std::size_t __usize) noexcept
 {
 	long result = syscall(__NR_mount_setattr,
 			      __dfd, __path, __flags,
