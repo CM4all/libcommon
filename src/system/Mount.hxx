@@ -76,3 +76,20 @@ BindMount(const char *source, const char *target);
 
 void
 Umount(const char *target, int flags);
+
+/**
+ * Unmount a filesystem specified by a directory file descriptor and
+ * path relative to it.
+ *
+ * No such system call exists in the Linux kernel, but this
+ * implementation does this by using move_mount() to a well-known
+ * temporary directory and then unmounting that directory.
+ *
+ * Throws on error.
+ *
+ * @param flags move_mount() flags such as MOVE_MOUNT_F_EMPTY_PATH
+ */
+void
+UmountDetachAt(FileDescriptor fd, const char *path,
+	       unsigned flags,
+	       const char *tmp);

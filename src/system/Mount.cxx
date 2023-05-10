@@ -226,3 +226,14 @@ Umount(const char *target, int flags)
 	if (umount2(target, flags) < 0)
 		throw FormatErrno("umount('%s') failed", target);
 }
+
+void
+UmountDetachAt(FileDescriptor fd, const char *path,
+	       unsigned flags,
+	       const char *tmp)
+{
+	MoveMount(fd, path,
+		  FileDescriptor{AT_FDCWD}, tmp,
+		  flags);
+	Umount(tmp, MNT_DETACH);
+}
