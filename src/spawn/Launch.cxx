@@ -64,6 +64,21 @@ Chown(const CgroupState &cgroup_state, uid_t uid, gid_t gid) noexcept
 
 #endif // HAVE_LIBSYSTEMD
 
+static void
+SetupPidNamespace()
+{
+	/* if the spawner runs in its own PID namespace, we need to
+	   mount a new /proc for that namespace; first make the
+	   existing /proc a "slave" mount (to avoid propagating the
+	   new /proc into the parent namespace), and mount the new
+	   /proc */
+	MountSetAttr(FileDescriptor::Undefined(), "/",
+		     AT_RECURSIVE|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+		     0, 0, MS_SLAVE);
+	umount2("/proc", MNT_DETACH);
+	mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV, nullptr);
+}
+
 /**
  * Drop capabilities which are not needed during normal spawner
  * operation.
@@ -109,16 +124,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	SetProcessName("spawn");
 
 	if (pid_namespace) {
-		/* if the spawner runs in its own PID namespace, we need to
-		   mount a new /proc for that namespace; first make the
-		   existing /proc a "slave" mount (to avoid propagating the
-		   new /proc into the parent namespace), and mount the new
-		   /proc */
-		MountSetAttr(FileDescriptor::Undefined(), "/",
-			     AT_RECURSIVE|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
-			     0, 0, MS_SLAVE);
-		umount2("/proc", MNT_DETACH);
-		mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV, nullptr);
+		SetupPidNamespace();
 	}
 
 	try {
