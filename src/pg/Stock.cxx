@@ -32,6 +32,10 @@ public:
 		 defer_initialized(event_loop,
 				   BIND_THIS_METHOD(OnDeferredInitialized))
 	{
+		/* don't reconnect; this object will be destroyed on
+		   disconnect and the next query will create a new
+		   one */
+		connection.DisableAutoReconnect();
 	}
 
 	void Connect(CancellablePointer &cancel_ptr) noexcept {

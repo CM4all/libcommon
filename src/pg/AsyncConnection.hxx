@@ -156,6 +156,8 @@ class AsyncConnection : public Connection {
 
 	AsyncResultHandler *result_handler = nullptr;
 
+	bool auto_reconnect = true;
+
 	bool cancelling = false;
 
 public:
@@ -177,6 +179,10 @@ public:
 
 	bool IsReady() const noexcept {
 		return state == State::READY;
+	}
+
+	void DisableAutoReconnect() noexcept {
+		auto_reconnect = false;
 	}
 
 	/**

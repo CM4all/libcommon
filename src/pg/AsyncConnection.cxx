@@ -39,10 +39,15 @@ AsyncConnection::Error() noexcept
 
 	cancelling = false;
 
+	/* copy the "auto_reconnect" field to the stack because
+	   OnDisconnect() may destroy this object*/
+	const bool _auto_reconnect = auto_reconnect;
+
 	if (was_connected)
 		handler.OnDisconnect();
 
-	ScheduleReconnect();
+	if (_auto_reconnect)
+		ScheduleReconnect();
 }
 
 void
