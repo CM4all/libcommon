@@ -18,13 +18,7 @@
 static int
 fsopen(const char *__fs_name, unsigned int __flags) noexcept
 {
-	long result = syscall(__NR_fsopen, __fs_name, __flags);
-	if (result < 0) {
-		errno = -result;
-		return -1;
-	}
-
-	return result;
+	return syscall(__NR_fsopen, __fs_name, __flags);
 }
 
 #define FSMOUNT_CLOEXEC 0x00000001
@@ -32,27 +26,15 @@ fsopen(const char *__fs_name, unsigned int __flags) noexcept
 static int
 fsmount(int __fd, unsigned int __flags, unsigned int __ms_flags) noexcept
 {
-	long result = syscall(__NR_fsmount, __fd, __flags, __ms_flags);
-	if (result < 0) {
-		errno = -result;
-		return -1;
-	}
-
-	return result;
+	return syscall(__NR_fsmount, __fd, __flags, __ms_flags);
 }
 
 static int
 fsconfig(int __fd, unsigned int __cmd, const char *__key,
 	 const void *__value, int __aux) noexcept
 {
-	long result = syscall(__NR_fsconfig, __fd, __cmd,
-			      __key, __value, __aux);
-	if (result < 0) {
-		errno = -result;
-		return -1;
-	}
-
-	return 0;
+	return syscall(__NR_fsconfig, __fd, __cmd,
+		       __key, __value, __aux);
 }
 
 static int
@@ -60,16 +42,10 @@ move_mount(int __from_dfd, const char *__from_pathname,
 	   int __to_dfd, const char *__to_pathname,
 	   unsigned int flags) noexcept
 {
-	long result = syscall(__NR_move_mount,
-			      __from_dfd, __from_pathname,
-			      __to_dfd, __to_pathname,
-			      flags);
-	if (result < 0) {
-		errno = -result;
-		return -1;
-	}
-
-	return 0;
+	return syscall(__NR_move_mount,
+		       __from_dfd, __from_pathname,
+		       __to_dfd, __to_pathname,
+		       flags);
 }
 
 #endif // FSOPEN_CLOEXEC
@@ -95,15 +71,9 @@ static int
 mount_setattr(int __dfd, const char *__path, unsigned int __flags,
 	      struct mount_attr *__uattr, std::size_t __usize) noexcept
 {
-	long result = syscall(__NR_mount_setattr,
-			      __dfd, __path, __flags,
-			      __uattr, __usize);
-	if (result < 0) {
-		errno = -result;
-		return -1;
-	}
-
-	return 0;
+	return syscall(__NR_mount_setattr,
+		       __dfd, __path, __flags,
+		       __uattr, __usize);
 }
 
 #endif // MOUNT_ATTR_SIZE_VER0
@@ -117,13 +87,7 @@ mount_setattr(int __dfd, const char *__path, unsigned int __flags,
 static int
 open_tree(int __dfd, const char *__filename, unsigned int __flags) noexcept
 {
-	long result = syscall(__NR_open_tree, __dfd, __filename, __flags);
-	if (result < 0) {
-		errno = -result;
-		return -1;
-	}
-
-	return result;
+	return syscall(__NR_open_tree, __dfd, __filename, __flags);
 }
 
 #endif
