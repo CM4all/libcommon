@@ -219,3 +219,10 @@ BindMount(const char *source, const char *target)
 	if (mount(source, target, nullptr, MS_BIND, nullptr) < 0)
 		throw FormatErrno("bind_mount('%s', '%s') failed", source, target);
 }
+
+void
+Umount(const char *target, int flags)
+{
+	if (umount2(target, flags) < 0)
+		throw FormatErrno("umount('%s') failed", target);
+}

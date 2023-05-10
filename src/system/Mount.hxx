@@ -73,3 +73,6 @@ MountOrThrow(const char *source, const char *target,
  */
 void
 BindMount(const char *source, const char *target);
+
+void
+Umount(const char *target, int flags);

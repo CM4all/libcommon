@@ -208,10 +208,9 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			ChdirOrThrow("/");
 	}
 
-	if (new_root != nullptr &&
+	if (new_root != nullptr)
 	    /* get rid of the old root */
-	    umount2(put_old, MNT_DETACH) < 0)
-		throw FormatErrno("umount('%s') failed", put_old);
+	    Umount(put_old, MNT_DETACH);
 
 	if (mount_root_tmpfs) {
 		rmdir(put_old);
