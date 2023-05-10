@@ -76,7 +76,9 @@ SetupPidNamespace()
 		     AT_RECURSIVE|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 		     0, 0, MS_SLAVE);
 	umount2("/proc", MNT_DETACH);
-	mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV, nullptr);
+
+	if (mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV, nullptr) < 0)
+		throw MakeErrno("Failed to mount new /proc");
 }
 
 /**
