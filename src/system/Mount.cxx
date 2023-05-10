@@ -24,7 +24,7 @@ fsopen(const char *__fs_name, unsigned int __flags) noexcept
 		return -1;
 	}
 
-	return 0;
+	return result;
 }
 
 #define FSMOUNT_CLOEXEC 0x00000001
@@ -38,7 +38,7 @@ fsmount(int __fd, unsigned int __flags, unsigned int __ms_flags) noexcept
 		return -1;
 	}
 
-	return 0;
+	return result;
 }
 
 static int
