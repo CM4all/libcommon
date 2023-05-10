@@ -79,6 +79,14 @@ SetupPidNamespace()
 
 	if (mount("proc", "/proc", "proc", MS_NOEXEC|MS_NOSUID|MS_NODEV, nullptr) < 0)
 		throw MakeErrno("Failed to mount new /proc");
+
+	/* mount a new tmpfs on /tmp because some spawner subsystems
+	   (e.g. MOUNT_NAMED_TMPFS) might need temporary files, and we
+	   want the kernel to clean them up automatically */
+	umount2("/tmp", MNT_DETACH);
+	if (mount("tmpfs", "/tmp", "tmpfs", MS_NOEXEC|MS_NOSUID|MS_NODEV,
+		  "size=16M,nr_inodes=1048576,mode=1777") < 0)
+		throw MakeErrno("Failed to mount new /tmp");
 }
 
 /**
