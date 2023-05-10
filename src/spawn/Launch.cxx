@@ -123,11 +123,10 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 
 	SetProcessName("spawn");
 
-	if (pid_namespace) {
-		SetupPidNamespace();
-	}
-
 	try {
+		if (pid_namespace)
+			SetupPidNamespace();
+
 		config.spawner_uid_gid.Apply();
 	} catch (...) {
 		WriteErrorPipe(error_pipe_w, {}, std::current_exception());
