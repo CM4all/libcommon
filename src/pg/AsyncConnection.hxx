@@ -56,7 +56,7 @@ public:
 	 * condition.
 	 *
 	 * If this was a fatal error which closed previously
-	 * successful connection, the OnDisconnect() will be called
+	 * successful connection, then OnDisconnect() will be called
 	 * right after this method.
 	 */
 	virtual void OnError(std::exception_ptr e) noexcept = 0;
