@@ -645,7 +645,7 @@ inline void
 TranslateParser::HandleMountNamedTmpfs(std::string_view payload)
 {
 	const auto [source, target] = Split(payload, '\0');
-	if (!IsValidNonEmptyString(source) ||
+	if (!IsValidName(source) ||
 	    !IsValidAbsolutePath(target))
 		throw std::runtime_error("malformed MOUNT_NAMED_TMPFS packet");
 
