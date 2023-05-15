@@ -3,22 +3,20 @@
 
 #include "FdOutputStream.hxx"
 #include "system/Error.hxx"
-#include "util/OffsetPointer.hxx"
 
 #include <stdexcept>
 
 void
-FdOutputStream::Write(const void *data, size_t size)
+FdOutputStream::Write(std::span<const std::byte> src)
 {
-	while (size > 0) {
-		auto nbytes = fd.Write(data, size);
+	while (!src.empty()) {
+		auto nbytes = fd.Write(src.data(), src.size());
 		if (nbytes < 0)
 			throw MakeErrno("Failed to write");
 
 		if (nbytes == 0)
 			throw std::runtime_error("Blocking write");
 
-		data = OffsetPointer(data, nbytes);
-		size -= nbytes;
+		src = src.subspan(nbytes);
 	}
 }

@@ -9,8 +9,8 @@ extern "C" {
 }
 
 void
-WasOutputStream::Write(const void *data, size_t size)
+WasOutputStream::Write(std::span<const std::byte> src)
 {
-	if (!was_simple_write(w, data, size))
+	if (!was_simple_write(w, src.data(), src.size()))
 		throw WriteFailed{};
 }

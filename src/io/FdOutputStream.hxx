@@ -17,7 +17,7 @@ public:
 		return fd;
 	}
 
-	void Write(const void *data, std::size_t size) override;
+	void Write(std::span<const std::byte> src) override;
 };
 
 #endif

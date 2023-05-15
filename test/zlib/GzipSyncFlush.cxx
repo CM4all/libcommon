@@ -23,7 +23,7 @@ Copy(OutputStream &os, Reader &r)
 		if (nbytes == 0)
 			break;
 
-		os.Write(&buffer, nbytes);
+		os.Write(std::span{buffer}.first(nbytes));
 	}
 }
 

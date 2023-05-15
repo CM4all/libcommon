@@ -18,5 +18,5 @@ public:
 	/**
 	 * Throws #WriteFailed if was_simple_write() fails.
 	 */
-	void Write(const void *data, size_t size) override;
+	void Write(std::span<const std::byte> src) override;
 };
