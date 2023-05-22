@@ -31,7 +31,7 @@ ReadProcessCgroup(unsigned pid, const std::string_view controller)
 	const auto path = FmtBuffer<64>("/proc/{}/cgroup", pid);
 	FILE *file = fopen(path, "r");
 	if (file == nullptr)
-		throw FmtErrno("Failed to open {}", path);
+		throw FmtErrno("Failed to open {}", path.c_str());
 
 	AtScopeExit(file) { fclose(file); };
 
