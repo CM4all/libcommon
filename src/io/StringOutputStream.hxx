@@ -5,6 +5,7 @@
 #define STRING_OUTPUT_STREAM_HXX
 
 #include "OutputStream.hxx"
+#include "util/SpanCast.hxx"
 
 #include <string>
 
@@ -21,8 +22,8 @@ public:
 	}
 
 	/* virtual methods from class OutputStream */
-	void Write(const void *data, size_t size) override {
-		value.append((const char *)data, size);
+	void Write(std::span<const std::byte> src) override {
+		value.append(ToStringView(src));
 	}
 };
 
