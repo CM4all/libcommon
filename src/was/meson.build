@@ -12,7 +12,7 @@ was = static_library(
   'StringRequestBody.cxx',
   'Reader.cxx',
   'WasOutputStream.cxx',
-  'WasSplice.cxx',
+  'Splice.cxx',
   include_directories: inc,
   dependencies: [
     libwas,

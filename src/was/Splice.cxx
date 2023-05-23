@@ -2,7 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#include "WasSplice.hxx"
+#include "Splice.hxx"
 #include "io/FileDescriptor.hxx"
 
 extern "C" {
