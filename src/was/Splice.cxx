@@ -19,7 +19,7 @@ extern "C" {
 #include <stdio.h>
 
 bool
-SpliceToWas(was_simple *w, FileDescriptor in_fd, uint64_t remaining) noexcept
+SpliceToWas(was_simple *w, FileDescriptor in_fd, uint_least64_t remaining) noexcept
 {
 	if (remaining == 0)
 		return true;
@@ -48,7 +48,7 @@ SpliceToWas(was_simple *w, FileDescriptor in_fd, uint64_t remaining) noexcept
 			return false;
 		}
 
-		constexpr uint64_t max = std::numeric_limits<size_t>::max();
+		constexpr uint_least64_t max = std::numeric_limits<std::size_t>::max();
 		size_t length = std::min(remaining, max);
 		ssize_t nbytes = splice(in_fd.Get(), nullptr,
 					out_fd.Get(), nullptr,

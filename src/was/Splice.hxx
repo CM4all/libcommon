@@ -10,4 +10,4 @@ struct was_simple;
 class FileDescriptor;
 
 bool
-SpliceToWas(was_simple *w, FileDescriptor in_fd, uint64_t size) noexcept;
+SpliceToWas(was_simple *w, FileDescriptor in_fd, uint_least64_t size) noexcept;
