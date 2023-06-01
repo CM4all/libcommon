@@ -4,6 +4,7 @@
 #pragma once
 
 #include "time/ISO8601.hxx"
+#include "util/StringBuffer.hxx"
 
 #include <fmt/format.h>
 
