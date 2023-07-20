@@ -95,11 +95,20 @@ TEST(StaticCache, Basic)
 
 	n_constructed = n_destructed = n_overwritten = 0;
 
-	cache.PutOrReplace(3, 42);
+	cache.PutOrReplace(3, 43);
 	EXPECT_TRUE(cache.IsFull());
 	EXPECT_EQ(n_constructed, 0U);
 	EXPECT_EQ(n_destructed, 0U);
 	EXPECT_EQ(n_overwritten, 1U);
+
+	ASSERT_NE(cache.Get(3), nullptr);
+	EXPECT_EQ(cache.Get(3)->value, 43U);
+
+	cache.PutOrReplace(3, 42);
+	EXPECT_TRUE(cache.IsFull());
+	EXPECT_EQ(n_constructed, 0U);
+	EXPECT_EQ(n_destructed, 0U);
+	EXPECT_EQ(n_overwritten, 2U);
 
 	ASSERT_NE(cache.Get(3), nullptr);
 	EXPECT_EQ(cache.Get(3)->value, 42U);
@@ -205,7 +214,7 @@ TEST(StaticCache, Basic)
 		EXPECT_EQ(n_overwritten, 0U);
 	}
 
-	cache.Put(28, 28);
+	cache.PutOrReplace(28, 28);
 	EXPECT_FALSE(cache.IsEmpty());
 	EXPECT_TRUE(cache.IsFull());
 	EXPECT_EQ(n_constructed, 8U);
