@@ -93,11 +93,13 @@ TEST(StaticCache, Basic)
 
 	/* replace item */
 
+	n_constructed = n_destructed = n_overwritten = 0;
+
 	cache.PutOrReplace(3, 42);
 	EXPECT_TRUE(cache.IsFull());
-	EXPECT_EQ(n_constructed, 8U);
+	EXPECT_EQ(n_constructed, 0U);
 	EXPECT_EQ(n_destructed, 0U);
-	EXPECT_EQ(n_overwritten, 3U);
+	EXPECT_EQ(n_overwritten, 1U);
 
 	ASSERT_NE(cache.Get(3), nullptr);
 	EXPECT_EQ(cache.Get(3)->value, 42U);
@@ -109,11 +111,13 @@ TEST(StaticCache, Basic)
 
 	/* Remove() */
 
+	n_constructed = n_destructed = n_overwritten = 0;
+
 	cache.Remove(4);
 	EXPECT_FALSE(cache.IsFull());
-	EXPECT_EQ(n_constructed, 8U);
+	EXPECT_EQ(n_constructed, 0U);
 	EXPECT_EQ(n_destructed, 1U);
-	EXPECT_EQ(n_overwritten, 3U);
+	EXPECT_EQ(n_overwritten, 0U);
 
 	ASSERT_EQ(cache.Get(4), nullptr);
 	ASSERT_NE(cache.Get(3), nullptr);
@@ -126,14 +130,16 @@ TEST(StaticCache, Basic)
 
 	/* RemoveIf() */
 
+	n_constructed = n_destructed = n_overwritten = 0;
+
 	cache.RemoveIf([](const auto &, const auto &value){
 		return value.value < 8;
 	});
 
 	EXPECT_FALSE(cache.IsFull());
-	EXPECT_EQ(n_constructed, 8U);
-	EXPECT_EQ(n_destructed, 4U);
-	EXPECT_EQ(n_overwritten, 3U);
+	EXPECT_EQ(n_constructed, 0U);
+	EXPECT_EQ(n_destructed, 3U);
+	EXPECT_EQ(n_overwritten, 0U);
 
 	ASSERT_NE(cache.Get(3), nullptr);
 	EXPECT_EQ(cache.Get(3)->value, 42U);
