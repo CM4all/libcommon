@@ -16,6 +16,7 @@ test(
     'TestIntrusiveList.cxx',
     'TestFNVHash.cxx',
     'TestMimeType.cxx',
+    'TestStaticCache.cxx',
     'TestStringStrip.cxx',
     'TestTemplateString.cxx',
     include_directories: inc,
