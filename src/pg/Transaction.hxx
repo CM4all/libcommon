@@ -6,7 +6,8 @@
 
 #include "Connection.hxx"
 #include "Error.hxx"
-#include "util/Concepts.hxx"
+
+#include <concepts>
 
 namespace Pg {
 
@@ -16,7 +17,7 @@ namespace Pg {
  */
 void
 DoSerializableRepeat(Pg::Connection &connection, unsigned retries,
-		     Invocable<> auto f)
+		     std::invocable<> auto f)
 {
 	while (true) {
 		try {
@@ -39,7 +40,7 @@ DoSerializableRepeat(Pg::Connection &connection, unsigned retries,
  */
 void
 DoRepeatableReadRepeat(Pg::Connection &connection, unsigned retries,
-		       Invocable<> auto f)
+		       std::invocable<> auto f)
 {
 	while (true) {
 		try {

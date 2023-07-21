@@ -9,10 +9,10 @@
 #include "Result.hxx"
 #include "Notify.hxx"
 #include "Error.hxx"
-#include "util/Concepts.hxx"
 
 #include <libpq-fe.h>
 
+#include <concepts>
 #include <new>
 #include <memory>
 #include <string>
@@ -336,7 +336,7 @@ public:
 	 * transaction.  Performs automatic rollback if the function
 	 * throws an exception.
 	 */
-	void DoSerializable(Invocable<> auto f) {
+	void DoSerializable(std::invocable<> auto f) {
 		BeginSerializable();
 
 		try {
@@ -355,7 +355,7 @@ public:
 	 * transaction.  Performs automatic rollback if the function
 	 * throws an exception.
 	 */
-	void DoRepeatableRead(Invocable<> auto f) {
+	void DoRepeatableRead(std::invocable<> auto f) {
 		BeginRepeatableRead();
 
 		try {

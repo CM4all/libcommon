@@ -6,9 +6,9 @@
 
 #include "WithFile.hxx"
 #include "system/Error.hxx"
-#include "util/Concepts.hxx"
 #include "util/IterableSplitString.hxx"
 
+#include <concepts>
 #include <string_view>
 
 /**
@@ -17,7 +17,7 @@
  */
 template<std::size_t buffer_size>
 decltype(auto)
-WithSmallTextFile(auto &&file, Invocable<std::string_view> auto f)
+WithSmallTextFile(auto &&file, std::invocable<std::string_view> auto f)
 {
 	char buffer[buffer_size];
 	std::size_t n = WithReadOnly(file, [&buffer](auto fd){
@@ -38,7 +38,7 @@ WithSmallTextFile(auto &&file, Invocable<std::string_view> auto f)
  */
 template<std::size_t buffer_size>
 decltype(auto)
-ForEachTextLine(auto &&file, Invocable<std::string_view> auto f)
+ForEachTextLine(auto &&file, std::invocable<std::string_view> auto f)
 {
 	return WithSmallTextFile<buffer_size>(file, [&f](std::string_view contents){
 		for (const auto i : IterableSplitString(contents, '\n'))

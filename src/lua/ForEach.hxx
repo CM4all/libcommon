@@ -6,7 +6,8 @@
 
 #include "Assert.hxx"
 #include "StackIndex.hxx"
-#include "util/Concepts.hxx"
+
+#include <concepts>
 
 #ifdef LUA_LJDIR
 #include <exception>
@@ -21,7 +22,7 @@ namespace Lua {
  */
 inline void
 ForEach(lua_State *L, auto table_idx,
-	Invocable<RelativeStackIndex, RelativeStackIndex> auto f)
+	std::invocable<RelativeStackIndex, RelativeStackIndex> auto f)
 {
 	const ScopeCheckStack check_stack{L};
 

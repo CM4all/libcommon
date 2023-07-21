@@ -7,7 +7,8 @@
 #include "FileAt.hxx"
 #include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "util/Concepts.hxx"
+
+#include <concepts>
 
 /**
  * Open the specified (regular) file read-only and pass it to the
@@ -18,21 +19,21 @@
  * AT_FDCWD) and an already open #FileDescriptor.
  */
 inline decltype(auto)
-WithReadOnly(FileAt file_at, Invocable<FileDescriptor> auto f)
+WithReadOnly(FileAt file_at, std::invocable<FileDescriptor> auto f)
 {
 	const auto fd = OpenReadOnly(file_at.directory, file_at.name);
 	return f(FileDescriptor{fd});
 }
 
 inline decltype(auto)
-WithReadOnly(const char *path, Invocable<FileDescriptor> auto f)
+WithReadOnly(const char *path, std::invocable<FileDescriptor> auto f)
 {
 	const auto fd = OpenReadOnly(path);
 	return f(FileDescriptor{fd});
 }
 
 inline decltype(auto)
-WithReadOnly(FileDescriptor fd, Invocable<FileDescriptor> auto f)
+WithReadOnly(FileDescriptor fd, std::invocable<FileDescriptor> auto f)
 {
 	return f(fd);
 }

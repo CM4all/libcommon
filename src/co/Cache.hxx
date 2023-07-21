@@ -6,9 +6,9 @@
 
 #include "InvokeTask.hxx"
 #include "util/StaticCache.hxx"
-#include "util/Concepts.hxx"
 #include "util/IntrusiveList.hxx"
 
+#include <concepts>
 #include <memory>
 #include <optional>
 
@@ -287,7 +287,7 @@ public:
 		cache.Remove(std::forward<K>(key));
 	}
 
-	void RemoveIf(Predicate<const Key &, const Data &> auto p) noexcept {
+	void RemoveIf(std::predicate<const Key &, const Data &> auto p) noexcept {
 		/* note: this method is unable to check pending
 		   requests, so unfortunately, pending requests may
 		   result in stale cache items */
