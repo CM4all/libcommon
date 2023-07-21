@@ -641,7 +641,7 @@ MultiStock::MakeMapItem(const char *uri, void *request) noexcept
 					 inner_class.GetLimit(request, limit),
 					 inner_class.GetClearInterval(request),
 					 inner_class);
-		map.insert(i, *item);
+		map.insert_commit(i, *item);
 		chronological_list.push_back(*item);
 		return *item;
 	} else {

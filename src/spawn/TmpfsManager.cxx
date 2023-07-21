@@ -150,7 +150,7 @@ TmpfsManager::MakeTmpfs(std::string_view name, bool exec)
 
 	if (inserted) {
 		auto *item = new Item(*this, name, CreateTmpfs(exec));
-		items.insert(i, *item);
+		items.insert_commit(i, *item);
 		i = items.iterator_to(*item);
 	} else if (i->IsAbandoned()) {
 		abandoned.erase(abandoned.iterator_to(*i));

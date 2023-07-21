@@ -56,7 +56,7 @@ StockMap::GetStock(const char *uri, void *request) noexcept
 				      max_idle,
 				      GetClearInterval(request),
 				      this);
-		map.insert(position, *item);
+		map.insert_commit(position, *item);
 		return item->stock;
 	} else
 		return position->stock;
