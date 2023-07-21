@@ -116,8 +116,7 @@ Stock::RetryWaiting() noexcept
 	for (std::size_t i = limit - GetActiveCount();
 	     GetActiveCount() < limit && i > 0 && !waiting.empty();
 	     --i) {
-		auto &w = waiting.front();
-		waiting.pop_front();
+		auto &w = waiting.pop_front();
 
 		GetCreate(std::move(w.request),
 			  w.handler,
