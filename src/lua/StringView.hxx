@@ -13,7 +13,7 @@ extern "C" {
 namespace Lua {
 
 [[gnu::pure]]
-static std::string_view
+inline std::string_view
 ToStringView(lua_State *L, int idx) noexcept
 {
 	size_t length;
