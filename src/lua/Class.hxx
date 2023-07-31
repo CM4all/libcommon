@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef LUA_OBJECT_HXX
-#define LUA_OBJECT_HXX
+#pragma once
 
 #include "Util.hxx"
 #include "Assert.hxx"
@@ -139,5 +138,3 @@ private:
 };
 
 }
-
-#endif

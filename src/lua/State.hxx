@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef LUA_STATE_HXX
-#define LUA_STATE_HXX
+#pragma once
 
 #include <memory>
 
@@ -17,5 +16,3 @@ struct StateDeleter {
 using State = std::unique_ptr<lua_State, StateDeleter>;
 
 }
-
-#endif

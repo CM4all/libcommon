@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef LUA_ERROR_HXX
-#define LUA_ERROR_HXX
+#pragma once
 
 #include <stdexcept>
 
@@ -51,5 +50,3 @@ void
 RaiseCurrent(lua_State *L);
 
 }
-
-#endif

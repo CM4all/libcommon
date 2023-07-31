@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef LUA_STACK_INDEX_HXX
-#define LUA_STACK_INDEX_HXX
+#pragma once
 
 namespace Lua {
 
@@ -54,5 +53,3 @@ StackPushed(RelativeStackIndex &idx, int n=1) noexcept
 }
 
 } // namespace Lua
-
-#endif
