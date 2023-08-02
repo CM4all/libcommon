@@ -24,21 +24,17 @@ class TmpfsManager {
 	struct ItemHash {
 		[[gnu::pure]]
 		std::size_t operator()(std::string_view name) const noexcept;
-
-		[[gnu::pure]]
-		std::size_t operator()(const Item &item) const noexcept;
 	};
 
-	struct ItemEqual {
+	struct ItemGetKey {
 		[[gnu::pure]]
-		bool operator()(std::string_view a, const Item &b) const noexcept;
-
-		[[gnu::pure]]
-		bool operator()(const Item &a, const Item &b) const noexcept;
+		std::string_view operator()(const Item &item) const noexcept;
 	};
 
 	IntrusiveHashSet<Item, 1021,
-			 IntrusiveHashSetOperators<ItemHash, ItemEqual>> items;
+			 IntrusiveHashSetOperators<ItemHash,
+						   std::equal_to<std::string_view>,
+						   ItemGetKey>> items;
 	IntrusiveList<Item> abandoned;
 
 	const UniqueFileDescriptor mnt;

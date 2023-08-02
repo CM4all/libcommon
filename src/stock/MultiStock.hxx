@@ -300,17 +300,18 @@ class MultiStock {
 		struct Hash {
 			[[gnu::pure]]
 			std::size_t operator()(const char *key) const noexcept;
-
-			[[gnu::pure]]
-			std::size_t operator()(const MapItem &value) const noexcept;
 		};
 
 		struct Equal {
 			[[gnu::pure]]
-			bool operator()(const char *a, const MapItem &b) const noexcept;
+			bool operator()(const char *a, const char *b) const noexcept;
+		};
 
+		struct GetKey {
 			[[gnu::pure]]
-			bool operator()(const MapItem &a, const MapItem &b) const noexcept;
+			const char *operator()(const MapItem &item) const noexcept {
+				return item.GetName();
+			}
 		};
 	};
 
@@ -326,9 +327,11 @@ class MultiStock {
 	MultiStockClass &inner_class;
 
 	static constexpr size_t N_BUCKETS = 251;
-	using Map = IntrusiveHashSet<MapItem, N_BUCKETS,
-				     IntrusiveHashSetOperators<MapItem::Hash,
-							       MapItem::Equal>>;
+	using Map =
+		IntrusiveHashSet<MapItem, N_BUCKETS,
+				 IntrusiveHashSetOperators<MapItem::Hash,
+							   MapItem::Equal,
+							   MapItem::GetKey>>;
 
 	Map map;
 

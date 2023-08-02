@@ -5,13 +5,23 @@
 #include "MapStock.hxx"
 #include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
+#include "util/StringAPI.hxx"
 
 inline size_t
-StockMap::Item::KeyHasher(const char *key) noexcept
+StockMap::Item::Hash::operator()(const char *key) const noexcept
 {
 	assert(key != nullptr);
 
 	return djb_hash_string(key);
+}
+
+inline bool
+StockMap::Item::Equal::operator()(const char *a, const char *b) const noexcept
+{
+	assert(a != nullptr);
+	assert(b != nullptr);
+
+	return StringIsEqual(a, b);
 }
 
 StockMap::StockMap(EventLoop &_event_loop, StockClass &_cls,

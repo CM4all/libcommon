@@ -34,50 +34,30 @@ class StockMap : StockHandler {
 			return stock.GetName();
 		}
 
-		[[gnu::pure]]
-		static size_t KeyHasher(const char *key) noexcept;
-
-		[[gnu::pure]]
-		static size_t ValueHasher(const Item &value) noexcept {
-			return KeyHasher(value.GetKey());
-		}
-
-		[[gnu::pure]]
-		static bool KeyValueEqual(const char *a, const Item &b) noexcept {
-			assert(a != nullptr);
-
-			return StringIsEqual(a, b.GetKey());
-		}
-
 		struct Hash {
 			[[gnu::pure]]
-			size_t operator()(const char *key) const noexcept {
-				return KeyHasher(key);
-			}
-
-			[[gnu::pure]]
-			size_t operator()(const Item &value) const noexcept {
-				return ValueHasher(value);
-			}
+			size_t operator()(const char *key) const noexcept;
 		};
 
 		struct Equal {
 			[[gnu::pure]]
-			bool operator()(const char *a, const Item &b) const noexcept {
-				return KeyValueEqual(a, b);
-			}
+			bool operator()(const char *a, const char *b) const noexcept;
+		};
 
+		struct GetKeyFunction {
 			[[gnu::pure]]
-			bool operator()(const Item &a, const Item &b) const noexcept {
-				return KeyValueEqual(a.GetKey(), b);
+			const char *operator()(const Item &item) const noexcept {
+				return item.GetKey();
 			}
 		};
 	};
 
 	static constexpr size_t N_BUCKETS = 251;
-	using Map = IntrusiveHashSet<Item, N_BUCKETS,
-				     IntrusiveHashSetOperators<Item::Hash,
-							       Item::Equal>>;
+	using Map =
+		IntrusiveHashSet<Item, N_BUCKETS,
+				 IntrusiveHashSetOperators<Item::Hash,
+							   Item::Equal,
+							   Item::GetKeyFunction>>;
 
 	EventLoop &event_loop;
 

@@ -566,22 +566,10 @@ MultiStock::MapItem::Hash::operator()(const char *key) const noexcept
 	return djb_hash_string(key);
 }
 
-inline std::size_t
-MultiStock::MapItem::Hash::operator()(const MapItem &value) const noexcept
-{
-	return (*this)(value.GetName());
-}
-
 inline bool
-MultiStock::MapItem::Equal::operator()(const char *a, const MapItem &b) const noexcept
+MultiStock::MapItem::Equal::operator()(const char *a, const char *b) const noexcept
 {
-	return StringIsEqual(a, b.GetName());
-}
-
-inline bool
-MultiStock::MapItem::Equal::operator()(const MapItem &a, const MapItem &b) const noexcept
-{
-	return (*this)(a.GetName(), b);
+	return StringIsEqual(a, b);
 }
 
 MultiStock::MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,

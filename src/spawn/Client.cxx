@@ -53,17 +53,10 @@ struct SpawnServerClient::ChildProcess final
 	}
 };
 
-inline std::size_t
-SpawnServerClient::ChildProcessHash::operator()(const ChildProcess &i) const noexcept
+inline unsigned
+SpawnServerClient::ChildProcessGetKey::operator()(const ChildProcess &i) const noexcept
 {
-	return operator()(i.pid);
-}
-
-inline bool
-SpawnServerClient::ChildProcessEqual::operator()(const unsigned a,
-						 const ChildProcess &b) const noexcept
-{
-	return a == b.pid;
+	return i.pid;
 }
 
 SpawnServerClient::SpawnServerClient(EventLoop &event_loop,

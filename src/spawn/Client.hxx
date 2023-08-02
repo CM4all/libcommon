@@ -23,19 +23,9 @@ class SpawnServerClientHandler;
 class SpawnServerClient final : public SpawnService {
 	struct ChildProcess;
 
-	struct ChildProcessHash {
-		constexpr std::size_t operator()(unsigned i) const noexcept {
-			return i;
-		}
-
+	struct ChildProcessGetKey {
 		[[gnu::pure]]
-		std::size_t operator()(const ChildProcess &i) const noexcept;
-	};
-
-	struct ChildProcessEqual{
-		[[gnu::pure]]
-		bool operator()(const unsigned a,
-				const ChildProcess &b) const noexcept;
+		unsigned operator()(const ChildProcess &i) const noexcept;
 	};
 
 	struct KillQueueItem {
@@ -49,8 +39,9 @@ class SpawnServerClient final : public SpawnService {
 
 	using ChildProcessSet =
 		IntrusiveHashSet<ChildProcess, 1021,
-				 IntrusiveHashSetOperators<ChildProcessHash,
-							   ChildProcessEqual>>;
+				 IntrusiveHashSetOperators<std::hash<unsigned>,
+							   std::equal_to<unsigned>,
+							   ChildProcessGetKey>>;
 
 	ChildProcessSet processes;
 

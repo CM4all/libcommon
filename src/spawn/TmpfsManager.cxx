@@ -92,24 +92,10 @@ TmpfsManager::ItemHash::operator()(std::string_view name) const noexcept
 	return djb_hash(AsBytes(name));
 }
 
-inline std::size_t
-TmpfsManager::ItemHash::operator()(const Item &item) const noexcept
+inline std::string_view
+TmpfsManager::ItemGetKey::operator()(const Item &item) const noexcept
 {
-	return operator()(item.name);
-}
-
-inline bool
-TmpfsManager::ItemEqual::operator()(std::string_view a,
-				    const Item &b) const noexcept
-{
-	return a == b.name;
-}
-
-inline bool
-TmpfsManager::ItemEqual::operator()(const Item &a,
-				    const Item &b) const noexcept
-{
-	return a.name == b.name;
+	return item.name;
 }
 
 TmpfsManager::TmpfsManager(UniqueFileDescriptor _mnt) noexcept

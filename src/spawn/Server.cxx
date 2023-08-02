@@ -117,20 +117,9 @@ public:
 	/* virtual methods from ExitListener */
 	void OnChildProcessExit(int status) noexcept override;
 
-	struct Hash {
-		constexpr std::size_t operator()(unsigned i) const noexcept {
-			return i;
-		}
-
-		std::size_t operator()(const SpawnServerChild &i) const noexcept {
-			return i.id;
-		}
-	};
-
-	struct Equal {
-		bool operator()(const unsigned a,
-				const SpawnServerChild &b) const noexcept {
-			return a == b.id;
+	struct GetKey {
+		unsigned operator()(const SpawnServerChild &child) const noexcept {
+			return child.id;
 		}
 	};
 };
@@ -145,9 +134,11 @@ class SpawnServerConnection final
 
 	SocketEvent event;
 
-	using ChildIdMap = IntrusiveHashSet<SpawnServerChild, 1021,
-					    IntrusiveHashSetOperators<SpawnServerChild::Hash,
-								      SpawnServerChild::Equal>>;
+	using ChildIdMap =
+		IntrusiveHashSet<SpawnServerChild, 1021,
+				 IntrusiveHashSetOperators<std::hash<unsigned>,
+							   std::equal_to<unsigned>,
+							   SpawnServerChild::GetKey>>;
 	ChildIdMap children;
 
 	struct ExitQueueItem {
