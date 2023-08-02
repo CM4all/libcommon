@@ -26,28 +26,18 @@ struct IntrusiveHashSetHook {
 };
 
 /**
- * Detect the hook type.
- */
-template<typename U>
-struct IntrusiveHashSetHookDetection {
-	/* TODO can this be simplified somehow, without checking for
-	   all possible enum values? */
-	using type = std::conditional_t<std::is_base_of_v<IntrusiveHashSetHook<IntrusiveHookMode::NORMAL>, U>,
-					IntrusiveHashSetHook<IntrusiveHookMode::NORMAL>,
-					std::conditional_t<std::is_base_of_v<IntrusiveHashSetHook<IntrusiveHookMode::TRACK>, U>,
-							   IntrusiveHashSetHook<IntrusiveHookMode::TRACK>,
-							   std::conditional_t<std::is_base_of_v<IntrusiveHashSetHook<IntrusiveHookMode::AUTO_UNLINK>, U>,
-									      IntrusiveHashSetHook<IntrusiveHookMode::AUTO_UNLINK>,
-									      void>>>;
-};
-
-/**
  * For classes which embed #IntrusiveHashSetHook as base class.
  */
 template<typename T>
 struct IntrusiveHashSetBaseHookTraits {
+	/* this is a helper which is never called, but only used in
+	   declval() to detect the hook's IntrusiveHookMode template
+	   parameter */
+	template<IntrusiveHookMode mode>
+	static constexpr IntrusiveHashSetHook<mode> _Cast(const IntrusiveHashSetHook<mode> &) noexcept;
+
 	template<typename U>
-	using Hook = typename IntrusiveHashSetHookDetection<U>::type;
+	using Hook = decltype(_Cast(std::declval<U>()));
 
 	static constexpr T *Cast(Hook<T> *node) noexcept {
 		return static_cast<T *>(node);
