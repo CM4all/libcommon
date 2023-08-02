@@ -49,7 +49,8 @@ class SpawnServerClient final : public SpawnService {
 
 	using ChildProcessSet =
 		IntrusiveHashSet<ChildProcess, 1021,
-				 ChildProcessHash, ChildProcessEqual>;
+				 IntrusiveHashSetOperators<ChildProcessHash,
+							   ChildProcessEqual>>;
 
 	ChildProcessSet processes;
 

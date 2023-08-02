@@ -37,7 +37,8 @@ class TmpfsManager {
 		bool operator()(const Item &a, const Item &b) const noexcept;
 	};
 
-	IntrusiveHashSet<Item, 1021, ItemHash, ItemEqual> items;
+	IntrusiveHashSet<Item, 1021,
+			 IntrusiveHashSetOperators<ItemHash, ItemEqual>> items;
 	IntrusiveList<Item> abandoned;
 
 	const UniqueFileDescriptor mnt;

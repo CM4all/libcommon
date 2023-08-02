@@ -146,8 +146,8 @@ class SpawnServerConnection final
 	SocketEvent event;
 
 	using ChildIdMap = IntrusiveHashSet<SpawnServerChild, 1021,
-					    SpawnServerChild::Hash,
-					    SpawnServerChild::Equal>;
+					    IntrusiveHashSetOperators<SpawnServerChild::Hash,
+								      SpawnServerChild::Equal>>;
 	ChildIdMap children;
 
 	struct ExitQueueItem {

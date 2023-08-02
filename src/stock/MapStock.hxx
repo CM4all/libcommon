@@ -75,7 +75,9 @@ class StockMap : StockHandler {
 	};
 
 	static constexpr size_t N_BUCKETS = 251;
-	using Map = IntrusiveHashSet<Item, N_BUCKETS, Item::Hash, Item::Equal>;
+	using Map = IntrusiveHashSet<Item, N_BUCKETS,
+				     IntrusiveHashSetOperators<Item::Hash,
+							       Item::Equal>>;
 
 	EventLoop &event_loop;
 
