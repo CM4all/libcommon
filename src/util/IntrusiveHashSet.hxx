@@ -30,11 +30,18 @@ struct IntrusiveHashSetHook {
  */
 template<typename T>
 struct IntrusiveHashSetBaseHookTraits {
-	/* this is a helper which is never called, but only used in
-	   declval() to detect the hook's IntrusiveHookMode template
-	   parameter */
+	/* a never-called helper function which is used by _Cast() */
 	template<IntrusiveHookMode mode>
-	static constexpr IntrusiveHashSetHook<mode> _Cast(const IntrusiveHashSetHook<mode> &) noexcept;
+	static constexpr IntrusiveHashSetHook<mode> _Identity(const IntrusiveHashSetHook<mode> &) noexcept;
+
+	/* another never-called helper function which "calls"
+	   _Identity(), implicitly casting the item to the
+	   IntrusiveHashSetHook specialization; we use this to detect
+	   which IntrusiveHashSetHook specialization is used */
+	template<typename U>
+	static constexpr auto _Cast(const U &u) noexcept {
+		return decltype(_Identity(u))();
+	}
 
 	template<typename U>
 	using Hook = decltype(_Cast(std::declval<U>()));
