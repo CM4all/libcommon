@@ -228,3 +228,65 @@ TEST(StaticCache, Basic)
 	EXPECT_EQ(n_destructed, 0U);
 	EXPECT_EQ(n_overwritten, 1U);
 }
+
+TEST(StaticCache, NotAssignable)
+{
+	static unsigned n_constructed, n_destructed;
+
+	struct Value {
+		int value;
+
+		Value(int _value) noexcept
+			:value(_value) {
+			++n_constructed;
+		}
+
+		~Value() noexcept {
+			++n_destructed;
+		}
+
+		Value(const Value &) = delete;
+		Value &operator=(const Value &) = delete;
+	};
+
+	n_constructed = n_destructed = 0;
+
+	StaticCache<unsigned, Value, 8, 3> cache;
+	EXPECT_TRUE(cache.IsEmpty());
+	EXPECT_FALSE(cache.IsFull());
+	EXPECT_EQ(cache.Get(1), nullptr);
+
+	for (unsigned i = 1; i <= 7; ++i) {
+		cache.Put(i, i);
+
+		EXPECT_FALSE(cache.IsFull());
+		EXPECT_EQ(n_constructed, i);
+		EXPECT_EQ(n_destructed, 0U);
+	}
+
+	/* replace item */
+
+	n_constructed = n_destructed = 0;
+
+	cache.PutOrReplace(3, 43);
+	EXPECT_FALSE(cache.IsFull());
+	EXPECT_EQ(n_constructed, 1U);
+	EXPECT_EQ(n_destructed, 1U);
+
+	ASSERT_NE(cache.Get(3), nullptr);
+	EXPECT_EQ(cache.Get(3)->value, 43U);
+
+	cache.PutOrReplace(3, 42);
+	EXPECT_FALSE(cache.IsFull());
+	EXPECT_EQ(n_constructed, 2U);
+	EXPECT_EQ(n_destructed, 2U);
+
+	ASSERT_NE(cache.Get(3), nullptr);
+	EXPECT_EQ(cache.Get(3)->value, 42U);
+
+	for (unsigned i = 1; i <= 7; ++i) {
+		if (i == 3) continue;
+		ASSERT_NE(cache.Get(i), nullptr);
+		EXPECT_EQ(cache.Get(i)->value, i);
+	}
+}
