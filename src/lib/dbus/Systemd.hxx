@@ -29,7 +29,7 @@ WaitUnitRemoved(ODBus::Connection &connection, const char *name,
  * Throws on error.
  */
 void
-StopService(ODBus::Connection &connection,
+StopUnit(ODBus::Connection &connection,
 	    const char *name, const char *mode="replace");
 
 /**

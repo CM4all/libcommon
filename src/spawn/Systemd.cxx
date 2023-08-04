@@ -147,7 +147,7 @@ CreateSystemdScope(const char *name, const char *description,
 			fprintf(stderr, "Old unit %s didn't disappear; attempting to stop it\n",
 				name);
 			try {
-				Systemd::StopService(connection, name);
+				Systemd::StopUnit(connection, name);
 				Systemd::WaitUnitRemoved(connection, name, -1);
 			} catch (...) {
 				fprintf(stderr, "Failed to stop unit %s: ", name);

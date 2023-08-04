@@ -84,8 +84,8 @@ WaitUnitRemoved(ODBus::Connection &connection, const char *name,
 }
 
 void
-StopService(ODBus::Connection &connection,
-	    const char *name, const char *mode)
+StopUnit(ODBus::Connection &connection,
+	 const char *name, const char *mode)
 {
 	using namespace ODBus;
 
