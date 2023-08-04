@@ -94,7 +94,7 @@ StopService(ODBus::Connection &connection,
 					  "org.freedesktop.systemd1.Manager",
 					  "StopUnit");
 
-	AppendMessageIter(*msg.Get()).Append(name).Append(mode);
+	AppendMessageIter{*msg.Get()}.Append(name).Append(mode);
 
 	auto pending = PendingCall::SendWithReply(connection, msg.Get());
 
@@ -123,7 +123,7 @@ ResetFailedUnit(ODBus::Connection &connection, const char *name)
 					  "org.freedesktop.systemd1.Manager",
 					  "ResetFailedUnit");
 
-	AppendMessageIter(*msg.Get()).Append(name);
+	AppendMessageIter{*msg.Get()}.Append(name);
 
 	auto pending = PendingCall::SendWithReply(connection, msg.Get());
 
