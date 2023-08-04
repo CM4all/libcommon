@@ -8,8 +8,7 @@
 #include "AppendIter.hxx"
 #include "PendingCall.hxx"
 #include "Error.hxx"
-
-#include <string.h>
+#include "util/StringAPI.hxx"
 
 namespace Systemd {
 
@@ -38,7 +37,7 @@ WaitJobRemoved(ODBus::Connection &connection, const char *object_path)
 					 DBUS_TYPE_STRING, &result_string))
 				error.Throw("JobRemoved failed");
 
-			if (strcmp(removed_object_path, object_path) == 0)
+			if (StringIsEqual(removed_object_path, object_path))
 				break;
 		}
 	}
@@ -78,7 +77,7 @@ WaitUnitRemoved(ODBus::Connection &connection, const char *name,
 				return false;
 			}
 
-			if (strcmp(unit_name, name) == 0)
+			if (StringIsEqual(unit_name, name))
 				return true;
 		}
 	}
