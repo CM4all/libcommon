@@ -119,6 +119,7 @@ endif
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   # this library needs std::byte
+  subdir('src/lib/nettle')
   subdir('src/lib/sodium')
   subdir('src/jwt')
 endif

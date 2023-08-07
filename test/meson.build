@@ -36,6 +36,7 @@ subdir('cares')
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   # this library needs std::byte
+  subdir('nettle')
   subdir('sodium')
   subdir('jwt')
 endif

@@ -33,6 +33,7 @@ You need:
 - `libseccomp <https://github.com/seccomp/libseccomp>`__
 - `liburing <https://github.com/axboe/liburing>`__
 - `libwas <https://github.com/CM4all/libwas>`__
+- `Nettle <https://www.lysator.liu.se/~nisse/nettle/>`__
 - `OpenSSL <https://www.openssl.org/>`__
 - `LuaJit <http://luajit.org/>`__
 - `PCRE <https://www.pcre.org/>`__
@@ -80,6 +81,8 @@ external libraries:
 - ``lib/fmt``: `libfmt <https://fmt.dev/>`__ helpers
 - ``lib/mariadb``: C++ wrappers for the `MariaDB
   <https://mariadb.org/>`__ client library
+- ``lib/nettle``: `Nettle
+  <https://www.lysator.liu.se/~nisse/nettle/>`__ C++ wrappers
 - ``lib/openssl``: `OpenSSL <https://www.openssl.org/>`__ C++ wrappers
 - ``lib/pcre``: `PCRE <https://www.pcre.org/>`__ C++ wrappers
 - ``lib/sodium``: `libsodium <https://github.com/jedisct1/libsodium/>`__
