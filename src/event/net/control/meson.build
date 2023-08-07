@@ -10,4 +10,7 @@ control_server = static_library(
 
 control_server_dep = declare_dependency(
   link_with: control_server,
+  dependencies: [
+    event_net_dep,
+  ],
 )
