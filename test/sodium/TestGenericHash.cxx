@@ -4,31 +4,23 @@
 
 #include "lib/sodium/GenericHash.hxx"
 #include "util/HexFormat.hxx"
-#include "util/StringBuffer.hxx"
+#include "util/SpanCast.hxx"
 
 #include <gtest/gtest.h>
 
 #include <array>
 #include <cstddef> // for std::byte
 
-template<std::size_t size>
-static auto
-HexFormat(const std::array<std::byte, size> &src) noexcept
-{
-	StringBuffer<size * 2 + 1> dest;
-	*HexFormat(dest.data(), std::span{src}) = 0;
-	return dest;
-}
-
 template<std::size_t bits>
 static void
-TGH(const char *expected)
+TGH(std::string_view expected)
 {
 	constexpr std::size_t size = bits / 8;
 	static_assert(size * 8 == bits);
 	GenericHashState state(size);
-	const auto hash = HexFormat(state.GetFinalT<std::array<std::byte, size>>());
-	EXPECT_STREQ(hash, expected);
+	const auto hash = state.GetFinalT<std::array<std::byte, size>>();
+	const auto hex = HexFormat(std::span{hash});
+	EXPECT_EQ(ToStringView(hex), expected);
 }
 
 TEST(TestGenericHash, Empty384)
