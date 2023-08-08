@@ -494,7 +494,15 @@ try {
 	if (userns_map_pipe_w.IsDefined()) {
 		/* set up the child's uid/gid mapping and wake it
 		   up */
-		DenySetGroups(pid);
+
+		if (is_sys_admin)
+			/* do this only if we have CAP_SYS_ADMIN
+			   (i.e. not already in a container); without
+			   it, we can't call setgroups() in the new
+			   child process because of this
+			   self-inflicted restriction */
+			DenySetGroups(pid);
+
 		params.ns.SetupUidGidMap(params.uid_gid, pid);
 
 		/* now the right process is ready to set up its mount
