@@ -4,7 +4,7 @@ was_json = static_library(
   'Write.cxx',
   include_directories: inc,
   dependencies: [
-    libwas,
+    was_dep,
     boost_json_dep,
   ],
 )
