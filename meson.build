@@ -94,6 +94,12 @@ endif
 
 inc = include_directories('src', 'fake', '.')
 
+libcommon_require_avahi = get_option('avahi')
+libcommon_require_pg = get_option('pg')
+libcommon_require_sodium = get_option('sodium')
+libcommon_require_uring = get_option('uring')
+libcommon_enable_was = get_option('was')
+
 subdir('src/util')
 subdir('src/lib/fmt')
 subdir('src/uri')

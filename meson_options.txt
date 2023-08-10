@@ -1,3 +1,9 @@
+option('avahi', type: 'feature', description: 'Avahi support (using libavahi-client)')
+option('pg', type: 'feature', description: 'PostgreSQL support (using libpq)')
+option('sodium', type: 'feature', description: 'libsodium support')
+option('uring', type: 'feature', description: 'enable io_uring (using liburing)')
+option('was', type: 'feature', description: 'WAS support')
+
 option('fuzzer', type: 'boolean', value: false,
        description: 'Build fuzzers')
 
