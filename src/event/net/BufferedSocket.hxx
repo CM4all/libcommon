@@ -85,6 +85,38 @@ enum class DirectResult {
 };
 
 /**
+ * Return type for BufferedSocket::Read().
+ */
+enum class BufferedReadResult {
+	/**
+	 * Operation was successful and the socket is still
+	 * connected.  It is unspecified whether data was
+	 * available.
+	 */
+	OK,
+
+	/**
+	 * Data is available but the handler blocks.
+	 */
+	BLOCKING,
+
+	/**
+	 * Operation was successful, but the socket is
+	 * disconnected (may have just been disconnected or
+	 * already disconnected before).  It is unspecified
+	 * whether (remaining) data has been consumed by the
+	 * handler.
+	 */
+	DISCONNECTED,
+
+	/**
+	 * During the method call, the #BufferedSocket has
+	 * been destroyed.
+	 */
+	DESTROYED,
+};
+
+/**
  * Special return values for BufferedSocket::Write() and
  * BufferedSocket::WriteFrom().
  */
@@ -535,7 +567,7 @@ public:
 	 * data available yet) an event gets scheduled and the
 	 * function returns immediately.
 	 */
-	bool Read() noexcept;
+	BufferedReadResult Read() noexcept;
 
 	/**
 	 * Variant of Write() which does not touch events and does not
@@ -616,11 +648,11 @@ private:
 	void Ended() noexcept;
 
 	BufferedResult InvokeData() noexcept;
-	bool SubmitFromBuffer() noexcept;
-	bool SubmitDirect() noexcept;
+	BufferedReadResult SubmitFromBuffer() noexcept;
+	BufferedReadResult SubmitDirect() noexcept;
 	bool FillBuffer() noexcept;
-	bool TryRead2() noexcept;
-	bool TryRead() noexcept;
+	BufferedReadResult TryRead2() noexcept;
+	BufferedReadResult TryRead() noexcept;
 
 	static bool OnWrite(void *ctx) noexcept;
 	static bool OnRead(void *ctx) noexcept;

@@ -160,11 +160,11 @@ BufferedSocket::InvokeData() noexcept
 	}
 }
 
-bool
+BufferedReadResult
 BufferedSocket::SubmitFromBuffer() noexcept
 {
 	if (IsEmpty())
-		return true;
+		return BufferedReadResult::OK;
 
 	BufferedResult result = InvokeData();
 	assert((result == BufferedResult::CLOSED) || IsValid());
@@ -176,7 +176,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 
 			if (!IsConnected()) {
 				Ended();
-				return false;
+				return BufferedReadResult::DESTROYED;
 			}
 
 			/* try to refill the buffer, now that it's
@@ -185,22 +185,19 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		} else if (IsFull()) {
 			if (IsConnected())
 				UnscheduleRead();
-		} else {
-			if (!IsConnected())
-				return false;
 		}
 
-		return true;
+		return IsConnected() ? BufferedReadResult::OK : BufferedReadResult::DISCONNECTED;
 
 	case BufferedResult::MORE:
 		if (!IsConnected()) {
 			ClosedPrematurely();
-			return false;
+			return BufferedReadResult::DESTROYED;
 		}
 
 		if (IsFull()) {
 			handler->OnBufferedError(std::make_exception_ptr(SocketBufferFullError()));
-			return false;
+			return BufferedReadResult::DESTROYED;
 		}
 
 		input.FreeIfEmpty();
@@ -210,7 +207,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		   consumed */
 		base.ScheduleRead();
 
-		return true;
+		return BufferedReadResult::OK;
 
 	case BufferedResult::AGAIN:
 		/* unreachable, has been handled by InvokeData() */
@@ -220,7 +217,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 	case BufferedResult::CLOSED:
 		/* the BufferedSocket object has been destroyed by the
 		   handler */
-		return false;
+		return BufferedReadResult::DESTROYED;
 	}
 
 	assert(false);
@@ -230,7 +227,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 /**
  * @return true if more data should be read from the socket
  */
-inline bool
+inline BufferedReadResult
 BufferedSocket::SubmitDirect() noexcept
 {
 	assert(IsConnected());
@@ -242,32 +239,34 @@ BufferedSocket::SubmitDirect() noexcept
 		result = handler->OnBufferedDirect(base.GetSocket(), base.GetType());
 	} catch (...) {
 		handler->OnBufferedError(std::current_exception());
-		return false;
+		return BufferedReadResult::DESTROYED;
 	}
 
 	switch (result) {
 	case DirectResult::OK:
 		/* some data was transferred: refresh the read timeout */
 		base.ScheduleRead();
-		return true;
+		return BufferedReadResult::OK;
 
 	case DirectResult::BLOCKING:
 		UnscheduleRead();
-		return false;
+		return BufferedReadResult::BLOCKING;
 
 	case DirectResult::EMPTY:
 		base.ScheduleRead();
-		return true;
+		return BufferedReadResult::OK;
 
 	case DirectResult::END:
-		return ClosedByPeer();
+		return ClosedByPeer()
+			? BufferedReadResult::DISCONNECTED
+			: BufferedReadResult::DESTROYED;
 
 	case DirectResult::CLOSED:
-		return false;
+		return BufferedReadResult::DESTROYED;
 
 	case DirectResult::ERRNO:
 		handler->OnBufferedError(std::make_exception_ptr(MakeErrno("splice() from socket failed")));
-		return false;
+		return BufferedReadResult::DESTROYED;
 	}
 
 	assert(false);
@@ -315,7 +314,7 @@ BufferedSocket::FillBuffer() noexcept
 	return true;
 }
 
-inline bool
+inline BufferedReadResult
 BufferedSocket::TryRead2() noexcept
 {
 	assert(IsValid());
@@ -330,15 +329,21 @@ BufferedSocket::TryRead2() noexcept
 			   outside of the OnBufferedData() callback;
 			   now's the time for the "ended" check */
 			Ended();
-			return false;
+			return BufferedReadResult::DESTROYED;
 		}
 
-		SubmitFromBuffer();
-		return false;
+		return SubmitFromBuffer();
 	} else if (direct) {
 		/* empty the remaining buffer before doing direct transfer */
-		if (!SubmitFromBuffer())
-			return false;
+		switch (auto result = SubmitFromBuffer()) {
+		case BufferedReadResult::OK:
+			break;
+
+		case BufferedReadResult::BLOCKING:
+		case BufferedReadResult::DISCONNECTED:
+		case BufferedReadResult::DESTROYED:
+			return result;
+		}
 
 		if (!direct)
 			/* meanwhile, the "direct" flag was reverted by the
@@ -350,7 +355,7 @@ BufferedSocket::TryRead2() noexcept
 			   ready for consuming it - stop reading from the
 			   socket */
 			UnscheduleRead();
-			return true;
+			return BufferedReadResult::OK;
 		}
 
 		return SubmitDirect();
@@ -358,18 +363,25 @@ BufferedSocket::TryRead2() noexcept
 		got_data = false;
 
 		if (!FillBuffer())
-			return false;
+			return BufferedReadResult::DESTROYED;
 
-		if (!SubmitFromBuffer())
-			return false;
+		switch (auto result = SubmitFromBuffer()) {
+		case BufferedReadResult::OK:
+			break;
+
+		case BufferedReadResult::BLOCKING:
+		case BufferedReadResult::DISCONNECTED:
+		case BufferedReadResult::DESTROYED:
+			return result;
+		}
 
 		if (got_data)
 			base.ScheduleRead();
-		return true;
+		return BufferedReadResult::OK;
 	}
 }
 
-bool
+BufferedReadResult
 BufferedSocket::TryRead() noexcept
 {
 	assert(IsValid());
@@ -382,12 +394,14 @@ BufferedSocket::TryRead() noexcept
 	reading = true;
 #endif
 
-	const bool result = TryRead2();
+	const auto result = TryRead2();
 
 #ifndef NDEBUG
 	if (!destructed) {
 		assert(reading);
 		reading = false;
+	} else {
+		assert(result == BufferedReadResult::DESTROYED);
 	}
 #endif
 
@@ -433,7 +447,17 @@ BufferedSocket::OnSocketRead() noexcept
 	assert(!destroyed);
 	assert(!ended);
 
-	return TryRead();
+	switch (TryRead()) {
+	case BufferedReadResult::OK:
+	case BufferedReadResult::BLOCKING:
+		break;
+
+	case BufferedReadResult::DISCONNECTED:
+	case BufferedReadResult::DESTROYED:
+		return false;
+	}
+
+	return true;
 }
 
 bool
@@ -568,7 +592,7 @@ BufferedSocket::Destroy() noexcept
 	destroyed = true;
 }
 
-bool
+BufferedReadResult
 BufferedSocket::Read() noexcept
 {
 	assert(!reading);
