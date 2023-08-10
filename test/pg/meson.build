@@ -1,3 +1,7 @@
+if not pg_dep.found()
+  subdir_done()
+endif
+
 test(
   'TestPg',
   executable(

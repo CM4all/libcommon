@@ -1,12 +1,14 @@
-executable(
-  'RunCoQuery',
-  'RunCoQuery.cxx',
-  include_directories: inc,
-  dependencies: [
-    pg_dep, stock_dep,
-    coroutines_dep,
-  ],
-)
+if pg_dep.found()
+  executable(
+    'RunCoQuery',
+    'RunCoQuery.cxx',
+    include_directories: inc,
+    dependencies: [
+      pg_dep, stock_dep,
+      coroutines_dep,
+    ],
+  )
+endif
 
 executable(
   'RunCoLookup',
@@ -17,14 +19,16 @@ executable(
   ],
 )
 
-executable(
-  'RunCoReadTextFile',
-  'RunCoReadTextFile.cxx',
-  include_directories: inc,
-  dependencies: [
-    event_uring_dep, stock_dep,
-  ],
-)
+if event_uring_dep.found()
+  executable(
+    'RunCoReadTextFile',
+    'RunCoReadTextFile.cxx',
+    include_directories: inc,
+    dependencies: [
+      event_uring_dep, stock_dep,
+    ],
+  )
+endif
 
 test(
   'TestCo',

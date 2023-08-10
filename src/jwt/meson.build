@@ -1,3 +1,8 @@
+if not sodium_dep.found()
+  jwt_dep = sodium_dep
+  subdir_done()
+endif
+
 jwt = static_library(
   'jwt',
   'RS256.cxx',

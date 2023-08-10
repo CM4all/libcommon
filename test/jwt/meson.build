@@ -1,3 +1,7 @@
+if not jwt_dep.found()
+  subdir_done()
+endif
+
 test(
   'TestJWT',
   executable(

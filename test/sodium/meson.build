@@ -1,3 +1,7 @@
+if not sodium_dep.found()
+  subdir_done()
+endif
+
 test(
   'TestSodium',
   executable(

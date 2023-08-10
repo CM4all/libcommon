@@ -1,3 +1,8 @@
+if not was_dep.found()
+  was_json_dep = was_dep
+  subdir_done()
+endif
+
 was_json = static_library(
   'was_json',
   'Read.cxx',
