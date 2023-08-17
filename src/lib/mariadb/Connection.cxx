@@ -4,6 +4,7 @@
 
 #include "Connection.hxx"
 #include "Statement.hxx"
+#include "Result.hxx"
 #include "util/RuntimeError.hxx"
 
 #include <stdexcept>

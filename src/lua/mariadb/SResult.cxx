@@ -7,6 +7,7 @@
 #include "lua/Error.hxx"
 #include "lib/mariadb/BindVector.hxx"
 #include "lib/mariadb/Statement.hxx"
+#include "lib/mariadb/Result.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/StringAPI.hxx"
 
