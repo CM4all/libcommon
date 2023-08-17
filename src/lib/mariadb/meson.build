@@ -2,11 +2,13 @@ libmariadb = dependency('libmariadb')
 
 mariadb = static_library(
   'mariadb',
+  'Error.cxx',
   'Connection.cxx',
   'Statement.cxx',
   include_directories: inc,
   dependencies: [
     libmariadb,
+    fmt_dep,
   ],
 )
 

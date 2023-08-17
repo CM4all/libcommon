@@ -5,9 +5,7 @@
 #include "Connection.hxx"
 #include "Statement.hxx"
 #include "Result.hxx"
-#include "util/RuntimeError.hxx"
-
-#include <stdexcept>
+#include "Error.hxx"
 
 void
 MysqlConnection::Connect(const char *host,
@@ -18,15 +16,14 @@ MysqlConnection::Connect(const char *host,
 {
 	if (!mysql_real_connect(&mysql, host, user, passwd, db, port,
 				unix_socket, clientflag))
-		throw std::runtime_error{mysql_error(&mysql)};
+		throw MysqlError{mysql, "mysql_real_connect() failed"};
 }
 
 void
 MysqlConnection::Query(std::string_view sql)
 {
 	if (mysql_real_query(&mysql, sql.data(), sql.size()) != 0)
-		throw FormatRuntimeError("mysql_real_query() failed: %s",
-					 mysql_error(&mysql));
+		throw MysqlError{mysql, "mysql_real_query() failed"};
 }
 
 MysqlResult
@@ -34,8 +31,7 @@ MysqlConnection::StoreResult()
 {
 	auto *r = mysql_store_result(&mysql);
 	if (r == nullptr && mysql_errno(&mysql) != 0)
-		throw FormatRuntimeError("mysql_store_result() failed: %s",
-					 mysql_error(&mysql));
+		throw MysqlError{mysql, "mysql_store_result() failed: %s"};
 
 	return MysqlResult{r};
 }
@@ -45,8 +41,7 @@ MysqlConnection::NextResult()
 {
 	int r = mysql_next_result(&mysql);
 	if (r > 0)
-		throw FormatRuntimeError("mysql_next_result() failed: %s",
-					 mysql_error(&mysql));
+		throw MysqlError{mysql, "mysql_next_result() failed: %s"};
 
 	return r == 0;
 }

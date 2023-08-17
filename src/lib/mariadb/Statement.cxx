@@ -4,9 +4,10 @@
 
 #include "Statement.hxx"
 #include "Result.hxx"
-#include "util/RuntimeError.hxx"
+#include "Error.hxx"
 
 #include <new> // for std::bad_alloc
+#include <stdexcept>
 
 MysqlStatement::MysqlStatement(MYSQL &mysql)
 	:stmt(mysql_stmt_init(&mysql))
@@ -19,32 +20,28 @@ void
 MysqlStatement::Prepare(std::string_view sql)
 {
 	if (mysql_stmt_prepare(stmt, sql.data(), sql.size()) != 0)
-		throw FormatRuntimeError("mysql_stmt_prepare() failed: %s",
-					 mysql_stmt_error(stmt));
+		throw MysqlError{*stmt, "mysql_stmt_prepare() failed"};
 }
 
 void
 MysqlStatement::BindParam(MYSQL_BIND *bnd)
 {
 	if (mysql_stmt_bind_param(stmt, bnd) != 0)
-		throw FormatRuntimeError("mysql_stmt_bind_param() failed: %s",
-					 mysql_stmt_error(stmt));
+		throw MysqlError{*stmt, "mysql_stmt_bind_param() failed"};
 }
 
 void
 MysqlStatement::Execute()
 {
 	if (mysql_stmt_execute(stmt) != 0)
-		throw FormatRuntimeError("mysql_stmt_execute() failed: %s",
-					 mysql_stmt_error(stmt));
+		throw MysqlError{*stmt, "mysql_stmt_execute() failed"};
 }
 
 void
 MysqlStatement::StoreResult()
 {
 	if (mysql_stmt_store_result(stmt) != 0)
-		throw FormatRuntimeError("mysql_stmt_store_result() failed: %s",
-					 mysql_stmt_error(stmt));
+		throw MysqlError{*stmt, "mysql_stmt_store_result() failed"};
 }
 
 MysqlResult
@@ -55,8 +52,7 @@ MysqlStatement::ResultMetadata()
 		if (mysql_stmt_errno(stmt) == 0)
 			throw std::runtime_error("Query can not return a result");
 		else
-			throw FormatRuntimeError("mysql_stmt_result_metadata() failed: %s",
-						 mysql_stmt_error(stmt));
+			throw MysqlError{*stmt, "mysql_stmt_result_metadata() failed"};
 	}
 
 	return MysqlResult{result};
@@ -66,8 +62,7 @@ void
 MysqlStatement::BindResult(MYSQL_BIND *bnd)
 {
 	if (mysql_stmt_bind_result(stmt, bnd) != 0)
-		throw FormatRuntimeError("mysql_stmt_bind_result() failed: %s",
-					 mysql_stmt_error(stmt));
+		throw MysqlError{*stmt, "mysql_stmt_bind_result() failed"};
 }
 
 bool
@@ -82,8 +77,7 @@ MysqlStatement::Fetch()
 		return false;
 
 	default:
-		throw FormatRuntimeError("mysql_stmt_fetch() failed: %s",
-					 mysql_stmt_error(stmt));
+		throw MysqlError{*stmt, "mysql_stmt_fetch() failed"};
 	}
 }
 
@@ -92,6 +86,5 @@ MysqlStatement::FetchColumn(MYSQL_BIND &bind, unsigned int column,
 			    unsigned long offset)
 {
 	if (mysql_stmt_fetch_column(stmt, &bind, column, offset) != 0)
-		throw FormatRuntimeError("mysql_stmt_fetch_column() failed: %s",
-					 mysql_stmt_error(stmt));
+		throw MysqlError{*stmt, "mysql_stmt_fetch_column() failed"};
 }
