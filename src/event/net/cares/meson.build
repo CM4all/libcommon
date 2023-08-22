@@ -1,4 +1,9 @@
-libcares = dependency('libcares')
+libcares = dependency('libcares',
+                      required: get_variable('libcommon_require_cares', true))
+if not libcares.found()
+  event_net_cares_dep = libcares
+  subdir_done()
+endif
 
 event_net_cares_sources = []
 

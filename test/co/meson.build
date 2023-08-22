@@ -10,14 +10,16 @@ if pg_dep.found()
   )
 endif
 
-executable(
-  'RunCoLookup',
-  'RunCoLookup.cxx',
-  include_directories: inc,
-  dependencies: [
-    event_net_cares_dep,
-  ],
-)
+if event_net_cares_dep.found()
+  executable(
+    'RunCoLookup',
+    'RunCoLookup.cxx',
+    include_directories: inc,
+    dependencies: [
+      event_net_cares_dep,
+    ],
+  )
+endif
 
 if event_uring_dep.found()
   executable(

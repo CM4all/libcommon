@@ -95,6 +95,11 @@ endif
 inc = include_directories('src', 'fake', '.')
 
 libcommon_require_avahi = get_option('avahi')
+libcommon_require_cares = get_option('cares')
+libcommon_require_curl = get_option('curl')
+libcommon_require_lua = get_option('lua')
+libcommon_require_nettle = get_option('nettle')
+libcommon_require_pcre = get_option('pcre')
 libcommon_require_pg = get_option('pg')
 libcommon_require_sodium = get_option('sodium')
 libcommon_require_uring = get_option('uring')
@@ -120,7 +125,10 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
   # this library checks __cpp_constinit and requires
   # std::memory_resource, so disable it with older GCC
   subdir('src/json')
-  subdir('src/lua/json')
+
+  if lua_dep.found()
+    subdir('src/lua/json')
+  endif
 endif
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
@@ -158,11 +166,13 @@ subdir('src/was')
 subdir('src/was/json')
 subdir('src/was/async')
 
-subdir('src/lua/net')
-subdir('src/lua/event')
-subdir('src/lua/sodium')
-subdir('src/lua/pg')
-subdir('src/lua/mariadb')
+if lua_dep.found()
+  subdir('src/lua/net')
+  subdir('src/lua/event')
+  subdir('src/lua/sodium')
+  subdir('src/lua/pg')
+  subdir('src/lua/mariadb')
+endif
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
   subdir('src/translation/server')

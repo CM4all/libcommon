@@ -1,4 +1,9 @@
-liblua = dependency('luajit')
+liblua = dependency('luajit',
+                    required: get_variable('libcommon_require_lua', true))
+if not liblua.found()
+  lua_dep = liblua
+  subdir_done()
+endif
 
 lua_sources = []
 

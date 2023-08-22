@@ -1,3 +1,7 @@
+if not pcre_dep.found()
+  subdir_done()
+endif
+
 test(
   'TestPcre',
   executable(

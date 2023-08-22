@@ -1,3 +1,7 @@
+if not nettle_dep.found()
+  subdir_done()
+endif
+
 test(
   'TestNettle',
   executable(

@@ -1,3 +1,7 @@
+if not curl_dep.found()
+  subdir_done()
+endif
+
 executable(
   'RunHttpGet',
   'RunHttpGet.cxx',

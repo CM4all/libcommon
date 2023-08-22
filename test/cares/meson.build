@@ -1,3 +1,7 @@
+if not event_net_cares_dep.found()
+  subdir_done()
+endif
+
 executable(
   'RunCares',
   'RunCares.cxx',
