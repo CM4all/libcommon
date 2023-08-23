@@ -223,11 +223,14 @@ public:
 
 	/**
 	 * The buffer has become empty after the socket has been
-	 * closed by the peer.  This may be called right after
-	 * OnBufferedClosed() if the input buffer was empty.
+	 * closed by the peer (but not yet destroyed).  This may be
+	 * called right after OnBufferedClosed() if the input buffer
+	 * was empty.
 	 *
 	 * If this method is not implemented, a "closed prematurely" error
 	 * is thrown.
+	 *
+	 * This method must not invoke BufferedSocket::Destroy().
 	 *
 	 * @return true if the stream has ended properly, false if the
 	 * stream end was unexpected (closed prematurely)

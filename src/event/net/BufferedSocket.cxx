@@ -39,14 +39,22 @@ BufferedSocket::ClosedPrematurely() noexcept
 void
 BufferedSocket::Ended() noexcept
 {
+	assert(IsValid());
 	assert(!IsConnected());
 	assert(!ended);
 
 #ifndef NDEBUG
 	ended = true;
+
+	DestructObserver destructed(*this);
 #endif
 
-	if (!handler->OnBufferedEnd())
+	const bool result = handler->OnBufferedEnd();
+
+	assert(!destructed);
+	assert(IsValid());
+
+	if (!result)
 		ClosedPrematurely();
 }
 
