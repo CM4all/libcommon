@@ -145,7 +145,6 @@ BufferedSocket::InvokeData() noexcept
 		if (destructed) {
 			assert(result == BufferedResult::CLOSED);
 		} else {
-			last_buffered_result = result;
 			assert((result == BufferedResult::CLOSED) || IsValid());
 		}
 #endif
@@ -539,7 +538,6 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type) noexcept
 #ifndef NDEBUG
 	reading = false;
 	ended = false;
-	last_buffered_result = BufferedResult(-1);
 #endif
 }
 
@@ -562,7 +560,6 @@ BufferedSocket::Init(SocketDescriptor _fd, FdType _fd_type,
 #ifndef NDEBUG
 	reading = false;
 	ended = false;
-	last_buffered_result = BufferedResult(-1);
 #endif
 }
 

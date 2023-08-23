@@ -350,8 +350,6 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 
 #ifndef NDEBUG
 	bool reading, ended;
-
-	BufferedResult last_buffered_result;
 #endif
 
 public:
