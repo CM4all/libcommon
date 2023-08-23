@@ -52,7 +52,7 @@ Control::OnBufferedData()
 {
 	if (done) {
 		InvokeError("received too much control data");
-		return BufferedResult::CLOSED;
+		return BufferedResult::DESTROYED;
 	}
 
 	while (true) {
@@ -62,7 +62,7 @@ Control::OnBufferedData()
 		    r.size() < sizeof(*header) + header->length) {
 			/* not enough data yet */
 			if (!InvokeDrained())
-				return BufferedResult::CLOSED;
+				return BufferedResult::DESTROYED;
 
 			return BufferedResult::MORE;
 		}
@@ -74,7 +74,7 @@ Control::OnBufferedData()
 		bool success = handler.OnWasControlPacket(was_command(header->command),
 							  {payload, header->length});
 		if (!success)
-			return BufferedResult::CLOSED;
+			return BufferedResult::DESTROYED;
 	}
 }
 

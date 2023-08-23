@@ -40,9 +40,10 @@ enum class BufferedResult {
 	AGAIN,
 
 	/**
-	 * The #BufferedSocket object has been closed by the handler.
+	 * The #BufferedSocket object has been destroyed by the
+	 * handler.
 	 */
-	CLOSED,
+	DESTROYED,
 };
 
 enum class DirectResult {

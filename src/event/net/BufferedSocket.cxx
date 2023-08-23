@@ -143,18 +143,18 @@ BufferedSocket::InvokeData() noexcept
 			assert(!destructed);
 
 			handler->OnBufferedError(std::current_exception());
-			return BufferedResult::CLOSED;
+			return BufferedResult::DESTROYED;
 		}
 
 #ifndef NDEBUG
 		if (destructed) {
-			assert(result == BufferedResult::CLOSED);
+			assert(result == BufferedResult::DESTROYED);
 		} else {
-			assert((result == BufferedResult::CLOSED) || IsValid());
+			assert((result == BufferedResult::DESTROYED) || IsValid());
 		}
 #endif
 
-		if (result != BufferedResult::CLOSED) {
+		if (result != BufferedResult::DESTROYED) {
 			assert(in_data_handler);
 			in_data_handler = false;
 		}
@@ -171,7 +171,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		return BufferedReadResult::OK;
 
 	BufferedResult result = InvokeData();
-	assert((result == BufferedResult::CLOSED) || IsValid());
+	assert((result == BufferedResult::DESTROYED) || IsValid());
 
 	switch (result) {
 	case BufferedResult::OK:
@@ -218,7 +218,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		assert(false);
 		gcc_unreachable();
 
-	case BufferedResult::CLOSED:
+	case BufferedResult::DESTROYED:
 		/* the BufferedSocket object has been destroyed by the
 		   handler */
 		return BufferedReadResult::DESTROYED;
