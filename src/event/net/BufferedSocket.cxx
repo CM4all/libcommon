@@ -16,7 +16,12 @@ BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
 {
 }
 
-BufferedSocket::~BufferedSocket() noexcept = default;
+BufferedSocket::~BufferedSocket() noexcept
+{
+	if (IsValid()) {
+		Destroy();
+	}
+}
 
 bool
 BufferedSocketHandler::OnBufferedTimeout() noexcept
