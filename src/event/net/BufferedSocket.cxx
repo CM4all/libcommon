@@ -294,7 +294,7 @@ BufferedSocket::SubmitDirect() noexcept
 	gcc_unreachable();
 }
 
-inline bool
+inline BufferedSocket::FillBufferResult
 BufferedSocket::FillBuffer() noexcept
 {
 	assert(IsConnected());
@@ -307,13 +307,13 @@ BufferedSocket::FillBuffer() noexcept
 		/* success: data was added to the buffer */
 		got_data = true;
 
-		return true;
+		return FillBufferResult::RECEIVED;
 	}
 
 	if (nbytes == -2) {
 		/* input buffer is full */
 		UnscheduleRead();
-		return true;
+		return FillBufferResult::BUFFER_FULL;
 	}
 
 	input.FreeIfEmpty();
@@ -322,25 +322,28 @@ BufferedSocket::FillBuffer() noexcept
 		/* socket closed */
 		switch (ClosedByPeer()) {
 		case ClosedByPeerResult::OK:
+			return FillBufferResult::DISCONNECTED;
+
 		case ClosedByPeerResult::ENDED:
-			return true;
+			return FillBufferResult::ENDED;
 
 		case ClosedByPeerResult::DESTROYED:
-			return false;
+			return FillBufferResult::DESTROYED;
 		}
 	}
 
 	if (nbytes == -1) {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
 			base.ScheduleRead();
-			return true;
+			return FillBufferResult::NOT_READY;
 		} else {
 			handler->OnBufferedError(std::make_exception_ptr(MakeErrno(e, "recv() failed")));
-			return false;
+			return FillBufferResult::DESTROYED;
 		}
 	}
 
-	return true;
+	// TODO this is unreachable
+	return FillBufferResult::RECEIVED;
 }
 
 inline BufferedReadResult
@@ -392,8 +395,41 @@ BufferedSocket::TryRead2() noexcept
 	} else {
 		got_data = false;
 
-		if (!FillBuffer())
+#ifndef NDEBUG
+		DestructObserver destructed(*this);
+#endif
+
+		switch (FillBuffer()) {
+		case FillBufferResult::RECEIVED:
+		case FillBufferResult::BUFFER_FULL:
+		case FillBufferResult::NOT_READY:
+			/* the socket is still connected and there may
+			   (or may not) be data in the input buffer */
+			assert(!destructed);
+			assert(IsValid());
+			assert(IsConnected());
+			break;
+
+		case FillBufferResult::DISCONNECTED:
+			/* the socket was just disconnected, but there
+			   is still data in the input buffer */
+			assert(!destructed);
+			assert(IsValid());
+			assert(!IsConnected());
+			break;
+
+		case FillBufferResult::ENDED:
+			/* the socket was just disconnected and there
+			   is no more data in the input buffer */
+			assert(!destructed);
+			assert(IsValid());
+			assert(!IsConnected());
+			return BufferedReadResult::DISCONNECTED;
+
+		case FillBufferResult::DESTROYED:
+			assert(destructed || !IsValid());
 			return BufferedReadResult::DESTROYED;
+		}
 
 		switch (auto result = SubmitFromBuffer()) {
 		case BufferedReadResult::OK:

@@ -676,7 +676,22 @@ private:
 	BufferedResult InvokeData() noexcept;
 	BufferedReadResult SubmitFromBuffer() noexcept;
 	BufferedReadResult SubmitDirect() noexcept;
-	bool FillBuffer() noexcept;
+
+	enum class FillBufferResult {
+		RECEIVED,
+		BUFFER_FULL,
+		NOT_READY,
+		DISCONNECTED,
+		ENDED,
+		DESTROYED,
+	};
+
+	/**
+	 * Receive data from the socket into the input buffer.
+	 */
+	[[nodiscard]]
+	FillBufferResult FillBuffer() noexcept;
+
 	BufferedReadResult TryRead2() noexcept;
 	BufferedReadResult TryRead() noexcept;
 
