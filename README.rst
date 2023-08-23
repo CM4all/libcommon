@@ -26,17 +26,20 @@ You need:
 - `Boost <http://boost.org/>`__
 - `libcurl <https://curl.haxx.se/>`__
 - `libfmt <https://fmt.dev/>`__
-- `libpq <https://www.postgresql.org/>`__
 - `libsystemd <https://www.freedesktop.org/wiki/Software/systemd/>`__
 - `libdbus <https://www.freedesktop.org/wiki/Software/dbus/>`__
 - `libcap <https://sites.google.com/site/fullycapable/>`__
 - `libseccomp <https://github.com/seccomp/libseccomp>`__
-- `liburing <https://github.com/axboe/liburing>`__
-- `libwas <https://github.com/CM4all/libwas>`__
 - `Nettle <https://www.lysator.liu.se/~nisse/nettle/>`__
 - `OpenSSL <https://www.openssl.org/>`__
 - `LuaJit <http://luajit.org/>`__
 - `PCRE <https://www.pcre.org/>`__
+
+Optional dependencies:
+
+- `libpq <https://www.postgresql.org/>`__
+- `liburing <https://github.com/axboe/liburing>`__
+- `libwas <https://github.com/CM4all/libwas>`__
 
 To build it, type::
 
