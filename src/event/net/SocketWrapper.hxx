@@ -74,6 +74,10 @@ public:
 
 	SocketWrapper(const SocketWrapper &) = delete;
 
+	~SocketWrapper() noexcept {
+		Close();
+	}
+
 	EventLoop &GetEventLoop() const noexcept {
 		return socket_event.GetEventLoop();
 	}
