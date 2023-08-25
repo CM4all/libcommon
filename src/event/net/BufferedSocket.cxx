@@ -66,11 +66,12 @@ try {
 
 	const bool result = handler->OnBufferedEnd();
 
-	assert(!destructed);
-	assert(IsValid());
-
-	if (!result)
-		ClosedPrematurely();
+	if (result) {
+		assert(!destructed);
+		assert(IsValid());
+	} else {
+		assert(destructed || !IsValid());
+	}
 
 	return result;
 } catch (...) {

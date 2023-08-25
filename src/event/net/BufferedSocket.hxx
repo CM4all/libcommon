@@ -235,8 +235,7 @@ public:
 	 * Exceptions thrown by this method are passed to
 	 * OnBufferedError().
 	 *
-	 * @return true if the stream has ended properly, false if the
-	 * stream end was unexpected (closed prematurely)
+	 * @return false if the #BufferedSocket was destroyed
 	 */
 	virtual bool OnBufferedEnd();
 
