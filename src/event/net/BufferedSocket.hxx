@@ -232,12 +232,13 @@ public:
 	 *
 	 * This method must not invoke BufferedSocket::Destroy().
 	 *
+	 * Exceptions thrown by this method are passed to
+	 * OnBufferedError().
+	 *
 	 * @return true if the stream has ended properly, false if the
 	 * stream end was unexpected (closed prematurely)
 	 */
-	virtual bool OnBufferedEnd() noexcept {
-		return false;
-	}
+	virtual bool OnBufferedEnd();
 
 	/**
 	 * The socket is ready for writing.

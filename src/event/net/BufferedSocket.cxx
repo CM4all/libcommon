@@ -23,6 +23,21 @@ BufferedSocket::~BufferedSocket() noexcept
 	}
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=noreturn"
+#endif
+
+bool
+BufferedSocketHandler::OnBufferedEnd()
+{
+	throw SocketClosedPrematurelyError{};
+}
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
 bool
 BufferedSocketHandler::OnBufferedTimeout() noexcept
 {
@@ -38,7 +53,7 @@ BufferedSocket::ClosedPrematurely() noexcept
 
 bool
 BufferedSocket::Ended() noexcept
-{
+try {
 	assert(IsValid());
 	assert(!IsConnected());
 	assert(!ended);
@@ -58,6 +73,11 @@ BufferedSocket::Ended() noexcept
 		ClosedPrematurely();
 
 	return result;
+} catch (...) {
+	assert(IsValid());
+
+	handler->OnBufferedError(std::current_exception());
+	return false;
 }
 
 BufferedSocket::ClosedByPeerResult
