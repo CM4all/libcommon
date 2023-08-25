@@ -647,7 +647,12 @@ public:
 
 private:
 	void ClosedPrematurely() noexcept;
-	void Ended() noexcept;
+
+	/**
+	 * @return false if the #BufferedSocket has been destroyed
+	 */
+	[[nodiscard]]
+	bool Ended() noexcept;
 
 	BufferedResult InvokeData() noexcept;
 	BufferedReadResult SubmitFromBuffer() noexcept;

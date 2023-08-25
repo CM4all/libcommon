@@ -36,7 +36,7 @@ BufferedSocket::ClosedPrematurely() noexcept
 	handler->OnBufferedError(std::make_exception_ptr(SocketClosedPrematurelyError()));
 }
 
-void
+bool
 BufferedSocket::Ended() noexcept
 {
 	assert(IsValid());
@@ -56,6 +56,8 @@ BufferedSocket::Ended() noexcept
 
 	if (!result)
 		ClosedPrematurely();
+
+	return result;
 }
 
 bool
@@ -70,10 +72,8 @@ BufferedSocket::ClosedByPeer() noexcept
 	assert(!IsConnected());
 	assert(remaining == input.GetAvailable());
 
-	if (input.empty()) {
-		Ended();
+	if (input.empty() && !Ended())
 		return false;
-	}
 
 	return true;
 }
@@ -186,10 +186,10 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		if (input.empty()) {
 			input.FreeIfDefined();
 
-			if (!IsConnected()) {
-				Ended();
-				return BufferedReadResult::DESTROYED;
-			}
+			if (!IsConnected())
+				return Ended()
+					? BufferedReadResult::DISCONNECTED
+					: BufferedReadResult::DESTROYED;
 
 			/* try to refill the buffer, now that it's
 			   become empty */
@@ -340,8 +340,9 @@ BufferedSocket::TryRead2() noexcept
 			   DisposeConsumed()/KeepConsumed() was called
 			   outside of the OnBufferedData() callback;
 			   now's the time for the "ended" check */
-			Ended();
-			return BufferedReadResult::DESTROYED;
+			return Ended()
+				? BufferedReadResult::DISCONNECTED
+				: BufferedReadResult::DESTROYED;
 		}
 
 		return SubmitFromBuffer();
