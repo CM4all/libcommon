@@ -454,12 +454,31 @@ public:
 		return base.GetSocket();
 	}
 
+	enum class ClosedByPeerResult {
+		/**
+		 * There is more data.
+		 */
+		OK,
+
+		/**
+		 * BufferedSocketHandler::OnBufferedEnd() has been
+		 * called.
+		 */
+		ENDED,
+
+		/**
+		 * The #BufferedSocket instance has been destroyed.
+		 */
+		DESTROYED,
+	};
+
 	/**
 	 * Called after we learn that the peer has closed the connection,
 	 * and no more data is available on the socket.  At this point,
 	 * our socket descriptor has not yet been closed.
 	 */
-	bool ClosedByPeer() noexcept;
+	[[nodiscard]]
+	ClosedByPeerResult ClosedByPeer() noexcept;
 
 	FdType GetType() const noexcept {
 		return base.GetType();

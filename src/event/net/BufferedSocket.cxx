@@ -60,22 +60,24 @@ BufferedSocket::Ended() noexcept
 	return result;
 }
 
-bool
+BufferedSocket::ClosedByPeerResult
 BufferedSocket::ClosedByPeer() noexcept
 {
 	const std::size_t remaining = input.GetAvailable();
 
 	if (!handler->OnBufferedClosed() ||
 	    !handler->OnBufferedRemaining(remaining))
-		return false;
+		return ClosedByPeerResult::DESTROYED;
 
 	assert(!IsConnected());
 	assert(remaining == input.GetAvailable());
 
-	if (input.empty() && !Ended())
-		return false;
+	if (input.empty())
+		return Ended()
+			? ClosedByPeerResult::ENDED
+			: ClosedByPeerResult::DESTROYED;
 
-	return true;
+	return ClosedByPeerResult::OK;
 }
 
 int
@@ -269,9 +271,16 @@ BufferedSocket::SubmitDirect() noexcept
 		return BufferedReadResult::OK;
 
 	case DirectResult::END:
-		return ClosedByPeer()
-			? BufferedReadResult::DISCONNECTED
-			: BufferedReadResult::DESTROYED;
+		switch (ClosedByPeer()) {
+		case ClosedByPeerResult::OK:
+		case ClosedByPeerResult::ENDED:
+			break;
+
+		case ClosedByPeerResult::DESTROYED:
+			return BufferedReadResult::DESTROYED;
+		}
+
+		return BufferedReadResult::DISCONNECTED;
 
 	case DirectResult::CLOSED:
 		return BufferedReadResult::DESTROYED;
@@ -309,9 +318,17 @@ BufferedSocket::FillBuffer() noexcept
 
 	input.FreeIfEmpty();
 
-	if (nbytes == 0)
+	if (nbytes == 0) {
 		/* socket closed */
-		return ClosedByPeer();
+		switch (ClosedByPeer()) {
+		case ClosedByPeerResult::OK:
+		case ClosedByPeerResult::ENDED:
+			return true;
+
+		case ClosedByPeerResult::DESTROYED:
+			return false;
+		}
+	}
 
 	if (nbytes == -1) {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
