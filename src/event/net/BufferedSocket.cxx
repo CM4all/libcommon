@@ -321,8 +321,6 @@ BufferedSocket::FillBuffer() noexcept
 	ssize_t nbytes = base.ReadToBuffer(input);
 	if (nbytes > 0) [[likely]] {
 		/* success: data was added to the buffer */
-		got_data = true;
-
 		return FillBufferResult::RECEIVED;
 	}
 
@@ -409,14 +407,17 @@ BufferedSocket::TryRead2() noexcept
 
 		return SubmitDirect();
 	} else {
-		got_data = false;
-
 #ifndef NDEBUG
 		DestructObserver destructed(*this);
 #endif
 
+		bool got_data = false;
+
 		switch (FillBuffer()) {
 		case FillBufferResult::RECEIVED:
+			got_data = true;
+			// fall through
+
 		case FillBufferResult::BUFFER_FULL:
 		case FillBufferResult::NOT_READY:
 			/* the socket is still connected and there may

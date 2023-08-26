@@ -339,11 +339,6 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	bool direct;
 
 	/**
-	 * Set to true each time data was received from the socket.
-	 */
-	bool got_data;
-
-	/**
 	 * Set to true while we are inside
 	 * BufferedSocketHandler::OnBufferedData().  This is used to
 	 * optimize ScheduleRead() from inside.
