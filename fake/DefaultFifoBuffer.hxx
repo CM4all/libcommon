@@ -19,6 +19,10 @@ class DefaultFifoBuffer : public ForeignFifoBuffer<std::byte> {
 public:
 	DefaultFifoBuffer():ForeignFifoBuffer(nullptr) {}
 
+	~DefaultFifoBuffer() noexcept {
+		delete[] GetBuffer();
+	}
+
 	bool IsDefinedAndFull() const {
 		return IsDefined() && IsFull();
 	}

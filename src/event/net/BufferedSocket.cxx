@@ -16,10 +16,7 @@ BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
 {
 }
 
-BufferedSocket::~BufferedSocket() noexcept
-{
-	input.FreeIfDefined();
-}
+BufferedSocket::~BufferedSocket() noexcept = default;
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
