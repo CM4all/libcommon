@@ -18,9 +18,7 @@ BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
 
 BufferedSocket::~BufferedSocket() noexcept
 {
-	if (IsValid()) {
-		Destroy();
-	}
+	input.FreeIfDefined();
 }
 
 #if defined(__GNUC__) && !defined(__clang__)
