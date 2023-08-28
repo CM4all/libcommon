@@ -240,7 +240,7 @@ BasicStock::ItemCreateAborted() noexcept
 }
 
 void
-BasicStock::Put(StockItem &item, bool destroy) noexcept
+BasicStock::Put(StockItem &item, PutAction action) noexcept
 {
 	assert(!item.is_idle);
 	assert(&item.GetStock() == this);
@@ -251,7 +251,8 @@ BasicStock::Put(StockItem &item, bool destroy) noexcept
 
 	busy.erase(busy.iterator_to(item));
 
-	if (destroy || item.IsFading() || !item.Release()) {
+	if (action == PutAction::DESTROY ||
+	    item.IsFading() || !item.Release()) {
 		delete &item;
 		ScheduleCheckEmpty();
 	} else {

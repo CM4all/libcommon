@@ -29,7 +29,7 @@ MultiStock::OuterItem::~OuterItem() noexcept
 
 	DiscardUnused();
 
-	shared_item.Put(true);
+	shared_item.Put(PutAction::DESTROY);
 }
 
 inline bool
@@ -167,7 +167,7 @@ MultiStock::OuterItem::GetEventLoop() const noexcept
 }
 
 void
-MultiStock::OuterItem::Put(StockItem &item, bool destroy) noexcept
+MultiStock::OuterItem::Put(StockItem &item, PutAction action) noexcept
 {
 	assert(!item.is_idle);
 	assert(&item.GetStock() == this);
@@ -176,7 +176,8 @@ MultiStock::OuterItem::Put(StockItem &item, bool destroy) noexcept
 
 	busy.erase(busy.iterator_to(item));
 
-	if (shared_item.IsFading() || destroy || item.IsFading() ||
+	if (shared_item.IsFading() || action == PutAction::DESTROY ||
+	    item.IsFading() ||
 	    !item.Release()) {
 		delete &item;
 	} else {
@@ -490,7 +491,7 @@ MultiStock::MapItem::ToOuterItem(StockItem &shared_item) noexcept
 }
 
 void
-MultiStock::MapItem::Put(StockItem &item, bool) noexcept
+MultiStock::MapItem::Put(StockItem &item, PutAction) noexcept
 {
 	assert(!item.is_idle);
 	assert(&item.GetStock() == this);

@@ -155,7 +155,7 @@ struct MyLease final : public StockGetHandler {
 	MyInnerStockItem *item = nullptr;
 	std::exception_ptr error;
 
-	bool reuse = true;
+	PutAction put_action = PutAction::REUSE;
 
 	explicit MyLease(Partition &_partition) noexcept
 		:partition(_partition)
@@ -182,7 +182,7 @@ struct MyLease final : public StockGetHandler {
 	MyLease &operator=(const MyLease &) = delete;
 
 	void SetDirty() noexcept {
-		reuse = false;
+		put_action = PutAction::DESTROY;
 	}
 
 	void Release() noexcept {
@@ -192,9 +192,9 @@ struct MyLease final : public StockGetHandler {
 
 		--partition.ready;
 
-		if (!reuse)
+		if (put_action == PutAction::DESTROY)
 			item->outer_item.Fade();
-		item->Put(!reuse);
+		item->Put(put_action);
 		item = nullptr;
 	}
 

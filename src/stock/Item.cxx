@@ -35,9 +35,9 @@ StockItem::GetStockName() const noexcept
 }
 
 void
-StockItem::Put(bool destroy) noexcept
+StockItem::Put(PutAction action) noexcept
 {
-	stock.Put(*this, destroy);
+	stock.Put(*this, action);
 }
 
 void

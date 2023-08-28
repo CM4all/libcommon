@@ -27,7 +27,7 @@ CoStockQuery(Stock &stock, const char *query, const Params&... params) noexcept
 	const AutoParamArray<Params...> param_array(params...);
 
 	auto *item = co_await CoStockGet(stock, {});
-	AtScopeExit(item) { item->Put(false); };
+	AtScopeExit(item) { item->Put(PutAction::REUSE); };
 
 	co_return co_await CoQuery(stock.GetConnection(*item), query,
 				   param_array);

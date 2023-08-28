@@ -232,8 +232,8 @@ Stock::ItemCreateAborted() noexcept
 }
 
 void
-Stock::Put(StockItem &item, bool destroy) noexcept
+Stock::Put(StockItem &item, PutAction action) noexcept
 {
-	BasicStock::Put(item, destroy);
+	BasicStock::Put(item, action);
 	ScheduleRetryWaiting();
 }

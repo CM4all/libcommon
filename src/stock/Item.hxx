@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "PutAction.hxx"
 #include "util/LeakDetector.hxx"
 #include "util/IntrusiveList.hxx"
 
@@ -86,7 +87,7 @@ public:
 	 * Return a busy item to the stock.  This is a wrapper for
 	 * Stock::Put().
 	 */
-	void Put(bool destroy) noexcept;
+	void Put(PutAction action) noexcept;
 
 	/**
 	 * Prepare this item to be borrowed by a client.

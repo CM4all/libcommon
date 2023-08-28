@@ -140,7 +140,7 @@ TEST(Stock, Basic)
 
 	/* release first item */
 
-	stock.Put(*item, false);
+	stock.Put(*item, PutAction::REUSE);
 	instance.RunSome();
 	ASSERT_EQ(num_create, 1);
 	ASSERT_EQ(num_fail, 0);
@@ -229,7 +229,7 @@ TEST(Stock, Basic)
 
 	/* return third item */
 
-	stock.Put(*third, false);
+	stock.Put(*third, PutAction::REUSE);
 	instance.RunSome();
 	ASSERT_EQ(num_create, 3);
 	ASSERT_EQ(num_fail, 1);
@@ -243,7 +243,7 @@ TEST(Stock, Basic)
 
 	got_item = false;
 	last_item = nullptr;
-	stock.Put(*second, true);
+	stock.Put(*second, PutAction::DESTROY);
 	instance.RunSome();
 	ASSERT_EQ(num_create, 4);
 	ASSERT_EQ(num_fail, 1);
@@ -256,7 +256,7 @@ TEST(Stock, Basic)
 
 	/* destroy first item */
 
-	stock.Put(*item, true);
+	stock.Put(*item, PutAction::DESTROY);
 	ASSERT_EQ(num_create, 4);
 	ASSERT_EQ(num_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
@@ -265,7 +265,7 @@ TEST(Stock, Basic)
 
 	/* destroy second item */
 
-	stock.Put(*second, true);
+	stock.Put(*second, PutAction::DESTROY);
 	ASSERT_EQ(num_create, 4);
 	ASSERT_EQ(num_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
@@ -274,7 +274,7 @@ TEST(Stock, Basic)
 
 	/* destroy third item */
 
-	stock.Put(*third, true);
+	stock.Put(*third, PutAction::DESTROY);
 	ASSERT_EQ(num_create, 4);
 	ASSERT_EQ(num_fail, 1);
 	ASSERT_EQ(num_borrow, 2);

@@ -30,7 +30,7 @@ public:
 		if (cancel_ptr)
 			cancel_ptr.Cancel();
 		else if (item != nullptr)
-			item->Put(false);
+			item->Put(PutAction::REUSE);
 	}
 
 	auto operator co_await() noexcept {

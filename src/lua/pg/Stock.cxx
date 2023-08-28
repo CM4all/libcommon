@@ -97,7 +97,7 @@ public:
 		else if (item != nullptr) {
 			auto &connection = Pg::Stock::GetConnection(*item);
 			connection.DiscardRequest();
-			item->Put(false);
+			item->Put(PutAction::REUSE);
 			item = nullptr;
 		}
 	}
@@ -113,7 +113,7 @@ private:
 	void SendQuery(Pg::AsyncConnection &connection);
 
 	void OnDeferredResume() noexcept {
-		item->Put(false);
+		item->Put(PutAction::REUSE);
 		item = nullptr;
 
 		if (!result.IsDefined()) {
@@ -140,7 +140,7 @@ private:
 			SendQuery(Pg::Stock::GetConnection(*item));
 		} catch (...) {
 			item = nullptr;
-			_item.Put(true);
+			_item.Put(PutAction::DESTROY);
 
 			ResumeError(std::current_exception());
 		}
