@@ -193,8 +193,14 @@ BufferedSocket::InvokeData() noexcept
 BufferedReadResult
 BufferedSocket::SubmitFromBuffer() noexcept
 {
-	if (IsEmpty())
+	if (IsEmpty()) {
+		/* only reachable if the socket is still connected, or
+		   else the BufferedSocket would have "ended"
+		   already */
+		assert(IsConnected());
+
 		return BufferedReadResult::OK;
+	}
 
 	BufferedResult result = InvokeData();
 	assert((result == BufferedResult::DESTROYED) || IsValid());
@@ -368,6 +374,10 @@ BufferedSocket::TryRead2() noexcept
 	assert(!ended);
 	assert(reading);
 
+#ifndef NDEBUG
+	DestructObserver destructed{*this};
+#endif
+
 	if (!IsConnected()) {
 		if (IsEmpty()) {
 			/* this can only happen if
@@ -384,11 +394,25 @@ BufferedSocket::TryRead2() noexcept
 		/* empty the remaining buffer before doing direct transfer */
 		switch (auto result = SubmitFromBuffer()) {
 		case BufferedReadResult::OK:
+			assert(!destructed);
+			assert(IsValid());
+			assert(IsConnected());
 			break;
 
 		case BufferedReadResult::BLOCKING:
+			assert(!destructed);
+			assert(IsValid());
+			assert(IsConnected());
+			return result;
+
 		case BufferedReadResult::DISCONNECTED:
+			assert(!destructed);
+			assert(IsValid());
+			assert(!IsConnected());
+			return result;
+
 		case BufferedReadResult::DESTROYED:
+			assert(destructed || !IsValid());
 			return result;
 		}
 
@@ -407,10 +431,6 @@ BufferedSocket::TryRead2() noexcept
 
 		return SubmitDirect();
 	} else {
-#ifndef NDEBUG
-		DestructObserver destructed(*this);
-#endif
-
 		bool got_data = false;
 
 		switch (FillBuffer()) {
@@ -450,11 +470,25 @@ BufferedSocket::TryRead2() noexcept
 
 		switch (auto result = SubmitFromBuffer()) {
 		case BufferedReadResult::OK:
+			assert(!destructed);
+			assert(IsValid());
+			assert(IsConnected());
 			break;
 
 		case BufferedReadResult::BLOCKING:
+			assert(!destructed);
+			assert(IsValid());
+			assert(IsConnected());
+			return result;
+
 		case BufferedReadResult::DISCONNECTED:
+			assert(!destructed);
+			assert(IsValid());
+			assert(!IsConnected());
+			return result;
+
 		case BufferedReadResult::DESTROYED:
+			assert(destructed || !IsValid());
 			return result;
 		}
 
@@ -530,13 +564,26 @@ BufferedSocket::OnSocketRead() noexcept
 	assert(!destroyed);
 	assert(!ended);
 
+#ifndef NDEBUG
+	DestructObserver destructed{*this};
+#endif
+
 	switch (TryRead()) {
 	case BufferedReadResult::OK:
 	case BufferedReadResult::BLOCKING:
+		assert(!destructed);
+		assert(IsValid());
+		assert(IsConnected());
 		break;
 
 	case BufferedReadResult::DISCONNECTED:
+		assert(!destructed);
+		assert(IsValid());
+		assert(!IsConnected());
+		return false;
+
 	case BufferedReadResult::DESTROYED:
+		assert(destructed || !IsValid());
 		return false;
 	}
 
