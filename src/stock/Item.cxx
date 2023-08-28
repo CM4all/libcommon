@@ -34,10 +34,10 @@ StockItem::GetStockName() const noexcept
 	return stock.GetName();
 }
 
-void
+PutAction
 StockItem::Put(PutAction action) noexcept
 {
-	stock.Put(*this, action);
+	return stock.Put(*this, action);
 }
 
 void

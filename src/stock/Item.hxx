@@ -87,7 +87,7 @@ public:
 	 * Return a busy item to the stock.  This is a wrapper for
 	 * Stock::Put().
 	 */
-	void Put(PutAction action) noexcept;
+	PutAction Put(PutAction action) noexcept;
 
 	/**
 	 * Prepare this item to be borrowed by a client.
