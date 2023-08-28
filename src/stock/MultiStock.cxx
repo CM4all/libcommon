@@ -166,7 +166,7 @@ MultiStock::OuterItem::GetEventLoop() const noexcept
 	return cleanup_timer.GetEventLoop();
 }
 
-void
+PutAction
 MultiStock::OuterItem::Put(StockItem &item, PutAction action) noexcept
 {
 	assert(!item.is_idle);
@@ -176,10 +176,12 @@ MultiStock::OuterItem::Put(StockItem &item, PutAction action) noexcept
 
 	busy.erase(busy.iterator_to(item));
 
+	PutAction result;
 	if (shared_item.IsFading() || action == PutAction::DESTROY ||
 	    item.IsFading() ||
 	    !item.Release()) {
 		delete &item;
+		result = PutAction::DESTROY;
 	} else {
 #ifndef NDEBUG
 		item.is_idle = true;
@@ -188,9 +190,13 @@ MultiStock::OuterItem::Put(StockItem &item, PutAction action) noexcept
 		idle.push_front(item);
 
 		ScheduleCleanupTimer();
+
+		result = PutAction::REUSE;
 	}
 
 	parent.OnLeaseReleased(*this);
+
+	return result;
 }
 
 void
@@ -490,13 +496,14 @@ MultiStock::MapItem::ToOuterItem(StockItem &shared_item) noexcept
 	return *i;
 }
 
-void
+PutAction
 MultiStock::MapItem::Put(StockItem &item, PutAction) noexcept
 {
 	assert(!item.is_idle);
 	assert(&item.GetStock() == this);
 
 	delete &item;
+	return PutAction::DESTROY;
 }
 
 void

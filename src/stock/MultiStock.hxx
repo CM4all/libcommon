@@ -141,7 +141,7 @@ class MultiStock {
 		const char *GetName() const noexcept override;
 		EventLoop &GetEventLoop() const noexcept override;
 
-		void Put(StockItem &item, PutAction action) noexcept override;
+		PutAction Put(StockItem &item, PutAction action) noexcept override;
 
 		void ItemIdleDisconnect(StockItem &item) noexcept override;
 		void ItemBusyDisconnect(StockItem &item) noexcept override;
@@ -287,7 +287,7 @@ class MultiStock {
 			return retry_event.GetEventLoop();
 		}
 
-		void Put(StockItem &item, PutAction action) noexcept override;
+		PutAction Put(StockItem &item, PutAction action) noexcept override;
 		void ItemIdleDisconnect(StockItem &item) noexcept override;
 		void ItemBusyDisconnect(StockItem &item) noexcept override;
 		void ItemCreateSuccess(StockGetHandler &get_handler,

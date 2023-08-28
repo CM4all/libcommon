@@ -24,7 +24,7 @@ public:
 	[[gnu::const]]
 	virtual EventLoop &GetEventLoop() const noexcept = 0;
 
-	virtual void Put(StockItem &item, PutAction action) noexcept = 0;
+	virtual PutAction Put(StockItem &item, PutAction action) noexcept = 0;
 	virtual void ItemIdleDisconnect(StockItem &item) noexcept = 0;
 	virtual void ItemBusyDisconnect(StockItem &item) noexcept = 0;
 	virtual void ItemCreateSuccess(StockGetHandler &get_handler,

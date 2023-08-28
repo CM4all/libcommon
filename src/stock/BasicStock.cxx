@@ -239,7 +239,7 @@ BasicStock::ItemCreateAborted() noexcept
 	ScheduleCheckEmpty();
 }
 
-void
+PutAction
 BasicStock::Put(StockItem &item, PutAction action) noexcept
 {
 	assert(!item.is_idle);
@@ -255,8 +255,10 @@ BasicStock::Put(StockItem &item, PutAction action) noexcept
 	    item.IsFading() || !item.Release()) {
 		delete &item;
 		ScheduleCheckEmpty();
+		return PutAction::DESTROY;
 	} else {
 		InjectIdle(item);
+		return PutAction::REUSE;
 	}
 }
 

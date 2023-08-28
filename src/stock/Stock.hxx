@@ -83,7 +83,7 @@ public:
 	 */
 	StockItem *GetNow(StockRequest request);
 
-	void Put(StockItem &item, PutAction action) noexcept override;
+	PutAction Put(StockItem &item, PutAction action) noexcept override;
 
 	/**
 	 * Inject a newly created item into the "idle" list.

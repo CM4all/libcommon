@@ -231,9 +231,10 @@ Stock::ItemCreateAborted() noexcept
 	ScheduleRetryWaiting();
 }
 
-void
+PutAction
 Stock::Put(StockItem &item, PutAction action) noexcept
 {
-	BasicStock::Put(item, action);
+	const auto result = BasicStock::Put(item, action);
 	ScheduleRetryWaiting();
+	return result;
 }
