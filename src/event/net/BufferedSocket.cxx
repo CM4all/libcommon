@@ -489,7 +489,7 @@ BufferedSocket::TryRead2() noexcept
 			if (IsFull())
 				UnscheduleRead();
 			else
-				ScheduleRead();
+				base.ScheduleRead();
 		}
 
 		return BufferedReadResult::OK;
