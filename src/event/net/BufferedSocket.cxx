@@ -659,7 +659,6 @@ BufferedSocket::Reinit(Event::Duration _write_timeout,
 	handler = &_handler;
 
 	direct = false;
-	in_data_handler = false;
 }
 
 void
