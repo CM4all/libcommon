@@ -332,7 +332,6 @@ BufferedSocket::FillBuffer() noexcept
 
 	if (nbytes == -2) {
 		/* input buffer is full */
-		UnscheduleRead();
 		return FillBufferResult::BUFFER_FULL;
 	}
 
@@ -354,7 +353,6 @@ BufferedSocket::FillBuffer() noexcept
 
 	if (nbytes == -1) {
 		if (const int e = errno; e == EAGAIN) [[likely]] {
-			base.ScheduleRead();
 			return FillBufferResult::NOT_READY;
 		} else {
 			handler->OnBufferedError(std::make_exception_ptr(MakeErrno(e, "recv() failed")));
@@ -431,13 +429,8 @@ BufferedSocket::TryRead2() noexcept
 
 		return SubmitDirect();
 	} else {
-		bool got_data = false;
-
 		switch (FillBuffer()) {
 		case FillBufferResult::RECEIVED:
-			got_data = true;
-			// fall through
-
 		case FillBufferResult::BUFFER_FULL:
 		case FillBufferResult::NOT_READY:
 			/* the socket is still connected and there may
@@ -492,8 +485,13 @@ BufferedSocket::TryRead2() noexcept
 			return result;
 		}
 
-		if (got_data)
-			base.ScheduleRead();
+		if (IsConnected()) {
+			if (IsFull())
+				UnscheduleRead();
+			else
+				ScheduleRead();
+		}
+
 		return BufferedReadResult::OK;
 	}
 }
