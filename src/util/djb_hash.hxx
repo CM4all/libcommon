@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <cstdint>
+#include <cstddef>
 #include <span>
 
 [[gnu::pure]]
