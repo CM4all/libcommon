@@ -45,6 +45,11 @@ struct SocketConfig {
 	 */
 	uint16_t mode = 0;
 
+	/**
+	 * Enable Multi-Path TCP?
+	 */
+	bool mptcp = false;
+
 	bool reuse_port = false;
 
 	bool free_bind = false;

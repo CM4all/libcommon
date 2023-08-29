@@ -34,8 +34,13 @@ SocketConfig::Create(int type) const
 	const bool is_inet = family == AF_INET || family == AF_INET6;
 	const bool is_tcp = is_inet && type == SOCK_STREAM;
 
+	int protocol = 0;
+
+	if (is_tcp && mptcp)
+		protocol = IPPROTO_MPTCP;
+
 	UniqueSocketDescriptor fd;
-	if (!fd.CreateNonBlock(family, type, 0))
+	if (!fd.CreateNonBlock(family, type, protocol))
 		throw MakeSocketError("Failed to create socket");
 
 	const char *local_path = bind_address.GetLocalPath();
