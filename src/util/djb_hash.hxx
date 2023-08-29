@@ -12,6 +12,8 @@
 #include <cstddef>
 #include <span>
 
+static constexpr std::size_t DJB_HASH_INIT = 5381;
+
 [[gnu::pure]]
 std::size_t
 djb_hash(std::span<const std::byte> src) noexcept;
