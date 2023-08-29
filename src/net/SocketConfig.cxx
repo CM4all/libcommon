@@ -36,8 +36,10 @@ SocketConfig::Create(int type) const
 
 	int protocol = 0;
 
+#ifdef IPPROTO_MPTCP
 	if (is_tcp && mptcp)
 		protocol = IPPROTO_MPTCP;
+#endif
 
 	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(family, type, protocol))
