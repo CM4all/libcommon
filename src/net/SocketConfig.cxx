@@ -86,8 +86,7 @@ SocketConfig::Create(int type) const
 		fchmod(fd.Get(), mode);
 
 	if (!fd.Bind(bind_address))
-		throw FmtSocketError("Failed to bind to {}",
-				     (SocketAddress)bind_address);
+		throw FmtSocketError("Failed to bind to {}", bind_address);
 
 	if (mode != 0 && local_path != nullptr && chmod(local_path, mode) < 0)
 		throw FmtErrno("Failed to chmod '{}'", local_path);
@@ -95,7 +94,7 @@ SocketConfig::Create(int type) const
 	if (!multicast_group.IsNull() &&
 	    !fd.AddMembership(multicast_group))
 		throw FmtSocketError("Failed to join multicast group {}",
-				     (SocketAddress)multicast_group);
+				     multicast_group);
 
 	if (is_tcp) {
 		fd.SetTcpFastOpen();

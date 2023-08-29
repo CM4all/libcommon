@@ -8,8 +8,11 @@
 
 #include <fmt/format.h>
 
-template<>
-struct fmt::formatter<SocketAddress> : formatter<string_view>
+#include <concepts>
+
+template<typename T>
+requires std::convertible_to<T, SocketAddress>
+struct fmt::formatter<T> : formatter<string_view>
 {
 	template<typename FormatContext>
 	auto format(SocketAddress address, FormatContext &ctx) {
