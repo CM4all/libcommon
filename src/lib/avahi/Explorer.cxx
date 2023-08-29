@@ -55,6 +55,8 @@ ServiceExplorer::Object::Resolve(AvahiClient *client, AvahiIfIndex interface,
 	if (resolver == nullptr)
 		explorer.error_handler.OnAvahiError(std::make_exception_ptr(MakeError(*client,
 										      "Failed to create Avahi service resolver")));
+	else
+		++explorer.n_resolvers;
 }
 
 void
@@ -109,7 +111,17 @@ ServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 		break;
 	}
 
-	CancelResolve();
+	if (resolver) {
+		assert(explorer.n_resolvers > 0);
+
+		resolver.reset();
+
+		if (--explorer.n_resolvers == 0 &&
+		    explorer.all_for_now_pending) {
+			explorer.all_for_now_pending = false;
+			explorer.listener.OnAvahiAllForNow();
+		}
+	}
 }
 
 void
@@ -195,6 +207,13 @@ ServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 
 			objects.erase(i);
 		}
+	} else if (event == AVAHI_BROWSER_ALL_FOR_NOW) {
+		if (n_resolvers == 0) {
+			assert(!all_for_now_pending);
+			listener.OnAvahiAllForNow();
+		} else {
+			all_for_now_pending = true;
+		}
 	}
 }
 
@@ -236,6 +255,7 @@ ServiceExplorer::OnAvahiDisconnect() noexcept
 {
 	for (auto &i : objects)
 		i.second.CancelResolve();
+	n_resolvers = 0;
 
 	avahi_browser.reset();
 }

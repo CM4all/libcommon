@@ -92,6 +92,10 @@ class ServiceExplorer final : ConnectionListener {
 	using Map = std::map<std::string, Object>;
 	Map objects;
 
+	std::size_t n_resolvers = 0;
+
+	bool all_for_now_pending = false;
+
 public:
 	ServiceExplorer(Client &_avahi_client,
 			ServiceExplorerListener &_listener,
