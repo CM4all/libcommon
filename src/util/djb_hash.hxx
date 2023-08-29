@@ -16,8 +16,10 @@ static constexpr std::size_t DJB_HASH_INIT = 5381;
 
 [[gnu::pure]]
 std::size_t
-djb_hash(std::span<const std::byte> src) noexcept;
+djb_hash(std::span<const std::byte> src,
+	 std::size_t init=DJB_HASH_INIT) noexcept;
 
 [[gnu::pure]]
 std::size_t
-djb_hash_string(const char *p) noexcept;
+djb_hash_string(const char *p,
+		std::size_t init=DJB_HASH_INIT) noexcept;

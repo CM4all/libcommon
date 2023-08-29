@@ -15,9 +15,9 @@ djb_hash_update(std::size_t hash, std::byte b) noexcept
 
 [[gnu::hot]]
 std::size_t
-djb_hash(std::span<const std::byte> src) noexcept
+djb_hash(std::span<const std::byte> src, std::size_t init) noexcept
 {
-	std::size_t hash = DJB_HASH_INIT;
+	std::size_t hash = init;
 
 	for (const auto i : src)
 		hash = djb_hash_update(hash, i);
@@ -27,11 +27,11 @@ djb_hash(std::span<const std::byte> src) noexcept
 
 [[gnu::hot]]
 std::size_t
-djb_hash_string(const char *p) noexcept
+djb_hash_string(const char *p, std::size_t init) noexcept
 {
 	assert(p != nullptr);
 
-	std::size_t hash = DJB_HASH_INIT;
+	std::size_t hash = init;
 
 	while (*p != 0)
 		hash = djb_hash_update(hash, static_cast<std::byte>(*p++));
