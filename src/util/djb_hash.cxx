@@ -10,7 +10,7 @@
 static constexpr std::size_t
 djb_hash_update(std::size_t hash, std::byte b) noexcept
 {
-	return (hash * 33) ^ static_cast<uint_fast8_t>(b);
+	return (hash * 33) ^ static_cast<std::size_t>(b);
 }
 
 std::size_t
