@@ -43,10 +43,11 @@ struct FNV1aAlgorithm {
 	}
 
 	[[gnu::pure]] [[gnu::hot]]
-	static value_type StringHash(const char *s) noexcept {
+	static value_type StringHash(const char *s,
+				     fast_type init=Traits::OFFSET_BASIS) noexcept {
 		using Algorithm = FNV1aAlgorithm<Traits>;
 
-		fast_type hash = Traits::OFFSET_BASIS;
+		fast_type hash = init;
 		while (*s)
 			/* cast to uint8_t first to avoid problems
 			   with signed char */
@@ -57,10 +58,11 @@ struct FNV1aAlgorithm {
 	}
 
 	[[gnu::pure]] [[gnu::hot]]
-	static constexpr value_type BinaryHash(std::span<const std::byte> s) noexcept {
+	static constexpr value_type BinaryHash(std::span<const std::byte> s,
+					       fast_type init=Traits::OFFSET_BASIS) noexcept {
 		using Algorithm = FNV1aAlgorithm<Traits>;
 
-		fast_type hash = Traits::OFFSET_BASIS;
+		fast_type hash = init;
 		for (auto b : s)
 			hash = Algorithm::Update(hash,
 						 static_cast<fast_type>(b));
