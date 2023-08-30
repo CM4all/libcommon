@@ -202,6 +202,10 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		return BufferedReadResult::OK;
 	}
 
+#ifndef NDEBUG
+	DestructObserver destructed{*this};
+#endif
+
 	BufferedResult result = InvokeData();
 	assert((result == BufferedResult::DESTROYED) || IsValid());
 
@@ -253,6 +257,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 	case BufferedResult::DESTROYED:
 		/* the BufferedSocket object has been destroyed by the
 		   handler */
+		assert(destructed || !IsValid());
 		return BufferedReadResult::DESTROYED;
 	}
 
@@ -266,14 +271,22 @@ BufferedSocket::SubmitFromBuffer() noexcept
 inline BufferedReadResult
 BufferedSocket::SubmitDirect() noexcept
 {
+	assert(IsValid());
 	assert(IsConnected());
 	assert(IsEmpty());
+
+#ifndef NDEBUG
+	DestructObserver destructed{*this};
+#endif
 
 	DirectResult result;
 
 	try {
 		result = handler->OnBufferedDirect(base.GetSocket(), base.GetType());
 	} catch (...) {
+		assert(!destructed);
+		assert(IsValid());
+
 		handler->OnBufferedError(std::current_exception());
 		return BufferedReadResult::DESTROYED;
 	}
@@ -281,34 +294,55 @@ BufferedSocket::SubmitDirect() noexcept
 	switch (result) {
 	case DirectResult::OK:
 		/* some data was transferred: refresh the read timeout */
+		assert(!destructed);
+		assert(IsValid());
+
 		base.ScheduleRead();
 		return BufferedReadResult::OK;
 
 	case DirectResult::BLOCKING:
+		assert(!destructed);
+		assert(IsValid());
+
 		UnscheduleRead();
 		return BufferedReadResult::BLOCKING;
 
 	case DirectResult::EMPTY:
+		assert(!destructed);
+		assert(IsValid());
+
 		base.ScheduleRead();
 		return BufferedReadResult::OK;
 
 	case DirectResult::END:
+		assert(!destructed);
+		assert(IsValid());
+
 		switch (ClosedByPeer()) {
 		case ClosedByPeerResult::OK:
 		case ClosedByPeerResult::ENDED:
 			break;
 
 		case ClosedByPeerResult::DESTROYED:
+			assert(destructed || !IsValid());
 			return BufferedReadResult::DESTROYED;
 		}
 
+		assert(!destructed);
+		assert(IsValid());
+		assert(!IsConnected());
 		return BufferedReadResult::DISCONNECTED;
 
 	case DirectResult::CLOSED:
+		assert(destructed || !IsValid());
 		return BufferedReadResult::DESTROYED;
 
 	case DirectResult::ERRNO:
+		assert(!destructed);
+		assert(IsValid());
+
 		handler->OnBufferedError(std::make_exception_ptr(MakeErrno("splice() from socket failed")));
+		assert(destructed || !IsValid());
 		return BufferedReadResult::DESTROYED;
 	}
 
