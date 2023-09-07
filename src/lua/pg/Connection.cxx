@@ -8,6 +8,8 @@
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
 #include "lua/Resume.hxx"
+#include "lua/Value.hxx"
+#include "lua/CoRunner.hxx"
 #include "pg/SharedConnection.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/Cancellable.hxx"
@@ -20,6 +22,8 @@ extern "C" {
 }
 
 #include <forward_list>
+#include <map>
+#include <string>
 
 #include <stdio.h>
 
@@ -29,6 +33,87 @@ class PgRequest;
 
 class PgConnection final : Pg::SharedConnectionHandler {
 	Pg::SharedConnection connection;
+
+	/**
+	 * A registration of one NOTIFY, submitted to PostgreSQL via
+	 * LISTEN.
+	 *
+	 * @see https://www.postgresql.org/docs/current/sql-listen.html
+	 */
+	class NotifyRegistration final : ResumeListener {
+		/**
+		 * The Lua function that will be invoked each time
+		 * this NOTIFY is received.
+		 */
+		Value handler;
+
+		/**
+		 * The Lua thread which currently runs the handler
+		 * coroutine.
+		 */
+		CoRunner thread;
+
+		bool busy = false, again = false;
+
+	public:
+		/**
+		 * Was LISTEN already called on the current PostgreSQL
+		 * connection?
+		 */
+		bool registered = false;
+
+		template<typename H>
+		explicit NotifyRegistration(lua_State *L, H &&_handler) noexcept
+			:handler(L, std::forward<H>(_handler)), thread(L) {}
+
+		void Start() noexcept;
+
+	private:
+		/* virtual methods from class ResumeListener */
+		void OnLuaFinished(lua_State *L) noexcept override;
+		void OnLuaError(lua_State *L,
+				std::exception_ptr e) noexcept override;
+	};
+
+	using NotifyRegistrationMap =
+		std::map<std::string, NotifyRegistration, std::less<>>;
+	NotifyRegistrationMap notify_registrations;
+
+	/**
+	 * A #SharedConnectionQuery implementation which sends LISTEN
+	 * queries to PostgreSQL for all newly registered NOTIFY
+	 * listeners, or sends LISTEN to all NOTIFY listeners if a new
+	 * PostgreSQL connection is established.
+	 */
+	class ListenQuery final : public Pg::SharedConnectionQuery {
+		NotifyRegistrationMap &notify_registrations;
+
+	public:
+		ListenQuery(Pg::SharedConnection &_shared_connection,
+			    NotifyRegistrationMap &_notify_registrations) noexcept
+			:Pg::SharedConnectionQuery(_shared_connection),
+			 notify_registrations(_notify_registrations) {}
+
+	private:
+		/* virtual methods from class Pg::SharedConnectionQuery */
+		void OnPgConnectionAvailable(Pg::AsyncConnection &connection) {
+			for (auto &[name, registration] : notify_registrations) {
+				if (registration.registered)
+					continue;
+
+				const auto sql = fmt::format("LISTEN \"{}\"", name);
+				connection.Execute(sql.c_str());
+				registration.registered = true;
+			}
+
+			Pg::SharedConnectionQuery::Cancel();
+		}
+
+		void OnPgError(std::exception_ptr e) noexcept {
+			// TODO log?
+			(void)e;
+		}
+	} listen_query{connection, notify_registrations};
 
 public:
 	template<typename... Args>
@@ -43,13 +128,18 @@ public:
 private:
 	static int Execute(lua_State *L);
 	int Execute(lua_State *L, int sql, int params);
+	static int Listen(lua_State *L);
+	int Listen(lua_State *L, int name_idx, int handler_idx);
 
 	/* virtual methods from class Pg::SharedConnectionHandler */
+	void OnPgConnect() override;
+	void OnPgNotify(const char *name) override;
 	void OnPgError(std::exception_ptr e) noexcept override;
 
 public:
 	static constexpr struct luaL_Reg methods [] = {
 		{"execute", Execute},
+		{"listen", Listen},
 		{nullptr, nullptr}
 	};
 };
@@ -182,7 +272,112 @@ PgConnection::Execute(lua_State *L)
 	return connection.Execute(L, sql, params);
 }
 
-inline void
+inline int
+PgConnection::Listen(lua_State *L, int name_idx, int handler_idx)
+{
+	const char *name = luaL_checkstring(L, name_idx);
+	luaL_checktype(L, 3, LUA_TFUNCTION);
+
+	auto [_, inserted] = notify_registrations.try_emplace(name, L,
+							      StackIndex{handler_idx});
+	if (!inserted)
+		luaL_argerror(L, name_idx, "Duplicate notify name");
+
+	/* schedule a LISTEN to PostgreSQL */
+	if (!listen_query.IsScheduled())
+		connection.ScheduleQuery(listen_query);
+
+	return 0;
+}
+
+int
+PgConnection::Listen(lua_State *L)
+{
+	if (lua_gettop(L) < 3)
+		return luaL_error(L, "Not enough parameters");
+	if (lua_gettop(L) > 3)
+		return luaL_error(L, "Too many parameters");
+
+	auto &connection = PgConnectionClass::Cast(L, 1);
+	return connection.Listen(L, 2, 3);
+}
+
+void
+PgConnection::OnPgConnect()
+{
+	if (!notify_registrations.empty()) {
+		/* if a new PostgreSQL connection is established, we
+		   need to re-run LISTEN for all NOTIFY listeners */
+		for (auto &[_, registration] : notify_registrations)
+			registration.registered = false;
+
+		if (!listen_query.IsScheduled())
+			connection.ScheduleQuery(listen_query);
+	}
+}
+
+void
+PgConnection::NotifyRegistration::Start() noexcept
+{
+	if (busy) {
+		/* already running - do it again after this Lua
+		   coroutine finishes */
+		again = true;
+		return;
+	}
+
+	auto *L = thread.CreateThread(*this);
+	handler.Push(L);
+	busy = true;
+
+	Resume(L, 0);
+}
+
+void
+PgConnection::NotifyRegistration::OnLuaFinished([[maybe_unused]] lua_State *L) noexcept
+{
+	assert(busy);
+	busy = false;
+
+	/* release the reference to the Lua thread */
+	thread.Cancel();
+
+	if (again) {
+		again = false;
+		Start();
+	}
+}
+
+void
+PgConnection::NotifyRegistration::OnLuaError([[maybe_unused]] lua_State *L,
+					     std::exception_ptr e) noexcept
+{
+	assert(busy);
+	busy = false;
+
+	/* release the reference to the Lua thread */
+	thread.Cancel();
+
+	// TOOD log?
+	(void)e;
+
+	if (again) {
+		again = false;
+		Start();
+	}
+}
+
+void
+PgConnection::OnPgNotify(const char *name)
+{
+	const auto i = notify_registrations.find(name);
+	if (i == notify_registrations.end())
+		return;
+
+	i->second.Start();
+}
+
+void
 PgConnection::OnPgError(std::exception_ptr e) noexcept
 {
 	// TODO log?
