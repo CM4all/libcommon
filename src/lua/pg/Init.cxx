@@ -4,7 +4,7 @@
 
 #include "Init.hxx"
 #include "Array.hxx"
-#include "Stock.hxx"
+#include "Connection.hxx"
 #include "Result.hxx"
 #include "lua/Util.hxx"
 #include "lua/PushCClosure.hxx"
@@ -26,17 +26,14 @@ NewPg(lua_State *L)
 	const char *conninfo = luaL_checkstring(L, 2);
 	const char *schema = luaL_optstring(L, 3, "");
 
-	constexpr unsigned limit = 4;
-	constexpr unsigned max_idle = 1;
-
-	NewPgStock(L, event_loop, conninfo, schema, limit, max_idle);
+	NewPgConnection(L, event_loop, conninfo, schema);
 	return 1;
 }
 
 void
 InitPg(lua_State *L, EventLoop &event_loop)
 {
-	InitPgStock(L);
+	InitPgConnection(L);
 	InitPgResult(L);
 
 	lua_newtable(L);

@@ -2,16 +2,13 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#include "Stock.hxx"
+#include "Connection.hxx"
 #include "Result.hxx"
 #include "lua/Assert.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
 #include "lua/Resume.hxx"
-#include "pg/AsyncConnection.hxx"
-#include "pg/Stock.hxx"
-#include "stock/GetHandler.hxx"
-#include "event/DeferEvent.hxx"
+#include "pg/SharedConnection.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/Cancellable.hxx"
 #include "util/RuntimeError.hxx"
@@ -28,17 +25,27 @@ extern "C" {
 
 namespace Lua {
 
-class PgStock {
-	Pg::Stock stock;
+class PgRequest;
+
+class PgConnection final : Pg::SharedConnectionHandler {
+	Pg::SharedConnection connection;
 
 public:
 	template<typename... Args>
-	explicit PgStock(Args&&... args) noexcept
-		:stock(std::forward<Args>(args)...) {}
+	explicit PgConnection(Args&&... args) noexcept
+		:connection(std::forward<Args>(args)...,
+			    static_cast<Pg::SharedConnectionHandler &>(*this)) {}
+
+	auto &GetEventLoop() const noexcept {
+		return connection.GetEventLoop();
+	}
 
 private:
 	static int Execute(lua_State *L);
 	int Execute(lua_State *L, int sql, int params);
+
+	/* virtual methods from class Pg::SharedConnectionHandler */
+	void OnPgError(std::exception_ptr e) noexcept override;
 
 public:
 	static constexpr struct luaL_Reg methods [] = {
@@ -47,25 +54,27 @@ public:
 	};
 };
 
-static constexpr char lua_pg_stock_class[] = "pg.Stock";
-using PgStockClass = Lua::Class<PgStock, lua_pg_stock_class>;
+static constexpr char lua_pg_connection_class[] = "pg.Connection";
+using PgConnectionClass = Lua::Class<PgConnection, lua_pg_connection_class>;
 
-class PgRequest final : StockGetHandler, Pg::AsyncResultHandler {
+class PgRequest final
+	: public Pg::SharedConnectionQuery, Pg::AsyncResultHandler
+{
 	lua_State *const L;
 
 	DeferEvent defer_resume;
 
-	CancellablePointer cancel_ptr;
-
-	StockItem *item = nullptr;
-
 	Pg::Result result;
 
+	std::exception_ptr error;
+
 public:
-	PgRequest(lua_State *_L, Stock &stock,
+	PgRequest(lua_State *_L,
+		  Pg::SharedConnection &connection,
 		  int sql, int params) noexcept
-		:L(_L),
-		 defer_resume(stock.GetEventLoop(),
+		:Pg::SharedConnectionQuery(connection),
+		 L(_L),
+		 defer_resume(connection.GetEventLoop(),
 			      BIND_THIS_METHOD(OnDeferredResume))
 	{
 		const ScopeCheckStack check_stack(L);
@@ -82,43 +91,30 @@ public:
 		}
 
 		lua_setfenv(L, -2);
-
-		/* start the operation */
-		stock.Get({}, *this, cancel_ptr);
 	}
 
-	~PgRequest() noexcept {
-		Cancel();
+	void SendQuery(Pg::AsyncConnection &c);
+
+	void DeferResumeError(std::exception_ptr _error) noexcept {
+		error = std::move(_error);
+		defer_resume.Schedule();
 	}
 
-	void Cancel() noexcept {
-		if (cancel_ptr)
-			cancel_ptr.Cancel();
-		else if (item != nullptr) {
-			auto &connection = Pg::Stock::GetConnection(*item);
-			connection.DiscardRequest();
-			item->Put(PutAction::REUSE);
-			item = nullptr;
-		}
-	}
-
-private:
-	void ResumeError(std::exception_ptr error) noexcept {
+	void ResumeError(std::exception_ptr _error) noexcept {
 		/* return [nil, error_message] for assert() */
 		Push(L, nullptr);
-		Push(L, error);
+		Push(L, _error);
 		Resume(L, 2);
 	}
 
-	void SendQuery(Pg::AsyncConnection &connection);
-
+private:
 	void OnDeferredResume() noexcept {
-		item->Put(PutAction::REUSE);
-		item = nullptr;
-
 		if (!result.IsDefined()) {
-			/* return nil */
-			Resume(L, 0);
+			if (error)
+				ResumeError(std::move(error));
+			else
+				/* return nil */
+				Resume(L, 0);
 		} else if (result.IsError()) {
 			/* return [nil, error_message] for assert() */
 			Push(L, nullptr);
@@ -131,26 +127,9 @@ private:
 		}
 	}
 
-	/* virtual methods from StockGetHandler */
-	void OnStockItemReady(StockItem &_item) noexcept override {
-		cancel_ptr = nullptr;
-		item = &_item;
-
-		try {
-			SendQuery(Pg::Stock::GetConnection(*item));
-		} catch (...) {
-			item = nullptr;
-			_item.Put(PutAction::DESTROY);
-
-			ResumeError(std::current_exception());
-		}
-	}
-
-	void OnStockItemError(std::exception_ptr error) noexcept override {
-		cancel_ptr = nullptr;
-
-		ResumeError(std::move(error));
-	}
+	/* virtual methods from Pg::SharedConnectionQuery */
+	void OnPgConnectionAvailable(Pg::AsyncConnection &connection) override;
+	void OnPgError(std::exception_ptr error) noexcept override;
 
 	/* virtual methods from Pg::AsyncResultHandler */
 	void OnResult(Pg::Result &&_result) override {
@@ -159,18 +138,31 @@ private:
 
 	void OnResultEnd() override {
 		defer_resume.Schedule();
+
+		Pg::SharedConnectionQuery::Cancel();
 	}
 
 	void OnResultError() noexcept override {
 		defer_resume.Schedule();
+
+		Pg::SharedConnectionQuery::Cancel();
 	}
 };
 
 static constexpr char lua_pg_request_class[] = "pg.Request";
 using PgRequestClass = Lua::Class<PgRequest, lua_pg_request_class>;
 
+inline int
+PgConnection::Execute(lua_State *L, int sql, int params)
+{
+	auto *request = PgRequestClass::New(L, L, connection,
+					    sql, params);
+	connection.ScheduleQuery(*request);
+	return lua_yield(L, 1);
+}
+
 int
-PgStock::Execute(lua_State *L)
+PgConnection::Execute(lua_State *L)
 {
 	if (lua_gettop(L) < 2)
 		return luaL_error(L, "Not enough parameters");
@@ -186,19 +178,19 @@ PgStock::Execute(lua_State *L)
 		params = 3;
 	}
 
-	auto &stock = PgStockClass::Cast(L, 1);
-	return stock.Execute(L, sql, params);
-}
-
-inline int
-PgStock::Execute(lua_State *L, int sql, int params)
-{
-	PgRequestClass::New(L, L, stock, sql, params);
-	return lua_yield(L, 1);
+	auto &connection = PgConnectionClass::Cast(L, 1);
+	return connection.Execute(L, sql, params);
 }
 
 inline void
-PgRequest::SendQuery(Pg::AsyncConnection &connection)
+PgConnection::OnPgError(std::exception_ptr e) noexcept
+{
+	// TODO log?
+	(void)e;
+}
+
+inline void
+PgRequest::SendQuery(Pg::AsyncConnection &c)
 {
 	const ScopeCheckStack check_stack(L);
 
@@ -246,19 +238,31 @@ PgRequest::SendQuery(Pg::AsyncConnection &connection)
 			}
 		}
 
-		connection.SendQueryParams(*this, false, lua_tostring(L, -2),
-					   n, p.data(),
-					   nullptr, nullptr);
+		c.SendQueryParams(*this, false, lua_tostring(L, -2),
+				  n, p.data(),
+				  nullptr, nullptr);
 	} else {
-		connection.SendQuery(*this, lua_tostring(L, -2));
+		c.SendQuery(*this, lua_tostring(L, -2));
 	}
 }
 
 void
-InitPgStock(lua_State *L) noexcept
+PgRequest::OnPgConnectionAvailable(Pg::AsyncConnection &connection)
 {
-	PgStockClass::Register(L);
-	luaL_newlib(L, PgStock::methods);
+	SendQuery(connection);
+}
+
+void
+PgRequest::OnPgError(std::exception_ptr _error) noexcept
+{
+	DeferResumeError(std::move(_error));
+}
+
+void
+InitPgConnection(lua_State *L) noexcept
+{
+	PgConnectionClass::Register(L);
+	luaL_newlib(L, PgConnection::methods);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
@@ -274,12 +278,10 @@ InitPgStock(lua_State *L) noexcept
 }
 
 void
-NewPgStock(struct lua_State *L, EventLoop &event_loop,
-	   const char *conninfo, const char *schema,
-	   unsigned limit, unsigned max_idle) noexcept
+NewPgConnection(struct lua_State *L, EventLoop &event_loop,
+		const char *conninfo, const char *schema) noexcept
 {
-	PgStockClass::New(L, event_loop, conninfo, schema,
-			  limit, max_idle);
+	PgConnectionClass::New(L, event_loop, conninfo, schema);
 }
 
 } // namespace Lua

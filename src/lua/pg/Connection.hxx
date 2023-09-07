@@ -10,11 +10,10 @@ class EventLoop;
 namespace Lua {
 
 void
-InitPgStock(lua_State *L) noexcept;
+InitPgConnection(lua_State *L) noexcept;
 
 void
-NewPgStock(struct lua_State *L, EventLoop &event_loop,
-	   const char *conninfo, const char *schema,
-	   unsigned limit, unsigned max_idle) noexcept;
+NewPgConnection(struct lua_State *L, EventLoop &event_loop,
+		const char *conninfo, const char *schema) noexcept;
 
 } // namespace Lua

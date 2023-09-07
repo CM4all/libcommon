@@ -7,13 +7,12 @@ lua_pg = static_library(
   'lua_pg',
   'Init.cxx',
   'Array.cxx',
-  'Stock.cxx',
+  'Connection.cxx',
   'Result.cxx',
   include_directories: inc,
   dependencies: [
     lua_dep,
     pg_dep,
-    stock_dep,
   ],
 )
 
