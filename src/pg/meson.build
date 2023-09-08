@@ -23,7 +23,10 @@ if is_variable('stock_dep')
 endif
 
 if is_variable('event_dep')
-  pg_sources += 'AsyncConnection.cxx'
+  pg_sources += [
+    'AsyncConnection.cxx',
+    'SharedConnection.cxx',
+  ]
   pg_dependencies += event_dep
 endif
 
