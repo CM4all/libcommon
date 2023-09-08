@@ -15,6 +15,13 @@ namespace Pg {
  */
 class SharedConnectionHandler {
 public:
+	virtual void OnPgConnect() {
+	}
+
+	virtual void OnPgNotify(const char *name) {
+		(void)name;
+	}
+
 	/**
 	 * An error has occurred (may be fatal or not), and the
 	 * handler can implement this method to log the error

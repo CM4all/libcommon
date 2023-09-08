@@ -85,6 +85,8 @@ SharedConnection::OnConnect()
 	assert(!defer_submit_next.IsPending());
 	assert(!submitted);
 
+	handler.OnPgConnect();
+
 	if (!queries.empty())
 		SubmitNext();
 }
@@ -114,8 +116,7 @@ SharedConnection::OnDisconnect() noexcept
 void
 SharedConnection::OnNotify(const char *name)
 {
-	// TODO support notifications
-	(void)name;
+	handler.OnPgNotify(name);
 }
 
 void
