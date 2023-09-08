@@ -248,6 +248,13 @@ AsyncConnection::Reconnect() noexcept
 }
 
 void
+AsyncConnection::MaybeScheduleConnect() noexcept
+{
+	if (state == State::DISCONNECTED)
+		reconnect_timer.Schedule(std::chrono::seconds{0});
+}
+
+void
 AsyncConnection::Disconnect() noexcept
 {
 	reconnect_timer.Cancel();

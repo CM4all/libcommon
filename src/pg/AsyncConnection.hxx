@@ -192,6 +192,13 @@ public:
 
 	void Reconnect() noexcept;
 
+	/**
+	 * If this connection is not already
+	 * established/connecting/reconnnecting, schedule a
+	 * connect/reconnect immediately.
+	 */
+	void MaybeScheduleConnect() noexcept;
+
 	void Disconnect() noexcept;
 
 	bool IsCancelling() const noexcept {
