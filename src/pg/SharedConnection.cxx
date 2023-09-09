@@ -18,10 +18,9 @@ SharedConnection::ScheduleQuery(SharedConnectionQuery &query) noexcept
 	   soon if reconnect is pending (skip the reconnect delay) */
 	connection.MaybeScheduleConnect();
 
-	if (was_empty && connection.IsDefined() && connection.IsIdle()) {
-		assert(!submitted);
+	if (was_empty && connection.IsDefined() && connection.IsIdle() &&
+	    !submitted)
 		defer_submit_next.Schedule();
-	}
 }
 
 void
@@ -63,9 +62,16 @@ SharedConnection::SubmitNext() noexcept
 	auto &query = queries.front();
 
 	try {
-		query.OnPgConnectionAvailable(connection);
 		submitted = true;
+
+		query.OnPgConnectionAvailable(connection);
 	} catch (...) {
+		assert(submitted);
+		assert(!queries.empty());
+		assert(&queries.front() == &query);
+
+		submitted = false;
+
 		queries.erase(queries.iterator_to(query));
 		query.OnPgError(std::current_exception());
 
