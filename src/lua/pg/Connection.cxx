@@ -96,13 +96,13 @@ class PgConnection final : Pg::SharedConnectionHandler {
 
 	private:
 		/* virtual methods from class Pg::SharedConnectionQuery */
-		void OnPgConnectionAvailable(Pg::AsyncConnection &connection) {
+		void OnPgConnectionAvailable(Pg::AsyncConnection &c) {
 			for (auto &[name, registration] : notify_registrations) {
 				if (registration.registered)
 					continue;
 
 				const auto sql = fmt::format("LISTEN \"{}\"", name);
-				connection.Execute(sql.c_str());
+				c.Execute(sql.c_str());
 				registration.registered = true;
 			}
 
