@@ -14,6 +14,9 @@
 /**
  * Read the specified file into a small stack buffer and pass it as
  * std::string_view to the given function.
+ *
+ * This function ignores the current file position (if the file is
+ * already open) and always reads from offset 0.
  */
 template<std::size_t buffer_size>
 decltype(auto)
@@ -21,7 +24,7 @@ WithSmallTextFile(auto &&file, std::invocable<std::string_view> auto f)
 {
 	char buffer[buffer_size];
 	std::size_t n = WithReadOnly(file, [&buffer](auto fd){
-		const auto nbytes = fd.Read(buffer, buffer_size);
+		const auto nbytes = fd.ReadAt(0, buffer, buffer_size);
 		if (nbytes < 0)
 			throw MakeErrno("Failed to read file");
 
@@ -35,6 +38,9 @@ WithSmallTextFile(auto &&file, std::invocable<std::string_view> auto f)
  * Read the specified file into a small stack buffer and invoke the
  * given function for each line (with the newline character already
  * stripped, but not other whitespace).
+ *
+ * This function ignores the current file position (if the file is
+ * already open) and always reads from offset 0.
  */
 template<std::size_t buffer_size>
 decltype(auto)
