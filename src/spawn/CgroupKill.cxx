@@ -7,6 +7,7 @@
 #include "system/Error.hxx"
 #include "io/Open.hxx"
 #include "io/ScopeChdir.hxx"
+#include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <array>
@@ -15,7 +16,8 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <string.h>
+
+using std::string_view_literals::operator""sv;
 
 static UniqueFileDescriptor
 OpenUnifiedCgroup(const CgroupState &state, const char *name)
@@ -36,14 +38,12 @@ OpenUnifiedCgroup(const CgroupState &state, const char *name,
 
 static bool
 IsPopulated(FileDescriptor fd) noexcept
-{
-	char buffer[4096];
-	ssize_t nbytes = fd.ReadAt(0, buffer, sizeof(buffer) - 1);
-	if (nbytes <= 0)
-		return false;
-
-	buffer[nbytes] = 0;
-	return strstr(buffer, "populated 0") == nullptr;
+try {
+	return WithSmallTextFile<4096>(fd, [](std::string_view contents){
+		return contents.find("populated 0"sv) == contents.npos;
+	});
+} catch (...) {
+	return false;
 }
 
 static UniqueFileDescriptor
