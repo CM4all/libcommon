@@ -5,8 +5,8 @@
 #include "SmallFile.hxx"
 #include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "system/Error.hxx"
-#include "util/RuntimeError.hxx"
+#include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/SystemError.hxx"
 
 #include <sys/stat.h>
 
@@ -15,23 +15,23 @@ ReadSmallFile(const char *path, FileDescriptor fd, std::span<std::byte> dest)
 {
 	struct stat st;
 	if (fstat(fd.Get(), &st) < 0)
-		throw FormatErrno("Failed to get file information about %s",
-				  path);
+		throw FmtErrno("Failed to get file information about {}",
+			       path);
 
 	if (!S_ISREG(st.st_mode))
-		throw FormatRuntimeError("%s is not a regular file", path);
+		throw FmtRuntimeError("{} is not a regular file", path);
 
 	if (st.st_size != (off_t)dest.size())
-		throw FormatRuntimeError("Size of %s is %llu, should %Zu",
-					 path, (unsigned long long)st.st_size,
-					 dest.size());
+		throw FmtRuntimeError("Size of {} is {}, should {}",
+				      path, st.st_size,
+				      dest.size());
 
 	ssize_t nbytes = fd.Read(dest.data(), dest.size());
 	if (nbytes < 0)
-		throw FormatErrno("Failed to read from %s", path);
+		throw FmtErrno("Failed to read from {}", path);
 
 	if (size_t(nbytes) != dest.size())
-		throw FormatRuntimeError("Short read from %s", path);
+		throw FmtRuntimeError("Short read from {}", path);
 }
 
 void
