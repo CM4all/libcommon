@@ -38,7 +38,7 @@ static bool
 IsPopulated(FileDescriptor fd) noexcept
 {
 	char buffer[4096];
-	ssize_t nbytes = pread(fd.Get(), buffer, sizeof(buffer) - 1, 0);
+	ssize_t nbytes = fd.ReadAt(0, buffer, sizeof(buffer) - 1);
 	if (nbytes <= 0)
 		return false;
 
@@ -117,8 +117,7 @@ LoadCgroupPids(FileDescriptor cgroup_procs_fd, std::span<pid_t> pids)
 {
 	char buffer[8192];
 
-	ssize_t nbytes = pread(cgroup_procs_fd.Get(),
-			       buffer, sizeof(buffer) - 1, 0);
+	ssize_t nbytes = cgroup_procs_fd.ReadAt(0, buffer, sizeof(buffer) - 1);
 	if (nbytes < 0)
 		throw MakeErrno("Reading cgroup.procs failed");
 

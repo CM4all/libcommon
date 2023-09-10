@@ -22,7 +22,7 @@ static uint64_t
 ReadUint64(FileDescriptor fd)
 {
 	char buffer[64];
-	ssize_t nbytes = pread(fd.Get(), buffer, sizeof(buffer), 0);
+	ssize_t nbytes = fd.ReadAt(0, buffer, sizeof(buffer));
 	if (nbytes < 0)
 		throw MakeErrno("Failed to read cgroup file");
 
