@@ -15,6 +15,8 @@
 #include "util/StringSplit.hxx"
 #include "util/StringStrip.hxx"
 
+#include <fmt/format.h>
+
 #include <span>
 
 #include <fcntl.h>
@@ -68,7 +70,7 @@ ForEachController(FileDescriptor group_fd, auto &&callback)
 }
 
 void
-CgroupState::EnableAllControllers() const
+CgroupState::EnableAllControllers(unsigned pid) const
 {
 	assert(IsEnabled());
 
@@ -76,7 +78,7 @@ CgroupState::EnableAllControllers() const
 	   we can't enable other controllers */
 
 	const auto leaf_group = MakeDirectory(group_fd, "_", 0700);
-	WriteFile(leaf_group, "cgroup.procs", "0");
+	WriteFile(leaf_group, "cgroup.procs", fmt::format_int{pid}.c_str());
 
 	/* now enable all other controllers in subtree_control */
 

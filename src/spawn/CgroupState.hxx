@@ -42,8 +42,11 @@ struct CgroupState {
 	 * to "subtree_control".
 	 *
 	 * Throws on error.
+	 *
+	 * @param pid the PID of the process that shall be moved to
+	 * the leaf cgroup; 0 means move the current process
 	 */
-	void EnableAllControllers() const;
+	void EnableAllControllers(unsigned pid=0) const;
 
 	/**
 	 * Obtain cgroup membership information from the cgroups
