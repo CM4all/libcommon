@@ -8,9 +8,9 @@
 #include "io/Open.hxx"
 #include "io/ScopeChdir.hxx"
 #include "system/Error.hxx"
+#include "util/NumberParser.hxx"
 #include "util/PrintException.hxx"
-
-#include <stdlib.h>
+#include "util/StringStrip.hxx"
 
 static UniqueFileDescriptor
 OpenMemoryUsage(const CgroupState &state)
@@ -29,12 +29,13 @@ ReadUint64(FileDescriptor fd)
 	if ((size_t)nbytes >= sizeof(buffer))
 		throw std::runtime_error("Cgroup file is too large");
 
-	char *endptr;
-	uint64_t value = strtoull(buffer, &endptr, 10);
-	if (endptr == buffer)
+	const std::string_view v{buffer, StripRight(buffer, nbytes)};
+
+	const auto value = ParseInteger<uint64_t>(v);
+	if (!value)
 		throw std::runtime_error("Failed to parse cgroup file");
 
-	return value;
+	return *value;
 }
 
 CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
