@@ -7,6 +7,7 @@
 #include "event/Loop.hxx"
 #include "io/Open.hxx"
 #include "io/ScopeChdir.hxx"
+#include "io/SmallTextFile.hxx"
 #include "system/Error.hxx"
 #include "util/NumberParser.hxx"
 #include "util/PrintException.hxx"
@@ -21,21 +22,13 @@ OpenMemoryUsage(const CgroupState &state)
 static uint64_t
 ReadUint64(FileDescriptor fd)
 {
-	char buffer[64];
-	ssize_t nbytes = fd.ReadAt(0, buffer, sizeof(buffer));
-	if (nbytes < 0)
-		throw MakeErrno("Failed to read cgroup file");
+	return WithSmallTextFile<64>(fd, [](std::string_view contents){
+		const auto value = ParseInteger<uint64_t>(StripRight(contents));
+		if (!value)
+			throw std::runtime_error("Failed to parse cgroup file");
 
-	if ((size_t)nbytes >= sizeof(buffer))
-		throw std::runtime_error("Cgroup file is too large");
-
-	const std::string_view v{buffer, StripRight(buffer, nbytes)};
-
-	const auto value = ParseInteger<uint64_t>(v);
-	if (!value)
-		throw std::runtime_error("Failed to parse cgroup file");
-
-	return *value;
+		return *value;
+	});
 }
 
 CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
