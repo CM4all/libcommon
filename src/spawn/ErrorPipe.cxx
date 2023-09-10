@@ -13,10 +13,8 @@
 
 void
 WriteErrorPipe(FileDescriptor p, std::string_view prefix,
-	       std::exception_ptr e) noexcept
+	       std::string_view msg) noexcept
 {
-	const auto msg = GetFullMessage(e);
-
 	const std::array v{
 		MakeIovec(AsBytes(prefix)),
 		MakeIovec(AsBytes(msg)),
@@ -24,6 +22,13 @@ WriteErrorPipe(FileDescriptor p, std::string_view prefix,
 
 	[[maybe_unused]]
 	auto nbytes = writev(p.Get(), v.data(), v.size());
+}
+
+void
+WriteErrorPipe(FileDescriptor p, std::string_view prefix,
+	       std::exception_ptr e) noexcept
+{
+	WriteErrorPipe(p, prefix, GetFullMessage(e));
 }
 
 void

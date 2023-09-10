@@ -9,6 +9,10 @@
 
 class FileDescriptor;
 
+void
+WriteErrorPipe(FileDescriptor p, std::string_view prefix,
+	       std::string_view msg) noexcept;
+
 /**
  * Write a C++ exception into the pipe.
  */
