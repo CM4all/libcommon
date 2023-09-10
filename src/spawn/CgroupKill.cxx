@@ -9,6 +9,7 @@
 #include "io/ScopeChdir.hxx"
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "util/NumberParser.hxx"
 
 #include <array>
 #include <span>
@@ -115,28 +116,16 @@ CgroupKill::OnInotifyError(std::exception_ptr error) noexcept
 static size_t
 LoadCgroupPids(FileDescriptor cgroup_procs_fd, std::span<pid_t> pids)
 {
-	char buffer[8192];
-
-	ssize_t nbytes = cgroup_procs_fd.ReadAt(0, buffer, sizeof(buffer) - 1);
-	if (nbytes < 0)
-		throw MakeErrno("Reading cgroup.procs failed");
-
-	buffer[nbytes] = 0;
-
-	const char *s = buffer;
 	size_t n = 0;
 
-	while (n < pids.size()) {
-		char *endptr;
-		auto value = strtoul(s, &endptr, 10);
-		if (*endptr == 0)
-			break;
+	ForEachTextLine<8192>(cgroup_procs_fd, [pids, &n](std::string_view line){
+		if (line.empty() || n >= pids.size())
+			return;
 
-		if (endptr > s && *endptr == '\n')
-			pids[n++] = value;
-
-		s = endptr + 1;
-	}
+		auto pid = ParseInteger<pid_t>(line);
+		if (pid)
+			pids[n++] = *pid;
+	});
 
 	return n;
 }
