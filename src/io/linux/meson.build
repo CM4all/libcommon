@@ -1,5 +1,6 @@
 io_linux = static_library(
   'io',
+  'ProcPid.cxx',
   'ProcCgroup.cxx',
   'MountInfo.cxx',
   include_directories: inc,

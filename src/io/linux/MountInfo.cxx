@@ -3,10 +3,11 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "MountInfo.hxx"
-#include "lib/fmt/ToBuffer.hxx"
+#include "ProcPid.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "io/FileAt.hxx"
-#include "util/ScopeExit.hxx"
+#include "io/Open.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/IterableSplitString.hxx"
 
 #include <fmt/format.h>
@@ -33,21 +34,20 @@ SplitFill(std::array<std::string_view, N> &dest, std::string_view s, char separa
 }
 
 static FILE *
-Open(const char *path, const char *mode)
+OpenReadOnlyStdio(FileDescriptor directory, const char *path)
 {
-	FILE *file = fopen(path, mode);
+	auto fd = OpenReadOnly(directory, path);
+	FILE *file = fdopen(fd.Get(), "r");
 	if (file == nullptr)
-		throw FmtErrno("Failed to open {}", path);
-
+		throw MakeErrno("fdopen() failed");
+	fd.Release();
 	return file;
 }
 
 static FILE *
 OpenMountInfo(unsigned pid)
 {
-	return pid > 0
-		? Open(FmtBuffer<64>("/proc/{}/mountinfo", pid), "r")
-		: Open("/proc/self/mountinfo", "r");
+	return OpenReadOnlyStdio(OpenProcPid(pid), "mountinfo");
 }
 
 struct MountInfoView {
