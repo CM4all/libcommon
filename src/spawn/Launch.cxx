@@ -15,7 +15,9 @@
 #include "system/ProcessName.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Open.hxx"
+#include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "util/NumberParser.hxx"
 #include "util/PrintException.hxx"
 
 #include <sched.h>
@@ -120,16 +122,33 @@ static int
 RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		UniqueSocketDescriptor socket,
 		FileDescriptor error_pipe_w,
-		FileDescriptor read_pipe,
 		const bool pid_namespace) noexcept
 {
-	/* receive our "real" PID from the parent process; we have no way
-	   to obtain it, because we're in a PID namespace and getpid()
-	   returns 1 */
+	/* open the old /proc/self to be able to extract PIDs from the
+	   top-level PID namespace which we need for the
+	   StartTransientUnit D-Bus request */
+	auto old_proc_self = OpenPath("/proc/self", O_DIRECTORY);
+
 	int real_pid;
-	if (read_pipe.Read(&real_pid, sizeof(real_pid)) != sizeof(real_pid))
+	if (pid_namespace) {
+		/* if we're in a new PID namespace, getpid() will
+		   return 1, but for D-Bus, we need our top-level PID
+		   which we can read from the old /proc/self/stat */
+		try {
+			real_pid = WithSmallTextFile<64>(FileAt{old_proc_self, "stat"}, [](std::string_view contents){
+				auto p = ParseInteger<int>(Split(contents, ' ').first);
+				if (!p)
+					throw std::runtime_error{"Failed to parse pid"};
+				return *p;
+			});
+		} catch (...) {
+			WriteErrorPipe(error_pipe_w,
+				       "Failed to determine real PID: ",
+				       std::current_exception());
+			return EXIT_FAILURE;
+		}
+	} else
 		real_pid = getpid();
-	read_pipe.Close();
 
 	SetProcessName("spawn");
 
@@ -199,6 +218,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	}
 
 	error_pipe_w.Close();
+	old_proc_self.Close();
 
 	try {
 		RunSpawnServer(config, cgroup_state, pid_namespace,
@@ -221,16 +241,6 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	 */
 	UniqueFileDescriptor error_pipe_r, error_pipe_w;
 	if (!UniqueFileDescriptor::CreatePipe(error_pipe_r, error_pipe_w))
-		throw MakeErrno("pipe() failed");
-
-	/**
-	 * A pipe which is used to copy the "real" PID to the spawner
-	 * (which doesn't know its own PID because it lives in a new PID
-	 * namespace).  The "real" PID is necessary because we need to
-	 * send it to systemd.
-	 */
-	UniqueFileDescriptor read_pipe, write_pipe;
-	if (!UniqueFileDescriptor::CreatePipe(read_pipe, write_pipe))
 		throw MakeErrno("pipe() failed");
 
 	bool pid_namespace = true;
@@ -268,21 +278,15 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 		post_clone();
 
 		error_pipe_r.Close();
-		write_pipe.Close();
 
 		_exit(RunSpawnServer2(config, hook, std::move(socket),
 				      error_pipe_w,
-				      read_pipe,
 				      pid_namespace));
 	}
 
 	error_pipe_w.Close();
 
 	UniqueFileDescriptor pidfd{_pidfd};
-
-	/* send its "real" PID to the spawner */
-	read_pipe.Close();
-	write_pipe.Write(&pid, sizeof(pid));
 
 	ReadErrorPipe(error_pipe_r);
 
