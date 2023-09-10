@@ -67,4 +67,5 @@ struct SystemdUnitProperties {
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
 		   const SystemdUnitProperties &properties,
-		   int pid, bool delegate=false, const char *slice=nullptr);
+		   int real_pid, int local_pid,
+		   bool delegate=false, const char *slice=nullptr);

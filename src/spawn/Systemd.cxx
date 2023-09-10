@@ -24,7 +24,8 @@
 CgroupState
 CreateSystemdScope(const char *name, const char *description,
 		   const SystemdUnitProperties &properties,
-		   int pid, bool delegate, const char *slice)
+		   int real_pid, int local_pid,
+		   bool delegate, const char *slice)
 {
 	if (!sd_booted())
 		return CgroupState();
@@ -65,7 +66,7 @@ CreateSystemdScope(const char *name, const char *description,
 	using PropTypeTraits = StructTypeTraits<StringTypeTraits,
 						VariantTypeTraits>;
 
-	const uint32_t pids_value[] = { uint32_t(pid) };
+	const uint32_t pids_value[] = { uint32_t(real_pid) };
 
 	AppendMessageIter(args, DBUS_TYPE_ARRAY, PropTypeTraits::as_string)
 		.Append(Struct(String("Description"),
@@ -172,6 +173,6 @@ CreateSystemdScope(const char *name, const char *description,
 	Systemd::WaitJobRemoved(connection, object_path);
 
 	return delegate
-		? CgroupState::FromProcess()
+		? CgroupState::FromProcess(local_pid)
 		: CgroupState();
 }

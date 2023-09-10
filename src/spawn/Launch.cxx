@@ -17,8 +17,10 @@
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "util/NumberParser.hxx"
+#include "io/linux/ProcFdinfo.hxx"
 #include "util/PrintException.hxx"
+
+#include <fmt/format.h>
 
 #include <sched.h>
 #include <fcntl.h> // for AT_SYMLINK_NOFOLLOW
@@ -26,6 +28,8 @@
 #include <string.h>
 #include <sys/signal.h>
 #include <sys/socket.h> // for AF_LOCAL
+
+using std::string_view_literals::operator""sv;
 
 #ifdef HAVE_LIBSYSTEMD
 
@@ -118,32 +122,99 @@ DropCapabilities()
 	state.Install();
 }
 
+#ifdef HAVE_LIBSYSTEMD
+
+struct SystemdScopeProcess {
+	int local_pid, real_pid;
+	UniqueFileDescriptor pipe_w;
+};
+
+/**
+ * Start the "scope" process which does nothing but hold the systemd
+ * scope.  It will be moved to a special sub-cgroup called "_" where
+ * it idles until the pipe gets closed.  It doesn't do anything else,
+ * so throttling it due to memcg constraints will not affect the real
+ * spawner process.
+ */
+static SystemdScopeProcess
+StartSystemdScopeProcess(SocketDescriptor socket,
+			 FileDescriptor error_pipe_w,
+			 const bool pid_namespace)
+{
+	UniqueFileDescriptor pipe_r;
+	SystemdScopeProcess p;
+
+	if (!UniqueFileDescriptor::CreatePipe(pipe_r, p.pipe_w))
+		throw MakeErrno("pipe() failed");
+
+	int _pidfd;
+	const struct clone_args clone_args{
+		.flags = CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUSER|CLONE_PIDFD,
+		.pidfd = (uintptr_t)&_pidfd,
+	};
+
+	p.local_pid = clone3(&clone_args, sizeof(clone_args));
+	if (p.local_pid < 0)
+		throw MakeErrno("clone() failed");
+
+	if (p.local_pid == 0) {
+		SetProcessName("scope");
+
+		/* ignore all signals which may stop us; shut down
+		   only when the pipe gets closed */
+		signal(SIGINT, SIG_IGN);
+		signal(SIGTERM, SIG_IGN);
+		signal(SIGQUIT, SIG_IGN);
+		signal(SIGHUP, SIG_IGN);
+		signal(SIGUSR1, SIG_IGN);
+		signal(SIGUSR2, SIG_IGN);
+
+		p.pipe_w.Close();
+		error_pipe_w.Close();
+		socket.Close();
+
+		// TODO set up seccomp filter
+
+		std::byte dummy;
+		pipe_r.Read(&dummy, sizeof(dummy));
+		_exit(EXIT_SUCCESS);
+	}
+
+	const UniqueFileDescriptor pidfd{_pidfd};
+
+	/* if we're in a non-root PID namespace, extract the real PID
+	   from /proc/self/fdinfo/PIDFD (this is still the old
+	   /proc) */
+	p.real_pid = pid_namespace
+		? ReadPidfdPid(pidfd)
+		: p.local_pid;
+
+	return p;
+}
+
+#endif
+
 static int
 RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		UniqueSocketDescriptor socket,
 		FileDescriptor error_pipe_w,
 		const bool pid_namespace) noexcept
 {
-	int real_pid;
-	if (pid_namespace) {
-		/* if we're in a new PID namespace, getpid() will
-		   return 1, but for D-Bus, we need our top-level PID
-		   which we can read from the old /proc/self/stat */
+#ifdef HAVE_LIBSYSTEMD
+	SystemdScopeProcess scope_process;
+
+	if (!config.systemd_scope.empty()) {
 		try {
-			real_pid = WithSmallTextFile<64>("/proc/self/stat", [](std::string_view contents){
-				auto p = ParseInteger<int>(Split(contents, ' ').first);
-				if (!p)
-					throw std::runtime_error{"Failed to parse pid"};
-				return *p;
-			});
+			scope_process = StartSystemdScopeProcess(socket, error_pipe_w,
+								 pid_namespace);
 		} catch (...) {
 			WriteErrorPipe(error_pipe_w,
-				       "Failed to determine real PID: ",
+				       "Failed to start scope process: ",
 				       std::current_exception());
 			return EXIT_FAILURE;
 		}
-	} else
-		real_pid = getpid();
+	}
+#endif
 
 	SetProcessName("spawn");
 
@@ -175,7 +246,9 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 				CreateSystemdScope(config.systemd_scope.c_str(),
 						   config.systemd_scope_description.c_str(),
 						   config.systemd_scope_properties,
-						   real_pid, true,
+						   scope_process.real_pid,
+						   scope_process.local_pid,
+						   true,
 						   config.systemd_slice.empty() ? nullptr : config.systemd_slice.c_str());
 
 			Chown(cgroup_state, config.spawner_uid_gid.uid,
@@ -190,13 +263,15 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 					       std::current_exception());
 				return EXIT_FAILURE;
 			}
+
+			scope_process.pipe_w.Close();
 		}
 	}
 #endif
 
 	if (cgroup_state.IsEnabled()) {
 		try {
-			cgroup_state.EnableAllControllers();
+			cgroup_state.EnableAllControllers(scope_process.local_pid);
 		} catch (...) {
 			WriteErrorPipe(error_pipe_w,
 				       "Failed to setup cgroup2: ",

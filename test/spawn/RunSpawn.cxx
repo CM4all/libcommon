@@ -148,7 +148,8 @@ try {
 	const CgroupState cgroup_state = scope_name != nullptr
 		? CreateSystemdScope(scope_name, scope_name,
 				     {},
-				     getpid(), true, nullptr)
+				     getpid(), getpid(),
+				     true, nullptr)
 		: CgroupState();
 
 	const auto pid = SpawnChildProcess(std::move(p), cgroup_state,
