@@ -66,5 +66,5 @@ private:
 	 * Throws on error.
 	 */
 	[[gnu::pure]]
-	static CgroupState FromProcCgroup(ProcCgroup &&proc_cgroup);
+	static CgroupState FromGroupPath(std::string &&group_path);
 };

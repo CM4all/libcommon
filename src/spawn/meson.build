@@ -154,6 +154,7 @@ spawn = static_library(
   include_directories: inc,
   dependencies: [
     util_dep,
+    io_linux_dep,
     cap_dep,
     fmt_dep,
     libsystemd,

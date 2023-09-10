@@ -9,6 +9,7 @@
 #include "io/Open.hxx"
 #include "io/WithFile.hxx"
 #include "io/WriteFile.hxx"
+#include "io/linux/ProcCgroup.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringSplit.hxx"
@@ -104,77 +105,6 @@ CgroupState::EnableAllControllers() const
 	TryWriteExistingFile(leaf_group, "io.bfq.weight", "1000");
 }
 
-static FILE *
-OpenOrThrow(const char *path, const char *mode)
-{
-	FILE *file = fopen(path, mode);
-	if (file == nullptr)
-		throw FormatErrno("Failed to open %s", path);
-
-	return file;
-}
-
-struct ProcCgroup {
-	std::string group_path;
-	bool have_unified = false, have_systemd = false, have_v1 = false;
-
-	bool IsDefined() const noexcept {
-		return !group_path.empty();
-	}
-};
-
-static FILE *
-OpenProcCgroup(unsigned pid)
-{
-	if (pid > 0)
-		return OpenOrThrow(FmtBuffer<64>("/proc/{}/cgroup", pid),
-				   "r");
-	else
-		return OpenOrThrow("/proc/self/cgroup", "r");
-
-}
-
-static ProcCgroup
-ReadProcCgroup(FILE *file)
-{
-	ProcCgroup pc;
-
-	char buffer[256];
-	while (fgets(buffer, sizeof(buffer), file) != nullptr) {
-		std::string_view line{buffer};
-		line = StripRight(line);
-
-		/* skip the hierarchy id */
-		line = Split(line, ':').second;
-
-		const auto [name, path] = Split(line, ':');
-		if (path.size() < 2 || path.front() != '/')
-			/* ignore malformed lines and lines in the
-			   root cgroup */
-			continue;
-
-		if (name == "name=systemd"sv) {
-			pc.have_systemd = true;
-		} else if (name.empty()) {
-			pc.group_path = path;
-			pc.have_unified = true;
-		} else {
-			pc.have_v1 = true;
-		}
-	}
-
-	return pc;
-}
-
-static ProcCgroup
-ReadProcCgroup(unsigned pid)
-{
-	FILE *file = OpenProcCgroup(pid);
-	AtScopeExit(file) { fclose(file); };
-
-	return ReadProcCgroup(file);
-}
-
 [[gnu::pure]]
 static bool
 HasCgroupKill(FileDescriptor fd) noexcept
@@ -185,20 +115,18 @@ HasCgroupKill(FileDescriptor fd) noexcept
 }
 
 CgroupState
-CgroupState::FromProcCgroup(ProcCgroup &&proc_cgroup)
+CgroupState::FromGroupPath(std::string &&group_path)
 {
-	if (!proc_cgroup.IsDefined())
-		/* no "systemd" controller found - disable the feature */
-		return {};
+	assert(!group_path.empty());
 
 	CgroupState state;
 
 	auto sys_fs_cgroup = OpenPath("/sys/fs/cgroup");
 
-	state.group_fd = OpenPath(sys_fs_cgroup, proc_cgroup.group_path.c_str() + 1);
+	state.group_fd = OpenPath(sys_fs_cgroup, group_path.c_str() + 1);
 	state.cgroup_kill = HasCgroupKill(state.group_fd);
 
-	state.group_path = std::move(proc_cgroup.group_path);
+	state.group_path = std::move(group_path);
 
 	return state;
 }
@@ -206,14 +134,18 @@ CgroupState::FromProcCgroup(ProcCgroup &&proc_cgroup)
 CgroupState
 CgroupState::FromProcess(unsigned pid)
 {
-	return FromProcCgroup(ReadProcCgroup(pid));
+	auto group_path = ReadProcessCgroup(pid);
+	if (group_path.empty())
+		return {};
+
+	return FromGroupPath(std::move(group_path));
 }
 
 CgroupState
-CgroupState::FromProcess(unsigned pid, std::string group_path)
+CgroupState::FromProcess(unsigned pid, std::string override_group_path)
 {
-	auto proc_cgroup = ReadProcCgroup(pid);
-	if (proc_cgroup.IsDefined())
-		proc_cgroup.group_path = std::move(group_path);
-	return FromProcCgroup(std::move(proc_cgroup));
+	if (auto group_path = ReadProcessCgroup(pid); group_path.empty())
+		return {};
+
+	return FromGroupPath(std::move(override_group_path));
 }
