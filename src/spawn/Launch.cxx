@@ -124,18 +124,13 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		FileDescriptor error_pipe_w,
 		const bool pid_namespace) noexcept
 {
-	/* open the old /proc/self to be able to extract PIDs from the
-	   top-level PID namespace which we need for the
-	   StartTransientUnit D-Bus request */
-	auto old_proc_self = OpenPath("/proc/self", O_DIRECTORY);
-
 	int real_pid;
 	if (pid_namespace) {
 		/* if we're in a new PID namespace, getpid() will
 		   return 1, but for D-Bus, we need our top-level PID
 		   which we can read from the old /proc/self/stat */
 		try {
-			real_pid = WithSmallTextFile<64>(FileAt{old_proc_self, "stat"}, [](std::string_view contents){
+			real_pid = WithSmallTextFile<64>("/proc/self/stat", [](std::string_view contents){
 				auto p = ParseInteger<int>(Split(contents, ' ').first);
 				if (!p)
 					throw std::runtime_error{"Failed to parse pid"};
@@ -218,7 +213,6 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	}
 
 	error_pipe_w.Close();
-	old_proc_self.Close();
 
 	try {
 		RunSpawnServer(config, cgroup_state, pid_namespace,
