@@ -247,10 +247,11 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 
 	int _pidfd;
 
-	struct clone_args ca{};
-	ca.flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_PIDFD;
-	ca.pidfd = (intptr_t)&_pidfd;
-	ca.exit_signal = SIGCHLD;
+	struct clone_args ca{
+		.flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_PIDFD,
+		.pidfd = (uintptr_t)&_pidfd,
+		.exit_signal = SIGCHLD,
+	};
 
 	/* try to run the spawner in a new PID namespace; to be able to
 	   mount a new /proc for this namespace, we need a mount namespace

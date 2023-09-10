@@ -442,10 +442,11 @@ try {
 
 	int _pidfd;
 
-	struct clone_args ca{};
-	ca.flags = clone_flags;
-	ca.pidfd = (intptr_t)&_pidfd;
-	ca.exit_signal = SIGCHLD;
+	struct clone_args ca{
+		.flags = clone_flags,
+		.pidfd = (uintptr_t)&_pidfd,
+		.exit_signal = SIGCHLD,
+	};
 
 	/* if a cgroup name is specified, it is used as the name for
 	   the "init" process */
