@@ -3,11 +3,24 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ProcCgroup.hxx"
-#include "lib/fmt/ToBuffer.hxx"
+#include "ProcPid.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "io/Open.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/StringSplit.hxx"
+
+static FILE *
+OpenReadOnlyStdio(FileDescriptor directory, const char *path)
+{
+	auto fd = OpenReadOnly(directory, path);
+	FILE *file = fdopen(fd.Get(), "r");
+	if (file == nullptr)
+		throw MakeErrno("fdopen() failed");
+	fd.Release();
+	return file;
+}
 
 static bool
 ListContains(std::string_view haystack, char separator, std::string_view needle)
@@ -28,11 +41,7 @@ StripTrailingNewline(std::string_view s)
 std::string
 ReadProcessCgroup(unsigned pid, const std::string_view controller)
 {
-	const auto path = FmtBuffer<64>("/proc/{}/cgroup", pid);
-	FILE *file = fopen(path, "r");
-	if (file == nullptr)
-		throw FmtErrno("Failed to open {}", path.c_str());
-
+	FILE *file = OpenReadOnlyStdio(OpenProcPid(pid), "cgroup");
 	AtScopeExit(file) { fclose(file); };
 
 	char line[4096];
