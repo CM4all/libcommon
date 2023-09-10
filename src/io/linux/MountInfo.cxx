@@ -141,9 +141,6 @@ public:
 MountInfo
 ReadProcessMount(unsigned pid, const char *_mountpoint)
 {
-	FILE *const file = OpenMountInfo(pid);
-	AtScopeExit(file) { fclose(file); };
-
 	const std::string_view mountpoint(_mountpoint);
 
 	for (const auto &i : MountInfoReader{pid})
@@ -156,9 +153,6 @@ ReadProcessMount(unsigned pid, const char *_mountpoint)
 MountInfo
 FindMountInfoByDevice(unsigned pid, const char *_device)
 {
-	FILE *const file = OpenMountInfo(pid);
-	AtScopeExit(file) { fclose(file); };
-
 	const std::string_view device{_device};
 
 	for (const auto &i : MountInfoReader{pid})
