@@ -80,6 +80,10 @@ public:
 	explicit MountInfoReader(unsigned pid)
 		:file(OpenMountInfo(pid)) {}
 
+	~MountInfoReader() noexcept {
+		fclose(file);
+	}
+
 	bool ReadLine() noexcept {
 		return fgets(line, sizeof(line), file) != nullptr;
 	}
