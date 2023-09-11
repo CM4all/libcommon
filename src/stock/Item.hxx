@@ -48,10 +48,10 @@ class StockItem
 	bool fade = false;
 
 public:
-	using List =
-		IntrusiveList<StockItem,
-			      IntrusiveListMemberHookTraits<&StockItem::stock_item_siblings>,
-			      true>;
+	using List = IntrusiveList<
+		StockItem,
+		IntrusiveListMemberHookTraits<&StockItem::stock_item_siblings>,
+		IntrusiveListOptions{.constant_time_size = true}>;
 
 	/**
 	 * Kludge: this flag is true if this item is idle and is not yet

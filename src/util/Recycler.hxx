@@ -33,9 +33,10 @@ class Recycler {
 		~Item() {}
 	};
 
-	IntrusiveForwardList<Item,
-			     IntrusiveForwardListMemberHookTraits<&Item::hook>,
-			     true> list;
+	IntrusiveForwardList<
+		Item,
+		IntrusiveForwardListMemberHookTraits<&Item::hook>,
+		IntrusiveForwardListOptions{.constant_time_size = true}> list;
 
 public:
 	~Recycler() {

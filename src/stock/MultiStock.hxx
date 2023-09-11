@@ -163,10 +163,10 @@ class MultiStock {
 
 		const std::string name;
 
-		using OuterItemList =
-			IntrusiveList<OuterItem,
-				      IntrusiveListBaseHookTraits<OuterItem>,
-				      true>;
+		using OuterItemList = IntrusiveList<
+			OuterItem,
+			IntrusiveListBaseHookTraits<OuterItem>,
+			IntrusiveListOptions{.constant_time_size = true}>;
 
 		OuterItemList items;
 
