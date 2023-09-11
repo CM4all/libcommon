@@ -194,7 +194,6 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 			scope_process.pipe_w.Close();
 		}
 	}
-#endif
 
 	if (cgroup_state.IsEnabled()) {
 		try {
@@ -206,6 +205,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 			return EXIT_FAILURE;
 		}
 	}
+#endif // HAVE_LIBSYSTEMD
 
 	try {
 		DropCapabilities();
