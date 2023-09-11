@@ -145,6 +145,7 @@ endif
 if libsystemd.found()
   spawn_sources += [
     'Systemd.cxx',
+    'ScopeProcess.cxx',
   ]
 endif
 

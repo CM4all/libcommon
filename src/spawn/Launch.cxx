@@ -5,6 +5,7 @@
 #include "Launch.hxx"
 #include "ErrorPipe.hxx"
 #include "Config.hxx"
+#include "ScopeProcess.hxx"
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
 #include "Server.hxx"
@@ -17,7 +18,6 @@
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "io/linux/ProcFdinfo.hxx"
 #include "util/PrintException.hxx"
 
 #include <fmt/format.h>
@@ -121,78 +121,6 @@ DropCapabilities()
 
 	state.Install();
 }
-
-#ifdef HAVE_LIBSYSTEMD
-
-struct SystemdScopeProcess {
-	int local_pid, real_pid;
-	UniqueFileDescriptor pipe_w;
-};
-
-/**
- * Start the "scope" process which does nothing but hold the systemd
- * scope.  It will be moved to a special sub-cgroup called "_" where
- * it idles until the pipe gets closed.  It doesn't do anything else,
- * so throttling it due to memcg constraints will not affect the real
- * spawner process.
- */
-static SystemdScopeProcess
-StartSystemdScopeProcess(SocketDescriptor socket,
-			 FileDescriptor error_pipe_w,
-			 const bool pid_namespace)
-{
-	UniqueFileDescriptor pipe_r;
-	SystemdScopeProcess p;
-
-	if (!UniqueFileDescriptor::CreatePipe(pipe_r, p.pipe_w))
-		throw MakeErrno("pipe() failed");
-
-	int _pidfd;
-	const struct clone_args clone_args{
-		.flags = CLONE_NEWIPC|CLONE_NEWNET|CLONE_NEWNS|CLONE_NEWUSER|CLONE_PIDFD,
-		.pidfd = (uintptr_t)&_pidfd,
-	};
-
-	p.local_pid = clone3(&clone_args, sizeof(clone_args));
-	if (p.local_pid < 0)
-		throw MakeErrno("clone() failed");
-
-	if (p.local_pid == 0) {
-		SetProcessName("scope");
-
-		/* ignore all signals which may stop us; shut down
-		   only when the pipe gets closed */
-		signal(SIGINT, SIG_IGN);
-		signal(SIGTERM, SIG_IGN);
-		signal(SIGQUIT, SIG_IGN);
-		signal(SIGHUP, SIG_IGN);
-		signal(SIGUSR1, SIG_IGN);
-		signal(SIGUSR2, SIG_IGN);
-
-		p.pipe_w.Close();
-		error_pipe_w.Close();
-		socket.Close();
-
-		// TODO set up seccomp filter
-
-		std::byte dummy;
-		pipe_r.Read(&dummy, sizeof(dummy));
-		_exit(EXIT_SUCCESS);
-	}
-
-	const UniqueFileDescriptor pidfd{_pidfd};
-
-	/* if we're in a non-root PID namespace, extract the real PID
-	   from /proc/self/fdinfo/PIDFD (this is still the old
-	   /proc) */
-	p.real_pid = pid_namespace
-		? ReadPidfdPid(pidfd)
-		: p.local_pid;
-
-	return p;
-}
-
-#endif
 
 static int
 RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
