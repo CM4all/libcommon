@@ -8,7 +8,6 @@
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
-#include "util/IterableSplitString.hxx"
 #include "util/StringSplit.hxx"
 
 static FILE *
@@ -22,16 +21,6 @@ OpenReadOnlyStdio(FileDescriptor directory, const char *path)
 	return file;
 }
 
-static bool
-ListContains(std::string_view haystack, char separator, std::string_view needle)
-{
-	for (const auto value : IterableSplitString(haystack, separator))
-		if (value == needle)
-			return true;
-
-	return false;
-}
-
 static std::string_view
 StripTrailingNewline(std::string_view s)
 {
@@ -39,7 +28,7 @@ StripTrailingNewline(std::string_view s)
 }
 
 std::string
-ReadProcessCgroup(unsigned pid, const std::string_view controller)
+ReadProcessCgroup(unsigned pid)
 {
 	FILE *file = OpenReadOnlyStdio(OpenProcPid(pid), "cgroup");
 	AtScopeExit(file) { fclose(file); };
@@ -47,7 +36,7 @@ ReadProcessCgroup(unsigned pid, const std::string_view controller)
 	char line[4096];
 	while (fgets(line, sizeof(line), file) != nullptr) {
 		const auto [controllers, group] = Split(Split(std::string_view{line}, ':').second, ':');
-		if (!group.empty() && ListContains(controllers, ',', controller))
+		if (controllers.empty() && !group.empty())
 			return std::string{StripTrailingNewline(group)};
 	}
 

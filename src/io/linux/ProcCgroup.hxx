@@ -17,4 +17,4 @@
  * /proc/PID/cgroup
  */
 std::string
-ReadProcessCgroup(unsigned pid, std::string_view controller={});
+ReadProcessCgroup(unsigned pid);

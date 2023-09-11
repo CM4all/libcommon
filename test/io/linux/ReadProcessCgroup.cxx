@@ -13,7 +13,7 @@ try {
 		return EXIT_FAILURE;
 	}
 
-	fmt::print("{}\n", ReadProcessCgroup(atoi(argv[1]), ""));
+	fmt::print("{}\n", ReadProcessCgroup(atoi(argv[1])));
 	return EXIT_SUCCESS;
 } catch (const std::exception &e) {
 	PrintException(e);
