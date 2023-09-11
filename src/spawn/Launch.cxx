@@ -133,8 +133,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 
 	if (!config.systemd_scope.empty()) {
 		try {
-			scope_process = StartSystemdScopeProcess(socket, error_pipe_w,
-								 pid_namespace);
+			scope_process = StartSystemdScopeProcess(pid_namespace);
 		} catch (...) {
 			WriteErrorPipe(error_pipe_w,
 				       "Failed to start scope process: ",

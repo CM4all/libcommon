@@ -6,8 +6,6 @@
 
 #include "io/UniqueFileDescriptor.hxx"
 
-class SocketDescriptor;
-
 struct SystemdScopeProcess {
 	int local_pid, real_pid;
 	UniqueFileDescriptor pipe_w;
@@ -21,6 +19,4 @@ struct SystemdScopeProcess {
  * spawner process.
  */
 SystemdScopeProcess
-StartSystemdScopeProcess(SocketDescriptor socket,
-			 FileDescriptor error_pipe_w,
-			 bool pid_namespace);
+StartSystemdScopeProcess(bool pid_namespace);

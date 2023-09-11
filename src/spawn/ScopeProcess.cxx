@@ -3,21 +3,20 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ScopeProcess.hxx"
-#include "net/SocketDescriptor.hxx"
 #include "system/clone3.h"
+#include "system/CloseRange.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "io/linux/ProcFdinfo.hxx"
 
 #include <cstdint> // for uintptr_t
 
+#include <limits.h> // for UINT_MAX
 #include <signal.h>
 #include <unistd.h> // for _exit()
 
 SystemdScopeProcess
-StartSystemdScopeProcess(SocketDescriptor socket,
-			 FileDescriptor error_pipe_w,
-			 const bool pid_namespace)
+StartSystemdScopeProcess(const bool pid_namespace)
 {
 	UniqueFileDescriptor pipe_r;
 	SystemdScopeProcess p;
@@ -38,6 +37,12 @@ StartSystemdScopeProcess(SocketDescriptor socket,
 	if (p.local_pid == 0) {
 		SetProcessName("scope");
 
+		pipe_r.CheckDuplicate(FileDescriptor{STDIN_FILENO});
+		pipe_r.Release();
+		p.pipe_w.Release();
+
+		sys_close_range(3, UINT_MAX, 0);
+
 		/* ignore all signals which may stop us; shut down
 		   only when the pipe gets closed */
 		signal(SIGINT, SIG_IGN);
@@ -47,14 +52,10 @@ StartSystemdScopeProcess(SocketDescriptor socket,
 		signal(SIGUSR1, SIG_IGN);
 		signal(SIGUSR2, SIG_IGN);
 
-		p.pipe_w.Close();
-		error_pipe_w.Close();
-		socket.Close();
-
 		// TODO set up seccomp filter
 
 		std::byte dummy;
-		pipe_r.Read(&dummy, sizeof(dummy));
+		read(STDIN_FILENO, &dummy, sizeof(dummy));
 		_exit(EXIT_SUCCESS);
 	}
 
