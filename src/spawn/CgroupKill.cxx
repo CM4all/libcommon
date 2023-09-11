@@ -118,14 +118,16 @@ LoadCgroupPids(FileDescriptor cgroup_procs_fd, std::span<pid_t> pids)
 {
 	size_t n = 0;
 
-	ForEachTextLine<8192>(cgroup_procs_fd, [pids, &n](std::string_view line){
-		if (line.empty() || n >= pids.size())
-			return;
+	for (const std::string_view line : IterableSmallTextFile<8192>(cgroup_procs_fd)) {
+		if (line.empty())
+			continue;
 
-		auto pid = ParseInteger<pid_t>(line);
-		if (pid)
+		if (auto pid = ParseInteger<pid_t>(line)) {
 			pids[n++] = *pid;
-	});
+			if (n >= pids.size())
+				break;
+		}
+	}
 
 	return n;
 }
