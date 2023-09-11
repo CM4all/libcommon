@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "NetworkNamespace.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/Open.hxx"
 
@@ -29,6 +29,6 @@ ReassociateNetworkNamespace(const char *name)
 	assert(name != nullptr);
 
 	if (setns(OpenNetworkNS(name).Get(), CLONE_NEWNET) < 0)
-		throw FormatErrno("Failed to reassociate with network namespace '%s'",
-				  name);
+		throw FmtErrno("Failed to reassociate with network namespace '{}'",
+			       name);
 }

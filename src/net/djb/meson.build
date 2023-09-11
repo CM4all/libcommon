@@ -4,6 +4,9 @@ net_djb = static_library(
   'NetstringHeader.cxx',
   'NetstringGenerator.cxx',
   include_directories: inc,
+  dependencies: [
+    fmt_dep,
+  ],
 )
 
 net_djb_dep = declare_dependency(

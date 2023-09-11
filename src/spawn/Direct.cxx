@@ -11,6 +11,7 @@
 #include "UserNamespace.hxx"
 #include "Init.hxx"
 #include "daemon/Client.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Iovec.hxx"
@@ -174,7 +175,7 @@ try {
 		p.rlimits.Apply(0);
 
 	if (p.chroot != nullptr && chroot(p.chroot) < 0)
-		throw FormatErrno("chroot('%s') failed", p.chroot);
+		throw FmtErrno("chroot('{}') failed", p.chroot);
 
 	if (userns_create_pipe_w.IsDefined()) {
 		/* user namespace allocation was postponed to allow
@@ -269,7 +270,7 @@ try {
 		p.uid_gid.Apply();
 
 	if (p.chdir != nullptr && chdir(p.chdir) < 0)
-		throw FormatErrno("chdir('%s') failed", p.chdir);
+		throw FmtErrno("chdir('{}') failed", p.chdir);
 
 	if (!stderr_fd.IsDefined() && p.stderr_path != nullptr &&
 	    !stderr_fd.Open(p.stderr_path,
@@ -310,7 +311,7 @@ try {
 		execve(path, const_cast<char *const*>(p.args.data()),
 		       const_cast<char *const*>(p.env.data()));
 
-		throw FormatErrno("Failed to execute '%s'", path);
+		throw FmtErrno("Failed to execute '{}'", path);
 	}
 } catch (...) {
 	WriteErrorPipe(error_pipe_w, {}, std::current_exception());

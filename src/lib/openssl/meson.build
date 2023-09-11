@@ -44,6 +44,7 @@ crypto = static_library(
   include_directories: inc,
   dependencies: [
     libcrypto,
+    fmt_dep,
   ],
 )
 

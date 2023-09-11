@@ -31,9 +31,9 @@
 #include "net/Parser.hxx"
 #include "http/Status.hxx"
 #endif
+#include "lib/fmt/RuntimeError.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
-#include "util/RuntimeError.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringCompare.hxx"
 #include "util/StringSplit.hxx"
@@ -353,14 +353,14 @@ parse_header(AllocatorPtr alloc,
 	const auto [_name, value] = Split(payload, ':');
 	if (_name.empty() || value.data() == nullptr ||
 	    !IsValidString(payload))
-		throw FormatRuntimeError("malformed %s packet", packet_name);
+		throw FmtRuntimeError("malformed {} packet", packet_name);
 
 	const char *name = alloc.DupToLower(_name);
 
 	if (!http_header_name_valid(name))
-		throw FormatRuntimeError("malformed name in %s packet", packet_name);
+		throw FmtRuntimeError("malformed name in {} packet", packet_name);
 	else if (http_header_is_hop_by_hop(name))
-		throw FormatRuntimeError("hop-by-hop %s packet", packet_name);
+		throw FmtRuntimeError("hop-by-hop {} packet", packet_name);
 
 	headers.Add(alloc, name, value.data());
 }
@@ -475,7 +475,7 @@ static void
 translate_client_check_pair(const char *name, std::string_view payload)
 {
 	if (!translate_client_check_pair(payload))
-		throw FormatRuntimeError("malformed %s packet", name);
+		throw FmtRuntimeError("malformed {} packet", name);
 }
 
 static void
@@ -496,7 +496,7 @@ translate_client_expand_pair(ExpandableStringList::Builder &builder,
 			     std::string_view payload)
 {
 	if (!builder.CanSetExpand())
-		throw FormatRuntimeError("misplaced %s packet", name);
+		throw FmtRuntimeError("misplaced {} packet", name);
 
 	translate_client_check_pair(name, payload);
 
@@ -1142,8 +1142,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 #if TRANSLATION_ENABLE_HTTP
 		if (!http_status_is_valid(response.status))
-			throw FormatRuntimeError("invalid HTTP status code %u",
-						 response.status);
+			throw FmtRuntimeError("invalid HTTP status code {}",
+					      response.status);
 #endif
 
 		return;
@@ -1814,8 +1814,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 						 ParseSocketAddress(string_payload.data(),
 								    default_port, false));
 		} catch (const std::exception &e) {
-			throw FormatRuntimeError("malformed ADDRESS_STRING packet: %s",
-						 e.what());
+			throw FmtRuntimeError("malformed ADDRESS_STRING packet: {}",
+					      e.what());
 		}
 
 		return;
@@ -4046,7 +4046,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 	}
 
-	throw FormatRuntimeError("unknown translation packet: %u", command);
+	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
 }
 
 inline TranslateParser::Result

@@ -34,6 +34,7 @@ translation_server = static_library(
     coroutines_dep,
     event_dep,
     libsystemd,
+    fmt_dep,
   ],
 )
 

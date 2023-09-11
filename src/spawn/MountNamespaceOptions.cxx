@@ -7,10 +7,10 @@
 #include "VfsBuilder.hxx"
 #include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
 #include "system/pivot_root.h"
 #include "system/Mount.hxx"
-#include "system/Error.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"
@@ -69,7 +69,7 @@ static void
 ChdirOrThrow(const char *path)
 {
 	if (chdir(path) < 0)
-		throw FormatErrno("chdir('%s') failed", path);
+		throw FmtErrno("chdir('{}') failed", path);
 }
 
 void
@@ -126,7 +126,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		/* enter the new root */
 		int result = my_pivot_root(new_root, put_old + 1);
 		if (result < 0)
-			throw FormatErrno("pivot_root('%s') failed", new_root);
+			throw FmtErrno("pivot_root('{}') failed", new_root);
 	}
 
 	if (mount_proc) {

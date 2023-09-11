@@ -3,7 +3,7 @@
 
 #include "DirectoryReader.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 
 #include <utility>
 
@@ -11,7 +11,7 @@ DirectoryReader::DirectoryReader(const char *path)
 	:dir(opendir(path))
 {
 	if (dir == nullptr)
-		throw FormatErrno("Failed to open directory %s", path);
+		throw FmtErrno("Failed to open directory {}", path);
 }
 
 static DIR *

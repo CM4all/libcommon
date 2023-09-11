@@ -7,7 +7,7 @@
 #include "Key.hxx"
 #include "Error.hxx"
 #include "UniqueBIO.hxx"
-#include "util/RuntimeError.hxx"
+#include "lib/fmt/RuntimeError.hxx"
 
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -73,8 +73,8 @@ LoadCertChainFile(const char *path, bool first_is_ca)
 			if (result < 0)
 				throw SslError("Failed to verify CA chain");
 			else
-				throw FormatRuntimeError("CA chain mismatch in %s",
-							 path);
+				throw FmtRuntimeError("CA chain mismatch in {}",
+						      path);
 		}
 
 		i = list.emplace_after(i, std::move(cert));

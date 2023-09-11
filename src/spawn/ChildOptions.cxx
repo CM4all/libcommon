@@ -6,7 +6,7 @@
 #include "ResourceLimits.hxx"
 #include "Prepared.hxx"
 #include "AllocatorPtr.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
@@ -147,7 +147,7 @@ ChildOptions::OpenStderrPath() const
 
 	UniqueFileDescriptor fd;
 	if (!fd.Open(stderr_path, O_CREAT|O_WRONLY|O_APPEND, 0600))
-		throw FormatErrno("open('%s') failed", stderr_path);
+		throw FmtErrno("open('{}') failed", stderr_path);
 
 	return fd;
 }

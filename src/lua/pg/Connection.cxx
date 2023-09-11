@@ -4,6 +4,7 @@
 
 #include "Connection.hxx"
 #include "Result.hxx"
+#include "lib/fmt/RuntimeError.hxx"
 #include "lua/Assert.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
@@ -13,7 +14,6 @@
 #include "pg/SharedConnection.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/Cancellable.hxx"
-#include "util/RuntimeError.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringBuffer.hxx"
 
@@ -428,8 +428,8 @@ PgRequest::SendQuery(Pg::AsyncConnection &c)
 				break;
 
 			default:
-				throw FormatRuntimeError("Unsupported query parameter type: %s",
-							 lua_typename(L, type));
+				throw FmtRuntimeError("Unsupported query parameter type: {}",
+						      lua_typename(L, type));
 			}
 		}
 

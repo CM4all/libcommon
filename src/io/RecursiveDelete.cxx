@@ -6,7 +6,7 @@
 #include "DirectoryReader.hxx"
 #include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -42,7 +42,7 @@ RecursiveDeleteDirectory(FileDescriptor parent, const char *filename)
 		return;
 
 	default:
-		throw FormatErrno(e, "Failed to delete %s", filename);
+		throw FmtErrno(e, "Failed to delete {}", filename);
 	}
 }
 
@@ -63,6 +63,6 @@ RecursiveDelete(FileDescriptor parent, const char *filename)
 		return;
 
 	default:
-		throw FormatErrno(e, "Failed to delete %s", filename);
+		throw FmtErrno(e, "Failed to delete {}", filename);
 	}
 }

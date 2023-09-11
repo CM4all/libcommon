@@ -2,13 +2,12 @@
 // author: Max Kellermann <max.kellermann@gmail.com>
 
 #include "FileWriter.hxx"
-#include "system/Error.hxx"
-#include "util/RuntimeError.hxx"
+#include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/SystemError.hxx"
+#include "lib/fmt/ToBuffer.hxx"
 
 #include <cassert>
 
-#include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -39,7 +38,7 @@ MakeTempFileInDirectory(const std::string &directory, mode_t mode)
 			return {std::move(path), std::move(fd)};
 
 		if (errno != EEXIST)
-			throw FormatErrno("Failed to create %s", path.c_str());
+			throw FmtErrno("Failed to create {}", path);
 
 		++r;
 	}
@@ -59,7 +58,7 @@ MakeTempFileInDirectory(FileDescriptor directory_fd, mode_t mode)
 			return {std::move(path), std::move(fd)};
 
 		if (errno != EEXIST)
-			throw FormatErrno("Failed to create %s", path.c_str());
+			throw FmtErrno("Failed to create {}", path);
 
 		++r;
 	}
@@ -102,10 +101,10 @@ FileWriter::Write(const void *data, size_t size)
 {
 	ssize_t nbytes = fd.Write(data, size);
 	if (nbytes < 0)
-		throw FormatRuntimeError("Failed to write to %s", path.c_str());
+		throw FmtRuntimeError("Failed to write to {}", path);
 
 	if (size_t(nbytes) < size)
-		throw FormatRuntimeError("Short write to %s", path.c_str());
+		throw FmtRuntimeError("Short write to {}", path);
 }
 
 void
@@ -117,24 +116,22 @@ FileWriter::Commit()
 		unlinkat(directory_fd.Get(), path.c_str(), 0);
 
 		/* hard-link the temporary file to the final path */
-		char fd_path[64];
-		snprintf(fd_path, sizeof(fd_path), "/proc/self/fd/%d",
-			 fd.Get());
+		const auto fd_path = FmtBuffer<64>("/proc/self/fd/{}",
+						   fd.Get());
 		if (linkat(AT_FDCWD, fd_path,
 			   directory_fd.Get(), path.c_str(),
 			   AT_SYMLINK_FOLLOW) < 0)
-			throw FormatErrno("Failed to commit %s",
-					  path.c_str());
+			throw FmtErrno("Failed to commit {}", path);
 	}
 
 	if (!fd.Close())
-		throw FormatErrno("Failed to commit %s", path.c_str());
+		throw FmtErrno("Failed to commit {}", path);
 
 	if (!tmp_path.empty() &&
 	    renameat(directory_fd.Get(), tmp_path.c_str(),
 		     directory_fd.Get(), path.c_str()) < 0)
-		throw FormatErrno("Failed to rename %s to %s",
-				  tmp_path.c_str(), path.c_str());
+		throw FmtErrno("Failed to rename {} to {}",
+			       tmp_path, path);
 }
 
 void

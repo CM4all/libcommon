@@ -4,7 +4,7 @@
 
 #include "PidNamespace.hxx"
 #include "spawn/daemon/Client.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
@@ -25,6 +25,6 @@ ReassociatePidNamespace(const char *name)
 	assert(name != nullptr);
 
 	if (setns(GetPidNS(name).Get(), CLONE_NEWPID) < 0)
-		throw FormatErrno("Failed to reassociate with PID namespace '%s'",
-				  name);
+		throw FmtErrno("Failed to reassociate with PID namespace '{}'",
+			       name);
 }

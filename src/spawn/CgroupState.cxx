@@ -3,8 +3,8 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "CgroupState.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
-#include "system/Error.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
@@ -32,7 +32,7 @@ static void
 WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 {
 	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
-		throw FormatErrno("write('%s') failed", path);
+		throw FmtErrno("write('{}') failed", path);
 }
 
 static void

@@ -9,14 +9,13 @@ system_sources = [
   'Urandom.cxx',
 ]
 
-system_dependencies = [
-]
-
 system = static_library(
   'system',
   system_sources,
   include_directories: inc,
-  dependencies: system_dependencies,
+  dependencies: [
+    fmt_dep,
+  ],
 )
 
 system_dep = declare_dependency(

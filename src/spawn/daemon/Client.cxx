@@ -4,13 +4,13 @@
 
 #include "Client.hxx"
 #include "Builder.hxx"
+#include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "net/SendMessage.hxx"
-#include "system/Error.hxx"
 #include "util/CRC32.hxx"
-#include "util/RuntimeError.hxx"
 #include "util/SpanCast.hxx"
 
 #include <sched.h>
@@ -26,7 +26,7 @@ CreateConnectLocalSocket(const char *path)
 		AllocatedSocketAddress address;
 		address.SetLocal(path);
 		if (!s.Connect(address))
-			throw FormatErrno("Failed to connect to %s", path);
+			throw FmtErrno("Failed to connect to {}", path);
 	}
 
 	return s;
@@ -101,9 +101,8 @@ MakePidNamespace(SocketDescriptor s, const char *name)
 
 	switch (rh.command) {
 	case ResponseCommand::ERROR:
-		throw FormatRuntimeError("Spawn server error: %.*s",
-					 int(rh.size),
-					 (const char *)payload.data());
+		throw FmtRuntimeError("Spawn server error: {}",
+				      ToStringView(payload));
 
 	case ResponseCommand::NAMESPACE_HANDLES:
 		if (rh.size != sizeof(uint32_t) ||

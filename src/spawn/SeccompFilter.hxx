@@ -2,10 +2,9 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef SECCOMP_FILTER_HXX
-#define SECCOMP_FILTER_HXX
+#pragma once
 
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 
 #include "seccomp.h"
 
@@ -48,7 +47,7 @@ public:
 		int error = seccomp_rule_add(ctx, action, syscall, sizeof...(args),
 					     std::forward<Args>(args)...);
 		if (error < 0)
-			throw FormatErrno(-error, "seccomp_rule_add(%d) failed", syscall);
+			throw FmtErrno(-error, "seccomp_rule_add({}) failed", syscall);
 	}
 };
 
@@ -125,6 +124,3 @@ private:
 #endif
 
 } // namespace Seccomp
-
-#endif
-

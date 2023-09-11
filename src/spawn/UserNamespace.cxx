@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "UserNamespace.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "io/WriteFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/linux/ProcPid.hxx"
@@ -24,7 +24,7 @@ static void
 WriteFileOrThrow(FileDescriptor directory, const char *path, std::string_view data)
 {
 	if (TryWriteExistingFile(directory, path, data) == WriteFileResult::ERROR)
-		throw FormatErrno("write('%s') failed", path);
+		throw FmtErrno("write('{}') failed", path);
 }
 
 void

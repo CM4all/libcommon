@@ -13,6 +13,7 @@ lua_pg = static_library(
   dependencies: [
     lua_dep,
     pg_dep,
+    fmt_dep,
   ],
 )
 

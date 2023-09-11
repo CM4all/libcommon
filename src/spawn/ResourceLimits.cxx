@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ResourceLimits.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
 #include "util/CharUtil.hxx"
@@ -25,16 +25,15 @@ inline void
 ResourceLimit::Get(int pid, int resource)
 {
 	if (prlimit(pid, my_rlimit_resource_t(resource), nullptr, this) < 0)
-		throw FormatErrno("getrlimit(%d) failed", resource);
+		throw FmtErrno("getrlimit({}) failed", resource);
 }
 
 inline void
 ResourceLimit::Set(int pid, int resource) const
 {
 	if (prlimit(pid, my_rlimit_resource_t(resource), this, nullptr) < 0)
-		throw FormatErrno("setrlimit(%d, %lu, %lu) failed",
-				  resource, (unsigned long)rlim_cur,
-				  (unsigned long)rlim_max);
+		throw FmtErrno("setrlimit({}, {}, {}) failed",
+			       resource, rlim_cur, rlim_max);
 }
 
 inline void

@@ -3,12 +3,12 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "VfsBuilder.hxx"
+#include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "system/Error.hxx"
 #include "system/Mount.hxx"
 #include "util/IterableSplitString.hxx"
-#include "util/RuntimeError.hxx"
 #include "util/StringCompare.hxx"
 
 #include <string>
@@ -104,10 +104,9 @@ MakeDirs(FileDescriptor fd, std::string_view suffix)
 			if (e == EEXIST)
 				continue;
 
-			throw FormatErrno(e,
-					  "Failed to create mount point %.*s",
-					  int(suffix.size()),
-					  suffix.data());
+			throw FmtErrno(e,
+				       "Failed to create mount point {}",
+				       suffix);
 		}
 	}
 }
@@ -120,9 +119,8 @@ VfsBuilder::Add(std::string_view path)
 	const auto fw = FindWritable(path);
 	if (fw.item != nullptr) {
 		if (fw.suffix.empty())
-			throw FormatRuntimeError("Already a mount point: %.*s",
-						 int(path.size()),
-						 path.data());
+			throw FmtRuntimeError("Already a mount point: {}",
+					      path);
 
 		if (old_umask == -1)
 			old_umask = umask(0022);
@@ -177,9 +175,7 @@ void
 VfsBuilder::MakeDirectory(std::string_view path)
 {
 	if (!MakeOptionalDirectory(path))
-		throw FormatRuntimeError("Not writable: %.*s",
-					 int(path.size()),
-					 path.data());
+		throw FmtRuntimeError("Not writable: {}", path);
 }
 
 void

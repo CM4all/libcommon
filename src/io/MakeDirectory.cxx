@@ -5,7 +5,7 @@
 #include "MakeDirectory.hxx"
 #include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "util/ScopeExit.hxx"
 
 #include <assert.h>
@@ -24,8 +24,8 @@ MakeDirectory(FileDescriptor parent_fd, const char *name, mode_t mode)
 			break;
 
 		default:
-			throw FormatErrno(e, "Failed to create directory '%s'",
-					  name);
+			throw FmtErrno(e, "Failed to create directory '{}'",
+				       name);
 		}
 	}
 
@@ -65,14 +65,14 @@ RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 		break;
 
 	default:
-		throw FormatErrno(e, "Failed to create directory '%s'",
-				  path);
+		throw FmtErrno(e, "Failed to create directory '{}'",
+			       path);
 	}
 
 	char *slash = LastSlash(path, path_length);
 	if (slash == nullptr)
-		throw FormatErrno(e, "Failed to create directory '%s'",
-				  path);
+		throw FmtErrno(e, "Failed to create directory '{}'",
+			       path);
 
 	*slash = 0;
 	AtScopeExit(slash) { *slash = '/'; };

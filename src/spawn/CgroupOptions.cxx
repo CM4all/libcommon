@@ -5,7 +5,7 @@
 #include "CgroupOptions.hxx"
 #include "CgroupState.hxx"
 #include "AllocatorPtr.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -45,7 +45,7 @@ static void
 WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 {
 	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
-		throw FormatErrno("write('%s') failed", path);
+		throw FmtErrno("write('{}') failed", path);
 }
 
 static void
@@ -78,8 +78,8 @@ CgroupOptions::Create2(const CgroupState &state) const
 		for (const auto &i : xattr)
 			if (fsetxattr(d.Get(), i.name,
 				      i.value, strlen(i.value), 0) < 0)
-				throw FormatErrno("Failed to set xattr '%s'",
-						  i.name);
+				throw FmtErrno("Failed to set xattr '{}'",
+					       i.name);
 	}
 
 	for (const auto &s : set)

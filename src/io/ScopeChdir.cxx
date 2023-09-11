@@ -4,7 +4,7 @@
 
 #include "ScopeChdir.hxx"
 #include "Open.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 
 #include <fcntl.h> // for O_DIRECTORY
 #include <unistd.h> // for fchdir(), chdir()
@@ -18,7 +18,7 @@ ScopeChdir::ScopeChdir(const char *path)
 	:ScopeChdir()
 {
 	if (chdir(path) < 0)
-		throw FormatErrno("Failed to change to directory %s", path);
+		throw FmtErrno("Failed to change to directory {}", path);
 }
 
 ScopeChdir::ScopeChdir(FileDescriptor new_wd)

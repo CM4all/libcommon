@@ -7,8 +7,8 @@
 #include "MakeDirectory.hxx"
 #include "DirectoryReader.hxx"
 #include "Open.hxx"
-#include "system/Error.hxx"
-#include "util/RuntimeError.hxx"
+#include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/SystemError.hxx"
 
 #include <array>
 #include <cstddef>
@@ -64,7 +64,7 @@ Preserve(const RecursiveCopyContext &ctx, const struct statx &stx,
 	     ? fchmodat(dst.Get(), ".", stx.stx_mode & ~S_IFMT,
 			0)
 	     : fchmod(dst.Get(), stx.stx_mode & ~S_IFMT)) < 0)
-		throw FormatErrno("Failed to set mode of '%s'", dst_filename);
+		throw FmtErrno("Failed to set mode of '{}'", dst_filename);
 
 	if (ctx.preserve_time) {
 		struct timespec times[2];
@@ -76,8 +76,8 @@ Preserve(const RecursiveCopyContext &ctx, const struct statx &stx,
 		     ? utimensat(dst.Get(), ".", times,
 				 AT_SYMLINK_NOFOLLOW)
 		     : futimens(dst.Get(), times)) < 0)
-			throw FormatErrno("Failed to set time of '%s'",
-					  dst_filename);
+			throw FmtErrno("Failed to set time of '{}'",
+				       dst_filename);
 	}
 }
 
@@ -179,7 +179,7 @@ CreateRegularFile(FileDescriptor parent, const char *filename, bool overwrite)
 		return dst;
 
 	if (const int e = errno; e != EEXIST)
-		throw FormatErrno(e, "Failed to create '%s'", filename);
+		throw FmtErrno(e, "Failed to create '{}'", filename);
 
 	if (!overwrite)
 		return {};
@@ -188,11 +188,11 @@ CreateRegularFile(FileDescriptor parent, const char *filename, bool overwrite)
 	   new file) */
 	if (unlinkat(parent.Get(), filename, 0) < 0)
 		if (const int e = errno; e != ENOENT)
-			throw FormatErrno(e, "Failed to delete '%s'", filename);
+			throw FmtErrno(e, "Failed to delete '{}'", filename);
 
 	/* ... and try again */
 	if (!dst.Open(parent, filename, O_CREAT|O_EXCL|O_WRONLY|O_NOFOLLOW))
-		throw FormatErrno("Failed to create '%s'", filename);
+		throw FmtErrno("Failed to create '{}'", filename);
 
 	return dst;
 }
@@ -281,19 +281,18 @@ CreateSymlink(FileDescriptor parent, const char *filename, const char *target,
 		return;
 
 	if (const int e = errno; e != EEXIST)
-		throw FormatErrno(e, "Failed to create '%s'",
-				  filename);
+		throw FmtErrno(e, "Failed to create '{}'",
+			       filename);
 
 	if (!overwrite)
 		return;
 
 	if (unlinkat(parent.Get(), filename, 0) < 0)
 		if (const int e = errno; e != ENOENT)
-			throw FormatErrno(e, "Failed to delete '%s'", filename);
+			throw FmtErrno(e, "Failed to delete '{}'", filename);
 
 	if (symlinkat(target, parent.Get(), filename) < 0)
-		throw FormatErrno("Failed to create '%s'",
-				  filename);
+		throw FmtErrno("Failed to create '{}'", filename);
 }
 
 static void
@@ -306,11 +305,11 @@ CopySymlink(FileDescriptor src_parent, const char *src_filename,
 	ssize_t length  = readlinkat(src_parent.Get(), src_filename,
 				     buffer, sizeof(buffer));
 	if (length < 0)
-		throw FormatErrno("Failed to read symlink '%s'", src_filename);
+		throw FmtErrno("Failed to read symlink '{}'", src_filename);
 
 	if ((std::size_t)length == sizeof(buffer))
-		throw FormatRuntimeError("Symlink '%s' is too long",
-					 src_filename);
+		throw FmtRuntimeError("Symlink '{}' is too long",
+				      src_filename);
 
 	buffer[length] = 0;
 
@@ -337,8 +336,8 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 			return;
 
 		default:
-			throw FormatErrno(e, "Failed to open '%s'",
-					  src_filename);
+			throw FmtErrno(e, "Failed to open '{}'",
+				       src_filename);
 		}
 	}
 
@@ -346,7 +345,7 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 	if (statx(src.Get(), "",
 		  AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_STATX_SYNC_AS_STAT,
 		  ctx.statx_mask, &stx) < 0)
-		throw FormatErrno("Failed to stat '%s'", src_filename);
+		throw FmtErrno("Failed to stat '{}'", src_filename);
 
 	if (ctx.one_filesystem) {
 		if (ctx.mnt_id == 0)

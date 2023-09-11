@@ -4,7 +4,7 @@
 
 #include "ConfigParser.hxx"
 #include "FileLineParser.hxx"
-#include "system/Error.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "util/ScopeExit.hxx"
 
 #include <algorithm>
@@ -337,7 +337,7 @@ IncludeConfigParser::IncludeOptionalPath(std::filesystem::path &&p)
 			return;
 
 		default:
-			throw FormatErrno(e, "Failed to open %s", sub.path.c_str());
+			throw FmtErrno(e, "Failed to open {}", sub.path.c_str());
 		}
 	}
 
@@ -352,7 +352,7 @@ ParseConfigFile(const std::filesystem::path &path, ConfigParser &parser)
 {
 	FILE *file = fopen(path.c_str(), "r");
 	if (file == nullptr)
-		throw FormatErrno("Failed to open %s", path.c_str());
+		throw FmtErrno("Failed to open {}", path.c_str());
 
 	AtScopeExit(file) { fclose(file); };
 

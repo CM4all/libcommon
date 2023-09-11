@@ -4,8 +4,8 @@
 
 #include "ConfigParser.hxx"
 #include "Config.hxx"
+#include "lib/fmt/RuntimeError.hxx"
 #include "io/config/FileLineParser.hxx"
-#include "util/RuntimeError.hxx"
 #include "util/CharUtil.hxx"
 #include "util/StringAPI.hxx"
 #include "util/StringStrip.hxx"
@@ -15,7 +15,6 @@
 
 #include <pwd.h>
 #include <grp.h>
-#include <inttypes.h>
 #include <unistd.h> // for sysconf()
 
 static uid_t
@@ -28,7 +27,7 @@ ParseUser(const char *name)
 
 	const auto *pw = getpwnam(name);
 	if (pw == nullptr)
-		throw FormatRuntimeError("No such user: %s", name);
+		throw FmtRuntimeError("No such user: {}", name);
 
 	return pw->pw_uid;
 }
@@ -43,7 +42,7 @@ ParseGroup(const char *name)
 
 	const auto *gr = getgrnam(name);
 	if (gr == nullptr)
-		throw FormatRuntimeError("No such group: %s", name);
+		throw FmtRuntimeError("No such group: {}", name);
 
 	return gr->gr_gid;
 }
@@ -56,7 +55,7 @@ ParseUint64(const char *s)
 	char *endptr;
 	const auto value = strtoull(s, &endptr, 10);
 	if (endptr == s || *endptr != 0)
-		throw FormatRuntimeError("Failed to parse number: %s", s);
+		throw FmtRuntimeError("Failed to parse number: '{}'", s);
 
 	return value;
 }
@@ -66,10 +65,10 @@ ParseRangeUint64(const char *s, uint64_t min, uint64_t max)
 {
 	const auto value = ParseUint64(s);
 	if (value < min)
-		throw FormatRuntimeError("Value too small; must be at least %" PRIu64, min);
+		throw FmtRuntimeError("Value too small; must be at least {}", min);
 
 	if (value > max)
-		throw FormatRuntimeError("Value too large; must be at most %" PRIu64, min);
+		throw FmtRuntimeError("Value too large; must be at most {}", min);
 
 	return value;
 }
@@ -147,7 +146,7 @@ ParsePositiveBytes(const char *s)
 	char *endptr;
 	uint64_t value = strtoull(s, &endptr, 10);
 	if (endptr == s)
-		throw FormatRuntimeError("Failed to parse number: %s", s);
+		throw FmtRuntimeError("Failed to parse number: '{}'", s);
 
 	if (value == 0)
 		throw std::runtime_error("Value must not be zero");
@@ -156,7 +155,7 @@ ParsePositiveBytes(const char *s)
 	if (*s != 0) {
 		auto unit = ParseByteUnit(s);
 		if (unit == 0)
-			throw FormatRuntimeError("Unknown byte unit: %s", s);
+			throw FmtRuntimeError("Unknown byte unit: '{}'", s);
 		value *= unit;
 	}
 
@@ -185,7 +184,7 @@ ParsePhysicalMemoryLimit(const char *s)
 		char *endptr;
 		uint64_t value = strtoull(s, &endptr, 10);
 		if (endptr == s || *endptr != '%' || endptr[1] != 0)
-			throw FormatRuntimeError("Failed to parse percent number: %s", s);
+			throw FmtRuntimeError("Failed to parse percent number: '{}'", s);
 
 		if (value == 0)
 			throw std::runtime_error("Value must not be zero");

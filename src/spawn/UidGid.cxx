@@ -3,8 +3,8 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "UidGid.hxx"
-#include "system/Error.hxx"
-#include "util/RuntimeError.hxx"
+#include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/SystemError.hxx"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -18,9 +18,9 @@ UidGid::Lookup(const char *username)
 	const auto *pw = getpwnam(username);
 	if (pw == nullptr) {
 		if (errno == 0 || errno == ENOENT)
-			throw FormatRuntimeError("No such user: %s", username);
+			throw FmtRuntimeError("No such user: {}", username);
 		else
-			throw FormatErrno("Failed to look up user '%s'", username);
+			throw FmtErrno("Failed to look up user '{}'", username);
 	}
 
 	uid = pw->pw_uid;
@@ -79,16 +79,16 @@ UidGid::Apply() const
 		return;
 
 	if (gid != 0 && setregid(gid, gid) < 0)
-		throw FormatErrno("setgid(%d) failed", int(gid));
+		throw FmtErrno("setgid({}) failed", gid);
 
 	if (HasGroups()) {
 		if (setgroups(CountGroups(), groups.data()) < 0)
 			throw MakeErrno("setgroups() failed");
 	} else if (gid != 0) {
 		if (setgroups(0, &gid) < 0)
-			throw FormatErrno("setgroups(%d) failed", int(gid));
+			throw FmtErrno("setgroups({}) failed", gid);
 	}
 
 	if (uid != 0 && setreuid(uid, uid) < 0)
-		throw FormatErrno("setuid(%d) failed", int(uid));
+		throw FmtErrno("setuid({}) failed", uid);
 }

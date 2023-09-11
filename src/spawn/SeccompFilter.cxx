@@ -34,8 +34,8 @@ Filter::AddArch(uint32_t arch_token)
 {
 	int error = seccomp_arch_add(ctx, arch_token);
 	if (error < 0)
-		throw FormatErrno(-error, "seccomp_add_arch(%u) failed",
-				  unsigned(arch_token));
+		throw FmtErrno(-error, "seccomp_add_arch({}) failed",
+			       arch_token);
 }
 
 void

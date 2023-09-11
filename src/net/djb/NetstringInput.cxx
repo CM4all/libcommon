@@ -3,9 +3,9 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "NetstringInput.hxx"
+#include "lib/fmt/RuntimeError.hxx"
 #include "io/FileDescriptor.hxx"
 #include "system/Error.hxx"
-#include "util/RuntimeError.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
 
@@ -64,7 +64,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 		throw std::runtime_error("Malformed netstring");
 
 	if (size >= max_size)
-		throw FormatRuntimeError("Netstring is too large: %zu", size);
+		throw FmtRuntimeError("Netstring is too large: {}", size);
 
 	/* allocate only extra byte for the trailing comma */
 	value.ResizeDiscard(size + 1);

@@ -4,7 +4,7 @@
 
 #include "Reflection.hxx"
 #include "Connection.hxx"
-#include "util/RuntimeError.hxx"
+#include "lib/fmt/RuntimeError.hxx"
 
 namespace Pg {
 
@@ -46,7 +46,7 @@ GetColumnType(Pg::Connection &c, const char *schema,
 				"WHERE table_schema=$1 AND table_name=$2 AND column_name=$3",
 				schema, table_name, column_name);
 	if (result.GetRowCount() == 0)
-		throw FormatRuntimeError("No such column: %s", column_name);
+		throw FmtRuntimeError("No such column: {}", column_name);
 
 	return result.GetValue(0, 0);
 

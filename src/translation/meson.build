@@ -9,6 +9,8 @@ translation = static_library(
     # PCRE support, but Meson can't check the value of the
     # TRANSLATION_ENABLE_EXPAND macro of translation/Features.h
     get_variable('pcre_dep', []),
+
+    fmt_dep,
   ],
 )
 

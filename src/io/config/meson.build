@@ -15,6 +15,7 @@ io_config = static_library(
   include_directories: inc,
   dependencies: [
     std_filesystem_dep,
+    fmt_dep,
   ],
 )
 

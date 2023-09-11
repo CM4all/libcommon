@@ -4,8 +4,8 @@
 
 #include "AllocatedRequest.hxx"
 #include "../Protocol.hxx"
+#include "lib/fmt/RuntimeError.hxx"
 #include "util/Compiler.h"
-#include "util/RuntimeError.hxx"
 #include "util/SpanCast.hxx"
 
 #include <assert.h>
@@ -77,8 +77,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		status = *(const HttpStatus *)(const void *)payload.data();
 		/* TODO enable
 		if (!http_status_is_valid(status))
-			throw FormatRuntimeError("invalid HTTP status code %u",
-						 status);
+			throw FmtRuntimeError("invalid HTTP status code {}", status);
 		*/
 
 		break;
@@ -277,8 +276,8 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		break;
 
 	default:
-		throw FormatRuntimeError("unknown translation packet: %u",
-					 unsigned(cmd));
+		throw FmtRuntimeError("unknown translation packet: {}",
+				      unsigned(cmd));
 	}
 }
 

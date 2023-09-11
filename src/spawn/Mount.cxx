@@ -5,13 +5,13 @@
 #include "Mount.hxx"
 #include "TmpfsCreate.hxx"
 #include "VfsBuilder.hxx"
+#include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
 #include "system/Mount.hxx"
-#include "system/Error.hxx"
 #include "system/Mount.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "util/RuntimeError.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringSplit.hxx"
 #include "AllocatorPtr.hxx"
@@ -121,11 +121,10 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 	if (struct stat st; lstat(target, &st) == 0) {
 		/* target exists already */
 		if (!S_ISREG(st.st_mode))
-			throw FormatRuntimeError("Not a regular file: %s",
-						 target);
+			throw FmtRuntimeError("Not a regular file: {}",
+					      target);
 	} else if (const int e = errno; e != ENOENT) {
-		throw FormatErrno(e, "Failed to stat %s",
-				  target);
+		throw FmtErrno(e, "Failed to stat {}", target);
 	} else {
 		/* target does not exist: first ensure that its parent
 		   directory exists, then create an empty target */
@@ -134,7 +133,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 
 		UniqueFileDescriptor fd;
 		if (!fd.Open(target, O_CREAT|O_WRONLY, 0666))
-			throw FormatErrno("Failed to create %s", target);
+			throw FmtErrno("Failed to create {}", target);
 	}
 
 	constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
