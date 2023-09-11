@@ -1143,7 +1143,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_HTTP
 		if (!http_status_is_valid(response.status))
 			throw FmtRuntimeError("invalid HTTP status code {}",
-					      response.status);
+					      (unsigned)response.status);
 #endif
 
 		return;
