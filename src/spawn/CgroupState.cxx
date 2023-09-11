@@ -7,7 +7,7 @@
 #include "system/Error.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
-#include "io/WithFile.hxx"
+#include "io/SmallTextFile.hxx"
 #include "io/WriteFile.hxx"
 #include "io/linux/ProcCgroup.hxx"
 #include "util/IterableSplitString.hxx"
@@ -27,24 +27,6 @@ using std::string_view_literals::operator""sv;
 CgroupState::CgroupState() noexcept {}
 CgroupState::~CgroupState() noexcept = default;
 
-static std::size_t
-ReadFile(FileAt file, std::span<std::byte> dest)
-{
-	return WithReadOnly(file, [dest](auto fd){
-		auto nbytes = fd.Read(dest.data(), dest.size());
-		if (nbytes < 0)
-			throw MakeErrno("Failed to read");
-		return static_cast<std::size_t>(nbytes);
-	});
-}
-
-static std::string_view
-ReadTextFile(FileAt file, std::span<char> dest)
-{
-	const auto size = ReadFile(file, std::as_writable_bytes(dest));
-	return {dest.data(), size};
-}
-
 static void
 WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 {
@@ -55,18 +37,14 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 static void
 ForEachController(FileDescriptor group_fd, auto &&callback)
 {
-	char buffer[1024];
+	WithSmallTextFile<1024>(FileAt{group_fd, "cgroup.controllers"}, [&callback](std::string_view contents){
+		if (contents.back() == '\n')
+			contents.remove_suffix(1);
 
-	auto contents = ReadTextFile({group_fd, "cgroup.controllers"}, buffer);
-	if (contents.empty())
-		return;
-
-	if (contents.back() == '\n')
-		contents.remove_suffix(1);
-
-	for (const auto name : IterableSplitString(contents, ' '))
-		if (!name.empty())
-			callback(name);
+		for (const auto name : IterableSplitString(contents, ' '))
+			if (!name.empty())
+				callback(name);
+	});
 }
 
 void
