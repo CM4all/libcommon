@@ -18,20 +18,15 @@ ReadPidfdPid(FileDescriptor pidfd)
 {
 	assert(pidfd.IsDefined());
 
-	std::optional<unsigned> result;
-
-	ForEachTextLine<4096>(FmtBuffer<64>("/proc/self/fdinfo/{}", pidfd.Get()).c_str(), [&result](std::string_view line){
+	for (std::string_view line : IterableSmallTextFile<4096>(FmtBuffer<64>("/proc/self/fdinfo/{}", pidfd.Get()).c_str())) {
 		if (SkipPrefix(line, "Pid:\t"sv)) {
 			auto pid = ParseInteger<int>(line);
 			if (!pid)
 				throw std::runtime_error{"Failed to parse Pid line"};
 
-			result = *pid;
+			return *pid;
 		}
-	});
+	}
 
-	if (!result)
-		throw std::runtime_error{"Not a pidfd"};
-
-	return *result;
+	throw std::runtime_error{"Not a pidfd"};
 }
