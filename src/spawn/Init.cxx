@@ -7,7 +7,6 @@
 #include "lib/cap/State.hxx"
 #include "system/CloseRange.hxx"
 #include "system/Error.hxx"
-#include "system/KernelVersion.hxx"
 #include "system/ProcessName.hxx"
 #include "system/LinuxFD.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -21,39 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
 #include <limits.h> // for UINT_MAX
 
 static sigset_t init_signal_mask;
-
-static void
-CloseAllFiles()
-{
-	/* use close_range() on Linux 5.8+ */
-	if (IsKernelVersionOrNewer({5,8}) &&
-	    sys_close_range(3, UINT_MAX, 0) == 0)
-		return;
-
-	auto *d = opendir("/proc/self/fd");
-	if (d != nullptr) {
-		/* we have a /proc: use that to enumerate open file
-		   descriptors and close each */
-		const int except = dirfd(d);
-		while (auto *e = readdir(d)) {
-			const char *name = e->d_name;
-			char *endptr;
-			auto fd = strtoul(name, &endptr, 10);
-			if (endptr > name && *endptr == 0 && fd > 2 && int(fd) != except)
-				close(fd);
-		}
-
-		closedir(d);
-	} else {
-		/* no /proc: the brute force way */
-		for (int i = 3; i < 1024; ++i)
-			close(i);
-	}
-}
 
 pid_t
 SpawnInitFork(const char *name)
@@ -86,7 +55,7 @@ SpawnInitFork(const char *name)
 		} else
 			SetProcessName("init");
 
-		CloseAllFiles();
+		sys_close_range(3, UINT_MAX, 0);
 	}
 
 	return pid;
@@ -219,7 +188,7 @@ UnshareForkSpawnInit()
 
 	SetProcessName("init");
 
-	CloseAllFiles();
+	sys_close_range(3, UINT_MAX, 0);
 
 	try {
 		_exit(SpawnInit(0, true));
