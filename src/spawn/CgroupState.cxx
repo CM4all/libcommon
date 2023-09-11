@@ -17,6 +17,7 @@
 
 #include <fmt/format.h>
 
+#include <concepts>
 #include <span>
 
 #include <fcntl.h>
@@ -35,7 +36,8 @@ WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 }
 
 static void
-ForEachController(FileDescriptor group_fd, auto &&callback)
+ForEachController(FileDescriptor group_fd,
+		  std::invocable<std::string_view> auto callback)
 {
 	WithSmallTextFile<1024>(FileAt{group_fd, "cgroup.controllers"}, [&callback](std::string_view contents){
 		if (contents.back() == '\n')
