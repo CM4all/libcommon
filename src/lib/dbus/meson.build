@@ -11,6 +11,7 @@ odbus = static_library(
   'Systemd.cxx',
   include_directories: inc,
   dependencies: [
+    fmt_dep,
     libdbus,
   ],
 )

@@ -3,12 +3,12 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Error.hxx"
-#include "util/RuntimeError.hxx"
+#include "lib/fmt/RuntimeError.hxx"
 
 void
 ODBus::Error::Throw(const char *prefix) const
 {
-	throw FormatRuntimeError("%s: %s", prefix, GetMessage());
+	throw FmtRuntimeError("{}: {}", prefix, GetMessage());
 }
 
 void
