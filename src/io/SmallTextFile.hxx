@@ -65,3 +65,21 @@ ForEachTextLine(auto &&file, std::invocable<std::string_view> auto f)
 			f(i);
 	});
 }
+
+template<std::size_t buffer_size>
+class IterableSmallTextFile {
+	SmallTextFileBuffer<buffer_size> buffer;
+	IterableSplitString splitter;
+
+public:
+	explicit IterableSmallTextFile(auto &&file)
+		:buffer(file), splitter(buffer, '\n') {}
+
+	auto begin() const noexcept {
+		return splitter.begin();
+	}
+
+	auto end() const noexcept {
+		return splitter.end();
+	}
+};
