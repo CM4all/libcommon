@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ScopeProcess.hxx"
+#include "SeccompFilter.hxx"
 #include "system/clone3.h"
 #include "system/CloseRange.hxx"
 #include "system/Error.hxx"
@@ -14,6 +15,29 @@
 #include <limits.h> // for UINT_MAX
 #include <signal.h>
 #include <unistd.h> // for _exit()
+
+/**
+ * Install a very strict seccomp filter which allows only very few
+ * system calls.
+ */
+static void
+LimitSysCalls()
+{
+	using Seccomp::Arg;
+
+	Seccomp::Filter sf{SCMP_ACT_KILL};
+
+	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(read), Arg(0) == STDIN_FILENO);
+	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(exit_group));
+	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(exit));
+
+	/* seccomp_load() may call free(), which may attempt to give
+	   heap memory back to the kernel using brk() - this rule
+	   ignores this (to prevent SIGKILL) */
+	sf.AddRule(SCMP_ACT_ERRNO(ENOMEM), SCMP_SYS(brk));
+
+	sf.Load();
+}
 
 SystemdScopeProcess
 StartSystemdScopeProcess(const bool pid_namespace)
@@ -52,7 +76,7 @@ StartSystemdScopeProcess(const bool pid_namespace)
 		signal(SIGUSR1, SIG_IGN);
 		signal(SIGUSR2, SIG_IGN);
 
-		// TODO set up seccomp filter
+		LimitSysCalls();
 
 		std::byte dummy;
 		read(STDIN_FILENO, &dummy, sizeof(dummy));
