@@ -52,7 +52,7 @@ CgroupMemoryWatch::OnInotify(int, unsigned, const char *)
 		// throttle
 		return;
 
-	next_time = now + std::chrono::seconds{30};
+	next_time = now + std::chrono::seconds{10};
 
 	uint64_t value = UINT64_MAX;
 
