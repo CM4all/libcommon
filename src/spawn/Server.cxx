@@ -251,7 +251,7 @@ public:
 		}
 
 #ifdef HAVE_LIBSYSTEMD
-		if (config.systemd_scope_properties.memory_max > 0 &&
+		if (config.systemd_scope_properties.HaveMemoryLimit() &&
 		    cgroup_state.IsEnabled())
 			cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>
 				(loop, cgroup_state,

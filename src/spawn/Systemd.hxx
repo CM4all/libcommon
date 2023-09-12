@@ -54,6 +54,10 @@ struct SystemdUnitProperties {
 	 * IOWeight; 0 means "undefined" (i.e. use systemd's default).
 	 */
 	uint64_t io_weight = 0;
+
+	constexpr bool HaveMemoryLimit() const noexcept {
+		return memory_low > 0 || memory_high > 0 || memory_max > 0;
+	}
 };
 
 /**
