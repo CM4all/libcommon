@@ -619,8 +619,14 @@ MultiStock::DiscardOldestIdle(std::size_t n_requested) noexcept
 {
 	std::size_t n_removed = 0;
 
-	for (auto &i : chronological_list) {
-		n_removed += i.DiscardUnused();
+	for (auto i = chronological_list.begin(); i != chronological_list.end();) {
+		n_removed += i->DiscardUnused();
+
+		if (i->IsEmpty())
+			i = chronological_list.erase_and_dispose(i, DeleteDisposer{});
+		else
+			++i;
+
 		if (n_removed >= n_requested)
 			break;
 	}
