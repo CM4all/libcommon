@@ -37,32 +37,32 @@ public:
 	constexpr MemberIteratorAdapter(const MemberIteratorAdapter &) noexcept = default;
 	constexpr MemberIteratorAdapter(MemberIteratorAdapter &) noexcept = default;
 
-	MemberIteratorAdapter &operator++() {
+	constexpr MemberIteratorAdapter &operator++() noexcept {
 		++i;
 		return *this;
 	}
 
-	MemberIteratorAdapter operator++(int) {
+	constexpr MemberIteratorAdapter operator++(int) noexcept {
 		return i++;
 	}
 
-	MemberIteratorAdapter &operator--() {
+	constexpr MemberIteratorAdapter &operator--() noexcept {
 		--i;
 		return *this;
 	}
 
-	MemberIteratorAdapter operator--(int) {
+	constexpr MemberIteratorAdapter operator--(int) noexcept {
 		return i--;
 	}
 
 	friend auto operator<=>(const MemberIteratorAdapter &,
 				const MemberIteratorAdapter &) noexcept = default;
 
-	constexpr reference operator*() const {
+	constexpr reference operator*() const noexcept {
 		return (*i).*member;
 	}
 
-	constexpr pointer operator->() const {
+	constexpr pointer operator->() const noexcept {
 		return &operator*();
 	}
 };
