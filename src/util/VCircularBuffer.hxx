@@ -5,9 +5,8 @@
 #pragma once
 
 #include "Cast.hxx"
+#include "IntrusiveForwardList.hxx"
 #include "MemberIteratorAdapter.hxx"
-
-#include <boost/intrusive/slist.hpp>
 
 #include <cassert>
 #include <iterator>
@@ -31,9 +30,7 @@ public:
 
 private:
 	struct Item {
-		using ListHook =
-			boost::intrusive::slist_member_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>>;
-		ListHook siblings;
+		IntrusiveForwardListHook list_hook;
 
 		T value;
 
@@ -56,13 +53,10 @@ private:
 		};
 	};
 
-	using List =
-		boost::intrusive::slist<Item,
-					boost::intrusive::member_hook<Item,
-								      typename Item::ListHook,
-								      &Item::siblings>,
-					boost::intrusive::cache_last<true>,
-					boost::intrusive::constant_time_size<true>>;
+	using List = IntrusiveForwardList<
+		Item,
+		IntrusiveForwardListMemberHookTraits<&Item::list_hook>,
+		IntrusiveForwardListOptions{.constant_time_size = true, .cache_last = true}>;
 
 	List *const list;
 	const size_t buffer_size;
@@ -176,11 +170,11 @@ public:
 						     &Item::value>;
 
 	constexpr const_iterator begin() const noexcept {
-		return list->cbegin();
+		return list->begin();
 	}
 
 	constexpr const_iterator end() const noexcept {
-		return list->cend();
+		return list->end();
 	}
 
 	constexpr const_iterator iterator_to(const_reference value) const noexcept {
