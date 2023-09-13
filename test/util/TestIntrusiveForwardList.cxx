@@ -32,7 +32,8 @@ TEST(IntrusiveForwardList, Basic)
 
 	Item items[]{'a', 'b', 'c'};
 
-	IntrusiveForwardList<CharItem> list;
+	using List = IntrusiveForwardList<CharItem>;
+	List list;
 	ASSERT_EQ(ToString(list), "");
 	list.reverse();
 	ASSERT_EQ(ToString(list), "");
@@ -59,6 +60,10 @@ TEST(IntrusiveForwardList, Basic)
 	list = std::move(list2);
 	ASSERT_EQ(ToString(list), "cb");
 	ASSERT_EQ(ToString(list2), "");
+
+	// insert_after()
+	List::insert_after(list.begin(), items[0]);
+	ASSERT_EQ(ToString(list), "cab");
 }
 
 TEST(IntrusiveForwardList, ConstantTimeSize)
@@ -107,4 +112,9 @@ TEST(IntrusiveForwardList, ConstantTimeSize)
 	ASSERT_EQ(list.size(), 2U);
 	ASSERT_EQ(ToString(list2), "");
 	ASSERT_EQ(list2.size(), 0U);
+
+	// insert_after()
+	list.insert_after(list.begin(), items[0]);
+	ASSERT_EQ(ToString(list), "cab");
+	ASSERT_EQ(list.size(), 3U);
 }
