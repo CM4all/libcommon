@@ -54,13 +54,8 @@ public:
 		return result;
 	}
 
-	constexpr bool operator==(const MemberIteratorAdapter &other) const {
-		return static_cast<const I &>(*this) == static_cast<const I &>(other);
-	}
-
-	constexpr bool operator!=(const MemberIteratorAdapter &other) const {
-		return !(*this == other);
-	}
+	friend auto operator<=>(const MemberIteratorAdapter &,
+				const MemberIteratorAdapter &) noexcept = default;
 
 	constexpr reference operator*() const {
 		return I::operator*().*member;
