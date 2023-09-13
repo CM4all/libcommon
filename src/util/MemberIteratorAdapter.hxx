@@ -17,48 +17,49 @@
  * RandomAccessIterator
  */
 template<typename I, auto member>
-class MemberIteratorAdapter : I
+class MemberIteratorAdapter
 {
+	I i;
+
 public:
-	using typename I::iterator_category;
+	using iterator_category = typename I::iterator_category;
 	using value_type = MemberPointerType<decltype(member)>;
 	using maybe_const_value_type = CopyConst<value_type,
 						 std::remove_reference_t<typename I::reference>>;
-	using typename I::difference_type;
+	using difference_type = typename I::difference_type;
 	using pointer = maybe_const_value_type *;
 	using reference = maybe_const_value_type &;
 
 	template<typename T>
 	constexpr MemberIteratorAdapter(T &&t) noexcept
-		:I(std::forward<T>(t)) {}
+		:i(std::forward<T>(t)) {}
+
+	constexpr MemberIteratorAdapter(const MemberIteratorAdapter &) noexcept = default;
+	constexpr MemberIteratorAdapter(MemberIteratorAdapter &) noexcept = default;
 
 	MemberIteratorAdapter &operator++() {
-		I::operator++();
+		++i;
 		return *this;
 	}
 
 	MemberIteratorAdapter operator++(int) {
-		auto result = *this;
-		++(*this);
-		return result;
+		return i++;
 	}
 
 	MemberIteratorAdapter &operator--() {
-		I::operator--();
+		--i;
 		return *this;
 	}
 
 	MemberIteratorAdapter operator--(int) {
-		auto result = *this;
-		--(*this);
-		return result;
+		return i--;
 	}
 
 	friend auto operator<=>(const MemberIteratorAdapter &,
 				const MemberIteratorAdapter &) noexcept = default;
 
 	constexpr reference operator*() const {
-		return I::operator*().*member;
+		return (*i).*member;
 	}
 
 	constexpr pointer operator->() const {
