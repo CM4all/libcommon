@@ -6,11 +6,9 @@
 #include "Close.hxx"
 #include "Handler.hxx"
 #include "Queue.hxx"
-#include "system/Error.hxx"
 
 #include <cassert>
 #include <cstdint>
-#include <exception>
 #include <utility>
 
 #include <fcntl.h>
@@ -83,7 +81,7 @@ OpenStat::StartOpenStatReadOnlyBeneath(FileDescriptor directory_fd,
 
 void
 OpenStat::OnUringCompletion(int res) noexcept
-try {
+{
 	if (canceled) {
 		if (!fd.IsDefined() && res >= 0)
 			Close(&queue, FileDescriptor{res});
@@ -94,7 +92,8 @@ try {
 
 	if (res < 0) {
 		fd.Close();
-		throw MakeErrno(-res, "Failed to open file");
+		handler.OnOpenStatError(-res);
+		return;
 	}
 
 	if (!fd.IsDefined()) {
@@ -111,8 +110,6 @@ try {
 	} else {
 		handler.OnOpenStat(std::move(fd), st);
 	}
-} catch (...) {
-	handler.OnOpenStatError(std::current_exception());
 }
 
 } // namespace Uring

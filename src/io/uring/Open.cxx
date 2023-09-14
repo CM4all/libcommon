@@ -7,11 +7,8 @@
 #include "Handler.hxx"
 #include "Queue.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "system/Error.hxx"
 
 #include <cstdint>
-#include <exception>
-#include <utility>
 
 #include <fcntl.h>
 
@@ -54,7 +51,7 @@ Open::StartOpen(const char *path, int flags, mode_t mode) noexcept
 
 void
 Open::StartOpenReadOnly(FileDescriptor directory_fd,
-				const char *path) noexcept
+			const char *path) noexcept
 {
 	StartOpen(directory_fd, path, O_RDONLY);
 }
@@ -67,7 +64,7 @@ Open::StartOpenReadOnly(const char *path) noexcept
 
 void
 Open::StartOpenReadOnlyBeneath(FileDescriptor directory_fd,
-				       const char *path) noexcept
+			       const char *path) noexcept
 {
 	auto &s = queue.RequireSubmitEntry();
 
@@ -79,7 +76,7 @@ Open::StartOpenReadOnlyBeneath(FileDescriptor directory_fd,
 
 void
 Open::OnUringCompletion(int res) noexcept
-try {
+{
 	if (canceled) {
 		if (res >= 0)
 			Close(&queue, FileDescriptor{res});
@@ -88,12 +85,10 @@ try {
 		return;
 	}
 
-	if (res < 0)
-		throw MakeErrno(-res, "Failed to open file");
-
-	handler.OnOpen(UniqueFileDescriptor{res});
-} catch (...) {
-	handler.OnOpenError(std::current_exception());
+	if (res >= 0)
+		handler.OnOpen(UniqueFileDescriptor{res});
+	else
+		handler.OnOpenError(-res);
 }
 
 } // namespace Uring

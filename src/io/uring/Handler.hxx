@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <exception>
-
 struct statx;
 class UniqueFileDescriptor;
 
@@ -14,14 +12,22 @@ namespace Uring {
 class OpenHandler {
 public:
 	virtual void OnOpen(UniqueFileDescriptor fd) noexcept = 0;
-	virtual void OnOpenError(std::exception_ptr e) noexcept = 0;
+
+	/**
+	 * @param error an errno code
+	 */
+	virtual void OnOpenError(int error) noexcept = 0;
 };
 
 class OpenStatHandler {
 public:
 	virtual void OnOpenStat(UniqueFileDescriptor fd,
 				struct statx &st) noexcept = 0;
-	virtual void OnOpenStatError(std::exception_ptr e) noexcept = 0;
+
+	/**
+	 * @param error an errno code
+	 */
+	virtual void OnOpenStatError(int error) noexcept = 0;
 };
 
 } // namespace Uring
