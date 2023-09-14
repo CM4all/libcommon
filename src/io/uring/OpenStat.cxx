@@ -6,6 +6,7 @@
 #include "Close.hxx"
 #include "Handler.hxx"
 #include "Queue.hxx"
+#include "io/FileAt.hxx"
 
 #include <cassert>
 #include <cstdint>
@@ -34,14 +35,14 @@ static constexpr auto ro_beneath = MakeReadOnlyBeneath();
 namespace Uring {
 
 void
-OpenStat::StartOpenStat(FileDescriptor directory_fd, const char *path,
+OpenStat::StartOpenStat(FileAt file,
 			int flags, mode_t mode) noexcept
 {
 	assert(!fd.IsDefined());
 
 	auto &s = queue.RequireSubmitEntry();
 
-	io_uring_prep_openat(&s, directory_fd.Get(), path,
+	io_uring_prep_openat(&s, file.directory.Get(), file.name,
 			     flags|O_NOCTTY|O_CLOEXEC, mode);
 	queue.Push(s, *this);
 }
@@ -49,31 +50,29 @@ OpenStat::StartOpenStat(FileDescriptor directory_fd, const char *path,
 void
 OpenStat::StartOpenStat(const char *path, int flags, mode_t mode) noexcept
 {
-	StartOpenStat(FileDescriptor(AT_FDCWD), path, flags, mode);
+	StartOpenStat({FileDescriptor(AT_FDCWD), path}, flags, mode);
 }
 
 void
-OpenStat::StartOpenStatReadOnly(FileDescriptor directory_fd,
-				const char *path) noexcept
+OpenStat::StartOpenStatReadOnly(FileAt file) noexcept
 {
-	StartOpenStat(directory_fd, path, O_RDONLY);
+	StartOpenStat(file, O_RDONLY);
 }
 
 void
 OpenStat::StartOpenStatReadOnly(const char *path) noexcept
 {
-	StartOpenStatReadOnly(FileDescriptor(AT_FDCWD), path);
+	StartOpenStatReadOnly({FileDescriptor(AT_FDCWD), path});
 }
 
 void
-OpenStat::StartOpenStatReadOnlyBeneath(FileDescriptor directory_fd,
-				       const char *path) noexcept
+OpenStat::StartOpenStatReadOnlyBeneath(FileAt file) noexcept
 {
 	assert(!fd.IsDefined());
 
 	auto &s = queue.RequireSubmitEntry();
 
-	io_uring_prep_openat2(&s, directory_fd.Get(), path,
+	io_uring_prep_openat2(&s, file.directory.Get(), file.name,
 			      /* why is this parameter not const? */
 			      const_cast<struct open_how *>(&ro_beneath));
 	queue.Push(s, *this);

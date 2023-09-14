@@ -9,6 +9,8 @@
 
 #include <sys/stat.h>
 
+struct FileAt;
+
 namespace Uring {
 
 class Queue;
@@ -38,22 +40,19 @@ public:
 		return queue;
 	}
 
-	void StartOpenStat(FileDescriptor directory_fd, const char *path,
-			   int flags, mode_t mode=0) noexcept;
+	void StartOpenStat(FileAt file, int flags, mode_t mode=0) noexcept;
 
 	void StartOpenStat(const char *path,
 			   int flags, mode_t mode=0) noexcept;
 
-	void StartOpenStatReadOnly(FileDescriptor directory_fd,
-				   const char *path) noexcept;
+	void StartOpenStatReadOnly(FileAt file) noexcept;
 
 	void StartOpenStatReadOnly(const char *path) noexcept;
 
 	/**
 	 * Same as StartOpenStatReadOnly(), but with RESOLVE_BENEATH.
 	 */
-	void StartOpenStatReadOnlyBeneath(FileDescriptor directory_fd,
-					  const char *path) noexcept;
+	void StartOpenStatReadOnlyBeneath(FileAt file) noexcept;
 
 	/**
 	 * Cancel this operation.  This works only if this instance

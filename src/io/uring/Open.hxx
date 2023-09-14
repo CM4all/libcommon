@@ -8,7 +8,7 @@
 
 #include <sys/types.h> // for mode_t
 
-class FileDescriptor;
+struct FileAt;
 
 namespace Uring {
 
@@ -34,22 +34,19 @@ public:
 		return queue;
 	}
 
-	void StartOpen(FileDescriptor directory_fd, const char *path,
-		       int flags, mode_t mode=0) noexcept;
+	void StartOpen(FileAt file, int flags, mode_t mode=0) noexcept;
 
 	void StartOpen(const char *path,
 		       int flags, mode_t mode=0) noexcept;
 
-	void StartOpenReadOnly(FileDescriptor directory_fd,
-			       const char *path) noexcept;
+	void StartOpenReadOnly(FileAt file) noexcept;
 
 	void StartOpenReadOnly(const char *path) noexcept;
 
 	/**
 	 * Same as StartOpenReadOnly(), but with RESOLVE_BENEATH.
 	 */
-	void StartOpenReadOnlyBeneath(FileDescriptor directory_fd,
-				      const char *path) noexcept;
+	void StartOpenReadOnlyBeneath(FileAt file) noexcept;
 
 	/**
 	 * Cancel this operation.  This works only if this instance
