@@ -100,3 +100,25 @@ http_method_to_string(HttpMethod _method) noexcept
 
 	return http_method_to_string_data[method];
 }
+
+/**
+ * Is this a "safe" method according to RFC 2616 9.1.1, i.e. it
+ * "should not have the significance of taking an action other than
+ * retrieval".
+ */
+static constexpr bool
+IsSafeMethod(HttpMethod method) noexcept
+{
+	switch (method) {
+	case HttpMethod::HEAD:
+	case HttpMethod::GET:
+	case HttpMethod::OPTIONS:
+	case HttpMethod::TRACE:
+	case HttpMethod::PROPFIND:
+	case HttpMethod::REPORT:
+		return true;
+
+	default:
+		return false;
+	}
+}
