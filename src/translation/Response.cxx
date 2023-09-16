@@ -220,7 +220,7 @@ TranslateResponse::Clear() noexcept
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
-	views = nullptr;
+	views.clear();
 	widget_group = nullptr;
 	container_groups.Init();
 #endif
@@ -475,9 +475,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
-	views = src.views != nullptr
-		? src.views->CloneChain(alloc)
-		: nullptr;
+	views = Clone(alloc, src.views);
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
@@ -647,7 +645,7 @@ TranslateResponse::IsExpandable() const noexcept
 		 address.IsExpandable() ||
 		 (external_session_manager != nullptr &&
 		  external_session_manager->IsExpandable()) ||
-		 widget_view_any_is_expandable(views));
+		 IsAnyExpandable(views));
 }
 
 void
@@ -717,7 +715,7 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 	if (external_session_manager != nullptr)
 		external_session_manager->Expand(alloc, match_data);
 
-	widget_view_expand_all(alloc, views, match_data);
+	::Expand(alloc, views, match_data);
 }
 
 #endif

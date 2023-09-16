@@ -17,6 +17,10 @@
 #include <vector>
 #endif
 
+#if TRANSLATION_ENABLE_WIDGET
+#include "widget/VList.hxx"
+#endif
+
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
 #include "translation/Request.hxx"
 #endif
@@ -35,7 +39,6 @@ struct Mount;
 struct AddressList;
 struct Transformation;
 struct FilterTransformation;
-struct WidgetView;
 struct TranslationLayoutItem;
 
 /**
@@ -146,7 +149,7 @@ class TranslateParser {
 	WidgetView *view;
 
 	/** pointer to the tail of the transformation view linked list */
-	WidgetView **widget_view_tail;
+	WidgetViewList::iterator widget_view_tail;
 #endif
 
 #if TRANSLATION_ENABLE_TRANSFORMATION

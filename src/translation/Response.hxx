@@ -11,6 +11,7 @@
 #include "bp/ForwardHeaders.hxx"
 #endif
 #if TRANSLATION_ENABLE_WIDGET
+#include "widget/VList.hxx"
 #include "util/StringSet.hxx"
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
@@ -36,7 +37,6 @@
 
 enum class HttpStatus : uint_least16_t;
 enum class TranslationCommand : uint16_t;
-struct WidgetView;
 struct TranslationLayoutItem;
 class AllocatorPtr;
 class UniqueRegex;
@@ -258,7 +258,7 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
-	WidgetView *views;
+	WidgetViewList views;
 
 	/**
 	 * From #TranslationCommand::WIDGET_GROUP.

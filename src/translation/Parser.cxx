@@ -254,14 +254,13 @@ valid_view_name(const char *name)
 void
 TranslateParser::FinishView()
 {
-	assert(response.views != nullptr);
+	assert(!response.views.empty());
 
 	FinishAddressList();
 
 	WidgetView *v = view;
 	if (view == nullptr) {
-		v = response.views;
-		assert(v != nullptr);
+		v = &response.views.front();
 
 		const ResourceAddress *address = &response.address;
 		if (address->IsDefined() && !v->address.IsDefined()) {
@@ -273,9 +272,9 @@ TranslateParser::FinishView()
 		v->request_header_forward = response.request_header_forward;
 		v->response_header_forward = response.response_header_forward;
 	} else {
-		if (!v->address.IsDefined() && v != response.views)
+		if (!v->address.IsDefined() && v != &response.views.front())
 			/* no address yet: inherits settings from the default view */
-			v->InheritFrom(alloc, *response.views);
+			v->InheritFrom(alloc, response.views.front());
 	}
 
 	v->address.Check();
@@ -293,8 +292,7 @@ TranslateParser::AddView(const char *name)
 	new_view->response_header_forward = response.response_header_forward;
 
 	view = new_view;
-	*widget_view_tail = new_view;
-	widget_view_tail = &new_view->next;
+	widget_view_tail = response.views.insert_after(widget_view_tail, *new_view);
 	resource_address = &new_view->address;
 	child_options = nullptr;
 	ns_options = nullptr;
@@ -4105,14 +4103,15 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
-		response.views = alloc.New<WidgetView>(nullptr);
+		response.views.clear();
+		response.views.push_front(*alloc.New<WidgetView>(nullptr));
 		view = nullptr;
-		widget_view_tail = &response.views->next;
+		widget_view_tail = response.views.begin();
 #endif
 
 #if TRANSLATION_ENABLE_TRANSFORMATION
 		transformation = nullptr;
-		transformation_tail = response.views->transformations.before_begin();
+		transformation_tail = response.views.front().transformations.before_begin();
 		filter = nullptr;
 #endif
 
