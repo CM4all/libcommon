@@ -90,11 +90,15 @@ FileDescriptor::OpenReadOnly(const char *pathname) noexcept
 	return Open(pathname, O_RDONLY);
 }
 
+#ifdef __linux__
+
 bool
 FileDescriptor::OpenReadOnly(FileDescriptor dir, const char *pathname) noexcept
 {
 	return Open(dir, pathname, O_RDONLY);
 }
+
+#endif
 
 #ifndef _WIN32
 
