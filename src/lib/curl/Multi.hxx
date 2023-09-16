@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef CURL_MULTI_HXX
-#define CURL_MULTI_HXX
+#pragma once
 
 #include <curl/curl.h>
 
 #include <chrono>
-#include <utility>
 #include <stdexcept>
-#include <cstddef>
+#include <utility>
 
 /**
  * An OO wrapper for a "CURLM*" (a libCURL "multi" handle).
@@ -101,5 +99,3 @@ public:
 		return Wait(timeout.count());
 	}
 };
-
-#endif
