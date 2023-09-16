@@ -11,6 +11,7 @@
 #endif
 #if TRANSLATION_ENABLE_WIDGET
 #include "widget/Class.hxx"
+#include "widget/View.hxx"
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 #include "translation/Layout.hxx"
