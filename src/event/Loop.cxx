@@ -5,15 +5,38 @@
 #include "Loop.hxx"
 #include "DeferEvent.hxx"
 #include "SocketEvent.hxx"
+#include "util/ScopeExit.hxx"
+
+#ifdef HAVE_THREADED_EVENT_LOOP
+#include "InjectEvent.hxx"
+#endif
 
 #include <array>
 
-EventLoop::EventLoop() = default;
+EventLoop::EventLoop(
+#ifdef HAVE_THREADED_EVENT_LOOP
+		     ThreadId _thread
+#endif
+		     )
+#ifdef HAVE_THREADED_EVENT_LOOP
+	:thread(_thread),
+	 /* if this instance is hosted by an EventThread (no ThreadId
+	    known yet) then we're not yet alive until the thread is
+	    started; for the main EventLoop instance, we assume it's
+	    already alive, because nobody but EventThread will call
+	    SetAlive() */
+	 alive(!_thread.IsNull())
+#endif
+{
+}
 
 EventLoop::~EventLoop() noexcept
 {
 	assert(defer.empty());
 	assert(idle.empty());
+#ifdef HAVE_THREADED_EVENT_LOOP
+	assert(inject.empty());
+#endif
 	assert(sockets.empty());
 	assert(ready_sockets.empty());
 }
@@ -21,6 +44,9 @@ EventLoop::~EventLoop() noexcept
 bool
 EventLoop::AddFD(int fd, unsigned events, SocketEvent &event) noexcept
 {
+#ifdef HAVE_THREADED_EVENT_LOOP
+	assert(!IsAlive() || IsInside());
+#endif
 	assert(events != 0);
 
 	if (!poll_backend.Add(fd, events, &event))
@@ -33,6 +59,9 @@ EventLoop::AddFD(int fd, unsigned events, SocketEvent &event) noexcept
 bool
 EventLoop::ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept
 {
+#ifdef HAVE_THREADED_EVENT_LOOP
+	assert(!IsAlive() || IsInside());
+#endif
 	assert(events != 0);
 
 	return poll_backend.Modify(fd, events, &event);
@@ -41,6 +70,10 @@ EventLoop::ModifyFD(int fd, unsigned events, SocketEvent &event) noexcept
 bool
 EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 {
+#ifdef HAVE_THREADED_EVENT_LOOP
+	assert(!IsAlive() || IsInside());
+#endif
+
 	event.unlink();
 	return poll_backend.Remove(fd);
 }
@@ -48,12 +81,19 @@ EventLoop::RemoveFD(int fd, SocketEvent &event) noexcept
 void
 EventLoop::AbandonFD(SocketEvent &event) noexcept
 {
+#ifdef HAVE_THREADED_EVENT_LOOP
+	assert(!IsAlive() || IsInside());
+#endif
+	assert(event.IsDefined());
+
 	event.unlink();
 }
 
 void
 EventLoop::Insert(CoarseTimerEvent &t) noexcept
 {
+	assert(IsInside());
+
 	coarse_timers.Insert(t, SteadyNow());
 	again = true;
 }
@@ -63,6 +103,8 @@ EventLoop::Insert(CoarseTimerEvent &t) noexcept
 void
 EventLoop::Insert(FineTimerEvent &t) noexcept
 {
+	assert(IsInside());
+
 	timers.Insert(t);
 	again = true;
 }
@@ -99,13 +141,31 @@ EventLoop::HandleTimers() noexcept
 void
 EventLoop::AddDefer(DeferEvent &e) noexcept
 {
+#ifdef HAVE_THREADED_EVENT_LOOP
+	assert(!IsAlive() || IsInside());
+#endif
+
 	defer.push_back(e);
+
+#ifdef HAVE_THREADED_EVENT_LOOP
+	/* setting this flag here is only relevant if we've been
+	   called by a DeferEvent */
+	again = true;
+#endif
 }
 
 void
 EventLoop::AddIdle(DeferEvent &e) noexcept
 {
+	assert(IsInside());
+
 	idle.push_back(e);
+
+#ifdef HAVE_THREADED_EVENT_LOOP
+	/* setting this flag here is only relevant if we've been
+	   called by a DeferEvent */
+	again = true;
+#endif
 }
 
 void
@@ -179,6 +239,25 @@ EventLoop::Wait(Event::Duration timeout) noexcept
 void
 EventLoop::Run() noexcept
 {
+#ifdef HAVE_THREADED_EVENT_LOOP
+	if (thread.IsNull())
+		thread = ThreadId::GetCurrent();
+#endif
+
+	assert(IsInside());
+#ifdef HAVE_THREADED_EVENT_LOOP
+	assert(alive || quit_injected);
+	assert(busy);
+
+	wake_event.Schedule(SocketEvent::READ);
+#endif
+
+#ifdef HAVE_THREADED_EVENT_LOOP
+	AtScopeExit(this) {
+		wake_event.Cancel();
+	};
+#endif
+
 	FlushClockCaches();
 
 	quit = false;
@@ -203,10 +282,24 @@ EventLoop::Run() noexcept
 			   very end */
 			continue;
 
-		if (again)
-			/* re-evaluate timers because one of the
-			   DeferEvents may have added a new timeout */
-			continue;
+#ifdef HAVE_THREADED_EVENT_LOOP
+		/* try to handle DeferEvents without WakeFD
+		   overhead */
+		{
+			const std::scoped_lock<Mutex> lock(mutex);
+			HandleInject();
+#endif
+
+			if (again)
+				/* re-evaluate timers because one of
+				   the DeferEvents may have added a
+				   new timeout */
+				continue;
+
+#ifdef HAVE_THREADED_EVENT_LOOP
+			busy = false;
+		}
+#endif
 
 		/* wait for new event */
 
@@ -217,6 +310,13 @@ EventLoop::Run() noexcept
 			Wait(timeout);
 			FlushClockCaches();
 		}
+
+#ifdef HAVE_THREADED_EVENT_LOOP
+		{
+			const std::scoped_lock<Mutex> lock(mutex);
+			busy = true;
+		}
+#endif
 
 		/* invoke sockets */
 		while (!ready_sockets.empty() && !quit) {
@@ -231,4 +331,75 @@ EventLoop::Run() noexcept
 
 		RunPost();
 	} while (!quit);
+
+#ifdef HAVE_THREADED_EVENT_LOOP
+#ifndef NDEBUG
+	assert(thread.IsInside());
+#endif
+#endif
 }
+
+#ifdef HAVE_THREADED_EVENT_LOOP
+
+void
+EventLoop::AddInject(InjectEvent &d) noexcept
+{
+	bool must_wake;
+
+	{
+		const std::scoped_lock<Mutex> lock(mutex);
+		if (d.IsPending())
+			return;
+
+		/* we don't need to wake up the EventLoop if another
+		   InjectEvent has already done it */
+		must_wake = !busy && inject.empty();
+
+		inject.push_back(d);
+		again = true;
+	}
+
+	if (must_wake)
+		wake_fd.Write();
+}
+
+void
+EventLoop::RemoveInject(InjectEvent &d) noexcept
+{
+	const std::scoped_lock<Mutex> protect(mutex);
+
+	if (d.IsPending())
+		inject.erase(inject.iterator_to(d));
+}
+
+void
+EventLoop::HandleInject() noexcept
+{
+	while (!inject.empty() && !quit) {
+		auto &m = inject.front();
+		assert(m.IsPending());
+
+		inject.pop_front();
+
+		const ScopeUnlock unlock(mutex);
+		m.Run();
+	}
+}
+
+void
+EventLoop::OnSocketReady([[maybe_unused]] unsigned flags) noexcept
+{
+	assert(IsInside());
+
+	wake_fd.Read();
+
+	if (quit_injected) {
+		Break();
+		return;
+	}
+
+	const std::scoped_lock<Mutex> lock(mutex);
+	HandleInject();
+}
+
+#endif

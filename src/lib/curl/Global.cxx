@@ -3,6 +3,7 @@
 
 #include "Global.hxx"
 #include "Request.hxx"
+#include "event/Loop.hxx"
 #include "event/SocketEvent.hxx"
 #include "util/Compiler.h"
 
@@ -98,6 +99,8 @@ CurlSocket::SocketFunction([[maybe_unused]] CURL *easy,
 	auto &global = *(CurlGlobal *)userp;
 	auto *cs = (CurlSocket *)socketp;
 
+	assert(global.GetEventLoop().IsInside());
+
 	if (action == CURL_POLL_REMOVE) {
 		delete cs;
 		return 0;
@@ -118,12 +121,16 @@ CurlSocket::SocketFunction([[maybe_unused]] CURL *easy,
 void
 CurlSocket::OnSocketReady(unsigned flags) noexcept
 {
+	assert(GetEventLoop().IsInside());
+
 	global.SocketAction(GetSocket().Get(), FlagsToCurlCSelect(flags));
 }
 
 void
 CurlGlobal::Add(CurlRequest &r)
 {
+	assert(GetEventLoop().IsInside());
+
 	multi.Add(r.Get());
 
 	InvalidateSockets();
@@ -132,6 +139,8 @@ CurlGlobal::Add(CurlRequest &r)
 void
 CurlGlobal::Remove(CurlRequest &r) noexcept
 {
+	assert(GetEventLoop().IsInside());
+
 	multi.Remove(r.Get());
 }
 
@@ -153,6 +162,8 @@ ToRequest(CURL *easy) noexcept
 inline void
 CurlGlobal::ReadInfo() noexcept
 {
+	assert(GetEventLoop().IsInside());
+
 	CURLMsg *msg;
 
 	while ((msg = multi.InfoRead()) != nullptr) {
@@ -199,6 +210,7 @@ CurlGlobal::TimerFunction([[maybe_unused]] CURLM *_multi, long timeout_ms,
 {
 	auto &global = *(CurlGlobal *)userp;
 	assert(_multi == global.multi.Get());
+
 	global.UpdateTimeout(timeout_ms);
 	return 0;
 }
