@@ -298,7 +298,6 @@ TranslateParser::AddView(const char *name)
 	resource_address = &new_view->address;
 	child_options = nullptr;
 	ns_options = nullptr;
-	mount_list = IntrusiveForwardList<Mount>::end();
 	file_address = nullptr;
 	http_address = nullptr;
 	cgi_address = nullptr;
@@ -621,7 +620,7 @@ TranslateParser::HandleMountHome(std::string_view payload)
 	m->expand_source = ns_options->mount.expand_home;
 #endif
 
-	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
+	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
 
 	assert(ns_options->mount.HasMountHome());
 }
@@ -639,7 +638,7 @@ TranslateParser::HandleMountTmpfs(std::string_view payload, bool writable)
 		throw std::runtime_error("misplaced MOUNT_TMPFS packet");
 
 	auto *m = alloc.New<Mount>(Mount::Tmpfs{}, payload.data(), writable);
-	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
+	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
 }
 
 inline void
@@ -650,7 +649,7 @@ TranslateParser::HandleMountNamedTmpfs(std::string_view payload)
 	    !IsValidAbsolutePath(target))
 		throw std::runtime_error("malformed MOUNT_NAMED_TMPFS packet");
 
-	if (mount_list == IntrusiveForwardList<Mount>::end())
+	if (ns_options == nullptr)
 		throw std::runtime_error("misplaced MOUNT_NAMED_TMPFS packet");
 
 	auto *m = alloc.New<Mount>(Mount::NamedTmpfs{},
@@ -658,7 +657,7 @@ TranslateParser::HandleMountNamedTmpfs(std::string_view payload)
 				   target.data(),
 				   true);
 
-	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
+	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
 }
 
 inline void
@@ -671,7 +670,7 @@ TranslateParser::HandleBindMount(std::string_view payload,
 	    !IsValidAbsolutePath(target))
 		throw std::runtime_error("malformed BIND_MOUNT packet");
 
-	if (mount_list == IntrusiveForwardList<Mount>::end())
+	if (ns_options == nullptr)
 		throw std::runtime_error("misplaced BIND_MOUNT packet");
 
 	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
@@ -687,13 +686,13 @@ TranslateParser::HandleBindMount(std::string_view payload,
 	if (file)
 		m->type = Mount::Type::BIND_FILE;
 
-	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
+	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
 }
 
 inline void
 TranslateParser::HandleWriteFile(std::string_view payload)
 {
-	if (mount_list == IntrusiveForwardList<Mount>::end())
+	if (ns_options == nullptr)
 		throw std::runtime_error("misplaced WRITE_FILE packet");
 
 	const auto [path, contents] = Split(payload, '\0');
@@ -704,7 +703,7 @@ TranslateParser::HandleWriteFile(std::string_view payload)
 				   path.data(),
 				   contents.data());
 
-	mount_list = IntrusiveForwardList<Mount>::insert_after(mount_list, *m);
+	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
 }
 
 static void
@@ -1375,7 +1374,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		resource_address = AddFilter();
 		child_options = nullptr;
 		ns_options = nullptr;
-		mount_list = IntrusiveForwardList<Mount>::end();
 		file_address = nullptr;
 		cgi_address = nullptr;
 		nfs_address = nullptr;
@@ -3770,7 +3768,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
 		case TranslationCommand::BIND_MOUNT_FILE:
 		case TranslationCommand::WRITE_FILE:
-			if (mount_list != IntrusiveForwardList<Mount>::end()) {
+			if (ns_options != nullptr &&
+			    mount_list != ns_options->mount.mounts.before_begin()) {
 				mount_list->optional = true;
 				return;
 			}
@@ -4095,7 +4094,6 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #else
 		child_options = nullptr;
 		ns_options = nullptr;
-		mount_list = IntrusiveForwardList<Mount>::end();
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 		file_address = nullptr;
