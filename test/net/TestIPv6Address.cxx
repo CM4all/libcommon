@@ -67,3 +67,11 @@ TEST(IPv6AddressTest, And)
 		  IPv6Address(0x2a00, 0x1400, 0, 0,
 			      0, 0, 0, 0, 0).GetAddress());
 }
+
+TEST(IPv6Address, Port)
+{
+	EXPECT_EQ(IPv6Address(0).GetPort(), 0);
+	EXPECT_EQ(IPv6Address(1).GetPort(), 1);
+	EXPECT_EQ(IPv6Address(1234).GetPort(), 1234);
+	EXPECT_EQ(IPv6Address(0xffff).GetPort(), 0xffff);
+}

@@ -70,3 +70,17 @@ TEST(IPv4AddressTest, And)
 		   IPv4Address(192, 168, 1, 2, 0)).GetNumericAddress(),
 		  IPv4Address(0, 0, 0, 0, 0).GetNumericAddress());
 }
+
+TEST(IPv4Address, Port)
+{
+	EXPECT_EQ(IPv4Address(0).GetPort(), 0);
+	EXPECT_EQ(IPv4Address(1).GetPort(), 1);
+	EXPECT_EQ(IPv4Address(1234).GetPort(), 1234);
+	EXPECT_EQ(IPv4Address(0xffff).GetPort(), 0xffff);
+}
+
+TEST(IPv4Address, Numeric)
+{
+	EXPECT_EQ(IPv4Address(1, 2, 3, 4, 0).GetNumericAddress(), 0x01020304u);
+	EXPECT_EQ(IPv4Address(1, 2, 3, 4, 0).GetNumericAddressBE(), htonl(0x01020304));
+}
