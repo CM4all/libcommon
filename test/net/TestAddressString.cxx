@@ -26,11 +26,11 @@ TEST(SocketAddressStringTest, Basic)
         const auto address = ParseSocketAddress(i.in, 80, false);
 
         char buffer[256];
-        ASSERT_TRUE(ToString(buffer, sizeof(buffer), address));
+        ASSERT_TRUE(ToString(std::span{buffer}, address));
         const char *out = i.out != nullptr ? i.out : i.in;
         ASSERT_STREQ(buffer, out);
 
-        ASSERT_TRUE(HostToString(buffer, sizeof(buffer), address));
+        ASSERT_TRUE(HostToString(std::span{buffer}, address));
         const char *host = i.host != nullptr ? i.host : i.in;
         ASSERT_STREQ(buffer, host);
     }

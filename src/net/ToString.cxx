@@ -15,40 +15,39 @@
 #include <stdint.h>
 
 static bool
-LocalToString(char *buffer, std::size_t buffer_size,
+LocalToString(std::span<char> buffer,
 	      const struct sockaddr_un *sun, std::size_t length) noexcept
 {
 	const auto prefix = (std::size_t)((struct sockaddr_un *)nullptr)->sun_path;
 	assert(length >= prefix);
 	length -= prefix;
-	if (length >= buffer_size)
-		length = buffer_size - 1;
+	if (length >= buffer.size())
+		length = buffer.size() - 1;
 
-	memcpy(buffer, sun->sun_path, length);
-	char *end = buffer + length;
+	memcpy(buffer.data(), sun->sun_path, length);
+	char *end = buffer.data() + length;
 
-	if (end > buffer && buffer[0] != '\0' && end[-1] == '\0')
+	if (end > buffer.data() && buffer[0] != '\0' && end[-1] == '\0')
 		/* don't convert the null terminator of a non-abstract socket
 		   to a '@' */
 		--end;
 
 	/* replace all null bytes with '@'; this also handles abstract
 	   addresses */
-	std::replace(buffer, end, '\0', '@');
+	std::replace(buffer.data(), end, '\0', '@');
 	*end = 0;
 
 	return true;
 }
 
 bool
-ToString(char *buffer, std::size_t buffer_size,
-	 SocketAddress address) noexcept
+ToString(std::span<char> buffer, SocketAddress address) noexcept
 {
 	if (address.IsNull() || address.GetSize() == 0)
 		return false;
 
 	if (address.GetFamily() == AF_LOCAL)
-		return LocalToString(buffer, buffer_size,
+		return LocalToString(buffer,
 				     &address.CastTo<struct sockaddr_un>(),
 				     address.GetSize());
 
@@ -58,7 +57,7 @@ ToString(char *buffer, std::size_t buffer_size,
 
 	char serv[16];
 	int ret = getnameinfo(address.GetAddress(), address.GetSize(),
-			      buffer, buffer_size,
+			      buffer.data(), buffer.size(),
 			      serv, sizeof(serv),
 			      NI_NUMERICHOST | NI_NUMERICSERV);
 	if (ret != 0)
@@ -68,46 +67,45 @@ ToString(char *buffer, std::size_t buffer_size,
 		if (address.GetFamily() == AF_INET6) {
 			/* enclose IPv6 address in square brackets */
 
-			std::size_t length = strlen(buffer);
-			if (length + 4 >= buffer_size)
+			std::size_t length = strlen(buffer.data());
+			if (length + 4 >= buffer.size())
 				/* no more room */
 				return false;
 
-			memmove(buffer + 1, buffer, length);
+			memmove(buffer.data() + 1, buffer.data(), length);
 			buffer[0] = '[';
 			buffer[++length] = ']';
 			buffer[++length] = 0;
 		}
 
-		if (strlen(buffer) + 1 + strlen(serv) >= buffer_size)
+		if (strlen(buffer.data()) + 1 + strlen(serv) >= buffer.size())
 			/* no more room */
 			return false;
 
-		strcat(buffer, ":");
-		strcat(buffer, serv);
+		strcat(buffer.data(), ":");
+		strcat(buffer.data(), serv);
 	}
 
 	return true;
 }
 
 const char *
-ToString(char *buffer, std::size_t buffer_size, SocketAddress address,
+ToString(std::span<char> buffer, SocketAddress address,
 	 const char *fallback) noexcept
 {
-	return ToString(buffer, buffer_size, address)
-		? buffer
+	return ToString(buffer, address)
+		? buffer.data()
 		: fallback;
 }
 
 bool
-HostToString(char *buffer, std::size_t buffer_size,
-	     SocketAddress address) noexcept
+HostToString(std::span<char> buffer, SocketAddress address) noexcept
 {
 	if (address.IsNull())
 		return false;
 
 	if (address.GetFamily() == AF_LOCAL)
-		return LocalToString(buffer, buffer_size,
+		return LocalToString(buffer,
 				     &address.CastTo<struct sockaddr_un>(),
 				     address.GetSize());
 
@@ -116,7 +114,7 @@ HostToString(char *buffer, std::size_t buffer_size,
 		address = ipv4_buffer = address.UnmapV4();
 
 	return getnameinfo(address.GetAddress(), address.GetSize(),
-			   buffer, buffer_size,
+			   buffer.data(), buffer.size(),
 			   nullptr, 0,
 			   NI_NUMERICHOST | NI_NUMERICSERV) == 0;
 }

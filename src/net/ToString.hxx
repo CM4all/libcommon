@@ -2,10 +2,10 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef NET_TO_STRING_HXX
-#define NET_TO_STRING_HXX
+#pragma once
 
 #include <cstddef>
+#include <span>
 
 class SocketAddress;
 
@@ -16,14 +16,14 @@ class SocketAddress;
  * @return true on success
  */
 bool
-ToString(char *buffer, std::size_t buffer_size, SocketAddress address) noexcept;
+ToString(std::span<char> buffer, SocketAddress address) noexcept;
 
 /**
  * Like ToString() above, but return the string pointer (or on error:
  * return the given fallback pointer).
  */
 const char *
-ToString(char *buffer, std::size_t buffer_size, SocketAddress address,
+ToString(std::span<char> buffer, SocketAddress address,
 	 const char *fallback) noexcept;
 
 /**
@@ -33,6 +33,4 @@ ToString(char *buffer, std::size_t buffer_size, SocketAddress address,
  * @return true on success
  */
 bool
-HostToString(char *buffer, std::size_t buffer_size, SocketAddress address) noexcept;
-
-#endif
+HostToString(std::span<char> buffer, SocketAddress address) noexcept;

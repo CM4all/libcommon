@@ -43,7 +43,7 @@ PrintResult(const std::vector<AllocatedSocketAddress> &result) noexcept
 {
 	for (const auto &i : result) {
 		char buffer[256];
-		if (ToString(buffer, sizeof(buffer), i))
+		if (ToString(std::span{buffer}, i))
 			printf("%s\n", buffer);
 	}
 }

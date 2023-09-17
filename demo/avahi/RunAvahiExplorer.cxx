@@ -43,7 +43,7 @@ private:
 		char buffer[1024];
 
 		printf("new '%s' at %s\n", key.c_str(),
-		       ToString(buffer, sizeof(buffer), address, "?"));
+		       ToString(std::span{buffer}, address, "?"));
 	}
 
 	void OnAvahiRemoveObject(const std::string &key) noexcept override {

@@ -19,7 +19,7 @@ struct fmt::formatter<T> : formatter<string_view>
 		char buffer[256];
 		std::string_view s;
 
-		if (ToString(buffer, sizeof(buffer), address))
+		if (ToString(std::span{buffer}, address))
 			s = buffer;
 		else
 			s = "?";

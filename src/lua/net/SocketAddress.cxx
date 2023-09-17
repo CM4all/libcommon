@@ -24,7 +24,7 @@ LuaSocketAddressToString(lua_State *L)
 	const auto a = GetSocketAddress(L, 1);
 
 	char buffer[256];
-	if (!ToString(buffer, sizeof(buffer), a))
+	if (!ToString(std::span{buffer}, a))
 		return 0;
 
 	Lua::Push(L, buffer);

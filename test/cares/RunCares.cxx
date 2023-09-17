@@ -29,7 +29,7 @@ public:
 	/* virtual methods from Cares::Handler */
 	void OnCaresAddress(SocketAddress address) noexcept override {
 		char buffer[256];
-		if (ToString(buffer, sizeof(buffer), address))
+		if (ToString(std::span{buffer}, address))
 			printf("%s\n", buffer);
 	}
 
