@@ -15,27 +15,26 @@
 #include <stdint.h>
 
 static bool
-LocalToString(std::span<char> buffer,
-	      const struct sockaddr_un *sun, std::size_t length) noexcept
+LocalToString(std::span<char> buffer, std::string_view raw) noexcept
 {
-	const auto prefix = (std::size_t)((struct sockaddr_un *)nullptr)->sun_path;
-	assert(length >= prefix);
-	length -= prefix;
-	if (length >= buffer.size())
-		length = buffer.size() - 1;
+	if (raw.empty())
+		return false;
 
-	memcpy(buffer.data(), sun->sun_path, length);
-	char *end = buffer.data() + length;
+	if (raw.size() >= buffer.size())
+		/* truncate to the buffer size */
+		raw = raw.substr(0, buffer.size() - 1);
 
-	if (end > buffer.data() && buffer[0] != '\0' && end[-1] == '\0')
+	if (raw.front() != '\0' && raw.back() == '\0')
 		/* don't convert the null terminator of a non-abstract socket
 		   to a '@' */
-		--end;
+		raw.remove_suffix(1);
+
+	*std::copy(raw.begin(), raw.end(), buffer.begin()) = '\0';
 
 	/* replace all null bytes with '@'; this also handles abstract
-	   addresses */
-	std::replace(buffer.data(), end, '\0', '@');
-	*end = 0;
+	   addresses (Linux specific) */
+	const auto result = buffer.first(raw.size());
+	std::replace(result.begin(), result.end(), '\0', '@');
 
 	return true;
 }
@@ -47,9 +46,8 @@ ToString(std::span<char> buffer, SocketAddress address) noexcept
 		return false;
 
 	if (address.GetFamily() == AF_LOCAL)
-		return LocalToString(buffer,
-				     &address.CastTo<struct sockaddr_un>(),
-				     address.GetSize());
+		/* return path of local socket */
+		return LocalToString(buffer, address.GetLocalRaw());
 
 	IPv4Address ipv4_buffer;
 	if (address.IsV4Mapped())
@@ -105,9 +103,8 @@ HostToString(std::span<char> buffer, SocketAddress address) noexcept
 		return false;
 
 	if (address.GetFamily() == AF_LOCAL)
-		return LocalToString(buffer,
-				     &address.CastTo<struct sockaddr_un>(),
-				     address.GetSize());
+		/* return path of local socket */
+		return LocalToString(buffer, address.GetLocalRaw());
 
 	IPv4Address ipv4_buffer;
 	if (address.IsV4Mapped())
