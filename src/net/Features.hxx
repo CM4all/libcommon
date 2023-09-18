@@ -6,4 +6,5 @@
 
 #define HAVE_UN
 #define HAVE_TCP
+#define HAVE_IPV6
 #define HAVE_STRUCT_UCRED

@@ -3,16 +3,28 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ToString.hxx"
+#include "Features.hxx"
 #include "SocketAddress.hxx"
 #include "IPv4Address.hxx"
 
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 
-#include <sys/un.h>
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#else
 #include <netdb.h>
-#include <string.h>
-#include <stdint.h>
+#ifdef HAVE_TCP
+#include <netinet/in.h>
+#endif
+#endif
+
+#ifdef HAVE_UN
+#include <sys/un.h>
+#endif
+
+#ifdef HAVE_UN
 
 static bool
 LocalToString(std::span<char> buffer, std::string_view raw) noexcept
@@ -39,19 +51,25 @@ LocalToString(std::span<char> buffer, std::string_view raw) noexcept
 	return true;
 }
 
+#endif
+
 bool
 ToString(std::span<char> buffer, SocketAddress address) noexcept
 {
 	if (address.IsNull() || address.GetSize() == 0)
 		return false;
 
+#ifdef HAVE_UN
 	if (address.GetFamily() == AF_LOCAL)
 		/* return path of local socket */
 		return LocalToString(buffer, address.GetLocalRaw());
+#endif
 
+#if defined(HAVE_IPV6) && defined(IN6_IS_ADDR_V4MAPPED)
 	IPv4Address ipv4_buffer;
 	if (address.IsV4Mapped())
 		address = ipv4_buffer = address.UnmapV4();
+#endif
 
 	char serv[NI_MAXSERV];
 	int ret = getnameinfo(address.GetAddress(), address.GetSize(),
@@ -62,6 +80,7 @@ ToString(std::span<char> buffer, SocketAddress address) noexcept
 		return false;
 
 	if (serv[0] != 0 && (serv[0] != '0' || serv[1] != 0)) {
+#ifdef HAVE_IPV6
 		if (address.GetFamily() == AF_INET6) {
 			/* enclose IPv6 address in square brackets */
 
@@ -75,6 +94,7 @@ ToString(std::span<char> buffer, SocketAddress address) noexcept
 			buffer[++length] = ']';
 			buffer[++length] = 0;
 		}
+#endif
 
 		if (strlen(buffer.data()) + 1 + strlen(serv) >= buffer.size())
 			/* no more room */
@@ -102,13 +122,17 @@ HostToString(std::span<char> buffer, SocketAddress address) noexcept
 	if (address.IsNull())
 		return false;
 
+#ifdef HAVE_UN
 	if (address.GetFamily() == AF_LOCAL)
 		/* return path of local socket */
 		return LocalToString(buffer, address.GetLocalRaw());
+#endif
 
+#if defined(HAVE_IPV6) && defined(IN6_IS_ADDR_V4MAPPED)
 	IPv4Address ipv4_buffer;
 	if (address.IsV4Mapped())
 		address = ipv4_buffer = address.UnmapV4();
+#endif
 
 	return getnameinfo(address.GetAddress(), address.GetSize(),
 			   buffer.data(), buffer.size(),
