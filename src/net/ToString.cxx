@@ -53,7 +53,7 @@ ToString(std::span<char> buffer, SocketAddress address) noexcept
 	if (address.IsV4Mapped())
 		address = ipv4_buffer = address.UnmapV4();
 
-	char serv[16];
+	char serv[NI_MAXSERV];
 	int ret = getnameinfo(address.GetAddress(), address.GetSize(),
 			      buffer.data(), buffer.size(),
 			      serv, sizeof(serv),
