@@ -119,7 +119,7 @@ ToString(std::span<char> buffer, SocketAddress address,
 bool
 HostToString(std::span<char> buffer, SocketAddress address) noexcept
 {
-	if (address.IsNull())
+	if (address.IsNull() || address.GetSize() == 0)
 		return false;
 
 #ifdef HAVE_UN
