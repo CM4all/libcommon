@@ -6,12 +6,13 @@
 
 #include "IterableSplitString.hxx"
 
+#include <concepts>
 #include <string_view>
 
-template <typename F>
 [[gnu::pure]]
-bool
-IsNonEmptyListOf(std::string_view s, char separator, F &&f) noexcept
+constexpr bool
+IsNonEmptyListOf(std::string_view s, char separator,
+		 std::predicate<std::string_view> auto f) noexcept
 {
 	if (s.empty())
 	    return false;
