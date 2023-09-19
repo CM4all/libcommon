@@ -39,6 +39,7 @@
 #include "util/StringCompare.hxx"
 #include "util/StringSplit.hxx"
 #include "util/StringVerify.hxx"
+#include "util/StringListVerify.hxx"
 
 #if TRANSLATION_ENABLE_HTTP
 #include "http/HeaderName.hxx"
@@ -999,9 +1000,15 @@ IsValidCgroupAttributeNameChar(char ch) noexcept
 }
 
 static constexpr bool
-IsValidCgroupAttributeName(std::string_view s) noexcept
+IsValidCgroupAttributeNameSegment(std::string_view s) noexcept
 {
 	return CheckCharsNonEmpty(s, IsValidCgroupAttributeNameChar);
+}
+
+static constexpr bool
+IsValidCgroupAttributeName(std::string_view s) noexcept
+{
+	return IsNonEmptyListOf(s, '.', IsValidCgroupAttributeNameSegment);
 }
 
 [[gnu::pure]]
