@@ -6,8 +6,8 @@
 #include "CgroupState.hxx"
 #include "event/Loop.hxx"
 #include "io/Open.hxx"
-#include "io/ScopeChdir.hxx"
 #include "io/SmallTextFile.hxx"
+#include "io/linux/ProcPath.hxx"
 #include "system/Error.hxx"
 #include "util/NumberParser.hxx"
 #include "util/PrintException.hxx"
@@ -38,10 +38,7 @@ CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
 	 inotify(event_loop, *this),
 	 callback(_callback)
 {
-	{
-		const ScopeChdir scope_chdir{state.group_fd};
-		inotify.AddModifyWatch("memory.events.local");
-	}
+	inotify.AddModifyWatch(ProcFdPath(OpenPath(state.group_fd, "memory.events.local")));
 }
 
 void

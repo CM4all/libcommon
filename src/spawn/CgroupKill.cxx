@@ -6,9 +6,9 @@
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
 #include "io/Open.hxx"
-#include "io/ScopeChdir.hxx"
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "io/linux/ProcPath.hxx"
 #include "util/NumberParser.hxx"
 
 #include <array>
@@ -73,10 +73,7 @@ CgroupKill::CgroupKill(EventLoop &event_loop,
 	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout))
 {
 	// TODO: initialize inotify only if cgroup is populated currently
-	{
-		const ScopeChdir scope_chdir{cgroup_fd};
-		inotify_event.AddModifyWatch("cgroup.events");
-	}
+	inotify_event.AddModifyWatch(ProcFdPath(OpenPath(cgroup_fd, "cgroup.events")));
 
 	send_term_event.Schedule();
 }
