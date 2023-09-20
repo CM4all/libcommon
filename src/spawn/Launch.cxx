@@ -28,6 +28,7 @@
 #include <string.h>
 #include <sys/signal.h>
 #include <sys/socket.h> // for AF_LOCAL
+#include <sys/wait.h>
 
 using std::string_view_literals::operator""sv;
 
@@ -191,7 +192,14 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 				return EXIT_FAILURE;
 			}
 
+			/* stop the "scope" process, we don't need it
+			   if we don't have a systemd scope */
 			scope_process.pipe_w.Close();
+
+			/* reap the "scope" process; __WCLONE is
+			   necessary because the process was cloned
+			   without exit_signal=SIGCHLD */
+			waitpid(scope_process.local_pid, nullptr, __WCLONE);
 		}
 	}
 
