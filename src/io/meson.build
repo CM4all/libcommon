@@ -19,7 +19,6 @@ io = static_library(
   'BufferedOutputStream.cxx',
   'BufferedReader.cxx',
   'Logger.cxx',
-  'ScopeChdir.cxx',
   'StringFile.cxx',
   'Temp.cxx',
   io_sources,
