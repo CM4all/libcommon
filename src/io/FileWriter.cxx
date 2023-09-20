@@ -2,6 +2,7 @@
 // author: Max Kellermann <max.kellermann@gmail.com>
 
 #include "FileWriter.hxx"
+#include "io/linux/ProcPath.hxx"
 #include "lib/fmt/RuntimeError.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
@@ -116,9 +117,7 @@ FileWriter::Commit()
 		unlinkat(directory_fd.Get(), path.c_str(), 0);
 
 		/* hard-link the temporary file to the final path */
-		const auto fd_path = FmtBuffer<64>("/proc/self/fd/{}",
-						   fd.Get());
-		if (linkat(AT_FDCWD, fd_path,
+		if (linkat(AT_FDCWD, ProcFdPath(fd),
 			   directory_fd.Get(), path.c_str(),
 			   AT_SYMLINK_FOLLOW) < 0)
 			throw FmtErrno("Failed to commit {}", path);

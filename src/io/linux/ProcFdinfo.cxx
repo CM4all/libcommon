@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ProcFdinfo.hxx"
+#include "ProcPath.hxx"
 #include "lib/fmt/ToBuffer.hxx"
 #include "io/SmallTextFile.hxx"
 #include "util/NumberParser.hxx"
@@ -18,7 +19,7 @@ ReadPidfdPid(FileDescriptor pidfd)
 {
 	assert(pidfd.IsDefined());
 
-	for (std::string_view line : IterableSmallTextFile<4096>(FmtBuffer<64>("/proc/self/fdinfo/{}", pidfd.Get()).c_str())) {
+	for (std::string_view line : IterableSmallTextFile<4096>(ProcFdinfoPath(pidfd))) {
 		if (SkipPrefix(line, "Pid:\t"sv)) {
 			auto pid = ParseInteger<int>(line);
 			if (!pid)
