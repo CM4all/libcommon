@@ -79,7 +79,9 @@ StartSystemdScopeProcess(const bool pid_namespace)
 		LimitSysCalls();
 
 		std::byte dummy;
-		read(STDIN_FILENO, &dummy, sizeof(dummy));
+		[[maybe_unused]]
+		auto nbytes = read(STDIN_FILENO, &dummy, sizeof(dummy));
+
 		_exit(EXIT_SUCCESS);
 	}
 
