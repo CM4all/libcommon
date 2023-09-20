@@ -1,20 +1,10 @@
-if get_variable('libcommon_enable_libsystemd', true)
-  libsystemd = dependency('libsystemd')
-  libsystemd = declare_dependency(
-    compile_args: ['-DHAVE_LIBSYSTEMD'],
-    dependencies: [
-      libsystemd,
-      odbus_dep,
-    ],
-  )
-else
-  libsystemd = dependency('', required: false)
-endif
-
 spawn_sources = [
   'CgroupKill.cxx',
   'CgroupState.cxx',
   'ZombieReaper.cxx',
+]
+
+spawn_internal_dependencies = [
 ]
 
 spawn_dependencies = [
@@ -35,6 +25,21 @@ if get_variable('libcommon_enable_spawn_server', true)
   libcommon_enable_spawn_registry = true
   libcommon_enable_spawn_direct = true
   libcommon_enable_spawn_config = true
+
+  if get_variable('libcommon_enable_libsystemd', true)
+    spawn_sources += [
+      'Systemd.cxx',
+      'ScopeProcess.cxx',
+    ]
+
+    spawn_internal_dependencies += declare_dependency(
+      compile_args: ['-DHAVE_LIBSYSTEMD'],
+      dependencies: [
+        dependency('libsystemd'),
+        odbus_dep,
+      ],
+    )
+  endif
 endif
 
 if get_variable('libcommon_enable_spawn_local', true)
@@ -142,23 +147,15 @@ if get_variable('libcommon_enable_spawn_config', false)
   ]
 endif
 
-if libsystemd.found()
-  spawn_sources += [
-    'Systemd.cxx',
-    'ScopeProcess.cxx',
-  ]
-endif
-
 spawn = static_library(
   'spawn',
   spawn_sources,
   include_directories: inc,
-  dependencies: [
+  dependencies: spawn_internal_dependencies + [
     util_dep,
     io_linux_dep,
     cap_dep,
     fmt_dep,
-    libsystemd,
   ],
 )
 
