@@ -32,6 +32,10 @@ if get_variable('libcommon_enable_spawn_server', true)
       'ScopeProcess.cxx',
     ]
 
+    spawn_dependencies += declare_dependency(
+      compile_args: ['-DHAVE_LIBSYSTEMD'],
+    )
+
     spawn_internal_dependencies += declare_dependency(
       compile_args: ['-DHAVE_LIBSYSTEMD'],
       dependencies: [
