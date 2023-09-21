@@ -216,7 +216,7 @@ public:
 	 * @return the number of removed items
 	 */
 	std::size_t remove_and_dispose_if(std::predicate<const_reference> auto pred,
-				   Disposer<value_type> auto disposer) noexcept {
+					  Disposer<value_type> auto disposer) noexcept {
 		std::size_t n = 0;
 		for (auto &bucket : table)
 			n += bucket.remove_and_dispose_if(pred, disposer);
