@@ -32,18 +32,6 @@ struct IntItem final : IntrusiveHashSetHook<IntrusiveHookMode::TRACK> {
 	};
 };
 
-struct ForwardIntItem final : IntrusiveForwardHashSetHook {
-	int value;
-
-	ForwardIntItem(int _value) noexcept:value(_value) {}
-
-	struct GetKey {
-		constexpr int operator()(const ForwardIntItem &item) noexcept {
-			return item.value;
-		}
-	};
-};
-
 } // anonymous namespace
 
 TEST(IntrusiveHashSet, Basic)
@@ -160,79 +148,4 @@ TEST(IntrusiveHashSet, Multi)
 	ASSERT_EQ(set.find(b), set.end());
 	ASSERT_EQ(set.remove_and_dispose_key(b, [](auto*){}), 0U);
 	ASSERT_EQ(set.find(b), set.end());
-}
-
-TEST(IntrusiveHashSet, SinglyLinked)
-{
-	ForwardIntItem a{1}, b{2}, c{3}, d{4}, e{5}, f{1};
-
-	IntrusiveHashSet<
-		ForwardIntItem, 3,
-		IntrusiveHashSetOperators<std::hash<int>,
-					  std::equal_to<int>,
-					  ForwardIntItem::GetKey>,
-		IntrusiveHashSetBaseHookTraits<ForwardIntItem>,
-		IntrusiveHashSetOptions{.singly_linked=true}> set;
-
-	{
-		auto [position, inserted] = set.insert_check(2);
-		ASSERT_TRUE(inserted);
-		set.insert_commit(position, b);
-	}
-
-	ASSERT_FALSE(set.insert_check(2).second);
-
-	{
-		auto [position, inserted] = set.insert_check(a.value);
-		ASSERT_TRUE(inserted);
-		set.insert_commit(position, a);
-	}
-
-	set.insert(c);
-
-	ASSERT_NE(set.find(3), set.end());
-	ASSERT_EQ(set.find(3), set.iterator_to(c));
-
-	ASSERT_EQ(set.find(4), set.end());
-
-	set.remove_and_dispose_key(c.value, [](auto *){});
-
-	ASSERT_EQ(set.find(3), set.end());
-	ASSERT_EQ(set.find(c.value), set.end());
-
-	set.insert(c);
-	set.insert(d);
-	set.insert(e);
-
-	ASSERT_FALSE(set.insert_check(1).second);
-	ASSERT_EQ(set.insert_check(1).first, set.iterator_to(a));
-	ASSERT_FALSE(set.insert_check(f.value).second);
-	ASSERT_EQ(set.insert_check(f.value).first, set.iterator_to(a));
-
-	ASSERT_EQ(set.find(1), set.iterator_to(a));
-	ASSERT_EQ(set.find(2), set.iterator_to(b));
-	ASSERT_EQ(set.find(3), set.iterator_to(c));
-	ASSERT_EQ(set.find(4), set.iterator_to(d));
-	ASSERT_EQ(set.find(5), set.iterator_to(e));
-
-	set.remove_and_dispose_key(1, [](auto *){});
-
-	{
-		auto [position, inserted] = set.insert_check(f.value);
-		ASSERT_TRUE(inserted);
-		set.insert_commit(position, f);
-	}
-
-	ASSERT_EQ(set.find(a.value), set.iterator_to(f));
-	ASSERT_EQ(set.find(f.value), set.iterator_to(f));
-	ASSERT_EQ(set.find(1), set.iterator_to(f));
-
-	set.clear_and_dispose([](auto *i){ i->value = -1; });
-
-	ASSERT_EQ(a.value, 1);
-	ASSERT_EQ(b.value, -1);
-	ASSERT_EQ(c.value, -1);
-	ASSERT_EQ(d.value, -1);
-	ASSERT_EQ(e.value, -1);
-	ASSERT_EQ(f.value, -1);
 }

@@ -5,20 +5,12 @@
 
 #include "Concepts.hxx"
 #include "IntrusiveList.hxx"
-#include "IntrusiveForwardList.hxx"
 
 #include <algorithm> // for std::all_of()
 #include <array>
 #include <numeric> // for std::accumulate()
-#include <type_traits> // for std::conditional_t
 
 struct IntrusiveHashSetOptions {
-	/**
-	 * If true, use singly-linked lists instead of doubly-linked
-	 * lists.
-	 */
-	bool singly_linked = false;
-
 	bool constant_time_size = false;
 
 	/**
@@ -42,12 +34,6 @@ struct IntrusiveHashSetHook {
 	}
 };
 
-struct IntrusiveForwardHashSetHook {
-	using SiblingsHook = IntrusiveForwardListHook;
-
-	SiblingsHook intrusive_hash_set_siblings;
-};
-
 /**
  * For classes which embed #IntrusiveHashSetHook as base class.
  */
@@ -56,8 +42,6 @@ struct IntrusiveHashSetBaseHookTraits {
 	/* a never-called helper function which is used by _Cast() */
 	template<IntrusiveHookMode mode>
 	static constexpr IntrusiveHashSetHook<mode> _Identity(const IntrusiveHashSetHook<mode> &) noexcept;
-
-	static constexpr IntrusiveForwardHashSetHook _Identity(const IntrusiveForwardHashSetHook &) noexcept;
 
 	/* another never-called helper function which "calls"
 	   _Identity(), implicitly casting the item to the
@@ -146,17 +130,12 @@ class IntrusiveHashSet {
 		using HashSetHook = typename HookTraits::template Hook<U>;
 
 		template<typename U>
-		using ListHook = std::conditional_t<
-			options.singly_linked,
-			IntrusiveForwardListMemberHookTraits<&HashSetHook<U>::intrusive_hash_set_siblings>,
-			IntrusiveListMemberHookTraits<&HashSetHook<U>::intrusive_hash_set_siblings>>;
+		using ListHook = IntrusiveListMemberHookTraits<&HashSetHook<U>::intrusive_hash_set_siblings>;
 
 		template<typename U>
 		using Hook = typename HashSetHook<U>::SiblingsHook;
 
-		static constexpr T *Cast(std::conditional_t<options.singly_linked,
-					 IntrusiveForwardListNode,
-					 IntrusiveListNode> *node) noexcept {
+		static constexpr T *Cast(IntrusiveListNode *node) noexcept {
 			auto *hook = ListHook<T>::Cast(node);
 			return HookTraits::Cast(hook);
 		}
@@ -167,11 +146,7 @@ class IntrusiveHashSet {
 		}
 	};
 
-	using Bucket = std::conditional_t<
-		options.singly_linked,
-		IntrusiveForwardList<T, BucketHookTraits>,
-		IntrusiveList<T, BucketHookTraits, IntrusiveListOptions{.zero_initialized = options.zero_initialized}>>;
-
+	using Bucket = IntrusiveList<T, BucketHookTraits, IntrusiveListOptions{.zero_initialized = options.zero_initialized}>;
 	std::array<Bucket, table_size> table;
 
 	using bucket_iterator = typename Bucket::iterator;
@@ -294,9 +269,6 @@ public:
 			if (ops.equal(key, ops.get_key(i)))
 				return {bucket.iterator_to(i), false};
 
-		if constexpr (options.singly_linked)
-			return {bucket.before_begin(), true};
-
 		/* bucket.end() is a pointer to the bucket's list
 		   head, a stable value that is guaranteed to be still
 		   valid when insert_commit() gets called
@@ -315,9 +287,6 @@ public:
 		for (auto &i : bucket)
 			if (ops.equal(key, ops.get_key(i)) && pred(i))
 				return {bucket.iterator_to(i), false};
-
-		if constexpr (options.singly_linked)
-			return {bucket.before_begin(), true};
 
 		/* bucket.end() is a pointer to the bucket's list
 		   head, a stable value that is guaranteed to be still
@@ -349,15 +318,13 @@ public:
 		return GetBucket(ops.get_key(item)).push_front(item);
 	}
 
-	constexpr bucket_iterator erase(bucket_iterator i) noexcept
-		requires(!options.singly_linked) {
+	constexpr bucket_iterator erase(bucket_iterator i) noexcept {
 		--counter;
 		return GetBucket(ops.get_key(*i)).erase(i);
 	}
 
 	constexpr bucket_iterator erase_and_dispose(bucket_iterator i,
-						    Disposer<value_type> auto disposer) noexcept
-		requires(!options.singly_linked) {
+						    Disposer<value_type> auto disposer) noexcept {
 		auto result = erase(i);
 		disposer(&*i);
 		return result;
