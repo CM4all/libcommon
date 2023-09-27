@@ -10,7 +10,7 @@ void
 FdOutputStream::Write(std::span<const std::byte> src)
 {
 	while (!src.empty()) {
-		auto nbytes = fd.Write(src.data(), src.size());
+		auto nbytes = fd.Write(src);
 		if (nbytes < 0)
 			throw MakeErrno("Failed to write");
 

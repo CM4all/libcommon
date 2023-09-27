@@ -10,6 +10,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/linux/ProcPath.hxx"
 #include "util/NumberParser.hxx"
+#include "util/SpanCast.hxx"
 
 #include <array>
 #include <span>
@@ -167,7 +168,7 @@ CgroupKill::OnSendKill() noexcept
 
 	try {
 		if (cgroup_kill_fd.IsDefined() &&
-		    cgroup_kill_fd.Write("1", 1) == 1)
+		    cgroup_kill_fd.Write(AsBytes("1"sv)) == 1)
 			return;
 
 		KillCgroup(cgroup_procs_fd, SIGKILL);

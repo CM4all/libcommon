@@ -15,7 +15,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 	auto w = buffer.Write();
 	assert(!w.empty());
 
-	auto nbytes = event.GetFileDescriptor().Read(w.data(), w.size());
+	auto nbytes = event.GetFileDescriptor().Read(std::as_writable_bytes(w));
 	if (nbytes < 0 && errno == EAGAIN)
 		return;
 

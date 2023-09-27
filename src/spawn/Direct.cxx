@@ -88,8 +88,8 @@ WakeUpPipe(UniqueFileDescriptor &&w) noexcept
 {
 	assert(w.IsDefined());
 
-	static constexpr std::byte one_byte{};
-	w.Write(&one_byte, sizeof(one_byte));
+	static constexpr std::byte one_byte[1]{};
+	w.Write(one_byte);
 	w.Close();
 }
 
@@ -105,10 +105,10 @@ WaitForPipe(FileDescriptor r) noexcept
 
 	/* expect one byte to indicate success, and then the pipe will
 	   be closed by the parent */
-	std::byte buffer;
+	std::byte buffer[1];
 
-	return r.Read(&buffer, sizeof(buffer)) == sizeof(buffer) &&
-		r.Read(&buffer, sizeof(buffer)) == 0;
+	return r.Read(buffer) == sizeof(buffer) &&
+		r.Read(buffer) == 0;
 }
 
 [[noreturn]]

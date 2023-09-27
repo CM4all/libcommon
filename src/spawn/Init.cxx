@@ -147,7 +147,7 @@ SpawnInit(pid_t child_pid, bool remain)
 		/* receive signals */
 
 		struct signalfd_siginfo info;
-		ssize_t nbytes = init_signal_fd.Read(&info, sizeof(info));
+		ssize_t nbytes = init_signal_fd.Read(std::as_writable_bytes(std::span{&info, 1}));
 		if (nbytes <= 0)
 			return EXIT_FAILURE;
 

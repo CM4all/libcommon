@@ -26,7 +26,7 @@ ReadSmallFile(const char *path, FileDescriptor fd, std::span<std::byte> dest)
 				      path, st.st_size,
 				      dest.size());
 
-	ssize_t nbytes = fd.Read(dest.data(), dest.size());
+	ssize_t nbytes = fd.Read(dest);
 	if (nbytes < 0)
 		throw FmtErrno("Failed to read from {}", path);
 

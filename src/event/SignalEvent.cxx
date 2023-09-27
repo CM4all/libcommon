@@ -44,7 +44,7 @@ void
 SignalEvent::EventCallback(unsigned) noexcept
 {
 	struct signalfd_siginfo info;
-	ssize_t nbytes = event.GetFileDescriptor().Read(&info, sizeof(info));
+	ssize_t nbytes = event.GetFileDescriptor().Read(std::as_writable_bytes(std::span{&info, 1}));
 	if (nbytes <= 0) {
 		// TODO: log error?
 		Disable();

@@ -145,8 +145,7 @@ CopyRegularFile(FileDescriptor src, FileDescriptor dst, off_t size)
 
 	while (size > 0) {
 		std::array<std::byte, 65536> buffer;
-		const auto nbytes1 =
-			src.Read(buffer.data(), buffer.size());
+		const auto nbytes1 = src.Read(buffer);
 		if (nbytes1 <= 0) [[unlikely]] {
 			if (nbytes1 == 0)
 				throw std::runtime_error{"Unexpected end of file"};
@@ -154,7 +153,7 @@ CopyRegularFile(FileDescriptor src, FileDescriptor dst, off_t size)
 			throw MakeErrno("Failed to read file");
 		}
 
-		ssize_t nbytes2 = dst.Write(buffer.data(), (size_t)nbytes1);
+		ssize_t nbytes2 = dst.Write(std::span<const std::byte>{buffer}.first(nbytes1));
 		if (nbytes2 < nbytes1) [[unlikely]] {
 			if (nbytes2 < 0)
 				throw MakeErrno("Failed to write file");

@@ -111,7 +111,7 @@ SimpleInput::TryRead()
 	if (w.empty())
 		throw std::runtime_error("Unexpected data on WAS pipe");
 
-	auto nbytes = GetPipe().Read(w.data(), w.size());
+	auto nbytes = GetPipe().Read(w);
 	if (nbytes <= 0) {
 		if (nbytes == 0)
 			throw std::runtime_error("Hangup on WAS pipe");

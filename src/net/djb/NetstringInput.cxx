@@ -27,8 +27,7 @@ OnlyDigits(const char *p, size_t size) noexcept
 inline NetstringInput::Result
 NetstringInput::ReceiveHeader(FileDescriptor fd)
 {
-	ssize_t nbytes = fd.Read(header_buffer + header_position,
-				 sizeof(header_buffer) - header_position);
+	ssize_t nbytes = fd.Read(std::as_writable_bytes(std::span{header_buffer}.subspan(header_position)));
 	if (nbytes < 0) {
 		switch (errno) {
 		case EAGAIN:
@@ -100,8 +99,7 @@ NetstringInput::ValueData(size_t nbytes)
 inline NetstringInput::Result
 NetstringInput::ReceiveValue(FileDescriptor fd)
 {
-	ssize_t nbytes = fd.Read(value.data() + value_position,
-				 value.size() - value_position);
+	ssize_t nbytes = fd.Read(std::span{value}.subspan(value_position));
 	if (nbytes < 0) {
 		switch (errno) {
 		case EAGAIN:

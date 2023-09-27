@@ -15,7 +15,7 @@ LoadStringFile(const char *path)
 	auto fd = OpenReadOnly(path);
 
 	char buffer[1024];
-	ssize_t nbytes = fd.Read(buffer, sizeof(buffer));
+	ssize_t nbytes = fd.Read(std::as_writable_bytes(std::span{buffer}));
 	if (nbytes < 0)
 		throw FmtErrno("Failed to read {}", path);
 

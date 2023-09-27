@@ -71,7 +71,7 @@ SimpleOutput::TryWrite()
 	r = r.subspan(position);
 	assert(!r.empty());
 
-	auto nbytes = GetPipe().Write(r.data(), r.size());
+	auto nbytes = GetPipe().Write(r);
 	if (nbytes <= 0) {
 		if (nbytes == 0 || errno == EAGAIN) {
 			event.ScheduleWrite();
