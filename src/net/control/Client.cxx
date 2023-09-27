@@ -46,7 +46,7 @@ BengControlClient::Send(BengProxy::ControlCommand cmd,
 void
 BengControlClient::Send(std::span<const std::byte> payload) const
 {
-	auto nbytes = socket.Write(payload.data(), payload.size());
+	auto nbytes = socket.Send(payload);
 	if (nbytes < 0)
 		throw MakeSocketError("send() failed");
 
