@@ -115,7 +115,7 @@ SendReceive(const Net::Log::Datagram &src)
 	Net::Log::Send(a, src);
 
 	static std::array<std::byte, 4096> buffer;
-	auto nbytes = b.Read(buffer.data(), buffer.size());
+	auto nbytes = b.Receive(buffer);
 	if (nbytes < 0)
 		throw MakeSocketError("Failed to receive");
 
