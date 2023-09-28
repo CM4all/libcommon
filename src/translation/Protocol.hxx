@@ -1213,6 +1213,11 @@ enum class TranslationCommand : uint16_t {
 	 * null byte.
 	 */
 	MOUNT_NAMED_TMPFS = 252,
+
+	/**
+	 * Limit file access to files beneath this directory.
+	 */
+	BENEATH = 253,
 };
 
 struct TranslationHeader {

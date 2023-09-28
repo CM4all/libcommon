@@ -4049,6 +4049,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::MOUNT_NAMED_TMPFS:
 		HandleMountNamedTmpfs(string_payload);
 		return;
+
+	case TranslationCommand::BENEATH:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (!IsValidAbsolutePath(string_payload))
+			throw std::runtime_error("malformed BENEATH packet");
+
+		if (file_address == nullptr)
+			throw std::runtime_error("misplaced BENEATH packet");
+
+		if (file_address->beneath != nullptr)
+			throw std::runtime_error("duplicate BENEATH packet");
+
+		file_address->beneath = string_payload.data();
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
