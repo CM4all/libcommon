@@ -14,16 +14,10 @@
 #include <fcntl.h>
 #include <linux/openat2.h> //  for RESOLVE_*
 
-static constexpr auto
-MakeReadOnlyBeneath() noexcept
-{
-	struct open_how how{};
-	how.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC;
-	how.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS;
-	return how;
-}
-
-static constexpr auto ro_beneath = MakeReadOnlyBeneath();
+static constexpr struct open_how ro_beneath{
+	.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC,
+	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
+};
 
 namespace Uring {
 
