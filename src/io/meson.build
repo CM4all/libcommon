@@ -5,6 +5,7 @@ io = static_library(
   'io',
   'FileDescriptor.cxx',
   'Open.cxx',
+  'Beneath.cxx',
   'MakeDirectory.cxx',
   'RecursiveCopy.cxx',
   'RecursiveDelete.cxx',
