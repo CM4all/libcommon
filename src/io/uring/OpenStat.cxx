@@ -13,17 +13,11 @@
 #include <utility>
 
 #include <fcntl.h>
+#include <linux/openat2.h> //  for RESOLVE_*
 
 static constexpr auto
 MakeReadOnlyBeneath() noexcept
 {
-#ifndef RESOLVE_NO_MAGICLINKS
-	constexpr uint64_t RESOLVE_NO_MAGICLINKS = 0x02;
-#endif
-#ifndef RESOLVE_BENEATH
-	constexpr uint64_t RESOLVE_BENEATH = 0x08;
-#endif
-
 	struct open_how how{};
 	how.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC;
 	how.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS;
