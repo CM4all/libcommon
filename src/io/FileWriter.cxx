@@ -117,7 +117,7 @@ FileWriter::Commit()
 		unlinkat(directory_fd.Get(), path.c_str(), 0);
 
 		/* hard-link the temporary file to the final path */
-		if (linkat(AT_FDCWD, ProcFdPath(fd),
+		if (linkat(-1, ProcFdPath(fd),
 			   directory_fd.Get(), path.c_str(),
 			   AT_SYMLINK_FOLLOW) < 0)
 			throw FmtErrno("Failed to commit {}", path);
