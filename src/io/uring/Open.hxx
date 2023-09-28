@@ -8,6 +8,7 @@
 
 #include <sys/types.h> // for mode_t
 
+struct open_how;
 struct FileAt;
 
 namespace Uring {
@@ -35,6 +36,14 @@ public:
 	}
 
 	void StartOpen(FileAt file, int flags, mode_t mode=0) noexcept;
+
+	/**
+	 * Calls openat2().  The "how" parameter must remain valid
+	 * until the operation finishes (cancellation does not count
+	 * as "finished" because the kernel may continue to
+	 * dereference the pointer).
+	 */
+	void StartOpen(FileAt file, const struct open_how &how) noexcept;
 
 	void StartOpen(const char *path,
 		       int flags, mode_t mode=0) noexcept;

@@ -32,6 +32,17 @@ Open::StartOpen(FileAt file, int flags, mode_t mode) noexcept
 }
 
 void
+Open::StartOpen(FileAt file, const struct open_how &how) noexcept
+{
+	auto &s = queue.RequireSubmitEntry();
+
+	io_uring_prep_openat2(&s, file.directory.Get(), file.name,
+			      /* why is this parameter not const? */
+			      const_cast<struct open_how *>(&how));
+	queue.Push(s, *this);
+}
+
+void
 Open::StartOpen(const char *path, int flags, mode_t mode) noexcept
 {
 	StartOpen({FileDescriptor(AT_FDCWD), path}, flags, mode);
@@ -52,12 +63,7 @@ Open::StartOpenReadOnly(const char *path) noexcept
 void
 Open::StartOpenReadOnlyBeneath(FileAt file) noexcept
 {
-	auto &s = queue.RequireSubmitEntry();
-
-	io_uring_prep_openat2(&s, file.directory.Get(), file.name,
-			      /* why is this parameter not const? */
-			      const_cast<struct open_how *>(&ro_beneath));
-	queue.Push(s, *this);
+	StartOpen(file, ro_beneath);
 }
 
 void
