@@ -1431,6 +1431,13 @@ public:
 			response.Packet(TranslationCommand::AUTO_BROTLI_PATH);
 			return *this;
 		}
+
+		template<typename... Types>
+		auto Beneath(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::BENEATH,
+					      value...);
+			return *this;
+		}
 	};
 
 	template<typename... Types>
