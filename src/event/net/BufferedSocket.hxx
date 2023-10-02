@@ -690,10 +690,6 @@ private:
 	BufferedReadResult TryRead2() noexcept;
 	BufferedReadResult TryRead() noexcept;
 
-	static bool OnWrite(void *ctx) noexcept;
-	static bool OnRead(void *ctx) noexcept;
-	static bool OnTimeout(void *ctx) noexcept;
-
 	void DeferReadCallback() noexcept {
 		Read();
 	}
