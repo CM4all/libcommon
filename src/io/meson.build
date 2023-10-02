@@ -7,6 +7,7 @@ io = static_library(
   'Open.cxx',
   'Beneath.cxx',
   'MakeDirectory.cxx',
+  'CopyRegularFile.cxx',
   'RecursiveCopy.cxx',
   'RecursiveDelete.cxx',
   'DirectoryReader.cxx',
