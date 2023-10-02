@@ -9,7 +9,6 @@
 #include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
 #include "system/Mount.hxx"
-#include "system/Mount.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/SpanCast.hxx"
