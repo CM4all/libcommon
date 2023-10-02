@@ -22,7 +22,7 @@
 template<typename T>
 class VCircularBuffer {
 public:
-	typedef T value_type;
+	using value_type = T;
 	using reference = T &;
 	using const_reference = const T &;
 	using pointer = T *;
