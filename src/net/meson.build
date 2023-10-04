@@ -12,6 +12,7 @@ net_sources = [
   'Resolver.cxx',
   'Parser.cxx',
   'FormatAddress.cxx',
+  'ToString.cxx',
   'Interface.cxx',
   'SocketDescriptor.cxx',
   'UniqueSocketDescriptor.cxx',
