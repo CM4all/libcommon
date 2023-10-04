@@ -5,6 +5,8 @@
 
 #include "UniqueFileDescriptor.hxx"
 
+#include <cstddef>
+#include <span>
 #include <string>
 
 /**
@@ -69,7 +71,7 @@ public:
 	/**
 	 * Throws std::runtime_error on error.
 	 */
-	void Write(const void *data, size_t size);
+	void Write(std::span<const std::byte> src);
 
 	/**
 	 * Throws std::system_error on error.

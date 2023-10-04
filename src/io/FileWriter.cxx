@@ -98,13 +98,13 @@ FileWriter::Allocate(off_t size) noexcept
 }
 
 void
-FileWriter::Write(const void *data, size_t size)
+FileWriter::Write(std::span<const std::byte> src)
 {
-	ssize_t nbytes = fd.Write(data, size);
+	ssize_t nbytes = fd.Write(src);
 	if (nbytes < 0)
 		throw FmtRuntimeError("Failed to write to {}", path);
 
-	if (size_t(nbytes) < size)
+	if (size_t(nbytes) < src.size())
 		throw FmtRuntimeError("Short write to {}", path);
 }
 
