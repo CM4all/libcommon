@@ -616,7 +616,7 @@ TranslateResponse::CompileRegex() const
 {
 	assert(regex != nullptr);
 
-	return {regex, protocol_version >= 3, IsExpandable()};
+	return {regex, {.anchored=protocol_version >= 3, .capture=IsExpandable()}};
 }
 
 UniqueRegex
@@ -624,7 +624,7 @@ TranslateResponse::CompileInverseRegex() const
 {
 	assert(inverse_regex != nullptr);
 
-	return {inverse_regex, protocol_version >= 3, false};
+	return {inverse_regex, {.anchored=protocol_version >= 3}};
 }
 
 bool
