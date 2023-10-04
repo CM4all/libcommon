@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef FILE_WRITER_HXX
-#define FILE_WRITER_HXX
+#pragma once
 
 #include "UniqueFileDescriptor.hxx"
 
@@ -41,7 +40,6 @@ public:
 	FileWriter(FileWriter &&src) noexcept = default;
 
 	FileWriter &operator=(FileWriter &&src) noexcept {
-		using std::swap;
 		if (IsDefined())
 			Cancel();
 
@@ -83,5 +81,3 @@ public:
 	 */
 	void Cancel() noexcept;
 };
-
-#endif
