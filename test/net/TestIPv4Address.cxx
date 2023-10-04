@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: BSD-2-Clause
-// Copyright CM4all GmbH
-// author: Max Kellermann <mk@cm4all.com>
+// author: Max Kellermann <max.kellermann@gmail.com>
 
 #include "net/IPv4Address.hxx"
+#include "net/ToString.hxx"
 #include "util/Compiler.h"
 
 #include <gtest/gtest.h>
+
+#include <stdexcept>
+
+#ifndef _WIN32
+#include <arpa/inet.h>
+#endif
 
 #if GCC_CHECK_VERSION(11,0)
 /* suppress warning for calling GetSize() on uninitialized object */
@@ -71,12 +77,58 @@ TEST(IPv4AddressTest, And)
 		  IPv4Address(0, 0, 0, 0, 0).GetNumericAddress());
 }
 
+static std::string
+ToString(const struct in_addr &a)
+{
+#ifdef _WIN32
+	/* on mingw32, the parameter is non-const (PVOID) */
+	const auto p = const_cast<struct in_addr *>(&a);
+#else
+	const auto p = &a;
+#endif
+
+	char buffer[256];
+	const char *result = inet_ntop(AF_INET, p, buffer, sizeof(buffer));
+	if (result == nullptr)
+		throw std::runtime_error("inet_ntop() failed");
+	return result;
+}
+
+TEST(IPv4Address, Octets)
+{
+	static constexpr auto a = IPv4Address(11, 22, 33, 44, 1234);
+	EXPECT_EQ(ToString(a.GetAddress()), "11.22.33.44");
+}
+
+TEST(IPv4Address, Any)
+{
+	EXPECT_EQ(ToString(IPv4Address(1234).GetAddress()), "0.0.0.0");
+	EXPECT_EQ(ToString(IPv4Address(1234)), "0.0.0.0:1234");
+}
+
 TEST(IPv4Address, Port)
 {
 	EXPECT_EQ(IPv4Address(0).GetPort(), 0);
 	EXPECT_EQ(IPv4Address(1).GetPort(), 1);
 	EXPECT_EQ(IPv4Address(1234).GetPort(), 1234);
 	EXPECT_EQ(IPv4Address(0xffff).GetPort(), 0xffff);
+}
+
+TEST(IPv4Address, Loopback)
+{
+	static constexpr auto a = IPv4Address(IPv4Address::Loopback(), 1234);
+	EXPECT_EQ(ToString(a.GetAddress()), "127.0.0.1");
+}
+
+TEST(IPv4Address, MaskFromPrefix)
+{
+	EXPECT_EQ(ToString(IPv4Address::MaskFromPrefix(0).GetAddress()), "0.0.0.0");
+	EXPECT_EQ(ToString(IPv4Address::MaskFromPrefix(4).GetAddress()), "240.0.0.0");
+	EXPECT_EQ(ToString(IPv4Address::MaskFromPrefix(8).GetAddress()), "255.0.0.0");
+	EXPECT_EQ(ToString(IPv4Address::MaskFromPrefix(16).GetAddress()), "255.255.0.0");
+	EXPECT_EQ(ToString(IPv4Address::MaskFromPrefix(24).GetAddress()), "255.255.255.0");
+	EXPECT_EQ(ToString(IPv4Address::MaskFromPrefix(31).GetAddress()), "255.255.255.254");
+	EXPECT_EQ(ToString(IPv4Address::MaskFromPrefix(32).GetAddress()), "255.255.255.255");
 }
 
 TEST(IPv4Address, Numeric)
