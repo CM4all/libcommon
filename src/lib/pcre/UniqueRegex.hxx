@@ -8,12 +8,33 @@
 
 #include <utility>
 
+namespace Pcre {
+
+struct CompileOptions {
+	bool anchored = false;
+	bool capture = false;
+
+	explicit constexpr operator int() const noexcept {
+		int options = PCRE2_DOTALL|PCRE2_NO_AUTO_CAPTURE;
+
+		if (anchored)
+			options |= PCRE2_ANCHORED;
+
+		if (capture)
+			options &= ~PCRE2_NO_AUTO_CAPTURE;
+
+		return options;
+	}
+};
+
+} // namespace Pcre
+
 class UniqueRegex : public RegexPointer {
 public:
 	UniqueRegex() = default;
 
-	UniqueRegex(const char *pattern, bool anchored, bool capture) {
-		Compile(pattern, anchored, capture);
+	UniqueRegex(const char *pattern, Pcre::CompileOptions options) {
+		Compile(pattern, options);
 	}
 
 	UniqueRegex(UniqueRegex &&src) noexcept:RegexPointer(src) {
@@ -34,5 +55,9 @@ public:
 	/**
 	 * Throws Pcre::Error on error.
 	 */
-	void Compile(const char *pattern, bool anchored, bool capture);
+	void Compile(const char *pattern, int options);
+
+	void Compile(const char *pattern, Pcre::CompileOptions options={}) {
+		Compile(pattern, (int)options);
+	}
 };

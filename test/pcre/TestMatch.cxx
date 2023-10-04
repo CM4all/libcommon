@@ -12,7 +12,7 @@ TEST(RegexTest, Match1)
 {
 	UniqueRegex r;
 	ASSERT_FALSE(r.IsDefined());
-	r.Compile(".", false, false);
+	r.Compile(".");
 	ASSERT_TRUE(r.IsDefined());
 	ASSERT_TRUE(r.Match("a"));
 	ASSERT_TRUE(r.Match("abc"));
@@ -22,7 +22,7 @@ TEST(RegexTest, Match2)
 {
 	UniqueRegex r = UniqueRegex();
 	ASSERT_FALSE(r.IsDefined());
-	r.Compile("..", false, false);
+	r.Compile("..");
 	ASSERT_TRUE(r.IsDefined());
 	ASSERT_FALSE(r.Match("a"));
 	ASSERT_TRUE(r.Match("abc"));
@@ -32,7 +32,7 @@ TEST(RegexTest, NotAnchored)
 {
 	UniqueRegex r = UniqueRegex();
 	ASSERT_FALSE(r.IsDefined());
-	r.Compile("/foo/", false, false);
+	r.Compile("/foo/");
 	ASSERT_TRUE(r.IsDefined());
 	ASSERT_TRUE(r.Match("/foo/"));
 	ASSERT_TRUE(r.Match("/foo/bar"));
@@ -43,7 +43,7 @@ TEST(RegexTest, Anchored)
 {
 	UniqueRegex r = UniqueRegex();
 	ASSERT_FALSE(r.IsDefined());
-	r.Compile("/foo/", true, false);
+	r.Compile("/foo/", {.anchored=true});
 	ASSERT_TRUE(r.IsDefined());
 	ASSERT_TRUE(r.Match("/foo/"));
 	ASSERT_TRUE(r.Match("/foo/bar"));
@@ -52,7 +52,7 @@ TEST(RegexTest, Anchored)
 
 TEST(RegexTest, Capture)
 {
-	const UniqueRegex r{"/foo/(.*)", true, true};
+	const UniqueRegex r{"/foo/(.*)", {.anchored=true, .capture=true}};
 	ASSERT_TRUE(r.IsDefined());
 
 	{
@@ -78,7 +78,7 @@ TEST(RegexTest, Capture)
 
 TEST(RegexTest, CaptureEmpty)
 {
-	const UniqueRegex r{"/fo(o?)", true, true};
+	const UniqueRegex r{"/fo(o?)", {.anchored=true, .capture=true}};
 	ASSERT_TRUE(r.IsDefined());
 
 	{
@@ -106,7 +106,7 @@ TEST(RegexTest, CaptureEmpty)
 
 TEST(RegexTest, CaptureOptional)
 {
-	const UniqueRegex r{"/foo/(.+)?", true, true};
+	const UniqueRegex r{"/foo/(.+)?", {.anchored=true, .capture=true}};
 	ASSERT_TRUE(r.IsDefined());
 
 	{
@@ -134,7 +134,7 @@ TEST(RegexTest, CaptureOptional)
 
 TEST(RegexTest, CaptureOptional2)
 {
-	const UniqueRegex r{"/fo(o)?/(.+)?", true, true};
+	const UniqueRegex r{"/fo(o)?/(.+)?", {.anchored=true, .capture=true}};
 	ASSERT_TRUE(r.IsDefined());
 
 	{
