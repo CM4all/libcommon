@@ -4,7 +4,7 @@
 #pragma once
 
 #include "net/SocketAddress.hxx"
-#include "net/ToString.hxx"
+#include "net/FormatAddress.hxx"
 
 #include <fmt/format.h>
 

@@ -1,5 +1,5 @@
 #include "co/InvokeTask.hxx"
-#include "net/ToString.hxx"
+#include "net/FormatAddress.hxx"
 #include "pg/Stock.hxx"
 #include "pg/CoStockQuery.hxx"
 #include "event/Loop.hxx"

@@ -2,7 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#include "ToString.hxx"
+#include "FormatAddress.hxx"
 #include "Features.hxx"
 #include "SocketAddress.hxx"
 #include "IPv4Address.hxx"

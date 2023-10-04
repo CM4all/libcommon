@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "co/InvokeTask.hxx"
-#include "net/ToString.hxx"
+#include "net/FormatAddress.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
 #include "event/net/cares/Channel.hxx"

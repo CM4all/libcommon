@@ -7,7 +7,7 @@
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
 #include "net/SocketAddress.hxx"
-#include "net/ToString.hxx"
+#include "net/FormatAddress.hxx"
 #include "util/Cancellable.hxx"
 #include "util/PrintException.hxx"
 

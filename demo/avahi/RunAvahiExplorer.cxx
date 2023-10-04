@@ -9,7 +9,7 @@
 #include "lib/avahi/ExplorerListener.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
-#include "net/ToString.hxx"
+#include "net/FormatAddress.hxx"
 #include "util/PrintException.hxx"
 
 class Instance final : Avahi::ServiceExplorerListener, Avahi::ErrorHandler {

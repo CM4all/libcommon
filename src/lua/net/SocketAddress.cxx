@@ -7,7 +7,7 @@
 #include "lua/Util.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 #include "net/Parser.hxx"
-#include "net/ToString.hxx"
+#include "net/FormatAddress.hxx"
 
 namespace Lua {
 

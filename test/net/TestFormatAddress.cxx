@@ -3,12 +3,12 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "net/Parser.hxx"
-#include "net/ToString.hxx"
+#include "net/FormatAddress.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 
 #include <gtest/gtest.h>
 
-TEST(SocketAddressStringTest, Basic)
+TEST(FormatAddress, Basic)
 {
     static constexpr struct {
         const char *in, *out, *host;
