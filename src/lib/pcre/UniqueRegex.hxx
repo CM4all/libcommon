@@ -12,6 +12,7 @@ namespace Pcre {
 
 struct CompileOptions {
 	bool anchored = false;
+	bool caseless = false;
 	bool capture = false;
 
 	explicit constexpr operator int() const noexcept {
@@ -19,6 +20,9 @@ struct CompileOptions {
 
 		if (anchored)
 			options |= PCRE2_ANCHORED;
+
+		if (caseless)
+			options |= PCRE2_CASELESS;
 
 		if (capture)
 			options &= ~PCRE2_NO_AUTO_CAPTURE;
