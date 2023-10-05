@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef FD_READER_HXX
-#define FD_READER_HXX
+#pragma once
 
 #include "Reader.hxx"
 #include "FileDescriptor.hxx"
@@ -19,7 +18,5 @@ public:
 	}
 
 	/* virtual methods from class Reader */
-	std::size_t Read(void *data, std::size_t size) override;
+	std::size_t Read(std::span<std::byte> dest) override;
 };
-
-#endif

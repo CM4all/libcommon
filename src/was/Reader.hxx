@@ -21,5 +21,5 @@ public:
 	/**
 	 * Throws #ReadFailed if was_simple_read() returns -2.
 	 */
-	std::size_t Read(void *data, std::size_t size) override;
+	std::size_t Read(std::span<std::byte> dest) override;
 };

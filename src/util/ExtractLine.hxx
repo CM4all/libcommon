@@ -4,27 +4,28 @@
 
 #pragma once
 
-#include <string.h>
+#include <cstring>
 
 template<typename B>
-auto
+std::span<char>
 ExtractLine(B &buffer, bool flush=false)
 {
 	auto r = buffer.Read();
-	char *newline = (char *)memchr(r.data(), '\n', r.size());
+	char *data = reinterpret_cast<char*>(r.data());
+	char *newline = reinterpret_cast<char*>(std::memchr(data, '\n', r.size()));
 	if (newline == nullptr) {
 		if (!r.empty() && (flush || buffer.IsFull())) {
 			buffer.Clear();
-			return r;
+			return {data, r.size()};
 		}
 
-		return decltype(r){};
+		return {};
 	}
 
-	buffer.Consume(newline + 1 - r.data());
+	buffer.Consume(newline + 1 - data);
 
-	while (newline > r.data() && newline[-1] == '\r')
+	while (newline > data && newline[-1] == '\r')
 		--newline;
 
-	return r.subspan(0, newline - r.data());
+	return std::span{data, static_cast<std::size_t>(newline - data)};
 }

@@ -7,11 +7,11 @@
 #include <assert.h>
 
 std::size_t
-FdReader::Read(void *data, std::size_t size)
+FdReader::Read(std::span<std::byte> dest)
 {
 	assert(fd.IsDefined());
 
-	const auto nbytes = fd.Read(data, size);
+	const auto nbytes = fd.Read(dest);
 	if (nbytes < 0)
 		throw MakeErrno("Failed to read");
 

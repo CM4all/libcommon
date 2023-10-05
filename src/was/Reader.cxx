@@ -10,9 +10,9 @@ extern "C" {
 }
 
 std::size_t
-WasReader::Read(void *data, std::size_t size)
+WasReader::Read(std::span<std::byte> dest)
 {
-	auto nbytes = was_simple_read(w, data, size);
+	auto nbytes = was_simple_read(w, dest.data(), dest.size());
 	if (nbytes < 0) {
 		if (nbytes == -1)
 			throw MakeErrno("Reading from request body failed");

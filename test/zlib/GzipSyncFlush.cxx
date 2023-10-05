@@ -19,7 +19,7 @@ Copy(OutputStream &os, Reader &r)
 {
 	while (true) {
 		std::array<std::byte, 16384> buffer;
-		std::size_t nbytes = r.Read(&buffer, sizeof(buffer));
+		std::size_t nbytes = r.Read(buffer);
 		if (nbytes == 0)
 			break;
 
