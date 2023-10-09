@@ -20,10 +20,7 @@ UrandomRead(void *p, std::size_t size)
 void
 UrandomFill(void *p, std::size_t size)
 {
-	ssize_t nbytes = getrandom(p, size, 0);
-	if (nbytes < 0)
-		throw MakeErrno("getrandom() failed");
-
-	if (std::size_t(nbytes) != size)
+	std::size_t nbytes = UrandomRead(p, size);
+	if (nbytes != size)
 		throw std::runtime_error("getrandom() was incomplete");
 }
