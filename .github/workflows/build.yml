@@ -44,7 +44,6 @@ jobs:
             libssl-dev \
             libcurl4-openssl-dev \
             libpq-dev \
-            liburing-dev \
             libluajit-5.1-dev \
             nettle-dev \
             libpcre2-dev \
@@ -62,11 +61,13 @@ jobs:
              -Dpcre=enabled \
              -Dpg=enabled \
              -Dsodium=enabled \
-             -During=enabled \
+             -During=disabled \
              -Dwas=enabled \
              -Dtest=enabled \
              --force-fallback-for=fmt,libcm4all-was-protocol,libcm4all-was-simple \
              output
+        # Note: io_uring is disabled because the liburing version in
+        # Ubuntu is broken; it redefines "struct open_how"
 
       - name: Build
         run: ninja -C output -v
