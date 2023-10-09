@@ -9,6 +9,7 @@
 #include "io/uring/CoTextFile.hxx"
 #include "io/uring/CoOperation.hxx"
 #include "util/PrintException.hxx"
+#include "util/SpanCast.hxx"
 
 #include <cstdio>
 #include <cstdlib>
@@ -54,7 +55,8 @@ Run(Uring::Queue &queue, const char *path)
 						     FileDescriptor(AT_FDCWD),
 						     path);
 	co_await CoWrite(queue, FileDescriptor(STDOUT_FILENO),
-			 result.data(), result.size(), 0);
+			 AsBytes(result),
+			 0);
 }
 
 int

@@ -96,10 +96,10 @@ CoOpenReadOnly(Queue &queue, const char *path) noexcept
 
 CoReadOperation::CoReadOperation(struct io_uring_sqe &s,
 				 FileDescriptor fd,
-				 void *buffer, std::size_t size,
+				 std::span<std::byte> dest,
 				 off_t offset, int flags) noexcept
 {
-	io_uring_prep_read(&s, fd.Get(), buffer, size, offset);
+	io_uring_prep_read(&s, fd.Get(), dest.data(), dest.size(), offset);
 	s.flags = flags;
 }
 
@@ -114,10 +114,10 @@ CoReadOperation::GetValue(int value) const
 
 CoWriteOperation::CoWriteOperation(struct io_uring_sqe &s,
 				   FileDescriptor fd,
-				   const void *buffer, std::size_t size,
+				   std::span<const std::byte> src,
 				   off_t offset, int flags) noexcept
 {
-	io_uring_prep_write(&s, fd.Get(), buffer, size, offset);
+	io_uring_prep_write(&s, fd.Get(), src.data(), src.size(), offset);
 	s.flags = flags;
 }
 

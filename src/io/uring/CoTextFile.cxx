@@ -42,7 +42,9 @@ CoReadTextFile(Queue &queue, FileDescriptor directory_fd, const char *path,
 	/* hard-link the read() and the close() with IOSQE_IO_HARDLINK
 	   (requires Linux 5.6) */
 
-	auto read = CoRead(queue, fd, value.data(), size, 0,
+	auto read = CoRead(queue, fd,
+			   std::as_writable_bytes(std::span{value.data(), size}),
+			   0,
 			   IOSQE_IO_HARDLINK);
 
 	try {

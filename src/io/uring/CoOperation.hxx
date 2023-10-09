@@ -8,6 +8,7 @@
 #include "co/Compat.hxx"
 
 #include <cstddef>
+#include <span>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -128,7 +129,7 @@ using CoClose = CoOperation<CoCloseOperation>;
 class CoReadOperation final {
 public:
 	CoReadOperation(struct io_uring_sqe &sqe, FileDescriptor fd,
-			void *buffer, std::size_t size,
+			std::span<std::byte> dest,
 			off_t offset, int flags=0) noexcept;
 
 	std::size_t GetValue(int value) const;
@@ -139,7 +140,7 @@ using CoRead = CoOperation<CoReadOperation>;
 class CoWriteOperation final {
 public:
 	CoWriteOperation(struct io_uring_sqe &sqe, FileDescriptor fd,
-			 const void *buffer, std::size_t size,
+			 std::span<const std::byte> src,
 			 off_t offset, int flags=0) noexcept;
 
 	std::size_t GetValue(int value) const;
