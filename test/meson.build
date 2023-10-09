@@ -36,14 +36,9 @@ subdir('io/config')
 subdir('net')
 subdir('pcre')
 subdir('pg')
-
-if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
-  # this library needs std::byte
-  subdir('nettle')
-  subdir('sodium')
-  subdir('jwt')
-endif
-
+subdir('nettle')
+subdir('sodium')
+subdir('jwt')
 subdir('ssl')
 subdir('stock')
 subdir('time')

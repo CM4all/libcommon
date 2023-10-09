@@ -131,12 +131,9 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
   endif
 endif
 
-if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
-  # this library needs std::byte
-  subdir('src/lib/nettle')
-  subdir('src/lib/sodium')
-  subdir('src/jwt')
-endif
+subdir('src/lib/nettle')
+subdir('src/lib/sodium')
+subdir('src/jwt')
 
 subdir('src/net')
 subdir('src/net/control')
@@ -174,9 +171,7 @@ if lua_dep.found()
   subdir('src/lua/mariadb')
 endif
 
-if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=8')
-  subdir('src/translation/server')
-endif
+subdir('src/translation/server')
 
 if get_option('fuzzer')
   subdir('fuzzer')
