@@ -14,13 +14,13 @@ WriteBuffer::Write(FileDescriptor fd)
 {
 	ssize_t nbytes = fd.Write({buffer, GetSize()});
 	if (nbytes < 0) {
-		switch (errno) {
+		switch (const int e = errno) {
 		case EAGAIN:
 		case EINTR:
 			return Result::MORE;
 
 		default:
-			throw MakeErrno("Failed to write");
+			throw MakeErrno(e, "Failed to write");
 		}
 	}
 
