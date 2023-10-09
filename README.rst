@@ -40,6 +40,7 @@ Optional dependencies:
 - `LuaJit <http://luajit.org/>`__
 - `Nettle <https://www.lysator.liu.se/~nisse/nettle/>`__
 - `PCRE <https://www.pcre.org/>`__
+- `GoogleTest <https://github.com/google/googletest>`__
 
 To build it, type::
 
