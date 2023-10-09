@@ -1,3 +1,7 @@
+if not avahi_dep.found()
+  subdir_done()
+endif
+
 executable(
   'RunAvahiExplorer',
   'RunAvahiExplorer.cxx',

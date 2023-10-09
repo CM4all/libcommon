@@ -182,8 +182,5 @@ if get_option('fuzzer')
   subdir('fuzzer')
 else
   subdir('test')
-
-  if avahi_dep.found()
-    subdir('demo/avahi')
-  endif
+  subdir('demo')
 endif
