@@ -44,7 +44,7 @@ jobs:
             liburing-dev \
             libluajit-5.1-dev \
             nettle-dev \
-            libpcre2-dev
+            libpcre2-dev \
             libgtest-dev
 
       - name: Configure
