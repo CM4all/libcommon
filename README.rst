@@ -35,6 +35,7 @@ Optional dependencies:
 
 - `libcurl <https://curl.haxx.se/>`__
 - `libpq <https://www.postgresql.org/>`__
+- `libsodium <https://www.libsodium.org/>`__
 - `liburing <https://github.com/axboe/liburing>`__
 - `libwas <https://github.com/CM4all/libwas>`__
 - `LuaJit <http://luajit.org/>`__
