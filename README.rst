@@ -35,6 +35,7 @@ Optional dependencies:
 
 - `c-ares <https://c-ares.org/>`__
 - `libcurl <https://curl.haxx.se/>`__
+- `libmariadb <https://mariadb.org/>`__
 - `libpq <https://www.postgresql.org/>`__
 - `libsodium <https://www.libsodium.org/>`__
 - `liburing <https://github.com/axboe/liburing>`__

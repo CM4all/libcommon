@@ -38,6 +38,7 @@ jobs:
             libsystemd-dev \
             libdbus-1-dev \
             libcap-dev \
+            libmariadb-dev \
             libseccomp-dev \
             libsodium-dev \
             libssl-dev \
@@ -56,6 +57,7 @@ jobs:
              -Dcares=enabled \
              -Dcurl=enabled \
              -Dlua=enabled \
+             -Dmariadb=enabled \
              -Dnettle=enabled \
              -Dpcre=enabled \
              -Dpg=enabled \
