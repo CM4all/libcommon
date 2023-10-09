@@ -762,9 +762,9 @@ BufferedSocket::Read() noexcept
 }
 
 ssize_t
-BufferedSocket::Write(const void *data, std::size_t length) noexcept
+BufferedSocket::Write(std::span<const std::byte> src) noexcept
 {
-	ssize_t nbytes = base.Write(data, length);
+	ssize_t nbytes = base.Write(src);
 
 	if (nbytes < 0) [[unlikely]] {
 		if (const int e = errno; e == EAGAIN) [[likely]] {

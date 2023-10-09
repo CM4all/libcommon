@@ -592,8 +592,8 @@ public:
 	 * in special cases when you want to push data to the socket right
 	 * before closing it.
 	 */
-	ssize_t DirectWrite(const void *data, std::size_t length) noexcept {
-		return base.Write(data, length);
+	ssize_t DirectWrite(std::span<const std::byte> src) noexcept {
+		return base.Write(src);
 	}
 
 	/**
@@ -602,7 +602,7 @@ public:
 	 * @return the positive number of bytes written or a #write_result
 	 * code
 	 */
-	ssize_t Write(const void *data, std::size_t length) noexcept;
+	ssize_t Write(std::span<const std::byte> src) noexcept;
 
 	ssize_t WriteV(const struct iovec *v, std::size_t n) noexcept;
 

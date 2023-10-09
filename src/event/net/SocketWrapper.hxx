@@ -164,7 +164,7 @@ public:
 	[[gnu::pure]]
 	bool IsReadyForWriting() const noexcept;
 
-	ssize_t Write(const void *data, std::size_t length) noexcept;
+	ssize_t Write(std::span<const std::byte> src) noexcept;
 
 	ssize_t WriteV(const struct iovec *v, std::size_t n) noexcept;
 

@@ -127,11 +127,12 @@ SocketWrapper::IsReadyForWriting() const noexcept
 }
 
 ssize_t
-SocketWrapper::Write(const void *data, std::size_t length) noexcept
+SocketWrapper::Write(std::span<const std::byte> src) noexcept
 {
 	assert(IsValid());
 
-	return send(GetSocket().Get(), data, length, MSG_DONTWAIT|MSG_NOSIGNAL);
+	return send(GetSocket().Get(), src.data(), src.size(),
+		    MSG_DONTWAIT|MSG_NOSIGNAL);
 }
 
 ssize_t

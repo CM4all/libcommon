@@ -92,7 +92,7 @@ Control::OnBufferedWrite()
 	auto r = output_buffer.Read();
 	assert(!r.empty());
 
-	ssize_t nbytes = socket.Write(r.data(), r.size());
+	ssize_t nbytes = socket.Write(r);
 	if (nbytes <= 0) {
 		if (nbytes == WRITE_ERRNO)
 			throw MakeErrno("WAS control send error");
