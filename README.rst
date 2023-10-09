@@ -33,6 +33,7 @@ You need:
 
 Optional dependencies:
 
+- `c-ares <https://c-ares.org/>`__
 - `libcurl <https://curl.haxx.se/>`__
 - `libpq <https://www.postgresql.org/>`__
 - `libsodium <https://www.libsodium.org/>`__

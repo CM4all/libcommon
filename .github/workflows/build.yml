@@ -34,6 +34,7 @@ jobs:
             meson \
             libavahi-client-dev \
             libboost-dev \
+            libc-ares-dev \
             libsystemd-dev \
             libdbus-1-dev \
             libcap-dev \
