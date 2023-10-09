@@ -7,6 +7,8 @@
 #include <cstddef>
 #include <span>
 
+class FileDescriptor;
+
 class WriteBuffer {
 	friend class MultiWriteBuffer;
 
@@ -37,5 +39,5 @@ public:
 	/**
 	 * Throws std::system_error on error.
 	 */
-	Result Write(int fd);
+	Result Write(FileDescriptor fd);
 };
