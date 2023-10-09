@@ -61,16 +61,17 @@ try {
 
 void
 MultiUdpListener::Reply(SocketAddress address,
-			const void *data, std::size_t data_length)
+			std::span<const std::byte> payload)
 {
 	assert(event.IsDefined());
 
-	ssize_t nbytes = sendto(event.GetSocket().Get(), data, data_length,
+	ssize_t nbytes = sendto(event.GetSocket().Get(),
+				payload.data(), payload.size(),
 				MSG_DONTWAIT|MSG_NOSIGNAL,
 				address.GetAddress(), address.GetSize());
 	if (nbytes < 0) [[unlikely]]
 		throw MakeErrno("Failed to send UDP packet");
 
-	if ((std::size_t)nbytes != data_length) [[unlikely]]
+	if ((std::size_t)nbytes != payload.size()) [[unlikely]]
 		throw std::runtime_error("Short send");
 }

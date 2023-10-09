@@ -73,8 +73,7 @@ public:
 	 *
 	 * Throws std::runtime_error on error.
 	 */
-	void Reply(SocketAddress address,
-		   const void *data, std::size_t data_length);
+	void Reply(SocketAddress address, std::span<const std::byte> payload);
 
 private:
 	void EventCallback(unsigned events) noexcept;
