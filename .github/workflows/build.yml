@@ -1,0 +1,75 @@
+---
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - 'fuzzer/**'
+    branches:
+      - master
+  pull_request:
+    paths-ignore:
+      - 'fuzzer/**'
+    branches:
+      - master
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - id: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - id: cache-ccache
+        uses: hendrikmuhs/ccache-action@v1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            meson \
+            libavahi-client-dev \
+            libboost-dev \
+            libsystemd-dev \
+            libdbus-1-dev \
+            libcap-dev \
+            libseccomp-dev \
+            libssl-dev \
+            libcurl4-openssl-dev \
+            libpq-dev \
+            liburing-dev \
+            libluajit-5.1-dev \
+            nettle-dev \
+            libpcre2-dev
+            libgtest-dev
+
+      - name: Configure
+        run: |
+          meson setup \
+             -Davahi=enabled \
+             -Dcares=enabled \
+             -Dcurl=enabled \
+             -Dlua=enabled \
+             -Dnettle=enabled \
+             -Dpcre=enabled \
+             -Dpg=enabled \
+             -Dsodium=enabled \
+             -During=enabled \
+             -Dwas=enabled \
+             --force-fallback-for=fmt,libcm4all-was-protocol,libcm4all-was-simple \
+             output
+
+      - name: Build
+        run: ninja -C output -v
+
+      - name: Unit Tests
+        run: meson test -C output
+
+      - name: Dump Unit Test Log
+        if: ${{ failure() }}
+        continue-on-error: true
+        run: cat output/meson-logs/testlog.txt
