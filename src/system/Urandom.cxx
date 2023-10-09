@@ -8,9 +8,9 @@
 #include <sys/random.h>
 
 std::size_t
-UrandomRead(void *p, std::size_t size)
+UrandomRead(std::span<std::byte> dest)
 {
-	ssize_t nbytes = getrandom(p, size, 0);
+	ssize_t nbytes = getrandom(dest.data(), dest.size(), 0);
 	if (nbytes < 0)
 		throw MakeErrno("getrandom() failed");
 
@@ -18,9 +18,9 @@ UrandomRead(void *p, std::size_t size)
 }
 
 void
-UrandomFill(void *p, std::size_t size)
+UrandomFill(std::span<std::byte> dest)
 {
-	std::size_t nbytes = UrandomRead(p, size);
-	if (nbytes != size)
+	std::size_t nbytes = UrandomRead(dest);
+	if (nbytes != dest.size())
 		throw std::runtime_error("getrandom() was incomplete");
 }

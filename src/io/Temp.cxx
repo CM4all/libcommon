@@ -15,7 +15,7 @@ static StringBuffer<16>
 RandomFilename() noexcept
 {
 	std::array<std::byte, 7> r;
-	UrandomFill(&r, sizeof(r));
+	UrandomFill(r);
 
 	StringBuffer<16> name;
 	*HexFormat(name.data(), r) = 0;
