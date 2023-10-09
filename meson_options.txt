@@ -9,6 +9,8 @@ option('sodium', type: 'feature', description: 'libsodium support')
 option('uring', type: 'feature', description: 'enable io_uring (using liburing)')
 option('was', type: 'feature', description: 'WAS support')
 
+option('test', type: 'feature', description: 'Build unit tests')
+
 option('fuzzer', type: 'boolean', value: false,
        description: 'Build fuzzers')
 

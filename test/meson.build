@@ -1,3 +1,10 @@
+gtest_main_dep = dependency('gtest', main: true,
+                            required: get_option('test'),
+                            fallback: ['gtest', 'gtest_main_dep'])
+if not gtest_main_dep.found()
+  subdir_done()
+endif
+
 gtest_warning_flags = []
 if compiler.get_id() == 'gcc'
   gtest_warning_flags += [
@@ -14,7 +21,6 @@ if compiler.get_id() == 'clang' and compiler.version().version_compare('>=10')
   ]
 endif
 
-gtest_main_dep = dependency('gtest', main: true, fallback: ['gtest', 'gtest_main_dep'])
 gtest = declare_dependency(
   dependencies: [gtest_main_dep],
   compile_args: gtest_warning_flags + [
