@@ -64,6 +64,7 @@ jobs:
              -Dsodium=enabled \
              -During=enabled \
              -Dwas=enabled \
+             -Dtest=enabled \
              --force-fallback-for=fmt,libcm4all-was-protocol,libcm4all-was-simple \
              output
 
