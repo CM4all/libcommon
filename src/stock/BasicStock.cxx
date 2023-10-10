@@ -14,17 +14,42 @@ struct BasicStock::Create final
 {
 	BasicStock &stock;
 
-	StockGetHandler &handler;
+	/**
+	 * Request was canceled if this field is nullptr.
+	 */
+	StockGetHandler *handler;
 
 	CancellablePointer cancel_ptr;
 
+	const bool continue_on_cancel;
+
 	Create(BasicStock &_stock,
+	       bool _continue_on_cancel,
 	       StockGetHandler &_handler, CancellablePointer &_cancel_ptr) noexcept
-		:stock(_stock), handler(_handler)
+		:stock(_stock), handler(&_handler),
+		 continue_on_cancel(_continue_on_cancel)
 	{
 		_cancel_ptr = *this;
 	}
 
+	bool IsDetached() const noexcept {
+		return handler == nullptr;
+	}
+
+	void Detach() noexcept {
+		assert(handler != nullptr);
+
+		handler = nullptr;
+	}
+
+	void Attach(StockGetHandler &_handler, CancellablePointer &_cancel_ptr) noexcept {
+		assert(handler == nullptr);
+
+		handler = &_handler;
+		_cancel_ptr = *this;
+	}
+
+	// virtual methods from class StockGetHandler
 	[[noreturn]]
 	void OnStockItemReady(StockItem &) noexcept override {
 		// unreachable
@@ -37,7 +62,10 @@ struct BasicStock::Create final
 		std::terminate();
 	}
 
+	// virtual methods from class Cancellable
 	void Cancel() noexcept override {
+		assert(handler != nullptr);
+
 		stock.CreateCanceled(*this);
 	}
 };
@@ -147,12 +175,20 @@ BasicStock::BasicStock(EventLoop &event_loop, StockClass &_cls,
 
 BasicStock::~BasicStock() noexcept
 {
-	assert(create.empty());
-
 	/* must not delete the Stock when there are busy items left */
 	assert(busy.empty());
 
 	ClearIdle();
+
+	create.clear_and_dispose([](Create *c){
+		/* by now, all create operations must have been
+		   canceled */
+		assert(c->handler == nullptr);
+		assert(c->cancel_ptr);
+
+		c->cancel_ptr.Cancel();
+		delete c;
+	});
 }
 
 StockItem *
@@ -215,7 +251,16 @@ BasicStock::GetCreate(StockRequest request,
 		      StockGetHandler &get_handler,
 		      CancellablePointer &cancel_ptr) noexcept
 {
-	auto *c = new Create(*this, get_handler, cancel_ptr);
+	for (auto &c : create) {
+		if (c.IsDetached()) {
+			c.Attach(get_handler, cancel_ptr);
+			return;
+		}
+	}
+
+	auto *c = new Create(*this,
+			     cls.ShouldContinueOnCancel(request.get()),
+			     get_handler, cancel_ptr);
 	create.push_front(*c);
 
 	try {
@@ -230,13 +275,15 @@ BasicStock::ItemCreateSuccess(StockGetHandler &_handler,
 			      StockItem &item) noexcept
 {
 	auto &c = static_cast<Create &>(_handler);
-	auto &get_handler = c.handler;
+	auto *get_handler = c.handler;
 
 	DeleteCreate(c);
 
-	busy.push_front(item);
-
-	get_handler.OnStockItemReady(item);
+	if (get_handler != nullptr) {
+		busy.push_front(item);
+		get_handler->OnStockItemReady(item);
+	} else
+		InjectIdle(item);
 }
 
 void
@@ -244,18 +291,27 @@ BasicStock::ItemCreateError(StockGetHandler &_handler,
 			    std::exception_ptr ep) noexcept
 {
 	auto &c = static_cast<Create &>(_handler);
-	auto &get_handler = c.handler;
+	auto *get_handler = c.handler;
 
 	DeleteCreate(c);
 
 	CheckEmpty();
 
-	get_handler.OnStockItemError(ep);
+	if (get_handler != nullptr)
+		get_handler->OnStockItemError(ep);
+
+	// TODO what to do with the error if the request was canceled?
 }
 
 inline void
 BasicStock::CreateCanceled(Create &c) noexcept
 {
+	if (c.continue_on_cancel) {
+		// TOOD connect to waiting item?
+		c.Detach();
+		return;
+	}
+
 	DeleteCreate(c);
 	OnCreateCanceled();
 	CheckEmpty();

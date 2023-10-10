@@ -123,7 +123,6 @@ TEST(Stock, Basic)
 	StockItem *item, *second, *third;
 
 	Instance instance;
-
 	MyStockClass cls;
 	Stock stock(instance.event_loop, cls, "test", 3, 8,
 		    Event::Duration::zero());
@@ -286,4 +285,140 @@ TEST(Stock, Basic)
 	ASSERT_EQ(num_borrow, 2);
 	ASSERT_EQ(num_release, 2);
 	ASSERT_EQ(num_destroy, 5);
+}
+
+TEST(Stock, ContinueOnCancel)
+{
+	Instance instance;
+
+	struct CocStockClass final : StockClass, Cancellable {
+		MyStockItem *item = nullptr;
+		StockGetHandler *handler = nullptr;
+
+		unsigned n_create = 0;
+
+		~CocStockClass() noexcept {
+			assert(item == nullptr);
+			assert(handler == nullptr);
+		}
+
+		void Finish() noexcept {
+			assert(item != nullptr);
+			assert(handler != nullptr);
+
+			std::exchange(item, nullptr)->InvokeCreateSuccess(*std::exchange(handler, nullptr));
+		}
+
+		/* virtual methods from class StockClass */
+		void Create(CreateStockItem c,
+			    [[maybe_unused]] StockRequest request,
+			    StockGetHandler &_handler,
+			    CancellablePointer &cancel_ptr) override {
+			assert(item == nullptr);
+			assert(handler == nullptr);
+
+			++n_create;
+
+			handler = &_handler;
+			item = new MyStockItem(c);
+			cancel_ptr = *this;
+		}
+
+		bool ShouldContinueOnCancel([[maybe_unused]] const void *request) const noexcept override {
+			return true;
+		}
+
+		/* virtual methods from class Cancellable */
+		void Cancel() noexcept {
+			assert(item != nullptr);
+			assert(handler != nullptr);
+
+			handler = nullptr;
+			delete item;
+			item = nullptr;
+		}
+	} cls;
+
+	Stock stock(instance.event_loop, cls, "test", 3, 8,
+		    Event::Duration::zero());
+
+	MyStockGetHandler handler;
+	CancellablePointer cancel_ptr;
+
+	// get one, finish, return
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 1);
+	EXPECT_FALSE(handler.got_item);
+
+	cls.Finish();
+
+	EXPECT_EQ(cls.n_create, 1);
+	EXPECT_TRUE(handler.got_item);
+
+	stock.Put(*handler.last_item, PutAction::DESTROY);
+
+	// get one, cancel, finish, get again (immediately)
+
+	cls.item = nullptr;
+	cls.handler = nullptr;
+	handler.got_item = false;
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 2);
+	EXPECT_FALSE(handler.got_item);
+
+	cancel_ptr.Cancel();
+
+	cls.Finish();
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 2);
+	EXPECT_TRUE(handler.got_item);
+
+	stock.Put(*handler.last_item, PutAction::DESTROY);
+
+	// get one, cancel, get again, finish
+
+	cls.item = nullptr;
+	cls.handler = nullptr;
+	handler.got_item = false;
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 3);
+	EXPECT_FALSE(handler.got_item);
+
+	cancel_ptr.Cancel();
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 3);
+	EXPECT_FALSE(handler.got_item);
+
+	cls.Finish();
+
+	EXPECT_EQ(cls.n_create, 3);
+	EXPECT_TRUE(handler.got_item);
+
+	stock.Put(*handler.last_item, PutAction::DESTROY);
+
+	// get one, cancel and leave (destructor must cancel it)
+
+	cls.item = nullptr;
+	cls.handler = nullptr;
+	handler.got_item = false;
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 4);
+	EXPECT_FALSE(handler.got_item);
+
+	cancel_ptr.Cancel();
+
+	EXPECT_EQ(cls.n_create, 4);
+	EXPECT_FALSE(handler.got_item);
 }
