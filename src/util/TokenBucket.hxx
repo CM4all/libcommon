@@ -15,7 +15,7 @@ class TokenBucket {
 	double zero_time = 0;
 
 public:
-	void Reset() noexcept {
+	constexpr void Reset() noexcept {
 		zero_time = 0;
 	}
 
@@ -23,7 +23,7 @@ public:
 	 * @return true if the given transmission is conforming, false
 	 * to discard it
 	 */
-	bool Check(double now, double rate, double burst, double size) noexcept {
+	constexpr bool Check(double now, double rate, double burst, double size) noexcept {
 		double available = std::min((now - zero_time) * rate, burst);
 		if (available < size)
 			return false;
