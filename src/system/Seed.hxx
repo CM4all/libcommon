@@ -19,7 +19,7 @@ std::seed_seq
 GenerateSeedSeq()
 {
 	uint32_t buffer[Engine::state_size * Engine::word_size / 32];
-	std::size_t nbytes = UrandomRead(buffer, sizeof(buffer));
+	std::size_t nbytes = UrandomRead(std::as_writable_bytes(std::span{buffer}));
 	std::size_t n = nbytes / sizeof(buffer[0]);
 	return std::seed_seq(buffer, buffer + n);
 }
