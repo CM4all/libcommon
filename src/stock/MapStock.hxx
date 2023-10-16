@@ -11,6 +11,7 @@
 #include "util/StringAPI.hxx"
 
 #include <cassert>
+#include <concepts> // for std::predicate
 #include <cstddef>
 
 /**
@@ -106,8 +107,7 @@ public:
 	/**
 	 * @see Stock::FadeIf()
 	 */
-	template<typename P>
-	void FadeIf(P &&predicate) noexcept {
+	void FadeIf(std::predicate<const StockItem &> auto predicate) noexcept {
 		map.for_each([&predicate](auto &i){
 			i.stock.FadeIf(predicate);
 		});

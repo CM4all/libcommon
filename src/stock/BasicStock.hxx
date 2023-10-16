@@ -13,6 +13,7 @@
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveList.hxx"
 
+#include <concepts> // for std::predicate
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -128,13 +129,12 @@ public:
 	 * Destroy all matching idle items and don't reuse any of the
 	 * matching busy items.
 	 */
-	template<typename P>
-	void FadeIf(P &&predicate) noexcept {
+	void FadeIf(std::predicate<const StockItem &> auto predicate) noexcept {
 		for (auto &i : busy)
 			if (predicate(i))
 				i.Fade();
 
-		ClearIdleIf(std::forward<P>(predicate));
+		ClearIdleIf(predicate);
 
 		ScheduleCheckEmpty();
 		// TODO: restart the "num_create" list?
@@ -174,9 +174,8 @@ private:
 
 	void ClearIdle() noexcept;
 
-	template<typename P>
-	void ClearIdleIf(P &&predicate) noexcept {
-		idle.remove_and_dispose_if(std::forward<P>(predicate),
+	void ClearIdleIf(std::predicate<const StockItem &> auto predicate) noexcept {
+		idle.remove_and_dispose_if(predicate,
 					   DeleteDisposer());
 
 		if (idle.size() <= max_idle)

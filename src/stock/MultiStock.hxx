@@ -14,6 +14,7 @@
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
 
+#include <concepts> // for std::predicate
 #include <string>
 
 class CancellablePointer;
@@ -106,8 +107,7 @@ class MultiStock {
 
 		void Fade() noexcept;
 
-		template<typename P>
-		void FadeIf(P &&predicate) noexcept {
+		void FadeIf(std::predicate<const StockItem &> auto predicate) noexcept {
 			if (predicate(shared_item))
 				Fade();
 		}
@@ -246,8 +246,7 @@ class MultiStock {
 				i.Fade();
 		}
 
-		template<typename P>
-		void FadeIf(P &&predicate) noexcept {
+		void FadeIf(std::predicate<const StockItem &> auto predicate) noexcept {
 			for (auto &i : items)
 				i.FadeIf(predicate);
 		}
@@ -388,8 +387,7 @@ public:
 	/**
 	 * @see Stock::FadeIf()
 	 */
-	template<typename P>
-	void FadeIf(P &&predicate) noexcept {
+	void FadeIf(std::predicate<const StockItem &> auto predicate) noexcept {
 		map.for_each([&predicate](auto &i){
 			i.FadeIf(predicate);
 		});
