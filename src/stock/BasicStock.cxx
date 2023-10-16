@@ -129,10 +129,6 @@ BasicStock::~BasicStock() noexcept
 	/* must not delete the Stock when there are busy items left */
 	assert(busy.empty());
 
-	empty_event.Cancel();
-	cleanup_event.Cancel();
-	clear_event.Cancel();
-
 	ClearIdle();
 }
 
