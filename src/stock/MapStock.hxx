@@ -6,7 +6,6 @@
 
 #include "Stock.hxx"
 #include "event/Chrono.hxx"
-#include "util/Cast.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/StringAPI.hxx"
 
@@ -19,21 +18,12 @@
  * URI.
  */
 class StockMap : StockHandler {
-	struct Item : IntrusiveHashSetHook<IntrusiveHookMode::NORMAL> {
-		Stock stock;
-
+	struct Item final : IntrusiveHashSetHook<IntrusiveHookMode::NORMAL>, Stock {
 		bool sticky = false;
 
 		template<typename... Args>
-		explicit Item(Args&&... args) noexcept:stock(std::forward<Args>(args)...) {}
-
-		static constexpr Item &Cast(Stock &s) noexcept {
-			return ContainerCast(s, &Item::stock);
-		}
-
-		const char *GetKey() const noexcept {
-			return stock.GetName();
-		}
+		explicit Item(Args&&... args) noexcept
+			:Stock(std::forward<Args>(args)...) {}
 
 		struct Hash {
 			[[gnu::pure]]
@@ -48,7 +38,7 @@ class StockMap : StockHandler {
 		struct GetKeyFunction {
 			[[gnu::pure]]
 			const char *operator()(const Item &item) const noexcept {
-				return item.GetKey();
+				return item.GetName();
 			}
 		};
 	};
@@ -100,7 +90,7 @@ public:
 	 */
 	void FadeAll() noexcept {
 		map.for_each([](auto &i){
-			i.stock.FadeAll();
+			i.FadeAll();
 		});
 	}
 
@@ -109,7 +99,7 @@ public:
 	 */
 	void FadeIf(std::predicate<const StockItem &> auto predicate) noexcept {
 		map.for_each([&predicate](auto &i){
-			i.stock.FadeIf(predicate);
+			i.FadeIf(predicate);
 		});
 	}
 
@@ -118,7 +108,7 @@ public:
 	 */
 	void AddStats(StockStats &data) const noexcept {
 		map.for_each([&data](auto &i){
-			i.stock.AddStats(data);
+			i.AddStats(data);
 		});
 	}
 

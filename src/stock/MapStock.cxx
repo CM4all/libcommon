@@ -48,7 +48,7 @@ StockMap::Erase(Item &item) noexcept
 void
 StockMap::OnStockEmpty(BasicStock &stock) noexcept
 {
-	auto &item = Item::Cast(static_cast<Stock &>(stock));
+	auto &item = static_cast<Item &>(stock);
 	if (item.sticky)
 		return;
 
@@ -67,15 +67,15 @@ StockMap::GetStock(const char *uri, void *request) noexcept
 				      GetClearInterval(request),
 				      this);
 		map.insert_commit(position, *item);
-		return item->stock;
+		return *item;
 	} else
-		return position->stock;
+		return *position;
 }
 
 void
 StockMap::SetSticky(Stock &stock, bool sticky) noexcept
 {
-	auto &item = Item::Cast(stock);
+	auto &item = static_cast<Item &>(stock);
 	if (!sticky && stock.IsEmpty()) {
 		Erase(item);
 		return;
