@@ -47,10 +47,25 @@ private:
 
 	using ItemList = StockItem::List;
 
+	/**
+	 * All items that are currently idle.  Once an item gets
+	 * borrowed, it gets moved to #busy.
+	 */
 	ItemList idle;
 
+	/**
+	 * All items that are currently busy (i.e. borrowed).  It will
+	 * eventually be returned by calling Put(), which either moves
+	 * it back to #idle or destroys it.
+	 */
 	ItemList busy;
 
+	/**
+	 * The number of items that are currently being created.  We
+	 * keep track of this because we need to know whether this
+	 * stock is empty (see OnEmpty()) and whether this stock is
+	 * full (see Stock::IsFull()).
+	 */
 	std::size_t num_create = 0;
 
 protected:
