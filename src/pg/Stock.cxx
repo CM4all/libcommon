@@ -83,7 +83,7 @@ private:
 	void Cancel() noexcept override {
 		assert(!initialized || defer_initialized.IsPending());
 
-		InvokeCreateAborted();
+		delete this;
 	}
 
 	/* virtual methods from class AsyncConnectionHandler */

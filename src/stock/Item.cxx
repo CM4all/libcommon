@@ -18,12 +18,6 @@ CreateStockItem::InvokeCreateError(StockGetHandler &handler,
 	stock.ItemCreateError(handler, ep);
 }
 
-void
-CreateStockItem::InvokeCreateAborted() noexcept
-{
-	stock.ItemCreateAborted();
-}
-
 StockItem::~StockItem() noexcept
 {
 }
@@ -51,12 +45,6 @@ StockItem::InvokeCreateError(StockGetHandler &handler,
 			     std::exception_ptr ep) noexcept
 {
 	stock.ItemCreateError(*this, handler, ep);
-}
-
-void
-StockItem::InvokeCreateAborted() noexcept
-{
-	stock.ItemCreateAborted(*this);
 }
 
 void

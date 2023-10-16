@@ -94,13 +94,14 @@ public:
 
 	void ItemCreateError(StockGetHandler &get_handler,
 			     std::exception_ptr ep) noexcept override;
-	void ItemCreateAborted() noexcept override;
 
 	void ItemUncleanFlagCleared() noexcept override {
 		ScheduleRetryWaiting();
 	}
 
 private:
+	void OnCreateCanceled() noexcept override;
+
 	[[gnu::pure]]
 	WaitingList::iterator PickWaiting() noexcept;
 

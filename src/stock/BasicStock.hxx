@@ -60,13 +60,17 @@ private:
 	 */
 	ItemList busy;
 
+	struct Create;
+
 	/**
-	 * The number of items that are currently being created.  We
-	 * keep track of this because we need to know whether this
-	 * stock is empty (see OnEmpty()) and whether this stock is
-	 * full (see Stock::IsFull()).
+	 * The items that are currently being created.  We keep track
+	 * of this because we need to know whether this stock is empty
+	 * (see OnEmpty()) and whether this stock is full (see
+	 * Stock::IsFull()).
 	 */
-	std::size_t num_create = 0;
+	IntrusiveList<Create,
+		IntrusiveListBaseHookTraits<Create>,
+		IntrusiveListOptions{.constant_time_size = true}> create;
 
 protected:
 	bool may_clear = false;
@@ -104,7 +108,7 @@ public:
 	 */
 	[[gnu::pure]]
 	bool IsEmpty() const noexcept {
-		return idle.empty() && busy.empty() && num_create == 0;
+		return idle.empty() && busy.empty() && create.empty();
 	}
 
 	/**
@@ -133,7 +137,7 @@ public:
 		ClearIdleIf(predicate);
 
 		CheckEmpty();
-		// TODO: restart the "num_create" list?
+		// TODO: restart the "create" list?
 	}
 
 	/**
@@ -149,12 +153,14 @@ protected:
 
 	/**
 	 * Determine the number of "active" items, i.e. the busy items
-	 * and the ones being created (#num_create).  This number is
-	 * used to compare with the configured #limit.
+	 * and the ones being created (#create).  This number is used
+	 * to compare with the configured #limit.
 	 */
 	std::size_t GetActiveCount() const noexcept {
-		return busy.size() + num_create;
+		return busy.size() + create.size();
 	}
+
+	virtual void OnCreateCanceled() noexcept {}
 
 	/**
 	 * The stock has become empty.  It is not safe to delete it
@@ -225,9 +231,11 @@ public:
 			       StockItem &item) noexcept override;
 	void ItemCreateError(StockGetHandler &get_handler,
 			     std::exception_ptr ep) noexcept override;
-	void ItemCreateAborted() noexcept override;
 
 private:
+	void DeleteCreate(Create &c) noexcept;
+	void CreateCanceled(Create &c) noexcept;
+
 	void ScheduleCleanup() noexcept {
 		cleanup_event.Schedule(std::chrono::seconds(20));
 	}

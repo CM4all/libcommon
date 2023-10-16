@@ -33,7 +33,5 @@ public:
 			     std::exception_ptr ep) noexcept;
 	virtual void ItemCreateError(StockGetHandler &get_handler,
 				     std::exception_ptr ep) noexcept = 0;
-	void ItemCreateAborted(StockItem &item) noexcept;
-	virtual void ItemCreateAborted() noexcept = 0;
 	virtual void ItemUncleanFlagCleared() noexcept {}
 };

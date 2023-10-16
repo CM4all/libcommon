@@ -27,12 +27,6 @@ struct CreateStockItem {
 	 */
 	void InvokeCreateError(StockGetHandler &handler,
 			       std::exception_ptr ep) noexcept;
-
-	/**
-	 * Announce that the creation of this item has been aborted by the
-	 * caller.
-	 */
-	void InvokeCreateAborted() noexcept;
 };
 
 class StockItem
@@ -123,12 +117,6 @@ public:
 	 */
 	void InvokeCreateError(StockGetHandler &handler,
 			       std::exception_ptr ep) noexcept;
-
-	/**
-	 * Announce that the creation of this item has been aborted by the
-	 * caller.
-	 */
-	void InvokeCreateAborted() noexcept;
 
 	/**
 	 * Announce that the item has been disconnected by the peer while

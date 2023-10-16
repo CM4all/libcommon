@@ -241,12 +241,6 @@ MultiStock::OuterItem::ItemCreateError(StockGetHandler &get_handler,
 }
 
 void
-MultiStock::OuterItem::ItemCreateAborted() noexcept
-{
-	// unreachable
-}
-
-void
 MultiStock::OuterItem::ItemUncleanFlagCleared() noexcept
 {
 	parent.OnLeaseReleased(*this);
@@ -543,12 +537,6 @@ MultiStock::MapItem::ItemCreateError(StockGetHandler &get_handler,
 				     std::exception_ptr ep) noexcept
 {
 	get_handler.OnStockItemError(ep);
-}
-
-void
-MultiStock::MapItem::ItemCreateAborted() noexcept
-{
-	assert(!get_cancel_ptr);
 }
 
 inline void

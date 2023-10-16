@@ -9,6 +9,39 @@
 
 #include <cassert>
 
+struct BasicStock::Create final
+	: IntrusiveListHook<>, StockGetHandler, Cancellable
+{
+	BasicStock &stock;
+
+	StockGetHandler &handler;
+
+	CancellablePointer cancel_ptr;
+
+	Create(BasicStock &_stock,
+	       StockGetHandler &_handler, CancellablePointer &_cancel_ptr) noexcept
+		:stock(_stock), handler(_handler)
+	{
+		_cancel_ptr = *this;
+	}
+
+	[[noreturn]]
+	void OnStockItemReady(StockItem &) noexcept override {
+		// unreachable
+		std::terminate();
+	}
+
+	[[noreturn]]
+	void OnStockItemError(std::exception_ptr) noexcept override {
+		// unreachable
+		std::terminate();
+	}
+
+	void Cancel() noexcept override {
+		stock.CreateCanceled(*this);
+	}
+};
+
 void
 BasicStock::FadeAll() noexcept
 {
@@ -114,7 +147,7 @@ BasicStock::BasicStock(EventLoop &event_loop, StockClass &_cls,
 
 BasicStock::~BasicStock() noexcept
 {
-	assert(num_create == 0);
+	assert(create.empty());
 
 	/* must not delete the Stock when there are busy items left */
 	assert(busy.empty());
@@ -182,22 +215,24 @@ BasicStock::GetCreate(StockRequest request,
 		      StockGetHandler &get_handler,
 		      CancellablePointer &cancel_ptr) noexcept
 {
-	++num_create;
+	auto *c = new Create(*this, get_handler, cancel_ptr);
+	create.push_front(*c);
 
 	try {
-		cls.Create({*this}, std::move(request),
-			   get_handler, cancel_ptr);
+		cls.Create({*this}, std::move(request), *c, c->cancel_ptr);
 	} catch (...) {
-		ItemCreateError(get_handler, std::current_exception());
+		ItemCreateError(*c, std::current_exception());
 	}
 }
 
 void
-BasicStock::ItemCreateSuccess(StockGetHandler &get_handler,
+BasicStock::ItemCreateSuccess(StockGetHandler &_handler,
 			      StockItem &item) noexcept
 {
-	assert(num_create > 0);
-	--num_create;
+	auto &c = static_cast<Create &>(_handler);
+	auto &get_handler = c.handler;
+
+	DeleteCreate(c);
 
 	busy.push_front(item);
 
@@ -205,23 +240,24 @@ BasicStock::ItemCreateSuccess(StockGetHandler &get_handler,
 }
 
 void
-BasicStock::ItemCreateError(StockGetHandler &get_handler,
+BasicStock::ItemCreateError(StockGetHandler &_handler,
 			    std::exception_ptr ep) noexcept
 {
-	assert(num_create > 0);
-	--num_create;
+	auto &c = static_cast<Create &>(_handler);
+	auto &get_handler = c.handler;
+
+	DeleteCreate(c);
 
 	CheckEmpty();
 
 	get_handler.OnStockItemError(ep);
 }
 
-void
-BasicStock::ItemCreateAborted() noexcept
+inline void
+BasicStock::CreateCanceled(Create &c) noexcept
 {
-	assert(num_create > 0);
-	--num_create;
-
+	DeleteCreate(c);
+	OnCreateCanceled();
 	CheckEmpty();
 }
 
@@ -287,4 +323,14 @@ BasicStock::ItemBusyDisconnect(StockItem &item) noexcept
 
 	/* this item will be destroyed by Put() */
 	item.Fade();
+}
+
+
+inline void
+BasicStock::DeleteCreate(Create &c) noexcept
+{
+	assert(!create.empty());
+
+	create.erase_and_dispose(create.iterator_to(c),
+				 DeleteDisposer{});
 }

@@ -149,7 +149,6 @@ class MultiStock {
 				       StockItem &item) noexcept override;
 		void ItemCreateError(StockGetHandler &get_handler,
 				     std::exception_ptr ep) noexcept override;
-		void ItemCreateAborted() noexcept override;
 		void ItemUncleanFlagCleared() noexcept override;
 	};
 
@@ -293,7 +292,6 @@ class MultiStock {
 				       StockItem &item) noexcept override;
 		void ItemCreateError(StockGetHandler &get_handler,
 				     std::exception_ptr ep) noexcept override;
-		void ItemCreateAborted() noexcept override;
 
 	public:
 		struct Hash {

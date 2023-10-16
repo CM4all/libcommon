@@ -308,7 +308,6 @@ MyStockClass::DeferredRequest::OnDeferred() noexcept
 void
 MyStockClass::DeferredRequest::Cancel() noexcept
 {
-	c.InvokeCreateAborted();
 	delete this;
 }
 

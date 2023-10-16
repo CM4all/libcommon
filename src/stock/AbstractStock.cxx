@@ -12,10 +12,3 @@ AbstractStock::ItemCreateError(StockItem &item, StockGetHandler &get_handler,
 	ItemCreateError(get_handler, ep);
 	delete &item;
 }
-
-void
-AbstractStock::ItemCreateAborted(StockItem &item) noexcept
-{
-	ItemCreateAborted();
-	delete &item;
-}

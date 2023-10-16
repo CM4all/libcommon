@@ -223,9 +223,8 @@ Stock::ItemCreateError(StockGetHandler &get_handler,
 }
 
 void
-Stock::ItemCreateAborted() noexcept
+Stock::OnCreateCanceled() noexcept
 {
-	BasicStock::ItemCreateAborted();
 	ScheduleRetryWaiting();
 }
 
