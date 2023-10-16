@@ -9,7 +9,6 @@
 #include "Request.hxx"
 #include "Stats.hxx"
 #include "event/CoarseTimerEvent.hxx"
-#include "event/DeferEvent.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveList.hxx"
 
@@ -22,15 +21,6 @@ class CancellablePointer;
 class BasicStock;
 class StockClass;
 class StockGetHandler;
-
-class StockHandler {
-public:
-	/**
-	 * The stock has become empty.  It is safe to delete it from
-	 * within this method.
-	 */
-	virtual void OnStockEmpty(BasicStock &stock) noexcept = 0;
-};
 
 /**
  * Objects in stock.  May be used for connection pooling.
@@ -51,14 +41,6 @@ private:
 	const std::size_t max_idle;
 
 	const Event::Duration clear_interval;
-
-	StockHandler *const handler;
-
-	/**
-	 * This event is used to move the "empty" check out of the current
-	 * stack, to invoke the handler method in a safe environment.
-	 */
-	DeferEvent empty_event;
 
 	CoarseTimerEvent cleanup_event;
 	CoarseTimerEvent clear_event;
@@ -82,8 +64,7 @@ public:
 	 */
 	BasicStock(EventLoop &event_loop, StockClass &cls,
 		   const char *name, std::size_t max_idle,
-		   Event::Duration _clear_interval,
-		   StockHandler *handler=nullptr) noexcept;
+		   Event::Duration _clear_interval) noexcept;
 
 	~BasicStock() noexcept;
 
@@ -91,7 +72,7 @@ public:
 	BasicStock &operator=(const BasicStock &) = delete;
 
 	EventLoop &GetEventLoop() const noexcept override {
-		return empty_event.GetEventLoop();
+		return cleanup_event.GetEventLoop();
 	}
 
 	StockClass &GetClass() noexcept {
@@ -136,7 +117,7 @@ public:
 
 		ClearIdleIf(predicate);
 
-		ScheduleCheckEmpty();
+		CheckEmpty();
 		// TODO: restart the "num_create" list?
 	}
 
@@ -160,12 +141,17 @@ protected:
 		return busy.size() + num_create;
 	}
 
+	/**
+	 * The stock has become empty.  It is not safe to delete it
+	 * from within this method.
+	 */
+	virtual void OnEmpty() noexcept {}
+
 private:
 	/**
 	 * Check if the stock has become empty, and invoke the handler.
 	 */
 	void CheckEmpty() noexcept;
-	void ScheduleCheckEmpty() noexcept;
 
 	void ScheduleClear() noexcept {
 		if (clear_interval > Event::Duration::zero())

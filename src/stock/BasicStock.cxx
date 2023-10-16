@@ -16,7 +16,7 @@ BasicStock::FadeAll() noexcept
 		i.Fade();
 
 	ClearIdle();
-	ScheduleCheckEmpty();
+	CheckEmpty();
 
 	// TODO: restart the "num_create" list?
 }
@@ -38,15 +38,8 @@ BasicStock::Shutdown() noexcept
 void
 BasicStock::CheckEmpty() noexcept
 {
-	if (IsEmpty() && handler != nullptr)
-		handler->OnStockEmpty(*this);
-}
-
-void
-BasicStock::ScheduleCheckEmpty() noexcept
-{
-	if (IsEmpty() && handler != nullptr)
-		empty_event.Schedule();
+	if (IsEmpty())
+		OnEmpty();
 }
 
 
@@ -106,14 +99,11 @@ BasicStock::ClearEventCallback() noexcept
 
 BasicStock::BasicStock(EventLoop &event_loop, StockClass &_cls,
 		       const char *_name, std::size_t _max_idle,
-		       Event::Duration _clear_interval,
-		       StockHandler *_handler) noexcept
+		       Event::Duration _clear_interval) noexcept
 	:cls(_cls),
 	 name(_name),
 	 max_idle(_max_idle),
 	 clear_interval(_clear_interval),
-	 handler(_handler),
-	 empty_event(event_loop, BIND_THIS_METHOD(CheckEmpty)),
 	 cleanup_event(event_loop, BIND_THIS_METHOD(CleanupEventCallback)),
 	 clear_event(event_loop, BIND_THIS_METHOD(ClearEventCallback))
 {
@@ -165,7 +155,7 @@ BasicStock::GetIdle() noexcept
 		delete &item;
 	}
 
-	ScheduleCheckEmpty();
+	CheckEmpty();
 	return nullptr;
 }
 
@@ -221,7 +211,7 @@ BasicStock::ItemCreateError(StockGetHandler &get_handler,
 	assert(num_create > 0);
 	--num_create;
 
-	ScheduleCheckEmpty();
+	CheckEmpty();
 
 	get_handler.OnStockItemError(ep);
 }
@@ -232,7 +222,7 @@ BasicStock::ItemCreateAborted() noexcept
 	assert(num_create > 0);
 	--num_create;
 
-	ScheduleCheckEmpty();
+	CheckEmpty();
 }
 
 PutAction
@@ -250,7 +240,7 @@ BasicStock::Put(StockItem &item, PutAction action) noexcept
 	if (action == PutAction::DESTROY ||
 	    item.IsFading() || !item.Release()) {
 		delete &item;
-		ScheduleCheckEmpty();
+		CheckEmpty();
 		return PutAction::DESTROY;
 	} else {
 		InjectIdle(item);
@@ -287,7 +277,7 @@ BasicStock::ItemIdleDisconnect(StockItem &item) noexcept
 		UnscheduleCleanup();
 
 	delete &item;
-	ScheduleCheckEmpty();
+	CheckEmpty();
 }
 
 void

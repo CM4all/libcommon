@@ -7,6 +7,13 @@
 #include "util/DeleteDisposer.hxx"
 #include "util/StringAPI.hxx"
 
+void
+StockMap::Item::OnDeferredEmpty() noexcept
+{
+	if (IsEmpty() && !sticky)
+		map.Erase(*this);
+}
+
 inline size_t
 StockMap::Item::Hash::operator()(const char *key) const noexcept
 {
@@ -45,27 +52,16 @@ StockMap::Erase(Item &item) noexcept
 	map.erase_and_dispose(i, DeleteDisposer());
 }
 
-void
-StockMap::OnStockEmpty(BasicStock &stock) noexcept
-{
-	auto &item = static_cast<Item &>(stock);
-	if (item.sticky)
-		return;
-
-	Erase(item);
-}
-
 Stock &
 StockMap::GetStock(const char *uri, void *request) noexcept
 {
 	auto [position, inserted] = map.insert_check(uri);
 	if (inserted) {
-		auto *item = new Item(event_loop, cls,
+		auto *item = new Item(*this, event_loop, cls,
 				      uri,
 				      GetLimit(request, limit),
 				      max_idle,
-				      GetClearInterval(request),
-				      this);
+				      GetClearInterval(request));
 		map.insert_commit(position, *item);
 		return *item;
 	} else

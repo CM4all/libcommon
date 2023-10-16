@@ -6,10 +6,9 @@
 
 #include "Stock.hxx"
 #include "event/Chrono.hxx"
+#include "event/DeferEvent.hxx"
 #include "util/IntrusiveHashSet.hxx"
-#include "util/StringAPI.hxx"
 
-#include <cassert>
 #include <concepts> // for std::predicate
 #include <cstddef>
 
@@ -17,14 +16,31 @@
  * A hash table of any number of Stock objects, each with a different
  * URI.
  */
-class StockMap : StockHandler {
+class StockMap {
 	struct Item final : IntrusiveHashSetHook<IntrusiveHookMode::NORMAL>, Stock {
+		StockMap &map;
+
+		DeferEvent defer_empty{GetEventLoop(), BIND_THIS_METHOD(OnDeferredEmpty)};
+
 		bool sticky = false;
+
+		template<typename... Args>
+		explicit Item(StockMap &_map, Args&&... args) noexcept
+			:Stock(std::forward<Args>(args)...), map(_map) {}
 
 		template<typename... Args>
 		explicit Item(Args&&... args) noexcept
 			:Stock(std::forward<Args>(args)...) {}
 
+	protected:
+		virtual void OnEmpty() noexcept override {
+			defer_empty.Schedule();
+		}
+
+	private:
+		void OnDeferredEmpty() noexcept;
+
+	public:
 		struct Hash {
 			[[gnu::pure]]
 			size_t operator()(const char *key) const noexcept;
@@ -158,8 +174,4 @@ protected:
 	virtual Event::Duration GetClearInterval([[maybe_unused]] const void *request) const noexcept {
 		return clear_interval;
 	}
-
-private:
-	/* virtual methods from class StockHandler */
-	void OnStockEmpty(BasicStock &stock) noexcept override;
 };

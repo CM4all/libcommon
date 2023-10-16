@@ -52,8 +52,7 @@ public:
 	 */
 	Stock(EventLoop &event_loop, StockClass &cls,
 	      const char *name, std::size_t limit, std::size_t max_idle,
-	      Event::Duration _clear_interval,
-	      StockHandler *handler=nullptr) noexcept;
+	      Event::Duration _clear_interval) noexcept;
 
 	~Stock() noexcept;
 

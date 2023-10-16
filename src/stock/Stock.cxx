@@ -139,12 +139,10 @@ Stock::ScheduleRetryWaiting() noexcept
 
 Stock::Stock(EventLoop &event_loop, StockClass &_cls,
 	     const char *_name, std::size_t _limit, std::size_t _max_idle,
-	     Event::Duration _clear_interval,
-	     StockHandler *_handler) noexcept
+	     Event::Duration _clear_interval) noexcept
 	:BasicStock(event_loop, _cls, _name,
 		    _max_idle,
-		    _clear_interval,
-		    _handler),
+		    _clear_interval),
 	 limit(_limit),
 	 retry_event(event_loop, BIND_THIS_METHOD(RetryWaiting))
 {
