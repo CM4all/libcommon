@@ -329,7 +329,7 @@ TEST(Stock, ContinueOnCancel)
 		}
 
 		/* virtual methods from class Cancellable */
-		void Cancel() noexcept {
+		void Cancel() noexcept override {
 			assert(item != nullptr);
 			assert(handler != nullptr);
 
