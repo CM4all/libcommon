@@ -118,9 +118,11 @@ Stock::RetryWaiting() noexcept
 	     --i) {
 		auto &w = waiting.pop_front();
 
-		GetCreate(std::move(w.request),
-			  w.handler,
-			  w.cancel_ptr);
+		if (!GetCanceled(w.handler, w.cancel_ptr))
+			GetCreate(std::move(w.request),
+				  w.handler,
+				  w.cancel_ptr);
+
 		w.Destroy();
 	}
 }
@@ -157,7 +159,8 @@ Stock::Get(StockRequest request,
 {
 	may_clear = false;
 
-	if (GetIdle(request, get_handler))
+	if (GetIdle(request, get_handler) ||
+	    GetCanceled(get_handler, cancel_ptr))
 		return;
 
 	if (IsFull()) {

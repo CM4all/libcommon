@@ -246,18 +246,25 @@ BasicStock::GetIdle(StockRequest &request,
 	return true;
 }
 
+bool
+BasicStock::GetCanceled(StockGetHandler &get_handler,
+			CancellablePointer &cancel_ptr) noexcept
+{
+	for (auto &c : create) {
+		if (c.IsDetached()) {
+			c.Attach(get_handler, cancel_ptr);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void
 BasicStock::GetCreate(StockRequest request,
 		      StockGetHandler &get_handler,
 		      CancellablePointer &cancel_ptr) noexcept
 {
-	for (auto &c : create) {
-		if (c.IsDetached()) {
-			c.Attach(get_handler, cancel_ptr);
-			return;
-		}
-	}
-
 	auto *c = new Create(*this,
 			     cls.ShouldContinueOnCancel(request.get()),
 			     get_handler, cancel_ptr);

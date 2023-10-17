@@ -205,6 +205,15 @@ public:
 	bool GetIdle(StockRequest &request,
 		     StockGetHandler &handler) noexcept;
 
+	/**
+	 * Attach the handler to a canceled create request.
+	 *
+	 * @return true on success, false if no canceled create
+	 * requests exists
+	 */
+	bool GetCanceled(StockGetHandler &get_handler,
+			 CancellablePointer &cancel_ptr) noexcept;
+
 	void GetCreate(StockRequest request,
 		       StockGetHandler &get_handler,
 		       CancellablePointer &cancel_ptr) noexcept;
