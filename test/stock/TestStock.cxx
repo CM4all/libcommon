@@ -126,6 +126,10 @@ TEST(Stock, Basic)
 
 	MyStockGetHandler handler;
 
+	num_create = num_fail = num_borrow = num_release = num_destroy = 0;
+	next_fail = got_item = false;
+	last_item = nullptr;
+
 	/* create first item */
 
 	stock.Get(nullptr, handler, cancel_ptr);
