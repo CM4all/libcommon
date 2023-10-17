@@ -117,12 +117,9 @@ Stock::RetryWaiting() noexcept
 	     GetActiveCount() < limit && i > 0 && !waiting.empty();
 	     --i) {
 		auto &w = waiting.pop_front();
-
-		if (!GetCanceled(w.handler, w.cancel_ptr))
-			GetCreate(std::move(w.request),
-				  w.handler,
-				  w.cancel_ptr);
-
+		GetCreate(std::move(w.request),
+			  w.handler,
+			  w.cancel_ptr);
 		w.Destroy();
 	}
 }
@@ -228,6 +225,18 @@ Stock::ItemCreateError(StockGetHandler &get_handler,
 void
 Stock::OnCreateCanceled() noexcept
 {
+	if (!waiting.empty()) {
+		/* try to attach a waiting request to the canceled
+		   create request */
+		auto &w = waiting.front();
+
+		if (GetCanceled(w.handler, w.cancel_ptr)) {
+			waiting.pop_front();
+			w.Destroy();
+			return;
+		}
+	}
+
 	ScheduleRetryWaiting();
 }
 
