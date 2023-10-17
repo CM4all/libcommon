@@ -18,10 +18,7 @@
 
 namespace {
 
-static unsigned num_create, num_fail, num_borrow, num_release, num_destroy;
-static bool next_fail;
-static bool got_item;
-static StockItem *last_item;
+static unsigned num_borrow, num_release, num_destroy;
 
 struct MyStockItem final : StockItem {
 	StockRequest request;
@@ -52,6 +49,10 @@ struct MyStockItem final : StockItem {
 
 class MyStockClass final : public StockClass {
 public:
+	unsigned n_create = 0, n_fail = 0;
+
+	bool next_fail = false;
+
 	/* virtual methods from class StockClass */
 	void Create(CreateStockItem c, StockRequest request,
 		    StockGetHandler &handler,
@@ -68,17 +69,20 @@ MyStockClass::Create(CreateStockItem c,
 	item->request = std::move(request);
 
 	if (next_fail) {
-		++num_fail;
+		++n_fail;
 		delete item;
 		throw std::runtime_error("next_fail");
 	} else {
-		++num_create;
+		++n_create;
 		item->InvokeCreateSuccess(handler);
 	}
 }
 
 class MyStockGetHandler final : public StockGetHandler {
 public:
+	bool got_item = false;
+	StockItem *last_item = nullptr;
+
 	/* virtual methods from class StockGetHandler */
 	void OnStockItemReady(StockItem &item) noexcept override {
 		assert(!got_item);
@@ -126,97 +130,95 @@ TEST(Stock, Basic)
 
 	MyStockGetHandler handler;
 
-	num_create = num_fail = num_borrow = num_release = num_destroy = 0;
-	next_fail = got_item = false;
-	last_item = nullptr;
+	num_borrow = num_release = num_destroy = 0;
 
 	/* create first item */
 
 	stock.Get(nullptr, handler, cancel_ptr);
-	ASSERT_TRUE(got_item);
-	ASSERT_NE(last_item, nullptr);
-	ASSERT_EQ(num_create, 1);
-	ASSERT_EQ(num_fail, 0);
+	ASSERT_TRUE(handler.got_item);
+	ASSERT_NE(handler.last_item, nullptr);
+	ASSERT_EQ(cls.n_create, 1);
+	ASSERT_EQ(cls.n_fail, 0);
 	ASSERT_EQ(num_borrow, 0);
 	ASSERT_EQ(num_release, 0);
 	ASSERT_EQ(num_destroy, 0);
-	item = last_item;
+	item = handler.last_item;
 
 	/* release first item */
 
 	stock.Put(*item, PutAction::REUSE);
 	instance.RunSome();
-	ASSERT_EQ(num_create, 1);
-	ASSERT_EQ(num_fail, 0);
+	ASSERT_EQ(cls.n_create, 1);
+	ASSERT_EQ(cls.n_fail, 0);
 	ASSERT_EQ(num_borrow, 0);
 	ASSERT_EQ(num_release, 1);
 	ASSERT_EQ(num_destroy, 0);
 
 	/* reuse first item */
 
-	got_item = false;
-	last_item = nullptr;
+	handler.got_item = false;
+	handler.last_item = nullptr;
 	stock.Get(nullptr, handler, cancel_ptr);
-	ASSERT_TRUE(got_item);
-	ASSERT_EQ(last_item, item);
-	ASSERT_EQ(num_create, 1);
-	ASSERT_EQ(num_fail, 0);
+	ASSERT_TRUE(handler.got_item);
+	ASSERT_EQ(handler.last_item, item);
+	ASSERT_EQ(cls.n_create, 1);
+	ASSERT_EQ(cls.n_fail, 0);
 	ASSERT_EQ(num_borrow, 1);
 	ASSERT_EQ(num_release, 1);
 	ASSERT_EQ(num_destroy, 0);
 
 	/* create second item */
 
-	got_item = false;
-	last_item = nullptr;
+	handler.got_item = false;
+	handler.last_item = nullptr;
 	stock.Get(nullptr, handler, cancel_ptr);
-	ASSERT_TRUE(got_item);
-	ASSERT_NE(last_item, nullptr);
-	ASSERT_NE(last_item, item);
-	ASSERT_EQ(num_create, 2);
-	ASSERT_EQ(num_fail, 0);
+	ASSERT_TRUE(handler.got_item);
+	ASSERT_NE(handler.last_item, nullptr);
+	ASSERT_NE(handler.last_item, item);
+	ASSERT_EQ(cls.n_create, 2);
+	ASSERT_EQ(cls.n_fail, 0);
 	ASSERT_EQ(num_borrow, 1);
 	ASSERT_EQ(num_release, 1);
 	ASSERT_EQ(num_destroy, 0);
-	second = last_item;
+	second = handler.last_item;
 
 	/* fail to create third item */
 
-	next_fail = true;
-	got_item = false;
-	last_item = nullptr;
+	cls.next_fail = true;
+	handler.got_item = false;
+	handler.last_item = nullptr;
 	stock.Get(nullptr, handler, cancel_ptr);
-	ASSERT_TRUE(got_item);
-	ASSERT_EQ(last_item, nullptr);
-	ASSERT_EQ(num_create, 2);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_TRUE(handler.got_item);
+	ASSERT_EQ(handler.last_item, nullptr);
+	ASSERT_EQ(cls.n_create, 2);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 1);
 	ASSERT_EQ(num_release, 1);
 	ASSERT_EQ(num_destroy, 1);
 
 	/* create third item */
 
-	next_fail = false;
-	got_item = false;
-	last_item = nullptr;
+	cls.next_fail = false;
+	handler.got_item = false;
+	handler.last_item = nullptr;
 	stock.Get(nullptr, handler, cancel_ptr);
-	ASSERT_TRUE(got_item);
-	ASSERT_NE(last_item, nullptr);
-	ASSERT_EQ(num_create, 3);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_TRUE(handler.got_item);
+	ASSERT_NE(handler.last_item, nullptr);
+	ASSERT_EQ(cls.n_create, 3);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 1);
 	ASSERT_EQ(num_release, 1);
 	ASSERT_EQ(num_destroy, 1);
-	third = last_item;
+	third = handler.last_item;
 
 	/* fourth item waiting */
 
-	got_item = false;
-	last_item = nullptr;
+	handler.got_item = false;
+	handler.last_item = nullptr;
 	stock.Get(nullptr, handler, cancel_ptr);
-	ASSERT_FALSE(got_item);
-	ASSERT_EQ(num_create, 3);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_FALSE(handler.got_item);
+	ASSERT_EQ(cls.n_create, 3);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 1);
 	ASSERT_EQ(num_release, 1);
 	ASSERT_EQ(num_destroy, 1);
@@ -224,9 +226,9 @@ TEST(Stock, Basic)
 	/* fifth item waiting */
 
 	stock.Get(nullptr, handler, cancel_ptr);
-	ASSERT_FALSE(got_item);
-	ASSERT_EQ(num_create, 3);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_FALSE(handler.got_item);
+	ASSERT_EQ(cls.n_create, 3);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 1);
 	ASSERT_EQ(num_release, 1);
 	ASSERT_EQ(num_destroy, 1);
@@ -235,34 +237,34 @@ TEST(Stock, Basic)
 
 	stock.Put(*third, PutAction::REUSE);
 	instance.RunSome();
-	ASSERT_EQ(num_create, 3);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_EQ(cls.n_create, 3);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
 	ASSERT_EQ(num_release, 2);
 	ASSERT_EQ(num_destroy, 1);
-	ASSERT_TRUE(got_item);
-	ASSERT_EQ(last_item, third);
+	ASSERT_TRUE(handler.got_item);
+	ASSERT_EQ(handler.last_item, third);
 
 	/* destroy second item */
 
-	got_item = false;
-	last_item = nullptr;
+	handler.got_item = false;
+	handler.last_item = nullptr;
 	stock.Put(*second, PutAction::DESTROY);
 	instance.RunSome();
-	ASSERT_EQ(num_create, 4);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_EQ(cls.n_create, 4);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
 	ASSERT_EQ(num_release, 2);
 	ASSERT_EQ(num_destroy, 2);
-	ASSERT_TRUE(got_item);
-	ASSERT_NE(last_item, nullptr);
-	second = last_item;
+	ASSERT_TRUE(handler.got_item);
+	ASSERT_NE(handler.last_item, nullptr);
+	second = handler.last_item;
 
 	/* destroy first item */
 
 	stock.Put(*item, PutAction::DESTROY);
-	ASSERT_EQ(num_create, 4);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_EQ(cls.n_create, 4);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
 	ASSERT_EQ(num_release, 2);
 	ASSERT_EQ(num_destroy, 3);
@@ -270,8 +272,8 @@ TEST(Stock, Basic)
 	/* destroy second item */
 
 	stock.Put(*second, PutAction::DESTROY);
-	ASSERT_EQ(num_create, 4);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_EQ(cls.n_create, 4);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
 	ASSERT_EQ(num_release, 2);
 	ASSERT_EQ(num_destroy, 4);
@@ -279,8 +281,8 @@ TEST(Stock, Basic)
 	/* destroy third item */
 
 	stock.Put(*third, PutAction::DESTROY);
-	ASSERT_EQ(num_create, 4);
-	ASSERT_EQ(num_fail, 1);
+	ASSERT_EQ(cls.n_create, 4);
+	ASSERT_EQ(cls.n_fail, 1);
 	ASSERT_EQ(num_borrow, 2);
 	ASSERT_EQ(num_release, 2);
 	ASSERT_EQ(num_destroy, 5);
