@@ -309,12 +309,12 @@ BasicStock::CreateCanceled(Create &c) noexcept
 	if (c.continue_on_cancel) {
 		// TOOD connect to waiting item?
 		c.Detach();
-		return;
+	} else {
+		DeleteCreate(c);
+		CheckEmpty();
 	}
 
-	DeleteCreate(c);
 	OnCreateCanceled();
-	CheckEmpty();
 }
 
 PutAction
