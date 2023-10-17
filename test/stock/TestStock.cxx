@@ -342,8 +342,8 @@ TEST(Stock, ContinueOnCancel)
 	Stock stock(instance.event_loop, cls, "test", 1, 8,
 		    Event::Duration::zero());
 
-	MyStockGetHandler handler;
-	CancellablePointer cancel_ptr;
+	MyStockGetHandler handler, handler2;
+	CancellablePointer cancel_ptr, cancel_ptr2;
 
 	// get one, finish, return
 
@@ -406,6 +406,39 @@ TEST(Stock, ContinueOnCancel)
 
 	stock.Put(*handler.last_item, PutAction::DESTROY);
 
+	// get one, get again, cancel, finish
+
+	cls.item = nullptr;
+	cls.handler = nullptr;
+	handler.got_item = false;
+	handler2.got_item = false;
+
+	stock.Get(nullptr, handler2, cancel_ptr2);
+
+	EXPECT_EQ(cls.n_create, 4);
+	EXPECT_FALSE(handler.got_item);
+	EXPECT_FALSE(handler2.got_item);
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 4);
+	EXPECT_FALSE(handler.got_item);
+	EXPECT_FALSE(handler2.got_item);
+
+	cancel_ptr2.Cancel();
+
+	EXPECT_EQ(cls.n_create, 4);
+	EXPECT_FALSE(handler.got_item);
+	EXPECT_FALSE(handler2.got_item);
+
+	cls.Finish();
+
+	EXPECT_EQ(cls.n_create, 4);
+	EXPECT_TRUE(handler.got_item);
+	EXPECT_FALSE(handler2.got_item);
+
+	stock.Put(*handler.last_item, PutAction::DESTROY);
+
 	// get one, cancel and leave (destructor must cancel it)
 
 	cls.item = nullptr;
@@ -414,11 +447,11 @@ TEST(Stock, ContinueOnCancel)
 
 	stock.Get(nullptr, handler, cancel_ptr);
 
-	EXPECT_EQ(cls.n_create, 4);
+	EXPECT_EQ(cls.n_create, 5);
 	EXPECT_FALSE(handler.got_item);
 
 	cancel_ptr.Cancel();
 
-	EXPECT_EQ(cls.n_create, 4);
+	EXPECT_EQ(cls.n_create, 5);
 	EXPECT_FALSE(handler.got_item);
 }
