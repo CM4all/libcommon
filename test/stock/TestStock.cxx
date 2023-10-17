@@ -339,7 +339,7 @@ TEST(Stock, ContinueOnCancel)
 		}
 	} cls;
 
-	Stock stock(instance.event_loop, cls, "test", 3, 8,
+	Stock stock(instance.event_loop, cls, "test", 1, 8,
 		    Event::Duration::zero());
 
 	MyStockGetHandler handler;
