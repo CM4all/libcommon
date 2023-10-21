@@ -25,8 +25,8 @@ public:
 	DatagramBuilder(const DatagramBuilder &) = delete;
 	DatagramBuilder &operator=(const DatagramBuilder &) = delete;
 
-	template<typename T>
-	void AppendRaw(std::span<T> s) noexcept {
+	template<typename T, std::size_t Extent>
+	void AppendRaw(std::span<T, Extent> s) noexcept {
 		v.push_back(MakeIovec(s));
 	}
 
