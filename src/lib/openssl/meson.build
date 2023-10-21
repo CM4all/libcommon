@@ -1,4 +1,10 @@
-libcrypto = dependency('libcrypto', version: '>= 1.1.1')
+libcrypto = dependency('libcrypto', version: '>= 1.1.1',
+                       required: get_variable('libcommon_require_libcrypto', true))
+if not libcrypto.found()
+  crypto_dep = libcrypto
+  subdir_done()
+endif
+
 libcrypto = declare_dependency(
   compile_args: ['-DOPENSSL_API_COMPAT=0x10100000L'],
   dependencies: libcrypto,
