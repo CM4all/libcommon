@@ -8,6 +8,7 @@
 #include "util/djb_hash.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Sanitizer.hxx"
+#include "util/SpanCast.hxx"
 
 #include <cassert>
 
@@ -68,7 +69,7 @@ ResourceLimits::IsEmpty() const noexcept
 inline std::size_t
 ResourceLimits::GetHash() const noexcept
 {
-	return djb_hash(std::as_bytes(std::span{this, 1}));
+	return djb_hash(ReferenceAsBytes(*this));
 }
 
 char *

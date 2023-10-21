@@ -8,6 +8,7 @@
 #include "net/SendMessage.hxx"
 #include "io/Iovec.hxx"
 #include "util/CRC32.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StaticVector.hxx"
 
 class DatagramBuilder {
@@ -44,7 +45,7 @@ public:
 	}
 
 	void Append(const SpawnDaemon::RequestHeader &rh) noexcept {
-		AppendRaw(std::as_bytes(std::span{&rh, 1}));
+		AppendRaw(ReferenceAsBytes(rh));
 	}
 
 	void Append(const SpawnDaemon::ResponseHeader &rh) noexcept {

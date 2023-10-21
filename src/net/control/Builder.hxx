@@ -65,6 +65,6 @@ private:
 	}
 
 	void AppendT(const auto &s) noexcept {
-		Append(std::as_bytes(std::span{&s, 1}));
+		Append(ReferenceAsBytes(s));
 	}
 };
