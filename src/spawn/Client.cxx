@@ -290,8 +290,21 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 	}
 
 	s.CheckWriteFd(SpawnExecCommand::STDIN, p.stdin_fd);
-	s.CheckWriteFd(SpawnExecCommand::STDOUT, p.stdout_fd);
-	s.CheckWriteFd(SpawnExecCommand::STDERR, p.stderr_fd);
+
+	if (p.stdout_fd.IsDefined()) {
+		if (p.stdout_fd == p.stdin_fd)
+			s.Write(SpawnExecCommand::STDOUT_IS_STDIN);
+		else
+			s.WriteFd(SpawnExecCommand::STDOUT, p.stdout_fd);
+	}
+
+	if (p.stderr_fd.IsDefined()) {
+		if (p.stderr_fd == p.stdin_fd)
+			s.Write(SpawnExecCommand::STDERR_IS_STDIN);
+		else
+			s.WriteFd(SpawnExecCommand::STDERR, p.stderr_fd);
+	}
+
 	s.CheckWriteFd(SpawnExecCommand::CONTROL, p.control_fd);
 
 	s.CheckWriteFd(SpawnExecCommand::RETURN_STDERR,

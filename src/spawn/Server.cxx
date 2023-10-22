@@ -542,8 +542,16 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.SetStdout(fds.Get().Steal());
 			break;
 
+		case SpawnExecCommand::STDOUT_IS_STDIN:
+			p.stdout_fd = p.stdin_fd;
+			break;
+
 		case SpawnExecCommand::STDERR:
 			p.SetStderr(fds.Get().Steal());
+			break;
+
+		case SpawnExecCommand::STDERR_IS_STDIN:
+			p.stderr_fd = p.stdin_fd;
 			break;
 
 		case SpawnExecCommand::STDERR_PATH:
