@@ -511,6 +511,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 	while (!payload.empty()) {
 		const SpawnExecCommand cmd = (SpawnExecCommand)payload.ReadByte();
 		switch (cmd) {
+		case SpawnExecCommand::EXEC_PATH:
+			p.exec_path = payload.ReadString();
+			break;
+
 		case SpawnExecCommand::ARG:
 			if (p.args.size() >= 16384)
 				throw MalformedSpawnPayloadError();

@@ -277,6 +277,8 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 
 	s.WriteOptionalString(SpawnExecCommand::HOOK_INFO, p.hook_info);
 
+	s.WriteOptionalString(SpawnExecCommand::EXEC_PATH, p.exec_path);
+
 	for (const char *i : p.args)
 		s.WriteString(SpawnExecCommand::ARG, i);
 
