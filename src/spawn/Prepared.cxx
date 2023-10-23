@@ -36,10 +36,9 @@ PreparedChildProcess::InsertWrapper(std::span<const char *const> w) noexcept
 }
 
 void
-PreparedChildProcess::SetEnv(const char *name, const char *value) noexcept
+PreparedChildProcess::SetEnv(std::string_view name, std::string_view value) noexcept
 {
-	assert(name != nullptr);
-	assert(value != nullptr);
+	assert(!name.empty());
 
 	strings.emplace_front(name);
 	auto &s = strings.front();

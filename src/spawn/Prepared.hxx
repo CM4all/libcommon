@@ -170,7 +170,7 @@ struct PreparedChildProcess {
 		env.push_back(p);
 	}
 
-	void SetEnv(const char *name, const char *value) noexcept;
+	void SetEnv(std::string_view name, std::string_view value) noexcept;
 
 	const char *GetEnv(std::string_view name) const noexcept;
 
