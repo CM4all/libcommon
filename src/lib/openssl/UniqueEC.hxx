@@ -22,6 +22,10 @@ struct ECDeleter {
 	void operator()(EC_POINT *p) noexcept {
 		EC_POINT_free(p);
 	}
+
+	void operator()(ECDSA_SIG *sig) noexcept {
+		ECDSA_SIG_free(sig);
+	}
 };
 
 #if OPENSSL_API_LEVEL < 30000
@@ -30,3 +34,4 @@ using UniqueEC_KEY = std::unique_ptr<EC_KEY, ECDeleter>;
 
 using UniqueEC_GROUP = std::unique_ptr<EC_GROUP, ECDeleter>;
 using UniqueEC_POINT = std::unique_ptr<EC_POINT, ECDeleter>;
+using UniqueECDSA_SIG = std::unique_ptr<ECDSA_SIG, ECDeleter>;
