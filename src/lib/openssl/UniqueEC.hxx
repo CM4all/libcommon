@@ -8,7 +8,7 @@
 
 #include <memory>
 
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
+#if OPENSSL_API_LEVEL < 30000
 
 struct ECDeleter {
 	void operator()(EC_KEY *key) noexcept {
