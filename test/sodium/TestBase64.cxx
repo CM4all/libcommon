@@ -47,6 +47,13 @@ TEST(TestBase64, DecodeBase64)
 		  std::string_view((const char *)d.data(), d.size()));
 }
 
+TEST(TestBase64, DecodeBase64IgnoreWhitespace)
+{
+	const auto d = DecodeBase64IgnoreWhitespace("TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdC Bvbmx5IGJ5IGhp\tcyByZWFzb24sIGJ1dCBieSB0aGlz\rIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBpcyBhIGx1c3Qgb2YgdGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGVsaWdodCBpbiB0aGUgY29udGludWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb24gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRoZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4\n=");
+	EXPECT_EQ(std::string_view(leviathan),
+		  std::string_view((const char *)d.data(), d.size()));
+}
+
 TEST(TestBase64, DecodeUrlSafeBase64)
 {
 	const auto d = DecodeUrlSafeBase64("TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBieSB0aGlzIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBpcyBhIGx1c3Qgb2YgdGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGVsaWdodCBpbiB0aGUgY29udGludWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb24gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRoZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4");

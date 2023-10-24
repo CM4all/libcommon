@@ -39,7 +39,8 @@ UrlSafeBase64(std::string_view src) noexcept
 
 [[gnu::pure]]
 static AllocatedArray<std::byte>
-SodiumDecodeBase64(std::string_view src, int variant) noexcept
+SodiumDecodeBase64(std::string_view src, const char *ignore,
+		   int variant) noexcept
 {
 	AllocatedArray<std::byte> buffer(src.size());
 
@@ -47,7 +48,7 @@ SodiumDecodeBase64(std::string_view src, int variant) noexcept
 	if (sodium_base642bin((unsigned char *)buffer.data(),
 			      buffer.capacity(),
 			      src.data(), src.size(),
-			      nullptr, &decoded_size,
+			      ignore, &decoded_size,
 			      nullptr,
 			      variant) != 0)
 		return nullptr;
@@ -59,12 +60,20 @@ SodiumDecodeBase64(std::string_view src, int variant) noexcept
 AllocatedArray<std::byte>
 DecodeBase64(std::string_view src) noexcept
 {
-	return SodiumDecodeBase64(src, sodium_base64_VARIANT_ORIGINAL);
+	return SodiumDecodeBase64(src, nullptr,
+				  sodium_base64_VARIANT_ORIGINAL);
+}
+
+AllocatedArray<std::byte>
+DecodeBase64IgnoreWhitespace(std::string_view src) noexcept
+{
+	return SodiumDecodeBase64(src, " \t\r\n",
+				  sodium_base64_VARIANT_ORIGINAL);
 }
 
 AllocatedArray<std::byte>
 DecodeUrlSafeBase64(std::string_view src) noexcept
 {
-	return SodiumDecodeBase64(src,
+	return SodiumDecodeBase64(src, nullptr,
 				  sodium_base64_VARIANT_URLSAFE_NO_PADDING);
 }
