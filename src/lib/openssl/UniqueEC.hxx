@@ -15,6 +15,10 @@ struct ECDeleter {
 	}
 #endif
 
+	void operator()(EC_GROUP *group) noexcept {
+		EC_GROUP_free(group);
+	}
+
 	void operator()(EC_POINT *p) noexcept {
 		EC_POINT_free(p);
 	}
@@ -24,4 +28,5 @@ struct ECDeleter {
 using UniqueEC_KEY = std::unique_ptr<EC_KEY, ECDeleter>;
 #endif
 
+using UniqueEC_GROUP = std::unique_ptr<EC_GROUP, ECDeleter>;
 using UniqueEC_POINT = std::unique_ptr<EC_POINT, ECDeleter>;
