@@ -1,4 +1,8 @@
-libcrypto = dependency('libcrypto', version: '>= 1.1.1',
+if not is_variable('openssl_min_version')
+  openssl_min_version = '1.1.1'
+endif
+
+libcrypto = dependency('libcrypto', version: '>= ' + openssl_min_version,
                        required: get_variable('libcommon_require_libcrypto', true))
 if not libcrypto.found()
   crypto_dep = libcrypto
@@ -11,7 +15,7 @@ libcrypto = declare_dependency(
 )
 
 if get_variable('libcommon_enable_libssl', true)
-  libssl = dependency('libssl', version: '>= 1.1.1')
+  libssl = dependency('libssl', version: '>= ' + openssl_min_version)
 
   libssl = declare_dependency(
     compile_args: ['-DOPENSSL_API_COMPAT=0x10100000L'],
