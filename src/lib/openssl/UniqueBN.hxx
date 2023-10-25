@@ -8,10 +8,19 @@
 
 #include <memory>
 
+/**
+ * @param clear clear memory before freeing it; use this for sensitive
+ * values such as private keys
+ */
+template<bool clear>
 struct BNDeleter {
 	void operator()(BIGNUM *bn) noexcept {
-		BN_free(bn);
+		if (clear)
+			BN_clear_free(bn);
+		else
+			BN_free(bn);
 	}
 };
 
-using UniqueBIGNUM = std::unique_ptr<BIGNUM, BNDeleter>;
+template<bool clear>
+using UniqueBIGNUM = std::unique_ptr<BIGNUM, BNDeleter<clear>>;
