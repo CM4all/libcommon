@@ -23,7 +23,7 @@ namespace JWT {
  * @return UrlSafeBase64 of the RSA signature
  */
 static AllocatedString
-SignRS256(EVP_PKEY &key, const SHA256Digest &digest)
+SignRS256(EVP_PKEY &key, const SHA256DigestView digest)
 {
 	UniqueEVP_PKEY_CTX ctx(EVP_PKEY_CTX_new(&key, nullptr));
 	if (!ctx)
