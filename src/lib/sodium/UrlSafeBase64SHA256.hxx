@@ -7,10 +7,9 @@
 #include "Base64.hxx"
 #include "SHA256.hxx"
 
-template<typename T>
 [[gnu::pure]]
 inline auto
-UrlSafeBase64SHA256(const T &src) noexcept
+UrlSafeBase64SHA256(std::span<const std::byte> src) noexcept
 {
 	const auto hash = SHA256(src);
 	return FixedBase64<crypto_hash_sha256_BYTES, sodium_base64_VARIANT_URLSAFE_NO_PADDING>(&hash);

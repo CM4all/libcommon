@@ -8,6 +8,7 @@
 #include "lib/openssl/Error.hxx"
 #include "lib/openssl/UniqueEVP.hxx"
 #include "util/AllocatedString.hxx"
+#include "util/SpanCast.hxx"
 
 #include <openssl/rsa.h>
 
@@ -61,9 +62,9 @@ SignRS256(EVP_PKEY &key, std::string_view protected_header_b64,
 	  std::string_view payload_b64)
 {
 	SHA256State sha256;
-	sha256.Update(protected_header_b64);
-	sha256.Update(std::string_view{"."});
-	sha256.Update(payload_b64);
+	sha256.Update(AsBytes(protected_header_b64));
+	sha256.Update(AsBytes(std::string_view{"."}));
+	sha256.Update(AsBytes(payload_b64));
 
 	return SignRS256(key, sha256.Final());
 }

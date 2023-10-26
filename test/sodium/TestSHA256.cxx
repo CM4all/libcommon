@@ -22,7 +22,7 @@ TEST(TestSHA256, Empty)
 
 TEST(TestSHA256, Empty1)
 {
-	const auto hash = SHA256("");
+	const auto hash = SHA256({});
 	const auto hex = HexFormat(std::span{hash});
 	EXPECT_EQ(ToStringView(hex), "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"sv);
 }
