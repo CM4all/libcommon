@@ -273,9 +273,12 @@ Serialize(SpawnSerializer &s, const UidGid &uid_gid)
 static void
 Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 {
-	assert(p.exec_function == nullptr); // not supported
-
 	s.WriteOptionalString(SpawnExecCommand::HOOK_INFO, p.hook_info);
+
+	if (p.exec_function != nullptr) {
+		s.Write(SpawnExecCommand::EXEC_FUNCTION);
+		s.WriteT(p.exec_function);
+	}
 
 	s.WriteOptionalString(SpawnExecCommand::EXEC_PATH, p.exec_path);
 

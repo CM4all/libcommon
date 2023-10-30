@@ -511,6 +511,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 	while (!payload.empty()) {
 		const SpawnExecCommand cmd = (SpawnExecCommand)payload.ReadByte();
 		switch (cmd) {
+		case SpawnExecCommand::EXEC_FUNCTION:
+			payload.ReadT(p.exec_function);
+			break;
+
 		case SpawnExecCommand::EXEC_PATH:
 			p.exec_path = payload.ReadString();
 			break;

@@ -21,6 +21,7 @@ enum class SpawnRequestCommand : uint8_t {
 };
 
 enum class SpawnExecCommand : uint8_t {
+	EXEC_FUNCTION,
 	EXEC_PATH,
 	ARG,
 	SETENV,
