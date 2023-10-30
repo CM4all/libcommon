@@ -210,6 +210,9 @@ try {
 	if (p.ioprio_idle)
 		ioprio_set_idle();
 
+	if (p.tty)
+		DisconnectTty();
+
 	if (p.ns.enable_pid && p.ns.pid_namespace == nullptr) {
 		setsid();
 
@@ -290,9 +293,6 @@ try {
 	CheckedDup2(stdout_fd, STDOUT_FILENO);
 	CheckedDup2(stderr_fd, STDERR_FILENO);
 	CheckedDup2(p.control_fd, CONTROL_FILENO);
-
-	if (p.tty)
-		DisconnectTty();
 
 	if (p.session)
 		setsid();
