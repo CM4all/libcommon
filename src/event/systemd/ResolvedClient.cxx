@@ -27,12 +27,13 @@ namespace Systemd {
 using std::string_view_literals::operator""sv;
 
 static json
-JsonResolveHostname(std::string_view hostname)
+JsonResolveHostname(std::string_view hostname, int family)
 {
 	return {
 		{"method"sv, "io.systemd.Resolve.ResolveHostname"sv},
 		{"parameters"sv, {
 				{"name"sv, hostname},
+				{"family"sv, family},
 				{"flags"sv, 0},
 			},
 		},
@@ -40,9 +41,9 @@ JsonResolveHostname(std::string_view hostname)
 }
 
 static std::string
-SerializeResolveHostname(std::string_view hostname)
+SerializeResolveHostname(std::string_view hostname, int family)
 {
-	std::string s = JsonResolveHostname(hostname).dump();
+	std::string s = JsonResolveHostname(hostname, family).dump();
 	s.push_back('\0');
 	return s;
 }
@@ -64,9 +65,9 @@ public:
 		socket.Close();
 	}
 
-	void Start(std::string_view hostname,
+	void Start(std::string_view hostname, int family,
 		   CancellablePointer &cancel_ptr) {
-		auto nbytes = socket.GetSocket().Send(AsBytes(SerializeResolveHostname(hostname)));
+		auto nbytes = socket.GetSocket().Send(AsBytes(SerializeResolveHostname(hostname, family)));
 		if (nbytes < 0)
 			throw MakeErrno("Failed to send");
 
@@ -220,7 +221,7 @@ ConnectResolved()
 
 void
 ResolveHostname(EventLoop &event_loop,
-		std::string_view hostname, unsigned port,
+		std::string_view hostname, unsigned port, int family,
 		ResolveHostnameHandler &handler,
 		CancellablePointer &cancel_ptr) noexcept
 try {
@@ -228,7 +229,7 @@ try {
 						   port, handler);
 
 	try {
-		request->Start(hostname, cancel_ptr);
+		request->Start(hostname, family, cancel_ptr);
 	} catch (...) {
 		delete request;
 		throw;

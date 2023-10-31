@@ -26,7 +26,7 @@ public:
  */
 void
 ResolveHostname(EventLoop &event_loop,
-		std::string_view hostname, unsigned port,
+		std::string_view hostname, unsigned port, int family,
 		ResolveHostnameHandler &handler,
 		CancellablePointer &cancel_ptr) noexcept;
 

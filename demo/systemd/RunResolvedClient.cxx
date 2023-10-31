@@ -37,7 +37,8 @@ try {
 	Handler handler;
 	CancellablePointer cancel_ptr;
 
-	Systemd::ResolveHostname(event_loop, argv[1], 3306, handler, cancel_ptr);
+	Systemd::ResolveHostname(event_loop, argv[1], 3306, AF_UNSPEC,
+				 handler, cancel_ptr);
 	event_loop.Run();
 
 	if (handler.error)
