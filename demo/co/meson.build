@@ -31,3 +31,14 @@ if event_uring_dep.found()
     ],
   )
 endif
+
+if nlohmann_json.found()
+  executable(
+    'RunCoResolvedClient',
+    'RunCoResolvedClient.cxx',
+    include_directories: inc,
+    dependencies: [
+      event_systemd_dep,
+    ],
+  )
+endif
