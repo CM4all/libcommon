@@ -2,6 +2,7 @@ event_systemd_sources = []
 event_systemd_dependencies = []
 
 nlohmann_json = dependency('nlohmann_json',
+                           version: '>= 3.11',
                            required: get_variable('libcommon_enable_json', false))
 if nlohmann_json.found()
   event_systemd_sources += 'ResolvedClient.cxx'
