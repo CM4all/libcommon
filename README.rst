@@ -42,6 +42,7 @@ Optional dependencies:
 - `libwas <https://github.com/CM4all/libwas>`__
 - `LuaJit <http://luajit.org/>`__
 - `Nettle <https://www.lysator.liu.se/~nisse/nettle/>`__
+- `nlohmann_json <https://json.nlohmann.me/>`__
 - `PCRE <https://www.pcre.org/>`__
 - `GoogleTest <https://github.com/google/googletest>`__
 

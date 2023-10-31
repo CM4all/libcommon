@@ -47,6 +47,7 @@ jobs:
             libluajit-5.1-dev \
             nettle-dev \
             libpcre2-dev \
+            nlohmann-json3-dev \
             libgtest-dev
 
       - name: Configure
@@ -63,6 +64,7 @@ jobs:
              -Dsodium=enabled \
              -During=disabled \
              -Dwas=enabled \
+             -Djson=enabled \
              -Dtest=enabled \
              --force-fallback-for=fmt,libcm4all-was-protocol,libcm4all-was-simple \
              output
