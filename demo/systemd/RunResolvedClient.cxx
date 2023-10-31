@@ -24,8 +24,9 @@ try {
 		std::exception_ptr error;
 
 		/* virtual methods from ResolveHostnameHandler */
-		void OnResolveHostname(SocketAddress address) noexcept override {
-			fmt::print("{}\n", address);
+		void OnResolveHostname(std::span<const SocketAddress> addresses) noexcept override {
+			for (const SocketAddress i : addresses)
+				fmt::print("{}\n", i);
 		}
 
 		void OnResolveHostnameError(std::exception_ptr _error) noexcept override {

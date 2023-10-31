@@ -144,26 +144,46 @@ ResolveHostnameRequest::OnResponse(std::string_view s)
 		throw FmtRuntimeError("systemd-resolved error: {}",
 				      error->dump());
 
-	auto &a = j.at("parameters"sv).at("addresses"sv).at(0);
+	/* this is a fixed-size array because we don't want the
+	   overhead of a heap allocation here; 32 should be enough for
+	   everybody (?) */
+	constexpr std::size_t MAX_ADDRESSES = 32;
+	std::array<SocketAddress, MAX_ADDRESSES> socket_addresses;
+	std::array<IPv4Address, MAX_ADDRESSES> ipv4_addresses;
+	std::array<IPv6Address, MAX_ADDRESSES> ipv6_addresses;
+	std::size_t n = 0, n_ipv4 = 0, n_ipv6 = 0;
 
-	const auto &address = a.at("address"sv);
+	const auto &addresses = j.at("parameters"sv).at("addresses"sv);
+	for (const auto &a : addresses) {
+		const auto &address = a.at("address"sv);
 
-	uint_least32_t ifindex = 0;
-	if (const auto i = a.find("ifindex"sv); i != a.end())
-		ifindex = i->get<uint_least32_t>();
+		uint_least32_t ifindex = 0;
+		if (const auto i = a.find("ifindex"sv); i != a.end())
+			ifindex = i->get<uint_least32_t>();
 
-	switch (a.at("family"sv).get<int>()) {
-	case AF_INET:
-		handler.OnResolveHostname(ToIPv4Address(address, port));
-		break;
+		switch (a.at("family"sv).get<int>()) {
+		case AF_INET:
+			socket_addresses[n++] = ipv4_addresses[n_ipv4++] =
+				ToIPv4Address(address, port);
+			break;
 
-	case AF_INET6:
-		handler.OnResolveHostname(ToIPv6Address(address, port, ifindex));
-		break;
+		case AF_INET6:
+			socket_addresses[n++] = ipv6_addresses[n_ipv6++] =
+				ToIPv6Address(address, port, ifindex);
+			break;
 
-	default:
-		throw SocketProtocolError{"Unsupported address family"};
+		default:
+			break;
+		}
+
+		if (n >= socket_addresses.size())
+			break;
 	}
+
+	if (n == 0)
+		throw SocketProtocolError{"Empty response from resolver"};
+
+	handler.OnResolveHostname(std::span{socket_addresses}.first(n));
 }
 
 void

@@ -5,6 +5,7 @@
 #pragma once
 
 #include <exception>
+#include <span>
 #include <string_view>
 
 class SocketAddress;
@@ -15,7 +16,7 @@ namespace Systemd {
 
 class ResolveHostnameHandler {
 public:
-	virtual void OnResolveHostname(SocketAddress address) noexcept = 0;
+	virtual void OnResolveHostname(std::span<const SocketAddress> addresses) noexcept = 0;
 	virtual void OnResolveHostnameError(std::exception_ptr error) noexcept = 0;
 };
 
