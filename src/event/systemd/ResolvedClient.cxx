@@ -16,7 +16,9 @@
 #include "util/Cancellable.hxx"
 #include "util/SpanCast.hxx"
 
-#include <boost/json.hpp>
+#define JSON_NO_IO
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 #include <cassert>
 
@@ -24,7 +26,7 @@ namespace Systemd {
 
 using std::string_view_literals::operator""sv;
 
-static boost::json::object
+static json
 JsonResolveHostname(std::string_view hostname)
 {
 	return {
@@ -40,7 +42,7 @@ JsonResolveHostname(std::string_view hostname)
 static std::string
 SerializeResolveHostname(std::string_view hostname)
 {
-	std::string s = boost::json::serialize(JsonResolveHostname(hostname));
+	std::string s = JsonResolveHostname(hostname).dump();
 	s.push_back('\0');
 	return s;
 }
@@ -83,44 +85,44 @@ private:
 };
 
 static IPv4Address
-ToIPv4Address(const boost::json::array &j, uint_least16_t port)
+ToIPv4Address(const json &j, uint_least16_t port)
 {
 	if (j.size() != 4)
 		throw SocketProtocolError{"Malformed IPv4 address"};
 
 	return {
-		static_cast<uint8_t>(j.at(0).as_int64()),
-		static_cast<uint8_t>(j.at(1).as_int64()),
-		static_cast<uint8_t>(j.at(2).as_int64()),
-		static_cast<uint8_t>(j.at(3).as_int64()),
+		j.at(0).get<uint8_t>(),
+		j.at(1).get<uint8_t>(),
+		j.at(2).get<uint8_t>(),
+		j.at(3).get<uint8_t>(),
 		port,
 	};
 }
 
 static IPv6Address
-ToIPv6Address(const boost::json::array &j, uint_least16_t port,
+ToIPv6Address(const json &j, uint_least16_t port,
 	      uint_least32_t ifindex)
 {
 	if (j.size() != 16)
 		throw SocketProtocolError{"Malformed IPv6 address"};
 
 	return {
-		static_cast<uint_least16_t>((j.at(0).as_int64() << 8) |
-					    j.at(1).as_int64()),
-		static_cast<uint_least16_t>((j.at(2).as_int64() << 8) |
-					    j.at(3).as_int64()),
-		static_cast<uint_least16_t>((j.at(4).as_int64() << 8) |
-					    j.at(5).as_int64()),
-		static_cast<uint_least16_t>((j.at(6).as_int64() << 8) |
-					    j.at(7).as_int64()),
-		static_cast<uint_least16_t>((j.at(8).as_int64() << 8) |
-					    j.at(9).as_int64()),
-		static_cast<uint_least16_t>((j.at(10).as_int64() << 8) |
-					    j.at(11).as_int64()),
-		static_cast<uint_least16_t>((j.at(12).as_int64() << 8) |
-					    j.at(13).as_int64()),
-		static_cast<uint_least16_t>((j.at(14).as_int64() << 8) |
-					    j.at(15).as_int64()),
+		static_cast<uint_least16_t>((j.at(0).get<uint_least16_t>() << 8) |
+					    j.at(1).get<uint_least16_t>()),
+		static_cast<uint_least16_t>((j.at(2).get<uint_least16_t>() << 8) |
+					    j.at(3).get<uint_least16_t>()),
+		static_cast<uint_least16_t>((j.at(4).get<uint_least16_t>() << 8) |
+					    j.at(5).get<uint_least16_t>()),
+		static_cast<uint_least16_t>((j.at(6).get<uint_least16_t>() << 8) |
+					    j.at(7).get<uint_least16_t>()),
+		static_cast<uint_least16_t>((j.at(8).get<uint_least16_t>() << 8) |
+					    j.at(9).get<uint_least16_t>()),
+		static_cast<uint_least16_t>((j.at(10).get<uint_least16_t>() << 8) |
+					    j.at(11).get<uint_least16_t>()),
+		static_cast<uint_least16_t>((j.at(12).get<uint_least16_t>() << 8) |
+					    j.at(13).get<uint_least16_t>()),
+		static_cast<uint_least16_t>((j.at(14).get<uint_least16_t>() << 8) |
+					    j.at(15).get<uint_least16_t>()),
 		port,
 		ifindex,
 	};
@@ -136,29 +138,27 @@ ResolveHostnameRequest::OnResponse(std::string_view s)
 
 	s.remove_suffix(1);
 
-	const auto j = boost::json::parse(s).as_object();
+	const auto j = json::parse(s);
 
-	if (const auto *error = j.if_contains("error"sv))
+	if (const auto error = j.find("error"sv); error != j.end())
 		throw FmtRuntimeError("systemd-resolved error: {}",
-				      boost::json::serialize(*error));
+				      error->dump());
 
-	auto &a = j.at("parameters"sv).at("addresses"sv).at(0).as_object();
+	auto &a = j.at("parameters"sv).at("addresses"sv).at(0);
 
 	const auto &address = a.at("address"sv);
 
 	uint_least32_t ifindex = 0;
-	if (const auto *i = a.if_contains("ifindex"sv))
-		ifindex = i->as_int64();
+	if (const auto i = a.find("ifindex"sv); i != a.end())
+		ifindex = i->get<uint_least32_t>();
 
-	switch (a.at("family"sv).as_int64()) {
+	switch (a.at("family"sv).get<int>()) {
 	case AF_INET:
-		handler.OnResolveHostname(ToIPv4Address(address.as_array(),
-							port));
+		handler.OnResolveHostname(ToIPv4Address(address, port));
 		break;
 
 	case AF_INET6:
-		handler.OnResolveHostname(ToIPv6Address(address.as_array(),
-							port, ifindex));
+		handler.OnResolveHostname(ToIPv6Address(address, port, ifindex));
 		break;
 
 	default:

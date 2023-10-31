@@ -105,6 +105,7 @@ libcommon_require_pg = get_option('pg')
 libcommon_require_sodium = get_option('sodium')
 libcommon_require_uring = get_option('uring')
 libcommon_enable_was = get_option('was')
+libcommon_enable_json = get_option('json')
 
 subdir('src/util')
 subdir('src/lib/fmt')
