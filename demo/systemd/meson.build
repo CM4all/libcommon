@@ -2,7 +2,7 @@ if not libsystemd.found()
   subdir_done()
 endif
 
-if libsystemd.found()
+if nlohmann_json.found()
   executable(
     'RunResolvedClient',
     'RunResolvedClient.cxx',
