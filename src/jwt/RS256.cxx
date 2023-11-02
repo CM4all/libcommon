@@ -46,12 +46,14 @@ SignRS256(EVP_PKEY &key, const SHA256DigestView digest)
 
 	size_t length;
 	if (EVP_PKEY_sign(ctx.get(), nullptr, &length,
-			  (const unsigned char *)&digest, sizeof(digest)) <= 0)
+			  reinterpret_cast<const unsigned char *>(digest.data()),
+			  digest.size()) <= 0)
 		throw SslError("EVP_PKEY_sign() failed");
 
 	const auto buffer = std::make_unique<std::byte[]>(length);
 	if (EVP_PKEY_sign(ctx.get(), (unsigned char *)buffer.get(), &length,
-			  (const unsigned char *)&digest, sizeof(digest)) <= 0)
+			  reinterpret_cast<const unsigned char *>(digest.data()),
+			  digest.size()) <= 0)
 		throw SslError("EVP_PKEY_sign() failed");
 
 	return UrlSafeBase64({buffer.get(), length});
