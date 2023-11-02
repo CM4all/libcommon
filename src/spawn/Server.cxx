@@ -33,6 +33,7 @@
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
 #include "util/SharedLease.hxx"
+#include "config.h"
 
 #include <forward_list>
 #include <optional>

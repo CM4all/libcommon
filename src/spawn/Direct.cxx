@@ -23,6 +23,7 @@
 #include "util/Exception.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/SpanCast.hxx"
+#include "config.h"
 
 #ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-journal.h>

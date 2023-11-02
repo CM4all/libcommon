@@ -1,3 +1,5 @@
+spawn_config = configuration_data()
+
 spawn_sources = [
   'CgroupKill.cxx',
   'CgroupState.cxx',
@@ -32,17 +34,13 @@ if get_variable('libcommon_enable_spawn_server', true)
       'ScopeProcess.cxx',
     ]
 
-    spawn_dependencies += declare_dependency(
-      compile_args: ['-DHAVE_LIBSYSTEMD'],
-    )
+    libsystemd = dependency('libsystemd')
+    spawn_config.set('HAVE_LIBSYSTEMD', libsystemd.found())
 
-    spawn_internal_dependencies += declare_dependency(
-      compile_args: ['-DHAVE_LIBSYSTEMD'],
-      dependencies: [
-        dependency('libsystemd'),
-        odbus_dep,
-      ],
-    )
+    spawn_internal_dependencies += [
+      libsystemd,
+      odbus_dep,
+    ]
   endif
 endif
 
@@ -150,6 +148,8 @@ if get_variable('libcommon_enable_spawn_config', false)
     io_config_dep,
   ]
 endif
+
+configure_file(output: 'config.h', configuration: spawn_config)
 
 spawn = static_library(
   'spawn',

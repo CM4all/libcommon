@@ -19,6 +19,7 @@
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
+#include "config.h"
 
 #include <fmt/format.h>
 

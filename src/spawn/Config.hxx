@@ -5,6 +5,7 @@
 #pragma once
 
 #include "UidGid.hxx"
+#include "config.h"
 
 #ifdef HAVE_LIBSYSTEMD
 #include "Systemd.hxx"
