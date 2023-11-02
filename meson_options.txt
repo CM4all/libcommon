@@ -10,6 +10,7 @@ option('pg', type: 'feature', description: 'PostgreSQL support (using libpq)')
 option('sodium', type: 'feature', description: 'libsodium support')
 option('uring', type: 'feature', description: 'enable io_uring (using liburing)')
 option('was', type: 'feature', description: 'WAS support')
+option('seccomp', type: 'feature', description: 'seccomp support (using libseccomp)')
 
 option('test', type: 'feature', description: 'Build unit tests')
 

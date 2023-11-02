@@ -343,6 +343,7 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 	if (p.ioprio_idle)
 		s.Write(SpawnExecCommand::IOPRIO_IDLE);
 
+#ifdef HAVE_LIBSECCOMP
 	if (p.forbid_user_ns)
 		s.Write(SpawnExecCommand::FORBID_USER_NS);
 
@@ -351,6 +352,7 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 
 	if (p.forbid_bind)
 		s.Write(SpawnExecCommand::FORBID_BIND);
+#endif // HAVE_LIBSECCOMP
 
 	if (p.no_new_privs)
 		s.Write(SpawnExecCommand::NO_NEW_PRIVS);

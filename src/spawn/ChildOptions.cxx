@@ -37,9 +37,11 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 	 stderr_null(src.stderr_null),
 	 stderr_jailed(src.stderr_jailed),
 	 stderr_pond(src.stderr_pond),
+#ifdef HAVE_LIBSECCOMP
 	 forbid_user_ns(src.forbid_user_ns),
 	 forbid_multicast(src.forbid_multicast),
 	 forbid_bind(src.forbid_bind),
+#endif // HAVE_LIBSECCOMP
 	 no_new_privs(src.no_new_privs)
 {
 }
@@ -114,6 +116,7 @@ ChildOptions::MakeId(char *p) const noexcept
 		*p++ = 'n';
 	}
 
+#ifdef HAVE_LIBSECCOMP
 	if (forbid_user_ns) {
 		*p++ = ';';
 		*p++ = 'f';
@@ -131,6 +134,7 @@ ChildOptions::MakeId(char *p) const noexcept
 		*p++ = 'f';
 		*p++ = 'b';
 	}
+#endif // HAVE_LIBSECCOMP
 
 	if (no_new_privs) {
 		*p++ = ';';
@@ -181,12 +185,16 @@ ChildOptions::CopyTo(PreparedChildProcess &dest) const
 	if (rlimits != nullptr)
 		dest.rlimits = *rlimits;
 	dest.uid_gid = uid_gid;
+#ifdef HAVE_LIBSECCOMP
 	dest.forbid_user_ns = forbid_user_ns;
 	dest.forbid_multicast = forbid_multicast;
 	dest.forbid_bind = forbid_bind;
+#endif // HAVE_LIBSECCOMP
 	dest.no_new_privs = no_new_privs;
 
+#ifdef HAVE_LIBSECCOMP
 	if (!forbid_user_ns)
+#endif
 		/* if we allow user namespaces, then we should allow writing
 		   to /proc/self/{uid,gid}_map, which requires a /proc mount
 		   which is not read-only */

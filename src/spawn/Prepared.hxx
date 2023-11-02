@@ -2,12 +2,12 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef PREPARED_CHILD_PROCESS_HXX
-#define PREPARED_CHILD_PROCESS_HXX
+#pragma once
 
 #include "ResourceLimits.hxx"
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
+#include "spawn/config.h"
 #include "io/UniqueFileDescriptor.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
@@ -122,11 +122,13 @@ struct PreparedChildProcess {
 	 */
 	bool ioprio_idle = false;
 
+#ifdef HAVE_LIBSECCOMP
 	bool forbid_user_ns = false;
 
 	bool forbid_multicast = false;
 
 	bool forbid_bind = false;
+#endif // HAVE_LIBSECCOMP
 
 	bool no_new_privs = false;
 
@@ -152,6 +154,7 @@ struct PreparedChildProcess {
 	PreparedChildProcess(const PreparedChildProcess &) = delete;
 	PreparedChildProcess &operator=(const PreparedChildProcess &) = delete;
 
+#ifdef HAVE_LIBSECCOMP
 	/**
 	 * Is at least one system call filter option enabled?  If yes,
 	 * then failures to set up the filter are fatal.
@@ -159,6 +162,7 @@ struct PreparedChildProcess {
 	bool HasSyscallFilter() const noexcept {
 		return forbid_user_ns || forbid_multicast || forbid_bind;
 	}
+#endif // HAVE_LIBSECCOMP
 
 	void InsertWrapper(std::span<const char *const> w) noexcept;
 
@@ -195,5 +199,3 @@ struct PreparedChildProcess {
 	 */
 	const char *Finish() noexcept;
 };
-
-#endif

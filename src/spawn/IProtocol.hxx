@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "spawn/config.h"
+
 #include <stdint.h>
 
 /*
@@ -60,9 +62,11 @@ enum class SpawnExecCommand : uint8_t {
 	HOSTNAME,
 	RLIMIT,
 	UID_GID,
+#ifdef HAVE_LIBSECCOMP
 	FORBID_USER_NS,
 	FORBID_MULTICAST,
 	FORBID_BIND,
+#endif // HAVE_LIBSECCOMP
 	NO_NEW_PRIVS,
 	CGROUP,
 	CGROUP_SESSION,

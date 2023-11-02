@@ -3,7 +3,6 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Init.hxx"
-#include "SeccompFilter.hxx"
 #include "lib/cap/State.hxx"
 #include "system/CloseRange.hxx"
 #include "system/Error.hxx"
@@ -11,6 +10,11 @@
 #include "system/LinuxFD.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
+#include "config.h"
+
+#ifdef HAVE_LIBSECCOMP
+#include "SeccompFilter.hxx"
+#endif
 
 #include <sys/wait.h>
 #include <sys/signalfd.h>
@@ -76,6 +80,8 @@ DropCapabilities()
 	state.Install();
 }
 
+#ifdef HAVE_LIBSECCOMP
+
 /**
  * Install a very strict seccomp filter which allows only very few
  * system calls.
@@ -109,6 +115,8 @@ LimitSysCalls(FileDescriptor read_fd, pid_t kill_pid)
 	sf.Load();
 }
 
+#endif // HAVE_LIBSECCOMP
+
 int
 SpawnInit(pid_t child_pid, bool remain)
 {
@@ -116,7 +124,9 @@ SpawnInit(pid_t child_pid, bool remain)
 
 	auto init_signal_fd = CreateSignalFD(init_signal_mask, false);
 
+#ifdef HAVE_LIBSECCOMP
 	LimitSysCalls(init_signal_fd, child_pid);
+#endif
 
 	int last_status = EXIT_SUCCESS;
 

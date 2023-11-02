@@ -72,6 +72,16 @@ if get_variable('libcommon_enable_spawn_registry', false)
   libcommon_enable_spawn_options = true
 endif
 
+if get_variable('libcommon_enable_spawn_direct', false) or get_variable('libcommon_enable_spawn_init', false)
+  libseccomp = dependency('libseccomp',
+                          required: get_variable('libcommon_enable_seccomp', true))
+  spawn_config.set('HAVE_LIBSECCOMP', libseccomp.found())
+  if libseccomp.found()
+    spawn_internal_dependencies += libseccomp
+    spawn_sources += 'SeccompFilter.cxx'
+  endif
+endif
+
 if get_variable('libcommon_enable_spawn_direct', false)
   # Enable the SpawnChildProcess() which spawns the
   # child process directly (without the #SpawnService interface).
@@ -79,8 +89,11 @@ if get_variable('libcommon_enable_spawn_direct', false)
   spawn_sources += [
     'Direct.cxx',
     'ErrorPipe.cxx',
-    'SyscallFilter.cxx',
   ]
+
+  if libseccomp.found()
+    spawn_sources += 'SyscallFilter.cxx'
+  endif
 
   libcommon_enable_spawn_daemon = true
   libcommon_enable_spawn_init = true
@@ -101,11 +114,6 @@ if get_variable('libcommon_enable_spawn_init', false)
 
   spawn_sources += [
     'Init.cxx',
-    'SeccompFilter.cxx',
-  ]
-
-  spawn_internal_dependencies += [
-    dependency('libseccomp')
   ]
 endif
 

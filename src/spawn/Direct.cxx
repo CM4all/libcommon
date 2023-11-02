@@ -7,7 +7,6 @@
 #include "Prepared.hxx"
 #include "CgroupOptions.hxx"
 #include "SeccompFilter.hxx"
-#include "SyscallFilter.hxx"
 #include "UserNamespace.hxx"
 #include "Init.hxx"
 #include "spawn/config.h"
@@ -24,6 +23,10 @@
 #include "util/Exception.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/SpanCast.hxx"
+
+#ifdef HAVE_LIBSECCOMP
+#include "SyscallFilter.hxx"
+#endif
 
 #ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-journal.h>
@@ -256,6 +259,7 @@ try {
 	if (p.no_new_privs)
 		prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
 
+#ifdef HAVE_LIBSECCOMP
 	try {
 		Seccomp::Filter sf(SCMP_ACT_ALLOW);
 
@@ -289,6 +293,7 @@ try {
 		fprintf(stderr, "Failed to setup seccomp filter for '%s': %s\n",
 			path, e.what());
 	}
+#endif // HAVE_LIBSECCOMP
 
 	if (!early_uid_gid && !p.uid_gid.IsEmpty())
 		p.uid_gid.Apply();

@@ -734,6 +734,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.ioprio_idle = true;
 			break;
 
+#ifdef HAVE_LIBSECCOMP
 		case SpawnExecCommand::FORBID_USER_NS:
 			p.forbid_user_ns = true;
 			break;
@@ -745,6 +746,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 		case SpawnExecCommand::FORBID_BIND:
 			p.forbid_bind = true;
 			break;
+#endif // HAVE_LIBSECCOMP
 
 		case SpawnExecCommand::NO_NEW_PRIVS:
 			p.no_new_privs = true;

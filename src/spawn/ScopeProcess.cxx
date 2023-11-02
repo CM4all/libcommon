@@ -3,18 +3,24 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ScopeProcess.hxx"
-#include "SeccompFilter.hxx"
 #include "system/clone3.h"
 #include "system/CloseRange.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "io/linux/ProcFdinfo.hxx"
+#include "config.h"
+
+#ifdef HAVE_LIBSECCOMP
+#include "SeccompFilter.hxx"
+#endif
 
 #include <cstdint> // for uintptr_t
 
 #include <limits.h> // for UINT_MAX
 #include <signal.h>
 #include <unistd.h> // for _exit()
+
+#ifdef HAVE_LIBSECCOMP
 
 /**
  * Install a very strict seccomp filter which allows only very few
@@ -38,6 +44,8 @@ LimitSysCalls()
 
 	sf.Load();
 }
+
+#endif // HAVE_LIBSECCOMP
 
 SystemdScopeProcess
 StartSystemdScopeProcess(const bool pid_namespace)
@@ -76,7 +84,9 @@ StartSystemdScopeProcess(const bool pid_namespace)
 		signal(SIGUSR1, SIG_IGN);
 		signal(SIGUSR2, SIG_IGN);
 
+#ifdef HAVE_LIBSECCOMP
 		LimitSysCalls();
+#endif
 
 		std::byte dummy;
 		[[maybe_unused]]
