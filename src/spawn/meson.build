@@ -65,7 +65,7 @@ if get_variable('libcommon_enable_spawn_registry', false)
     'Registry.cxx',
   ]
 
-  spawn_dependencies += [
+  spawn_internal_dependencies += [
     time_dep,
   ]
 
@@ -104,7 +104,7 @@ if get_variable('libcommon_enable_spawn_init', false)
     'SeccompFilter.cxx',
   ]
 
-  spawn_dependencies += [
+  spawn_internal_dependencies += [
     dependency('libseccomp')
   ]
 endif
