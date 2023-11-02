@@ -6,7 +6,6 @@
 #include "ErrorPipe.hxx"
 #include "Prepared.hxx"
 #include "CgroupOptions.hxx"
-#include "SeccompFilter.hxx"
 #include "UserNamespace.hxx"
 #include "Init.hxx"
 #include "spawn/config.h"
@@ -25,6 +24,7 @@
 #include "util/SpanCast.hxx"
 
 #ifdef HAVE_LIBSECCOMP
+#include "SeccompFilter.hxx"
 #include "SyscallFilter.hxx"
 #endif
 
