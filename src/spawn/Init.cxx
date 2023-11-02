@@ -21,7 +21,6 @@
 
 #include <sys/wait.h>
 #include <sys/signalfd.h>
-#include <sys/capability.h>
 #include <unistd.h>
 #include <sched.h>
 #include <stdio.h>
