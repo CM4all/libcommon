@@ -19,6 +19,7 @@
 #include "ZombieReaper.hxx"
 #include "ExitListener.hxx"
 #include "PidfdEvent.hxx"
+#include "spawn/config.h"
 #include "lib/cap/Glue.hxx"
 #include "event/CoarseTimerEvent.hxx"
 #include "event/SocketEvent.hxx"
@@ -33,7 +34,6 @@
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
 #include "util/SharedLease.hxx"
-#include "config.h"
 
 #include <forward_list>
 #include <optional>

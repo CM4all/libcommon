@@ -9,6 +9,7 @@
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
 #include "Server.hxx"
+#include "spawn/config.h"
 #include "lib/cap/State.hxx"
 #include "system/clone3.h"
 #include "system/Error.hxx"
@@ -19,7 +20,6 @@
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
-#include "config.h"
 
 #include <fmt/format.h>
 

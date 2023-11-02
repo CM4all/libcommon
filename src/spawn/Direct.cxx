@@ -10,6 +10,7 @@
 #include "SyscallFilter.hxx"
 #include "UserNamespace.hxx"
 #include "Init.hxx"
+#include "spawn/config.h"
 #include "daemon/Client.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "net/EasyMessage.hxx"
@@ -23,7 +24,6 @@
 #include "util/Exception.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/SpanCast.hxx"
-#include "config.h"
 
 #ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-journal.h>
