@@ -3,12 +3,12 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ScopeProcess.hxx"
+#include "spawn/config.h"
 #include "system/clone3.h"
 #include "system/CloseRange.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "io/linux/ProcFdinfo.hxx"
-#include "config.h"
 
 #ifdef HAVE_LIBSECCOMP
 #include "SeccompFilter.hxx"

@@ -1,4 +1,5 @@
 spawn_config = configuration_data()
+spawn_config.set('HAVE_LIBCAP', cap_dep.found())
 
 spawn_sources = [
   'CgroupKill.cxx',

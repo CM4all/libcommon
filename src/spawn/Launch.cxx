@@ -10,7 +10,6 @@
 #include "CgroupState.hxx"
 #include "Server.hxx"
 #include "spawn/config.h"
-#include "lib/cap/State.hxx"
 #include "system/clone3.h"
 #include "system/Error.hxx"
 #include "system/Mount.hxx"
@@ -20,6 +19,10 @@
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
+
+#ifdef HAVE_LIBCAP
+#include "lib/cap/State.hxx"
+#endif
 
 #include <fmt/format.h>
 
@@ -104,6 +107,7 @@ SetupPidNamespace()
 static void
 DropCapabilities()
 {
+#ifdef HAVE_LIBCAP
 	static constexpr cap_value_t drop_caps[] = {
 		/* not needed at all by the spawner */
 		CAP_DAC_READ_SEARCH,
@@ -122,6 +126,7 @@ DropCapabilities()
 	state.ClearFlag(CAP_INHERITABLE);
 
 	state.Install();
+#endif // HAVE_LIBCAP
 }
 
 static int

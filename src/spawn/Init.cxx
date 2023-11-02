@@ -3,14 +3,17 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Init.hxx"
-#include "lib/cap/State.hxx"
+#include "spawn/config.h"
 #include "system/CloseRange.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "system/LinuxFD.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
-#include "config.h"
+
+#ifdef HAVE_LIBCAP
+#include "lib/cap/State.hxx"
+#endif
 
 #ifdef HAVE_LIBSECCOMP
 #include "SeccompFilter.hxx"
@@ -68,6 +71,7 @@ SpawnInitFork(const char *name)
 static void
 DropCapabilities()
 {
+#ifdef HAVE_LIBCAP
 	static constexpr cap_value_t keep_caps[] = {
 		/* needed to forward received signals to the main child
 		   process (running under a different uid) */
@@ -78,6 +82,7 @@ DropCapabilities()
 	state.SetFlag(CAP_EFFECTIVE, keep_caps, CAP_SET);
 	state.SetFlag(CAP_PERMITTED, keep_caps, CAP_SET);
 	state.Install();
+#endif // HAVE_LIBCAP
 }
 
 #ifdef HAVE_LIBSECCOMP

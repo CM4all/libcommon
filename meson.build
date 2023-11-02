@@ -95,6 +95,7 @@ endif
 inc = include_directories('src', 'fake', '.')
 
 libcommon_require_avahi = get_option('avahi')
+libcommon_require_cap = get_option('cap')
 libcommon_require_cares = get_option('cares')
 libcommon_require_curl = get_option('curl')
 libcommon_require_lua = get_option('lua')

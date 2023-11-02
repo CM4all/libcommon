@@ -20,7 +20,6 @@
 #include "ExitListener.hxx"
 #include "PidfdEvent.hxx"
 #include "spawn/config.h"
-#include "lib/cap/Glue.hxx"
 #include "event/CoarseTimerEvent.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/Loop.hxx"
@@ -34,6 +33,10 @@
 #include "util/PrintException.hxx"
 #include "util/Exception.hxx"
 #include "util/SharedLease.hxx"
+
+#ifdef HAVE_LIBCAP
+#include "lib/cap/Glue.hxx"
+#endif
 
 #include <forward_list>
 #include <optional>
@@ -235,7 +238,11 @@ class SpawnServerProcess {
 	using ConnectionList = IntrusiveList<SpawnServerConnection>;
 	ConnectionList connections;
 
+#ifdef HAVE_LIBCAP
 	const bool is_sys_admin = ::IsSysAdmin();
+#else
+	const bool is_sys_admin = geteuid() == 0;
+#endif
 
 public:
 	SpawnServerProcess(const SpawnConfig &_config,
