@@ -1,5 +1,6 @@
 nlohmann_json = dependency('nlohmann_json',
                            version: '>= 3.11',
+                           fallback: ['nlohmann_json', 'nlohmann_json_multiple_headers'],
                            required: get_variable('libcommon_enable_json', true))
 if not nlohmann_json.found()
   nlohmann_json_dep = nlohmann_json
