@@ -66,22 +66,22 @@ TEST(JWTEdDSA, Basic)
 {
 	/* data from RFC 8037 A.4 */
 
-	static constexpr auto d_base64 = "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A";
-	static constexpr auto x_base64 = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
+	static constexpr auto d_base64 = "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A"sv;
+	static constexpr auto x_base64 = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"sv;
 
 	const auto key = ParseBase64Key(d_base64, x_base64);
 
-	const auto signature = JWT::SignEdDSA(key, "eyJhbGciOiJFZERTQSJ9",
-					      "RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc");
+	const auto signature = JWT::SignEdDSA(key, "eyJhbGciOiJFZERTQSJ9"sv,
+					      "RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc"sv);
 
 	ASSERT_STREQ(signature.c_str(),
 		     "hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg");
 
 	const auto public_key = ParseBase64Key(x_base64);
 	ASSERT_TRUE(JWT::VerifyEdDSA(public_key,
-				     "eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg"));
+				     "eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg"sv));
 
 	const auto d = JWT::VerifyDecodeEdDSA(public_key,
-					      "eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg");
+					      "eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg"sv);
 	ASSERT_EQ(ToStringView(d), "Example of Ed25519 signing"sv);
 }
