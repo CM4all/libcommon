@@ -32,12 +32,31 @@ RSAToJWK(const EVP_PKEY &key)
 	};
 }
 
+static nlohmann::json
+ECToJWK(const EVP_PKEY &key)
+{
+	assert(EVP_PKEY_get_base_id(&key) == EVP_PKEY_EC);
+
+	const auto x = GetBNParam<false>(key, OSSL_PKEY_PARAM_EC_PUB_X);
+	const auto y = GetBNParam<false>(key, OSSL_PKEY_PARAM_EC_PUB_Y);
+
+	return {
+		{ "kty"sv, "EC"sv },
+		{ "crv"sv, "P-256"sv }, // TODO check
+		{ "x"sv, UrlSafeBase64(SslBuffer{*x}.get()).c_str() },
+		{ "y"sv, UrlSafeBase64(SslBuffer{*y}.get()).c_str() },
+	};
+}
+
 nlohmann::json
 ToJWK(const EVP_PKEY &key)
 {
 	switch (EVP_PKEY_get_base_id(&key)) {
 	case EVP_PKEY_RSA:
 		return RSAToJWK(key);
+
+	case EVP_PKEY_EC:
+		return ECToJWK(key);
 
 	default:
 		throw std::invalid_argument{"RSA key expected"};

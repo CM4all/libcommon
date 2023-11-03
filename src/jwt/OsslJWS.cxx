@@ -19,6 +19,9 @@ GetAlg(const EVP_PKEY &key)
 	case EVP_PKEY_RSA:
 		return "RS256"sv;
 
+	case EVP_PKEY_EC:
+		return "ES256"sv;
+
 	default:
 		throw std::invalid_argument{"Unsupported key type"};
 	}
