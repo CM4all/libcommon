@@ -8,6 +8,7 @@ jwt = static_library(
   'RS256.cxx',
   'EdDSA.cxx',
   'OsslJWK.cxx',
+  'OsslJWS.cxx',
   include_directories: inc,
   dependencies: [
     crypto_dep,
