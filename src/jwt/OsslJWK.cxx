@@ -5,11 +5,10 @@
 #include "OsslJWK.hxx"
 #include "lib/sodium/Base64.hxx"
 #include "lib/openssl/Buffer.hxx"
+#include "lib/openssl/EvpParam.hxx"
 #include "util/AllocatedString.hxx"
-#include "util/ScopeExit.hxx"
 
 #include <openssl/evp.h>
-#include <openssl/rsa.h>
 #include <openssl/core_names.h>
 
 #include <nlohmann/json.hpp>
@@ -23,17 +22,8 @@ RSAToJWK(const EVP_PKEY &key)
 {
 	assert(EVP_PKEY_get_base_id(&key) == EVP_PKEY_RSA);
 
-	BIGNUM *n = nullptr;
-	if (!EVP_PKEY_get_bn_param(&key, OSSL_PKEY_PARAM_RSA_N, &n))
-		throw std::runtime_error("Failed to get RSA N value");
-
-	AtScopeExit(n) { BN_clear_free(n); };
-
-	BIGNUM *e = nullptr;
-	if (!EVP_PKEY_get_bn_param(&key, OSSL_PKEY_PARAM_RSA_E, &e))
-		throw std::runtime_error("Failed to get RSA E value");
-
-	AtScopeExit(e) { BN_clear_free(e); };
+	const auto n = GetBNParam<false>(key, OSSL_PKEY_PARAM_RSA_N);
+	const auto e = GetBNParam<false>(key, OSSL_PKEY_PARAM_RSA_E);
 
 	return {
 		{ "e"sv, UrlSafeBase64(SslBuffer{*e}.get()).c_str() },
