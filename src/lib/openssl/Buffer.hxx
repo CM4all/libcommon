@@ -14,10 +14,10 @@ class SslBuffer {
 	std::span<unsigned char> span;
 
 public:
-	explicit SslBuffer(X509 &cert);
-	explicit SslBuffer(X509_NAME &cert);
-	explicit SslBuffer(X509_REQ &req);
-	explicit SslBuffer(EVP_PKEY &key);
+	explicit SslBuffer(const X509 &cert);
+	explicit SslBuffer(const X509_NAME &cert);
+	explicit SslBuffer(const X509_REQ &req);
+	explicit SslBuffer(const EVP_PKEY &key);
 	explicit SslBuffer(const BIGNUM &bn);
 
 	SslBuffer(SslBuffer &&src) noexcept

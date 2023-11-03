@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <new> // for std::bad_alloc
 
-SslBuffer::SslBuffer(X509 &cert)
+SslBuffer::SslBuffer(const X509 &cert)
 {
 	unsigned char *data = nullptr;
 	int result = i2d_X509(&cert, &data);
@@ -18,7 +18,7 @@ SslBuffer::SslBuffer(X509 &cert)
 	span = {data, static_cast<std::size_t>(result)};
 }
 
-SslBuffer::SslBuffer(X509_NAME &name)
+SslBuffer::SslBuffer(const X509_NAME &name)
 {
 	unsigned char *data = nullptr;
 	int result = i2d_X509_NAME(&name, &data);
@@ -28,7 +28,7 @@ SslBuffer::SslBuffer(X509_NAME &name)
 	span = {data, static_cast<std::size_t>(result)};
 }
 
-SslBuffer::SslBuffer(X509_REQ &req)
+SslBuffer::SslBuffer(const X509_REQ &req)
 {
 	unsigned char *data = nullptr;
 	int result = i2d_X509_REQ(&req, &data);
@@ -38,7 +38,7 @@ SslBuffer::SslBuffer(X509_REQ &req)
 	span = {data, static_cast<std::size_t>(result)};
 }
 
-SslBuffer::SslBuffer(EVP_PKEY &key)
+SslBuffer::SslBuffer(const EVP_PKEY &key)
 {
 	unsigned char *data = nullptr;
 	int result = i2d_PrivateKey(&key, &data);
