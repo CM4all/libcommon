@@ -136,6 +136,7 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
 endif
 
 subdir('src/lib/nettle')
+subdir('src/lib/nlohmann_json')
 subdir('src/lib/sodium')
 subdir('src/jwt')
 
