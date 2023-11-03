@@ -44,6 +44,7 @@ crypto = static_library(
   crypto_sources,
   'AltName.cxx',
   'Buffer.cxx',
+  'EvpParam.cxx',
   'Request.cxx',
   'Certificate.cxx',
   'Dummy.cxx',
