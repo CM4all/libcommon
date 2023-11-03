@@ -7,10 +7,12 @@ jwt = static_library(
   'jwt',
   'RS256.cxx',
   'EdDSA.cxx',
+  'OsslJWK.cxx',
   include_directories: inc,
   dependencies: [
     crypto_dep,
     sodium_dep,
+    nlohmann_json_dep,
   ],
 )
 
@@ -18,5 +20,6 @@ jwt_dep = declare_dependency(
   link_with: jwt,
   dependencies: [
     crypto_dep,
+    nlohmann_json_dep,
   ],
 )
