@@ -16,7 +16,6 @@
 #include "util/Cancellable.hxx"
 #include "util/SpanCast.hxx"
 
-#define JSON_NO_IO
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 

@@ -1,12 +1,9 @@
 event_systemd_sources = []
 event_systemd_dependencies = []
 
-nlohmann_json = dependency('nlohmann_json',
-                           version: '>= 3.11',
-                           required: get_variable('libcommon_enable_json', false))
-if nlohmann_json.found()
+if is_variable('nlohmann_json_dep') and nlohmann_json_dep.found()
   event_systemd_sources += 'ResolvedClient.cxx'
-  event_systemd_dependencies += nlohmann_json
+  event_systemd_dependencies += nlohmann_json_dep
 endif
 
 event_systemd = static_library(
