@@ -6,6 +6,7 @@
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 #include "util/HexFormat.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StringBuffer.hxx"
 
 #include <gtest/gtest.h>
@@ -13,6 +14,8 @@
 #include <sodium/utils.h>
 
 #include <stdexcept>
+
+using std::string_view_literals::operator""sv;
 
 static JWT::Ed25519PublicKey
 ParseBase64Key(const std::string_view base64)
@@ -80,6 +83,5 @@ TEST(JWTEdDSA, Basic)
 
 	const auto d = JWT::VerifyDecodeEdDSA(public_key,
 					      "eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc.hgyY0il_MGCjP0JzlnLWG1PPOt7-09PGcvMg3AIbQR6dWbhijcNR4ki4iylGjg5BhVsPt9g7sVvpAr_MuM0KAg");
-	ASSERT_EQ(std::string_view((const char *)d.data(), d.size()),
-		  std::string_view("Example of Ed25519 signing"));
+	ASSERT_EQ(ToStringView(d), "Example of Ed25519 signing"sv);
 }
