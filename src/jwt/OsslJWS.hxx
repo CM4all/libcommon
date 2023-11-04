@@ -8,6 +8,8 @@
 
 #include <string_view>
 
+class AllocatedString;
+
 namespace JWS {
 
 /**
@@ -20,5 +22,18 @@ namespace JWS {
  */
 std::string_view
 GetAlg(const EVP_PKEY &key);
+
+/**
+ * Create a JWS signature with the specified EVP_PKEY.
+ *
+ * Throws on error.
+ *
+ * @param header_b64 the UrlSafeBase64 of the JWT header
+ * @param payload_b64 the UrlSafeBase64 of the payload
+ * @return UrlSafeBase64 of the RSA signature
+ */
+AllocatedString
+Sign(EVP_PKEY &key, std::string_view header_b64,
+     std::string_view payload_b64);
 
 } // namespace JWS
