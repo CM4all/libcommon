@@ -7,6 +7,7 @@
 #include "lib/sodium/SHA256.hxx"
 #include "lib/openssl/Error.hxx"
 #include "lib/openssl/UniqueEVP.hxx"
+#include "lib/openssl/AllocateSign.hxx"
 #include "util/AllocatedString.hxx"
 #include "util/SpanCast.hxx"
 
@@ -44,19 +45,8 @@ SignRS256(EVP_PKEY &key, const SHA256DigestView digest)
 
 #pragma GCC diagnostic pop
 
-	size_t length;
-	if (EVP_PKEY_sign(ctx.get(), nullptr, &length,
-			  reinterpret_cast<const unsigned char *>(digest.data()),
-			  digest.size()) <= 0)
-		throw SslError("EVP_PKEY_sign() failed");
-
-	const auto buffer = std::make_unique<std::byte[]>(length);
-	if (EVP_PKEY_sign(ctx.get(), (unsigned char *)buffer.get(), &length,
-			  reinterpret_cast<const unsigned char *>(digest.data()),
-			  digest.size()) <= 0)
-		throw SslError("EVP_PKEY_sign() failed");
-
-	return UrlSafeBase64({buffer.get(), length});
+	const auto sig = EVP_PKEY_sign(*ctx, digest);
+	return UrlSafeBase64(sig);
 }
 
 AllocatedString
