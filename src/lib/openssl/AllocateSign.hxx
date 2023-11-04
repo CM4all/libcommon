@@ -32,7 +32,8 @@ EVP_PKEY_sign(EVP_PKEY_CTX &ctx, std::span<const std::byte> tbs)
 			  tbs.size()) <= 0)
 		throw SslError("EVP_PKEY_sign() failed");
 
-	assert(length == sig.size());
+	assert(length <= sig.size());
+	sig.SetSize(length);
 
 	return sig;
 }
