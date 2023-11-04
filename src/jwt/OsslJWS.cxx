@@ -4,6 +4,7 @@
 
 #include "OsslJWS.hxx"
 #include "RS256.hxx"
+#include "ES256.hxx"
 #include "util/AllocatedString.hxx"
 
 #include <openssl/evp.h>
@@ -36,6 +37,9 @@ Sign(EVP_PKEY &key, std::string_view header_b64,
 	switch (EVP_PKEY_get_base_id(&key)) {
 	case EVP_PKEY_RSA:
 		return JWT::SignRS256(key, header_b64, payload_b64);
+
+	case EVP_PKEY_EC:
+		return JWT::SignES256(key, header_b64, payload_b64);
 
 	default:
 		throw std::invalid_argument{"Unsupported key type"};

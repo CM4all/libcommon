@@ -5,6 +5,7 @@ endif
 
 jwt = static_library(
   'jwt',
+  'ES256.cxx',
   'RS256.cxx',
   'EdDSA.cxx',
   'OsslJWK.cxx',
