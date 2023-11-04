@@ -20,7 +20,6 @@
 #include "http/local/Address.hxx"
 #include "http/Address.hxx"
 #include "cgi/Address.hxx"
-#include "nfs/Address.hxx"
 #include "uri/Base.hxx"
 #endif
 #include "spawn/ChildOptions.hxx"
@@ -300,7 +299,6 @@ TranslateParser::AddView(const char *name)
 	file_address = nullptr;
 	http_address = nullptr;
 	cgi_address = nullptr;
-	nfs_address = nullptr;
 	lhttp_address = nullptr;
 	transformation_tail = new_view->transformations.before_begin();
 	transformation = nullptr;
@@ -774,7 +772,6 @@ translate_client_file_not_found(TranslateResponse &response,
 			throw std::runtime_error("FILE_NOT_FOUND not compatible with resource address");
 
 		case ResourceAddress::Type::LOCAL:
-		case ResourceAddress::Type::NFS:
 		case ResourceAddress::Type::CGI:
 		case ResourceAddress::Type::FASTCGI:
 		case ResourceAddress::Type::WAS:
@@ -795,9 +792,6 @@ TranslateParser::HandleContentTypeLookup(std::span<const std::byte> payload)
 	if (file_address != nullptr) {
 		content_type = file_address->content_type;
 		content_type_lookup = &file_address->content_type_lookup;
-	} else if (nfs_address != nullptr) {
-		content_type = nfs_address->content_type;
-		content_type_lookup = &nfs_address->content_type_lookup;
 	} else
 		throw std::runtime_error("misplaced CONTENT_TYPE_LOOKUP");
 
@@ -824,7 +818,6 @@ translate_client_enotdir(TranslateResponse &response,
 
 		case ResourceAddress::Type::HTTP:
 		case ResourceAddress::Type::PIPE:
-		case ResourceAddress::Type::NFS:
 			throw std::runtime_error("ENOTDIR not compatible with resource address");
 
 		case ResourceAddress::Type::LOCAL:
@@ -860,7 +853,6 @@ translate_client_directory_index(TranslateResponse &response,
 			throw std::runtime_error("DIRECTORY_INDEX not compatible with resource address");
 
 		case ResourceAddress::Type::LOCAL:
-		case ResourceAddress::Type::NFS:
 			break;
 		}
 	}
@@ -1158,11 +1150,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidAbsolutePath(string_payload))
 			throw std::runtime_error("malformed PATH packet");
 
-		if (nfs_address != nullptr && *nfs_address->path == 0) {
-			nfs_address->path = string_payload.data();
-			return;
-		}
-
 		if (resource_address == nullptr || resource_address->IsDefined())
 			throw std::runtime_error("misplaced PATH packet");
 
@@ -1203,10 +1190,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		} else if (cgi_address != nullptr && !cgi_address->expand_path) {
 			cgi_address->path = string_payload.data();
 			cgi_address->expand_path = true;
-			return;
-		} else if (nfs_address != nullptr && !nfs_address->expand_path) {
-			nfs_address->path = string_payload.data();
-			nfs_address->expand_path = true;
 			return;
 		} else if (file_address != nullptr && !file_address->expand_path) {
 			file_address->path = string_payload.data();
@@ -1261,9 +1244,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 			file_address->gzipped = string_payload.data();
 			return;
-		} else if (nfs_address != nullptr) {
-			/* ignore for now */
-			return;
 		} else {
 			throw std::runtime_error("misplaced GZIPPED packet");
 		}
@@ -1298,11 +1278,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 				throw std::runtime_error("CONTENT_TYPE/CONTENT_TYPE_LOOKUP conflict");
 
 			file_address->content_type = string_payload.data();
-		} else if (nfs_address != nullptr) {
-			if (nfs_address->content_type_lookup.data() != nullptr)
-				throw std::runtime_error("CONTENT_TYPE/CONTENT_TYPE_LOOKUP conflict");
-
-			nfs_address->content_type = string_payload.data();
 		} else if (from_request.content_type_lookup) {
 			response.content_type = string_payload.data();
 		} else
@@ -1381,7 +1356,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		ns_options = nullptr;
 		file_address = nullptr;
 		cgi_address = nullptr;
-		nfs_address = nullptr;
 		lhttp_address = nullptr;
 		return;
 #else
@@ -1653,30 +1627,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::NFS_SERVER:
 #if TRANSLATION_ENABLE_RADDRESS
-		if (resource_address == nullptr || resource_address->IsDefined())
-			throw std::runtime_error("misplaced NFS_SERVER packet");
-
-		if (payload.empty())
-			throw std::runtime_error("malformed NFS_SERVER packet");
-
-		nfs_address = alloc.New<NfsAddress>(string_payload.data(), "", "");
-		*resource_address = *nfs_address;
-		return;
+		throw std::runtime_error{"NFS support has been removed"};
 #else
 		break;
 #endif
 
 	case TranslationCommand::NFS_EXPORT:
 #if TRANSLATION_ENABLE_RADDRESS
-		if (nfs_address == nullptr ||
-		    *nfs_address->export_name != 0)
-			throw std::runtime_error("misplaced NFS_EXPORT packet");
-
-		if (!IsValidAbsolutePath(string_payload))
-			throw std::runtime_error("malformed NFS_EXPORT packet");
-
-		nfs_address->export_name = string_payload.data();
-		return;
+		throw std::runtime_error{"NFS support has been removed"};
 #else
 		break;
 #endif
@@ -2815,8 +2773,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 				throw std::runtime_error("duplicate AUTO_GZIPPED packet");
 
 			file_address->auto_gzipped = true;
-		} else if (nfs_address != nullptr) {
-			/* ignore for now */
 		} else if (from_request.content_type_lookup) {
 			if (response.auto_gzipped)
 				throw std::runtime_error("duplicate AUTO_GZIPPED packet");
@@ -3797,8 +3753,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 				throw std::runtime_error("duplicate AUTO_BROTLI_PATH packet");
 
 			file_address->auto_brotli_path = true;
-		} else if (nfs_address != nullptr) {
-			/* ignore for now */
 		} else if (from_request.content_type_lookup) {
 			if (response.auto_brotli_path)
 				throw std::runtime_error("duplicate AUTO_BROTLI_PATH packet");
@@ -4121,7 +4075,6 @@ TranslateParser::HandlePacket(TranslationCommand command,
 		file_address = nullptr;
 		http_address = nullptr;
 		cgi_address = nullptr;
-		nfs_address = nullptr;
 		lhttp_address = nullptr;
 		address_list = nullptr;
 #endif

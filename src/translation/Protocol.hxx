@@ -305,16 +305,10 @@ enum class TranslationCommand : uint16_t {
 	 */
 	VALIDATE_MTIME = 94,
 
-	/**
-	 * Mount a NFS share.  This packet specifies the server (IP
-	 * address).
-	 */
+	/** deprecated */
 	NFS_SERVER = 95,
 
-	/**
-	 * Mount a NFS share.  This packet specifies the export path to be
-	 * mounted from the server.
-	 */
+	/** deprecated */
 	NFS_EXPORT = 96,
 
 	/**

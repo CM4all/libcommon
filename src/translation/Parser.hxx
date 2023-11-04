@@ -32,7 +32,6 @@ struct FileAddress;
 struct CgiAddress;
 struct HttpAddress;
 struct LhttpAddress;
-struct NfsAddress;
 struct ChildOptions;
 struct NamespaceOptions;
 struct Mount;
@@ -120,9 +119,6 @@ class TranslateParser {
 
 	/** the current CGI/FastCGI/WAS address being edited */
 	CgiAddress *cgi_address;
-
-	/** the current NFS address being edited */
-	NfsAddress *nfs_address;
 
 	/** the current "local HTTP" address being edited */
 	LhttpAddress *lhttp_address;
