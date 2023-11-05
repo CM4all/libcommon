@@ -7,6 +7,7 @@ test(
     'TestHashRing.cxx',
     'TestIntrusiveForwardList.cxx',
     'TestIntrusiveHashSet.cxx',
+    'TestIntrusiveHashArrayTrie.cxx',
     'TestIntrusiveList.cxx',
     'TestFNVHash.cxx',
     'TestMimeType.cxx',
