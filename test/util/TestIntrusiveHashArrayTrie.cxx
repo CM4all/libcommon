@@ -57,6 +57,10 @@ TEST(IntrusiveHashArrayTrie, Basic)
 	EXPECT_FALSE(e.is_linked());
 	EXPECT_FALSE(f.is_linked());
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wunreachable-code-loop-increment"
+#endif
+
 	for ([[maybe_unused]] const auto &i : set)
 		FAIL();
 
