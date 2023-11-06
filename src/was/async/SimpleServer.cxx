@@ -352,8 +352,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 
 	request.cancel_ptr = nullptr;
 
-	if (!control.Send(WAS_COMMAND_STATUS, &response.status,
-			  sizeof(response.status)))
+	if (!control.SendT(WAS_COMMAND_STATUS, response.status))
 		return false;
 
 	if (response.body && http_method_is_empty(request.method)) {
@@ -369,13 +368,13 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 			return false;
 
 	if (response.body) {
-		if (!control.SendEmpty(WAS_COMMAND_DATA) ||
+		if (!control.Send(WAS_COMMAND_DATA) ||
 		    !control.SendUint64(WAS_COMMAND_LENGTH, response.body.size()))
 			return false;
 
 		output.Activate(std::move(response.body));
 	} else {
-		if (!control.SendEmpty(WAS_COMMAND_NO_DATA))
+		if (!control.Send(WAS_COMMAND_NO_DATA))
 			return false;
 	}
 

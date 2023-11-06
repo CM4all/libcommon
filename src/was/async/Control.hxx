@@ -82,11 +82,7 @@ public:
 	bool FlushOutput() noexcept;
 
 	bool Send(enum was_command cmd,
-		  const void *payload, size_t payload_length) noexcept;
-
-	bool SendEmpty(enum was_command cmd) noexcept {
-		return Send(cmd, nullptr, 0);
-	}
+		  std::span<const std::byte> payload={}) noexcept;
 
 	bool SendString(enum was_command cmd,
 			std::string_view payload) noexcept;
@@ -98,8 +94,12 @@ public:
 	bool SendPair(enum was_command cmd, std::string_view name,
 		      std::string_view value) noexcept;
 
+	bool SendT(enum was_command cmd, const auto &payload) noexcept {
+		return Send(cmd, std::as_bytes(std::span{&payload, 1}));
+	}
+
 	bool SendUint64(enum was_command cmd, uint64_t payload) noexcept {
-		return Send(cmd, &payload, sizeof(payload));
+		return SendT(cmd, payload);
 	}
 
 	bool SendArray(enum was_command cmd,

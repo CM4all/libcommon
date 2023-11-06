@@ -5,6 +5,7 @@
 #include "Control.hxx"
 #include "Error.hxx"
 #include "system/Error.hxx"
+#include "util/SpanCast.hxx"
 
 #include <was/protocol.h>
 
@@ -183,23 +184,23 @@ Control::Finish(size_t payload_length) noexcept
 
 bool
 Control::Send(enum was_command cmd,
-	      const void *payload, size_t payload_length) noexcept
+	      std::span<const std::byte> payload) noexcept
 {
 	assert(!done);
 
-	void *dest = Start(cmd, payload_length);
+	void *dest = Start(cmd, payload.size());
 	if (dest == nullptr)
 		return false;
 
-	memcpy(dest, payload, payload_length);
-	Finish(payload_length);
+	memcpy(dest, payload.data(), payload.size());
+	Finish(payload.size());
 	return true;
 }
 
 bool
 Control::SendString(enum was_command cmd, std::string_view payload) noexcept
 {
-	return Send(cmd, payload.data(), payload.size());
+	return Send(cmd, AsBytes(payload));
 }
 
 bool
