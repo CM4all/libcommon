@@ -23,7 +23,6 @@ You need:
 - a C++20 compiler (`GCC <https://gcc.gnu.org/>`__ or `clang
   <https://clang.llvm.org/>`__)
 - `meson 0.56 <http://mesonbuild.com/>`__
-- `Boost <http://boost.org/>`__
 - `libfmt <https://fmt.dev/>`__
 - `libsystemd <https://www.freedesktop.org/wiki/Software/systemd/>`__
 - `libdbus <https://www.freedesktop.org/wiki/Software/dbus/>`__

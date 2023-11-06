@@ -33,7 +33,6 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             meson \
             libavahi-client-dev \
-            libboost-dev \
             libc-ares-dev \
             libsystemd-dev \
             libdbus-1-dev \
