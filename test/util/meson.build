@@ -14,6 +14,7 @@ test(
     'TestStaticCache.cxx',
     'TestStringStrip.cxx',
     'TestTemplateString.cxx',
+    'TestUnaligned.cxx',
     'TestVCircularBuffer.cxx',
     include_directories: inc,
     dependencies: [gtest, util_dep],
