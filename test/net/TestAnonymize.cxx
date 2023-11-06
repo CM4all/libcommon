@@ -10,13 +10,13 @@
 
 using std::string_view_literals::operator""sv;
 
-void
+inline void
 PrintTo(std::string_view s, std::ostream* os)
 {
 	*os << '"' << s << '"';
 }
 
-void
+inline void
 PrintTo(std::pair<std::string_view, std::string_view> p, std::ostream* os)
 {
 	*os << '"' << p.first << p.second << '"';
@@ -24,7 +24,7 @@ PrintTo(std::pair<std::string_view, std::string_view> p, std::ostream* os)
 
 namespace std {
 
-bool
+inline bool
 operator==(pair<string_view, string_view> a,
 	   const string_view b) noexcept
 {
