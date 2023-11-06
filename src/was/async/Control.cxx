@@ -9,11 +9,6 @@
 
 #include <was/protocol.h>
 
-#include <string.h>
-
-#include <stdio.h>
-#include <unistd.h>
-
 namespace Was {
 
 Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
@@ -153,7 +148,7 @@ Control::FlushOutput() noexcept
  *
  */
 
-void *
+std::byte *
 Control::Start(enum was_command cmd, size_t payload_length) noexcept
 {
 	assert(!done);
@@ -169,7 +164,7 @@ Control::Start(enum was_command cmd, size_t payload_length) noexcept
 	header->command = cmd;
 	header->length = payload_length;
 
-	return header + 1;
+	return reinterpret_cast<std::byte *>(header + 1);
 }
 
 void
@@ -188,11 +183,11 @@ Control::Send(enum was_command cmd,
 {
 	assert(!done);
 
-	void *dest = Start(cmd, payload.size());
+	std::byte *dest = Start(cmd, payload.size());
 	if (dest == nullptr)
 		return false;
 
-	memcpy(dest, payload.data(), payload.size());
+	std::copy(payload.begin(), payload.end(), dest);
 	Finish(payload.size());
 	return true;
 }
@@ -209,7 +204,7 @@ Control::SendPair(enum was_command cmd, std::string_view name,
 {
 	const std::size_t payload_size = name.size() + 1 + value.size();
 
-	char *dest = (char *)Start(cmd, payload_size);
+	char *dest = reinterpret_cast<char *>(Start(cmd, payload_size));
 	if (dest == nullptr)
 		return false;
 

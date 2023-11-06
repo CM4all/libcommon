@@ -112,7 +112,8 @@ public:
 	}
 
 private:
-	void *Start(enum was_command cmd, size_t payload_length) noexcept;
+	[[nodiscard]]
+	std::byte *Start(enum was_command cmd, size_t payload_length) noexcept;
 	void Finish(size_t payload_length) noexcept;
 
 	void ScheduleWrite() noexcept;
