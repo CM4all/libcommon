@@ -9,7 +9,7 @@
 #include "AbstractStock.hxx"
 #include "Item.hxx"
 #include "event/DeferEvent.hxx"
-#include "event/TimerEvent.hxx"
+#include "event/CoarseTimerEvent.hxx"
 #include "util/Cancellable.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
@@ -62,7 +62,7 @@ class MultiStock {
 		 * idle items, to get rid of all unused items
 		 * eventually.
 		 */
-		TimerEvent cleanup_timer;
+		CoarseTimerEvent cleanup_timer;
 
 		const Event::Duration cleanup_interval;
 
