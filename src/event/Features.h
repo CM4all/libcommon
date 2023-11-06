@@ -4,6 +4,7 @@
 
 #pragma once
 
+#define NO_BOOST
 #define USE_EVENTFD
 #define USE_SIGNALFD
 #define USE_EPOLL
