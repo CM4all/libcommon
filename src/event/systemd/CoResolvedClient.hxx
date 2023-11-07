@@ -24,9 +24,9 @@ class CoResolveHostname final : ResolveHostnameHandler {
 
 public:
 	CoResolveHostname(EventLoop &event_loop,
-			  std::string_view hostname, int family=AF_UNSPEC,
-			  unsigned port=0) noexcept {
-		ResolveHostname(event_loop, hostname, family, port,
+			  std::string_view hostname, unsigned port=0,
+			  int family=AF_UNSPEC) noexcept {
+		ResolveHostname(event_loop, hostname, port, family,
 				*this, cancel_ptr);
 	}
 
