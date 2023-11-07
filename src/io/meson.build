@@ -4,6 +4,7 @@ io_deps = []
 io = static_library(
   'io',
   'FileDescriptor.cxx',
+  'Pipe.cxx',
   'Open.cxx',
   'Beneath.cxx',
   'MakeDirectory.cxx',

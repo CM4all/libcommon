@@ -14,6 +14,7 @@
 #include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Iovec.hxx"
+#include "io/Pipe.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "system/clone3.h"
@@ -377,9 +378,7 @@ try {
 	 * If an error occurs during setup, the child process will
 	 * write an error message to this pipe.
 	 */
-	UniqueFileDescriptor error_pipe_r, error_pipe_w;
-	if (!UniqueFileDescriptor::CreatePipe(error_pipe_r, error_pipe_w))
-		throw MakeErrno("pipe() failed");
+	auto [error_pipe_r, error_pipe_w] = CreatePipe();
 
 	UniqueFileDescriptor old_pidns;
 
