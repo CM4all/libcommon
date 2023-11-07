@@ -13,6 +13,7 @@
 #include "Mount.hxx"
 #include "ExitListener.hxx"
 #include "system/Error.hxx"
+#include "net/SocketPair.hxx"
 #include "util/PrintException.hxx"
 
 #include <stdexcept>
@@ -126,11 +127,7 @@ SpawnServerClient::Connect()
 {
 	CheckOrAbort();
 
-	UniqueSocketDescriptor local_socket, remote_socket;
-	if (!UniqueSocketDescriptor::CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET, 0,
-							      local_socket,
-							      remote_socket))
-		throw MakeErrno("socketpair() failed");
+	auto [local_socket, remote_socket] = CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET);
 
 	static constexpr SpawnRequestCommand cmd = SpawnRequestCommand::CONNECT;
 
@@ -143,7 +140,7 @@ SpawnServerClient::Connect()
 		std::throw_with_nested(std::runtime_error("Spawn server failed"));
 	}
 
-	return local_socket;
+	return std::move(local_socket);
 }
 
 static void

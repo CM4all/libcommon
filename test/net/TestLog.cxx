@@ -7,6 +7,7 @@
 #include "net/log/Parser.hxx"
 #include "net/log/Datagram.hxx"
 #include "net/SocketError.hxx"
+#include "net/SocketPair.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "http/Method.hxx"
 #include "http/Status.hxx"
@@ -107,10 +108,7 @@ TEST(Log, Serializer)
 static auto
 SendReceive(const Net::Log::Datagram &src)
 {
-	UniqueSocketDescriptor a, b;
-	if (!UniqueSocketDescriptor::CreateSocketPair(AF_LOCAL, SOCK_SEQPACKET,
-						      0, a, b))
-		throw MakeSocketError("Failed to create socket pair");
+	auto [a, b] = CreateSocketPair(SOCK_SEQPACKET);
 
 	Net::Log::Send(a, src);
 

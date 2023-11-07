@@ -15,6 +15,7 @@
 #include "system/Mount.hxx"
 #include "system/ProcessName.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
+#include "net/SocketPair.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -307,13 +308,10 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 UniqueSocketDescriptor
 LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook)
 {
-	UniqueSocketDescriptor s1, s2;
-	if (!UniqueSocketDescriptor::CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET, 0,
-							      s1, s2))
-		throw MakeErrno("socketpair() failed");
+	auto [for_client, for_server] = CreateSocketPairNonBlock(SOCK_SEQPACKET);
 
-	LaunchSpawnServer(config, hook, std::move(s1),
-			  [&s2](){ s2.Close(); });
+	LaunchSpawnServer(config, hook, std::move(for_server),
+			  [&]{ for_client.Close(); });
 
-	return s2;
+	return std::move(for_client);
 }
