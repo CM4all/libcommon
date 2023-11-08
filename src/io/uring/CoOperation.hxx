@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Operation.hxx"
-#include "co/Compat.hxx"
+#include "co/AwaitableHelper.hxx"
 
 #include <cstddef>
 #include <span>
@@ -48,6 +48,9 @@ template<typename T>
 class CoOperation final : public CoOperationBase {
 	T base;
 
+	using Awaitable = Co::AwaitableHelper<CoOperation<T>, false>;
+	friend Awaitable;
+
 	template<typename... Args>
 	CoOperation(struct io_uring_sqe &sqe, Queue &queue, Args&&... args)
 		:base(sqe, std::forward<Args>(args)...)
@@ -61,29 +64,16 @@ public:
 		:CoOperation(_RequireSubmitEntry(queue), queue,
 			     std::forward<Args>(args)...) {}
 
-	struct Awaitable final {
-		CoOperation &op;
-
-		bool await_ready() const noexcept {
-			return !op.IsUringPending();
-		}
-
-		std::coroutine_handle<> await_suspend(std::coroutine_handle<> continuation) noexcept {
-			op.continuation = continuation;
-			return std::noop_coroutine();
-		}
-
-		decltype(auto) await_resume() const {
-			return op.GetValue();
-		}
-	};
-
 	Awaitable operator co_await() noexcept {
-		return {*this};
+		return *this;
 	}
 
 private:
-	decltype(auto) GetValue() noexcept {
+	bool IsReady() const noexcept {
+		return !IsUringPending();
+	}
+
+	decltype(auto) TakeValue() noexcept {
 		return base.GetValue(result);
 	}
 };

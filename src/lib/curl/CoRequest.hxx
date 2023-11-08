@@ -6,7 +6,7 @@
 
 #include "Request.hxx"
 #include "Handler.hxx"
-#include "co/Compat.hxx"
+#include "co/AwaitableHelper.hxx"
 
 #include <exception>
 
@@ -33,34 +33,25 @@ class CoRequest final : CurlResponseHandler {
 
 	bool ready = false;
 
+	using Awaitable = Co::AwaitableHelper<CoRequest>;
+	friend Awaitable;
+
 public:
 	CoRequest(CurlGlobal &global, CurlEasy easy);
 
-	auto operator co_await() noexcept {
-		struct Awaitable final {
-			CoRequest &request;
-
-			bool await_ready() const noexcept {
-				return request.ready;
-			}
-
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) const noexcept {
-				request.continuation = _continuation;
-				return std::noop_coroutine();
-			}
-
-			CoResponse await_resume() const {
-				if (request.error)
-					std::rethrow_exception(std::move(request.error));
-
-				return std::move(request.response);
-			}
-		};
-
-		return Awaitable{*this};
+	Awaitable operator co_await() noexcept {
+		return *this;
 	}
 
 private:
+	bool IsReady() const noexcept {
+		return ready;
+	}
+
+	CoResponse TakeValue() noexcept {
+		return std::move(response);
+	}
+
 	/* virtual methods from CurlResponseHandler */
 	void OnHeaders(HttpStatus status, Headers &&headers) override;
 	void OnData(std::span<const std::byte> data) override;

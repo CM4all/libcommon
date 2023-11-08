@@ -6,7 +6,7 @@
 
 #include "ConnectSocket.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "co/Compat.hxx"
+#include "co/AwaitableHelper.hxx"
 
 class CoConnectSocket final : ConnectSocketHandler {
 	ConnectSocket connect;
@@ -17,6 +17,9 @@ class CoConnectSocket final : ConnectSocketHandler {
 
 	std::exception_ptr error;
 
+	using Awaitable = Co::AwaitableHelper<CoConnectSocket>;
+	friend Awaitable;
+
 public:
 	CoConnectSocket(EventLoop &event_loop,
 			const auto &address,
@@ -26,31 +29,19 @@ public:
 		connect.Connect(address, timeout);
 	}
 
-	auto operator co_await() noexcept {
-		struct Awaitable final {
-			CoConnectSocket &task;
-
-			bool await_ready() const noexcept {
-				return !task.connect.IsPending();
-			}
-
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
-				task.continuation = _continuation;
-				return std::noop_coroutine();
-			}
-
-			decltype(auto) await_resume() {
-				if (task.error)
-					std::rethrow_exception(task.error);
-
-				return std::move(task.value);
-			}
-		};
-
-		return Awaitable{*this};
+	Awaitable operator co_await() noexcept {
+		return *this;
 	}
 
 private:
+	bool IsReady() const noexcept {
+		return !connect.IsPending();
+	}
+
+	UniqueSocketDescriptor TakeValue() noexcept {
+		return std::move(value);
+	}
+
 	/* virtual methods from ConnectSocketHandler */
 	void OnSocketConnectSuccess(UniqueSocketDescriptor fd) noexcept override {
 		value = std::move(fd);

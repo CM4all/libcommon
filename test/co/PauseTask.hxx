@@ -2,7 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#include "co/Compat.hxx"
+#include "co/AwaitableHelper.hxx"
 
 #include <cassert>
 
@@ -13,29 +13,12 @@ class PauseTask {
 
 	bool resumed = false;
 
-	struct Awaitable final {
-		PauseTask &task;
+	friend Co::AwaitableHelper<PauseTask, false>;
 
-		Awaitable(PauseTask &_task) noexcept:task(_task) {}
-
+	struct Awaitable : Co::AwaitableHelper<PauseTask, false> {
 		~Awaitable() noexcept {
 			task.continuation = {};
-		}
-
-		Awaitable(const Awaitable &) = delete;
-		Awaitable &operator=(const Awaitable &) = delete;
-
-		bool await_ready() const noexcept {
-			return task.resumed;
-		}
-
-		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
-			task.continuation = _continuation;
-			return std::noop_coroutine();
-		}
-
-		void await_resume() noexcept {
-		}
+               }
 	};
 
 public:
@@ -55,6 +38,13 @@ public:
 		if (continuation)
 			continuation.resume();
 	}
+
+private:
+	bool IsReady() const noexcept {
+		return resumed;
+	}
+
+	void TakeValue() const noexcept {}
 };
 
 } // namespace Co

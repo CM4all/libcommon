@@ -6,7 +6,7 @@
 
 #include "Stock.hxx"
 #include "GetHandler.hxx"
-#include "co/Compat.hxx"
+#include "co/AwaitableHelper.hxx"
 #include "util/Cancellable.hxx"
 
 /**
@@ -21,6 +21,9 @@ class CoStockGet final : public StockGetHandler {
 
 	std::coroutine_handle<> continuation;
 
+	using Awaitable = Co::AwaitableHelper<CoStockGet>;
+	friend Awaitable;
+
 public:
 	CoStockGet(Stock &stock, StockRequest request) noexcept {
 		stock.Get(std::move(request), *this, cancel_ptr);
@@ -33,31 +36,19 @@ public:
 			item->Put(PutAction::REUSE);
 	}
 
-	auto operator co_await() noexcept {
-		struct Awaitable final {
-			CoStockGet &get;
-
-			bool await_ready() const noexcept {
-				return get.item != nullptr || get.error;
-			}
-
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) const noexcept {
-				get.continuation = _continuation;
-				return std::noop_coroutine();
-			}
-
-			StockItem *await_resume() {
-				if (get.error)
-					std::rethrow_exception(get.error);
-
-				return std::exchange(get.item, nullptr);
-			}
-		};
-
+	Awaitable operator co_await() noexcept {
 		return Awaitable{*this};
 	}
 
 private:
+	bool IsReady() const noexcept {
+		return item != nullptr || error;
+	}
+
+	StockItem *TakeValue() noexcept {
+		return std::exchange(item, nullptr);
+	}
+
 	/* virtual methods from StockGetHandler */
 	void OnStockItemReady(StockItem &_item) noexcept override {
 		cancel_ptr = nullptr;

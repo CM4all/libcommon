@@ -5,7 +5,7 @@
 #pragma once
 
 #include "ResolvedClient.hxx"
-#include "co/Compat.hxx"
+#include "co/AwaitableHelper.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 #include "util/Cancellable.hxx"
 
@@ -22,6 +22,9 @@ class CoResolveHostname final : ResolveHostnameHandler {
 
 	CancellablePointer cancel_ptr{nullptr};
 
+	using Awaitable = Co::AwaitableHelper<CoResolveHostname>;
+	friend Awaitable;
+
 public:
 	CoResolveHostname(EventLoop &event_loop,
 			  std::string_view hostname, unsigned port=0,
@@ -35,31 +38,19 @@ public:
 			cancel_ptr.Cancel();
 	}
 
-	auto operator co_await() noexcept {
-		struct Awaitable final {
-			CoResolveHostname &lookup;
-
-			bool await_ready() const noexcept {
-				return !lookup.cancel_ptr;
-			}
-
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
-				lookup.continuation = _continuation;
-				return std::noop_coroutine();
-			}
-
-			decltype(auto) await_resume() {
-				if (lookup.error)
-					std::rethrow_exception(lookup.error);
-
-				return std::move(lookup.value);
-			}
-		};
-
-		return Awaitable{*this};
+	Awaitable operator co_await() noexcept {
+		return *this;
 	}
 
 private:
+	bool IsReady() const noexcept {
+		return !cancel_ptr;
+	}
+
+	std::vector<AllocatedSocketAddress> TakeValue() noexcept {
+		return std::move(value);
+	}
+
 	/* virtual methods from ResolveHostnameHandler */
 	void OnResolveHostname(std::span<const SocketAddress> addresses) noexcept override {
 		cancel_ptr = nullptr;

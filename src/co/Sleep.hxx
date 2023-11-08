@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Compat.hxx"
+#include "AwaitableHelper.hxx"
 #include "event/FineTimerEvent.hxx"
 
 namespace Co {
@@ -18,6 +19,9 @@ class Sleep final {
 
 	std::coroutine_handle<> continuation;
 
+	using Awaitable = AwaitableHelper<Sleep, false>;
+	friend Awaitable;
+
 public:
 	[[nodiscard]]
 	Sleep(EventLoop &event_loop, Event::Duration d) noexcept
@@ -27,29 +31,17 @@ public:
 	}
 
 	[[nodiscard]]
-	auto operator co_await() noexcept {
-		struct Awaitable final {
-			Sleep &sleep;
-
-			[[nodiscard]]
-			bool await_ready() const noexcept {
-				return !sleep.event.IsPending();
-			}
-
-			[[nodiscard]]
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
-				sleep.continuation = _continuation;
-				return std::noop_coroutine();
-			}
-
-			void await_resume() noexcept {
-			}
-		};
-
-		return Awaitable{*this};
+	Awaitable operator co_await() noexcept {
+		return *this;
 	}
 
 private:
+	bool IsReady() const noexcept {
+		return !event.IsPending();
+	}
+
+	void TakeValue() const noexcept {}
+
 	void OnTimer() noexcept {
 		continuation.resume();
 	}
