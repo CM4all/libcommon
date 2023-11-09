@@ -33,7 +33,6 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             meson \
             libavahi-client-dev \
-            libc-ares-dev \
             libsystemd-dev \
             libdbus-1-dev \
             libcap-dev \
@@ -53,7 +52,6 @@ jobs:
         run: |
           meson setup \
              -Davahi=enabled \
-             -Dcares=enabled \
              -Dcurl=enabled \
              -Dlua=enabled \
              -Dmariadb=enabled \

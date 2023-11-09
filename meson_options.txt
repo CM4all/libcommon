@@ -1,5 +1,4 @@
 option('avahi', type: 'feature', description: 'Avahi support (using libavahi-client)')
-option('cares', type: 'feature', description: 'c-ares support')
 option('curl', type: 'feature', description: 'CURL support')
 option('lua', type: 'feature', description: 'Lua support (using luajit)')
 option('json', type: 'feature', description: 'JSON support (using nlohman_json)')

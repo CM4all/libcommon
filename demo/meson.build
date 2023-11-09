@@ -1,5 +1,4 @@
 subdir('avahi')
-subdir('cares')
 subdir('co')
 subdir('curl')
 subdir('io/linux')
