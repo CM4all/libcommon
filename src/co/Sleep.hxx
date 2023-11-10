@@ -43,7 +43,8 @@ private:
 	void TakeValue() const noexcept {}
 
 	void OnTimer() noexcept {
-		continuation.resume();
+		if (continuation)
+			continuation.resume();
 	}
 };
 
