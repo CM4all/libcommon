@@ -969,6 +969,13 @@ public:
 		}
 
 		template<typename... Types>
+		auto Shell(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::SHELL,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
 		auto Rlimits(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::RLIMITS,
 					      value...);
