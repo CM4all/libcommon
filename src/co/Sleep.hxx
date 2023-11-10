@@ -8,6 +8,8 @@
 #include "AwaitableHelper.hxx"
 #include "event/FineTimerEvent.hxx"
 
+#include <cassert>
+
 namespace Co {
 
 /**
@@ -43,6 +45,52 @@ private:
 	void TakeValue() const noexcept {}
 
 	void OnTimer() noexcept {
+		if (continuation)
+			continuation.resume();
+	}
+};
+
+/**
+ * Like #Sleep, but schedule the timer only when being awaited (which
+ * avoids the timer list overhead when this object is never awaited).
+ * The duration is relative to the time the object was constructed.
+ */
+class LazySleep final {
+	FineTimerEvent event;
+
+	std::coroutine_handle<> continuation;
+
+	bool ready = false;
+
+	using Awaitable = AwaitableHelper<LazySleep, false>;
+	friend Awaitable;
+
+public:
+	[[nodiscard]]
+	LazySleep(EventLoop &event_loop, Event::Duration d) noexcept
+		:event(event_loop, BIND_THIS_METHOD(OnTimer))
+	{
+		event.SetDue(d);
+	}
+
+	[[nodiscard]]
+	Awaitable operator co_await() noexcept {
+		if (!ready && !event.IsPending())
+			event.ScheduleCurrent();
+
+		return *this;
+	}
+
+private:
+	bool IsReady() const noexcept {
+		return ready;
+	}
+
+	void TakeValue() const noexcept {}
+
+	void OnTimer() noexcept {
+		ready = true;
+
 		if (continuation)
 			continuation.resume();
 	}
