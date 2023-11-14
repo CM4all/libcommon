@@ -1212,6 +1212,15 @@ enum class TranslationCommand : uint16_t {
 	 * Limit file access to files beneath this directory.
 	 */
 	BENEATH = 253,
+
+	/**
+	 * Like #UID_GID, but these are the numbers visible inside the
+	 * user namespace.
+	 *
+	 * Currently, only the uid is implemented, therefore the
+	 * payload must be a 32-bit integer.
+	 */
+	MAPPED_UID_GID = 254,
 };
 
 struct TranslationHeader {

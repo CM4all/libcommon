@@ -953,6 +953,23 @@ TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 }
 
 inline void
+TranslateParser::HandleMappedUidGid(std::span<const std::byte> payload)
+{
+	if (child_options == nullptr || child_options->uid_gid.uid == 0 ||
+	    ns_options == nullptr || !ns_options->enable_user)
+		throw std::runtime_error{"misplaced MAPPED_UID_GID packet"};
+
+	const auto *value = (const uint32_t *)(const void *)payload.data();
+	if (payload.size() != sizeof(*value) || *value <= 0)
+		throw std::runtime_error{"malformed MAPPED_UID_GID packet"};
+
+	if (ns_options->mapped_uid != 0)
+		throw std::runtime_error{"duplicate MAPPED_UID_GID packet"};
+
+	ns_options->mapped_uid = *value;
+}
+
+inline void
 TranslateParser::HandleUmask(std::span<const std::byte> payload)
 {
 	typedef uint16_t value_type;
@@ -4020,6 +4037,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::MAPPED_UID_GID:
+		HandleMappedUidGid(payload);
+		return;
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
