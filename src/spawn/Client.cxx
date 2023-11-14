@@ -173,6 +173,12 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 	s.WriteOptionalString(SpawnExecCommand::NETWORK_NS_NAME,
 			      ns.network_namespace);
 	s.WriteOptional(SpawnExecCommand::IPC_NS, ns.enable_ipc);
+
+	if (ns.mapped_uid > 0) {
+		s.Write(SpawnExecCommand::MAPPED_UID);
+		s.WriteT(ns.mapped_uid);
+	}
+
 	s.WriteOptional(SpawnExecCommand::MOUNT_PROC, ns.mount.mount_proc);
 	s.WriteOptional(SpawnExecCommand::MOUNT_DEV, ns.mount.mount_dev);
 	s.WriteOptional(SpawnExecCommand::MOUNT_PTS, ns.mount.mount_pts);

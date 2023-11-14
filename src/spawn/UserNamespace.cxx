@@ -28,11 +28,13 @@ WriteFileOrThrow(FileDescriptor directory, const char *path, std::string_view da
 }
 
 void
-SetupUidMap(unsigned pid, unsigned uid, bool root)
+SetupUidMap(unsigned pid, unsigned uid,
+	    unsigned mapped_uid,
+	    bool root)
 {
 	char data_buffer[256];
 
-	size_t position = sprintf(data_buffer, "%u %u 1\n", uid, uid);
+	size_t position = sprintf(data_buffer, "%u %u 1\n", mapped_uid, uid);
 	if (root && uid != 0)
 		strcpy(data_buffer + position, "0 0 1\n");
 

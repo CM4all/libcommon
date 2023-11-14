@@ -296,8 +296,17 @@ try {
 	}
 #endif // HAVE_LIBSECCOMP
 
-	if (!early_uid_gid && !p.uid_gid.IsEmpty())
-		p.uid_gid.Apply();
+	if (!early_uid_gid && !p.uid_gid.IsEmpty()) {
+		if (p.ns.mapped_uid > 0 && p.ns.mapped_uid != p.uid_gid.uid) {
+			/* we need to use the mapped_uid because the
+			   original uid isn't valid from inside this
+			   user namespace */
+			auto mapped = p.uid_gid;
+			mapped.uid = p.ns.mapped_uid;
+			mapped.Apply();
+		} else
+			p.uid_gid.Apply();
+	}
 
 	if (p.chdir != nullptr && chdir(p.chdir) < 0)
 		throw FmtErrno("chdir('{}') failed", p.chdir);

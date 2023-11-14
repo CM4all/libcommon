@@ -20,10 +20,13 @@ DenySetGroups(unsigned pid);
  * @param pid the process id whose user namespace shall be modified; 0
  * for current process
  * @param uid the user id to be mapped inside the user namespace
+ * @param mapped_uid the user id the #uid parameter is mapped to
  * @param root true to also map root
  */
 void
-SetupUidMap(unsigned pid, unsigned uid, bool root);
+SetupUidMap(unsigned pid, unsigned uid,
+	    unsigned mapped_uid,
+	    bool root);
 
 /**
  * Set up a gid mapping for a user namespace.

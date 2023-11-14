@@ -62,6 +62,7 @@ enum class SpawnExecCommand : uint8_t {
 	HOSTNAME,
 	RLIMIT,
 	UID_GID,
+	MAPPED_UID,
 #ifdef HAVE_LIBSECCOMP
 	FORBID_USER_NS,
 	FORBID_MULTICAST,

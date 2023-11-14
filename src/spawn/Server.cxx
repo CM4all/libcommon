@@ -733,6 +733,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			Read(payload, p.uid_gid);
 			break;
 
+		case SpawnExecCommand::MAPPED_UID:
+			payload.ReadT(p.ns.mapped_uid);
+			break;
+
 		case SpawnExecCommand::SCHED_IDLE_:
 			p.sched_idle = true;
 			break;

@@ -24,6 +24,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 	 enable_cgroup(src.enable_cgroup),
 	 enable_network(src.enable_network),
 	 enable_ipc(src.enable_ipc),
+	 mapped_uid(src.mapped_uid),
 	 pid_namespace(alloc.CheckDup(src.pid_namespace)),
 	 network_namespace(alloc.CheckDup(src.network_namespace)),
 	 hostname(alloc.CheckDup(src.hostname)),
@@ -80,7 +81,9 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
 		gids.emplace(uid_gid.groups[i]);
 
 	SetupGidMap(pid, gids);
-	SetupUidMap(pid, uid_gid.uid, false);
+	SetupUidMap(pid, uid_gid.uid,
+		    mapped_uid > 0 ? mapped_uid : uid_gid.uid,
+		    false);
 }
 
 void
@@ -110,7 +113,9 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 			SetupGidMap(0, uid_gid.gid, false);
 		// TODO: map the current effective gid if no gid was given?
 
-		SetupUidMap(0, uid_gid.uid, false);
+		SetupUidMap(0, uid_gid.uid,
+			    mapped_uid > 0 ? mapped_uid : uid_gid.uid,
+			    false);
 	}
 
 	if (network_namespace != nullptr)
@@ -162,6 +167,11 @@ NamespaceOptions::MakeId(char *p) const
 
 	if (enable_ipc)
 		p = (char *)mempcpy(p, ";ins", 4);
+
+	if (mapped_uid > 0) {
+		p = (char *)mempcpy(p, ";mu", 3);
+		p += sprintf(p, "%u", (unsigned)mapped_uid);
+	}
 
 	p = mount.MakeId(p);
 
