@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
 
 namespace Pg {
 
@@ -32,7 +33,7 @@ public:
 	 * std::invalid_argument on error.
 	 */
 	[[nodiscard]]
-	static Serial Parse(const char *s);
+	static Serial Parse(std::string_view s);
 };
 
 /**
@@ -59,7 +60,7 @@ public:
 	 * std::invalid_argument on error.
 	 */
 	[[nodiscard]]
-	static BigSerial Parse(const char *s);
+	static BigSerial Parse(std::string_view s);
 };
 
 }
