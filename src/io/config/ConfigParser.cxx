@@ -338,7 +338,7 @@ IncludeConfigParser::IncludeOptionalPath(std::filesystem::path &&p)
 			return;
 
 		default:
-			throw FmtErrno(e, "Failed to open {}", sub.path.c_str());
+			throw FmtErrno(e, "Failed to open {}", sub.path.native());
 		}
 	}
 
@@ -353,7 +353,7 @@ ParseConfigFile(const std::filesystem::path &path, ConfigParser &parser)
 {
 	FILE *file = fopen(path.c_str(), "r");
 	if (file == nullptr)
-		throw FmtErrno("Failed to open {}", path.c_str());
+		throw FmtErrno("Failed to open {}", path.native());
 
 	AtScopeExit(file) { fclose(file); };
 
