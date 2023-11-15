@@ -249,14 +249,12 @@ IncludeConfigParser::PreParseLine(FileLineParser &line)
 void
 IncludeConfigParser::ParseLine(FileLineParser &line)
 {
-	if (line.SkipWord("@include") ||
-	    /* v11.2 legacy: */ line.SkipWord("include")) {
+	if (line.SkipWord("@include")) {
 		auto p = line.ExpectPath();
 		line.ExpectEnd();
 
 		IncludePath(std::move(p));
-	} else if (line.SkipWord("@include_optional") ||
-		   /* v11.2 legacy: */ line.SkipWord("include_optional")) {
+	} else if (line.SkipWord("@include_optional")) {
 		auto p = line.ExpectPath();
 		line.ExpectEnd();
 
