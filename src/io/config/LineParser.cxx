@@ -9,7 +9,7 @@
 #include <string.h>
 
 bool
-LineParser::SkipWord(const char *word)
+LineParser::SkipWord(const char *word) noexcept
 {
 	char *q = p;
 
@@ -29,7 +29,7 @@ LineParser::SkipWord(const char *word)
 }
 
 const char *
-LineParser::NextWord()
+LineParser::NextWord() noexcept
 {
 	if (!IsWordChar(front()))
 		return nullptr;
@@ -49,7 +49,7 @@ LineParser::NextWord()
 }
 
 inline char *
-LineParser::NextUnquotedValue()
+LineParser::NextUnquotedValue() noexcept
 {
 	if (!IsUnquotedChar(front()))
 		return nullptr;
@@ -69,7 +69,7 @@ LineParser::NextUnquotedValue()
 }
 
 inline char *
-LineParser::NextRelaxedUnquotedValue()
+LineParser::NextRelaxedUnquotedValue() noexcept
 {
 	if (IsEnd())
 		return nullptr;
@@ -88,7 +88,7 @@ LineParser::NextRelaxedUnquotedValue()
 }
 
 inline char *
-LineParser::NextQuotedValue(const char stop)
+LineParser::NextQuotedValue(const char stop) noexcept
 {
 	char *const value = p;
 	char *q = strchr(p, stop);
@@ -101,7 +101,7 @@ LineParser::NextQuotedValue(const char stop)
 }
 
 char *
-LineParser::NextValue()
+LineParser::NextValue() noexcept
 {
 	const char ch = front();
 	if (IsQuote(ch)) {
@@ -112,7 +112,7 @@ LineParser::NextValue()
 }
 
 char *
-LineParser::NextRelaxedValue()
+LineParser::NextRelaxedValue() noexcept
 {
 	const char ch = front();
 	if (IsQuote(ch)) {
@@ -123,7 +123,7 @@ LineParser::NextRelaxedValue()
 }
 
 char *
-LineParser::NextUnescape()
+LineParser::NextUnescape() noexcept
 {
 	const char stop = front();
 	if (!IsQuote(stop))

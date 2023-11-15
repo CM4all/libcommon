@@ -17,7 +17,9 @@ class LineParser {
 public:
 	using Error = std::runtime_error;
 
-	explicit LineParser(char *_p):p(StripLeft(_p)) {
+	explicit LineParser(char *_p) noexcept
+		:p(StripLeft(_p))
+	{
 		StripRight(p);
 	}
 
@@ -25,23 +27,23 @@ public:
 	 * Replace the string pointer.  This is a kludge for class
 	 * #VariableConfigParser.
 	 */
-	void Replace(char *_p) {
+	void Replace(char *_p) noexcept {
 		p = _p;
 	}
 
-	char *Rest() {
+	char *Rest() noexcept {
 		return p;
 	}
 
-	void Strip() {
+	void Strip() noexcept {
 		p = StripLeft(p);
 	}
 
-	char front() const {
+	char front() const noexcept {
 		return *p;
 	}
 
-	bool IsEnd() const {
+	bool IsEnd() const noexcept {
 		return front() == 0;
 	}
 
@@ -81,7 +83,7 @@ public:
 		return found;
 	}
 
-	bool SkipSymbol(char a, char b) {
+	bool SkipSymbol(char a, char b) noexcept {
 		bool found = p[0] == a && p[1] == b;
 		if (found)
 			p += 2;
@@ -93,12 +95,12 @@ public:
 	 * return true.  If not, the method returns false, leaving the
 	 * object unmodified.
 	 */
-	bool SkipWord(const char *word);
+	bool SkipWord(const char *word) noexcept;
 
-	const char *NextWord();
-	char *NextValue();
-	char *NextRelaxedValue();
-	char *NextUnescape();
+	const char *NextWord() noexcept;
+	char *NextValue() noexcept;
+	char *NextRelaxedValue() noexcept;
+	char *NextUnescape() noexcept;
 
 	bool NextBool();
 	unsigned NextPositiveInteger();
@@ -124,15 +126,15 @@ public:
 	}
 
 private:
-	char *NextUnquotedValue();
-	char *NextRelaxedUnquotedValue();
-	char *NextQuotedValue(char stop);
+	char *NextUnquotedValue() noexcept;
+	char *NextRelaxedUnquotedValue() noexcept;
+	char *NextQuotedValue(char stop) noexcept;
 
-	static constexpr bool IsUnquotedChar(char ch) {
+	static constexpr bool IsUnquotedChar(char ch) noexcept {
 		return IsWordChar(ch) || ch == '.' || ch == '-' || ch == ':';
 	}
 
-	static constexpr bool IsQuote(char ch) {
+	static constexpr bool IsQuote(char ch) noexcept {
 		return ch == '"' || ch == '\'';
 	}
 };
