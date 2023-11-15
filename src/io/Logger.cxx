@@ -51,23 +51,6 @@ LoggerDetail::WriteV(std::string_view domain,
 }
 
 void
-LoggerDetail::Format(unsigned level, std::string_view domain,
-		     const char *fmt, ...) noexcept
-{
-	if (!CheckLevel(level))
-		return;
-
-	char buffer[2048];
-
-	va_list ap;
-	va_start(ap, fmt);
-	std::string_view s(buffer, vsnprintf(buffer, sizeof(buffer), fmt, ap));
-	va_end(ap);
-
-	WriteV(domain, {&s, 1});
-}
-
-void
 LoggerDetail::Fmt(unsigned level, std::string_view domain,
 		  fmt::string_view format_str, fmt::format_args args) noexcept
 {

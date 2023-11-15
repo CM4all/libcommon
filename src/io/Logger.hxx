@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "util/Compiler.h"
-
 #include <fmt/core.h>
 
 #include <cstdint>
@@ -17,7 +15,6 @@
 #include <tuple>
 #include <utility>
 
-#include <stdio.h>
 #include <inttypes.h>
 
 namespace LoggerDetail {
@@ -158,10 +155,6 @@ LogConcat(unsigned level, std::string_view domain, Params... _params) noexcept
 	WriteV(domain, params.values);
 }
 
-gcc_printf(3, 4)
-void
-Format(unsigned level, std::string_view domain, const char *fmt, ...) noexcept;
-
 void
 Fmt(unsigned level, std::string_view domain,
     fmt::string_view format_str, fmt::format_args args) noexcept;
@@ -186,15 +179,6 @@ LogConcat(unsigned level, D &&domain, Params... params) noexcept
 {
 	LoggerDetail::LogConcat(level, std::forward<D>(domain),
 				std::forward<Params>(params)...);
-}
-
-template<typename D, typename... Params>
-void
-LogFormat(unsigned level, D &&domain,
-	  const char *fmt, Params... params) noexcept
-{
-	LoggerDetail::Format(level, std::forward<D>(domain),
-			     fmt, std::forward<Params>(params)...);
 }
 
 template<typename S, typename... Args>
@@ -223,13 +207,6 @@ public:
 	void operator()(unsigned level, Params... params) const noexcept {
 		LoggerDetail::LogConcat(level, GetDomain(),
 					std::forward<Params>(params)...);
-	}
-
-	template<typename... Params>
-	void Format(unsigned level,
-		    const char *fmt, Params... params) const noexcept {
-		LoggerDetail::Format(level, GetDomain(),
-				     fmt, std::forward<Params>(params)...);
 	}
 
 	template<typename S, typename... Args>

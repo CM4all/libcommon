@@ -18,6 +18,8 @@
 #include <linux/wait.h> // for P_PIDFD on glibc < 2.36
 #endif
 
+using std::string_view_literals::operator""sv;
+
 /**
  * A custom waitid() system call wrapper which, unlike the glibc
  * wrapper, supports the "rusage" parameter.
@@ -103,12 +105,12 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 	const auto stime = ToSteadyClockDuration(rusage.ru_stime);
 	const auto stime_f = std::chrono::duration_cast<std::chrono::duration<double>>(stime);
 
-	logger.Format(6, "stats: %1.3fs elapsed, %1.3fs user, %1.3fs sys, %ld/%ld faults, %ld/%ld switches",
-		      duration_f.count(),
-		      utime_f.count(),
-		      stime_f.count(),
-		      rusage.ru_minflt, rusage.ru_majflt,
-		      rusage.ru_nvcsw, rusage.ru_nivcsw);
+	logger.Fmt(6, "stats: {:1.3}s elapsed, {:1.3}s user, {:1.3}s sys, {}/{} faults, {}/{} switches"sv,
+		   duration_f.count(),
+		   utime_f.count(),
+		   stime_f.count(),
+		   rusage.ru_minflt, rusage.ru_majflt,
+		   rusage.ru_nvcsw, rusage.ru_nivcsw);
 
 	event.Close();
 
