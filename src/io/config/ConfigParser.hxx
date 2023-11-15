@@ -14,7 +14,7 @@ class FileLineParser;
 
 class ConfigParser {
 public:
-	virtual ~ConfigParser() {}
+	virtual ~ConfigParser() noexcept = default;
 
 	virtual bool PreParseLine(FileLineParser &line);
 	virtual void ParseLine(FileLineParser &line) = 0;
