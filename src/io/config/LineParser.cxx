@@ -5,8 +5,46 @@
 #include "LineParser.hxx"
 
 #include <cstdlib>
+#include <string>
 
 #include <string.h>
+
+void
+LineParser::ExpectWhitespace()
+{
+	if (!IsWhitespaceNotNull(front()))
+		throw std::runtime_error("Syntax error");
+
+	++p;
+	Strip();
+}
+
+void
+LineParser::ExpectEnd()
+{
+	if (!IsEnd())
+		throw Error(std::string("Unexpected tokens at end of line: ") + p);
+}
+
+void
+LineParser::ExpectSymbol(char symbol)
+{
+	if (front() != symbol)
+		throw Error(std::string("'") + symbol + "' expected");
+
+	++p;
+	Strip();
+}
+
+void
+LineParser::ExpectSymbolAndEol(char symbol)
+{
+	ExpectSymbol(symbol);
+
+	if (!IsEnd())
+		throw Error(std::string("Unexpected tokens after '")
+			    + symbol + "': " + p);
+}
 
 bool
 LineParser::SkipWord(const char *word) noexcept

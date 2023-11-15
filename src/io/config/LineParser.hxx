@@ -2,14 +2,12 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef LINE_PARSER_HXX
-#define LINE_PARSER_HXX
+#pragma once
 
 #include "util/StringStrip.hxx"
 #include "util/CharUtil.hxx"
 
 #include <stdexcept>
-#include <string>
 
 class LineParser {
 	char *p;
@@ -47,34 +45,10 @@ public:
 		return front() == 0;
 	}
 
-	void ExpectWhitespace() {
-		if (!IsWhitespaceNotNull(front()))
-			throw std::runtime_error("Syntax error");
-
-		++p;
-		Strip();
-	}
-
-	void ExpectEnd() {
-		if (!IsEnd())
-			throw Error(std::string("Unexpected tokens at end of line: ") + p);
-	}
-
-	void ExpectSymbol(char symbol) {
-		if (front() != symbol)
-			throw Error(std::string("'") + symbol + "' expected");
-
-		++p;
-		Strip();
-	}
-
-	void ExpectSymbolAndEol(char symbol) {
-		ExpectSymbol(symbol);
-
-		if (!IsEnd())
-			throw Error(std::string("Unexpected tokens after '")
-				    + symbol + "': " + p);
-	}
+	void ExpectWhitespace();
+	void ExpectEnd();
+	void ExpectSymbol(char symbol);
+	void ExpectSymbolAndEol(char symbol);
 
 	bool SkipSymbol(char symbol) {
 		bool found = front() == symbol;
@@ -138,5 +112,3 @@ private:
 		return ch == '"' || ch == '\'';
 	}
 };
-
-#endif
