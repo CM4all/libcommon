@@ -6,6 +6,8 @@
 
 #include "util/Compiler.h"
 
+#include <fmt/core.h>
+
 #include <cstdint>
 #include <array>
 #include <exception>
@@ -160,6 +162,10 @@ gcc_printf(3, 4)
 void
 Format(unsigned level, std::string_view domain, const char *fmt, ...) noexcept;
 
+void
+Fmt(unsigned level, std::string_view domain,
+    fmt::string_view format_str, fmt::format_args args) noexcept;
+
 } /* namespace LoggerDetail */
 
 inline void
@@ -191,6 +197,15 @@ LogFormat(unsigned level, D &&domain,
 			     fmt, std::forward<Params>(params)...);
 }
 
+template<typename S, typename... Args>
+void
+LogFmt(unsigned level, std::string_view domain,
+       const S &format_str, Args&&... args) noexcept
+{
+	LoggerDetail::Fmt(level, domain, format_str,
+			  fmt::make_format_args(args...));
+}
+
 template<typename Domain>
 class BasicLogger : public Domain {
 public:
@@ -215,6 +230,13 @@ public:
 		    const char *fmt, Params... params) const noexcept {
 		LoggerDetail::Format(level, GetDomain(),
 				     fmt, std::forward<Params>(params)...);
+	}
+
+	template<typename S, typename... Args>
+	void Fmt(unsigned level,  const S &format_str,
+		 Args&&... args) const noexcept {
+		LoggerDetail::Fmt(level, GetDomain(), format_str,
+				  fmt::make_format_args(args...));
 	}
 
 	std::string_view GetDomain() const noexcept {

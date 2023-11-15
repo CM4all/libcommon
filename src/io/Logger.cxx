@@ -4,6 +4,7 @@
 
 #include "Logger.hxx"
 #include "Iovec.hxx"
+#include "lib/fmt/ToBuffer.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StaticVector.hxx"
 #include "util/Exception.hxx"
@@ -64,6 +65,19 @@ LoggerDetail::Format(unsigned level, std::string_view domain,
 	va_end(ap);
 
 	WriteV(domain, {&s, 1});
+}
+
+void
+LoggerDetail::Fmt(unsigned level, std::string_view domain,
+		  fmt::string_view format_str, fmt::format_args args) noexcept
+{
+	if (!CheckLevel(level))
+		return;
+
+	const auto msg = VFmtBuffer<1024>(format_str, args);
+
+	std::string_view s[]{msg.c_str()};
+	WriteV(domain, s);
 }
 
 std::string
