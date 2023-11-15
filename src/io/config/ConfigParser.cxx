@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 
+using std::string_view_literals::operator""sv;
 namespace fs = std::filesystem;
 
 bool
@@ -160,7 +161,8 @@ VariableConfigParser::ExpandOne(std::string &dest,
 	const std::string name(name_begin, name_end);
 	auto i = variables.find(name);
 	if (i == variables.end())
-		throw LineParser::Error("No such variable: " + name);
+		throw LineParser::Error{fmt::format("No such variable: {}"sv,
+						    name)};
 
 	dest += i->second;
 }
@@ -313,7 +315,8 @@ ParseConfigFile(const std::filesystem::path &path, FILE *file,
 			if (!parser.PreParseLine(line_parser))
 				parser.ParseLine(line_parser);
 		} catch (...) {
-			std::throw_with_nested(LineParser::Error(path.native() + ':' + std::to_string(i)));
+			std::throw_with_nested(LineParser::Error{fmt::format("{}:{}"sv,
+									     path.native(), i)});
 		}
 
 		++i;

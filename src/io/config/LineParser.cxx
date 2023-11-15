@@ -4,10 +4,13 @@
 
 #include "LineParser.hxx"
 
+#include <fmt/core.h>
+
 #include <cstdlib>
-#include <string>
 
 #include <string.h>
+
+using std::string_view_literals::operator""sv;
 
 void
 LineParser::ExpectWhitespace()
@@ -23,14 +26,15 @@ void
 LineParser::ExpectEnd()
 {
 	if (!IsEnd())
-		throw Error(std::string("Unexpected tokens at end of line: ") + p);
+		throw Error{fmt::format("Unexpected tokens at end of line: {}"sv,
+					p)};
 }
 
 void
 LineParser::ExpectSymbol(char symbol)
 {
 	if (front() != symbol)
-		throw Error(std::string("'") + symbol + "' expected");
+		throw Error{fmt::format("'{}' expected"sv, symbol)};
 
 	++p;
 	Strip();
@@ -42,8 +46,8 @@ LineParser::ExpectSymbolAndEol(char symbol)
 	ExpectSymbol(symbol);
 
 	if (!IsEnd())
-		throw Error(std::string("Unexpected tokens after '")
-			    + symbol + "': " + p);
+		throw Error{fmt::format("Unexpected tokens after '{}': {}"sv,
+					symbol, p)};
 }
 
 bool
