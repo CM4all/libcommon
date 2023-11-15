@@ -4,8 +4,11 @@
 
 #include "ConfigParser.hxx"
 #include "FileLineParser.hxx"
+#include "io/BufferedReader.hxx"
+#include "io/FdReader.hxx"
+#include "io/Open.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "lib/fmt/SystemError.hxx"
-#include "util/ScopeExit.hxx"
 
 #include <algorithm>
 #include <exception>
@@ -14,7 +17,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <fnmatch.h>
-#include <stdio.h>
 #include <string.h>
 
 using std::string_view_literals::operator""sv;
@@ -303,12 +305,11 @@ IncludeConfigParser::IncludePath(std::filesystem::path &&p)
 }
 
 static void
-ParseConfigFile(const std::filesystem::path &path, FILE *file,
+ParseConfigFile(const std::filesystem::path &path, BufferedReader &reader,
 		ConfigParser &parser)
 {
-	char buffer[4096], *line;
 	unsigned i = 1;
-	while ((line = fgets(buffer, sizeof(buffer), file)) != nullptr) {
+	while (char *line = reader.ReadLine()) {
 		FileLineParser line_parser(path, line);
 
 		try {
@@ -328,8 +329,8 @@ IncludeConfigParser::IncludeOptionalPath(std::filesystem::path &&p)
 {
 	IncludeConfigParser sub(std::move(p), child, false);
 
-	FILE *file = fopen(sub.path.c_str(), "r");
-	if (file == nullptr) {
+	UniqueFileDescriptor fd;
+	if (!fd.OpenReadOnly(sub.path.c_str())) {
 		int e = errno;
 		switch (e) {
 		case ENOENT:
@@ -342,21 +343,20 @@ IncludeConfigParser::IncludeOptionalPath(std::filesystem::path &&p)
 		}
 	}
 
-	AtScopeExit(file) { fclose(file); };
+	FdReader fd_reader{fd};
+	BufferedReader buffered_reader{fd_reader};
 
-	ParseConfigFile(sub.path, file, sub);
+	ParseConfigFile(sub.path, buffered_reader, sub);
 	sub.Finish();
 }
 
 void
 ParseConfigFile(const std::filesystem::path &path, ConfigParser &parser)
 {
-	FILE *file = fopen(path.c_str(), "r");
-	if (file == nullptr)
-		throw FmtErrno("Failed to open {}", path.native());
+	const auto fd = OpenReadOnly(path.c_str());
+	FdReader fd_reader{fd};
+	BufferedReader buffered_reader{fd_reader};
 
-	AtScopeExit(file) { fclose(file); };
-
-	ParseConfigFile(path, file, parser);
+	ParseConfigFile(path, buffered_reader, parser);
 	parser.Finish();
 }

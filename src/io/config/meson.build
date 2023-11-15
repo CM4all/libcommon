@@ -14,6 +14,7 @@ io_config = static_library(
   'IniParser.cxx',
   include_directories: inc,
   dependencies: [
+    io_dep,
     std_filesystem_dep,
     fmt_dep,
   ],
