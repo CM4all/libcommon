@@ -294,11 +294,11 @@ IncludeConfigParser::IncludePath(std::filesystem::path &&p)
 
 		for (auto &i : files) {
 			IncludeConfigParser sub(std::move(i), child, false);
-			ParseConfigFile(sub.path.c_str(), sub);
+			ParseConfigFile(sub.path, sub);
 		}
 	} else {
 		IncludeConfigParser sub(std::move(p), child, false);
-		ParseConfigFile(sub.path.c_str(), sub);
+		ParseConfigFile(sub.path, sub);
 	}
 }
 
@@ -344,7 +344,7 @@ IncludeConfigParser::IncludeOptionalPath(std::filesystem::path &&p)
 
 	AtScopeExit(file) { fclose(file); };
 
-	ParseConfigFile(sub.path.c_str(), file, sub);
+	ParseConfigFile(sub.path, file, sub);
 	sub.Finish();
 }
 
