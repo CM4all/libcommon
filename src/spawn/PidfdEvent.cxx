@@ -74,6 +74,8 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 	if (info.si_pid == 0)
 		return;
 
+	int status = W_EXITCODE(info.si_status, 0);
+
 	switch (info.si_code) {
 	case CLD_EXITED:
 		if (info.si_status == 0)
@@ -83,11 +85,15 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 		break;
 
 	case CLD_KILLED:
+		status = W_STOPCODE(info.si_status);
+
 		logger(info.si_status == SIGTERM ? 4 : 1,
 		       "died from signal ", info.si_status);
 		break;
 
 	case CLD_DUMPED:
+		status = W_STOPCODE(info.si_status) | WCOREFLAG;
+
 		logger(1, "died from signal ", info.si_status,
 		       " (core dumped)");
 		break;
@@ -114,7 +120,7 @@ PidfdEvent::OnPidfdReady(unsigned) noexcept
 
 	event.Close();
 
-	listener->OnChildProcessExit(info.si_status);
+	listener->OnChildProcessExit(status);
 }
 
 bool
