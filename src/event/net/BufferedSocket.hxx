@@ -623,6 +623,16 @@ public:
 		return base.IsReadyForWriting();
 	}
 
+	[[gnu::pure]]
+	bool IsReadPending() const noexcept {
+		return base.IsReadPending() || defer_read.IsPending();
+	}
+
+	[[gnu::pure]]
+	bool IsWritePending() const noexcept {
+		return base.IsWritePending() || defer_write.IsPending();
+	}
+
 	/**
 	 * Defer a call to Read().
 	 */
