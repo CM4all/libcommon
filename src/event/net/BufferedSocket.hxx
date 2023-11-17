@@ -604,7 +604,7 @@ public:
 	 */
 	ssize_t Write(std::span<const std::byte> src) noexcept;
 
-	ssize_t WriteV(const struct iovec *v, std::size_t n) noexcept;
+	ssize_t WriteV(std::span<const struct iovec> v) noexcept;
 
 	/**
 	 * Transfer data from the given file descriptor to the socket.

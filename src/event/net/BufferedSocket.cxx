@@ -8,6 +8,7 @@
 #include "net/TimeoutError.hxx"
 
 #include <errno.h>
+#include <sys/uio.h> // for struct iovec
 
 BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
 	:base(_event_loop, *this),
@@ -784,9 +785,9 @@ BufferedSocket::Write(std::span<const std::byte> src) noexcept
 }
 
 ssize_t
-BufferedSocket::WriteV(const struct iovec *v, std::size_t n) noexcept
+BufferedSocket::WriteV(std::span<const struct iovec> v) noexcept
 {
-	ssize_t nbytes = base.WriteV(v, n);
+	ssize_t nbytes = base.WriteV(v);
 
 	if (nbytes < 0) [[unlikely]] {
 		if (const int e = errno; e == EAGAIN) [[likely]] {

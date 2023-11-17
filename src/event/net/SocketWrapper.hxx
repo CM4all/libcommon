@@ -166,7 +166,7 @@ public:
 
 	ssize_t Write(std::span<const std::byte> src) noexcept;
 
-	ssize_t WriteV(const struct iovec *v, std::size_t n) noexcept;
+	ssize_t WriteV(std::span<const struct iovec> v) noexcept;
 
 	ssize_t WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
 			  off_t *other_offset,
