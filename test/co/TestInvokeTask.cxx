@@ -57,6 +57,17 @@ MakeInvokeTask(int &i, auto &task) noexcept
 	++i;
 }
 
+static Co::InvokeTask
+ThrowInvokeTask(int &i)
+{
+	if constexpr (false)
+		/* force this to be a coroutine */
+		co_return;
+
+	++i;
+	throw "error";
+}
+
 static Co::Task<void>
 ThrowTask(int &i)
 {
@@ -143,7 +154,24 @@ TEST(InvokeTask, EagerTask)
 	ASSERT_EQ(task_i, 1);
 }
 
-TEST(InvokeTask, Throw)
+TEST(InvokeTask, Throw1)
+{
+	int i = 0;
+
+	auto invoke = ThrowInvokeTask(i);
+	ASSERT_TRUE(invoke);
+	ASSERT_EQ(i, 0);
+
+	Completion c;
+	c.Start(invoke);
+	ASSERT_FALSE(invoke);
+	ASSERT_TRUE(c.done);
+	ASSERT_TRUE(c.error);
+
+	ASSERT_EQ(i, 1);
+}
+
+TEST(InvokeTask, Throw2)
 {
 	int task_i = 0, invoke_i = 0;
 
