@@ -170,6 +170,10 @@ if not get_option('fuzzer')
   subdir('src/was')
   subdir('src/was/json')
   subdir('src/was/async')
+
+  if nlohmann_json_dep.found()
+    subdir('src/was/nlohmann_json')
+  endif
 endif
 
 if lua_dep.found() and not get_option('fuzzer')
