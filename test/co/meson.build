@@ -3,6 +3,7 @@ test(
   executable(
     'TestCo',
     'TestInvokeTask.cxx',
+    'TestEagerInvokeTask.cxx',
     'TestEagerTask.cxx',
     'TestAll.cxx',
     'TestCoCache.cxx',
