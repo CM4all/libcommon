@@ -130,6 +130,7 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
   subdir('src/json')
 
   if lua_dep.found()
+    subdir('src/lua/io')
     subdir('src/lua/json')
   endif
 endif
