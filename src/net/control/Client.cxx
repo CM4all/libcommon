@@ -9,12 +9,36 @@
 #include "net/ScmRightsBuilder.hxx"
 #include "net/MsgHdr.hxx"
 #include "net/SocketError.hxx"
+#include "net/IPv4Address.hxx"
 #include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
 
 BengControlClient::BengControlClient(const char *host_and_port)
 	:BengControlClient(ResolveConnectDatagramSocket(host_and_port,
 							5478)) {}
+
+/**
+ * Create a new datagram socket that is connected to the same address
+ * as the specified one.  Returns an "undefined"
+ * UniqueSocketDescriptor on error.
+ */
+static UniqueSocketDescriptor
+CloneConnectedDatagramSocket(SocketDescriptor old_socket) noexcept
+{
+	const auto peer_address = old_socket.GetPeerAddress();
+	if (!peer_address.IsDefined())
+		return {};
+
+	UniqueSocketDescriptor new_socket;
+	if (!new_socket.Create(peer_address.GetFamily(), SOCK_DGRAM,
+			       old_socket.GetProtocol()))
+		return {};
+
+	if (!new_socket.Connect(peer_address))
+		return {};
+
+	return new_socket;
+}
 
 void
 BengControlClient::Send(BengProxy::ControlCommand cmd,
@@ -40,7 +64,27 @@ BengControlClient::Send(BengProxy::ControlCommand cmd,
 		b.push_back(i.Get());
 	b.Finish(msg);
 
-	SendMessage(socket, msg, 0);
+	try {
+		SendMessage(socket, msg, 0);
+	} catch (const std::system_error &e) {
+		if (e.code().category() == SocketErrorCategory() &&
+		    e.code().value() == ENETUNREACH) {
+			/* ENETUNREACH can happen when the outgoing
+			   network interface gets a new address which
+			   invalidates our socket which was
+			   (implicitly) bound to the old address; to
+			   fix this, we create a new socket, connect
+			   it (which binds it to the new address) */
+
+			auto new_socket = CloneConnectedDatagramSocket(socket);
+			if (new_socket.IsDefined() &&
+			    new_socket.ToFileDescriptor().Duplicate(socket.ToFileDescriptor())) {
+				SendMessage(socket, msg, 0);
+				return;
+			}
+		}
+		throw;
+	}
 }
 
 void
