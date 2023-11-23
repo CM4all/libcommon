@@ -378,6 +378,8 @@ public:
 			clear();
 	}
 
+	IntrusiveHashArrayTrie &operator=(IntrusiveHashArrayTrie &&src) noexcept = delete;
+
 	[[nodiscard]]
 	constexpr const hasher &hash_function() const noexcept {
 		return ops.hash;
