@@ -12,7 +12,7 @@ namespace {
 struct IntItem final : IntrusiveHashArrayTrieHook<IntrusiveHookMode::TRACK> {
 	int value;
 
-	IntItem(int _value) noexcept:value(_value) {}
+	constexpr IntItem(int _value) noexcept:value(_value) {}
 
 	struct Hash {
 		constexpr std::size_t operator()(const IntItem &i) const noexcept {
@@ -224,4 +224,49 @@ TEST(IntrusiveHashArrayTrie, Basic)
 
 	set.clear_and_dispose([](const auto *){});
 	EXPECT_TRUE(set.empty());
+}
+
+template<int... values>
+static constexpr auto
+MakeIntItems(std::integer_sequence<int, values...>) noexcept
+	-> std::array<IntItem, sizeof...(values)>
+{
+	return {values...};
+}
+
+/**
+ * Test with a big number of items to test a deep tree.
+ */
+TEST(IntrusiveHashArrayTrie, Bulk)
+{
+	IntItem first{65521};
+	auto items = MakeIntItems(std::make_integer_sequence<int, 256>());
+
+	IntrusiveHashArrayTrie<IntItem,
+			       IntrusiveHashArrayTrieOperators<IntItem::Hash,
+							       IntItem::Equal>> set;
+	set.insert(first);
+
+	for (auto &i : items)
+		set.insert(i);
+
+	EXPECT_EQ(set.size(), 1 + items.size());
+
+	EXPECT_EQ(set.find(first), set.iterator_to(first));
+	for (auto &i : items) {
+		EXPECT_EQ(set.find(i), set.iterator_to(i));
+	}
+
+	first.unlink();
+	EXPECT_EQ(set.size(), items.size());
+	EXPECT_EQ(set.find(first), set.end());
+
+	std::size_t size = items.size();
+	for (auto &i : items) {
+		EXPECT_EQ(set.find(i), set.iterator_to(i));
+		i.unlink();
+		--size;
+		EXPECT_EQ(set.size(), size);
+		EXPECT_EQ(set.find(i), set.end());
+	}
 }
