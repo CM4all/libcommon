@@ -432,6 +432,8 @@ private:
 			if (i == nullptr)
 				continue;
 
+			assert(node.children[i->GetIndexInParent()] == i);
+
 			DisposeChildren(*i, disposer);
 			disposer(Cast(i));
 		}
@@ -699,6 +701,10 @@ public:
 				   std::predicate<const_reference> auto pred) noexcept {
 		std::size_t hash = ops.hash(key);
 
+#ifndef NDEBUG
+		std::size_t inverse_hash_mask = ~std::size_t{};
+#endif
+
 		IntrusiveHashArrayTrieNode *node = &root;
 
 		while (true) {
@@ -710,6 +716,12 @@ public:
 
 			assert(item->parent == node);
 			assert(item->GetIndexInParent() == idx);
+
+#ifndef NDEBUG
+			inverse_hash_mask >>= IntrusiveHashArrayTrieNode::INDEX_BITS;
+			const std::size_t hash_mask = ~std::rotl(inverse_hash_mask, IntrusiveHashArrayTrieNode::INDEX_BITS);
+#endif
+			assert((item->rotated_hash & hash_mask) == (hash & hash_mask));
 
 			if (item->rotated_hash == hash &&
 			    ops.equal(key, ops.get_key(*Cast(item))) &&
