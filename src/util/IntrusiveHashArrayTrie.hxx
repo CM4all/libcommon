@@ -124,6 +124,7 @@ struct IntrusiveHashArrayTrieItem : IntrusiveHashArrayTrieNode {
 			if (i != nullptr) {
 				assert(children[i->GetIndexInParent()] == i);
 
+				i->rotated_hash = std::rotl(i->rotated_hash, INDEX_BITS);
 				chosen_child.insert(*i);
 			}
 		}
