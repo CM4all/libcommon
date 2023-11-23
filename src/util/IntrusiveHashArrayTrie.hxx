@@ -366,8 +366,7 @@ public:
 			}
 		}
 
-		std::fill(src.root.children.begin(), src.root.children.end(),
-			  nullptr);
+		src.root.children = {};
 
 		using std::swap;
 		swap(counter, src.counter);
@@ -409,8 +408,7 @@ public:
 	}
 
 	constexpr void clear() noexcept {
-		std::fill(root.children.begin(), root.children.end(), nullptr);
-
+		root.children = {};
 		counter.reset();
 	}
 
