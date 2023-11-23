@@ -465,14 +465,8 @@ private:
 
 public:
 	constexpr void clear_and_dispose(Disposer<value_type> auto disposer) noexcept {
-		for (IntrusiveHashArrayTrieItem *&i : root.children) {
-			if (i == nullptr)
-				continue;
-
-			DisposeChildren(*i, disposer);
-			disposer(Cast(i));
-			i = nullptr;
-		}
+		DisposeChildren(root, disposer);
+		root.children = {};
 
 		counter.reset();
 	}
