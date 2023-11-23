@@ -100,6 +100,8 @@ struct IntrusiveHashArrayTrieItem : IntrusiveHashArrayTrieNode {
 		   trie position and replace it in our parent */
 
 		auto &chosen_child = *children[chosen_index];
+		children[chosen_index] = nullptr;
+
 		assert(chosen_child.parent == this);
 		assert(chosen_child.GetIndexInParent() == chosen_index);
 
@@ -109,11 +111,21 @@ struct IntrusiveHashArrayTrieItem : IntrusiveHashArrayTrieNode {
 		parent_slot = &chosen_child;
 		chosen_child.parent = parent;
 
-		/* move all remaining children over */
+		/* move all remaining children over; we swap because
+		   we need chosen_child's previous children list for
+		   the next step */
 
-		for (std::size_t i = chosen_index + 1; i < children.size(); ++i) {
-			if (children[i] != nullptr)
-				chosen_child.insert(*children[i]);
+		SwapChildren(chosen_child);
+
+		/* now reinsert chosen_children's previous children
+		   list */
+
+		for (IntrusiveHashArrayTrieItem *i : children) {
+			if (i != nullptr) {
+				assert(children[i->GetIndexInParent()] == i);
+
+				chosen_child.insert(*i);
+			}
 		}
 
 		return &chosen_child;
