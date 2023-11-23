@@ -44,6 +44,11 @@ struct IntrusiveHashArrayTrieNode {
 		return nullptr;
 	}
 
+	/**
+	 * @param item a single item (assumed to have no children)
+	 * whose #rotated_hash field has been calculated and rotated
+	 * to be inserted right as this node's child
+	 */
 	constexpr void insert(IntrusiveHashArrayTrieItem &item) noexcept;
 
 	constexpr void SwapChildren(IntrusiveHashArrayTrieNode &other) noexcept;
