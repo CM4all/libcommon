@@ -401,10 +401,10 @@ public:
 			swap(root.children[i], other.root.children[i]);
 
 			if (root.children[i] != nullptr)
-				root.children[i]->parent = &root;
+				root.children[i]->Reparent(other.root, root);
 
 			if (other.root.children[i] != nullptr)
-				other.root.children[i]->parent = &other.root;
+				other.root.children[i]->Reparent(root, other.root);
 		}
 
 		swap(counter, other.counter);
