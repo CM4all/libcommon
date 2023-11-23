@@ -52,6 +52,12 @@ struct IntrusiveHashArrayTrieItem : IntrusiveHashArrayTrieNode {
 
 	std::size_t rotated_hash;
 
+	constexpr void Reparent([[maybe_unused]] IntrusiveHashArrayTrieNode &old_parent,
+				IntrusiveHashArrayTrieNode &new_parent) noexcept {
+		assert(parent == &old_parent);
+		parent = &new_parent;
+	}
+
 	constexpr std::size_t GetIndexInParent() const noexcept {
 		return GetIndexByHash(rotated_hash);
 	}
@@ -338,8 +344,7 @@ public:
 
 		for (IntrusiveHashArrayTrieItem *item : root.children) {
 			if (item != nullptr) {
-				assert(item->parent == &src.root);
-				item->parent = &root;
+				item->Reparent(src.root, root);
 			}
 		}
 
