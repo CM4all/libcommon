@@ -45,6 +45,8 @@ struct IntrusiveHashArrayTrieNode {
 	}
 
 	constexpr void insert(IntrusiveHashArrayTrieItem &item) noexcept;
+
+	constexpr void SwapChildren(IntrusiveHashArrayTrieNode &other) noexcept;
 };
 
 struct IntrusiveHashArrayTrieItem : IntrusiveHashArrayTrieNode {
@@ -145,6 +147,22 @@ IntrusiveHashArrayTrieNode::insert(IntrusiveHashArrayTrieItem &item) noexcept
 
 		p = slot;
 		item.rotated_hash = std::rotr(item.rotated_hash, INDEX_BITS);
+	}
+}
+
+constexpr void
+IntrusiveHashArrayTrieNode::SwapChildren(IntrusiveHashArrayTrieNode &other) noexcept
+{
+	using std::swap;
+
+	for (std::size_t i = 0; i < ARRAY_SIZE; ++i) {
+		swap(children[i], other.children[i]);
+
+		if (children[i] != nullptr)
+			children[i]->Reparent(other, *this);
+
+		if (other.children[i] != nullptr)
+			other.children[i]->Reparent(*this, other);
 	}
 }
 
@@ -397,15 +415,7 @@ public:
 	constexpr void swap(IntrusiveHashArrayTrie &other) noexcept {
 		using std::swap;
 
-		for (std::size_t i = 0; i < root.children.size(); ++i) {
-			swap(root.children[i], other.root.children[i]);
-
-			if (root.children[i] != nullptr)
-				root.children[i]->Reparent(other.root, root);
-
-			if (other.root.children[i] != nullptr)
-				other.root.children[i]->Reparent(root, other.root);
-		}
+		root.SwapChildren(other.root);
 
 		swap(counter, other.counter);
 	}
