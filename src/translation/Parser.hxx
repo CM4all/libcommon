@@ -220,9 +220,6 @@ private:
 	template<typename... Args>
 	Transformation *AddTransformation(Args&&... args) noexcept;
 	ResourceAddress *AddFilter();
-	void AddSubstYamlFile(const char *prefix,
-			      const char *file_path,
-			      const char *map_path) noexcept;
 #endif
 
 	void HandleMountTmpfs(std::string_view payload, bool writable);
@@ -255,8 +252,6 @@ private:
 
 	void HandleCgroupSet(std::string_view payload);
 	void HandleCgroupXattr(std::string_view payload);
-
-	void HandleSubstYamlFile(std::string_view payload);
 
 	Result HandlePacket(TranslationCommand command,
 			    std::span<const std::byte> payload);

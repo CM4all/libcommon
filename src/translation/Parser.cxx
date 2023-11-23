@@ -220,14 +220,6 @@ TranslateParser::AddFilter()
 	return &t->u.filter.address;
 }
 
-void
-TranslateParser::AddSubstYamlFile(const char *prefix,
-				  const char *file_path,
-				  const char *map_path) noexcept
-{
-	AddTransformation(SubstTransformation{prefix, file_path, map_path});
-}
-
 #endif
 
 static bool
@@ -1090,26 +1082,6 @@ CheckProbeSuffix(std::string_view payload) noexcept
 	return payload.find('/') == payload.npos &&
 		IsValidString(payload);
 }
-
-#if TRANSLATION_ENABLE_TRANSFORMATION
-
-inline void
-TranslateParser::HandleSubstYamlFile(std::string_view payload)
-{
-	const auto [prefix, rest] = Split(payload, '\0');
-	if (rest.data() == nullptr)
-		throw std::runtime_error("malformed SUBST_YAML_FILE packet");
-
-	const auto [yaml_file, yaml_map_path] = Split(rest, '\0');
-	if (yaml_map_path.data() == nullptr ||
-	    !IsValidAbsolutePath(yaml_file))
-		throw std::runtime_error("malformed SUBST_YAML_FILE packet");
-
-	AddSubstYamlFile(prefix.data(), yaml_file.data(),
-			 yaml_map_path.data());
-}
-
-#endif
 
 inline void
 TranslateParser::HandleRegularPacket(TranslationCommand command,
@@ -3518,26 +3490,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::SUBST_YAML_FILE:
-#if TRANSLATION_ENABLE_TRANSFORMATION
-		HandleSubstYamlFile(string_payload);
-		return;
-#else
 		break;
-#endif
 
 	case TranslationCommand::SUBST_ALT_SYNTAX:
-#if TRANSLATION_ENABLE_TRANSFORMATION
-		if (!payload.empty())
-			throw std::runtime_error("malformed SUBST_ALT_SYNTAX packet");
-
-		if (response.subst_alt_syntax)
-			throw std::runtime_error("duplicate SUBST_ALT_SYNTAX packet");
-
-		response.subst_alt_syntax = true;
-		return;
-#else
 		break;
-#endif
 
 	case TranslationCommand::CACHE_TAG:
 #if TRANSLATION_ENABLE_CACHE
