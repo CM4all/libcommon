@@ -708,6 +708,7 @@ public:
 			if (item == nullptr)
 				return end();
 
+			assert(item->parent == node);
 			assert(item->GetIndexInParent() == idx);
 
 			if (item->rotated_hash == hash &&
