@@ -51,6 +51,17 @@ struct IntrusiveHashArrayTrieNode {
 	 */
 	constexpr void insert(IntrusiveHashArrayTrieItem &item) noexcept;
 
+	/**
+	 * Insert a (sub)tree of items recursively.
+	 *
+	 * @param rotate_bits the number of bits the specified item's
+	 * #rotated_hash field must be rotated to the left so it is a
+	 * valid hash to be this node's child (a multiple of
+	 * #INDEX_BITS)
+	 */
+	constexpr void RecursiveInsert(IntrusiveHashArrayTrieItem &item,
+				       unsigned rotate_bits) noexcept;
+
 	constexpr void SwapChildren(IntrusiveHashArrayTrieNode &other) noexcept;
 };
 
@@ -124,8 +135,7 @@ struct IntrusiveHashArrayTrieItem : IntrusiveHashArrayTrieNode {
 			if (i != nullptr) {
 				assert(children[i->GetIndexInParent()] == i);
 
-				i->rotated_hash = std::rotl(i->rotated_hash, INDEX_BITS);
-				chosen_child.insert(*i);
+				chosen_child.RecursiveInsert(*i, INDEX_BITS);
 			}
 		}
 
@@ -166,6 +176,23 @@ IntrusiveHashArrayTrieNode::insert(IntrusiveHashArrayTrieItem &item) noexcept
 		p = slot;
 		item.rotated_hash = std::rotr(item.rotated_hash, INDEX_BITS);
 	}
+}
+
+constexpr void
+IntrusiveHashArrayTrieNode::RecursiveInsert(IntrusiveHashArrayTrieItem &item,
+					    unsigned rotate_bits) noexcept
+{
+	for (IntrusiveHashArrayTrieItem *child : item.children) {
+		if (child != nullptr) {
+			assert(child->parent == &item);
+			assert(item.children[child->GetIndexInParent()] == child);
+
+			RecursiveInsert(*child, rotate_bits + INDEX_BITS);
+		}
+	}
+
+	item.rotated_hash = std::rotl(item.rotated_hash, rotate_bits);
+	insert(item);
 }
 
 constexpr void
