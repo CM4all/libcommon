@@ -10,6 +10,7 @@
 #include "system/LinuxFD.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
+#include "util/Sanitizer.hxx"
 
 #ifdef HAVE_LIBCAP
 #include "lib/cap/State.hxx"
@@ -113,8 +114,11 @@ LimitSysCalls(FileDescriptor read_fd, pid_t kill_pid)
 	   ignores this (to prevent SIGKILL) */
 	sf.AddRule(SCMP_ACT_ERRNO(ENOMEM), SCMP_SYS(brk));
 
-	/* needed by libasan (if AddressSanitizer is enabled) */
-	sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(sigaltstack));
+	if (HaveAddressSanitizer()) {
+		/* needed by libasan (if AddressSanitizer is
+		   enabled) */
+		sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(sigaltstack));
+	}
 
 	sf.Load();
 }
