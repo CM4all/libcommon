@@ -118,6 +118,7 @@ LimitSysCalls(FileDescriptor read_fd, pid_t kill_pid)
 		/* needed by libasan (if AddressSanitizer is
 		   enabled) */
 		sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(sigaltstack));
+		sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(mmap));
 	}
 
 	sf.Load();
