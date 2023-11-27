@@ -11,3 +11,9 @@ TryOpenReadOnlyBeneath(FileAt file) noexcept;
 
 UniqueFileDescriptor
 OpenReadOnlyBeneath(FileAt file);
+
+UniqueFileDescriptor
+TryOpenDirectoryBeneath(FileAt file) noexcept;
+
+UniqueFileDescriptor
+OpenDirectoryBeneath(FileAt file);
