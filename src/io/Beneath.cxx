@@ -29,12 +29,9 @@ TryOpenReadOnlyBeneath(FileAt file) noexcept
 UniqueFileDescriptor
 OpenReadOnlyBeneath(FileAt file)
 {
-	assert(file.directory.IsDefined());
-
-	int fd = openat2(file.directory.Get(), file.name,
-			 &ro_beneath, sizeof(ro_beneath));
-	if (fd < 0)
+	auto fd = TryOpenReadOnlyBeneath(file);
+	if (!fd.IsDefined())
 		throw FmtErrno("Failed to open '{}'", file.name);
 
-	return UniqueFileDescriptor{fd};
+	return fd;
 }
