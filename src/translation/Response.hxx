@@ -458,6 +458,10 @@ struct TranslateResponse {
 	bool auto_brotli_path;
 #endif
 
+#if TRANSLATION_ENABLE_LOGIN
+	bool no_home_authorized_keys;
+#endif
+
 	TranslateResponse() noexcept = default;
 	TranslateResponse(TranslateResponse &&) = default;
 	TranslateResponse &operator=(TranslateResponse &&) = default;

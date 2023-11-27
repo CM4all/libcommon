@@ -1626,6 +1626,10 @@ public:
 				    payload...);
 	}
 
+	auto &NoHomeAuthorizedKeys() noexcept {
+		return Packet(TranslationCommand::NO_HOME_AUTHORIZED_KEYS);
+	}
+
 	auto &MaxAge(uint32_t seconds) noexcept {
 		return PacketT(TranslationCommand::MAX_AGE, seconds);
 	}

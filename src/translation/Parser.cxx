@@ -3997,6 +3997,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::MAPPED_UID_GID:
 		HandleMappedUidGid(payload);
 		return;
+
+	case TranslationCommand::NO_HOME_AUTHORIZED_KEYS:
+#if TRANSLATION_ENABLE_LOGIN
+		if (!payload.empty())
+			throw std::runtime_error("malformed NO_HOME_AUTHORIZED_KEYS packet");
+
+		if (response.no_home_authorized_keys)
+			throw std::runtime_error("misplaced NO_HOME_AUTHORIZED_KEYS packet");
+
+		response.no_home_authorized_keys = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

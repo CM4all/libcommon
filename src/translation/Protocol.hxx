@@ -1221,6 +1221,11 @@ enum class TranslationCommand : uint16_t {
 	 * payload must be a 32-bit integer.
 	 */
 	MAPPED_UID_GID = 254,
+
+	/**
+	 * If present, then ~/.ssh/authorized_keys is not used.
+	 */
+	NO_HOME_AUTHORIZED_KEYS = 255,
 };
 
 struct TranslationHeader {

@@ -167,6 +167,9 @@ TranslateResponse::Clear() noexcept
 	auto_gzipped = false;
 	auto_brotli_path = false;
 #endif
+#if TRANSLATION_ENABLE_LOGIN
+	no_home_authorized_keys = false;
+#endif
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = false;
 
@@ -419,6 +422,9 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	auto_brotli = src.auto_brotli;
 	auto_gzipped = src.auto_gzipped;
 	auto_brotli_path = src.auto_brotli_path;
+#endif
+#if TRANSLATION_ENABLE_LOGIN
+	no_home_authorized_keys = src.no_home_authorized_keys;
 #endif
 #if TRANSLATION_ENABLE_SESSION
 	realm_from_auth_base = src.realm_from_auth_base;
