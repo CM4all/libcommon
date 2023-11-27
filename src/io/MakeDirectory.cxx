@@ -14,14 +14,22 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+static constexpr int
+FilterErrno(int e, const MakeDirectoryOptions options) noexcept
+{
+	if (e == EEXIST && !options.exclusive)
+		e = 0;
+
+	return e;
+}
+
 UniqueFileDescriptor
 MakeDirectory(FileDescriptor parent_fd, const char *name,
 	      const MakeDirectoryOptions options)
 {
 	if (mkdirat(parent_fd.Get(), name, options.mode) < 0) {
-		const int e = errno;
-		switch (e) {
-		case EEXIST:
+		switch (const int e = FilterErrno(errno, options)) {
+		case 0:
 			break;
 
 		default:
@@ -55,9 +63,9 @@ RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 	if (mkdirat(parent_fd.Get(), path, options.mode) == 0)
 		return OpenPath(parent_fd, path, O_DIRECTORY);
 
-	const int e = errno;
+	const int e = FilterErrno(errno, options);
 	switch (e) {
-	case EEXIST:
+	case 0:
 		return OpenPath(parent_fd, path, O_DIRECTORY);
 
 	case ENOENT:
@@ -82,8 +90,11 @@ RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 	while (*name == '/')
 		++name;
 
+	auto middle_options = options;
+	middle_options.exclusive = false;
+
 	return MakeDirectory(RecursiveMakeNestedDirectory(parent_fd, path, slash - path,
-							  options),
+							  middle_options),
 			     name,
 			     options);
 }

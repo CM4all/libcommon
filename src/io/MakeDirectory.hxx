@@ -12,6 +12,11 @@ class UniqueFileDescriptor;
 
 struct MakeDirectoryOptions {
 	mode_t mode = 0777;
+
+	/**
+	 * Throw an error if the directory already exists?
+	 */
+	bool exclusive = false;
 };
 
 /**
