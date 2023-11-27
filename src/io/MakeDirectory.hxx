@@ -17,6 +17,11 @@ struct MakeDirectoryOptions {
 	 * Throw an error if the directory already exists?
 	 */
 	bool exclusive = false;
+
+	/**
+	 * Follow symbolic links while traversing the specified path?
+	 */
+	bool follow_symlinks = true;
 };
 
 /**

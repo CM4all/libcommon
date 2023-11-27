@@ -3,9 +3,9 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "MakeDirectory.hxx"
-#include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "system/openat2.h"
 #include "util/ScopeExit.hxx"
 
 #include <assert.h>
@@ -23,6 +23,26 @@ FilterErrno(int e, const MakeDirectoryOptions options) noexcept
 	return e;
 }
 
+static UniqueFileDescriptor
+OpenDirectory(FileDescriptor directory, const char *name,
+	      const MakeDirectoryOptions options)
+{
+	struct open_how how{
+		.flags = O_DIRECTORY|O_PATH|O_RDONLY|O_CLOEXEC,
+	};
+
+	if (!options.follow_symlinks) {
+		how.flags |= O_NOFOLLOW;
+		how.resolve |= RESOLVE_NO_SYMLINKS;
+	}
+
+	int fd = openat2(directory.Get(), name, &how, sizeof(how));
+	if (fd < 0)
+		throw FmtErrno("Failed to open '{}'", name);
+
+	return UniqueFileDescriptor{fd};
+}
+
 UniqueFileDescriptor
 MakeDirectory(FileDescriptor parent_fd, const char *name,
 	      const MakeDirectoryOptions options)
@@ -38,7 +58,7 @@ MakeDirectory(FileDescriptor parent_fd, const char *name,
 		}
 	}
 
-	return OpenPath(parent_fd, name, O_DIRECTORY);
+	return OpenDirectory(parent_fd, name, options);
 }
 
 static char *
@@ -61,12 +81,12 @@ RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 	assert(path[path_length] == 0);
 
 	if (mkdirat(parent_fd.Get(), path, options.mode) == 0)
-		return OpenPath(parent_fd, path, O_DIRECTORY);
+		return OpenDirectory(parent_fd, path, options);
 
 	const int e = FilterErrno(errno, options);
 	switch (e) {
 	case 0:
-		return OpenPath(parent_fd, path, O_DIRECTORY);
+		return OpenDirectory(parent_fd, path, options);
 
 	case ENOENT:
 		/* parent directory doesn't exist - we must create it
