@@ -57,7 +57,7 @@ CgroupState::EnableAllControllers(unsigned pid) const
 	/* create a leaf cgroup and move this process into it, or else
 	   we can't enable other controllers */
 
-	const auto leaf_group = MakeDirectory(group_fd, "_", 0700);
+	const auto leaf_group = MakeDirectory(group_fd, "_", {.mode=0700});
 	WriteFile(leaf_group, "cgroup.procs", fmt::format_int{pid}.c_str());
 
 	/* now enable all other controllers in subtree_control */

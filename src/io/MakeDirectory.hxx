@@ -10,6 +10,10 @@
 class FileDescriptor;
 class UniqueFileDescriptor;
 
+struct MakeDirectoryOptions {
+	mode_t mode = 0777;
+};
+
 /**
  * Open a directory, and create it if it does not exist.
  *
@@ -18,7 +22,8 @@ class UniqueFileDescriptor;
  * @return an O_PATH file handle to the directory
  */
 UniqueFileDescriptor
-MakeDirectory(FileDescriptor parent_fd, const char *name, mode_t mode=0777);
+MakeDirectory(FileDescriptor parent_fd, const char *name,
+	      MakeDirectoryOptions options=MakeDirectoryOptions{});
 
 /**
  * Like MakeDirectory(), but create parent directories as well.
@@ -28,6 +33,6 @@ MakeDirectory(FileDescriptor parent_fd, const char *name, mode_t mode=0777);
  */
 UniqueFileDescriptor
 MakeNestedDirectory(FileDescriptor parent_fd, const char *path,
-		    mode_t mode=0777);
+		    MakeDirectoryOptions options=MakeDirectoryOptions{});
 
 #endif

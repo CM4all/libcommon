@@ -15,9 +15,10 @@
 #include <sys/stat.h>
 
 UniqueFileDescriptor
-MakeDirectory(FileDescriptor parent_fd, const char *name, mode_t mode)
+MakeDirectory(FileDescriptor parent_fd, const char *name,
+	      const MakeDirectoryOptions options)
 {
-	if (mkdirat(parent_fd.Get(), name, mode) < 0) {
+	if (mkdirat(parent_fd.Get(), name, options.mode) < 0) {
 		const int e = errno;
 		switch (e) {
 		case EEXIST:
@@ -45,13 +46,13 @@ LastSlash(char *p, size_t size) noexcept
 static UniqueFileDescriptor
 RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 			     char *path, size_t path_length,
-			     mode_t mode)
+			     const MakeDirectoryOptions options)
 {
 	assert(path != nullptr);
 	assert(path_length > 0);
 	assert(path[path_length] == 0);
 
-	if (mkdirat(parent_fd.Get(), path, mode) == 0)
+	if (mkdirat(parent_fd.Get(), path, options.mode) == 0)
 		return OpenPath(parent_fd, path, O_DIRECTORY);
 
 	const int e = errno;
@@ -81,12 +82,15 @@ RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 	while (*name == '/')
 		++name;
 
-	return MakeDirectory(RecursiveMakeNestedDirectory(parent_fd, path, slash - path, mode),
-			     name);
+	return MakeDirectory(RecursiveMakeNestedDirectory(parent_fd, path, slash - path,
+							  options),
+			     name,
+			     options);
 }
 
 UniqueFileDescriptor
-MakeNestedDirectory(FileDescriptor parent_fd, const char *path, mode_t mode)
+MakeNestedDirectory(FileDescriptor parent_fd, const char *path,
+		    const MakeDirectoryOptions options)
 {
 	size_t path_length = strlen(path);
 	char copy[PATH_MAX];
@@ -95,5 +99,5 @@ MakeNestedDirectory(FileDescriptor parent_fd, const char *path, mode_t mode)
 
 	strcpy(copy, path);
 	return RecursiveMakeNestedDirectory(parent_fd, copy, path_length,
-					    mode);
+					    options);
 }

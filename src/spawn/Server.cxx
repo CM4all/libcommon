@@ -211,7 +211,8 @@ static UniqueFileDescriptor
 MakeTmpfsMountRoot()
 {
 	// TODO hard-coded path
-	return MakeDirectory(FileDescriptor::Undefined(), "/tmp/tmpfs", 0100);
+	return MakeDirectory(FileDescriptor::Undefined(), "/tmp/tmpfs",
+			     {.mode = 0100});
 }
 
 class SpawnServerProcess {
