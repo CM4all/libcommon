@@ -120,6 +120,13 @@ enum class ControlCommand {
      * Drop items from the HTTP cache with the given tag.
      */
     FLUSH_HTTP_CACHE = 15,
+
+    /**
+     * Terminate all child processes with the CHILD_TAG from the
+     * payload.  Unlike #FADE_CHILDREN, this does not wait for
+     * completion of the child's currently work.
+     */
+    TERMINATE_CHILDREN = 16,
 };
 
 struct ControlStats {
