@@ -60,7 +60,7 @@ WriteCgroupFile(FileDescriptor group_fd,
 }
 
 UniqueFileDescriptor
-CgroupOptions::Create2(const CgroupState &state) const
+CgroupOptions::Create2(const CgroupState &state, const char *session) const
 {
 	if (name == nullptr)
 		return {};
@@ -97,11 +97,6 @@ CgroupOptions::MakeId(char *p) const noexcept
 	if (name != nullptr) {
 		p = (char *)mempcpy(p, ";cg", 3);
 		p = stpcpy(p, name);
-
-		if (session != nullptr) {
-			*p++ = '/';
-			p = stpcpy(p, session);
-		}
 	}
 
 	return p;

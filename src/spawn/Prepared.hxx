@@ -89,6 +89,13 @@ struct PreparedChildProcess {
 
 	const CgroupOptions *cgroup = nullptr;
 
+	/**
+	 * Create one child cgroup per session?  Set this to the name
+	 * of the session cgroup below the one created by
+	 * #CgroupOptions.
+	 */
+	const char *cgroup_session = nullptr;
+
 	NamespaceOptions ns;
 
 	ResourceLimits rlimits;

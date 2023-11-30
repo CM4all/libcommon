@@ -776,7 +776,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			if (p.cgroup == nullptr)
 				throw MalformedSpawnPayloadError();
 
-			cgroup.session = payload.ReadString();
+			p.cgroup_session = payload.ReadString();
 			break;
 
 		case SpawnExecCommand::CGROUP_SET:

@@ -120,7 +120,7 @@ try {
 			if (p.cgroup == nullptr)
 				throw "--cgroup-session requires --cgroup";
 
-			cgroup_options.session = session;
+			p.cgroup_session = session;
 		} else if (const char *cgroup_set = StringAfterPrefix(arg, "--cgroup-set=")) {
 			if (p.cgroup == nullptr)
 				throw "--cgroup-set requires --cgroup";

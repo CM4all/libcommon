@@ -147,7 +147,6 @@ static void
 Serialize(SpawnSerializer &s, const CgroupOptions &c)
 {
 	s.WriteOptionalString(SpawnExecCommand::CGROUP, c.name);
-	s.WriteOptionalString(SpawnExecCommand::CGROUP_SESSION, c.session);
 
 	for (const auto &i : c.xattr) {
 		s.Write(SpawnExecCommand::CGROUP_XATTR);
@@ -331,8 +330,12 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 		s.WriteInt(p.priority);
 	}
 
-	if (p.cgroup != nullptr)
+	if (p.cgroup != nullptr) {
 		Serialize(s, *p.cgroup);
+		s.WriteOptionalString(SpawnExecCommand::CGROUP_SESSION,
+				      p.cgroup_session);
+	}
+
 	Serialize(s, p.ns);
 	Serialize(s, p.rlimits);
 	Serialize(s, p.uid_gid);

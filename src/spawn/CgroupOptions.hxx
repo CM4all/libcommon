@@ -26,12 +26,6 @@ struct CgroupOptions {
 	const char *name = nullptr;
 
 	/**
-	 * Create one child cgroup per session?  Set this to the name
-	 * of the session cgroup below the one created by #name above.
-	 */
-	const char *session = nullptr;
-
-	/**
 	 * A list of cgroup extended attributes.  They should usually
 	 * be in the "user" namespace.
 	 */
@@ -53,7 +47,6 @@ struct CgroupOptions {
 	constexpr CgroupOptions(ShallowCopy shallow_copy,
 				const CgroupOptions &src) noexcept
 		:name(src.name),
-		 session(src.session),
 		 xattr(shallow_copy, src.xattr),
 		 set(shallow_copy, src.set) {}
 
@@ -76,8 +69,12 @@ struct CgroupOptions {
 	 * this is not a cgroup2-only host.
 	 *
 	 * Throws on error.
+	 *
+	 * @param session if not nullptr, create one child cgroupbelow
+	 * the one created by #name
 	 */
-	UniqueFileDescriptor Create2(const CgroupState &state) const;
+	UniqueFileDescriptor Create2(const CgroupState &state,
+				     const char *session) const;
 
 	char *MakeId(char *p) const noexcept;
 };

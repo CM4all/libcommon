@@ -491,7 +491,8 @@ try {
 
 	UniqueFileDescriptor cgroup_fd;
 	if (params.cgroup != nullptr) {
-		cgroup_fd = params.cgroup->Create2(cgroup_state);
+		cgroup_fd = params.cgroup->Create2(cgroup_state,
+						   params.cgroup_session);
 		if (cgroup_fd.IsDefined()) {
 			ca.flags |= CLONE_INTO_CGROUP;
 			ca.cgroup = cgroup_fd.Get();
