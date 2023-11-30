@@ -571,6 +571,12 @@ public:
 		return Packet(TranslationCommand::WWW_AUTHENTICATE, value);
 	}
 
+	template<typename... Types>
+	auto &Header(std::string_view name, Types... value) noexcept {
+		return StringPacket(TranslationCommand::HEADER,
+				    name, ":", value...);
+	}
+
 	auto &CookieDomain(std::string_view value) noexcept {
 		return Packet(TranslationCommand::COOKIE_DOMAIN, value);
 	}
