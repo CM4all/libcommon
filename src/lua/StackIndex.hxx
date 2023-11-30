@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <concepts>
+
 namespace Lua {
 
 /**
@@ -23,6 +25,13 @@ struct StackIndex {
 struct RelativeStackIndex : StackIndex {
 	using StackIndex::StackIndex;
 };
+
+/**
+ * Types satisfying this concept can be used as Lua stack index.
+ */
+template<class T>
+concept AnyStackIndex = std::convertible_to<T, StackIndex> ||
+	std::is_same_v<T, int>;
 
 static constexpr int
 GetStackIndex(int idx) noexcept
