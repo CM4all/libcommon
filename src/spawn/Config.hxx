@@ -53,6 +53,13 @@ struct SpawnConfig {
 	uid_t allow_all_uids_from = 0;
 
 	/**
+	 * If non-zero, then all cgroups can be managed by this gid.
+	 * All cgroups are then owned by this gid and are
+	 * group-writable.
+	 */
+	gid_t cgroups_writable_by_gid = 0;
+
+	/**
 	 * Is a systemd scope optional?  This option is only for
 	 * debugging/development if launched by an unprivileged user.
 	 */

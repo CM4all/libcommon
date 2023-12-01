@@ -15,6 +15,7 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Iovec.hxx"
 #include "io/Pipe.hxx"
+#include "io/ScopeUmask.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "system/clone3.h"
@@ -376,6 +377,7 @@ ReadErrorPipeTimeout(FileDescriptor error_pipe_r)
 std::pair<UniqueFileDescriptor, pid_t>
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
+		  bool cgroups_group_writable,
 		  bool is_sys_admin)
 try {
 	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
@@ -491,6 +493,10 @@ try {
 
 	UniqueFileDescriptor cgroup_fd;
 	if (params.cgroup != nullptr) {
+		const ScopeUmask scope_umask{
+			cgroups_group_writable ? mode_t{0002} : mode_t{0022}
+		};
+
 		cgroup_fd = params.cgroup->Create2(cgroup_state,
 						   params.cgroup_session);
 		if (cgroup_fd.IsDefined()) {

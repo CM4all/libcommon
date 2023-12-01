@@ -460,6 +460,7 @@ SpawnServerConnection::SpawnChild(unsigned id, const char *name,
 
 		pid = SpawnChildProcess(std::move(p),
 					process.GetCgroupState(),
+					config.cgroups_writable_by_gid > 0,
 					process.IsSysAdmin()).first;
 	} catch (...) {
 		logger(1, "Failed to spawn child process: ",

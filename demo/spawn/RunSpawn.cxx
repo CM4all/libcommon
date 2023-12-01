@@ -153,6 +153,7 @@ try {
 		: CgroupState();
 
 	const auto pid = SpawnChildProcess(std::move(p), cgroup_state,
+					   false,
 					   geteuid() == 0).first;
 
 	siginfo_t info;

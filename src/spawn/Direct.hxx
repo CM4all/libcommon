@@ -15,6 +15,9 @@ class UniqueFileDescriptor;
 /**
  * Throws exception on error.
  *
+ * @param cgroups_group_writable shall cgroups created by this
+ * function be writable by the owner gid?
+ *
  * @param is_sys_admin are we CAP_SYS_ADMIN?
  *
  * @return a pidfd and a classic pid (the latter for legacy callers
@@ -24,4 +27,5 @@ class UniqueFileDescriptor;
 std::pair<UniqueFileDescriptor, pid_t>
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
+		  bool cgroups_group_writable,
 		  bool is_sys_admin);

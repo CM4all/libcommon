@@ -33,6 +33,7 @@
 #include <string.h>
 #include <sys/signal.h>
 #include <sys/socket.h> // for AF_LOCAL
+#include <sys/stat.h> // for fchmodat()
 #include <sys/wait.h>
 
 using std::string_view_literals::operator""sv;
@@ -45,10 +46,10 @@ using std::string_view_literals::operator""sv;
 #endif
 
 static void
-Chown(FileDescriptor mount, uid_t uid, gid_t gid) noexcept
+Chown(FileDescriptor mount, uid_t uid, gid_t gid, gid_t procs_gid) noexcept
 {
 	fchownat(mount.Get(), ".", uid, gid, AT_SYMLINK_NOFOLLOW);
-	fchownat(mount.Get(), "cgroup.procs", uid, gid,
+	fchownat(mount.Get(), "cgroup.procs", uid, procs_gid,
 		 AT_SYMLINK_NOFOLLOW);
 }
 
@@ -69,9 +70,10 @@ Chown(FileDescriptor mount, uid_t uid, gid_t gid) noexcept
  * https://github.com/torvalds/linux/blob/99613159ad749543621da8238acf1a122880144e/kernel/cgroup/cgroup.c#L4856
  */
 static void
-Chown(const CgroupState &cgroup_state, uid_t uid, gid_t gid) noexcept
+Chown(const CgroupState &cgroup_state, uid_t uid,
+      gid_t gid, gid_t procs_gid) noexcept
 {
-	Chown(cgroup_state.group_fd, uid, gid);
+	Chown(cgroup_state.group_fd, uid, gid, procs_gid);
 }
 
 #endif // HAVE_LIBSYSTEMD
@@ -187,7 +189,16 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 						   config.systemd_slice.empty() ? nullptr : config.systemd_slice.c_str());
 
 			Chown(cgroup_state, config.spawner_uid_gid.uid,
+			      config.cgroups_writable_by_gid > 0 ? config.cgroups_writable_by_gid : config.spawner_uid_gid.gid,
 			      config.spawner_uid_gid.gid);
+
+			if (config.cgroups_writable_by_gid > 0)
+				/* if all cgroups shall be writable by
+				   the configured gid, do "chmod g+w"
+				   as well as "g+s" (so the owning gid
+				   propagates to new cgroups) */
+				fchmodat(cgroup_state.group_fd.Get(), ".",
+					 S_ISGID|0775, AT_SYMLINK_NOFOLLOW);
 		} catch (...) {
 			if (config.systemd_scope_optional) {
 				fprintf(stderr, "Failed to create systemd scope: ");
