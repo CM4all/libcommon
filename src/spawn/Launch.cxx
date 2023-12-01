@@ -197,8 +197,9 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 				   the configured gid, do "chmod g+w"
 				   as well as "g+s" (so the owning gid
 				   propagates to new cgroups) */
-				fchmodat(cgroup_state.group_fd.Get(), ".",
-					 S_ISGID|0775, AT_SYMLINK_NOFOLLOW);
+				if (fchmodat(cgroup_state.group_fd.Get(), ".",
+					     S_ISGID|0775, AT_SYMLINK_NOFOLLOW) < 0)
+					throw MakeErrno("Failed to chmod() the cgroup");
 		} catch (...) {
 			if (config.systemd_scope_optional) {
 				fprintf(stderr, "Failed to create systemd scope: ");
