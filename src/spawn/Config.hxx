@@ -43,14 +43,14 @@ struct SpawnConfig {
 
 	UidGid default_uid_gid;
 
+	std::set<uid_t> allowed_uids;
+	std::set<gid_t> allowed_gids;
+
 	/**
 	 * If non-zero, then all user ids from this value on are
 	 * allowed.
 	 */
 	uid_t allow_all_uids_from = 0;
-
-	std::set<uid_t> allowed_uids;
-	std::set<gid_t> allowed_gids;
 
 	/**
 	 * Is a systemd scope optional?  This option is only for
