@@ -25,6 +25,13 @@ public:
 
 	lua_State *CreateThread(ResumeListener &listener);
 
+	/**
+	 * Push the thread object to the given #lua_State stack.
+	 */
+	void Push(lua_State *L) {
+		thread.Push(L);
+	}
+
 	void Cancel();
 
 	lua_State *GetMainState() const noexcept {

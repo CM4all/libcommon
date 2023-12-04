@@ -40,6 +40,13 @@ public:
 	}
 
 	/**
+	 * Push the thread object to the given #lua_State stack.
+	 */
+	void Push(lua_State *L) {
+		thread.Push(L);
+	}
+
+	/**
 	 * Drop the thread reference and invoke the given disposer
 	 * function.
 	 */
