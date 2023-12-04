@@ -32,7 +32,7 @@ CreateConnectLocalSocket(const char *path)
 	return s;
 }
 
-namespace SpawnDaemon {
+namespace SpawnAccessory {
 
 /**
  * Connect to the local Spawn daemon.

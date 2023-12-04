@@ -12,13 +12,13 @@
 #include "util/StaticVector.hxx"
 
 class DatagramBuilder {
-	SpawnDaemon::DatagramHeader header;
+	SpawnAccessory::DatagramHeader header;
 
 	StaticVector<struct iovec, 16> v;
 
 public:
 	DatagramBuilder() noexcept {
-		header.magic = SpawnDaemon::MAGIC;
+		header.magic = SpawnAccessory::MAGIC;
 
 		AppendRaw(std::span{&header, 1});
 	}
@@ -44,11 +44,11 @@ public:
 		AppendPadded(std::as_bytes(s));
 	}
 
-	void Append(const SpawnDaemon::RequestHeader &rh) noexcept {
+	void Append(const SpawnAccessory::RequestHeader &rh) noexcept {
 		AppendRaw(ReferenceAsBytes(rh));
 	}
 
-	void Append(const SpawnDaemon::ResponseHeader &rh) noexcept {
+	void Append(const SpawnAccessory::ResponseHeader &rh) noexcept {
 		AppendRaw(std::span{&rh, 1});
 	}
 

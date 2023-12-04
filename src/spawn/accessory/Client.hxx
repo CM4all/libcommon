@@ -8,7 +8,7 @@ class UniqueFileDescriptor;
 class SocketDescriptor;
 class UniqueSocketDescriptor;
 
-namespace SpawnDaemon {
+namespace SpawnAccessory {
 
 /**
  * Connect to the local Spawn daemon.

@@ -29,7 +29,7 @@
 
 */
 
-namespace SpawnDaemon {
+namespace SpawnAccessory {
 
 /**
  * This magic number precedes every datagram.

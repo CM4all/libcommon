@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "PidNamespace.hxx"
-#include "spawn/daemon/Client.hxx"
+#include "accessory/Client.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -16,7 +16,7 @@
 static UniqueFileDescriptor
 GetPidNS(const char *name)
 {
-	return SpawnDaemon::MakePidNamespace(SpawnDaemon::Connect(), name);
+	return SpawnAccessory::MakePidNamespace(SpawnAccessory::Connect(), name);
 }
 
 void

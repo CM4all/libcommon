@@ -9,7 +9,7 @@
 #include "UserNamespace.hxx"
 #include "Init.hxx"
 #include "spawn/config.h"
-#include "daemon/Client.hxx"
+#include "accessory/Client.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
@@ -405,8 +405,8 @@ try {
 		if (!old_pidns.OpenReadOnly("/proc/self/ns/pid"))
 			throw MakeErrno("Failed to open current PID namespace");
 
-		auto fd = SpawnDaemon::MakePidNamespace(SpawnDaemon::Connect(),
-							params.ns.pid_namespace);
+		auto fd = SpawnAccessory::MakePidNamespace(SpawnAccessory::Connect(),
+							   params.ns.pid_namespace);
 		if (setns(fd.Get(), CLONE_NEWPID) < 0)
 			throw MakeErrno("setns(CLONE_NEWPID) failed");
 	}

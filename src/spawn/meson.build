@@ -106,7 +106,7 @@ if get_variable('libcommon_enable_spawn_daemon', false)
   # "cm4all-spawn").
 
   spawn_sources += [
-    'daemon/Client.cxx',
+    'accessory/Client.cxx',
   ]
 endif
 
