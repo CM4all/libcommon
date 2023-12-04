@@ -7,6 +7,7 @@
 #include "Assert.hxx"
 #include "Close.hxx"
 #include "ForEach.hxx"
+#include "Table.hxx"
 #include "Util.hxx"
 
 #include <cstddef>
@@ -17,23 +18,6 @@ namespace Lua {
  * A unique pointer to be used as LUA_REGISTRYINDEX key.
  */
 inline std::byte auto_close_table;
-
-inline void
-NewTableWithMode(lua_State *L, const char *mode)
-{
-	const ScopeCheckStack check_stack{L, 1};
-
-	lua_newtable(L);
-	lua_newtable(L);
-	SetTable(L, RelativeStackIndex{-1}, "__mode", mode);
-	lua_setmetatable(L, -2);
-}
-
-inline void
-NewWeakKeyTable(lua_State *L)
-{
-	NewTableWithMode(L, "k");
-}
 
 inline void
 PushAutoCloseTable(lua_State *L)
