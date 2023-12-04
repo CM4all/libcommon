@@ -4,6 +4,7 @@
 
 #include "CoCancel.hxx"
 #include "Assert.hxx"
+#include "Close.hxx"
 
 extern "C" {
 #include <lua.h>
@@ -14,30 +15,7 @@ namespace Lua {
 static bool
 CoCancel(lua_State *L, int idx)
 {
-	const ScopeCheckStack check_main_stack{L};
-
-	lua_getmetatable(L, idx);
-	if (!lua_istable(L, -1)) {
-		/* pop nil */
-		lua_pop(L, 1);
-		return false;
-	}
-
-	lua_getfield(L, -1, "__close");
-	if (!lua_isfunction(L, -1)) {
-		/* pop nil and metatable */
-		lua_pop(L, 2);
-		return false;
-	}
-
-	/* call __close(self), ignore return values and errors */
-	lua_pushvalue(L, idx);
-	lua_pcall(L, 1, 0, 0);
-
-	/* pop metatable */
-	lua_pop(L, 1);
-
-	return true;
+	return Close(L, idx);
 }
 
 bool
