@@ -27,7 +27,7 @@ class CgroupInfo {
 
 public:
 	CgroupInfo(lua_State *L, Lua::AutoCloseList &_auto_close,
-		std::string_view _path);
+		   std::string_view _path);
 
 	bool IsStale() const noexcept {
 		return auto_close == nullptr;
@@ -85,6 +85,18 @@ CgroupInfo::Index(lua_State *L)
 
 		// auto-close the file descriptor when the connection is closed
 		auto_close->Add(L, Lua::RelativeStackIndex{-1});
+
+		// copy a reference to the fenv (our cache)
+		Lua::SetFenvCache(L, 1, name_idx, Lua::RelativeStackIndex{-1});
+
+		return 1;
+	} else if (StringIsEqual(name, "parent")) {
+		const auto slash = path.rfind('/');
+		if (slash == path.npos || slash == 0)
+			return 0;
+
+		NewCgroupInfo(L, *auto_close,
+			      std::string_view{path}.substr(0, slash));
 
 		// copy a reference to the fenv (our cache)
 		Lua::SetFenvCache(L, 1, name_idx, Lua::RelativeStackIndex{-1});
