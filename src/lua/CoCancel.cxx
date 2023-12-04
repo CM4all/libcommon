@@ -31,7 +31,7 @@ CoCancel(lua_State *L, int idx)
 	}
 
 	/* call __close(self), ignore return values and errors */
-	lua_pushvalue(L, 1);
+	lua_pushvalue(L, idx);
 	lua_pcall(L, 1, 0, 0);
 
 	/* pop metatable */
