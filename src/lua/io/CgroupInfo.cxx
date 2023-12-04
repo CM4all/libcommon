@@ -50,6 +50,9 @@ CgroupInfo::CgroupInfo(lua_State *L, Lua::AutoCloseList &_auto_close,
 	 path(_path)
 {
 	auto_close->Add(L, Lua::RelativeStackIndex{-1});
+
+	lua_newtable(L);
+	lua_setfenv(L, -2);
 }
 
 inline int
