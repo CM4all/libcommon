@@ -6,6 +6,7 @@ endif
 lua_io = static_library(
   'lua_io',
   'XattrTable.cxx',
+  'CgroupInfo.cxx',
   include_directories: inc,
   dependencies: [
     lua_dep,
