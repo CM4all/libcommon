@@ -18,6 +18,8 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include <string>
+
 namespace Lua {
 
 class CgroupInfo {
