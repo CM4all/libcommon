@@ -19,14 +19,29 @@ public:
 	explicit XattrTable(UniqueFileDescriptor &&_fd) noexcept
 		:fd(std::move(_fd)) {}
 
+	static int Close(lua_State *L);
 	static int Index(lua_State *L);
 
 private:
+	int _Close() {
+		fd.Close();
+		return 0;
+	}
+
 	int _Index(lua_State *L, const char *name);
 };
 
 static constexpr char lua_xattr_table_class[] = "io.XattrTable";
 using XattrTableClass = Lua::Class<XattrTable, lua_xattr_table_class>;
+
+int
+XattrTable::Close(lua_State *L)
+{
+	if (lua_gettop(L) != 1)
+		return luaL_error(L, "Invalid parameters");
+
+	return XattrTableClass::Cast(L, 1)._Close();
+}
 
 int
 XattrTable::Index(lua_State *L)
@@ -40,6 +55,9 @@ XattrTable::Index(lua_State *L)
 inline int
 XattrTable::_Index(lua_State *L, const char *name)
 {
+	if (!fd.IsDefined())
+		luaL_error(L, "Stale object");
+
 	char buffer[4096];
 	ssize_t nbytes;
 
@@ -69,6 +87,7 @@ InitXattrTable(lua_State *L) noexcept
 {
 	XattrTableClass::Register(L);
 	SetField(L, RelativeStackIndex{-1}, "__index", XattrTable::Index);
+	SetField(L, RelativeStackIndex{-1}, "__close", XattrTable::Close);
 	lua_pop(L, 1);
 }
 
