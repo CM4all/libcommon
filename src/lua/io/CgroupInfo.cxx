@@ -61,13 +61,14 @@ CgroupInfo::Index(lua_State *L)
 	if (lua_gettop(L) != 2)
 		return luaL_error(L, "Invalid parameters");
 
+	constexpr StackIndex name_idx{2};
 	const char *const name = luaL_checkstring(L, 2);
 
 	if (IsStale())
 		return luaL_error(L, "Stale object");
 
 	// look it up in the fenv (our cache)
-	if (Lua::GetFenvCache(L, 1, name))
+	if (Lua::GetFenvCache(L, 1, name_idx))
 		return 1;
 
 	if (StringIsEqual(name, "path")) {
@@ -86,7 +87,7 @@ CgroupInfo::Index(lua_State *L)
 		auto_close->Add(L, Lua::RelativeStackIndex{-1});
 
 		// copy a reference to the fenv (our cache)
-		Lua::SetFenvCache(L, 1, name, Lua::RelativeStackIndex{-1});
+		Lua::SetFenvCache(L, 1, name_idx, Lua::RelativeStackIndex{-1});
 
 		return 1;
 	} else
