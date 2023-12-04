@@ -23,29 +23,19 @@ public:
 	explicit PgResult(Pg::Result &&_result) noexcept
 		:result(std::move(_result)) {}
 
-private:
-	static int Fetch(lua_State *L);
-	int _Fetch(lua_State *L);
-
-public:
-	static constexpr struct luaL_Reg methods [] = {
-		{"fetch", Fetch},
-		{nullptr, nullptr}
-	};
+	int Fetch(lua_State *L);
 };
 
 static constexpr char lua_pg_result_class[] = "pg.Result";
 using PgResultClass = Lua::Class<PgResult, lua_pg_result_class>;
 
-int
-PgResult::Fetch(lua_State *L)
-{
-	auto &result = PgResultClass::Cast(L, 1);
-	return result._Fetch(L);
-}
+static constexpr struct luaL_Reg lua_pg_result_methods [] = {
+	{"fetch", PgResultClass::WrapMethod<&PgResult::Fetch>()},
+	{nullptr, nullptr}
+};
 
 inline int
-PgResult::_Fetch(lua_State *L)
+PgResult::Fetch(lua_State *L)
 {
 	if (next_row >= result.GetRowCount())
 		return 0;
@@ -86,7 +76,7 @@ void
 InitPgResult(lua_State *L) noexcept
 {
 	PgResultClass::Register(L);
-	luaL_newlib(L, PgResult::methods);
+	luaL_newlib(L, lua_pg_result_methods);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 }

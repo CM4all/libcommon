@@ -125,27 +125,24 @@ public:
 		return connection.GetEventLoop();
 	}
 
-private:
-	static int Execute(lua_State *L);
-	int Execute(lua_State *L, int sql, int params);
-	static int Listen(lua_State *L);
-	int Listen(lua_State *L, int name_idx, int handler_idx);
+	int Execute(lua_State *L);
+	int Listen(lua_State *L);
 
+private:
 	/* virtual methods from class Pg::SharedConnectionHandler */
 	void OnPgConnect() override;
 	void OnPgNotify(const char *name) override;
 	void OnPgError(std::exception_ptr e) noexcept override;
-
-public:
-	static constexpr struct luaL_Reg methods [] = {
-		{"execute", Execute},
-		{"listen", Listen},
-		{nullptr, nullptr}
-	};
 };
 
 static constexpr char lua_pg_connection_class[] = "pg.Connection";
 using PgConnectionClass = Lua::Class<PgConnection, lua_pg_connection_class>;
+
+static constexpr struct luaL_Reg lua_pg_connection_methods[] = {
+	{"execute", PgConnectionClass::WrapMethod<&PgConnection::Execute>()},
+	{"listen", PgConnectionClass::WrapMethod<&PgConnection::Listen>()},
+	{nullptr, nullptr}
+};
 
 class PgRequest final
 	: public Pg::SharedConnectionQuery, Pg::AsyncResultHandler
@@ -243,15 +240,6 @@ static constexpr char lua_pg_request_class[] = "pg.Request";
 using PgRequestClass = Lua::Class<PgRequest, lua_pg_request_class>;
 
 inline int
-PgConnection::Execute(lua_State *L, int sql, int params)
-{
-	auto *request = PgRequestClass::New(L, L, connection,
-					    sql, params);
-	connection.ScheduleQuery(*request);
-	return lua_yield(L, 1);
-}
-
-int
 PgConnection::Execute(lua_State *L)
 {
 	if (lua_gettop(L) < 2)
@@ -268,13 +256,23 @@ PgConnection::Execute(lua_State *L)
 		params = 3;
 	}
 
-	auto &connection = PgConnectionClass::Cast(L, 1);
-	return connection.Execute(L, sql, params);
+	auto *request = PgRequestClass::New(L, L, connection,
+					    sql, params);
+	connection.ScheduleQuery(*request);
+	return lua_yield(L, 1);
 }
 
 inline int
-PgConnection::Listen(lua_State *L, int name_idx, int handler_idx)
+PgConnection::Listen(lua_State *L)
 {
+	if (lua_gettop(L) < 3)
+		return luaL_error(L, "Not enough parameters");
+	if (lua_gettop(L) > 3)
+		return luaL_error(L, "Too many parameters");
+
+	constexpr int name_idx = 2;
+	constexpr int handler_idx = 3;
+
 	const char *name = luaL_checkstring(L, name_idx);
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
@@ -288,18 +286,6 @@ PgConnection::Listen(lua_State *L, int name_idx, int handler_idx)
 		connection.ScheduleQuery(listen_query);
 
 	return 0;
-}
-
-int
-PgConnection::Listen(lua_State *L)
-{
-	if (lua_gettop(L) < 3)
-		return luaL_error(L, "Not enough parameters");
-	if (lua_gettop(L) > 3)
-		return luaL_error(L, "Too many parameters");
-
-	auto &connection = PgConnectionClass::Cast(L, 1);
-	return connection.Listen(L, 2, 3);
 }
 
 void
@@ -457,7 +443,7 @@ void
 InitPgConnection(lua_State *L) noexcept
 {
 	PgConnectionClass::Register(L);
-	luaL_newlib(L, PgConnection::methods);
+	luaL_newlib(L, lua_pg_connection_methods);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
