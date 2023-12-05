@@ -27,9 +27,12 @@ class CgroupInfo {
 
 	const std::string path;
 
+	UniqueFileDescriptor directory_fd;
+
 public:
 	CgroupInfo(lua_State *L, Lua::AutoCloseList &_auto_close,
-		   std::string_view _path);
+		   std::string_view _path,
+		   UniqueFileDescriptor &&_directory_fd={});
 
 	bool IsStale() const noexcept {
 		return auto_close == nullptr;
@@ -41,20 +44,35 @@ public:
 	}
 
 	int Index(lua_State *L);
+
+private:
+	UniqueFileDescriptor OpenDirectory();
 };
 
 static constexpr char lua_cgroup_info_class[] = "cgroup_info";
 typedef Lua::Class<CgroupInfo, lua_cgroup_info_class> LuaCgroupInfo;
 
 CgroupInfo::CgroupInfo(lua_State *L, Lua::AutoCloseList &_auto_close,
-		 std::string_view _path)
+		       std::string_view _path,
+		       UniqueFileDescriptor &&_directory_fd)
 	:auto_close(&_auto_close),
-	 path(_path)
+	 path(_path),
+	 directory_fd(std::move(_directory_fd))
 {
 	auto_close->Add(L, Lua::RelativeStackIndex{-1});
 
 	lua_newtable(L);
 	lua_setfenv(L, -2);
+}
+
+inline UniqueFileDescriptor
+CgroupInfo::OpenDirectory()
+{
+	if (directory_fd.IsDefined())
+		return std::move(directory_fd);
+
+	const auto sys_fs_cgroup = OpenPath("/sys/fs/cgroup");
+	return OpenReadOnlyBeneath({sys_fs_cgroup, path.c_str() + 1});
 }
 
 inline int
@@ -78,9 +96,7 @@ CgroupInfo::Index(lua_State *L)
 		return 1;
 	} else if (StringIsEqual(name, "xattr")) {
 		try {
-			const auto sys_fs_cgroup = OpenPath("/sys/fs/cgroup");
-			auto fd = OpenReadOnlyBeneath({sys_fs_cgroup, path.c_str() + 1});
-			Lua::NewXattrTable(L, std::move(fd));
+			Lua::NewXattrTable(L, OpenDirectory());
 		} catch (...) {
 			Lua::RaiseCurrent(L);
 		}
@@ -124,6 +140,13 @@ NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
 	      std::string_view path) noexcept
 {
 	LuaCgroupInfo::New(L, L, auto_close, path);
+}
+
+void
+NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
+	      std::string_view path, UniqueFileDescriptor directory_fd) noexcept
+{
+	LuaCgroupInfo::New(L, L, auto_close, path, std::move(directory_fd));
 }
 
 } // namespace Lua

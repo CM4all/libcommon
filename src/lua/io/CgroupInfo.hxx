@@ -20,4 +20,12 @@ void
 NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
 	      std::string_view path) noexcept;
 
+/**
+ * @param cgroup_fd an O_RDONLY|O_DIRECTORY file descriptor on the
+ * cgroup directory
+ */
+void
+NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
+	      std::string_view path, UniqueFileDescriptor directory_fd) noexcept;
+
 } // namespace Lua
