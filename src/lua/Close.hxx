@@ -18,12 +18,8 @@ Close(lua_State *L, AnyStackIndex auto idx)
 {
 	const ScopeCheckStack check_stack{L};
 
-	lua_getmetatable(L, GetStackIndex(idx));
-	if (!lua_istable(L, -1)) {
-		/* pop nil */
-		lua_pop(L, 1);
+	if (!lua_getmetatable(L, GetStackIndex(idx)))
 		return false;
-	}
 
 	lua_getfield(L, -1, "__close");
 	if (!lua_isfunction(L, -1)) {
