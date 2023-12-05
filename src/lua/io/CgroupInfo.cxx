@@ -105,7 +105,7 @@ CgroupInfo::Index(lua_State *L)
 
 		return 1;
 	} else
-		return luaL_error(L, "Unknown attribute");
+		return 0;
 }
 
 void
