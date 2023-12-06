@@ -158,7 +158,7 @@ class PgRequest final
 public:
 	PgRequest(lua_State *_L,
 		  Pg::SharedConnection &connection,
-		  int sql, int params) noexcept
+		  StackIndex sql, StackIndex params) noexcept
 		:Pg::SharedConnectionQuery(connection),
 		 L(_L),
 		 defer_resume(connection.GetEventLoop(),
@@ -169,13 +169,10 @@ public:
 		/* copy the parameters to fenv */
 		lua_newtable(L);
 
-		lua_pushvalue(L, sql);
-		lua_setfield(L, -2, "sql");
+		SetTable(L, RelativeStackIndex{-1}, "sql", sql);
 
-		if (params > 0) {
-			lua_pushvalue(L, params);
-			lua_setfield(L, -2, "params");
-		}
+		if (params.idx > 0)
+			SetTable(L, RelativeStackIndex{-1}, "params", params);
 
 		lua_setfenv(L, -2);
 	}
@@ -248,12 +245,12 @@ PgConnection::Execute(lua_State *L)
 		return luaL_error(L, "Too many parameters");
 
 	luaL_checkstring(L, 2);
-	int sql = 2;
+	constexpr StackIndex sql{2};
 
-	int params = 0;
+	StackIndex params{0};
 	if (lua_gettop(L) >= 3) {
 		luaL_checktype(L, 3, LUA_TTABLE);
-		params = 3;
+		params = StackIndex{3};
 	}
 
 	auto *request = PgRequestClass::New(L, L, connection,
