@@ -23,6 +23,7 @@ lua = static_library(
   'CoCancel.cxx',
   'CoRunner.cxx',
   'Error.cxx',
+  'ReloadRunner.cxx',
   'Resume.cxx',
   'RunFile.cxx',
   'State.cxx',
