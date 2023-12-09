@@ -7,9 +7,8 @@
 
 #include <algorithm> // for std::copy_n()
 #include <cassert>
+#include <cstdint>
 #include <stdexcept>
-
-#include <stdint.h>
 
 bool
 BufferedReader::Fill(bool need_more)
