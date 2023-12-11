@@ -16,7 +16,7 @@
  * glibc has a "__rlimit_resource_t" typedef which maps to "int" in
  * C++ (probably to work around "invalid conversion from 'int' to
  * '__rlimit_resource'"); however prlimit() does not uses that
- * typedef, but uses "enum __rlimit_resource" directory.  Thus we need
+ * typedef, but uses "enum __rlimit_resource" directly.  Thus we need
  * to cast to that (internal) type.  Fortunately C++'s decltype()
  * helps us to make that internal type access portable.
  */
