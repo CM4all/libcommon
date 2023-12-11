@@ -223,7 +223,7 @@ ResourceLimits::Parse(const char *s) noexcept
 		}
 
 		assert(resource < values.size());
-		struct rlimit *const t = &values[resource];
+		struct rlimit &t = values[resource];
 
 		unsigned long value;
 
@@ -259,15 +259,15 @@ ResourceLimits::Parse(const char *s) noexcept
 
 		switch (which) {
 		case BOTH:
-			t->rlim_cur = t->rlim_max = value;
+			t.rlim_cur = t.rlim_max = value;
 			break;
 
 		case SOFT:
-			t->rlim_cur = value;
+			t.rlim_cur = value;
 			break;
 
 		case HARD:
-			t->rlim_max = value;
+			t.rlim_max = value;
 			break;
 		}
 	}
