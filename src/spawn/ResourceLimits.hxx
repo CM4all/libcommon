@@ -6,6 +6,7 @@
 
 #include <sys/resource.h>
 
+#include <array>
 #include <cstddef>
 
 struct ResourceLimit : rlimit {
@@ -44,7 +45,7 @@ struct ResourceLimit : rlimit {
  * Resource limits.
  */
 struct ResourceLimits {
-	ResourceLimit values[RLIM_NLIMITS];
+	std::array<ResourceLimit, RLIM_NLIMITS> values;
 
 	[[gnu::pure]]
 	bool IsEmpty() const noexcept;

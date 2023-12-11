@@ -120,7 +120,7 @@ rlimit_apply(int pid, int resource, const ResourceLimit &r)
 void
 ResourceLimits::Apply(int pid) const
 {
-	for (unsigned i = 0; i < RLIM_NLIMITS; ++i)
+	for (unsigned i = 0; i < values.size(); ++i)
 		rlimit_apply(pid, i, values[i]);
 }
 
@@ -222,7 +222,7 @@ ResourceLimits::Parse(const char *s) noexcept
 			return false;
 		}
 
-		assert(resource < RLIM_NLIMITS);
+		assert(resource < values.size());
 		struct rlimit *const t = &values[resource];
 
 		unsigned long value;
