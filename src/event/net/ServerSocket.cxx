@@ -8,10 +8,9 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/StaticSocketAddress.hxx"
 #include "net/SocketConfig.hxx"
-#include "system/Error.hxx"
+#include "net/SocketError.hxx"
 
-#include <assert.h>
-#include <errno.h>
+#include <cassert>
 
 ServerSocket::~ServerSocket() noexcept
 {
@@ -113,15 +112,15 @@ ServerSocket::EventCallback(unsigned) noexcept
 	StaticSocketAddress remote_address;
 	UniqueSocketDescriptor remote_fd(event.GetSocket().AcceptNonBlock(remote_address));
 	if (!remote_fd.IsDefined()) {
-		const int e = errno;
-		if (e != EAGAIN && e != EWOULDBLOCK)
-			OnAcceptError(std::make_exception_ptr(MakeErrno(e, "Failed to accept connection")));
+		const auto e = GetSocketError();
+		if (!IsSocketErrorAcceptWouldBlock(e))
+			OnAcceptError(std::make_exception_ptr(MakeSocketError(e, "Failed to accept connection")));
 
 		return;
 	}
 
 	if (IsTCP(remote_address) && !remote_fd.SetNoDelay()) {
-		OnAcceptError(std::make_exception_ptr(MakeErrno("setsockopt(TCP_NODELAY) failed")));
+		OnAcceptError(std::make_exception_ptr(MakeSocketError("setsockopt(TCP_NODELAY) failed")));
 		return;
 	}
 
