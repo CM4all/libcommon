@@ -11,6 +11,7 @@
 #include "util/SpanCast.hxx"
 
 #include <cassert>
+#include <charconv>
 
 /**
  * glibc has a "__rlimit_resource_t" typedef which maps to "int" in
@@ -125,7 +126,7 @@ ResourceLimits::Apply(int pid) const
 }
 
 bool
-ResourceLimits::Parse(const char *s) noexcept
+ResourceLimits::Parse(std::string_view s) noexcept
 {
 	enum {
 		BOTH,
@@ -133,8 +134,9 @@ ResourceLimits::Parse(const char *s) noexcept
 		HARD,
 	} which = BOTH;
 
-	char ch;
-	while ((ch = *s++) != 0) {
+	for (auto i = s.begin(), end = s.end(); i != end;) {
+		const char ch = *i++;
+
 		unsigned resource;
 
 		switch (ch) {
@@ -227,18 +229,20 @@ ResourceLimits::Parse(const char *s) noexcept
 
 		unsigned long value;
 
-		if (*s == '!') {
+		if (i == end)
+			return false;
+
+		if (*i == '!') {
 			value = (unsigned long)RLIM_INFINITY;
-			++s;
+			++i;
 		} else {
-			char *endptr;
-			value = strtoul(s, &endptr, 10);
-			if (endptr == s)
+			auto [ptr, ec] = std::from_chars(i, end, value, 10);
+			if (ec != std::errc{})
 				return false;
 
-			s = endptr;
+			i = ptr;
 
-			switch (*s) {
+			switch (i != end ? *i : '\0') {
 			case 'T':
 				value <<= 10;
 				[[fallthrough]];
@@ -253,7 +257,7 @@ ResourceLimits::Parse(const char *s) noexcept
 
 			case 'K':
 				value <<= 10;
-				++s;
+				++i;
 			}
 		}
 

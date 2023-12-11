@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cstddef>
+#include <string_view>
 
 struct ResourceLimit : rlimit {
 	static constexpr rlim_t UNDEFINED = rlim_t(-2);
@@ -60,5 +61,5 @@ struct ResourceLimits {
 	 */
 	void Apply(int pid) const;
 
-	bool Parse(const char *s) noexcept;
+	bool Parse(std::string_view s) noexcept;
 };

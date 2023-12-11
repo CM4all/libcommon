@@ -710,7 +710,7 @@ translate_client_uts_namespace(NamespaceOptions *ns,
 
 static void
 translate_client_rlimits(AllocatorPtr alloc, ChildOptions *child_options,
-			 const char *payload)
+			 std::string_view payload)
 {
 	if (child_options == nullptr)
 		throw std::runtime_error("misplaced RLIMITS packet");
@@ -2559,7 +2559,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::RLIMITS:
-		translate_client_rlimits(alloc, child_options, string_payload.data());
+		translate_client_rlimits(alloc, child_options, string_payload);
 		return;
 
 	case TranslationCommand::WANT:
