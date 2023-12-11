@@ -4,7 +4,7 @@
 
 #include "MultiUdpListener.hxx"
 #include "UdpHandler.hxx"
-#include "system/Error.hxx"
+#include "net/SocketError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
 #include <assert.h>
@@ -29,8 +29,8 @@ void
 MultiUdpListener::EventCallback(unsigned events) noexcept
 try {
 	if (events & event.ERROR)
-		throw MakeErrno(event.GetSocket().GetError(),
-				"Socket error");
+		throw MakeSocketError(event.GetSocket().GetError(),
+				      "Socket error");
 
 	if ((events & event.HANGUP) != 0 &&
 	    !handler.OnUdpHangup())
@@ -70,7 +70,7 @@ MultiUdpListener::Reply(SocketAddress address,
 				MSG_DONTWAIT|MSG_NOSIGNAL,
 				address.GetAddress(), address.GetSize());
 	if (nbytes < 0) [[unlikely]]
-		throw MakeErrno("Failed to send UDP packet");
+		throw MakeSocketError("Failed to send UDP packet");
 
 	if ((std::size_t)nbytes != payload.size()) [[unlikely]]
 		throw std::runtime_error("Short send");
