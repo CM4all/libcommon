@@ -25,14 +25,16 @@ using my_rlimit_resource_t = decltype(RLIMIT_NLIMITS);
 inline void
 ResourceLimit::Get(int pid, int resource)
 {
-	if (prlimit(pid, my_rlimit_resource_t(resource), nullptr, this) < 0)
+	if (prlimit(pid, static_cast<my_rlimit_resource_t>(resource),
+		    nullptr, this) < 0)
 		throw FmtErrno("getrlimit({}) failed", resource);
 }
 
 inline void
 ResourceLimit::Set(int pid, int resource) const
 {
-	if (prlimit(pid, my_rlimit_resource_t(resource), this, nullptr) < 0)
+	if (prlimit(pid, static_cast<my_rlimit_resource_t>(resource),
+		    this, nullptr) < 0)
 		throw FmtErrno("setrlimit({}, {}, {}) failed",
 			       resource, rlim_cur, rlim_max);
 }
