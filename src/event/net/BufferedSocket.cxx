@@ -4,10 +4,10 @@
 
 #include "BufferedSocket.hxx"
 #include "system/Error.hxx"
+#include "net/SocketError.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "net/TimeoutError.hxx"
 
-#include <errno.h>
 #include <sys/uio.h> // for struct iovec
 
 BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
@@ -387,10 +387,10 @@ BufferedSocket::FillBuffer() noexcept
 	}
 
 	if (nbytes == -1) {
-		if (const int e = errno; e == EAGAIN) [[likely]] {
+		if (const auto e = GetSocketError(); IsSocketErrorReceiveWouldBlock(e)) [[likely]] {
 			return FillBufferResult::NOT_READY;
 		} else {
-			handler->OnBufferedError(std::make_exception_ptr(MakeErrno(e, "recv() failed")));
+			handler->OnBufferedError(std::make_exception_ptr(MakeSocketError(e, "recv() failed")));
 			return FillBufferResult::DESTROYED;
 		}
 	}
@@ -677,8 +677,8 @@ BufferedSocket::OnSocketError(int error) noexcept
 		}
 	}
 
-	handler->OnBufferedError(std::make_exception_ptr(MakeErrno(error,
-								   "Socket error")));
+	handler->OnBufferedError(std::make_exception_ptr(MakeSocketError(error,
+									 "Socket error")));
 	return false;
 }
 
@@ -768,10 +768,10 @@ BufferedSocket::Write(std::span<const std::byte> src) noexcept
 	ssize_t nbytes = base.Write(src);
 
 	if (nbytes < 0) [[unlikely]] {
-		if (const int e = errno; e == EAGAIN) [[likely]] {
+		if (const auto e = GetSocketError(); IsSocketErrorSendWouldBlock(e)) [[likely]] {
 			ScheduleWrite();
 			return WRITE_BLOCKING;
-		} else if (e == EPIPE || e == ECONNRESET) {
+		} else if (IsSocketErrorClosed(e)) {
 			enum write_result r = handler->OnBufferedBroken();
 
 			if (r == WRITE_BROKEN)
@@ -790,10 +790,10 @@ BufferedSocket::WriteV(std::span<const struct iovec> v) noexcept
 	ssize_t nbytes = base.WriteV(v);
 
 	if (nbytes < 0) [[unlikely]] {
-		if (const int e = errno; e == EAGAIN) [[likely]] {
+		if (const auto e = GetSocketError(); IsSocketErrorSendWouldBlock(e)) [[likely]] {
 			ScheduleWrite();
 			return WRITE_BLOCKING;
-		} else if (e == EPIPE || e == ECONNRESET) {
+		} else if (IsSocketErrorClosed(e)) {
 			enum write_result r = handler->OnBufferedBroken();
 			if (r == WRITE_BROKEN)
 				UnscheduleWrite();
