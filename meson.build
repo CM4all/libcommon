@@ -122,6 +122,7 @@ subdir('src/io/config')
 subdir('src/io/linux')
 subdir('src/io/uring')
 subdir('src/system')
+subdir('src/memory')
 subdir('src/lib/openssl')
 
 if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
