@@ -8,10 +8,14 @@
 
 #include <cstdint>
 
+struct ThreadJobTag;
+
 /**
  * A job that shall be executed in a worker thread.
  */
-class ThreadJob : public IntrusiveListHook<IntrusiveHookMode::NORMAL> {
+class ThreadJob
+	: public IntrusiveListHook<IntrusiveHookMode::NORMAL, ThreadJobTag>
+{
 public:
 	enum class State : uint_least8_t {
 		/**

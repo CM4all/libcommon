@@ -12,6 +12,7 @@
 
 class EventLoop;
 class ThreadJob;
+struct ThreadJobTag;
 
 /**
  * A queue that manages work for worker threads (#ThreadWorker).
@@ -28,7 +29,8 @@ class ThreadQueue {
 	 */
 	bool volatile_notify = false;
 
-	using JobList = IntrusiveList<ThreadJob>;
+	using JobList = IntrusiveList<ThreadJob,
+				      IntrusiveListBaseHookTraits<ThreadJob, ThreadJobTag>>;
 
 	JobList waiting, busy, done;
 
