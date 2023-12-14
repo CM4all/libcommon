@@ -32,6 +32,7 @@ You need:
 
 Optional dependencies:
 
+- `Avahi <https://www.avahi.org/>`__
 - `libcurl <https://curl.haxx.se/>`__
 - `libmariadb <https://mariadb.org/>`__
 - `libpq <https://www.postgresql.org/>`__
@@ -60,14 +61,29 @@ Each directory below ``src`` contains a sub-library:
 - ``adata``: data structures using our pool allocator
 - ``co``: C++20 Coroutines
 - ``event``: a non-blocking I/O event loop
+- ``event/net``: non-blocking networking libraries
+- ``event/systemd``: non-blocking systemd clients
+- ``event/uring``: integration of io_uring in the event loop
 - ``http``: HTTP protocol definitions and helpers
 - ``io``: file I/O utilities
+- ``io/config``: a configuration file parser
+- ``io/linux``: Linux-specific I/O helpers
 - ``io/uring``: `liburing <https://github.com/axboe/liburing>`__ C++
   wrapper
 - ``json``: standalone ``boost::json``
+- ``jwt``: helpers for JSON Web Tokens
 - ``lib``: C++ wrappers or additional utilities for various
   external libraries.
 - ``lua``: `Lua <http://www.lua.org/>`__ C++ wrappers
+- ``lua/event``: non-blocking Lua
+- ``lua/io``: I/O helpers for Lua
+- ``lua/json``: Lua JSON library
+- ``lua/mariadb``: Lua wrapper for libmariadb
+- ``lua/net``: networking helpers for Lua
+- ``lua/pg``: non-blocking PostgreSQL client for Lua
+- ``lua/sodium``: Lua wrappers for `libsodium
+  <https://libsodium.org/>`__
+- ``memory``: memory allocators
 - ``net``: networking/socket utilities
 - ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers
 - ``spawn``: a process spawner
@@ -76,11 +92,18 @@ Each directory below ``src`` contains a sub-library:
 - ``system``: operating system utilities
 - ``time``: dealing with date and time
 - ``translation``: implementation of the CM4all translation protocol
+- ``uri``: URI utilities
 - ``util``: generic utilities
+- ``was``: helpers for `libwas <https://github.com/CM4all/libwas>`__
+- ``was/async``: a non-blocking implementation of the Web Application
+  Socket protocol
 
 These directories contain C++ wrappers or additional utilities for
 external libraries:
 
+- ``lib/avahi``: `Avahi <https://avahi.org/>`__ C++ wrappers
+- ``lib/cap``: `libcap
+  <https://sites.google.com/site/fullycapable/>`__ C++ wrappers
 - ``lib/curl``: `libcurl <https://curl.haxx.se/>`__ C++ wrappers
 - ``lib/dbus``: `libdbus
   <https://www.freedesktop.org/wiki/Software/dbus/>`__ C++ wrappers
@@ -89,6 +112,8 @@ external libraries:
   <https://mariadb.org/>`__ client library
 - ``lib/nettle``: `Nettle
   <https://www.lysator.liu.se/~nisse/nettle/>`__ C++ wrappers
+- ``lib/nlohmann_json``: `nlohmann_json
+  <https://json.nlohmann.me/>`__ helpers
 - ``lib/openssl``: `OpenSSL <https://www.openssl.org/>`__ C++ wrappers
 - ``lib/pcre``: `PCRE <https://www.pcre.org/>`__ C++ wrappers
 - ``lib/sodium``: `libsodium <https://github.com/jedisct1/libsodium/>`__
