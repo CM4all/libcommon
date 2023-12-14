@@ -154,6 +154,7 @@ if not get_option('fuzzer')
   subdir('src/event/net/log')
   subdir('src/event/systemd')
   subdir('src/event/uring')
+  subdir('src/thread')
 
   subdir('src/lib/avahi')
   subdir('src/lib/cap')

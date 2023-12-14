@@ -90,6 +90,7 @@ Each directory below ``src`` contains a sub-library:
 - ``stock``: manage stocks of reusable objects (e.g. for connection
   pooling)
 - ``system``: operating system utilities
+- ``thread``: helpers for multi-threaded applications
 - ``time``: dealing with date and time
 - ``translation``: implementation of the CM4all translation protocol
 - ``uri``: URI utilities
