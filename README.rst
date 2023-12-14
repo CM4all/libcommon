@@ -57,26 +57,26 @@ Contents
 
 Each directory below ``src`` contains a sub-library:
 
-- ``util``: generic utilities
-- ``co``: C++20 Coroutines
-- ``time``: dealing with date and time
-- ``http``: HTTP protocol definitions and helpers
 - ``adata``: data structures using our pool allocator
-- ``system``: operating system utilities
+- ``co``: C++20 Coroutines
+- ``event``: a non-blocking I/O event loop
+- ``http``: HTTP protocol definitions and helpers
 - ``io``: file I/O utilities
 - ``io/uring``: `liburing <https://github.com/axboe/liburing>`__ C++
   wrapper
 - ``json``: standalone ``boost::json``
-- ``net``: networking/socket utilities
-- ``event``: a non-blocking I/O event loop
 - ``lib``: C++ wrappers or additional utilities for various
   external libraries.
 - ``lua``: `Lua <http://www.lua.org/>`__ C++ wrappers
+- ``net``: networking/socket utilities
 - ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers
-- ``translation``: implementation of the CM4all translation protocol
 - ``spawn``: a process spawner
 - ``stock``: manage stocks of reusable objects (e.g. for connection
   pooling)
+- ``system``: operating system utilities
+- ``time``: dealing with date and time
+- ``translation``: implementation of the CM4all translation protocol
+- ``util``: generic utilities
 
 These directories contain C++ wrappers or additional utilities for
 external libraries:
