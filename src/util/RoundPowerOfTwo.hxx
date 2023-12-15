@@ -4,14 +4,16 @@
 
 #pragma once
 
-template<typename T>
+#include <concepts>
+
+template<std::unsigned_integral T>
 constexpr T
 RoundUpToPowerOfTwo(T value, T power_of_two) noexcept
 {
 	return ((value - 1) | (power_of_two - 1)) + 1;
 }
 
-template<typename T>
+template<std::unsigned_integral T>
 constexpr T
 RoundDownToPowerOfTwo(T value, T power_of_two) noexcept
 {
