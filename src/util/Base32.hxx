@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <type_traits>
 
 constexpr char base32_digits[] = "0123456789abcdefghijklmnopqrstuv";
@@ -19,8 +20,7 @@ static_assert(sizeof(base32_digits) == 33);
  *
  * @return a pointer to one after the last character
  */
-template<typename I>
-requires std::is_integral_v<I>
+template<std::integral I>
 constexpr char *
 FormatIntBase32(char *buffer, I _value) noexcept
 {
