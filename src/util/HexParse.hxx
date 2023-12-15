@@ -7,9 +7,9 @@
 #include "CharUtil.hxx"
 
 #include <array>
+#include <concepts>
 #include <cstdint>
 #include <string_view>
-#include <type_traits>
 
 constexpr int
 ParseHexDigit(char ch) noexcept
@@ -41,8 +41,7 @@ ParseLowerHexDigit(char ch) noexcept
  *
  * @return the end of the parsed string on success, nullptr on error
  */
-template<typename T>
-requires std::is_integral_v<T> && std::is_unsigned_v<T>
+template<std::unsigned_integral T>
 const char *
 ParseLowerHexFixed(const char *input, T &output) noexcept
 {
