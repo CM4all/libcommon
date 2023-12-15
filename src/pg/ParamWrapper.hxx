@@ -39,8 +39,7 @@ struct ParamWrapper {
 	size_t GetSize() const noexcept;
 };
 
-template<typename T>
-requires std::is_integral_v<T>
+template<std::integral T>
 struct ParamWrapper<T> {
 	fmt::format_int buffer;
 
