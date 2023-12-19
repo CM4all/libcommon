@@ -3,6 +3,7 @@ memory = static_library(
   'SlicePool.cxx',
   'SliceAllocation.cxx',
   'SliceFifoBuffer.cxx',
+  'BufferQueue.cxx',
   include_directories: inc,
   dependencies: [
     util_dep,
