@@ -8,7 +8,7 @@
 #include "Crc.hxx"
 #include "http/Method.hxx"
 #include "http/Status.hxx"
-#include "util/ByteOrder.hxx"
+#include "util/PackedBigEndian.hxx"
 
 #include <assert.h>
 #include <string.h>

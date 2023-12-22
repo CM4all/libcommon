@@ -9,7 +9,7 @@
 #include "net/SocketDescriptor.hxx"
 #include "net/SendMessage.hxx"
 #include "io/Iovec.hxx"
-#include "util/ByteOrder.hxx"
+#include "util/PackedBigEndian.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StaticVector.hxx"
 
