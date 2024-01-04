@@ -138,7 +138,6 @@ if get_variable('libcommon_enable_spawn_options', false)
     'PidNamespace.cxx',
     'ResourceLimits.cxx',
     'UidGid.cxx',
-    'UserNamespace.cxx',
     'VfsBuilder.cxx',
   ]
 

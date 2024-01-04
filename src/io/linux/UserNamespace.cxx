@@ -3,12 +3,13 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "UserNamespace.hxx"
+#include "ProcPid.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "io/WriteFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "io/linux/ProcPid.hxx"
 
-#include <assert.h>
+#include <cassert>
+
 #include <string.h>
 #include <stdio.h>
 

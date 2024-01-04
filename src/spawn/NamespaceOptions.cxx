@@ -3,12 +3,12 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "NamespaceOptions.hxx"
-#include "UserNamespace.hxx"
 #include "PidNamespace.hxx"
 #include "NetworkNamespace.hxx"
 #include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
+#include "io/linux/UserNamespace.hxx"
 
 #include <set>
 
