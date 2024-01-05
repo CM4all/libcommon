@@ -31,8 +31,7 @@ SocketConfig::Create(int type) const
 	assert(bind_address.IsDefined());
 
 	const int family = bind_address.GetFamily();
-	const bool is_inet = family == AF_INET || family == AF_INET6;
-	const bool is_tcp = is_inet && type == SOCK_STREAM;
+	const bool is_tcp = bind_address.IsInet() && type == SOCK_STREAM;
 
 	int protocol = 0;
 
