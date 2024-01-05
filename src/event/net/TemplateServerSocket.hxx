@@ -2,11 +2,11 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef TEMPLATE_SERVER_SOCKET_HXX
-#define TEMPLATE_SERVER_SOCKET_HXX
+#pragma once
 
 #include "ServerSocket.hxx"
 #include "net/SocketAddress.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveList.hxx"
 #include "util/PrintException.hxx"
@@ -65,7 +65,7 @@ public:
 	}
 
 protected:
-	void OnAccept(UniqueSocketDescriptor &&_fd,
+	void OnAccept(UniqueSocketDescriptor _fd,
 		      SocketAddress address) noexcept override {
 		try {
 			auto *c = CreateConnection(std::move(_fd), address);
@@ -86,5 +86,3 @@ private:
 											      address, params);
 	}
 };
-
-#endif

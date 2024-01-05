@@ -22,7 +22,7 @@ Listener::~Listener() noexcept
 }
 
 void
-Listener::OnAccept(UniqueSocketDescriptor &&new_fd,
+Listener::OnAccept(UniqueSocketDescriptor new_fd,
 		   SocketAddress) noexcept
 {
 	auto *connection = new Connection(GetEventLoop(),

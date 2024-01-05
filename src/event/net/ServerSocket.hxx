@@ -69,7 +69,7 @@ protected:
 	 *
 	 * @param fd the socket owned by the callee
 	 */
-	virtual void OnAccept(UniqueSocketDescriptor &&fd,
+	virtual void OnAccept(UniqueSocketDescriptor fd,
 			      SocketAddress address) noexcept = 0;
 	virtual void OnAcceptError(std::exception_ptr ep) noexcept = 0;
 

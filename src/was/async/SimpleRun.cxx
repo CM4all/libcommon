@@ -245,12 +245,12 @@ public:
 
 private:
 	/* virtual methods from class ServerSocket */
-	void OnAccept(UniqueSocketDescriptor &&fd,
-		      SocketAddress) noexcept {
+	void OnAccept(UniqueSocketDescriptor fd,
+		      SocketAddress) noexcept override {
 		connections.Add(GetEventLoop(), std::move(fd));
 	}
 
-	void OnAcceptError(std::exception_ptr _error) noexcept {
+	void OnAcceptError(std::exception_ptr _error) noexcept override {
 		error = std::move(_error);
 		GetEventLoop().Break();
 	}
