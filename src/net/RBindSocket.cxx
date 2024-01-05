@@ -21,6 +21,11 @@ ResolveBindSocket(const char *host_and_port, int default_port,
 	if (!s.CreateNonBlock(ai.GetFamily(), ai.GetType(), ai.GetProtocol()))
 		throw MakeSocketError("Failed to create socket");
 
+	if (ai.IsTCP())
+		/* always set SO_REUSEADDR for TCP sockets to allow
+		   quick restarts */
+		s.SetReuseAddress();
+
 	if (!s.Bind(ai))
 		throw MakeSocketError("Failed to bind");
 
@@ -36,6 +41,11 @@ ParseBindSocket(const char *host_and_port, int default_port, int socktype)
 	UniqueSocketDescriptor s;
 	if (!s.CreateNonBlock(address.GetFamily(), socktype, 0))
 		throw MakeSocketError("Failed to create socket");
+
+	if (address.IsInet() && socktype == SOCK_STREAM)
+		/* always set SO_REUSEADDR for TCP sockets to allow
+		   quick restarts */
+		s.SetReuseAddress();
 
 	if (!s.Bind(address))
 		throw MakeSocketError("Failed to bind");
