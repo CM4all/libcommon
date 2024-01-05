@@ -48,12 +48,6 @@ MakeListener(const SocketAddress address,
 	return config.Create(socktype);
 }
 
-static bool
-IsTCP(SocketAddress address) noexcept
-{
-	return address.GetFamily() == AF_INET || address.GetFamily() == AF_INET6;
-}
-
 void
 ServerSocket::Listen(SocketAddress address,
 		     bool reuse_port,
@@ -119,7 +113,7 @@ ServerSocket::EventCallback(unsigned) noexcept
 		return;
 	}
 
-	if (IsTCP(remote_address) && !remote_fd.SetNoDelay()) {
+	if (remote_address.IsInet() && !remote_fd.SetNoDelay()) {
 		OnAcceptError(std::make_exception_ptr(MakeSocketError("setsockopt(TCP_NODELAY) failed")));
 		return;
 	}
