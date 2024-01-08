@@ -18,6 +18,7 @@ net_sources = [
   'UniqueSocketDescriptor.cxx',
   'SocketPair.cxx',
   'SocketConfig.cxx',
+  'BindSocket.cxx',
   'RBindSocket.cxx',
   'RConnectSocket.cxx',
   'ConnectSocket.cxx',

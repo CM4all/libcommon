@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "RBindSocket.hxx"
+#include "BindSocket.hxx"
 #include "AddressInfo.hxx"
 #include "AllocatedSocketAddress.hxx"
 #include "Parser.hxx"
@@ -17,19 +18,7 @@ ResolveBindSocket(const char *host_and_port, int default_port,
 	const auto ail = Resolve(host_and_port, default_port, &hints);
 	const auto &ai = ail.GetBest();
 
-	UniqueSocketDescriptor s;
-	if (!s.CreateNonBlock(ai.GetFamily(), ai.GetType(), ai.GetProtocol()))
-		throw MakeSocketError("Failed to create socket");
-
-	if (ai.IsTCP())
-		/* always set SO_REUSEADDR for TCP sockets to allow
-		   quick restarts */
-		s.SetReuseAddress();
-
-	if (!s.Bind(ai))
-		throw MakeSocketError("Failed to bind");
-
-	return s;
+	return BindSocket(ai);
 }
 
 static UniqueSocketDescriptor
@@ -38,19 +27,7 @@ ParseBindSocket(const char *host_and_port, int default_port, int socktype)
 	const auto address = ParseSocketAddress(host_and_port,
 						default_port, true);
 
-	UniqueSocketDescriptor s;
-	if (!s.CreateNonBlock(address.GetFamily(), socktype, 0))
-		throw MakeSocketError("Failed to create socket");
-
-	if (address.IsInet() && socktype == SOCK_STREAM)
-		/* always set SO_REUSEADDR for TCP sockets to allow
-		   quick restarts */
-		s.SetReuseAddress();
-
-	if (!s.Bind(address))
-		throw MakeSocketError("Failed to bind");
-
-	return s;
+	return BindSocket(socktype, address);
 }
 
 static UniqueSocketDescriptor
