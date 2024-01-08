@@ -29,3 +29,9 @@ BindSocket(const AddressInfo &ai);
  */
 UniqueSocketDescriptor
 BindLoopback(int type, unsigned port);
+
+/**
+ * Create a socket bound to a port on all interfaces.
+ */
+UniqueSocketDescriptor
+BindPort(int type, unsigned port);

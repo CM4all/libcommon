@@ -63,3 +63,25 @@ BindLoopback(int type, unsigned port)
 
 	return s;
 }
+
+UniqueSocketDescriptor
+BindPort(int type, unsigned port)
+{
+	UniqueSocketDescriptor s;
+	if (!s.CreateNonBlock(AF_INET6, SOCK_STREAM, 0))
+		throw MakeSocketError("Failed to create socket");
+
+	// TODO do we need a fallback to IPv4?
+
+	/* always set SO_REUSEADDR for TCP sockets to allow quick
+	   restarts */
+	if (type == SOCK_STREAM)
+		s.SetReuseAddress();
+
+	s.SetV6Only(false);
+
+	if (!s.Bind(IPv6Address(port)))
+		throw MakeSocketError("Failed to bind");
+
+	return s;
+}
