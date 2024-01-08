@@ -23,3 +23,9 @@ BindSocket(int type, SocketAddress address);
 
 UniqueSocketDescriptor
 BindSocket(const AddressInfo &ai);
+
+/**
+ * Create a socket bound to a port on the loopback interface.
+ */
+UniqueSocketDescriptor
+BindLoopback(int type, unsigned port);
