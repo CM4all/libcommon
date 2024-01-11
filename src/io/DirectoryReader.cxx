@@ -21,7 +21,7 @@ OpenDir(UniqueFileDescriptor &&fd)
 	if (dir == nullptr)
 		throw MakeErrno("Failed to reopen directory");
 
-	fd.Steal();
+	fd.Release();
 	return dir;
 }
 

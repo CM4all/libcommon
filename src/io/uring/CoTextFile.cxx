@@ -49,7 +49,7 @@ CoReadTextFile(Queue &queue, FileDescriptor directory_fd, const char *path,
 
 	try {
 		co_await CoClose(queue, fd);
-		fd.Steal();
+		fd.Release();
 	} catch (...) {
 		/* if CoClose() fails, ~UniqueFileDescriptor() fall
 		   back to regular close() */
