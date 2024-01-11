@@ -114,7 +114,7 @@ WakeUpPipe(UniqueFileDescriptor &&w) noexcept
 	assert(w.IsDefined());
 
 	static constexpr std::byte one_byte[1]{};
-	w.Write(one_byte);
+	(void)w.Write(one_byte);
 	w.Close();
 }
 

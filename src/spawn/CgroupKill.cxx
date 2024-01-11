@@ -54,7 +54,7 @@ OpenCgroupKill(const CgroupState &state, FileDescriptor cgroup_fd)
 	UniqueFileDescriptor fd;
 
 	if (state.cgroup_kill)
-		fd.Open(cgroup_fd, "cgroup.kill", O_WRONLY);
+		(void)fd.Open(cgroup_fd, "cgroup.kill", O_WRONLY);
 
 	return fd;
 }

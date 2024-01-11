@@ -256,7 +256,9 @@ WriteToTempFile(char *buffer, std::span<const std::byte> contents)
 
 		UniqueFileDescriptor fd;
 		if (fd.Open(buffer, O_CREAT|O_EXCL|O_WRONLY, 0644)) {
-			fd.Write(contents);
+			if (fd.Write(contents) < 0)
+				throw MakeErrno("Failed to write");
+
 			return buffer;
 		}
 
@@ -293,7 +295,9 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
 	    vfs_builder.MakeOptionalDirectory(dir)) {
 		/* inside a tmpfs: create the file here */
 		auto fd = OpenWriteOnly(target, O_CREAT|O_TRUNC);
-		fd.Write(contents);
+
+		if (fd.Write(contents) < 0)
+			throw MakeErrno("Failed to write");
 	} else {
 		/* inside a read-only mount: create the file in /tmp
 		   and bind-mount it over the existing (read-only)
