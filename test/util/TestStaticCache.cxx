@@ -55,7 +55,7 @@ TEST(StaticCache, Basic)
 	EXPECT_EQ(n_destructed, 0U);
 	EXPECT_EQ(n_overwritten, 0U);
 
-	for (unsigned i = 1; i <= 8; ++i) {
+	for (int i = 1; i <= 8; ++i) {
 		ASSERT_NE(cache.Get(i), nullptr);
 		EXPECT_EQ(cache.Get(i)->value, i);
 	}
@@ -70,7 +70,7 @@ TEST(StaticCache, Basic)
 
 	EXPECT_EQ(cache.Get(1), nullptr);
 
-	for (unsigned i = 2; i <= 9; ++i) {
+	for (int i = 2; i <= 9; ++i) {
 		ASSERT_NE(cache.Get(i), nullptr);
 		EXPECT_EQ(cache.Get(i)->value, i);
 	}
@@ -86,7 +86,7 @@ TEST(StaticCache, Basic)
 	EXPECT_EQ(cache.Get(1), nullptr);
 	EXPECT_EQ(cache.Get(2), nullptr);
 
-	for (unsigned i = 3; i <= 10; ++i) {
+	for (int i = 3; i <= 10; ++i) {
 		ASSERT_NE(cache.Get(i), nullptr);
 		EXPECT_EQ(cache.Get(i)->value, i);
 	}
@@ -102,7 +102,7 @@ TEST(StaticCache, Basic)
 	EXPECT_EQ(n_overwritten, 1U);
 
 	ASSERT_NE(cache.Get(3), nullptr);
-	EXPECT_EQ(cache.Get(3)->value, 43U);
+	EXPECT_EQ(cache.Get(3)->value, 43);
 
 	cache.PutOrReplace(3, 42);
 	EXPECT_TRUE(cache.IsFull());
@@ -111,9 +111,9 @@ TEST(StaticCache, Basic)
 	EXPECT_EQ(n_overwritten, 2U);
 
 	ASSERT_NE(cache.Get(3), nullptr);
-	EXPECT_EQ(cache.Get(3)->value, 42U);
+	EXPECT_EQ(cache.Get(3)->value, 42);
 
-	for (unsigned i = 4; i <= 10; ++i) {
+	for (int i = 4; i <= 10; ++i) {
 		ASSERT_NE(cache.Get(i), nullptr);
 		EXPECT_EQ(cache.Get(i)->value, i);
 	}
@@ -130,9 +130,9 @@ TEST(StaticCache, Basic)
 
 	ASSERT_EQ(cache.Get(4), nullptr);
 	ASSERT_NE(cache.Get(3), nullptr);
-	EXPECT_EQ(cache.Get(3)->value, 42U);
+	EXPECT_EQ(cache.Get(3)->value, 42);
 
-	for (unsigned i = 5; i <= 10; ++i) {
+	for (int i = 5; i <= 10; ++i) {
 		ASSERT_NE(cache.Get(i), nullptr);
 		EXPECT_EQ(cache.Get(i)->value, i);
 	}
@@ -151,12 +151,12 @@ TEST(StaticCache, Basic)
 	EXPECT_EQ(n_overwritten, 0U);
 
 	ASSERT_NE(cache.Get(3), nullptr);
-	EXPECT_EQ(cache.Get(3)->value, 42U);
+	EXPECT_EQ(cache.Get(3)->value, 42);
 
 	for (unsigned i = 4; i <= 7; ++i)
 		ASSERT_EQ(cache.Get(i), nullptr);
 
-	for (unsigned i = 8; i <= 10; ++i) {
+	for (int i = 8; i <= 10; ++i) {
 		ASSERT_NE(cache.Get(i), nullptr);
 		EXPECT_EQ(cache.Get(i)->value, i);
 	}
@@ -274,7 +274,7 @@ TEST(StaticCache, NotAssignable)
 	EXPECT_EQ(n_destructed, 1U);
 
 	ASSERT_NE(cache.Get(3), nullptr);
-	EXPECT_EQ(cache.Get(3)->value, 43U);
+	EXPECT_EQ(cache.Get(3)->value, 43);
 
 	cache.PutOrReplace(3, 42);
 	EXPECT_FALSE(cache.IsFull());
@@ -282,9 +282,9 @@ TEST(StaticCache, NotAssignable)
 	EXPECT_EQ(n_destructed, 2U);
 
 	ASSERT_NE(cache.Get(3), nullptr);
-	EXPECT_EQ(cache.Get(3)->value, 42U);
+	EXPECT_EQ(cache.Get(3)->value, 42);
 
-	for (unsigned i = 1; i <= 7; ++i) {
+	for (int i = 1; i <= 7; ++i) {
 		if (i == 3) continue;
 		ASSERT_NE(cache.Get(i), nullptr);
 		EXPECT_EQ(cache.Get(i)->value, i);

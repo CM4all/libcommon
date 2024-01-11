@@ -43,7 +43,7 @@ TEST(IntrusiveHashArrayTrie, Basic)
 							       IntItem::Equal>> set;
 
 	EXPECT_TRUE(set.empty());
-	EXPECT_EQ(set.size(), 0);
+	EXPECT_EQ(set.size(), 0U);
 	EXPECT_EQ(set.find(a), set.end());
 	EXPECT_EQ(set.find(b), set.end());
 	EXPECT_EQ(set.find(c), set.end());
@@ -69,7 +69,7 @@ TEST(IntrusiveHashArrayTrie, Basic)
 	EXPECT_EQ(er.second, set.end());
 
 	set.insert(a);
-	EXPECT_EQ(set.size(), 1);
+	EXPECT_EQ(set.size(), 1U);
 	EXPECT_NE(set.find(a), set.end());
 	EXPECT_EQ(&*set.find(a), &a);
 	EXPECT_EQ(set.find(b), set.end());
@@ -91,15 +91,15 @@ TEST(IntrusiveHashArrayTrie, Basic)
 	EXPECT_EQ(std::next(er.first), er.second);
 
 	set.insert(b);
-	EXPECT_EQ(set.size(), 2);
+	EXPECT_EQ(set.size(), 2U);
 	set.insert(c);
-	EXPECT_EQ(set.size(), 3);
+	EXPECT_EQ(set.size(), 3U);
 	set.insert(d);
-	EXPECT_EQ(set.size(), 4);
+	EXPECT_EQ(set.size(), 4U);
 	set.insert(e);
-	EXPECT_EQ(set.size(), 5);
+	EXPECT_EQ(set.size(), 5U);
 	set.insert(f);
-	EXPECT_EQ(set.size(), 6);
+	EXPECT_EQ(set.size(), 6U);
 
 	EXPECT_TRUE(a.is_linked());
 	EXPECT_TRUE(b.is_linked());
@@ -183,12 +183,12 @@ TEST(IntrusiveHashArrayTrie, Basic)
 					expected_v.begin(), expected_v.end()));
 
 	auto other_set = std::move(set);
-	EXPECT_EQ(set.size(), 0);
-	EXPECT_EQ(other_set.size(), 4);
+	EXPECT_EQ(set.size(), 0U);
+	EXPECT_EQ(other_set.size(), 4U);
 
 	other_set.swap(set);
-	EXPECT_EQ(set.size(), 4);
-	EXPECT_EQ(other_set.size(), 0);
+	EXPECT_EQ(set.size(), 4U);
+	EXPECT_EQ(other_set.size(), 0U);
 
 	set.insert(a);
 	set.insert(b);
@@ -214,9 +214,9 @@ TEST(IntrusiveHashArrayTrie, Basic)
 	EXPECT_TRUE(found_f);
 	EXPECT_FALSE(found_other);
 
-	EXPECT_EQ(set.remove_and_dispose_key(f, [](auto*){}), 2);
-	EXPECT_EQ(set.remove_and_dispose_key(e, [](auto*){}), 1);
-	EXPECT_EQ(set.remove_and_dispose_key(e, [](auto*){}), 0);
+	EXPECT_EQ(set.remove_and_dispose_key(f, [](auto*){}), 2U);
+	EXPECT_EQ(set.remove_and_dispose_key(e, [](auto*){}), 1U);
+	EXPECT_EQ(set.remove_and_dispose_key(e, [](auto*){}), 0U);
 
 	er = set.equal_range(f);
 	EXPECT_EQ(er.first, set.end());
