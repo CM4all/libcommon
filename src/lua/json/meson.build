@@ -5,7 +5,7 @@ lua_json = static_library(
   include_directories: inc,
   dependencies: [
     lua_dep,
-    boost_json_dep,
+    nlohmann_json_dep,
   ],
 )
 
@@ -13,6 +13,6 @@ lua_json_dep = declare_dependency(
   link_with: lua_json,
   dependencies: [
     lua_dep,
-    boost_json_dep,
+    nlohmann_json_dep,
   ],
 )

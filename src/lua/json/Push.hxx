@@ -4,22 +4,13 @@
 
 #pragma once
 
-#include <boost/json/fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 struct lua_State;
 
 namespace Lua {
 
 void
-Push(lua_State *L, const boost::json::string &s);
-
-void
-Push(lua_State *L, const boost::json::array &a);
-
-void
-Push(lua_State *L, const boost::json::object &o);
-
-void
-Push(lua_State *L, const boost::json::value &value);
+Push(lua_State *L, const nlohmann::json &j);
 
 } // namespace Lua

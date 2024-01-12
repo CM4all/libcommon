@@ -4,71 +4,65 @@
 
 #include "Push.hxx"
 #include "lua/Util.hxx"
+#include "util/SpanCast.hxx"
 
-#include <boost/json/value.hpp>
+#include <nlohmann/json.hpp>
+
+static std::string_view
+ToStringView(const std::vector<uint8_t> &src) noexcept
+{
+	return ToStringView(std::as_bytes(std::span{src.data(), src.size()}));
+}
 
 namespace Lua {
 
 void
-Push(lua_State *L, const boost::json::string &s)
+Push(lua_State *L, const nlohmann::json &j)
 {
-	Push(L, (std::string_view)s);
-}
-
-void
-Push(lua_State *L, const boost::json::array &a)
-{
-	lua_newtable(L);
-
-	for (std::size_t i = 0, n = a.size(); i != n; ++i) {
-		Push(L, a[i]);
-		lua_rawseti(L, -2, i + 1);
-	}
-}
-
-void
-Push(lua_State *L, const boost::json::object &o)
-{
-	lua_newtable(L);
-
-	for (const auto &i : o)
-		SetTable(L, RelativeStackIndex{-1},
-			 i.key(), i.value());
-}
-
-void
-Push(lua_State *L, const boost::json::value &value)
-{
-	switch (value.kind()) {
-	case boost::json::kind::null:
+	switch (j.type()) {
+	case nlohmann::json::value_t::null:
+	case nlohmann::json::value_t::discarded:
 		break;
 
-	case boost::json::kind::bool_:
-		Push(L, value.get_bool());
+	case nlohmann::json::value_t::boolean:
+		Push(L, j.get<bool>());
 		return;
 
-	case boost::json::kind::double_:
-		Push(L, value.get_double());
+	case nlohmann::json::value_t::number_float:
+		Push(L, j.get<double>());
 		return;
 
-	case boost::json::kind::array:
-		Push(L, value.get_array());
+	case nlohmann::json::value_t::array:
+		lua_newtable(L);
+
+		for (std::size_t i = 0, n = j.size(); i != n; ++i) {
+			Push(L, j[i]);
+			lua_rawseti(L, -2, i + 1);
+		}
+
 		return;
 
-	case boost::json::kind::object:
-		Push(L, value.get_object());
+	case nlohmann::json::value_t::object:
+		lua_newtable(L);
+
+		for (const auto &[key, value] : j.items())
+			SetTable(L, RelativeStackIndex{-1},
+				 static_cast<std::string_view>(key),
+				 value);
+
 		return;
 
-	case boost::json::kind::int64:
-		Push(L, (lua_Integer)value.get_int64());
+	case nlohmann::json::value_t::number_integer:
+	case nlohmann::json::value_t::number_unsigned:
+		Push(L, j.get<lua_Integer>());
 		return;
 
-	case boost::json::kind::uint64:
-		Push(L, (lua_Integer)value.get_uint64());
+	case nlohmann::json::value_t::string:
+		Push(L, j.get<std::string_view>());
 		return;
 
-	case boost::json::kind::string:
-		Push(L, value.get_string());
+	case nlohmann::json::value_t::binary:
+		Push(L, ToStringView(j.get<nlohmann::json::binary_t>()));
 		return;
 	}
 

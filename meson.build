@@ -132,7 +132,6 @@ if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
 
   if lua_dep.found()
     subdir('src/lua/io')
-    subdir('src/lua/json')
   endif
 endif
 
@@ -140,6 +139,10 @@ subdir('src/lib/nettle')
 subdir('src/lib/nlohmann_json')
 subdir('src/lib/sodium')
 subdir('src/jwt')
+
+if lua_dep.found() and nlohmann_json_dep.found()
+  subdir('src/lua/json')
+endif
 
 subdir('src/net')
 subdir('src/net/control')

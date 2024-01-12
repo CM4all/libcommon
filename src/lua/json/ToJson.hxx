@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <boost/json/fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 struct lua_State;
 
@@ -14,7 +14,7 @@ void
 InitToJson(lua_State *L) noexcept;
 
 [[gnu::pure]]
-boost::json::value
+nlohmann::json
 ToJson(lua_State *L, int idx) noexcept;
 
 } // namespace Lua

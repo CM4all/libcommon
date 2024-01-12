@@ -7,8 +7,7 @@
 #include "lua/StringView.hxx"
 #include "util/ScopeExit.hxx"
 
-#include <boost/json/value.hpp>
-#include <boost/json/serialize.hpp>
+#include <nlohmann/json.hpp>
 
 extern "C" {
 #include <lua.h>
@@ -19,7 +18,7 @@ extern "C" {
 
 namespace Lua {
 
-static boost::json::string
+static nlohmann::json
 PointerToJson(const char *prefix, const void *ptr) noexcept
 {
 	char buffer[32];
@@ -27,31 +26,31 @@ PointerToJson(const char *prefix, const void *ptr) noexcept
 	return buffer;
 }
 
-static boost::json::string
+static nlohmann::json
 UserDataToJson(lua_State *L, int idx) noexcept
 {
 	return PointerToJson("userdata", lua_touserdata(L, idx));
 }
 
-static boost::json::string
+static nlohmann::json
 FunctionToJson(lua_State *L, int idx) noexcept
 {
 	return PointerToJson("cfunction",
 			     (const void *)lua_tocfunction(L, idx));
 }
 
-static boost::json::string
+static nlohmann::json
 ThreadToJson(lua_State *L, int idx) noexcept
 {
 	return PointerToJson("thread", lua_tothread(L, idx));
 }
 
-static boost::json::object
+static nlohmann::json
 TableToJson(lua_State *L, int idx) noexcept
 {
 	// TODO array?
 
-	boost::json::object o;
+        auto o = nlohmann::json::object();
 
 	ForEach(L, idx, [L, &o](auto key_idx, auto value_idx){
 		auto value = ToJson(L, GetStackIndex(value_idx));
@@ -66,12 +65,12 @@ TableToJson(lua_State *L, int idx) noexcept
 	return o;
 }
 
-boost::json::value
+nlohmann::json
 ToJson(lua_State *L, int idx) noexcept
 {
 	switch (lua_type(L, idx)) {
 	case LUA_TNIL:
-		return {};
+		return nullptr;
 
 	case LUA_TBOOLEAN:
 		return lua_toboolean(L, idx);
@@ -110,7 +109,7 @@ ToJson(lua_State *L)
 	if (lua_gettop(L) > 1)
 		return luaL_error(L, "Too many parameters");
 
-	const auto json = boost::json::serialize(ToJson(L, 1));
+	const auto json = ToJson(L, 1).dump();
 	lua_pushlstring(L, json.data(), json.size());
 	return 1;
 }
