@@ -12,3 +12,15 @@ nlohmann_json_dep = declare_dependency(
   compile_args: '-DJSON_NO_IO',
   dependencies: nlohmann_json,
 )
+
+nlohmann_json = static_library(
+  'nlohmann_json',
+  'ToDisposableBuffer.cxx',
+  dependencies: nlohmann_json_dep,
+  include_directories: inc,
+)
+
+nlohmann_json_dep = declare_dependency(
+  link_with: nlohmann_json,
+  dependencies: nlohmann_json_dep,
+)
