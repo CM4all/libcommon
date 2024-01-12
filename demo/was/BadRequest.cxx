@@ -4,12 +4,9 @@
 
 #include "was/async/CoRun.hxx"
 #include "was/ExceptionResponse.hxx"
-#include "json/ToDisposableBuffer.hxx"
 #include "event/Loop.hxx"
 #include "uri/MapQueryString.hxx"
 #include "util/PrintException.hxx"
-
-#include <boost/json.hpp>
 
 static Co::Task<Was::SimpleResponse>
 MyHandler(Was::SimpleRequest)

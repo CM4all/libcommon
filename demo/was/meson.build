@@ -44,7 +44,6 @@ if coroutines_dep.found()
     dependencies: [
       uri_dep,
       was_server_async_dep,
-      boost_json_dep,
     ],
   )
 endif
