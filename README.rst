@@ -70,7 +70,6 @@ Each directory below ``src`` contains a sub-library:
 - ``io/linux``: Linux-specific I/O helpers
 - ``io/uring``: `liburing <https://github.com/axboe/liburing>`__ C++
   wrapper
-- ``json``: standalone ``boost::json``
 - ``jwt``: helpers for JSON Web Tokens
 - ``lib``: C++ wrappers or additional utilities for various
   external libraries.

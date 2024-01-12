@@ -125,14 +125,8 @@ subdir('src/system')
 subdir('src/memory')
 subdir('src/lib/openssl')
 
-if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
-  # this library checks __cpp_constinit and requires
-  # std::memory_resource, so disable it with older GCC
-  subdir('src/json')
-
-  if lua_dep.found()
-    subdir('src/lua/io')
-  endif
+if lua_dep.found()
+  subdir('src/lua/io')
 endif
 
 subdir('src/lib/nettle')
