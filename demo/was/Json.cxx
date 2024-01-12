@@ -3,13 +3,13 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "was/async/CoRun.hxx"
-#include "json/Was.hxx"
-#include "json/ToDisposableBuffer.hxx"
+#include "lib/nlohmann_json/Was.hxx"
+#include "lib/nlohmann_json/ToDisposableBuffer.hxx"
 #include "event/Loop.hxx"
 #include "uri/MapQueryString.hxx"
 #include "util/PrintException.hxx"
 
-#include <boost/json.hpp>
+#include <nlohmann/json.hpp>
 
 static Co::Task<Was::SimpleResponse>
 MyHandler(Was::SimpleRequest request)
