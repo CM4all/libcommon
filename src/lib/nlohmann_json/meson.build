@@ -16,6 +16,7 @@ nlohmann_json_dep = declare_dependency(
 nlohmann_json = static_library(
   'nlohmann_json',
   'ToDisposableBuffer.cxx',
+  'Was.cxx',
   dependencies: nlohmann_json_dep,
   include_directories: inc,
 )
