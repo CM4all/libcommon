@@ -53,7 +53,7 @@ ReceiveMessage(SocketDescriptor s,
 	auto msg = MakeMsgHdr(buffer.address, iov,
 			      {(const std::byte *)buffer.cmsg, sizeof(buffer.cmsg)});
 
-	auto nbytes = recvmsg(s.Get(), &msg, flags);
+	auto nbytes = s.Receive(msg, flags);
 	if (nbytes < 0)
 		throw MakeSocketError("recvmsg() failed");
 

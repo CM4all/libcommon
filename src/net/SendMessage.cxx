@@ -6,15 +6,10 @@
 #include "SocketDescriptor.hxx"
 #include "SocketError.hxx"
 
-/**
- * Wrapper for sendmsg().
- *
- * Throws on error.
- */
 std::size_t
 SendMessage(SocketDescriptor s, const MessageHeader &mh, int flags)
 {
-	auto nbytes = sendmsg(s.Get(), &mh, flags);
+	auto nbytes = s.Send(mh, flags);
 	if (nbytes < 0)
 		throw MakeSocketError("sendmsg() failed");
 

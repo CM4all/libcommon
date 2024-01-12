@@ -116,7 +116,7 @@ BengControlClient::Receive() const
 
 	auto msg = MakeMsgHdr(v);
 
-	auto nbytes = recvmsg(socket.Get(), &msg, 0);
+	auto nbytes = socket.Receive(msg);
 	if (nbytes < 0)
 		throw MakeSocketError("recvmsg() failed");
 
