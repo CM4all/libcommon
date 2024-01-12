@@ -171,7 +171,6 @@ if not get_option('fuzzer')
   subdir('src/translation/server')
 
   subdir('src/was')
-  subdir('src/was/json')
   subdir('src/was/async')
 
   if nlohmann_json_dep.found()
