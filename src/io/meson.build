@@ -24,6 +24,7 @@ io = static_library(
   'BufferedReader.cxx',
   'Logger.cxx',
   'StringFile.cxx',
+  'StateDirectories.cxx',
   'Temp.cxx',
   io_sources,
   include_directories: inc,
