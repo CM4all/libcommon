@@ -132,6 +132,20 @@ enum class ControlCommand {
      * completion of the child's currently work.
      */
     TERMINATE_CHILDREN = 16,
+
+    /**
+     * Disable all queues, i.e. do not accept any new jobs.
+     *
+     * Used by Workshop.
+     */
+    DISABLE_QUEUE = 17,
+
+    /**
+     * Re-enable all queues, i.e. resume accepting new jobs.
+     *
+     * Used by Workshop.
+     */
+    ENABLE_QUEUE = 18,
 };
 
 struct ControlStats {
