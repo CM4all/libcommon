@@ -134,14 +134,18 @@ enum class ControlCommand {
     TERMINATE_CHILDREN = 16,
 
     /**
-     * Disable all queues, i.e. do not accept any new jobs.
+     * Disable all queues, i.e. do not accept any new jobs.  If the
+     * payload is not empty, then it is the name of the queue
+     * (partition) which shall be disabled.
      *
      * Used by Workshop.
      */
     DISABLE_QUEUE = 17,
 
     /**
-     * Re-enable all queues, i.e. resume accepting new jobs.
+     * Re-enable all queues, i.e. resume accepting new jobs.  If the
+     * payload is not empty, then it is the name of the queue
+     * (partition) which shall be enabled.
      *
      * Used by Workshop.
      */
