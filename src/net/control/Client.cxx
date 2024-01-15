@@ -15,7 +15,7 @@
 
 BengControlClient::BengControlClient(const char *host_and_port)
 	:BengControlClient(ResolveConnectDatagramSocket(host_and_port,
-							5478)) {}
+							BengProxy::CONTROL_PORT)) {}
 
 /**
  * Create a new datagram socket that is connected to the same address

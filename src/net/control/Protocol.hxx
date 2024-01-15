@@ -12,6 +12,11 @@
 
 namespace BengProxy {
 
+/**
+ * The default port for the control protocol.
+ */
+static constexpr unsigned CONTROL_PORT = 5478;
+
 enum class ControlCommand {
     NOP = 0,
 
