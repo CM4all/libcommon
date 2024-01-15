@@ -31,6 +31,10 @@ public:
 		data.erase(4);
 	}
 
+	void Add(BengProxy::ControlCommand cmd) noexcept {
+		AppendT(BengProxy::ControlHeader{0U, ToBE16(uint16_t(cmd))});
+	}
+
 	void Add(BengProxy::ControlCommand cmd,
 		 std::span<const std::byte> payload) noexcept {
 		AppendT(BengProxy::ControlHeader{ToBE16(payload.size()), ToBE16(uint16_t(cmd))});
