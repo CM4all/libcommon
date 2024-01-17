@@ -11,23 +11,26 @@
 class SocketAddress;
 class UniqueSocketDescriptor;
 class EventLoop;
-class ControlHandler;
 struct SocketConfig;
+
+namespace BengControl {
+
+class Handler;
 
 /**
  * Server side part of the "control" protocol.
  */
-class ControlServer final : UdpHandler {
-	ControlHandler &handler;
+class Server final : UdpHandler {
+	Handler &handler;
 
 	UdpListener socket;
 
 public:
-	ControlServer(EventLoop &event_loop, UniqueSocketDescriptor s,
-		      ControlHandler &_handler) noexcept;
+	Server(EventLoop &event_loop, UniqueSocketDescriptor s,
+	       Handler &_handler) noexcept;
 
-	ControlServer(EventLoop &event_loop, ControlHandler &_handler,
-		      const SocketConfig &config);
+	Server(EventLoop &event_loop, Handler &_handler,
+	       const SocketConfig &config);
 
 	auto &GetEventLoop() const noexcept {
 		return socket.GetEventLoop();
@@ -45,7 +48,7 @@ public:
 	 * Throws std::runtime_error on error.
 	 */
 	void Reply(SocketAddress address,
-		   BengProxy::ControlCommand command,
+		   Command command,
 		   std::span<const std::byte> payload);
 
 private:
@@ -55,3 +58,5 @@ private:
 			   SocketAddress address, int uid) override;
 	void OnUdpError(std::exception_ptr ep) noexcept override;
 };
+
+} // namespace BengControl

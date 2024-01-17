@@ -6,38 +6,38 @@
 
 #include <cstddef>
 
-namespace BengProxy {
+namespace BengControl {
 
 constexpr bool
-IsControlSizePadded(std::size_t size) noexcept
+IsSizePadded(std::size_t size) noexcept
 {
 	return size % 4 == 0;
 }
 
 constexpr std::size_t
-ControlPaddingSize(std::size_t size) noexcept
+PaddingSize(std::size_t size) noexcept
 {
 	return (3 - ((size - 1) & 0x3));
 }
 
-static_assert(ControlPaddingSize(0) == 0);
-static_assert(ControlPaddingSize(1) == 3);
-static_assert(ControlPaddingSize(2) == 2);
-static_assert(ControlPaddingSize(3) == 1);
-static_assert(ControlPaddingSize(4) == 0);
-static_assert(ControlPaddingSize(5) == 3);
+static_assert(PaddingSize(0) == 0);
+static_assert(PaddingSize(1) == 3);
+static_assert(PaddingSize(2) == 2);
+static_assert(PaddingSize(3) == 1);
+static_assert(PaddingSize(4) == 0);
+static_assert(PaddingSize(5) == 3);
 
 constexpr std::size_t
-PadControlSize(std::size_t size) noexcept
+PadSize(std::size_t size) noexcept
 {
 	return ((size + 3) | 3) - 3;
 }
 
-static_assert(PadControlSize(0) == 0);
-static_assert(PadControlSize(1) == 4);
-static_assert(PadControlSize(2) == 4);
-static_assert(PadControlSize(3) == 4);
-static_assert(PadControlSize(4) == 4);
-static_assert(PadControlSize(5) == 8);
+static_assert(PadSize(0) == 0);
+static_assert(PadSize(1) == 4);
+static_assert(PadSize(2) == 4);
+static_assert(PadSize(3) == 4);
+static_assert(PadSize(4) == 4);
+static_assert(PadSize(5) == 8);
 
-} // namespace BengProxy
+} // namespace BengControl

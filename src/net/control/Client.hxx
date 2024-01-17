@@ -13,36 +13,38 @@
 #include <string>
 #include <string_view>
 
-class BengControlClient {
+namespace BengControl {
+
+class Client {
 	UniqueSocketDescriptor socket;
 
 public:
-	explicit BengControlClient(UniqueSocketDescriptor _socket) noexcept
+	explicit Client(UniqueSocketDescriptor _socket) noexcept
 		:socket(std::move(_socket)) {}
 
-	explicit BengControlClient(const char *host_and_port);
+	explicit Client(const char *host_and_port);
 
 	void AutoBind() const noexcept {
 		socket.AutoBind();
 	}
 
-	void Send(BengProxy::ControlCommand cmd,
+	void Send(Command cmd,
 		  std::span<const std::byte> payload={},
 		  std::span<const FileDescriptor> fds={}) const;
 
-	void Send(BengProxy::ControlCommand cmd, std::nullptr_t,
+	void Send(Command cmd, std::nullptr_t,
 		  std::span<const FileDescriptor> fds={}) const {
 		Send(cmd, std::span<const std::byte>{}, fds);
 	}
 
-	void Send(BengProxy::ControlCommand cmd, std::string_view payload,
+	void Send(Command cmd, std::string_view payload,
 		  std::span<const FileDescriptor> fds={}) const {
 		Send(cmd, AsBytes(payload), fds);
 	}
 
 	void Send(std::span<const std::byte> payload) const;
 
-	std::pair<BengProxy::ControlCommand, std::string> Receive() const;
+	std::pair<Command, std::string> Receive() const;
 
 	static std::string MakeTcacheInvalidate(TranslationCommand cmd,
 						std::span<const std::byte> payload) noexcept;
@@ -52,3 +54,5 @@ public:
 		return MakeTcacheInvalidate(cmd, AsBytes(value));
 	}
 };
+
+} // namespace BengControl

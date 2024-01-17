@@ -5,19 +5,21 @@
 #pragma once
 
 #include "Padding.hxx"
-#include "net/control/Protocol.hxx"
+#include "Protocol.hxx"
 #include "util/ByteOrder.hxx"
 #include "util/SpanCast.hxx"
 
 #include <span>
 #include <string>
 
-class BengControlBuilder {
+namespace BengControl {
+
+class Builder {
 	std::string data;
 
 public:
-	BengControlBuilder() noexcept {
-		static constexpr uint32_t magic = ToBE32(BengProxy::control_magic);
+	Builder() noexcept {
+		static constexpr uint32_t magic = ToBE32(MAGIC);
 		AppendT(magic);
 	}
 
@@ -31,17 +33,17 @@ public:
 		data.erase(4);
 	}
 
-	void Add(BengProxy::ControlCommand cmd) noexcept {
-		AppendT(BengProxy::ControlHeader{0U, ToBE16(uint16_t(cmd))});
+	void Add(Command cmd) noexcept {
+		AppendT(Header{0U, ToBE16(uint16_t(cmd))});
 	}
 
-	void Add(BengProxy::ControlCommand cmd,
+	void Add(Command cmd,
 		 std::span<const std::byte> payload) noexcept {
-		AppendT(BengProxy::ControlHeader{ToBE16(payload.size()), ToBE16(uint16_t(cmd))});
+		AppendT(Header{ToBE16(payload.size()), ToBE16(uint16_t(cmd))});
 		AppendPadded(payload);
 	}
 
-	void Add(BengProxy::ControlCommand cmd,
+	void Add(Command cmd,
 		 std::string_view payload) noexcept {
 		Add(cmd, AsBytes(payload));
 	}
@@ -65,10 +67,12 @@ private:
 
 	void AppendPadded(std::span<const std::byte> s) noexcept {
 		Append(s);
-		data.append(BengProxy::ControlPaddingSize(s.size()), '\0');
+		data.append(PaddingSize(s.size()), '\0');
 	}
 
 	void AppendT(const auto &s) noexcept {
 		Append(ReferenceAsBytes(s));
 	}
 };
+
+} // namespace BengControl

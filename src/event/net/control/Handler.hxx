@@ -12,15 +12,20 @@
 
 class UniqueFileDescriptor;
 class SocketAddress;
-class ControlServer;
 
-class ControlHandler {
+namespace BengControl {
+
+class Server;
+
+class Handler {
 public:
-	virtual void OnControlPacket(ControlServer &control_server,
-				     BengProxy::ControlCommand command,
+	virtual void OnControlPacket(Server &control_server,
+				     Command command,
 				     std::span<const std::byte> payload,
 				     std::span<UniqueFileDescriptor> fds,
 				     SocketAddress address, int uid) = 0;
 
 	virtual void OnControlError(std::exception_ptr ep) noexcept = 0;
 };
+
+} // namespace BengControl

@@ -13,9 +13,11 @@
 #include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
 
-BengControlClient::BengControlClient(const char *host_and_port)
-	:BengControlClient(ResolveConnectDatagramSocket(host_and_port,
-							BengProxy::CONTROL_PORT)) {}
+namespace BengControl {
+
+Client::Client(const char *host_and_port)
+	:Client(ResolveConnectDatagramSocket(host_and_port,
+					     DEFAULT_PORT)) {}
 
 /**
  * Create a new datagram socket that is connected to the same address
@@ -41,12 +43,12 @@ CloneConnectedDatagramSocket(SocketDescriptor old_socket) noexcept
 }
 
 void
-BengControlClient::Send(BengProxy::ControlCommand cmd,
-			std::span<const std::byte> payload,
-			std::span<const FileDescriptor> fds) const
+Client::Send(Command cmd,
+	     std::span<const std::byte> payload,
+	     std::span<const FileDescriptor> fds) const
 {
-	static constexpr uint32_t magic = ToBE32(BengProxy::control_magic);
-	const BengProxy::ControlHeader header{ToBE16(payload.size()), ToBE16(uint16_t(cmd))};
+	static constexpr uint32_t magic = ToBE32(MAGIC);
+	const Header header{ToBE16(payload.size()), ToBE16(uint16_t(cmd))};
 
 	static constexpr uint8_t padding[3] = {0, 0, 0};
 
@@ -54,7 +56,7 @@ BengControlClient::Send(BengProxy::ControlCommand cmd,
 		MakeIovecT(magic),
 		MakeIovecT(header),
 		MakeIovec(payload),
-		MakeIovec(std::span{padding, BengProxy::ControlPaddingSize(payload.size())}),
+		MakeIovec(std::span{padding, PaddingSize(payload.size())}),
 	};
 
 	MessageHeader msg{std::span{v}};
@@ -88,7 +90,7 @@ BengControlClient::Send(BengProxy::ControlCommand cmd,
 }
 
 void
-BengControlClient::Send(std::span<const std::byte> payload) const
+Client::Send(std::span<const std::byte> payload) const
 {
 	auto nbytes = socket.Send(payload);
 	if (nbytes < 0)
@@ -96,8 +98,8 @@ BengControlClient::Send(std::span<const std::byte> payload) const
 
 }
 
-std::pair<BengProxy::ControlCommand, std::string>
-BengControlClient::Receive() const
+std::pair<Command, std::string>
+Client::Receive() const
 {
 	int result = socket.WaitReadable(10000);
 	if (result < 0)
@@ -106,7 +108,7 @@ BengControlClient::Receive() const
 	if (result == 0)
 		throw std::runtime_error("Timeout");
 
-	BengProxy::ControlHeader header;
+	Header header;
 	char payload[4096];
 
 	struct iovec v[] = {
@@ -127,24 +129,26 @@ BengControlClient::Receive() const
 	if (sizeof(header) + payload_length > size_t(nbytes))
 		throw std::runtime_error("Truncated datagram");
 
-	return std::make_pair(BengProxy::ControlCommand(FromBE16(header.command)),
+	return std::make_pair(static_cast<Command>(FromBE16(header.command)),
 			      std::string(payload, payload_length));
 }
 
 std::string
-BengControlClient::MakeTcacheInvalidate(TranslationCommand cmd,
-					std::span<const std::byte> payload) noexcept
+Client::MakeTcacheInvalidate(TranslationCommand cmd,
+			     std::span<const std::byte> payload) noexcept
 {
 	TranslationHeader h;
 	h.length = ToBE16(payload.size());
-	h.command = TranslationCommand(ToBE16(uint16_t(cmd)));
+	h.command = static_cast<TranslationCommand>(ToBE16(uint16_t(cmd)));
 
 	std::string result;
 	result.append((const char *)&h, sizeof(h));
 	if (!payload.empty()) {
 		result.append((const char *)payload.data(), payload.size());
-		result.append(BengProxy::ControlPaddingSize(payload.size()), '\0');
+		result.append(PaddingSize(payload.size()), '\0');
 	}
 
 	return result;
 }
+
+} // namespace BengControl

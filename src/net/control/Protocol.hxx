@@ -10,14 +10,14 @@
 
 #include <cstdint>
 
-namespace BengProxy {
+namespace BengControl {
 
 /**
  * The default port for the control protocol.
  */
-static constexpr unsigned CONTROL_PORT = 5478;
+static constexpr unsigned DEFAULT_PORT = 5478;
 
-enum class ControlCommand {
+enum class Command {
     NOP = 0,
 
     /**
@@ -216,7 +216,7 @@ struct ControlStats {
     uint64_t http_traffic_sent;
 };
 
-struct ControlHeader {
+struct Header {
     uint16_t length;
     uint16_t command;
 };
@@ -224,6 +224,6 @@ struct ControlHeader {
 /**
  * This magic number precedes every UDP packet.
  */
-static const uint32_t control_magic = 0x63046101;
+static const uint32_t MAGIC = 0x63046101;
 
-} // namespace BengProxy
+} // namespace BengControl
