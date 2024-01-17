@@ -152,7 +152,7 @@ enum class Command {
     ENABLE_QUEUE = 18,
 };
 
-struct ControlStats {
+struct Stats {
     /**
      * Number of open incoming connections.
      */
