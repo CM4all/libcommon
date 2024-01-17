@@ -5,13 +5,14 @@
 #pragma once
 
 #include "Protocol.hxx"
-#include "translation/Protocol.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/SpanCast.hxx"
 
 #include <span>
 #include <string>
 #include <string_view>
+
+enum class TranslationCommand : uint16_t;
 
 namespace BengControl {
 

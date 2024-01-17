@@ -4,6 +4,7 @@
 
 #include "Client.hxx"
 #include "Padding.hxx"
+#include "translation/Protocol.hxx"
 #include "net/RConnectSocket.hxx"
 #include "net/SendMessage.hxx"
 #include "net/ScmRightsBuilder.hxx"
