@@ -150,6 +150,12 @@ enum class Command {
      * Used by Workshop.
      */
     ENABLE_QUEUE = 18,
+
+    /**
+     * Reload the state from class #StateDirectories and apply it to
+     * the current process.
+     */
+    RELOAD_STATE = 19,
 };
 
 struct Stats {
