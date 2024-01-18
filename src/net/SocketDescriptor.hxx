@@ -304,6 +304,7 @@ public:
 	[[nodiscard]]
 	ssize_t Receive(std::span<std::byte> dest, int flags=0) const noexcept;
 
+#ifndef _WIN32
 	/**
 	 * Wrapper for recvmsg().
 	 */
@@ -315,6 +316,7 @@ public:
 	 */
 	[[nodiscard]]
 	ssize_t Receive(std::span<const struct iovec> v, int flags=0) const noexcept;
+#endif // !_WIN32
 
 	/**
 	 * Wrapper for send().
@@ -324,6 +326,7 @@ public:
 	[[nodiscard]]
 	ssize_t Send(std::span<const std::byte> src, int flags=0) const noexcept;
 
+#ifndef _WIN32
 	/**
 	 * Wrapper for sendmsg().
 	 *
@@ -339,6 +342,7 @@ public:
 	 */
 	[[nodiscard]]
 	ssize_t Send(std::span<const struct iovec> v, int flags=0) const noexcept;
+#endif // !_WIN32
 
 	[[nodiscard]]
 	ssize_t Read(std::span<std::byte> dest) const noexcept {
