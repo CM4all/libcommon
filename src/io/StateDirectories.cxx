@@ -69,12 +69,12 @@ StateDirectories::GetBinary(const char *relative_path,
 	return buffer.first(nbytes);
 }
 
-int
-StateDirectories::GetInt(const char *relative_path, int default_value) const noexcept
+signed
+StateDirectories::GetSigned(const char *relative_path, int default_value) const noexcept
 {
 	std::byte buffer[64];
 	const auto r = GetBinary(relative_path, buffer);
-	const auto value = ParseInteger<int>(Strip(ToStringView(r)));
+	const auto value = ParseInteger<signed>(Strip(ToStringView(r)));
 	return value
 		? *value
 		: default_value;

@@ -65,7 +65,7 @@ public:
 					     std::span<std::byte> buffer) const noexcept;
 
 	[[gnu::pure]]
-	int GetInt(const char *relative_path, int default_value) const noexcept;
+	signed GetSigned(const char *relative_path, int default_value) const noexcept;
 
 	[[gnu::pure]]
 	unsigned GetUnsigned(const char *relative_path, unsigned default_value) const noexcept;
