@@ -176,6 +176,7 @@ if not get_option('fuzzer')
 
   if nlohmann_json_dep.found()
     subdir('src/was/nlohmann_json')
+    subdir('src/was/async/nlohmann_json')
   endif
 endif
 

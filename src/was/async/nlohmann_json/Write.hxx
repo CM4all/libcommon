@@ -8,16 +8,7 @@
 
 namespace Was {
 
-struct SimpleRequest;
 struct SimpleResponse;
-
-/**
- * Parse a JSON request body.  Throws #BadRequest if the request body
- * is not JSON (according to the Content-Type header) and on JSON
- * parser errors.
- */
-nlohmann::json
-ParseJson(const SimpleRequest &request);
 
 /**
  * Serialize the given JSON value and place it as the response body

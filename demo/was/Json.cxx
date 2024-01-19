@@ -3,7 +3,8 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "was/async/CoRun.hxx"
-#include "lib/nlohmann_json/Was.hxx"
+#include "was/async/nlohmann_json/Read.hxx"
+#include "was/async/nlohmann_json/Write.hxx"
 #include "lib/nlohmann_json/ToDisposableBuffer.hxx"
 #include "event/Loop.hxx"
 #include "uri/MapQueryString.hxx"

@@ -2,8 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#include "Was.hxx"
-#include "ToDisposableBuffer.hxx"
+#include "Read.hxx"
 #include "was/ExceptionResponse.hxx"
 #include "was/async/SimpleHandler.hxx"
 
@@ -27,21 +26,6 @@ ParseJson(const SimpleRequest &request)
 	} catch (...) {
 		throw BadRequest{"JSON parser error\n"sv};
 	}
-}
-
-void
-WriteJson(SimpleResponse &response, const nlohmann::json &j) noexcept
-{
-	response.headers.emplace("content-type"sv, "application/json"sv);
-	response.body = Json::ToDisposableBuffer(j);
-}
-
-SimpleResponse
-ToResponse(const nlohmann::json &j) noexcept
-{
-	SimpleResponse response;
-	WriteJson(response, j);
-	return response;
 }
 
 } // namespace Was

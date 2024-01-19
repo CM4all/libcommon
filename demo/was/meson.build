@@ -26,16 +26,18 @@ if coroutines_dep.found()
     ],
   )
 
-  executable(
-    'Json',
-    'Json.cxx',
-    include_directories: inc,
-    dependencies: [
-      uri_dep,
-      was_server_async_dep,
-      nlohmann_json_dep,
-    ],
-  )
+  if nlohmann_json_dep.found()
+    executable(
+      'Json',
+      'Json.cxx',
+      include_directories: inc,
+      dependencies: [
+        uri_dep,
+        was_server_async_dep,
+        was_async_nlohmann_json_dep,
+      ],
+    )
+  endif
 
   executable(
     'BadRequest',
