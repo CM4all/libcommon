@@ -1226,6 +1226,14 @@ enum class TranslationCommand : uint16_t {
 	 * If present, then ~/.ssh/authorized_keys is not used.
 	 */
 	NO_HOME_AUTHORIZED_KEYS = 255,
+
+	/**
+	 * The maximum duration (e.g. for a cron job to finish); the
+	 * operation will be canceled (or the process is killed) after
+	 * this duration.  Payload is a 32 bit wall clock duration in
+	 * seconds.
+	 */
+	TIMEOUT = 256,
 };
 
 struct TranslationHeader {

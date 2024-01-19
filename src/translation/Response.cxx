@@ -197,6 +197,8 @@ TranslateResponse::Clear() noexcept
 	chain = {};
 #endif
 
+	timeout = {};
+
 #if TRANSLATION_ENABLE_SESSION
 	session_site = nullptr;
 	user = nullptr;
@@ -500,6 +502,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	probe_path_suffixes = alloc.Dup(src.probe_path_suffixes);
 	probe_suffixes = DupStringArray(alloc, src.probe_suffixes);
 	read_file = alloc.CheckDup(src.read_file);
+
+	timeout = src.timeout;
 
 	validate_mtime.mtime = src.validate_mtime.mtime;
 	validate_mtime.path = alloc.CheckDup(src.validate_mtime.path);

@@ -1640,6 +1640,10 @@ public:
 		return PacketT(TranslationCommand::MAX_AGE, seconds);
 	}
 
+	auto &Timeout(const std::chrono::duration<uint32_t> seconds) noexcept {
+		return PacketT(TranslationCommand::TIMEOUT, seconds);
+	}
+
 	std::span<std::byte> Finish() noexcept;
 
 private:

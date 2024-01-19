@@ -316,6 +316,11 @@ struct TranslateResponse {
 		const char *path;
 	} validate_mtime;
 
+	/**
+	 * From #TranslationCommand::TIMEOUT.  Zero if unset.
+	 */
+	std::chrono::duration<uint_least32_t> timeout;
+
 #if TRANSLATION_ENABLE_SESSION
 	std::chrono::duration<uint32_t> user_max_age;
 	std::chrono::duration<uint16_t> external_session_keepalive;

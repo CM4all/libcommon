@@ -4011,6 +4011,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::TIMEOUT:
+		if (payload.size() != 4)
+			throw std::runtime_error("malformed TIMEOUT packet");
+
+		response.timeout = std::chrono::seconds(*(const uint32_t *)(const void *)payload.data());
+		return;
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
