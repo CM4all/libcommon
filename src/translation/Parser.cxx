@@ -1100,6 +1100,22 @@ TranslateParser::HandleCgroupXattr(std::string_view payload)
 	child_options->cgroup.SetXattr(alloc, xattr.first, xattr.second);
 }
 
+inline void
+TranslateParser::HandleMountListenStream(std::span<const std::byte> payload)
+{
+	if (ns_options == nullptr)
+		throw std::runtime_error("misplaced MOUNT_LISTEN_STREAM packet");
+
+	if (ns_options->mount.mount_listen_stream.data() != nullptr)
+		throw std::runtime_error("duplicate MOUNT_LISTEN_STREAM packet");
+
+	const auto [path, rest] = Split(ToStringView(payload), '\0');
+	if (!IsValidAbsolutePath(path))
+		throw std::runtime_error("malformed MOUNT_LISTEN_STREAM packet");
+
+	ns_options->mount.mount_listen_stream = payload;
+}
+
 #endif // TRANSLATION_ENABLE_SPAWN
 
 static bool
@@ -4212,6 +4228,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		response.timeout = std::chrono::seconds(*(const uint32_t *)(const void *)payload.data());
 		return;
+
+	case TranslationCommand::MOUNT_LISTEN_STREAM:
+#if TRANSLATION_ENABLE_SPAWN
+		HandleMountListenStream(payload);
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

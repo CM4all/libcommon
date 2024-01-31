@@ -261,6 +261,8 @@ private:
 	void HandleCgroupXattr(std::string_view payload);
 #endif // TRANSLATION_ENABLE_SPAWN
 
+	void HandleMountListenStream(std::span<const std::byte> payload);
+
 	Result HandlePacket(TranslationCommand command,
 			    std::span<const std::byte> payload);
 };

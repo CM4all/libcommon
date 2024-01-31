@@ -8,6 +8,9 @@
 #include "util/IntrusiveForwardList.hxx"
 #include "util/ShallowCopy.hxx"
 
+#include <cstddef>
+#include <span>
+
 class AllocatorPtr;
 struct UidGid;
 struct Mount;
@@ -62,6 +65,15 @@ struct MountNamespaceOptions {
 	 */
 	const char *mount_tmp_tmpfs = nullptr;
 
+	/**
+	 * @see TranslationCommand::MOUNT_LISTEN_STREAM
+	 *
+	 * Note that this field is not used by the spawner library.
+	 * The calling application must evaluate it, set up the
+	 * listener and set up a bind mount.
+	 */
+	std::span<const std::byte> mount_listen_stream;
+
 	IntrusiveForwardList<Mount> mounts;
 
 	MountNamespaceOptions() = default;
@@ -80,6 +92,7 @@ struct MountNamespaceOptions {
 		 pivot_root(src.pivot_root),
 		 home(src.home),
 		 mount_tmp_tmpfs(src.mount_tmp_tmpfs),
+		 mount_listen_stream(src.mount_listen_stream),
 		 mounts(shallow_copy, src.mounts) {}
 
 	MountNamespaceOptions(AllocatorPtr alloc,

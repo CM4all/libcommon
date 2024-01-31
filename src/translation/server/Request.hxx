@@ -98,6 +98,8 @@ struct Request {
 
 	const char *plan = nullptr;
 
+	std::span<const std::byte> mount_listen_stream{};
+
 	bool path_exists = false;
 
 	bool login = false;

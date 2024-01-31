@@ -12,6 +12,7 @@
 #include "UidGid.hxx"
 #include "util/ShallowCopy.hxx"
 
+#include <span>
 #include <string_view>
 
 struct ResourceLimits;

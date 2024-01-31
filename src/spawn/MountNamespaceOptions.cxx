@@ -12,6 +12,8 @@
 #include "system/pivot_root.h"
 #include "system/Mount.hxx"
 #include "io/FileDescriptor.hxx"
+#include "util/Base32.hxx"
+#include "util/djb_hash.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"
 
@@ -40,6 +42,7 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 	 pivot_root(alloc.CheckDup(src.pivot_root)),
 	 home(alloc.CheckDup(src.home)),
 	 mount_tmp_tmpfs(alloc.CheckDup(src.mount_tmp_tmpfs)),
+	 mount_listen_stream(alloc.Dup(src.mount_listen_stream)),
 	 mounts(Mount::CloneAll(alloc, src.mounts))
 {
 }
@@ -250,6 +253,13 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 	if (mount_tmp_tmpfs != nullptr) {
 		p = (char *)mempcpy(p, ";tt:", 3);
 		p = stpcpy(p, mount_tmp_tmpfs);
+	}
+
+	if (mount_listen_stream.data() != nullptr) {
+		*p++ = ';';
+		*p++ = 'l';
+		*p++ = 's';
+		p = FormatIntBase32(p, djb_hash(mount_listen_stream));
 	}
 
 	p = Mount::MakeIdAll(p, mounts);

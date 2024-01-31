@@ -1234,6 +1234,21 @@ enum class TranslationCommand : uint16_t {
 	 * seconds.
 	 */
 	TIMEOUT = 256,
+
+	/**
+	 * Listen on the specified stream socket path (AF_LOCAL).  An
+	 * opaque token may come after the path, separated by a null
+	 * byte.
+	 *
+	 * Once the socket becomes ready, a request echoing the
+	 * #LISTEN_STREAM packet is sent to the translation server who
+	 * may then describe a process to be spawned (with the
+	 * listener socket on fd=0).
+	 *
+	 * Multiple processes with the same payload may share the same
+	 * socket.
+	 */
+	MOUNT_LISTEN_STREAM = 257,
 };
 
 struct TranslationHeader {

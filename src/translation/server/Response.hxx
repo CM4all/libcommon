@@ -809,6 +809,13 @@ public:
 			return *this;
 		}
 
+		template<typename... Types>
+		auto MountListenStream(Types... mnt) noexcept {
+			response.StringPacket(TranslationCommand::MOUNT_LISTEN_STREAM,
+					      mnt...);
+			return *this;
+		}
+
 		template<typename P, typename C>
 		auto WriteFile(P &&path, C &&contents) noexcept {
 			response.StringPacket(TranslationCommand::WRITE_FILE,

@@ -55,6 +55,7 @@ class AllocatedRequest : public Request {
 	std::string execute_buffer;
 	std::string service_buffer;
 	std::string plan_buffer;
+	std::string mount_listen_stream_buffer;
 
 public:
 	/**
