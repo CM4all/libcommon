@@ -101,6 +101,7 @@ class TranslateParser {
 	ResourceAddress *resource_address;
 #endif
 
+#if TRANSLATION_ENABLE_SPAWN
 	/** the current child process options being edited */
 	ChildOptions *child_options;
 
@@ -109,6 +110,7 @@ class TranslateParser {
 
 	/** the tail of the current mount_list */
 	IntrusiveForwardList<Mount>::iterator mount_list;
+#endif
 
 #if TRANSLATION_ENABLE_RADDRESS
 	/** the current local file address being edited */
@@ -193,7 +195,9 @@ public:
 private:
 	bool HasArgs() const noexcept;
 
+#if TRANSLATION_ENABLE_SPAWN
 	void SetChildOptions(ChildOptions &_child_options);
+#endif // TRANSLATION_ENABLE_SPAWN
 
 #if TRANSLATION_ENABLE_RADDRESS
 	void SetCgiAddress(ResourceAddress::Type type, const char *path);
@@ -222,6 +226,7 @@ private:
 	ResourceAddress *AddFilter();
 #endif
 
+#if TRANSLATION_ENABLE_SPAWN
 	void HandleMountTmpfs(std::string_view payload, bool writable);
 
 	void HandleMountNamedTmpfs(std::string_view payload);
@@ -233,6 +238,7 @@ private:
 			     bool file=false);
 
 	void HandleWriteFile(std::string_view payload);
+#endif // TRANSLATION_ENABLE_SPAWN
 
 #if TRANSLATION_ENABLE_WANT
 	void HandleWant(const TranslationCommand *payload,
@@ -246,12 +252,14 @@ private:
 	void HandleRegularPacket(TranslationCommand command,
 				 std::span<const std::byte> payload);
 
+#if TRANSLATION_ENABLE_SPAWN
 	void HandleUidGid(std::span<const std::byte> payload);
 	void HandleMappedUidGid(std::span<const std::byte> payload);
 	void HandleUmask(std::span<const std::byte> payload);
 
 	void HandleCgroupSet(std::string_view payload);
 	void HandleCgroupXattr(std::string_view payload);
+#endif // TRANSLATION_ENABLE_SPAWN
 
 	Result HandlePacket(TranslationCommand command,
 			    std::span<const std::byte> payload);

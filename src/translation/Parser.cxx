@@ -22,9 +22,11 @@
 #include "cgi/Address.hxx"
 #include "uri/Base.hxx"
 #endif
+#if TRANSLATION_ENABLE_SPAWN
 #include "spawn/ChildOptions.hxx"
 #include "spawn/Mount.hxx"
 #include "spawn/ResourceLimits.hxx"
+#endif
 #if TRANSLATION_ENABLE_HTTP
 #include "net/AllocatedSocketAddress.hxx"
 #include "net/AddressInfo.hxx"
@@ -67,6 +69,8 @@ TranslateParser::HasArgs() const noexcept
 	return false;
 }
 
+#if TRANSLATION_ENABLE_SPAWN
+
 void
 TranslateParser::SetChildOptions(ChildOptions &_child_options)
 {
@@ -75,6 +79,8 @@ TranslateParser::SetChildOptions(ChildOptions &_child_options)
 	mount_list = ns_options->mount.mounts.before_begin();
 	env_builder = child_options->env;
 }
+
+#endif // TRANSLATION_ENABLE_SPAWN
 
 #if TRANSLATION_ENABLE_RADDRESS
 
@@ -134,6 +140,8 @@ IsValidNonEmptyString(std::string_view s) noexcept
 	return !s.empty() && IsValidString(s);
 }
 
+#if TRANSLATION_ENABLE_SPAWN
+
 static constexpr bool
 IsValidNameChar(char ch)
 {
@@ -145,6 +153,8 @@ IsValidName(std::string_view s) noexcept
 {
 	return CheckCharsNonEmpty(s, IsValidNameChar);
 }
+
+#endif // TRANSLATION_ENABLE_SPAWN
 
 [[gnu::pure]]
 static bool
@@ -222,6 +232,8 @@ TranslateParser::AddFilter()
 
 #endif
 
+#if TRANSLATION_ENABLE_SPAWN
+
 static bool
 valid_view_name_char(char ch)
 {
@@ -240,6 +252,8 @@ valid_view_name(const char *name)
 
 	return true;
 }
+
+#endif // TRANSLATION_ENABLE_SPAWN
 
 #if TRANSLATION_ENABLE_WIDGET
 
@@ -451,6 +465,8 @@ FinishTranslateResponse(AllocatorPtr alloc,
 #endif
 }
 
+#if TRANSLATION_ENABLE_SPAWN
+
 [[gnu::pure]]
 static bool
 translate_client_check_pair(std::string_view payload) noexcept
@@ -477,6 +493,8 @@ translate_client_pair(AllocatorPtr alloc,
 	builder.Add(alloc, payload.data(), false);
 }
 
+#endif // TRANSLATION_ENABLE_SPAWN
+
 #if TRANSLATION_ENABLE_EXPAND
 
 static void
@@ -493,6 +511,8 @@ translate_client_expand_pair(ExpandableStringList::Builder &builder,
 }
 
 #endif
+
+#if TRANSLATION_ENABLE_SPAWN
 
 static void
 translate_client_pivot_root(NamespaceOptions *ns, std::string_view payload)
@@ -722,6 +742,8 @@ translate_client_rlimits(AllocatorPtr alloc, ChildOptions *child_options,
 		throw std::runtime_error("malformed RLIMITS packet");
 }
 
+#endif // TRANSLATION_ENABLE_SPAWN
+
 #if TRANSLATION_ENABLE_WANT
 
 inline void
@@ -879,6 +901,8 @@ translate_client_expires_relative_with_query(TranslateResponse &response,
 
 	response.expires_relative_with_query = std::chrono::seconds(*(const uint32_t *)(const void *)payload.data());
 }
+
+#if TRANSLATION_ENABLE_SPAWN
 
 static void
 translate_client_stderr_path(ChildOptions *child_options,
@@ -1076,6 +1100,8 @@ TranslateParser::HandleCgroupXattr(std::string_view payload)
 	child_options->cgroup.SetXattr(alloc, xattr.first, xattr.second);
 }
 
+#endif // TRANSLATION_ENABLE_SPAWN
+
 static bool
 CheckProbeSuffix(std::string_view payload) noexcept
 {
@@ -1116,8 +1142,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		throw std::runtime_error("misplaced translate request packet");
 
 	case TranslationCommand::UID_GID:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleUidGid(payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::STATUS:
 		if (payload.size() != 2)
@@ -1633,9 +1663,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		break;
 
 	case TranslationCommand::HOME:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_home(ns_options,
 				      string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::INTERPRETER:
 #if TRANSLATION_ENABLE_RADDRESS
@@ -2021,12 +2055,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		}
 #endif
 
+#if TRANSLATION_ENABLE_SPAWN
 		if (child_options != nullptr) {
 			translate_client_pair(alloc, env_builder, "PAIR",
 					      string_payload);
+			return;
 		} else
+#endif // TRANSLATION_ENABLE_SPAWN
 			throw std::runtime_error("misplaced PAIR packet");
-		return;
 
 	case TranslationCommand::EXPAND_PAIR:
 #if TRANSLATION_ENABLE_RADDRESS
@@ -2493,6 +2529,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::USER_NAMESPACE:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!payload.empty())
 			throw std::runtime_error("malformed USER_NAMESPACE packet");
 
@@ -2502,8 +2539,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("misplaced USER_NAMESPACE packet");
 
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::PID_NAMESPACE:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!payload.empty())
 			throw std::runtime_error("malformed PID_NAMESPACE packet");
 
@@ -2516,8 +2557,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("Can't combine PID_NAMESPACE with PID_NAMESPACE_NAME");
 
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::NETWORK_NAMESPACE:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!payload.empty())
 			throw std::runtime_error("malformed NETWORK_NAMESPACE packet");
 
@@ -2532,35 +2577,66 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		ns_options->enable_network = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::PIVOT_ROOT:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_pivot_root(ns_options, string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::MOUNT_PROC:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_mount_proc(ns_options, payload.size());
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::MOUNT_HOME:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleMountHome(string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::BIND_MOUNT:
+#if TRANSLATION_ENABLE_SPAWN
 		previous_command = command;
 		HandleBindMount(string_payload, false, false);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::MOUNT_TMP_TMPFS:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_mount_tmp_tmpfs(ns_options, string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::UTS_NAMESPACE:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_uts_namespace(ns_options, string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::RLIMITS:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_rlimits(alloc, child_options, string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::WANT:
 #if TRANSLATION_ENABLE_WANT
@@ -2651,10 +2727,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::STDERR_PATH:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_stderr_path(child_options,
 					     string_payload,
 					     false);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::AUTH:
 #if TRANSLATION_ENABLE_SESSION
@@ -2674,6 +2754,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::SETENV:
+#if TRANSLATION_ENABLE_SPAWN
 		if (child_options != nullptr) {
 			translate_client_pair(alloc, env_builder,
 					      "SETENV",
@@ -2681,6 +2762,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		} else
 			throw std::runtime_error("misplaced SETENV packet");
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::EXPAND_SETENV:
 #if TRANSLATION_ENABLE_EXPAND
@@ -2971,6 +3055,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::IPC_NAMESPACE:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!payload.empty())
 			throw std::runtime_error("malformed IPC_NAMESPACE packet");
 
@@ -2980,6 +3065,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("misplaced IPC_NAMESPACE packet");
 
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::AUTO_DEFLATE:
 		/* deprecated */
@@ -3096,9 +3184,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::BIND_MOUNT_RW:
+#if TRANSLATION_ENABLE_SPAWN
 		previous_command = command;
 		HandleBindMount(string_payload, false, true);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::EXPAND_BIND_MOUNT_RW:
 #if TRANSLATION_ENABLE_EXPAND
@@ -3125,12 +3217,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::MOUNT_TMPFS:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleMountTmpfs(string_payload, true);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::MOUNT_EMPTY:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleMountTmpfs(string_payload, false);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::REVEAL_USER:
 #if TRANSLATION_ENABLE_TRANSFORMATION
@@ -3164,6 +3264,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::FORBID_USER_NS:
+#if TRANSLATION_ENABLE_SPAWN
 		if (child_options == nullptr || child_options->forbid_user_ns)
 			throw std::runtime_error("misplaced FORBID_USER_NS packet");
 
@@ -3172,8 +3273,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->forbid_user_ns = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::NO_NEW_PRIVS:
+#if TRANSLATION_ENABLE_SPAWN
 		if (child_options == nullptr || child_options->no_new_privs)
 			throw std::runtime_error("misplaced NO_NEW_PRIVS packet");
 
@@ -3182,8 +3287,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->no_new_privs = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::CGROUP:
+#if TRANSLATION_ENABLE_SPAWN
 		if (child_options == nullptr ||
 		    child_options->cgroup.name != nullptr)
 			throw std::runtime_error("misplaced CGROUP packet");
@@ -3193,10 +3302,17 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->cgroup.name = string_payload.data();
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::CGROUP_SET:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleCgroupSet(string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::EXTERNAL_SESSION_MANAGER:
 #if TRANSLATION_ENABLE_SESSION
@@ -3237,9 +3353,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	}
 
 	case TranslationCommand::BIND_MOUNT_EXEC:
+#if TRANSLATION_ENABLE_SPAWN
 		previous_command = command;
 		HandleBindMount(string_payload, false, false, true);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
 #if TRANSLATION_ENABLE_EXPAND
@@ -3251,6 +3371,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::STDERR_NULL:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!payload.empty())
 			throw std::runtime_error("malformed STDERR_NULL packet");
 
@@ -3262,6 +3383,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->stderr_null = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::EXECUTE:
 #if TRANSLATION_ENABLE_EXECUTE
@@ -3321,14 +3445,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::STDERR_PATH_JAILED:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_stderr_path(child_options, string_payload, true);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::UMASK:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleUmask(payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::CGROUP_NAMESPACE:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!payload.empty())
 			throw std::runtime_error("malformed CGROUP_NAMESPACE packet");
 
@@ -3341,6 +3474,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("misplaced CGROUP_NAMESPACE packet");
 
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::REDIRECT_FULL_URI:
 #if TRANSLATION_ENABLE_HTTP
@@ -3385,6 +3521,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::FORBID_MULTICAST:
+#if TRANSLATION_ENABLE_SPAWN
 		if (child_options == nullptr || child_options->forbid_multicast)
 			throw std::runtime_error("misplaced FORBID_MULTICAST packet");
 
@@ -3393,8 +3530,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->forbid_multicast = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::FORBID_BIND:
+#if TRANSLATION_ENABLE_SPAWN
 		if (child_options == nullptr || child_options->forbid_bind)
 			throw std::runtime_error("misplaced FORBID_BIND packet");
 
@@ -3403,8 +3544,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->forbid_bind = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::NETWORK_NAMESPACE_NAME:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!IsValidName(string_payload))
 			throw std::runtime_error("malformed NETWORK_NAMESPACE_NAME packet");
 
@@ -3419,12 +3564,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		ns_options->network_namespace = string_payload.data();
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::MOUNT_ROOT_TMPFS:
+#if TRANSLATION_ENABLE_SPAWN
 		translate_client_mount_root_tmpfs(ns_options, payload.size());
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::CHILD_TAG:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!IsValidNonEmptyString(string_payload))
 			throw std::runtime_error("malformed CHILD_TAG packet");
 
@@ -3439,6 +3592,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 						 string_payload);
 
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::CERTIFICATE:
 #if TRANSLATION_ENABLE_RADDRESS
@@ -3474,6 +3630,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::PID_NAMESPACE_NAME:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!IsValidName(string_payload))
 			throw std::runtime_error("malformed PID_NAMESPACE_NAME packet");
 
@@ -3488,6 +3645,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		ns_options->pid_namespace = string_payload.data();
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::SUBST_YAML_FILE:
 		break;
@@ -3564,6 +3724,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::STDERR_POND:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!payload.empty())
 			throw std::runtime_error("malformed STDERR_POND packet");
 
@@ -3575,6 +3736,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->stderr_pond = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::CHAIN:
 #if TRANSLATION_ENABLE_HTTP
@@ -3702,11 +3866,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
 		case TranslationCommand::BIND_MOUNT_FILE:
 		case TranslationCommand::WRITE_FILE:
+#if TRANSLATION_ENABLE_SPAWN
 			if (ns_options != nullptr &&
 			    mount_list != ns_options->mount.mounts.before_begin()) {
 				mount_list->optional = true;
 				return;
 			}
+#endif
 
 			break;
 
@@ -3764,6 +3930,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::MOUNT_DEV:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!payload.empty())
 			throw std::runtime_error("malformed MOUNT_DEV packet");
 
@@ -3777,11 +3944,18 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		ns_options->mount.mount_dev = true;
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::BIND_MOUNT_FILE:
+#if TRANSLATION_ENABLE_SPAWN
 		previous_command = command;
 		HandleBindMount(string_payload, false, false, false, true);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::EAGER_CACHE:
 #if TRANSLATION_ENABLE_CACHE
@@ -3839,8 +4013,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::CGROUP_XATTR:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleCgroupXattr(string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::CHECK_HEADER:
 #if TRANSLATION_ENABLE_SESSION
@@ -3860,6 +4038,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::CHDIR:
+#if TRANSLATION_ENABLE_SPAWN
 		if (child_options == nullptr)
 			throw std::runtime_error("misplaced CHDIR packet");
 
@@ -3868,6 +4047,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		child_options->chdir = string_payload.data();
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::SESSION_COOKIE_SAME_SITE:
 #if TRANSLATION_ENABLE_SESSION
@@ -3897,9 +4079,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::WRITE_FILE:
+#if TRANSLATION_ENABLE_SPAWN
 		previous_command = command;
 		HandleWriteFile(string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::PATH_EXISTS:
 #if TRANSLATION_ENABLE_RADDRESS
@@ -3974,8 +4160,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::MOUNT_NAMED_TMPFS:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleMountNamedTmpfs(string_payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::BENEATH:
 #if TRANSLATION_ENABLE_RADDRESS
@@ -3995,8 +4185,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::MAPPED_UID_GID:
+#if TRANSLATION_ENABLE_SPAWN
 		HandleMappedUidGid(payload);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::NO_HOME_AUTHORIZED_KEYS:
 #if TRANSLATION_ENABLE_LOGIN
@@ -4065,10 +4259,10 @@ TranslateParser::HandlePacket(TranslationCommand command,
 		probe_suffixes_builder.clear();
 #if TRANSLATION_ENABLE_EXECUTE
 		SetChildOptions(response.child_options);
-#else
+#elif TRANSLATION_ENABLE_SPAWN
 		child_options = nullptr;
 		ns_options = nullptr;
-#endif
+ #endif
 #if TRANSLATION_ENABLE_RADDRESS
 		file_address = nullptr;
 		http_address = nullptr;
