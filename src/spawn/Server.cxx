@@ -81,6 +81,16 @@ public:
 	UniqueSocketDescriptor GetSocket() {
 		return UniqueSocketDescriptor{Get().Release()};
 	}
+
+	/**
+	 * Like Get(), but does not transfer ownership to the caller.
+	 */
+	FileDescriptor Borrow() {
+		if (IsEmpty())
+			throw MalformedSpawnPayloadError();
+
+		return *i++;
+	}
 };
 
 class SpawnServerConnection;
@@ -703,6 +713,34 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				const char *target = payload.ReadString();
 				mounts.emplace_front(source, target);
 				mounts.front().type = Mount::Type::BIND_FILE;
+				mounts.front().optional = payload.ReadBool();
+			}
+
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
+			break;
+
+		case SpawnExecCommand::FD_BIND_MOUNT:
+			{
+				const char *target = payload.ReadString();
+				bool writable = payload.ReadBool();
+				bool exec = payload.ReadBool();
+				mounts.emplace_front(nullptr, target,
+						     writable, exec);
+				mounts.front().source_fd = fds.Borrow();
+				mounts.front().optional = payload.ReadBool();
+			}
+
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
+			break;
+
+		case SpawnExecCommand::FD_BIND_MOUNT_FILE:
+			{
+				const char *target = payload.ReadString();
+				mounts.emplace_front(nullptr, target);
+				mounts.front().type = Mount::Type::BIND_FILE;
+				mounts.front().source_fd = fds.Borrow();
 				mounts.front().optional = payload.ReadBool();
 			}
 

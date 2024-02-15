@@ -196,8 +196,14 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 	for (const auto &i : ns.mount.mounts) {
 		switch (i.type) {
 		case Mount::Type::BIND:
-			s.Write(SpawnExecCommand::BIND_MOUNT);
-			s.WriteString(i.source);
+			if (i.source_fd.IsDefined()) {
+				s.WriteFd(SpawnExecCommand::FD_BIND_MOUNT,
+					  i.source_fd);
+			} else {
+				s.Write(SpawnExecCommand::BIND_MOUNT);
+				s.WriteString(i.source);
+			}
+
 			s.WriteString(i.target);
 			s.WriteBool(i.writable);
 			s.WriteBool(i.exec);
@@ -205,8 +211,14 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			break;
 
 		case Mount::Type::BIND_FILE:
-			s.Write(SpawnExecCommand::BIND_MOUNT_FILE);
-			s.WriteString(i.source);
+			if (i.source_fd.IsDefined()) {
+				s.WriteFd(SpawnExecCommand::FD_BIND_MOUNT_FILE,
+					  i.source_fd);
+			} else {
+				s.Write(SpawnExecCommand::BIND_MOUNT_FILE);
+				s.WriteString(i.source);
+			}
+
 			s.WriteString(i.target);
 			s.WriteBool(i.optional);
 			break;
