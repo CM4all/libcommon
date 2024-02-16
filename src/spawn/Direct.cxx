@@ -139,6 +139,7 @@ WaitForPipe(FileDescriptor r) noexcept
 [[noreturn]]
 static void
 Exec(const char *path, PreparedChildProcess &&p,
+     const bool skip_uid_gid,
      const char *name,
      UniqueFileDescriptor &&userns_map_pipe_r,
      UniqueFileDescriptor &&userns_create_pipe_w,
@@ -190,7 +191,7 @@ try {
 	   early would require the spawner to have CAP_SYS_RESOURCE
 	   for prlimit() */
 	const bool early_uid_gid = !wait_pipe_r.IsDefined();
-	if (early_uid_gid && !p.uid_gid.IsEmpty())
+	if (early_uid_gid && !skip_uid_gid)
 		p.uid_gid.Apply();
 
 	p.ns.Apply(p.uid_gid);
@@ -297,7 +298,7 @@ try {
 	}
 #endif // HAVE_LIBSECCOMP
 
-	if (!early_uid_gid && !p.uid_gid.IsEmpty()) {
+	if (!early_uid_gid && !skip_uid_gid) {
 		if (p.ns.mapped_uid > 0 && p.ns.mapped_uid != p.uid_gid.uid) {
 			/* we need to use the mapped_uid because the
 			   original uid isn't valid from inside this
@@ -428,6 +429,16 @@ try {
 	 */
 	UniqueFileDescriptor wait_pipe_r, wait_pipe_w;
 
+	/**
+	 * In "debug mode", uid/gid setup is skipped (because the
+	 * application is unprivileged and cannot switch uid/gid).
+	 * UidGid::IsNop() must be checked from outside the new user
+	 * namespace or else getresuid()/getresgid() will only return
+	 * the "overflow" ids, and UidGid::IsNop() always returns
+	 * false.
+	 */
+	const bool skip_uid_gid = params.uid_gid.IsNop();
+
 	if (params.ns.enable_user && is_sys_admin) {
 		/* from inside the new user namespace, we cannot
 		   reassociate with a new network namespace or mount
@@ -453,8 +464,7 @@ try {
 		/* this process will set up the uid/gid maps, so
 		   disable that part in the child process */
 		params.ns.enable_user = false;
-	} else if (params.ns.enable_user &&
-		   !params.uid_gid.IsEmpty()) {
+	} else if (params.ns.enable_user && !skip_uid_gid) {
 		/* if we have to set a user or group without being
 		   CAP_SYS_ADMIN (only CAP_SETUID/CAP_SETGID,
 		   e.g. inside a container), then the child process
@@ -523,6 +533,7 @@ try {
 		error_pipe_r.Close();
 
 		Exec(path, std::move(params),
+		     skip_uid_gid,
 		     name,
 		     std::move(userns_map_pipe_r),
 		     std::move(userns_create_pipe_w),
