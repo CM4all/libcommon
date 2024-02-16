@@ -67,11 +67,16 @@ IsGid(gid_t gid) noexcept
 		gid == rgid && gid == egid && gid == sgid;
 }
 
+bool
+UidGid::IsNop() const noexcept
+{
+	return (uid == 0 || IsUid(uid)) && (gid == 0 || IsGid(gid));
+}
+
 void
 UidGid::Apply() const
 {
-	if ((uid == 0 || IsUid(uid)) &&
-	    (gid == 0 || IsGid(gid)))
+	if (IsNop())
 		/* skip if we're already the configured (unprivileged)
 		   uid/gid; also don't try setgroups(), because that will fail
 		   anyway if we're unprivileged; unprivileged operation is

@@ -35,6 +35,16 @@ struct UidGid {
 		return uid != 0 && gid != 0;
 	}
 
+	/**
+	 * Is Apply() a no-op?  This can be because no uid/gid is
+	 * configured or because the uid/gid is already in effect
+	 * (which usually only happens in "debug" mode where the
+	 * program runs on a developer machine as regular user and
+	 * never switches users).
+	 */
+	[[gnu::pure]]
+	bool IsNop() const noexcept;
+
 	bool HasGroups() const noexcept {
 		return groups.front() != 0;
 	}
