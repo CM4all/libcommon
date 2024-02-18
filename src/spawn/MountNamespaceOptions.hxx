@@ -103,6 +103,7 @@ struct MountNamespaceOptions {
 			mount_pts || bind_mount_pts ||
 			pivot_root != nullptr ||
 			mount_tmp_tmpfs != nullptr ||
+			mount_listen_stream.data() != nullptr ||
 			!mounts.empty();
 	}
 
