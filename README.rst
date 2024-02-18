@@ -119,3 +119,8 @@ external libraries:
 - ``lib/sodium``: `libsodium <https://github.com/jedisct1/libsodium/>`__
   C++ wrappers
 - ``lib/zlib``: `zlib <https://zlib.net//>`__ C++ wrappers
+
+Special directories:
+
+- ``pluggable``: contains fallback implementations for modules that
+  should be replaced by applications using libcommon

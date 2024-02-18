@@ -96,7 +96,7 @@ if compiler.has_header('valgrind/memcheck.h')
   add_global_arguments('-DHAVE_VALGRIND_MEMCHECK_H', language: 'cpp')
 endif
 
-inc = include_directories('src', 'fake', '.')
+inc = include_directories('src', 'src/pluggable', '.')
 
 libcommon_require_avahi = get_option('avahi')
 libcommon_require_cap = get_option('cap')
