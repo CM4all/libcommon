@@ -11,6 +11,7 @@ translation = static_library(
     get_variable('pcre_dep', []),
 
     fmt_dep,
+    alloc_dep,
   ],
 )
 
@@ -19,5 +20,6 @@ translation_dep = declare_dependency(
   dependencies: [
     spawn_dep,
     net_dep,
+    alloc_dep,
   ],
 )

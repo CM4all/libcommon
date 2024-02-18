@@ -142,6 +142,7 @@ if get_variable('libcommon_enable_spawn_options', false)
   ]
 
   spawn_dependencies += [
+    alloc_dep,
     adata_dep,
   ]
 endif

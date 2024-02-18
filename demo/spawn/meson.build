@@ -15,6 +15,7 @@ executable(
   'RunSpawn.cxx',
   include_directories: inc,
   dependencies: [
+    alloc_dep,
     spawn_dep,
     net_dep,
     system_dep,
@@ -27,6 +28,7 @@ executable(
   'KillCgroup.cxx',
   include_directories: inc,
   dependencies: [
+    alloc_dep,
     spawn_dep,
     event_dep,
     net_dep,
@@ -40,6 +42,7 @@ executable(
   'WatchCgroup.cxx',
   include_directories: inc,
   dependencies: [
+    alloc_dep,
     spawn_dep,
     event_dep,
     net_dep,

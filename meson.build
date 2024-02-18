@@ -119,6 +119,8 @@ subdir('src/time')
 subdir('src/http')
 subdir('src/co')
 
+subdir('src/pluggable')
+
 subdir('src/adata')
 subdir('src/lua')
 subdir('src/io')
