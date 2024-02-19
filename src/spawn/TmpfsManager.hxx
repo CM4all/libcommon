@@ -31,7 +31,7 @@ class TmpfsManager {
 		std::string_view operator()(const Item &item) const noexcept;
 	};
 
-	IntrusiveHashSet<Item, 1021,
+	IntrusiveHashSet<Item, 1024,
 			 IntrusiveHashSetOperators<ItemHash,
 						   std::equal_to<std::string_view>,
 						   ItemGetKey>> items;

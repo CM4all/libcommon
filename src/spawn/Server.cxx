@@ -149,7 +149,7 @@ class SpawnServerConnection final
 	SocketEvent event;
 
 	using ChildIdMap =
-		IntrusiveHashSet<SpawnServerChild, 1021,
+		IntrusiveHashSet<SpawnServerChild, 1024,
 				 IntrusiveHashSetOperators<std::hash<unsigned>,
 							   std::equal_to<unsigned>,
 							   SpawnServerChild::GetKey>>;
