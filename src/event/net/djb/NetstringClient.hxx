@@ -50,6 +50,10 @@ public:
 			NetstringClientHandler &_handler) noexcept;
 	~NetstringClient() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	/**
 	 * Start sending the request.  This method may be called only
 	 * once.

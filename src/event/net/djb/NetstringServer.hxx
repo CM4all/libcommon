@@ -36,6 +36,10 @@ public:
 			size_t max_size=16*1024*1024) noexcept;
 	~NetstringServer() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 protected:
 	SocketDescriptor GetSocket() const noexcept {
 		return event.GetSocket();
