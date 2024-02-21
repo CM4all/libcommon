@@ -45,7 +45,7 @@ NetstringClient::Request(FileDescriptor _out_fd, FileDescriptor _in_fd,
 
 	generator(data);
 	for (const auto &i : data)
-		write.Push(i.data(), i.size());
+		write.Push(i);
 
 	event.Open(SocketDescriptor::FromFileDescriptor(out_fd));
 	event.ScheduleWrite();

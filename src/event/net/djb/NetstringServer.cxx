@@ -33,7 +33,7 @@ try {
 	std::list<std::span<const std::byte>> list{response};
 	generator(list);
 	for (const auto &i : list)
-		write.Push(i.data(), i.size());
+		write.Push(i);
 
 	switch (write.Write(GetSocket().ToFileDescriptor())) {
 	case MultiWriteBuffer::Result::MORE:

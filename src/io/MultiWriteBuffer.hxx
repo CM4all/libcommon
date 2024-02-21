@@ -9,6 +9,7 @@
 #include <array>
 #include <cstddef>
 #include <cassert>
+#include <span>
 
 class FileDescriptor;
 
@@ -22,10 +23,10 @@ class MultiWriteBuffer {
 public:
 	typedef WriteBuffer::Result Result;
 
-	void Push(const void *buffer, size_t size) noexcept {
+	void Push(std::span<const std::byte> s) noexcept {
 		assert(n < buffers.size());
 
-		buffers[n++] = WriteBuffer(buffer, size);
+		buffers[n++] = WriteBuffer(s.data(), s.size());
 	}
 
 	/**
