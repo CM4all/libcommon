@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef STRING_PARSER_HXX
-#define STRING_PARSER_HXX
+#pragma once
 
 #include <cstddef>
 
@@ -29,5 +28,3 @@ ParsePositiveLong(const char *s, unsigned long max_value);
  */
 std::size_t
 ParseSize(const char *s);
-
-#endif

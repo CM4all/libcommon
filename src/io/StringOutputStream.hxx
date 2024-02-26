@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#ifndef STRING_OUTPUT_STREAM_HXX
-#define STRING_OUTPUT_STREAM_HXX
+#pragma once
 
 #include "OutputStream.hxx"
 #include "util/SpanCast.hxx"
@@ -26,5 +25,3 @@ public:
 		value.append(ToStringView(src));
 	}
 };
-
-#endif
