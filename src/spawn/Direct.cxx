@@ -12,7 +12,6 @@
 #include "lib/fmt/SystemError.hxx"
 #include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "io/Iovec.hxx"
 #include "io/Pipe.hxx"
 #include "io/ScopeUmask.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -23,7 +22,6 @@
 #include "system/IOPrio.hxx"
 #include "util/Exception.hxx"
 #include "util/ScopeExit.hxx"
-#include "util/SpanCast.hxx"
 
 #ifdef HAVE_LIBSECCOMP
 #include "SeccompFilter.hxx"
@@ -47,8 +45,6 @@
 #include <signal.h>
 #include <sched.h>
 #include <poll.h> // for POLLIN
-
-using std::string_view_literals::operator""sv;
 
 #ifndef PR_SET_NO_NEW_PRIVS
 #define PR_SET_NO_NEW_PRIVS 38
@@ -380,7 +376,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
 		  bool is_sys_admin)
-try {
+{
 	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
 	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
@@ -604,18 +600,4 @@ try {
 	/* TODO don't return the "classic" pid_t as soon as all
 	   callers have been fully migrated to pidfd */
 	return {std::move(pidfd), pid};
-} catch (...) {
-	if (params.stderr_fd.IsDefined()) {
-		const auto msg = GetFullMessage(std::current_exception());
-		const std::array v = {
-			MakeIovec(ToSpan(msg)),
-			MakeIovec(ToSpan("\n"sv)),
-		};
-
-		[[maybe_unused]]
-		auto nbytes = writev(params.stderr_fd.Get(),
-				     v.data(), v.size());
-	}
-
-	throw;
 }
