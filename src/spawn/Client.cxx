@@ -294,7 +294,10 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 		s.WriteT(p.exec_function);
 	}
 
-	s.WriteOptionalString(SpawnExecCommand::EXEC_PATH, p.exec_path);
+	if (p.exec_fd.IsDefined())
+		s.WriteFd(SpawnExecCommand::EXEC_FD, p.exec_fd);
+	else
+		s.WriteOptionalString(SpawnExecCommand::EXEC_PATH, p.exec_path);
 
 	for (const char *i : p.args)
 		s.WriteString(SpawnExecCommand::ARG, i);

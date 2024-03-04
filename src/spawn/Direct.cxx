@@ -342,8 +342,14 @@ try {
 	if (p.exec_function != nullptr) {
 		_exit(p.exec_function(std::move(p)));
 	} else {
-		execve(path, const_cast<char *const*>(p.args.data()),
-		       const_cast<char *const*>(p.env.data()));
+		if (p.exec_fd.IsDefined())
+			execveat(p.exec_fd.Get(), "",
+				 const_cast<char *const*>(p.args.data()),
+				 const_cast<char *const*>(p.env.data()),
+				 AT_EMPTY_PATH);
+		else
+			execve(path, const_cast<char *const*>(p.args.data()),
+			       const_cast<char *const*>(p.env.data()));
 
 		throw FmtErrno("Failed to execute '{}'", path);
 	}

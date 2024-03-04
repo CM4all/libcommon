@@ -539,6 +539,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			p.exec_path = payload.ReadString();
 			break;
 
+		case SpawnExecCommand::EXEC_FD:
+			p.exec_fd = fds.Borrow();
+			break;
+
 		case SpawnExecCommand::ARG:
 			if (p.args.size() >= 16384)
 				throw MalformedSpawnPayloadError();

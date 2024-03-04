@@ -76,6 +76,13 @@ struct PreparedChildProcess {
 	UniqueSocketDescriptor return_cgroup;
 
 	/**
+	 * A file descriptor to be executed by execveat(), for example
+	 * a static executable on the host filesystem.  If this field
+	 * is set, then #exec_path is ignored.
+	 */
+	FileDescriptor exec_fd = FileDescriptor::Undefined();
+
+	/**
 	 * The umask for the new child process.  -1 means do not change
 	 * it.
 	 */
