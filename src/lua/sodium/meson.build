@@ -2,6 +2,7 @@ lua_sodium = static_library(
   'lua_sodium',
   'Init.cxx',
   'Box.cxx',
+  'ScalarMult.cxx',
   include_directories: inc,
   dependencies: [
     lua_dep,

@@ -23,6 +23,7 @@ TEST(LuaSodium, Box)
 
 	if (luaL_dostring(L, R"(
 pk, sk = sodium.crypto_box_keypair()
+pk2 = sodium.crypto_scalarmult_base(sk)
 ciphertext = sodium.crypto_box_seal('hello world', pk)
 message = sodium.crypto_box_seal_open(ciphertext, pk, sk)
 )"))
@@ -32,4 +33,11 @@ message = sodium.crypto_box_seal_open(ciphertext, pk, sk)
 	ASSERT_TRUE(lua_isstring(L, -1));
 	ASSERT_STREQ(lua_tostring(L, -1), "hello world");
 	lua_pop(L, 1);
+
+	lua_getglobal(L, "pk");
+	lua_getglobal(L, "pk2");
+	ASSERT_TRUE(lua_isstring(L, -2));
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_STREQ(lua_tostring(L, -1), lua_tostring(L, -2));
+	lua_pop(L, 2);
 }

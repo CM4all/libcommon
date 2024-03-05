@@ -4,6 +4,7 @@
 
 #include "Init.hxx"
 #include "Box.hxx"
+#include "ScalarMult.hxx"
 
 extern "C" {
 #include <lua.h>
@@ -16,6 +17,7 @@ static constexpr struct luaL_Reg lua_sodium[] = {
 	{"crypto_box_keypair", crypto_box_keypair},
 	{"crypto_box_seal", crypto_box_seal},
 	{"crypto_box_seal_open", crypto_box_seal_open},
+	{"crypto_scalarmult_base", crypto_scalarmult_base},
 	{nullptr, nullptr}
 };
 
