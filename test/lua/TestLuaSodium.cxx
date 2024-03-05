@@ -5,6 +5,7 @@
 #include "lua/Assert.hxx"
 #include "lua/Error.hxx"
 #include "lua/State.hxx"
+#include "lua/StringView.hxx"
 #include "lua/sodium/Init.hxx"
 
 #include <gtest/gtest.h>
@@ -13,6 +14,8 @@ extern "C" {
 #include <lauxlib.h>
 #include <lualib.h>
 }
+
+using std::string_view_literals::operator""sv;
 
 TEST(LuaSodium, Box)
 {
@@ -31,13 +34,13 @@ message = sodium.crypto_box_seal_open(ciphertext, pk, sk)
 
 	lua_getglobal(L, "message");
 	ASSERT_TRUE(lua_isstring(L, -1));
-	ASSERT_STREQ(lua_tostring(L, -1), "hello world");
+	ASSERT_EQ(Lua::ToStringView(L, -1), "hello world"sv);
 	lua_pop(L, 1);
 
 	lua_getglobal(L, "pk");
 	lua_getglobal(L, "pk2");
 	ASSERT_TRUE(lua_isstring(L, -2));
 	ASSERT_TRUE(lua_isstring(L, -1));
-	ASSERT_STREQ(lua_tostring(L, -1), lua_tostring(L, -2));
+	ASSERT_EQ(Lua::ToStringView(L, -1), Lua::ToStringView(L, -2));
 	lua_pop(L, 2);
 }
