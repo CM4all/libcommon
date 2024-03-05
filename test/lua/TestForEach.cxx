@@ -90,7 +90,7 @@ TEST(ForEach, Error)
 
 	try {
 		ForEach(L, RelativeStackIndex{-1}, [L](auto, auto){
-			lua_pushstring(L, "bar");
+			lua_pushstring(L, "error");
 			lua_error(L);
 		});
 
@@ -98,7 +98,7 @@ TEST(ForEach, Error)
 	} catch (...) {
 		EXPECT_FALSE(std::exception_ptr());
 		EXPECT_TRUE(lua_isstring(L, -1));
-		EXPECT_STREQ(lua_tostring(L, -1), "bar");
+		EXPECT_STREQ(lua_tostring(L, -1), "error");
 		lua_pop(L, 1);
 	}
 
