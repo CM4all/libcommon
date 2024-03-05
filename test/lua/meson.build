@@ -12,6 +12,10 @@ if coroutines_dep.found()
   test_lua_sources += 'TestCoAwaitable.cxx'
 endif
 
+if lua_sodium_dep.found()
+  test_lua_sources += 'TestLuaSodium.cxx'
+endif
+
 test(
   'TestLua',
   executable(
@@ -22,6 +26,7 @@ test(
       gtest,
       lua_dep,
       lua_event_dep,
+      lua_sodium_dep,
     ],
   ),
 )

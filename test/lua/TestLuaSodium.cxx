@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright CM4all GmbH
+// author: Max Kellermann <mk@cm4all.com>
+
+#include "lua/Assert.hxx"
+#include "lua/Error.hxx"
+#include "lua/State.hxx"
+#include "lua/sodium/Init.hxx"
+
+#include <gtest/gtest.h>
+
+extern "C" {
+#include <lauxlib.h>
+#include <lualib.h>
+}
+
+TEST(LuaSodium, Box)
+{
+	const Lua::State main{luaL_newstate()};
+	lua_State *const L = main.get();
+	const Lua::ScopeCheckStack check_stack{L};
+	Lua::InitSodium(L);
+
+	if (luaL_dostring(L, R"(
+pk, sk = sodium.crypto_box_keypair()
+ciphertext = sodium.crypto_box_seal('hello world', pk)
+message = sodium.crypto_box_seal_open(ciphertext, pk, sk)
+)"))
+		throw Lua::PopError(L);
+
+	lua_getglobal(L, "message");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_STREQ(lua_tostring(L, -1), "hello world");
+	lua_pop(L, 1);
+}
