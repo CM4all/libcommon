@@ -104,3 +104,28 @@ TEST(ForEach, Error)
 
 	lua_pop(L, 1);
 }
+
+TEST(ForEach, AuxError)
+{
+	const State main{luaL_newstate()};
+	const auto L = main.get();
+	const ScopeCheckStack check_stack{L};
+
+	lua_newtable(L);
+	RawSet(L, RelativeStackIndex{-1}, 42, "foo");
+
+	try {
+		ForEach(L, RelativeStackIndex{-1}, [L](auto, auto){
+			luaL_error(L, "error");
+		});
+
+		FAIL();
+	} catch (...) {
+		EXPECT_FALSE(std::exception_ptr());
+		EXPECT_TRUE(lua_isstring(L, -1));
+		EXPECT_STREQ(lua_tostring(L, -1), "error");
+		lua_pop(L, 1);
+	}
+
+	lua_pop(L, 1);
+}
