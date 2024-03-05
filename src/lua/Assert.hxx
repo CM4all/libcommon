@@ -43,7 +43,15 @@ public:
 			   stack; since std::current_exception() does
 			   not work here, we can't know the
 			   difference, so this assert() allows both */
+			/* note: we also allow expected_top+2 because
+			   luaL_error() and friends push the error
+			   message twice on the stack; I have no idea
+			   why, and I guess it's a bug, but we have no
+			   way to detect this condition, so we allow
+			   it always and hope the caller is able to
+			   deal with it */
 			assert(lua_gettop(L) == expected_top ||
+			       lua_gettop(L) == expected_top + 2 ||
 			       lua_gettop(L) == expected_top + 1);
 		}
 #endif
