@@ -72,6 +72,42 @@ bad_bin2 = sodium.hex2bin("410")
 	lua_pop(L, 1);
 }
 
+TEST(LuaSodium, RandomBytes)
+{
+	const Lua::State main{luaL_newstate()};
+	lua_State *const L = main.get();
+	const Lua::ScopeCheckStack check_stack{L};
+	Lua::InitSodium(L);
+
+	if (luaL_dostring(L, R"(
+r1 = sodium.randombytes(1)
+r3 = sodium.randombytes(3)
+r8 = sodium.randombytes(8)
+r1024 = sodium.randombytes(1024)
+)"))
+		throw Lua::PopError(L);
+
+	lua_getglobal(L, "r1");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1).size(), 1);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "r3");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1).size(), 3);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "r8");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1).size(), 8);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "r1024");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1).size(), 1024);
+	lua_pop(L, 1);
+}
+
 TEST(LuaSodium, Box)
 {
 	const Lua::State main{luaL_newstate()};

@@ -4,6 +4,7 @@
 
 #include "Init.hxx"
 #include "Box.hxx"
+#include "RandomBytes.hxx"
 #include "ScalarMult.hxx"
 #include "Utils.hxx"
 
@@ -25,6 +26,7 @@ static constexpr struct luaL_Reg lua_sodium[] = {
 	{"crypto_scalarmult_base", crypto_scalarmult_base},
 	{"bin2hex", bin2hex},
 	{"hex2bin", hex2bin},
+	{"randombytes", randombytes},
 	{nullptr, nullptr}
 };
 
