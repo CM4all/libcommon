@@ -17,10 +17,10 @@
 
 using std::string_view_literals::operator""sv;
 
-static JWT::Ed25519PublicKey
+static CryptoSignPublicKey
 ParseBase64Key(const std::string_view base64)
 {
-	JWT::Ed25519PublicKey key;
+	CryptoSignPublicKey key;
 
 	size_t length;
 	if (sodium_base642bin((unsigned char *)key.data(), key.size(),
@@ -35,11 +35,11 @@ ParseBase64Key(const std::string_view base64)
 	return key;
 }
 
-static JWT::Ed25519SecretKey
+static CryptoSignSecretKey
 ParseBase64Key(const std::string_view d_base64,
 	       const std::string_view x_base64)
 {
-	JWT::Ed25519SecretKey key;
+	CryptoSignSecretKey key;
 
 	size_t d_length;
 	if (sodium_base642bin((unsigned char *)key.data(), key.size(),

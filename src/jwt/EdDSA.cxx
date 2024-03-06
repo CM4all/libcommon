@@ -17,7 +17,7 @@ namespace JWT {
 using Ed25519Signature = std::array<std::byte, crypto_sign_BYTES>;
 
 static AllocatedString
-SignEdDSA(const Ed25519SecretKey &key, std::span<const std::byte> input) noexcept
+SignEdDSA(const CryptoSignSecretKeyView key, std::span<const std::byte> input) noexcept
 {
 	Ed25519Signature signature;
 	crypto_sign_detached((unsigned char *)signature.data(), nullptr,
@@ -28,7 +28,7 @@ SignEdDSA(const Ed25519SecretKey &key, std::span<const std::byte> input) noexcep
 }
 
 AllocatedString
-SignEdDSA(const Ed25519SecretKey &key, std::string_view header_b64,
+SignEdDSA(const CryptoSignSecretKeyView key, std::string_view header_b64,
 	  std::string_view payload_b64) noexcept
 {
 	/* unfortunately, we need to allocate memory here, because
@@ -44,7 +44,7 @@ SignEdDSA(const Ed25519SecretKey &key, std::string_view header_b64,
 }
 
 bool
-VerifyEdDSA(const Ed25519PublicKey &key,
+VerifyEdDSA(const CryptoSignPublicKeyView key,
 	    std::string_view header_dot_payload_b64,
 	    std::string_view signature_b64) noexcept
 {
@@ -79,7 +79,7 @@ VerifyEdDSA(const Ed25519PublicKey &key,
 }
 
 bool
-VerifyEdDSA(const Ed25519PublicKey &key,
+VerifyEdDSA(const CryptoSignPublicKeyView key,
 	    std::string_view header_dot_payload_dot_signature_b64) noexcept
 {
 	const auto [header_dot_payload_b64, signature_b64] =
@@ -89,7 +89,7 @@ VerifyEdDSA(const Ed25519PublicKey &key,
 }
 
 AllocatedArray<std::byte>
-VerifyDecodeEdDSA(const Ed25519PublicKey &key,
+VerifyDecodeEdDSA(const CryptoSignPublicKeyView key,
 		  std::string_view header_dot_payload_b64,
 		  std::string_view signature_b64) noexcept
 {
@@ -101,7 +101,7 @@ VerifyDecodeEdDSA(const Ed25519PublicKey &key,
 }
 
 AllocatedArray<std::byte>
-VerifyDecodeEdDSA(const Ed25519PublicKey &key,
+VerifyDecodeEdDSA(const CryptoSignPublicKeyView key,
 		  std::string_view header_dot_payload_dot_signature_b64) noexcept
 {
 	const auto [header_dot_payload_b64, signature_b64] =
