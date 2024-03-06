@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Box.hxx"
+#include "lua/CheckArg.hxx"
 
 extern "C" {
 #include <lua.h>
@@ -12,17 +13,8 @@ extern "C" {
 #include <sodium/crypto_box.h>
 
 #include <memory>
-#include <string_view>
 
 namespace Lua {
-
-static std::string_view
-CheckString(lua_State *L, int arg)
-{
-	std::size_t size;
-	const char *data = luaL_checklstring(L, arg, &size);
-	return {data, size};
-}
 
 int
 crypto_box_keypair(lua_State *L)
@@ -47,9 +39,9 @@ crypto_box_seal(lua_State *L)
 	if (lua_gettop(L) > 2)
 		return luaL_error(L, "Too many parameters");
 
-	const auto m = CheckString(L, 1);
+	const auto m = CheckStringView(L, 1);
 
-	const auto pk = CheckString(L, 2);
+	const auto pk = CheckStringView(L, 2);
 	luaL_argcheck(L, pk.size() == crypto_box_PUBLICKEYBYTES, 2,
 		      "Malformed public key");
 
@@ -71,15 +63,15 @@ crypto_box_seal_open(lua_State *L)
 	if (lua_gettop(L) > 3)
 		return luaL_error(L, "Too many parameters");
 
-	const auto c = CheckString(L, 1);
+	const auto c = CheckStringView(L, 1);
 	luaL_argcheck(L, c.size() >= crypto_box_SEALBYTES, 1,
 		      "Malformed ciphertext");
 
-	const auto pk = CheckString(L, 2);
+	const auto pk = CheckStringView(L, 2);
 	luaL_argcheck(L, pk.size() == crypto_box_PUBLICKEYBYTES, 2,
 		      "Malformed public key");
 
-	const auto sk = CheckString(L, 3);
+	const auto sk = CheckStringView(L, 3);
 	luaL_argcheck(L, sk.size() == crypto_box_SECRETKEYBYTES, 3,
 		      "Malformed secret key");
 

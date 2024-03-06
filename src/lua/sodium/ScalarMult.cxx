@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "ScalarMult.hxx"
+#include "lua/CheckArg.hxx"
 
 extern "C" {
 #include <lua.h>
@@ -11,17 +12,7 @@ extern "C" {
 
 #include <sodium/crypto_scalarmult.h>
 
-#include <string_view>
-
 namespace Lua {
-
-static std::string_view
-CheckString(lua_State *L, int arg)
-{
-	std::size_t size;
-	const char *data = luaL_checklstring(L, arg, &size);
-	return {data, size};
-}
 
 int
 crypto_scalarmult_base(lua_State *L)
@@ -29,7 +20,7 @@ crypto_scalarmult_base(lua_State *L)
 	if (lua_gettop(L) > 1)
 		return luaL_error(L, "Too many parameters");
 
-	const auto sk = CheckString(L, 1);
+	const auto sk = CheckStringView(L, 1);
 	luaL_argcheck(L, sk.size() == crypto_scalarmult_SCALARBYTES, 1,
 		      "Malformed secret key");
 
