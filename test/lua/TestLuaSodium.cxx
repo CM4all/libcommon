@@ -6,6 +6,7 @@
 #include "lua/Error.hxx"
 #include "lua/State.hxx"
 #include "lua/StringView.hxx"
+#include "lua/Util.hxx"
 #include "lua/sodium/Init.hxx"
 
 #include <gtest/gtest.h>
@@ -16,6 +17,60 @@ extern "C" {
 }
 
 using std::string_view_literals::operator""sv;
+
+TEST(LuaSodium, Hex)
+{
+	const Lua::State main{luaL_newstate()};
+	lua_State *const L = main.get();
+	const Lua::ScopeCheckStack check_stack{L};
+	Lua::InitSodium(L);
+
+	Lua::SetGlobal(L, "bin", "AB\0\xff\xfe"sv);
+
+	if (luaL_dostring(L, R"(
+hex = sodium.bin2hex(bin)
+bin2 = sodium.hex2bin(hex)
+empty_hex = sodium.bin2hex("")
+bin3 = sodium.hex2bin("007f80ff")
+empty_bin = sodium.hex2bin("")
+bad_bin1 = sodium.hex2bin("xx")
+bad_bin2 = sodium.hex2bin("410")
+)"))
+		throw Lua::PopError(L);
+
+	lua_getglobal(L, "hex");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1), "414200fffe"sv);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "bin2");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1), "AB\0\xff\xfe"sv);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "empty_hex");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1), ""sv);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "bin3");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1), "\x00\x7f\x80\xff"sv);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "empty_bin");
+	ASSERT_TRUE(lua_isstring(L, -1));
+	ASSERT_EQ(Lua::ToStringView(L, -1), ""sv);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "bad_bin1");
+	ASSERT_TRUE(lua_isnil(L, -1));
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "bad_bin2");
+	ASSERT_TRUE(lua_isnil(L, -1));
+	lua_pop(L, 1);
+}
 
 TEST(LuaSodium, Box)
 {
