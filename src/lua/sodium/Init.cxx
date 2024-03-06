@@ -11,6 +11,10 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include <sodium/core.h>
+
+#include <stdexcept>
+
 namespace Lua {
 
 static constexpr struct luaL_Reg lua_sodium[] = {
@@ -24,6 +28,9 @@ static constexpr struct luaL_Reg lua_sodium[] = {
 void
 InitSodium(lua_State *L)
 {
+	if (sodium_init() == -1)
+		throw std::runtime_error{"sodium_init() failed"};
+
 	luaL_newlib(L, lua_sodium);
 	lua_setglobal(L, "sodium");
 }
