@@ -8,6 +8,7 @@
 #include "lua/Resume.hxx"
 #include "lua/event/Init.hxx"
 #include "lua/pg/Init.hxx"
+#include "lua/sodium/Init.hxx"
 #include "event/Loop.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/ShutdownListener.hxx"
@@ -115,6 +116,7 @@ try {
 
 	InitEvent(L, event_loop);
 	InitPg(L, event_loop);
+	InitSodium(L);
 
 	Thread thread(L, event_loop, path);
 

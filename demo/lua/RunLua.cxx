@@ -5,6 +5,7 @@
 #include "lua/RunFile.hxx"
 #include "lua/json/ToJson.hxx"
 #include "lua/mariadb/Init.hxx"
+#include "lua/sodium/Init.hxx"
 #include "util/PrintException.hxx"
 #include "util/ScopeExit.hxx"
 
@@ -28,6 +29,7 @@ try {
 
 	luaL_openlibs(L);
 	Lua::InitToJson(L);
+	Lua::InitSodium(L);
 	Lua::MariaDB::Init(L);
 
 	Lua::RunFile(L, path);
