@@ -78,12 +78,13 @@ struct Datagram {
 		return timestamp != TimePoint();
 	}
 
-	constexpr void SetTimestamp(TimePoint t) noexcept {
+	constexpr auto &SetTimestamp(TimePoint t) noexcept {
 		timestamp = t;
+		return *this;
 	}
 
-	constexpr void SetTimestamp(std::chrono::system_clock::time_point t) noexcept {
-		SetTimestamp(FromSystem(t));
+	constexpr auto &SetTimestamp(std::chrono::system_clock::time_point t) noexcept {
+		return SetTimestamp(FromSystem(t));
 	}
 
 	constexpr bool HasHttpMethod() const noexcept {
