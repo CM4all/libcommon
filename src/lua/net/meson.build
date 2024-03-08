@@ -1,6 +1,7 @@
 lua_net = static_library(
   'lua_net',
   'SocketAddress.cxx',
+  'Resolver.cxx',
   include_directories: inc,
   dependencies: [
     lua_dep,
