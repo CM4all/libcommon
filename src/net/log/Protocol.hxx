@@ -140,6 +140,11 @@ enum class Attribute : uint8_t {
 	 * record type.
 	 */
 	JSON = 16,
+
+	/**
+	 * An identifier for the website used for analytics.
+	 */
+	ANALYTICS_ID = 17,
 };
 
 /**

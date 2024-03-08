@@ -173,6 +173,10 @@ log_server_apply_attributes(Deserializer d)
 		case Attribute::JSON:
 			datagram.json = d.ReadString();
 			break;
+
+		case Attribute::ANALYTICS_ID:
+			datagram.analytics_id = d.ReadString();
+			break;
 		}
 	}
 

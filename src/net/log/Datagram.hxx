@@ -26,6 +26,8 @@ struct Datagram {
 	const char *http_uri = nullptr, *http_referer = nullptr;
 	const char *user_agent = nullptr;
 
+	const char *analytics_id = nullptr;
+
 	std::string_view message{};
 
 	std::string_view json{};

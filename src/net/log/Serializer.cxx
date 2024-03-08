@@ -151,6 +151,8 @@ Serialize(void *buffer, std::size_t size, const Datagram &d)
 		w.WriteT(d.type);
 	}
 
+	w.WriteOptionalString(Attribute::ANALYTICS_ID, d.analytics_id);
+
 	Crc crc;
 	crc.Update({(const std::byte *)buffer + 4, w.size() - 4});
 
