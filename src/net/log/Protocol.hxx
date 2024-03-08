@@ -10,8 +10,7 @@
 
 #include <cstdint>
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 /*
 
@@ -193,4 +192,4 @@ enum class Type : uint8_t {
 	HISTORY = 6,
 };
 
-}}
+} // namespace Net::Log

@@ -6,8 +6,7 @@
 
 class SocketDescriptor;
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 struct Datagram;
 
@@ -19,4 +18,4 @@ struct Datagram;
 void
 Send(SocketDescriptor s, const Datagram &d);
 
-}}
+} // namespace Net::Log

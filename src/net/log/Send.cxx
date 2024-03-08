@@ -16,6 +16,8 @@
 #include <string.h>
 #include <sys/socket.h>
 
+namespace Net::Log {
+
 static void
 PushString(auto &v, const char *s) noexcept
 {
@@ -28,9 +30,6 @@ PushString(auto &v, std::string_view s) noexcept
 	v.push_back(MakeIovec(AsBytes(s)));
 	v.push_back(MakeIovecStatic<char, 0>());
 }
-
-namespace Net {
-namespace Log {
 
 template<Attribute value>
 static auto
@@ -176,4 +175,4 @@ Send(SocketDescriptor s, const Datagram &d)
 	SendMessage(s, std::span{v}, MSG_DONTWAIT);
 }
 
-}}
+} // namespace Net::Log

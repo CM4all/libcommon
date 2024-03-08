@@ -13,8 +13,7 @@
 #include <assert.h>
 #include <string.h>
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 class Deserializer {
 	const std::byte *p;
@@ -210,4 +209,4 @@ ParseDatagram(std::span<const std::byte> d)
 	return log_server_apply_attributes(d);
 }
 
-}} // namespace Net::Log
+} // namespace Net::Log

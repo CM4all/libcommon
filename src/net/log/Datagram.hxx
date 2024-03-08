@@ -14,8 +14,7 @@
 enum class HttpMethod : uint_least8_t;
 enum class HttpStatus : uint_least16_t;
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 struct Datagram {
 	TimePoint timestamp = TimePoint();
@@ -111,4 +110,4 @@ struct Datagram {
 	}
 };
 
-}}
+} // namespace Net::Log

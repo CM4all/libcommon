@@ -5,11 +5,9 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 
-#include <stdint.h>
-
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 using Duration = std::chrono::duration<uint64_t, std::micro>;
 using TimePoint = std::chrono::time_point<std::chrono::system_clock, Duration>;
@@ -28,4 +26,4 @@ ToSystem(TimePoint t) noexcept
 	return system_clock::time_point(duration_cast<system_clock::duration>(t.time_since_epoch()));
 }
 
-}}
+} // namespace Net::Log

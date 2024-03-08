@@ -7,8 +7,7 @@
 #include <cstddef> // for std::byte
 #include <span>
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 struct Datagram;
 
@@ -20,4 +19,4 @@ class ProtocolError {};
 Datagram
 ParseDatagram(std::span<const std::byte> d);
 
-}}
+} // namespace Net::Log

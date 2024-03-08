@@ -6,12 +6,11 @@
 
 #include "util/CRC32.hxx"
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 /**
  * The CRC algorithm.
  */
 using Crc = CRC32State;
 
-}}
+} // namespace Net::Log

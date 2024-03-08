@@ -11,8 +11,7 @@
 #include <sys/socket.h>
 #include <string.h>
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 namespace {
 
@@ -160,4 +159,4 @@ Serialize(void *buffer, std::size_t size, const Datagram &d)
 	return w.size();
 }
 
-}}
+} // namespace Net::Log

@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 enum class Type : uint8_t;
 
@@ -21,4 +20,4 @@ ToString(Type type) noexcept;
 Type
 ParseType(const char *s);
 
-}}
+} // namespace Net::Log

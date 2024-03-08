@@ -9,8 +9,7 @@
 #include "event/PipeLineReader.hxx"
 #include "util/TokenBucket.hxx"
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 /**
  * Reads lines from a pipe and sends them to a Pond server.  This can
@@ -70,4 +69,4 @@ private:
 	void OnPipeEnd() noexcept override;
 };
 
-}}
+} // namespace Net::Log

@@ -8,8 +8,7 @@
 
 #include <stdexcept>
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 const char *
 ToString(Type type) noexcept
@@ -60,4 +59,4 @@ ParseType(const char *s)
 	throw std::invalid_argument("Invalid log record type");
 }
 
-}}
+} // namespace Net::Log

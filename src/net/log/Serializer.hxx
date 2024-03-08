@@ -6,8 +6,7 @@
 
 #include <cstddef>
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 struct Datagram;
 
@@ -25,4 +24,4 @@ class BufferTooSmall {};
 std::size_t
 Serialize(void *buffer, std::size_t size, const Datagram &d);
 
-}}
+} // namespace Net::Log

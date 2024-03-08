@@ -7,8 +7,7 @@
 #include "net/log/Send.hxx"
 #include "time/Cast.hxx"
 
-namespace Net {
-namespace Log {
+namespace Net::Log {
 
 bool
 PipeAdapter::OnPipeLine(std::span<char> line) noexcept
@@ -52,4 +51,4 @@ PipeAdapter::OnPipeEnd() noexcept
 	   destructed by whoever owns it */
 }
 
-}}
+} // namespace Net::Log
