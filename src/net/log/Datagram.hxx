@@ -45,20 +45,20 @@ struct Datagram {
 	bool valid_length = false, valid_traffic = false;
 	bool valid_duration = false;
 
-	Datagram() = default;
+	constexpr Datagram() = default;
 
 	explicit constexpr Datagram(Type _type) noexcept
 		:type(_type) {}
 
-	Datagram(TimePoint _timestamp,
-		 HttpMethod _method, const char *_uri,
-		 const char *_remote_host,
-		 const char *_host, const char *_site,
-		 const char *_referer, const char *_user_agent,
-		 HttpStatus _status, int64_t _length,
-		 uint_least64_t _traffic_received,
-		 uint_least64_t _traffic_sent,
-		 Duration _duration) noexcept
+	constexpr Datagram(TimePoint _timestamp,
+			   HttpMethod _method, const char *_uri,
+			   const char *_remote_host,
+			   const char *_host, const char *_site,
+			   const char *_referer, const char *_user_agent,
+			   HttpStatus _status, int64_t _length,
+			   uint_least64_t _traffic_received,
+			   uint_least64_t _traffic_sent,
+			   Duration _duration) noexcept
 		:timestamp(_timestamp),
 		 remote_host(_remote_host), host(_host), site(_site),
 		 http_uri(_uri), http_referer(_referer), user_agent(_user_agent),
@@ -74,27 +74,27 @@ struct Datagram {
 	constexpr Datagram(Type _type, std::string_view _message) noexcept
 		:message(_message), type(_type) {}
 
-	bool HasTimestamp() const noexcept {
+	constexpr bool HasTimestamp() const noexcept {
 		return timestamp != TimePoint();
 	}
 
-	void SetTimestamp(TimePoint t) noexcept {
+	constexpr void SetTimestamp(TimePoint t) noexcept {
 		timestamp = t;
 	}
 
-	void SetTimestamp(std::chrono::system_clock::time_point t) noexcept {
+	constexpr void SetTimestamp(std::chrono::system_clock::time_point t) noexcept {
 		SetTimestamp(FromSystem(t));
 	}
 
-	bool HasHttpMethod() const noexcept {
+	constexpr bool HasHttpMethod() const noexcept {
 		return http_method != HttpMethod{};
 	}
 
-	bool HasHttpStatus() const noexcept {
+	constexpr bool HasHttpStatus() const noexcept {
 		return http_status != HttpStatus{};
 	}
 
-	bool GuessIsHttpAccess() const noexcept {
+	constexpr bool GuessIsHttpAccess() const noexcept {
 		return http_uri != nullptr && HasHttpMethod() &&
 			/* the following matches cancelled HTTP
 			   requests (that have no HTTP status), but
@@ -104,7 +104,7 @@ struct Datagram {
 			(HasHttpStatus() || valid_traffic);
 	}
 
-	bool IsHttpAccess() const noexcept {
+	constexpr bool IsHttpAccess() const noexcept {
 		return type == Type::HTTP_ACCESS ||
 			(type == Type::UNSPECIFIED && GuessIsHttpAccess());
 	}
