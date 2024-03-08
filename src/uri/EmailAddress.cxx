@@ -14,9 +14,13 @@
 static bool
 VerifyQuotedString(std::string_view s) noexcept
 {
-	/* this implementation is not 100% accurate; it is more
-	   relaxed than the RFC */
-	return s.size() > 2 && s.front() == '"' && s.back() == '"';
+	return s.size() > 2 && s.front() == '"' && s.back() == '"' &&
+		CheckChars(s.substr(1, s.size() - 2), [](char ch){
+			/* this allows the backslash unconditionally
+			   and doesn't verify the "quoted-pair"
+			   syntax */
+			return ch >= 33 && ch <= 126 && ch != '"';
+		});
 }
 
 static constexpr bool
