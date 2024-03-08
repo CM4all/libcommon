@@ -16,7 +16,7 @@ VerifyQuotedString(std::string_view s) noexcept
 {
 	/* this implementation is not 100% accurate; it is more
 	   relaxed than the RFC */
-	return s.size() > 2 && s.front() != '"' && s.back() != '"';
+	return s.size() > 2 && s.front() == '"' && s.back() == '"';
 }
 
 static constexpr bool
