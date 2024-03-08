@@ -38,7 +38,8 @@ public:
 	PipeAdapter(EventLoop &event_loop, UniqueFileDescriptor _pipe,
 		    SocketDescriptor _socket, Net::Log::Type type) noexcept
 		:line_reader(event_loop, std::move(_pipe), *this),
-		 socket(_socket), datagram(type) {}
+		 socket(_socket),
+		 datagram{.type=type} {}
 
 	EventLoop &GetEventLoop() const noexcept {
 		return line_reader.GetEventLoop();

@@ -45,41 +45,32 @@ struct Datagram {
 	bool valid_length = false, valid_traffic = false;
 	bool valid_duration = false;
 
-	constexpr Datagram() = default;
-
-	explicit constexpr Datagram(Type _type) noexcept
-		:type(_type) {}
-
-	constexpr Datagram(TimePoint _timestamp,
-			   HttpMethod _method, const char *_uri,
-			   const char *_remote_host,
-			   const char *_host, const char *_site,
-			   const char *_referer, const char *_user_agent,
-			   HttpStatus _status, int64_t _length,
-			   uint_least64_t _traffic_received,
-			   uint_least64_t _traffic_sent,
-			   Duration _duration) noexcept
-		:timestamp(_timestamp),
-		 remote_host(_remote_host), host(_host), site(_site),
-		 http_uri(_uri), http_referer(_referer), user_agent(_user_agent),
-		 length(_length),
-		 traffic_received(_traffic_received), traffic_sent(_traffic_sent),
-		 duration(_duration),
-		 http_method(_method),
-		 http_status(_status),
-		 type(Type::HTTP_ACCESS),
-		 valid_length(_length >= 0), valid_traffic(true),
-		 valid_duration(true) {}
-
-	constexpr Datagram(Type _type, std::string_view _message) noexcept
-		:message(_message), type(_type) {}
-
 	constexpr bool HasTimestamp() const noexcept {
 		return timestamp != TimePoint();
 	}
 
 	constexpr auto &SetTimestamp(TimePoint t) noexcept {
 		timestamp = t;
+		return *this;
+	}
+
+	constexpr auto &SetLength(uint_least64_t _length) noexcept {
+		length = _length;
+		valid_length = true;
+		return *this;
+	}
+
+	constexpr auto &SetTraffic(uint_least64_t _received,
+				   uint_least64_t _sent) noexcept {
+		traffic_received = _received;
+		traffic_sent = _sent;
+		valid_traffic = true;
+		return *this;
+	}
+
+	constexpr auto &SetDuration(Duration _duration) noexcept {
+		duration = _duration;
+		valid_duration = true;
 		return *this;
 	}
 
