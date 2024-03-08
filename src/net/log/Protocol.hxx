@@ -8,7 +8,7 @@
  * Definitions for the beng-proxy logging protocol.
  */
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace Net {
 namespace Log {
@@ -35,6 +35,11 @@ namespace Log {
   itself).
 
  */
+
+/**
+ * The default port when using TCP.
+ */
+static constexpr uint_least16_t DEFAULT_PORT = 5479;
 
 /**
  * Protocol version 2 magic number.  Changes:
