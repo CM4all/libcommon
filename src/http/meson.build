@@ -12,10 +12,10 @@ http = static_library(
   include_directories: inc,
   dependencies: [
     util_dep,
+    time_dep,
   ],
 )
 
 http_dep = declare_dependency(
   link_with: http,
-  dependencies: [util_dep, time_dep],
 )
