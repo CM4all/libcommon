@@ -275,7 +275,7 @@ Params::Apply(lua_State *L, int key_idx, int value_idx)
 {
 	const ScopeCheckStack check_stack{L};
 
-	if (!lua_isstring(L, key_idx))
+	if (lua_type(L, key_idx) != LUA_TSTRING)
 		throw ArgError{"Bad key type"};
 
 	const char *key = lua_tostring(L, key_idx);
