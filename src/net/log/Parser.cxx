@@ -207,12 +207,6 @@ ParseDatagram(std::span<const std::byte> d)
 		return log_server_apply_attributes(d);
 	}
 
-	/* allow both little-endian and big-endian magic in the V1
-	   protocol due to a client bug which always used host byte
-	   order for the magic */
-	if (*magic != ToLE32(MAGIC_V1) && *magic != ToBE32(MAGIC_V1))
-		throw ProtocolError();
-
 	return log_server_apply_attributes(d);
 }
 

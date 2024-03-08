@@ -19,7 +19,7 @@ namespace Log {
   integers are in network byte order (big-endian).
 
   The datagram payload starts with a "magic" 32 bit number which
-  identifies this datagram (#MAGIC_V2).
+  identifies this datagram.
 
   After the magic, there are a variable number of attributes.  The
   first byte identifies the attribute according to enum Attribute,
@@ -35,11 +35,6 @@ namespace Log {
   itself).
 
  */
-
-/**
- * Protocol version 1 magic number.
- */
-static constexpr uint32_t MAGIC_V1 = 0x63046102;
 
 /**
  * Protocol version 2 magic number.  Changes:
