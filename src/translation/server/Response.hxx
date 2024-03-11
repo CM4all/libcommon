@@ -239,6 +239,11 @@ public:
 	}
 
 	template<typename... Types>
+	auto &AnalyticsId(Types... value) noexcept {
+		return StringPacket(TranslationCommand::ANALYTICS_ID, value...);
+	}
+
+	template<typename... Types>
 	auto &StatsTag(Types... value) noexcept {
 		return StringPacket(TranslationCommand::STATS_TAG, value...);
 	}

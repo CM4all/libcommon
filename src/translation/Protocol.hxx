@@ -1249,6 +1249,11 @@ enum class TranslationCommand : uint16_t {
 	 * socket.
 	 */
 	MOUNT_LISTEN_STREAM = 257,
+
+	/**
+	 * @see Net::Log::Attribute::ANALYTICS_ID
+	 */
+	ANALYTICS_ID = 258,
 };
 
 struct TranslationHeader {

@@ -64,6 +64,8 @@ struct TranslateResponse {
 
 	const char *token;
 
+	const char *analytics_id;
+
 #if TRANSLATION_ENABLE_LOGIN
 	/**
 	 * @see #TranslationCommand::NO_PASSWORD

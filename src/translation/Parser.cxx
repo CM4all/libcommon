@@ -4236,6 +4236,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::ANALYTICS_ID:
+		if (!IsValidString(string_payload))
+			throw std::runtime_error("malformed ANALYTICS_ID packet");
+		response.analytics_id = string_payload.data();
+		return;
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
