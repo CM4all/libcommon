@@ -163,6 +163,11 @@ Send(SocketDescriptor s, const Datagram &d)
 		v.push_back(MakeIovecT(type));
 	}
 
+	if (d.analytics_id != nullptr) {
+		v.push_back(MakeIovecAttribute<Attribute::ANALYTICS_ID>());
+		PushString(v, d.analytics_id);
+	}
+
 	Crc crc;
 
 	const auto begin = std::next(v.begin()), end = v.end();
