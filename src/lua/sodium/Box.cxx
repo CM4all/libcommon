@@ -4,13 +4,13 @@
 
 #include "Box.hxx"
 #include "lua/CheckArg.hxx"
+#include "lib/sodium/Box.hxx"
+#include "util/SpanCast.hxx"
 
 extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
 }
-
-#include <sodium/crypto_box.h>
 
 #include <memory>
 
@@ -22,14 +22,12 @@ crypto_box_keypair(lua_State *L)
 	if (lua_gettop(L) > 0)
 		return luaL_error(L, "Too many parameters");
 
-	unsigned char pk[crypto_box_PUBLICKEYBYTES];
-	unsigned char sk[crypto_box_SECRETKEYBYTES];
+	CryptoBoxPublicKey pk;
+	CryptoBoxSecretKey sk;
 	::crypto_box_keypair(pk, sk);
 
-	lua_pushlstring(L, reinterpret_cast<const char *>(pk),
-			crypto_box_PUBLICKEYBYTES);
-	lua_pushlstring(L, reinterpret_cast<const char *>(sk),
-			crypto_box_SECRETKEYBYTES);
+	lua_pushlstring(L, reinterpret_cast<const char *>(pk.data()), pk.size());
+	lua_pushlstring(L, reinterpret_cast<const char *>(sk.data()), sk.size());
 	return 2;
 }
 
@@ -47,11 +45,9 @@ crypto_box_seal(lua_State *L)
 
 	std::unique_ptr<char[]> c(new char[m.size() + crypto_box_SEALBYTES]);
 
-	if (::crypto_box_seal(reinterpret_cast<unsigned char *>(c.get()),
-			      reinterpret_cast<const unsigned char *>(m.data()),
-			      m.size(),
-			      reinterpret_cast<const unsigned char *>(pk.data()))  != 0)
-		return 0;
+	::crypto_box_seal(reinterpret_cast<std::byte *>(c.get()),
+			  AsBytes(m),
+			  AsBytes(pk).first<crypto_box_PUBLICKEYBYTES>());
 
 	lua_pushlstring(L, c.get(), m.size() + crypto_box_SEALBYTES);
 	return 1;
@@ -77,11 +73,10 @@ crypto_box_seal_open(lua_State *L)
 
 	std::unique_ptr<char[]> m(new char[c.size() - crypto_box_SEALBYTES]);
 
-	if (::crypto_box_seal_open(reinterpret_cast<unsigned char *>(m.get()),
-				   reinterpret_cast<const unsigned char *>(c.data()),
-				   c.size(),
-				   reinterpret_cast<const unsigned char *>(pk.data()),
-				   reinterpret_cast<const unsigned char *>(sk.data())) != 0)
+	if (::crypto_box_seal_open(reinterpret_cast<std::byte *>(m.get()),
+				   AsBytes(c),
+				   AsBytes(pk).first<crypto_box_PUBLICKEYBYTES>(),
+				   AsBytes(sk).first<crypto_box_SECRETKEYBYTES>()) != 0)
 		return 0;
 
 	lua_pushlstring(L, m.get(), c.size() - crypto_box_SEALBYTES);
