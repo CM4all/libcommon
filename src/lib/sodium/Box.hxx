@@ -11,7 +11,7 @@
 static inline void
 crypto_box_seal(std::byte *c,
 		std::span<const std::byte> m,
-		CryptoBoxPublicKeyView pk)
+		CryptoBoxPublicKeyView pk) noexcept
 {
 	crypto_box_seal(reinterpret_cast<unsigned char *>(c),
 			reinterpret_cast<const unsigned char *>(m.data()),
