@@ -65,7 +65,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	if (size >= max_size)
 		throw FmtRuntimeError("Netstring is too large: {}", size);
 
-	/* allocate only extra byte for the trailing comma */
+	/* allocate one extra byte for the trailing comma */
 	value.ResizeDiscard(size + 1);
 	state = State::VALUE;
 	value_position = 0;
