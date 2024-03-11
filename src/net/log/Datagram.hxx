@@ -21,12 +21,12 @@ struct Datagram {
 
 	const char *remote_host = nullptr, *host = nullptr, *site = nullptr;
 
+	const char *analytics_id = nullptr;
+
 	const char *forwarded_to = nullptr;
 
 	const char *http_uri = nullptr, *http_referer = nullptr;
 	const char *user_agent = nullptr;
-
-	const char *analytics_id = nullptr;
 
 	std::string_view message{};
 
