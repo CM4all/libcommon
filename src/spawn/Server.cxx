@@ -567,11 +567,11 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::STDIN:
-			p.SetStdin(fds.Get().Steal());
+			p.stdin_fd = fds.Borrow();
 			break;
 
 		case SpawnExecCommand::STDOUT:
-			p.SetStdout(fds.Get().Steal());
+			p.stdout_fd = fds.Borrow();
 			break;
 
 		case SpawnExecCommand::STDOUT_IS_STDIN:
@@ -579,7 +579,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::STDERR:
-			p.SetStderr(fds.Get().Steal());
+			p.stderr_fd = fds.Borrow();
 			break;
 
 		case SpawnExecCommand::STDERR_IS_STDIN:
@@ -603,7 +603,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::CONTROL:
-			p.SetControl(fds.Get());
+			p.control_fd = fds.Borrow();
 			break;
 
 		case SpawnExecCommand::TTY:

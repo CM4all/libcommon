@@ -19,6 +19,7 @@ struct ResourceLimits;
 struct PreparedChildProcess;
 class MatchData;
 class UniqueFileDescriptor;
+class FdHolder;
 
 /**
  * Options for launching a child process.
@@ -137,8 +138,11 @@ struct ChildOptions {
 
 	/**
 	 * Throws error.
+	 *
+	 * @param close_fds a list of file descriptors that shall be
+	 * closed after #dest has been destructed
 	 */
-	void CopyTo(PreparedChildProcess &dest) const;
+	void CopyTo(PreparedChildProcess &dest, FdHolder &close_fds) const;
 };
 
 #endif

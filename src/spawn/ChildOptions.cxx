@@ -7,6 +7,7 @@
 #include "Prepared.hxx"
 #include "AllocatorPtr.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "io/FdHolder.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
@@ -157,7 +158,7 @@ ChildOptions::OpenStderrPath() const
 }
 
 void
-ChildOptions::CopyTo(PreparedChildProcess &dest) const
+ChildOptions::CopyTo(PreparedChildProcess &dest, FdHolder &close_fds) const
 {
 	dest.umask = umask;
 
@@ -169,12 +170,12 @@ ChildOptions::CopyTo(PreparedChildProcess &dest) const
 		/* open the file in the child process after jailing */
 		dest.stderr_path = stderr_path;
 	} else if (stderr_path != nullptr) {
-		dest.SetStderr(OpenStderrPath());
+		dest.stderr_fd = close_fds.Insert(OpenStderrPath());
 	} else if (stderr_null) {
 		const char *path = "/dev/null";
-		int fd = open(path, O_WRONLY|O_CLOEXEC|O_NOCTTY);
-		if (fd >= 0)
-			dest.SetStderr(fd);
+		UniqueFileDescriptor fd;
+		if (fd.Open(path, O_WRONLY))
+			dest.stderr_fd = close_fds.Insert(std::move(fd));
 	}
 
 	for (const char *e : env)

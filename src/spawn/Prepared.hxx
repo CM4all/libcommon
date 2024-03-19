@@ -54,7 +54,7 @@ struct PreparedChildProcess {
 	FileDescriptor stdin_fd = FileDescriptor::Undefined();
 	FileDescriptor stdout_fd = FileDescriptor::Undefined();
 	FileDescriptor stderr_fd = FileDescriptor::Undefined();
-	UniqueFileDescriptor control_fd;
+	FileDescriptor control_fd = FileDescriptor::Undefined();
 
 	/**
 	 * If defined, then this is a socket where the child process
@@ -191,22 +191,6 @@ struct PreparedChildProcess {
 	void SetEnv(std::string_view name, std::string_view value) noexcept;
 
 	const char *GetEnv(std::string_view name) const noexcept;
-
-	void SetStdin(int fd) noexcept;
-	void SetStdout(int fd) noexcept;
-	void SetStderr(int fd) noexcept;
-
-	void SetStdin(UniqueFileDescriptor fd) noexcept;
-	void SetStdout(UniqueFileDescriptor fd) noexcept;
-	void SetStderr(UniqueFileDescriptor fd) noexcept;
-	void SetControl(UniqueFileDescriptor fd) noexcept {
-		control_fd = std::move(fd);
-	}
-
-	void SetStdin(UniqueSocketDescriptor fd) noexcept;
-	void SetStdout(UniqueSocketDescriptor fd) noexcept;
-	void SetStderr(UniqueSocketDescriptor fd) noexcept;
-	void SetControl(UniqueSocketDescriptor fd) noexcept;
 
 	/**
 	 * Finish this object and return the executable path.

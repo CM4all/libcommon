@@ -4,7 +4,6 @@
 
 #include "Prepared.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
 #include "util/StringCompare.hxx"
 
 #include <string.h>
@@ -14,20 +13,7 @@ PreparedChildProcess::PreparedChildProcess() noexcept
 {
 }
 
-PreparedChildProcess::~PreparedChildProcess() noexcept
-{
-	/* note: the lower boundary here is 3 because we should never
-	   close 0, 1 or 2; these are the standard file descriptors
-	   and the caller still needs them */
-
-	if (stderr_fd.Get() >= 3 &&
-	    stderr_fd != stdout_fd && stderr_fd != stdin_fd)
-		stderr_fd.Close();
-	if (stdout_fd.Get() >= 3 && stdout_fd != stdin_fd)
-		stdout_fd.Close();
-	if (stdin_fd.Get() >= 3)
-		stdin_fd.Close();
-}
+PreparedChildProcess::~PreparedChildProcess() noexcept = default;
 
 void
 PreparedChildProcess::InsertWrapper(std::span<const char *const> w) noexcept
@@ -60,78 +46,6 @@ PreparedChildProcess::GetEnv(std::string_view name) const noexcept
 	}
 
 	return nullptr;
-}
-
-void
-PreparedChildProcess::SetStdin(int fd) noexcept
-{
-	assert(fd != stdin_fd.Get());
-
-	if (stdin_fd.Get() >= 3)
-		stdin_fd.Close();
-	stdin_fd = FileDescriptor{fd};
-}
-
-void
-PreparedChildProcess::SetStdout(int fd) noexcept
-{
-	assert(fd != stdout_fd.Get());
-
-	if (stdout_fd.Get() >= 3)
-		stdout_fd.Close();
-	stdout_fd = FileDescriptor{fd};
-}
-
-void
-PreparedChildProcess::SetStderr(int fd) noexcept
-{
-	assert(fd != stderr_fd.Get());
-
-	if (stderr_fd.Get() >= 3)
-		stderr_fd.Close();
-	stderr_fd = FileDescriptor{fd};
-}
-
-void
-PreparedChildProcess::SetStdin(UniqueFileDescriptor fd) noexcept
-{
-	SetStdin(fd.Steal());
-}
-
-void
-PreparedChildProcess::SetStdout(UniqueFileDescriptor fd) noexcept
-{
-	SetStdout(fd.Steal());
-}
-
-void
-PreparedChildProcess::SetStderr(UniqueFileDescriptor fd) noexcept
-{
-	SetStderr(fd.Steal());
-}
-
-void
-PreparedChildProcess::SetStdin(UniqueSocketDescriptor fd) noexcept
-{
-	SetStdin(fd.Steal());
-}
-
-void
-PreparedChildProcess::SetStdout(UniqueSocketDescriptor fd) noexcept
-{
-	SetStdout(fd.Steal());
-}
-
-void
-PreparedChildProcess::SetStderr(UniqueSocketDescriptor fd) noexcept
-{
-	SetStderr(fd.Steal());
-}
-
-void
-PreparedChildProcess::SetControl(UniqueSocketDescriptor fd) noexcept
-{
-	SetControl(std::move(fd).MoveToFileDescriptor());
 }
 
 const char *
