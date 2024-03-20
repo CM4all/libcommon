@@ -131,7 +131,7 @@ PreparedChildProcess::SetStderr(UniqueSocketDescriptor fd) noexcept
 void
 PreparedChildProcess::SetControl(UniqueSocketDescriptor fd) noexcept
 {
-	SetControl(UniqueFileDescriptor{fd.Release().ToFileDescriptor()});
+	SetControl(std::move(fd).MoveToFileDescriptor());
 }
 
 const char *
