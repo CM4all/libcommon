@@ -338,8 +338,8 @@ TEST(Stock, Blocking)
 	Stock stock(instance.event_loop, cls, "test", 1, 8,
 		    Event::Duration::zero());
 
-	MyStockGetHandler handler, handler2;
-	CancellablePointer cancel_ptr, cancel_ptr2;
+	MyStockGetHandler handler;
+	CancellablePointer cancel_ptr;
 
 	// get one, finish, return
 
