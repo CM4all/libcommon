@@ -313,10 +313,13 @@ BasicStock::ItemCreateError(StockGetHandler &_handler,
 inline void
 BasicStock::CreateCanceled(Create &c) noexcept
 {
+	assert(c.cancel_ptr);
+
 	if (c.continue_on_cancel) {
 		// TOOD connect to waiting item?
 		c.Detach();
 	} else {
+		c.cancel_ptr.Cancel();
 		DeleteCreate(c);
 		CheckEmpty();
 	}
