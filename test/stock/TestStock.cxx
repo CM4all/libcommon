@@ -287,6 +287,102 @@ TEST(Stock, Basic)
 	ASSERT_EQ(num_destroy, 5);
 }
 
+TEST(Stock, Blocking)
+{
+	Instance instance;
+
+	struct CocStockClass final : StockClass, Cancellable {
+		MyStockItem *item = nullptr;
+		StockGetHandler *handler = nullptr;
+
+		unsigned n_create = 0;
+
+		~CocStockClass() noexcept {
+			assert(item == nullptr);
+			assert(handler == nullptr);
+		}
+
+		void Finish() noexcept {
+			assert(item != nullptr);
+			assert(handler != nullptr);
+
+			std::exchange(item, nullptr)->InvokeCreateSuccess(*std::exchange(handler, nullptr));
+		}
+
+		/* virtual methods from class StockClass */
+		void Create(CreateStockItem c,
+			    [[maybe_unused]] StockRequest request,
+			    StockGetHandler &_handler,
+			    CancellablePointer &cancel_ptr) override {
+			assert(item == nullptr);
+			assert(handler == nullptr);
+
+			++n_create;
+
+			handler = &_handler;
+			item = new MyStockItem(c);
+			cancel_ptr = *this;
+		}
+
+		/* virtual methods from class Cancellable */
+		void Cancel() noexcept override {
+			assert(item != nullptr);
+			assert(handler != nullptr);
+
+			handler = nullptr;
+			delete item;
+			item = nullptr;
+		}
+	} cls;
+
+	Stock stock(instance.event_loop, cls, "test", 1, 8,
+		    Event::Duration::zero());
+
+	MyStockGetHandler handler, handler2;
+	CancellablePointer cancel_ptr, cancel_ptr2;
+
+	// get one, finish, return
+
+	num_borrow = num_release = num_destroy = 0;
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 1);
+	EXPECT_FALSE(handler.got_item);
+
+	cls.Finish();
+
+	EXPECT_EQ(cls.n_create, 1);
+	EXPECT_TRUE(handler.got_item);
+
+	stock.Put(*handler.last_item, PutAction::DESTROY);
+
+	EXPECT_EQ(num_borrow, 0);
+	EXPECT_EQ(num_release, 0);
+	EXPECT_EQ(num_destroy, 1);
+
+	// cancel
+
+	num_borrow = num_release = num_destroy = 0;
+
+	cls.item = nullptr;
+	cls.handler = nullptr;
+	handler.got_item = false;
+
+	stock.Get(nullptr, handler, cancel_ptr);
+
+	EXPECT_EQ(cls.n_create, 2);
+	EXPECT_FALSE(handler.got_item);
+
+	cancel_ptr.Cancel();
+
+	EXPECT_EQ(cls.n_create, 2);
+
+	EXPECT_EQ(num_borrow, 0);
+	EXPECT_EQ(num_release, 0);
+	EXPECT_EQ(num_destroy, 1);
+}
+
 TEST(Stock, ContinueOnCancel)
 {
 	Instance instance;
