@@ -347,6 +347,8 @@ TEST(Stock, ContinueOnCancel)
 
 	// get one, finish, return
 
+	num_borrow = num_release = num_destroy = 0;
+
 	stock.Get(nullptr, handler, cancel_ptr);
 
 	EXPECT_EQ(cls.n_create, 1);
@@ -358,9 +360,15 @@ TEST(Stock, ContinueOnCancel)
 	EXPECT_TRUE(handler.got_item);
 
 	stock.Put(*handler.last_item, PutAction::DESTROY);
+
+	EXPECT_EQ(num_borrow, 0);
+	EXPECT_EQ(num_release, 0);
+	EXPECT_EQ(num_destroy, 1);
 
 	// get one, cancel, finish, get again (immediately)
 
+	num_borrow = num_release = num_destroy = 0;
+
 	cls.item = nullptr;
 	cls.handler = nullptr;
 	handler.got_item = false;
@@ -380,9 +388,15 @@ TEST(Stock, ContinueOnCancel)
 	EXPECT_TRUE(handler.got_item);
 
 	stock.Put(*handler.last_item, PutAction::DESTROY);
+
+	EXPECT_EQ(num_borrow, 1);
+	EXPECT_EQ(num_release, 0);
+	EXPECT_EQ(num_destroy, 1);
 
 	// get one, cancel, get again, finish
 
+	num_borrow = num_release = num_destroy = 0;
+
 	cls.item = nullptr;
 	cls.handler = nullptr;
 	handler.got_item = false;
@@ -406,7 +420,13 @@ TEST(Stock, ContinueOnCancel)
 
 	stock.Put(*handler.last_item, PutAction::DESTROY);
 
+	EXPECT_EQ(num_borrow, 0);
+	EXPECT_EQ(num_release, 0);
+	EXPECT_EQ(num_destroy, 1);
+
 	// get one, get again, cancel, finish
+
+	num_borrow = num_release = num_destroy = 0;
 
 	cls.item = nullptr;
 	cls.handler = nullptr;
@@ -439,7 +459,13 @@ TEST(Stock, ContinueOnCancel)
 
 	stock.Put(*handler.last_item, PutAction::DESTROY);
 
+	EXPECT_EQ(num_borrow, 0);
+	EXPECT_EQ(num_release, 0);
+	EXPECT_EQ(num_destroy, 1);
+
 	// get one, cancel and leave (destructor must cancel it)
+
+	num_borrow = num_release = num_destroy = 0;
 
 	cls.item = nullptr;
 	cls.handler = nullptr;
@@ -454,4 +480,8 @@ TEST(Stock, ContinueOnCancel)
 
 	EXPECT_EQ(cls.n_create, 5);
 	EXPECT_FALSE(handler.got_item);
+
+	EXPECT_EQ(num_borrow, 0);
+	EXPECT_EQ(num_release, 0);
+	EXPECT_EQ(num_destroy, 0);
 }
