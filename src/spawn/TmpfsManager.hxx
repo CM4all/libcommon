@@ -32,9 +32,8 @@ class TmpfsManager {
 	};
 
 	IntrusiveHashSet<Item, 1024,
-			 IntrusiveHashSetOperators<ItemHash,
-						   std::equal_to<std::string_view>,
-						   ItemGetKey>> items;
+			 IntrusiveHashSetOperators<Item, ItemGetKey, ItemHash,
+						   std::equal_to<std::string_view>>> items;
 	IntrusiveList<Item> abandoned;
 
 	const UniqueFileDescriptor mnt;

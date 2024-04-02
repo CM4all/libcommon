@@ -127,8 +127,8 @@ class StaticCache {
 
 	using KeyMap =
 		IntrusiveHashSet<Item, table_size,
-				 IntrusiveHashSetOperators<Hash, Equal,
-							   ItemGetKey>>;
+				 IntrusiveHashSetOperators<Item, ItemGetKey,
+							   Hash, Equal>>;
 
 	KeyMap map;
 

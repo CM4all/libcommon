@@ -150,9 +150,10 @@ class SpawnServerConnection final
 
 	using ChildIdMap =
 		IntrusiveHashSet<SpawnServerChild, 1024,
-				 IntrusiveHashSetOperators<std::hash<unsigned>,
-							   std::equal_to<unsigned>,
-							   SpawnServerChild::GetKey>>;
+				 IntrusiveHashSetOperators<SpawnServerChild,
+							   SpawnServerChild::GetKey,
+							   std::hash<unsigned>,
+							   std::equal_to<unsigned>>>;
 	ChildIdMap children;
 
 	struct ExitQueueItem {

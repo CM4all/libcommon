@@ -39,9 +39,10 @@ class SpawnServerClient final : public SpawnService {
 
 	using ChildProcessSet =
 		IntrusiveHashSet<ChildProcess, 1024,
-				 IntrusiveHashSetOperators<std::hash<unsigned>,
-							   std::equal_to<unsigned>,
-							   ChildProcessGetKey>>;
+				 IntrusiveHashSetOperators<ChildProcess,
+							   ChildProcessGetKey,
+							   std::hash<unsigned>,
+							   std::equal_to<unsigned>>>;
 
 	ChildProcessSet processes;
 

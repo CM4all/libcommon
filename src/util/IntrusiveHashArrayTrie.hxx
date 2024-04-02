@@ -320,8 +320,11 @@ struct IntrusiveHashArrayTrieMemberHookTraits {
  * @param GetKey a function object which extracts the "key" part of an
  * item
  */
-template<typename Hash, typename Equal,
-	 typename GetKey=std::identity>
+template<typename T,
+	 std::regular_invocable<const T &> GetKey,
+	 std::regular_invocable<std::invoke_result_t<GetKey, const T &>> Hash,
+	 std::predicate<std::invoke_result_t<GetKey, const T &>,
+			std::invoke_result_t<GetKey, const T &>> Equal>
 struct IntrusiveHashArrayTrieOperators {
 	using hasher = Hash;
 	using key_equal = Equal;

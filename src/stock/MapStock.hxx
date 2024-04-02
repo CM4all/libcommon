@@ -62,9 +62,10 @@ class StockMap {
 	static constexpr size_t N_BUCKETS = 251;
 	using Map =
 		IntrusiveHashSet<Item, N_BUCKETS,
-				 IntrusiveHashSetOperators<Item::Hash,
-							   Item::Equal,
-							   Item::GetKeyFunction>>;
+				 IntrusiveHashSetOperators<Item,
+							   Item::GetKeyFunction,
+							   Item::Hash,
+							   Item::Equal>>;
 
 	EventLoop &event_loop;
 

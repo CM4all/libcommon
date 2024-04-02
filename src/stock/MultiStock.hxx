@@ -326,9 +326,9 @@ class MultiStock {
 	static constexpr size_t N_BUCKETS = 251;
 	using Map =
 		IntrusiveHashSet<MapItem, N_BUCKETS,
-				 IntrusiveHashSetOperators<MapItem::Hash,
-							   MapItem::Equal,
-							   MapItem::GetKey>>;
+				 IntrusiveHashSetOperators<MapItem, MapItem::GetKey,
+							   MapItem::Hash,
+							   MapItem::Equal>>;
 
 	Map map;
 

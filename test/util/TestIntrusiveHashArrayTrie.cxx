@@ -39,7 +39,8 @@ TEST(IntrusiveHashArrayTrie, Basic)
 	IntItem a{1}, b{2}, c{3}, d{4}, e{5}, f{1};
 
 	IntrusiveHashArrayTrie<IntItem,
-			       IntrusiveHashArrayTrieOperators<IntItem::Hash,
+			       IntrusiveHashArrayTrieOperators<IntItem, std::identity,
+							       IntItem::Hash,
 							       IntItem::Equal>> set;
 
 	EXPECT_TRUE(set.empty());
@@ -243,7 +244,9 @@ TEST(IntrusiveHashArrayTrie, Bulk)
 	auto items = MakeIntItems(std::make_integer_sequence<int, 256>());
 
 	IntrusiveHashArrayTrie<IntItem,
-			       IntrusiveHashArrayTrieOperators<IntItem::Hash,
+			       IntrusiveHashArrayTrieOperators<IntItem,
+							       std::identity,
+							       IntItem::Hash,
 							       IntItem::Equal>> set;
 	set.insert(first);
 
