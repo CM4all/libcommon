@@ -9,6 +9,7 @@ test(
     'TestIntrusiveHashSet.cxx',
     'TestIntrusiveHashArrayTrie.cxx',
     'TestIntrusiveList.cxx',
+    'TestIntrusiveTreeSet.cxx',
     'TestFNVHash.cxx',
     'TestMimeType.cxx',
     'TestStaticCache.cxx',
