@@ -22,23 +22,17 @@ public:
 
 class QmqpClientError : std::runtime_error {
 public:
-	template<typename W>
-	QmqpClientError(W &&what_arg) noexcept
-		:std::runtime_error(std::forward<W>(what_arg)) {}
+	using std::runtime_error::runtime_error;
 };
 
 class QmqpClientTemporaryFailure final : QmqpClientError {
 public:
-	template<typename W>
-	QmqpClientTemporaryFailure(W &&what_arg) noexcept
-		:QmqpClientError(std::forward<W>(what_arg)) {}
+	using QmqpClientError::QmqpClientError;
 };
 
 class QmqpClientPermanentFailure final : QmqpClientError {
 public:
-	template<typename W>
-	QmqpClientPermanentFailure(W &&what_arg) noexcept
-		:QmqpClientError(std::forward<W>(what_arg)) {}
+	using QmqpClientError::QmqpClientError;
 };
 
 /**
