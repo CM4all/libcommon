@@ -44,9 +44,9 @@ try {
 
 	auto mount_tail = p.ns.mount.mounts.before_begin();
 
-	p.stdin_fd = FileDescriptor{dup(STDIN_FILENO)};
-	p.stdout_fd = FileDescriptor{dup(STDOUT_FILENO)};
-	p.stderr_fd = FileDescriptor{dup(STDERR_FILENO)};
+	p.stdin_fd = FileDescriptor{STDIN_FILENO};
+	p.stdout_fd = FileDescriptor{STDOUT_FILENO};
+	p.stderr_fd = FileDescriptor{STDERR_FILENO};
 
 	while (!args.empty() && *args.front() == '-') {
 		const char *arg = args.shift();
