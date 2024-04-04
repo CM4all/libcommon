@@ -4,6 +4,7 @@
 
 #include "StateDirectories.hxx"
 #include "UniqueFileDescriptor.hxx"
+#include "system/openat2.h"
 #include "util/NumberParser.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringStrip.hxx"
@@ -32,14 +33,29 @@ StateDirectories::AddDirectory(const char *path) noexcept
 		directories.emplace_front(std::move(fd));
 }
 
+/**
+ * Open the specified directory as an O_PATH descriptor, but don't
+ * follow any symlinks while resolving the given path.
+ */
+static FileDescriptor
+OpenReadOnlyNoFollow(FileDescriptor directory, const char *path)
+{
+	static constexpr struct open_how how{
+		.flags = O_RDONLY|O_NOFOLLOW|O_NOCTTY|O_CLOEXEC,
+		.resolve = RESOLVE_IN_ROOT|RESOLVE_NO_MAGICLINKS|RESOLVE_NO_SYMLINKS,
+	};
+
+	int fd = openat2(directory.Get(), path, &how, sizeof(how));
+	return FileDescriptor{fd};
+}
+
 UniqueFileDescriptor
 StateDirectories::OpenFile(const char *relative_path) const noexcept
 {
-	UniqueFileDescriptor fd;
-
 	for (const auto &i : directories) {
-		if (fd.OpenReadOnly(i, relative_path))
-			break;
+		if (const auto fd = OpenReadOnlyNoFollow(i, relative_path);
+		    fd.IsDefined())
+			return UniqueFileDescriptor{fd};
 
 		const int e = errno;
 		if (e != ENOENT)
@@ -47,7 +63,7 @@ StateDirectories::OpenFile(const char *relative_path) const noexcept
 				   relative_path, strerror(e));
 	}
 
-	return fd;
+	return {};
 }
 
 std::span<const std::byte>
