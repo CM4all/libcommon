@@ -6,8 +6,6 @@
 #include "Easy.hxx"
 #include "Adapter.hxx"
 
-#include <cstddef>
-
 class CurlGlobal;
 class CurlResponseHandler;
 
