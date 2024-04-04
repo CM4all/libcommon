@@ -8,6 +8,7 @@
 #include <forward_list>
 #include <span>
 
+class FileDescriptor;
 class UniqueFileDescriptor;
 
 /**
@@ -75,4 +76,12 @@ public:
 
 private:
 	void AddDirectory(const char *path) noexcept;
+
+	[[gnu::pure]]
+	UniqueFileDescriptor OpenFileAutoFollow(const char *relative_path,
+						unsigned follow_limit) const noexcept;
+
+	UniqueFileDescriptor OpenFileFollow(FileDescriptor directory_fd,
+					    const char *relative_path,
+					    unsigned follow_limit) const noexcept;
 };
