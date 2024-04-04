@@ -98,7 +98,7 @@ FileDescriptor::OpenReadOnly(FileDescriptor dir, const char *pathname) noexcept
 	return Open(dir, pathname, O_RDONLY);
 }
 
-#endif
+#endif // __linux__
 
 #ifndef _WIN32
 
