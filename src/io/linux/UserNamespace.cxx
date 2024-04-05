@@ -25,7 +25,7 @@ static void
 WriteFileOrThrow(FileDescriptor directory, const char *path, std::string_view data)
 {
 	if (TryWriteExistingFile(directory, path, data) == WriteFileResult::ERROR)
-		throw FmtErrno("write('{}') failed", path);
+		throw FmtErrno("write({:?}) failed", path);
 }
 
 void

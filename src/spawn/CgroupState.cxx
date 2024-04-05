@@ -32,7 +32,7 @@ static void
 WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 {
 	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
-		throw FmtErrno("write('{}') failed", path);
+		throw FmtErrno("write({:?}) failed", path);
 }
 
 static void

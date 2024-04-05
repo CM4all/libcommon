@@ -189,7 +189,7 @@ FindMountInfoByPath(FileAt path)
 	if (statx(path.directory.Get(), path.name,
 		  AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_STATX_SYNC_AS_STAT,
 		  STATX_MNT_ID, &stx) < 0)
-		throw FmtErrno("Failed to stat '{}'", path.name);
+		throw FmtErrno("Failed to stat {:?}", path.name);
 
 	return FindMountInfoById(0, stx.stx_mnt_id);
 }

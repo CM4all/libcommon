@@ -43,7 +43,7 @@ StateDirectories::OpenFile(const char *relative_path) const noexcept
 
 		const int e = errno;
 		if (e != ENOENT)
-			fmt::print(stderr, "Failed to open '{}': {}\n",
+			fmt::print(stderr, "Failed to open {:?}: {}\n",
 				   relative_path, strerror(e));
 	}
 
@@ -61,7 +61,7 @@ StateDirectories::GetBinary(const char *relative_path,
 
 	const auto nbytes = fd.Read(buffer);
 	if (nbytes < 0) {
-		fmt::print(stderr, "Failed to read '{}': {}\n",
+		fmt::print(stderr, "Failed to read {:?}: {}\n",
 			   relative_path, strerror(errno));
 		return {};
 	}

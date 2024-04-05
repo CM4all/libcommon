@@ -88,7 +88,7 @@ OpenDirectoryPathNoFollow(FileDescriptor directory, const char *path)
 
 	int fd = openat2(directory.Get(), path, &how, sizeof(how));
 	if (fd < 0)
-		throw FmtErrno("Failed to open '{}'", path);
+		throw FmtErrno("Failed to open {:?}", path);
 
 	return UniqueFileDescriptor{fd};
 }

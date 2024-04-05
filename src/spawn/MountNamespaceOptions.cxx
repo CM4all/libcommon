@@ -72,7 +72,7 @@ static void
 ChdirOrThrow(const char *path)
 {
 	if (chdir(path) < 0)
-		throw FmtErrno("chdir('{}') failed", path);
+		throw FmtErrno("chdir({:?}) failed", path);
 }
 
 void
@@ -129,7 +129,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		/* enter the new root */
 		int result = my_pivot_root(new_root, put_old + 1);
 		if (result < 0)
-			throw FmtErrno("pivot_root('{}') failed", new_root);
+			throw FmtErrno("pivot_root({:?}) failed", new_root);
 	}
 
 	if (mount_proc) {

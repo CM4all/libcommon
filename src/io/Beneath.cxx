@@ -31,7 +31,7 @@ OpenReadOnlyBeneath(FileAt file)
 {
 	auto fd = TryOpenReadOnlyBeneath(file);
 	if (!fd.IsDefined())
-		throw FmtErrno("Failed to open '{}'", file.name);
+		throw FmtErrno("Failed to open {:?}", file.name);
 
 	return fd;
 }
@@ -56,7 +56,7 @@ OpenDirectoryBeneath(FileAt file)
 {
 	auto fd = TryOpenDirectoryBeneath(file);
 	if (!fd.IsDefined())
-		throw FmtErrno("Failed to open '{}'", file.name);
+		throw FmtErrno("Failed to open {:?}", file.name);
 
 	return fd;
 }

@@ -174,21 +174,21 @@ MountOrThrow(const char *source, const char *target,
 	     const void *data)
 {
 	if (mount(source, target, filesystemtype, mountflags, data) < 0)
-		throw FmtErrno("mount('{}') failed", target);
+		throw FmtErrno("mount({:?}) failed", target);
 }
 
 void
 BindMount(const char *source, const char *target)
 {
 	if (mount(source, target, nullptr, MS_BIND, nullptr) < 0)
-		throw FmtErrno("bind_mount('{}', '{}') failed", source, target);
+		throw FmtErrno("bind_mount({:?}, {:?}) failed", source, target);
 }
 
 void
 Umount(const char *target, int flags)
 {
 	if (umount2(target, flags) < 0)
-		throw FmtErrno("umount('{}') failed", target);
+		throw FmtErrno("umount({:?}) failed", target);
 }
 
 void

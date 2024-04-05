@@ -38,7 +38,7 @@ OpenDirectory(FileDescriptor directory, const char *name,
 
 	int fd = openat2(directory.Get(), name, &how, sizeof(how));
 	if (fd < 0)
-		throw FmtErrno("Failed to open '{}'", name);
+		throw FmtErrno("Failed to open {:?}", name);
 
 	return UniqueFileDescriptor{fd};
 }
@@ -53,7 +53,7 @@ MakeDirectory(FileDescriptor parent_fd, const char *name,
 			break;
 
 		default:
-			throw FmtErrno(e, "Failed to create directory '{}'",
+			throw FmtErrno(e, "Failed to create directory {:?}",
 				       name);
 		}
 	}
@@ -94,13 +94,13 @@ RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 		break;
 
 	default:
-		throw FmtErrno(e, "Failed to create directory '{}'",
+		throw FmtErrno(e, "Failed to create directory {:?}",
 			       path);
 	}
 
 	char *slash = LastSlash(path, path_length);
 	if (slash == nullptr)
-		throw FmtErrno(e, "Failed to create directory '{}'",
+		throw FmtErrno(e, "Failed to create directory {:?}",
 			       path);
 
 	*slash = 0;

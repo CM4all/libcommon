@@ -29,6 +29,6 @@ ReassociateNetworkNamespace(const char *name)
 	assert(name != nullptr);
 
 	if (setns(OpenNetworkNS(name).Get(), CLONE_NEWNET) < 0)
-		throw FmtErrno("Failed to reassociate with network namespace '{}'",
+		throw FmtErrno("Failed to reassociate with network namespace {:?}",
 			       name);
 }

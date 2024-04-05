@@ -88,7 +88,7 @@ SocketConfig::Create(int type) const
 		throw FmtSocketError("Failed to bind to {}", bind_address);
 
 	if (mode != 0 && local_path != nullptr && chmod(local_path, mode) < 0)
-		throw FmtErrno("Failed to chmod '{}'", local_path);
+		throw FmtErrno("Failed to chmod {:?}", local_path);
 
 	if (!multicast_group.IsNull() &&
 	    !fd.AddMembership(multicast_group))

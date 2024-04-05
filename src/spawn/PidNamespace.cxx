@@ -25,6 +25,6 @@ ReassociatePidNamespace(const char *name)
 	assert(name != nullptr);
 
 	if (setns(GetPidNS(name).Get(), CLONE_NEWPID) < 0)
-		throw FmtErrno("Failed to reassociate with PID namespace '{}'",
+		throw FmtErrno("Failed to reassociate with PID namespace {:?}",
 			       name);
 }

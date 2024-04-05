@@ -18,9 +18,9 @@ UidGid::Lookup(const char *username)
 	const auto *pw = getpwnam(username);
 	if (pw == nullptr) {
 		if (errno == 0 || errno == ENOENT)
-			throw FmtRuntimeError("No such user: {}", username);
+			throw FmtRuntimeError("No such user: {:?}", username);
 		else
-			throw FmtErrno("Failed to look up user '{}'", username);
+			throw FmtErrno("Failed to look up user {:?}", username);
 	}
 
 	uid = pw->pw_uid;

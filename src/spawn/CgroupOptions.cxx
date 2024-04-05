@@ -45,7 +45,7 @@ static void
 WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 {
 	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
-		throw FmtErrno("write('{}') failed", path);
+		throw FmtErrno("write({:?}) failed", path);
 }
 
 static void
@@ -78,7 +78,7 @@ CgroupOptions::Create2(const CgroupState &state, const char *session) const
 		for (const auto &i : xattr)
 			if (fsetxattr(d.Get(), i.name,
 				      i.value, strlen(i.value), 0) < 0)
-				throw FmtErrno("Failed to set xattr '{}'",
+				throw FmtErrno("Failed to set xattr {:?}",
 					       i.name);
 	}
 
