@@ -31,8 +31,7 @@ QmqpClient::Commit(FileDescriptor out_fd, FileDescriptor in_fd) noexcept
 void
 QmqpClient::OnNetstringResponse(AllocatedArray<std::byte> &&_payload) noexcept
 try {
-	const std::span<const std::byte> __payload{_payload};
-	std::string_view payload = ToStringView(__payload);
+	std::string_view payload = ToStringView(_payload);
 
 	if (!payload.empty()) {
 		switch (payload[0]) {
