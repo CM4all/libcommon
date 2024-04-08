@@ -41,4 +41,10 @@ SendMethodNotAllowed(struct was_simple *w, const char *allow) noexcept
 		was_simple_set_header(w, "allow", allow);
 }
 
+bool
+SendConflict(struct was_simple *w, std::string_view body) noexcept
+{
+	return SendTextResponse(w, HTTP_STATUS_CONFLICT, body);
+}
+
 } // namespace Was

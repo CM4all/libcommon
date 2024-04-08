@@ -35,6 +35,8 @@ WasLoop(F &&f) noexcept
 			Was::SendNotFound(was, e.body);
 		} catch (const Was::BadRequest &e) {
 			Was::SendBadRequest(was, e.body);
+		} catch (const Was::Conflict &e) {
+			Was::SendConflict(was, e.body);
 		}
 	}
 

@@ -30,4 +30,8 @@ SendBadRequest(struct was_simple *w,
 bool
 SendMethodNotAllowed(struct was_simple *w, const char *allow) noexcept;
 
+bool
+SendConflict(struct was_simple *w,
+	     std::string_view body="Conflict\n") noexcept;
+
 } // namespace Was

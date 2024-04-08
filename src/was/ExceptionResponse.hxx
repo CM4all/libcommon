@@ -46,4 +46,12 @@ struct BadRequest : Exception {
 		:body(_body) {}
 };
 
+struct Conflict : Exception {
+	std::string_view body = "Conflict\n";
+
+	Conflict() noexcept = default;
+	constexpr Conflict(std::string_view _body) noexcept
+		:body(_body) {}
+};
+
 } // namespace Was
