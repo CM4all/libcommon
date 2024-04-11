@@ -117,6 +117,8 @@ StateDirectories::OpenFileFollow(FileDescriptor directory_fd,
 			relative_path[slash_pos] = '\0';
 
 		char buffer[4096];
+		std::string_view target;
+
 		if (auto length = readlinkat(directory_fd.Get(),
 					     relative_path.c_str(),
 					     buffer, sizeof(buffer));
@@ -140,11 +142,13 @@ StateDirectories::OpenFileFollow(FileDescriptor directory_fd,
 		} else if (static_cast<std::size_t>(length) == sizeof(buffer))
 			/* symlink target is too long - bail out */
 			return {};
+		else
+			target = {buffer, static_cast<std::size_t>(length)};
 
 		const auto [symlink_path, rest] = slash_pos != relative_path.npos
 			? PartitionWithout(std::string_view{relative_path}, slash_pos)
 			: std::pair{std::string_view{relative_path}, std::string_view{}};
-		const auto new_path = ResolveSymlink(symlink_path, buffer, rest);
+		const auto new_path = ResolveSymlink(symlink_path, target, rest);
 		return OpenFileAutoFollow(new_path.c_str(), follow_limit);
 	}
 }
