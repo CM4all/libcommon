@@ -10,7 +10,7 @@
 #include "CgroupState.hxx"
 #include "Server.hxx"
 #include "spawn/config.h"
-#include "system/clone3.h"
+#include "system/linux/clone3.h"
 #include "system/Error.hxx"
 #include "system/Mount.hxx"
 #include "system/ProcessName.hxx"

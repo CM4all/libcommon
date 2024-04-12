@@ -4,7 +4,7 @@
 
 #include "StateDirectories.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "system/openat2.h"
+#include "system/linux/openat2.h"
 #include "util/IterableSplitString.hxx"
 #include "util/NumberParser.hxx"
 #include "util/SpanCast.hxx"

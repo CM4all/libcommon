@@ -6,7 +6,7 @@
 #include "ExitListener.hxx"
 #include "event/Loop.hxx"
 #include "time/Convert.hxx"
-#include "system/PidFD.h"
+#include "system/linux/PidFD.h"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <errno.h>

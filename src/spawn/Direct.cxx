@@ -17,9 +17,9 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "io/linux/UserNamespace.hxx"
-#include "system/clone3.h"
-#include "system/CoreScheduling.hxx"
-#include "system/IOPrio.hxx"
+#include "system/linux/clone3.h"
+#include "system/linux/CoreScheduling.hxx"
+#include "system/linux/IOPrio.hxx"
 #include "util/Exception.hxx"
 #include "util/ScopeExit.hxx"
 

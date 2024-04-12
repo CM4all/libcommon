@@ -5,7 +5,7 @@
 #include "MakeDirectory.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "lib/fmt/SystemError.hxx"
-#include "system/openat2.h"
+#include "system/linux/openat2.h"
 #include "util/ScopeExit.hxx"
 
 #include <assert.h>

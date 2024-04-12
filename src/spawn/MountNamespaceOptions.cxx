@@ -9,7 +9,7 @@
 #include "AllocatorPtr.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
-#include "system/pivot_root.h"
+#include "system/linux/pivot_root.h"
 #include "system/Mount.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/Base32.hxx"

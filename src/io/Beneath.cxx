@@ -4,7 +4,7 @@
 #include "Beneath.hxx"
 #include "FileAt.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "system/openat2.h"
+#include "system/linux/openat2.h"
 #include "lib/fmt/SystemError.hxx"
 
 #include <cassert>

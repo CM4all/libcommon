@@ -4,7 +4,7 @@
 
 #include "Init.hxx"
 #include "spawn/config.h"
-#include "system/CloseRange.hxx"
+#include "system/linux/CloseRange.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "system/LinuxFD.hxx"
