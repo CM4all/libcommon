@@ -12,10 +12,10 @@
 #include <cstdint>
 
 void
-EasySendMessage(SocketDescriptor s, FileDescriptor fd)
+EasySendMessage(SocketDescriptor s, std::span<const std::byte> payload,
+		FileDescriptor fd)
 {
-	static uint8_t dummy_payload = 0;
-	const struct iovec v[] = {MakeIovecT(dummy_payload)};
+	const struct iovec v[] = {MakeIovec(payload)};
 	MessageHeader msg{v};
 
 	ScmRightsBuilder<1> srb(msg);
@@ -23,6 +23,12 @@ EasySendMessage(SocketDescriptor s, FileDescriptor fd)
 	srb.Finish(msg);
 
 	SendMessage(s, msg, MSG_NOSIGNAL);
+}
+
+void
+EasySendMessage(SocketDescriptor s, FileDescriptor fd)
+{
+	EasySendMessage(s, {}, fd);
 }
 
 UniqueFileDescriptor
