@@ -10,12 +10,15 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
 #include "util/IntrusiveHashSet.hxx"
+#include "config.h"
 
 #include <forward_list>
 #include <map>
+#include <memory>
 #include <span>
 
 struct PreparedChildProcess;
+class CgroupMemoryWatch;
 class SpawnPayload;
 class SpawnSerializer;
 class SpawnServerClientHandler;
@@ -54,9 +57,13 @@ class SpawnServerClient final : public SpawnService {
 
 	SocketEvent event;
 
-	MultiReceiveMessage receive{16, 1024};
+	MultiReceiveMessage receive{16, 1024, CMSG_SPACE(sizeof(int)), 1};
 
 	SpawnServerClientHandler *handler = nullptr;
+
+#ifdef HAVE_LIBSYSTEMD
+	std::unique_ptr<CgroupMemoryWatch> cgroup_memory_watch;
+#endif
 
 	/**
 	 * Call UidGid::Verify() before sending the spawn request to the
@@ -130,7 +137,8 @@ private:
 
 	void HandleOneExit(SpawnPayload &payload);
 	void HandleExitMessage(SpawnPayload payload);
-	void HandleMessage(std::span<const std::byte> payload);
+	void HandleMessage(std::span<const std::byte> payload,
+			   std::span<UniqueFileDescriptor> fds);
 
 	/**
 	 * Throws on error.
@@ -145,6 +153,8 @@ private:
 	void OnSocketEvent(unsigned events) noexcept;
 
 	void Kill(ChildProcess &child_process, int signo) noexcept;
+
+	void OnCgroupMemoryWarning(uint64_t memory_usage) noexcept;
 
 public:
 	/* virtual methods from class SpawnService */

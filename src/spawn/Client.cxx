@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Client.hxx"
+#include "CgroupWatch.hxx"
 #include "ProcessHandle.hxx"
 #include "Handler.hxx"
 #include "IProtocol.hxx"
@@ -88,6 +89,11 @@ void
 SpawnServerClient::Shutdown() noexcept
 {
 	shutting_down = true;
+
+#ifdef HAVE_LIBSYSTEMD
+	cgroup_memory_watch.reset();
+#endif
+
 	ShutdownComplete();
 }
 
@@ -466,7 +472,8 @@ SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 }
 
 inline void
-SpawnServerClient::HandleMessage(std::span<const std::byte> payload)
+SpawnServerClient::HandleMessage(std::span<const std::byte> payload,
+				 std::span<UniqueFileDescriptor> fds)
 {
 	const auto cmd = (SpawnResponseCommand)payload.front();
 	payload = payload.subspan(1);
@@ -474,15 +481,17 @@ SpawnServerClient::HandleMessage(std::span<const std::byte> payload)
 	switch (cmd) {
 	case SpawnResponseCommand::CGROUPS_AVAILABLE:
 		cgroups = true;
-		break;
 
-	case SpawnResponseCommand::MEMORY_WARNING:
-		if (handler != nullptr) {
-			// TODO: fix alignment
-			const auto &p = *(const SpawnMemoryWarningPayload *)(const void *)payload.data();
-			assert(payload.size() == sizeof(p));
-			handler->OnMemoryWarning(p.memory_usage, p.memory_max);
-		}
+#ifdef HAVE_LIBSYSTEMD
+		if (!fds.empty() &&
+		    config.systemd_scope_properties.HaveMemoryLimit() &&
+		    !shutting_down)
+			cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>(GetEventLoop(),
+										  fds.front(),
+										  BIND_THIS_METHOD(OnCgroupMemoryWarning));
+#else
+		(void)fds;
+#endif
 
 		break;
 
@@ -526,7 +535,7 @@ SpawnServerClient::ReceiveAndHandle()
 			throw std::runtime_error("spawner closed the socket");
 
 		try {
-			HandleMessage(i.payload);
+			HandleMessage(i.payload, i.fds);
 		} catch (...) {
 			PrintException(std::current_exception());
 		}
@@ -559,3 +568,15 @@ try {
 	PrintException(std::current_exception());
 	Close();
 }
+
+#ifdef HAVE_LIBSYSTEMD
+
+inline void
+SpawnServerClient::OnCgroupMemoryWarning(uint64_t memory_usage) noexcept
+{
+	if (handler != nullptr)
+		handler->OnMemoryWarning(memory_usage,
+					 config.systemd_scope_properties.memory_max);
+}
+
+#endif

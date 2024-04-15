@@ -8,7 +8,6 @@
 #include "Parser.hxx"
 #include "Builder.hxx"
 #include "Prepared.hxx"
-#include "CgroupWatch.hxx"
 #include "CgroupOptions.hxx"
 #include "Hook.hxx"
 #include "Mount.hxx"
@@ -23,6 +22,7 @@
 #include "event/CoarseTimerEvent.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/Loop.hxx"
+#include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "io/MakeDirectory.hxx"
@@ -178,11 +178,6 @@ public:
 	void OnChildProcessExit(unsigned id, int status,
 				SpawnServerChild *child) noexcept;
 
-#ifdef HAVE_LIBSYSTEMD
-	void SendMemoryWarning(uint64_t memory_usage,
-			       uint64_t memory_max) noexcept;
-#endif
-
 private:
 	void RemoveConnection() noexcept;
 
@@ -243,10 +238,6 @@ class SpawnServerProcess {
 
 	ZombieReaper zombie_reaper{loop};
 
-#ifdef HAVE_LIBSYSTEMD
-	std::unique_ptr<CgroupMemoryWatch> cgroup_memory_watch;
-#endif
-
 	using ConnectionList = IntrusiveList<SpawnServerConnection>;
 	ConnectionList connections;
 
@@ -269,14 +260,6 @@ public:
 
 			ScheduleExpireTimer();
 		}
-
-#ifdef HAVE_LIBSYSTEMD
-		if (config.systemd_scope_properties.HaveMemoryLimit() &&
-		    cgroup_state.IsEnabled())
-			cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>
-				(loop, cgroup_state.group_fd,
-				 BIND_THIS_METHOD(OnCgroupMemoryWarning));
-#endif
 	}
 
 	const SpawnConfig &GetConfig() const noexcept {
@@ -340,21 +323,9 @@ private:
 	void Quit() noexcept {
 		assert(connections.empty());
 
-#ifdef HAVE_LIBSYSTEMD
-		cgroup_memory_watch.reset();
-#endif
-
 		zombie_reaper.Disable();
 		expire_timer.Cancel();
 	}
-
-#ifdef HAVE_LIBSYSTEMD
-	void OnCgroupMemoryWarning(uint64_t memory_usage) noexcept {
-		for (auto &c : connections)
-			c.SendMemoryWarning(memory_usage,
-					    config.systemd_scope_properties.memory_max);
-	}
-#endif
 };
 
 SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
@@ -383,25 +354,6 @@ SpawnServerConnection::RemoveConnection() noexcept
 {
 	process.RemoveConnection(*this);
 }
-
-#ifdef HAVE_LIBSYSTEMD
-
-void
-SpawnServerConnection::SendMemoryWarning(uint64_t memory_usage,
-					 uint64_t memory_max) noexcept
-{
-	SpawnSerializer s(SpawnResponseCommand::MEMORY_WARNING);
-	s.WriteT(SpawnMemoryWarningPayload{memory_usage, memory_max});
-
-	try {
-		::Send<1>(socket, s);
-	} catch (...) {
-		logger(1, "Failed to send MEMORY_WARNING to worker: ",
-		       GetFullMessage(std::current_exception()).c_str());
-	}
-}
-
-#endif
 
 void
 SpawnServerConnection::SendExit(unsigned id, int status) noexcept
@@ -1002,10 +954,10 @@ try {
 }
 
 static void
-AnnounceCgroup(SocketDescriptor s) noexcept
+AnnounceCgroup(SocketDescriptor s, FileDescriptor group_fd) noexcept
 {
 	static constexpr auto cmd = SpawnResponseCommand::CGROUPS_AVAILABLE;
-	send(s.Get(), &cmd, sizeof(cmd), MSG_NOSIGNAL);
+	EasySendMessage(s, ReferenceAsBytes(cmd), group_fd);
 }
 
 void
@@ -1018,7 +970,7 @@ RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 		/* tell the client that the cgroups feature is available;
 		   there is no other way for the client to know if we don't
 		   tell him; see SpawnServerClient::SupportsCgroups() */
-		AnnounceCgroup(socket);
+		AnnounceCgroup(socket, cgroup_state.group_fd);
 	}
 
 	SpawnServerProcess process(config, cgroup_state, has_mount_namespace, hook);

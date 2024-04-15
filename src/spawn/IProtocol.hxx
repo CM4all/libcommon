@@ -90,12 +90,6 @@ enum class SpawnResponseCommand : uint16_t {
 	 */
 	CGROUPS_AVAILABLE,
 
-	/**
-	 * Memory usage is above the threshold.  Payload is a
-	 * #SpawnMemoryWarningPayload.
-	 */
-	MEMORY_WARNING,
-
 	EXIT,
 };
 
