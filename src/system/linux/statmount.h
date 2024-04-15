@@ -6,37 +6,21 @@
 
 #include <linux/mount.h>
 #include <linux/types.h> // for __u32, __u64
+#include <linux/version.h>
 #include <sys/syscall.h>
 #include <stddef.h> // for size_t
 #include <unistd.h> // for syscall()
 
-#ifndef __NR_statmount
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
+
 #define __NR_statmount 457
-#endif
 
-#ifndef STATMOUNT_SB_BASIC
 #define STATMOUNT_SB_BASIC 0x00000001U
-#endif
-
-#ifndef STATMOUNT_MNT_BASIC
 #define STATMOUNT_MNT_BASIC 0x00000002U
-#endif
-
-#ifndef STATMOUNT_PROPAGATE_FROM
 #define STATMOUNT_PROPAGATE_FROM 0x00000004U
-#endif
-
-#ifndef STATMOUNT_MNT_ROOT
 #define STATMOUNT_MNT_ROOT 0x00000008U
-#endif
-
-#ifndef STATMOUNT_MNT_POINT
 #define STATMOUNT_MNT_POINT 0x00000010U
-#endif
-
-#ifndef STATMOUNT_FS_TYPE
 #define STATMOUNT_FS_TYPE 0x00000020U
-#endif
 
 struct mnt_id_req;
 
@@ -63,6 +47,8 @@ struct statmount {
 	__u64 __spare2[50];
 	//char str[];
 };
+
+#endif // Linux < 6.8.0
 
 static inline int
 do_statmount(const struct mnt_id_req *req,

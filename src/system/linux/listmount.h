@@ -6,17 +6,16 @@
 
 #include <linux/mount.h>
 #include <linux/types.h> // for __u32, __u64
+#include <linux/version.h>
 #include <sys/syscall.h>
 #include <stddef.h> // for size_t
 #include <unistd.h> // for syscall()
 
-#ifndef __NR_listmount
-#define __NR_listmount 458
-#endif
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
 
-#ifndef LSMT_ROOT
+#define __NR_listmount 458
+
 #define LSMT_ROOT 0xffffffffffffffff
-#endif
 
 struct mnt_id_req {
 	__u32 size;
@@ -24,6 +23,8 @@ struct mnt_id_req {
 	__u64 mnt_id;
 	__u64 param;
 };
+
+#endif // Linux < 6.8.0
 
 static inline int
 listmount(const struct mnt_id_req *req,
