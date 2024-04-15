@@ -75,6 +75,10 @@ public:
 				   bool _verify=true) noexcept;
 	~SpawnServerClient() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	/**
 	 * Does the server support cgroups?  This requires a systemd new
 	 * enough to implement the cgroup management protocol.
