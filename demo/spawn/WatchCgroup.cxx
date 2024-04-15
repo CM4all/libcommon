@@ -22,8 +22,8 @@ class MyCgroupWatch {
 
 public:
 	MyCgroupWatch(EventLoop &event_loop,
-		      const CgroupState &state)
-		:watch(event_loop, state,
+		      FileDescriptor group_fd)
+		:watch(event_loop, group_fd,
 		       BIND_THIS_METHOD(OnCgroupWatch)) {}
 
 private:
@@ -49,7 +49,7 @@ try {
 
 	EventLoop event_loop;
 
-	MyCgroupWatch watch{event_loop, cgroup_state};
+	MyCgroupWatch watch{event_loop, cgroup_state.group_fd};
 
 	event_loop.Run();
 

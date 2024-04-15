@@ -274,7 +274,7 @@ public:
 		if (config.systemd_scope_properties.HaveMemoryLimit() &&
 		    cgroup_state.IsEnabled())
 			cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>
-				(loop, cgroup_state,
+				(loop, cgroup_state.group_fd,
 				 BIND_THIS_METHOD(OnCgroupMemoryWarning));
 #endif
 	}

@@ -14,9 +14,9 @@
 #include "util/StringStrip.hxx"
 
 static UniqueFileDescriptor
-OpenMemoryUsage(const CgroupState &state)
+OpenMemoryUsage(FileDescriptor group_fd)
 {
-	return OpenReadOnly(state.group_fd, "memory.current");
+	return OpenReadOnly(group_fd, "memory.current");
 }
 
 static uint64_t
@@ -32,13 +32,13 @@ ReadUint64(FileDescriptor fd)
 }
 
 CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
-				     const CgroupState &state,
+				     FileDescriptor group_fd,
 				     BoundMethod<void(uint64_t value) noexcept> _callback)
-	:fd(OpenMemoryUsage(state)),
+	:fd(OpenMemoryUsage(group_fd)),
 	 inotify(event_loop, *this),
 	 callback(_callback)
 {
-	inotify.AddModifyWatch(ProcFdPath(OpenPath(state.group_fd, "memory.events.local")));
+	inotify.AddModifyWatch(ProcFdPath(OpenPath(group_fd, "memory.events.local")));
 }
 
 void

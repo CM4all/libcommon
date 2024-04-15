@@ -10,8 +10,6 @@
 
 #include <cstdint>
 
-struct CgroupState;
-
 class CgroupMemoryWatch final : InotifyHandler {
 	UniqueFileDescriptor fd;
 
@@ -24,9 +22,12 @@ class CgroupMemoryWatch final : InotifyHandler {
 public:
 	/**
 	 * Throws if the group memory usage file could not be opened.
+	 *
+	 * @param group_fd a file descriptor to the cgroup directory
+	 * to be watched
 	 */
 	CgroupMemoryWatch(EventLoop &event_loop,
-			  const CgroupState &state,
+			  FileDescriptor group_fd,
 			  BoundMethod<void(uint64_t value) noexcept> _callback);
 
 	auto &GetEventLoop() const noexcept {
