@@ -1,5 +1,5 @@
 # using include_type:system to work around -Wfloat-equal
-libfmt = dependency('fmt', version: '>= 7',
+libfmt = dependency('fmt', version: '>= 9',
                     include_type: 'system',
                     fallback: ['fmt', 'fmt_dep'])
 
