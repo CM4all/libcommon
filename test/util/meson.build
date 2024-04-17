@@ -15,6 +15,7 @@ test(
     'TestStaticCache.cxx',
     'TestStringStrip.cxx',
     'TestTemplateString.cxx',
+    'TestTokenBucket.cxx',
     'TestUnaligned.cxx',
     'TestVCircularBuffer.cxx',
     include_directories: inc,
