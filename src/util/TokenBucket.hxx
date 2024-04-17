@@ -24,11 +24,11 @@ public:
 	 * to discard it
 	 */
 	constexpr bool Check(double now, double rate, double burst, double size) noexcept {
-		double available = std::min((now - zero_time) * rate, burst);
-		if (available < size)
+		double available = std::min((now - zero_time) * rate, burst) - size;
+		if (available < 0)
 			return false;
 
-		zero_time = now - (available - size) / rate;
+		zero_time = now - available / rate;
 		return true;
 	}
 };
