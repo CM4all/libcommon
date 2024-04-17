@@ -31,4 +31,16 @@ public:
 		zero_time = now - available / rate;
 		return true;
 	}
+
+	/**
+	 * A non-standard method which always updates, even if the check fails.
+	 *
+	 * @return the numer of tokens that are available after the
+	 * update
+	 */
+	constexpr double Update(double now, double rate, double burst, double size) noexcept {
+		double available = std::min((now - zero_time) * rate, burst) - size;
+		zero_time = now - available / rate;
+		return available;
+	}
 };
