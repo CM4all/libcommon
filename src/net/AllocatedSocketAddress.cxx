@@ -78,6 +78,8 @@ AllocatedSocketAddress::SetLocal(std::string_view path) noexcept
 
 	auto out = std::copy(path.begin(), path.end(), sun->sun_path);
 	if (is_abstract)
+		sun->sun_path[0] = 0;
+	else
 		*out = 0;
 }
 
