@@ -145,6 +145,14 @@ enum class Attribute : uint8_t {
 	 * An identifier for the website used for analytics.
 	 */
 	ANALYTICS_ID = 17,
+
+	/**
+	 * An identifier for the entity which has generated the
+	 * response.  This value usually comes from the
+	 * X-CM4all-Generator response header or from the
+	 * TranslationCommand::GENERATOR translation packet.
+	 */
+	GENERATOR = 18,
 };
 
 /**

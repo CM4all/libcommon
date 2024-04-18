@@ -140,8 +140,6 @@ IsValidNonEmptyString(std::string_view s) noexcept
 	return !s.empty() && IsValidString(s);
 }
 
-#if TRANSLATION_ENABLE_SPAWN
-
 static constexpr bool
 IsValidNameChar(char ch)
 {
@@ -153,8 +151,6 @@ IsValidName(std::string_view s) noexcept
 {
 	return CheckCharsNonEmpty(s, IsValidNameChar);
 }
-
-#endif // TRANSLATION_ENABLE_SPAWN
 
 [[gnu::pure]]
 static bool
@@ -4241,6 +4237,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidString(string_payload))
 			throw std::runtime_error("malformed ANALYTICS_ID packet");
 		response.analytics_id = string_payload.data();
+		return;
+
+	case TranslationCommand::GENERATOR:
+		if (!IsValidName(string_payload))
+			throw std::runtime_error("malformed GENERATOR packet");
+		response.generator = string_payload.data();
 		return;
 	}
 

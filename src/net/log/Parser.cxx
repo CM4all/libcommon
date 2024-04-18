@@ -177,6 +177,10 @@ log_server_apply_attributes(Deserializer d)
 		case Attribute::ANALYTICS_ID:
 			datagram.analytics_id = d.ReadString();
 			break;
+
+		case Attribute::GENERATOR:
+			datagram.generator = d.ReadString();
+			break;
 		}
 	}
 

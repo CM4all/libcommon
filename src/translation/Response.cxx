@@ -37,6 +37,7 @@ TranslateResponse::Clear() noexcept
 
 	token = nullptr;
 	analytics_id = nullptr;
+	generator = nullptr;
 
 #if TRANSLATION_ENABLE_LOGIN
 	no_password = nullptr;
@@ -285,6 +286,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 
 	token = alloc.CheckDup(src.token);
 	analytics_id = alloc.CheckDup(src.analytics_id);
+	generator = alloc.CheckDup(src.generator);
 
 #if TRANSLATION_ENABLE_LOGIN
 	no_password = alloc.CheckDup(src.no_password);

@@ -1254,6 +1254,11 @@ enum class TranslationCommand : uint16_t {
 	 * @see Net::Log::Attribute::ANALYTICS_ID
 	 */
 	ANALYTICS_ID = 258,
+
+	/**
+	 * @see Net::Log::Attribute::GENERATOR
+	 */
+	GENERATOR = 259,
 };
 
 struct TranslationHeader {

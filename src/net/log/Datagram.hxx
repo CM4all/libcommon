@@ -23,6 +23,8 @@ struct Datagram {
 
 	const char *analytics_id = nullptr;
 
+	const char *generator = nullptr;
+
 	const char *forwarded_to = nullptr;
 
 	const char *http_uri = nullptr, *http_referer = nullptr;
