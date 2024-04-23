@@ -140,6 +140,10 @@ private:
 		}
 
 		requests.clear_and_dispose([](Awaitable *r){
+			assert(r->ready);
+			assert(r->continuation);
+			assert(!r->continuation.done());
+
 			r->continuation.resume();
 		});
 	}
