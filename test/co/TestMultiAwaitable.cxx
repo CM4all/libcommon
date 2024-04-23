@@ -8,6 +8,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cassert>
+
 static Co::Task<void>
 NoTask()
 {
@@ -185,4 +187,221 @@ TEST(MultiAwaitable, Reuse)
 		pause.Resume();
 		ASSERT_TRUE(complete);
 	}
+}
+
+/**
+ * Delete the MultiAwaitable in the continuation.
+ */
+TEST(MultiAwaitable, ResumeDelete)
+{
+	Co::PauseTask pause;
+	ASSERT_FALSE(pause.IsAwaited());
+
+	auto m = std::make_unique<Co::MultiAwaitable>(MyTask(pause));
+	ASSERT_TRUE(m->IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+
+	auto task = [&]() -> Co::EagerTask<void> {
+		co_await *m;
+		m.reset();
+		co_return;
+	};
+
+	ASSERT_TRUE(m);
+	ASSERT_TRUE(m->IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+
+	auto waiter = task();
+
+	ASSERT_TRUE(m);
+	ASSERT_TRUE(pause.IsAwaited());
+	pause.Resume();
+
+	ASSERT_FALSE(m);
+}
+
+/**
+ * Resumed first waiter adds another waiter from within a
+ * continuation, and this waiter must not suspend at all because the
+ * MultiAwaitable is ready.
+ */
+TEST(MultiAwaitable, ResumeAdd)
+{
+	Co::PauseTask pause;
+	ASSERT_FALSE(pause.IsAwaited());
+
+	Co::PauseTask pause2;
+	ASSERT_FALSE(pause2.IsAwaited());
+
+	Co::MultiAwaitable m{MyTask(pause)};
+	ASSERT_TRUE(m.IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(pause2.IsAwaited());
+
+	bool complete1 = false, complete2 = false;
+
+	auto task1 = [&]() -> Co::EagerTask<void> {
+		co_await m;
+		pause2.Resume();
+		complete1 = true;
+		co_return;
+	};
+
+	auto task2 = [&]() -> Co::EagerTask<void> {
+		co_await pause2;
+		co_await m;
+		complete2 = true;
+		co_return;
+	};
+
+	ASSERT_TRUE(m.IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(pause2.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	auto waiter1 = task1();
+
+	ASSERT_TRUE(m.IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(pause2.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	auto waiter2 = task2();
+
+	ASSERT_TRUE(m.IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_TRUE(pause2.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	pause.Resume();
+
+	ASSERT_TRUE(complete1);
+	ASSERT_TRUE(complete2);
+}
+
+/**
+ * Cancel the second waiter from within a continuation.  This tests
+ * whether the MultiAwaitable's resume loop handles this case
+ * properly.
+ */
+TEST(MultiAwaitable, ResumeCancel)
+{
+	Co::PauseTask pause;
+	ASSERT_FALSE(pause.IsAwaited());
+
+	Co::MultiAwaitable m{MyTask(pause)};
+	ASSERT_TRUE(m.IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+
+	bool complete1 = false, complete2 = false;
+
+	Co::EagerTask<void> waiter2;
+
+	auto task1 = [&]() -> Co::EagerTask<void> {
+		assert(!waiter2.IsDefined());
+
+		co_await m;
+
+		assert(waiter2.IsDefined());
+		waiter2 = {};
+		assert(!waiter2.IsDefined());
+
+		complete1 = true;
+		co_return;
+	};
+
+	auto task2 = [&]() -> Co::EagerTask<void> {
+		co_await m;
+		complete2 = true;
+		co_return;
+	};
+
+	ASSERT_TRUE(m.IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	auto waiter1 = task1();
+
+	ASSERT_TRUE(m.IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	waiter2 = task2();
+
+	ASSERT_TRUE(m.IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	pause.Resume();
+
+	ASSERT_TRUE(complete1);
+	ASSERT_FALSE(complete2);
+}
+
+/**
+ * Like ResumeCancel, but delete the MultiAwaitable.
+ */
+TEST(MultiAwaitable, ResumeCancelDelete)
+{
+	Co::PauseTask pause;
+	ASSERT_FALSE(pause.IsAwaited());
+
+	auto m = std::make_unique<Co::MultiAwaitable>(MyTask(pause));
+	ASSERT_TRUE(m->IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+
+	bool complete1 = false, complete2 = false;
+
+	Co::EagerTask<void> waiter2;
+
+	auto task1 = [&]() -> Co::EagerTask<void> {
+		assert(!waiter2.IsDefined());
+
+		co_await *m;
+
+		assert(waiter2.IsDefined());
+		waiter2 = {};
+		assert(!waiter2.IsDefined());
+
+		complete1 = true;
+
+		m.reset();
+		co_return;
+	};
+
+	auto task2 = [&]() -> Co::EagerTask<void> {
+		co_await *m;
+		complete2 = true;
+		co_return;
+	};
+
+	ASSERT_TRUE(m->IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	auto waiter1 = task1();
+
+	ASSERT_TRUE(m->IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	waiter2 = task2();
+
+	ASSERT_TRUE(m->IsActive());
+	ASSERT_TRUE(pause.IsAwaited());
+	ASSERT_FALSE(complete1);
+	ASSERT_FALSE(complete2);
+
+	pause.Resume();
+
+	ASSERT_TRUE(complete1);
+	ASSERT_FALSE(complete2);
 }
