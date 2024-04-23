@@ -184,8 +184,7 @@ public:
 		}, awaitables);
 	}
 
-	[[nodiscard]]
-	std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
+	void await_suspend(std::coroutine_handle<> _continuation) noexcept {
 		/* at least one task is not yet ready - call
 		   await_suspend() on not-yet-ready tasks to install
 		   the completion callback */
@@ -195,8 +194,6 @@ public:
 		std::apply([&](auto &...i){
 			(i.await_suspend(), ...);
 		}, awaitables);
-
-		return std::noop_coroutine();
 	}
 
 	void await_resume() noexcept {

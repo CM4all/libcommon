@@ -50,8 +50,7 @@ TEST(LuaCoAwaitable, Basic)
 
 	ASSERT_FALSE(complete);
 
-	const auto noop = awaitable.await_suspend(callback.get());
-	ASSERT_EQ(noop, std::noop_coroutine());
+	awaitable.await_suspend(callback.get());
 
 	ASSERT_FALSE(complete);
 
@@ -89,8 +88,7 @@ TEST(LuaCoAwaitable, Cancel)
 
 		ASSERT_FALSE(complete);
 
-		const auto noop = awaitable.await_suspend(callback.get());
-		ASSERT_EQ(noop, std::noop_coroutine());
+		awaitable.await_suspend(callback.get());
 
 		ASSERT_FALSE(complete);
 

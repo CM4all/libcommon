@@ -141,10 +141,8 @@ class Cache : Factory {
 					return task.IsReady();
 				}
 
-				std::coroutine_handle<>
-				await_suspend(std::coroutine_handle<> _continuation) noexcept {
+				void await_suspend(std::coroutine_handle<> _continuation) noexcept {
 					task.AwaitSuspend(_continuation);
-					return std::noop_coroutine();
 				}
 
 				decltype(auto) await_resume() {

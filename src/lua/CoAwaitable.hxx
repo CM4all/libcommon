@@ -41,12 +41,11 @@ public:
 		return ready;
 	}
 
-	std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
+	void await_suspend(std::coroutine_handle<> _continuation) noexcept {
 		assert(!ready);
 		assert(!continuation);
 
 		continuation = _continuation;
-		return std::noop_coroutine();
 	}
 
 	void await_resume() const {

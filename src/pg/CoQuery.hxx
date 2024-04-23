@@ -85,9 +85,8 @@ public:
 				return query.ready;
 			}
 
-			std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) const noexcept {
+			void await_suspend(std::coroutine_handle<> _continuation) const noexcept {
 				query.continuation = _continuation;
-				return std::noop_coroutine();
 			}
 
 			Result await_resume() const {

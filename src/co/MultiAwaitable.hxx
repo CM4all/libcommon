@@ -53,8 +53,7 @@ class MultiAwaitable final {
 			return ready;
 		}
 
-		[[nodiscard]]
-		std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
+		void await_suspend(std::coroutine_handle<> _continuation) noexcept {
 			assert(!is_linked());
 			assert(!continuation);
 			assert(_continuation);
@@ -63,8 +62,6 @@ class MultiAwaitable final {
 			continuation = _continuation;
 
 			multi.AddRequest(*this);
-
-			return std::noop_coroutine();
 		}
 
 		void await_resume() noexcept {
