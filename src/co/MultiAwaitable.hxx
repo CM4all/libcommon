@@ -136,7 +136,11 @@ private:
 			i.ready = true;
 		}
 
-		requests.clear_and_dispose([](Awaitable *r){
+		/* move the request list to the stack just in case one
+		   of the continuations deletes the MultiAwaitable */
+		auto tmp = std::move(requests);
+
+		tmp.clear_and_dispose([](Awaitable *r){
 			assert(r->ready);
 			assert(r->continuation);
 			assert(!r->continuation.done());
