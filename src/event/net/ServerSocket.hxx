@@ -36,7 +36,7 @@ public:
 	void Listen(UniqueSocketDescriptor _fd) noexcept;
 
 	/**
-	 * Throws std::runtime_error on error.
+	 * Throws on error.
 	 */
 	void Listen(SocketAddress address,
 		    bool reuse_port=false,
