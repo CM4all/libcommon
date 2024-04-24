@@ -53,8 +53,6 @@ public:
 		return event.GetSocket();
 	}
 
-	StaticSocketAddress GetLocalAddress() const noexcept;
-
 protected:
 	/**
 	 * A new incoming connection has been established.

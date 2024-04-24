@@ -94,12 +94,6 @@ ServerSocket::ListenPath(const char *path)
 	Listen(address, false, false, nullptr);
 }
 
-StaticSocketAddress
-ServerSocket::GetLocalAddress() const noexcept
-{
-	return event.GetSocket().GetLocalAddress();
-}
-
 void
 ServerSocket::EventCallback(unsigned) noexcept
 {
