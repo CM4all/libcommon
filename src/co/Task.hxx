@@ -60,9 +60,8 @@ public:
 			return false;
 		}
 
-		template<typename PROMISE>
 		[[nodiscard]]
-		std::coroutine_handle<> await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
+		std::coroutine_handle<> await_suspend(std::coroutine_handle<promise> coro) noexcept {
 			const auto &promise = coro.promise();
 
 			if (!lazy && !promise.continuation)

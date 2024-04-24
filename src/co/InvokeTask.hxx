@@ -54,8 +54,7 @@ private:
 			return false;
 		}
 
-		template<typename PROMISE>
-		bool await_suspend(std::coroutine_handle<PROMISE> coro) noexcept {
+		bool await_suspend(std::coroutine_handle<InvokePromise> coro) noexcept {
 			assert(coro);
 			assert(coro.done());
 
