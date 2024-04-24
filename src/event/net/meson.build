@@ -4,6 +4,7 @@ event_net_sources = [
   'UdpListener.cxx',
   'MultiUdpListener.cxx',
   'SocketWrapper.cxx',
+  'PrometheusExporterListener.cxx',
 ]
 
 if get_variable('libcommon_enable_DefaultFifoBuffer', true)
@@ -16,6 +17,9 @@ event_net = static_library(
   'event_net',
   event_net_sources,
   include_directories: inc,
+  dependencies: [
+    fmt_dep,
+  ],
 )
 
 event_net_dep = declare_dependency(
