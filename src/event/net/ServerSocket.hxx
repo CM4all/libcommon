@@ -55,10 +55,6 @@ public:
 
 	StaticSocketAddress GetLocalAddress() const noexcept;
 
-	bool SetTcpDeferAccept(const int &seconds) noexcept {
-		return event.GetSocket().SetTcpDeferAccept(seconds);
-	}
-
 	void AddEvent() noexcept {
 		event.ScheduleRead();
 	}
