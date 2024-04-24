@@ -24,7 +24,7 @@ ServerSocket::Listen(UniqueSocketDescriptor _fd) noexcept
 	assert(_fd.IsDefined());
 
 	event.Open(_fd.Release());
-	AddEvent();
+	event.ScheduleRead();
 }
 
 static UniqueSocketDescriptor

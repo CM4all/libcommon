@@ -55,14 +55,6 @@ public:
 
 	StaticSocketAddress GetLocalAddress() const noexcept;
 
-	void AddEvent() noexcept {
-		event.ScheduleRead();
-	}
-
-	void RemoveEvent() noexcept {
-		event.Cancel();
-	}
-
 protected:
 	/**
 	 * A new incoming connection has been established.
