@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Task.hxx"
+#include "UniqueHandle.hxx"
 #include "util/IntrusiveList.hxx"
 
 #include <cassert>
@@ -70,6 +70,58 @@ class MultiAwaitable final {
 		}
 	};
 
+	struct MultiTask {
+		struct promise_type {
+			MultiTask *task;
+
+			[[nodiscard]]
+			auto initial_suspend() noexcept {
+				return std::suspend_never{};
+			}
+
+			[[nodiscard]]
+			auto final_suspend() noexcept {
+				/* the coroutine_handle has already
+				   been released by Wait() and the
+				   coroutine handle will be freed by
+				   our caller */
+
+				return std::suspend_never{};
+			}
+
+			[[nodiscard]]
+			auto get_return_object() noexcept {
+				return MultiTask{std::coroutine_handle<promise_type>::from_promise(*this)};
+			}
+
+			[[noreturn]]
+			void unhandled_exception() {
+				/* the coroutine_handle will be
+				   destroyed by the compiler after
+				   rethrowing the exception */
+				(void)task->coroutine.release();
+
+				throw;
+			}
+		};
+
+		UniqueHandle<promise_type> coroutine;
+
+		[[nodiscard]]
+		MultiTask() noexcept = default;
+
+		[[nodiscard]]
+		explicit MultiTask(std::coroutine_handle<promise_type> _coroutine) noexcept
+			:coroutine(_coroutine) {
+			coroutine->promise().task = this;
+		}
+
+		[[nodiscard]]
+		auto release() noexcept {
+			return coroutine.release();
+		}
+	};
+
 	/**
 	 * A list of suspended waiters.
 	 */
@@ -79,7 +131,7 @@ class MultiAwaitable final {
 	 * This refers to coroutine Wait() which executes the actual
 	 * task.
 	 */
-	EagerTask<void> task;
+	MultiTask task;
 
 public:
 	/**
@@ -154,11 +206,19 @@ private:
 	 * all waiters.
 	 */
 	[[nodiscard]]
-	EagerTask<void> Wait(auto _task) noexcept {
+	MultiTask Wait(auto _task) noexcept {
 		assert(!ready);
 
 		co_await _task;
+
+		/* move the request list to the stack just in case one
+		   of the continuations deletes the MultiAwaitable */
+		auto this_task = std::move(task);
+
 		SetReady();
+
+		/* the coroutine_handle will be freed automatically */
+		(void)this_task.release();
 	}
 
 	void AddRequest(Awaitable &r) noexcept {
