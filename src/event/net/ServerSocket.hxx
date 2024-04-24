@@ -49,6 +49,10 @@ public:
 
 	void ListenPath(const char *path);
 
+	SocketDescriptor GetSocket() const noexcept {
+		return event.GetSocket();
+	}
+
 	StaticSocketAddress GetLocalAddress() const noexcept;
 
 	bool SetTcpDeferAccept(const int &seconds) noexcept {
