@@ -37,7 +37,7 @@ TEST(MultiAwaitable, CompleteEarly)
 {
 	Co::MultiAwaitable m{NoTask()};
 
-	std::array complete{false, false, false};
+	std::array complete{false, false};
 	std::array waiters{
 		Waiter(m, complete[0]),
 		Waiter(m, complete[1]),
