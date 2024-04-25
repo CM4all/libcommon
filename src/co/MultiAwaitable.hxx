@@ -76,7 +76,13 @@ class MultiAwaitable final {
 
 			[[nodiscard]]
 			auto initial_suspend() noexcept {
-				return std::suspend_never{};
+				/* the coroutine is suspended
+				   initially; the MultiAwaitable::task
+				   field needs to be initialized
+				   before the MultiAwaitable::Wait()
+				   actually gets executed because it
+				   manipulates the task field */
+				return std::suspend_always{};
 			}
 
 			[[nodiscard]]
@@ -116,6 +122,12 @@ class MultiAwaitable final {
 			coroutine->promise().task = this;
 		}
 
+		void resume() noexcept {
+			assert(coroutine);
+
+			coroutine->resume();
+		}
+
 		[[nodiscard]]
 		auto release() noexcept {
 			assert(coroutine);
@@ -150,7 +162,9 @@ public:
 	template<typename T>
 	[[nodiscard]]
 	explicit MultiAwaitable(T &&_task) noexcept
-		:task(Wait(std::forward<T>(_task))) {}
+		:task(Wait(std::forward<T>(_task))) {
+		task.resume();
+	}
 
 	bool IsActive() const noexcept {
 		return !ready;
@@ -167,6 +181,7 @@ public:
 
 		ready = false;
 		task = Wait(std::forward<T>(_task));
+		task.resume();
 	}
 
 	/**
