@@ -47,6 +47,25 @@ TEST(MultiAwaitable, CompleteEarly)
 	ASSERT_TRUE(complete[1]);
 }
 
+/**
+ * Same as CompleteEarly(), but launch the task with Start(), which
+ * uses the MultiAwaitable::MultiTask move operator.
+ */
+TEST(MultiAwaitable, CompleteEarlyStart)
+{
+	Co::MultiAwaitable m;
+	m.Start(NoTask());
+
+	std::array complete{false, false};
+	std::array waiters{
+		Waiter(m, complete[0]),
+		Waiter(m, complete[1]),
+	};
+
+	ASSERT_TRUE(complete[0]);
+	ASSERT_TRUE(complete[1]);
+}
+
 TEST(MultiAwaitable, CompleteLate)
 {
 	Co::PauseTask pause;
