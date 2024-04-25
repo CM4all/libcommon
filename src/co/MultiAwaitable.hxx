@@ -118,6 +118,8 @@ class MultiAwaitable final {
 
 		[[nodiscard]]
 		auto release() noexcept {
+			assert(coroutine);
+
 			return coroutine.release();
 		}
 	};
