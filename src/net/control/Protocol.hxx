@@ -62,7 +62,7 @@ enum class Command {
     DUMP_POOLS = 5,
 
     /**
-     * Server statistics.
+     * Deprecated (in favor of the Prometheus exporter).
      */
     STATS = 6,
 
