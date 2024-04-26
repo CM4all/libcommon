@@ -74,8 +74,8 @@ enum class Command {
     VERBOSE = 7,
 
     /**
-     * Fade out all child processes (FastCGI, WAS, LHTTP, Delegate;
-     * but not beng-proxy workers).  These will not be used for new
+     * Fade out all child processes (FastCGI, WAS, LHTTP, Delegate).
+     * These will not be used for new
      * requests; instead, fresh child processes will be launched.
      * Idle child processes will be killed immediately, and the
      * remaining ones will be killed as soon as their current work is
