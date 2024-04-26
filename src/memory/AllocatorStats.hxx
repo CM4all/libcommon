@@ -17,10 +17,6 @@ struct AllocatorStats {
 	 */
 	std::size_t netto_size;
 
-	static constexpr AllocatorStats Zero() noexcept {
-		return { 0, 0 };
-	}
-
 	constexpr void Clear() noexcept {
 		brutto_size = 0;
 		netto_size = 0;
