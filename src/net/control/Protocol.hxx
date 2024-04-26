@@ -97,7 +97,7 @@ enum class Command {
     ENABLE_ZEROCONF = 10,
 
     /**
-     * Flush the NFS cache.
+     * Deprecated (because userspace NFS support was removed).
      */
     FLUSH_NFS_CACHE = 11,
 
