@@ -6,8 +6,8 @@
 #include "lib/fmt/RuntimeError.hxx"
 #include "event/SocketEvent.hxx"
 #include "system/Error.hxx"
-#include "net/AllocatedSocketAddress.hxx"
 #include "net/ConnectSocket.hxx"
+#include "net/LocalSocketAddress.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/IPv4Address.hxx"
@@ -213,8 +213,7 @@ try {
 static UniqueSocketDescriptor
 ConnectResolved()
 {
-	AllocatedSocketAddress address;
-	address.SetLocal("/run/systemd/resolve/io.systemd.Resolve");
+	static constexpr LocalSocketAddress address{"/run/systemd/resolve/io.systemd.Resolve"sv};
 	return CreateConnectSocket(address, SOCK_STREAM);
 }
 

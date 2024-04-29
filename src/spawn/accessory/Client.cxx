@@ -7,7 +7,7 @@
 #include "lib/fmt/RuntimeError.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "net/AllocatedSocketAddress.hxx"
+#include "net/LocalSocketAddress.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "net/SendMessage.hxx"
 #include "util/CRC32.hxx"
@@ -15,19 +15,17 @@
 
 #include <sched.h>
 
+using std::string_view_literals::operator""sv;
+
 static UniqueSocketDescriptor
-CreateConnectLocalSocket(const char *path)
+CreateConnectLocalSocket(std::string_view path)
 {
 	UniqueSocketDescriptor s;
 	if (!s.Create(AF_LOCAL, SOCK_SEQPACKET, 0))
 		throw MakeErrno("Failed to create socket");
 
-	{
-		AllocatedSocketAddress address;
-		address.SetLocal(path);
-		if (!s.Connect(address))
-			throw FmtErrno("Failed to connect to {}", path);
-	}
+	if (!s.Connect(LocalSocketAddress{path}))
+		throw FmtErrno("Failed to connect to {}", path);
 
 	return s;
 }
@@ -40,7 +38,7 @@ namespace SpawnAccessory {
 UniqueSocketDescriptor
 Connect()
 {
-	return CreateConnectLocalSocket("@cm4all-spawn");
+	return CreateConnectLocalSocket("@cm4all-spawn"sv);
 }
 
 static void

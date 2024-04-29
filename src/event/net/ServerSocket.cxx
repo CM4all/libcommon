@@ -5,6 +5,7 @@
 #include "ServerSocket.hxx"
 #include "net/IPv4Address.hxx"
 #include "net/IPv6Address.hxx"
+#include "net/LocalSocketAddress.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/StaticSocketAddress.hxx"
 #include "net/SocketConfig.hxx"
@@ -88,10 +89,7 @@ ServerSocket::ListenTCP6(unsigned port)
 void
 ServerSocket::ListenPath(const char *path)
 {
-	AllocatedSocketAddress address;
-	address.SetLocal(path);
-
-	Listen(address, false, false, nullptr);
+	Listen(LocalSocketAddress{path}, false, false, nullptr);
 }
 
 void
