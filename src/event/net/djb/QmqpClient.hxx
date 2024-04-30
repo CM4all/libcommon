@@ -20,17 +20,17 @@ public:
 	virtual void OnQmqpClientError(std::exception_ptr error) noexcept = 0;
 };
 
-class QmqpClientError : std::runtime_error {
+class QmqpClientError : public std::runtime_error {
 public:
 	using std::runtime_error::runtime_error;
 };
 
-class QmqpClientTemporaryFailure final : QmqpClientError {
+class QmqpClientTemporaryFailure final : public QmqpClientError {
 public:
 	using QmqpClientError::QmqpClientError;
 };
 
-class QmqpClientPermanentFailure final : QmqpClientError {
+class QmqpClientPermanentFailure final : public QmqpClientError {
 public:
 	using QmqpClientError::QmqpClientError;
 };
