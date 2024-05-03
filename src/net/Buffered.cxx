@@ -4,10 +4,10 @@
 
 #include "Buffered.hxx"
 #include "SocketDescriptor.hxx"
+#include "SocketError.hxx"
 #include "util/ForeignFifoBuffer.hxx"
 
 #include <cassert>
-#include <cerrno>
 
 ssize_t
 ReceiveToBuffer(const SocketDescriptor s,
@@ -39,7 +39,7 @@ SendFromBuffer(const SocketDescriptor s,
 	ssize_t nbytes = s.WriteNoWait(r);
 	if (nbytes >= 0)
 		buffer.Consume((size_t)nbytes);
-	else if (errno == EAGAIN)
+	else if (IsSocketErrorSendWouldBlock(GetSocketError()))
 		nbytes = 0;
 
 	return nbytes;
