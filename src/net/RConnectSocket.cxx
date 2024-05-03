@@ -8,6 +8,7 @@
 #include "AddressInfo.hxx"
 #include "Parser.hxx"
 #include "SocketError.hxx"
+#include "TimeoutError.hxx"
 #include "UniqueSocketDescriptor.hxx"
 
 #include <stdexcept>
@@ -27,7 +28,7 @@ ConnectWait(SocketDescriptor s, const SocketAddress address,
 	if (w < 0)
 		throw MakeSocketError("Connect wait error");
 	else if (w == 0)
-		throw std::runtime_error("Connect timeout");
+		throw TimeoutError{"Connect timeout"};
 
 	int err = s.GetError();
 	if (err != 0)
