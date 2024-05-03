@@ -13,6 +13,19 @@ UniqueSocketDescriptor
 CreateConnectSocket(const SocketAddress address, int type)
 {
 	UniqueSocketDescriptor fd;
+	if (!fd.Create(address.GetFamily(), type, 0))
+		throw MakeSocketError("Failed to create socket");
+
+	if (!fd.Connect(address))
+		throw FmtSocketError("Failed to connect to {}", address);
+
+	return fd;
+}
+
+UniqueSocketDescriptor
+CreateConnectSocketNonBlock(const SocketAddress address, int type)
+{
+	UniqueSocketDescriptor fd;
 	if (!fd.CreateNonBlock(address.GetFamily(), type, 0))
 		throw MakeSocketError("Failed to create socket");
 
@@ -25,5 +38,5 @@ CreateConnectSocket(const SocketAddress address, int type)
 UniqueSocketDescriptor
 CreateConnectDatagramSocket(const SocketAddress address)
 {
-	return CreateConnectSocket(address, SOCK_DGRAM);
+	return CreateConnectSocketNonBlock(address, SOCK_DGRAM);
 }

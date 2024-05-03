@@ -214,7 +214,7 @@ static UniqueSocketDescriptor
 ConnectResolved()
 {
 	static constexpr LocalSocketAddress address{"/run/systemd/resolve/io.systemd.Resolve"sv};
-	return CreateConnectSocket(address, SOCK_STREAM);
+	return CreateConnectSocketNonBlock(address, SOCK_STREAM);
 }
 
 void

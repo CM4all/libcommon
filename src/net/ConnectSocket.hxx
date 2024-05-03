@@ -8,12 +8,20 @@ class SocketAddress;
 class UniqueSocketDescriptor;
 
 /**
- * Create a non-blocking socket and connect it.
+ * Create a (blocking) socket and connect it.
  *
  * Throws on error.
  */
 UniqueSocketDescriptor
 CreateConnectSocket(SocketAddress address, int type);
+
+/**
+ * Create a non-blocking socket and connect it.
+ *
+ * Throws on error.
+ */
+UniqueSocketDescriptor
+CreateConnectSocketNonBlock(SocketAddress address, int type);
 
 /**
  * Create a non-blocking datagram socket and connect it.
