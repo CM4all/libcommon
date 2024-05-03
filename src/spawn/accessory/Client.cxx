@@ -6,6 +6,7 @@
 #include "Builder.hxx"
 #include "lib/fmt/RuntimeError.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "net/ConnectSocket.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/LocalSocketAddress.hxx"
 #include "net/ReceiveMessage.hxx"
@@ -17,19 +18,6 @@
 
 using std::string_view_literals::operator""sv;
 
-static UniqueSocketDescriptor
-CreateConnectLocalSocket(std::string_view path)
-{
-	UniqueSocketDescriptor s;
-	if (!s.Create(AF_LOCAL, SOCK_SEQPACKET, 0))
-		throw MakeErrno("Failed to create socket");
-
-	if (!s.Connect(LocalSocketAddress{path}))
-		throw FmtErrno("Failed to connect to {}", path);
-
-	return s;
-}
-
 namespace SpawnAccessory {
 
 /**
@@ -38,7 +26,8 @@ namespace SpawnAccessory {
 UniqueSocketDescriptor
 Connect()
 {
-	return CreateConnectLocalSocket("@cm4all-spawn"sv);
+	return CreateConnectSocket(LocalSocketAddress{"@cm4all-spawn"sv},
+				   SOCK_SEQPACKET);
 }
 
 static void
