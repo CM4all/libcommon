@@ -58,7 +58,7 @@ SocketAddress::GetLocalPath() const noexcept
 		raw.front() == '/' &&
 		/* must be null-terminated and there must not be any
 		   other null byte */
-		raw.find('\0') == raw.size()
+		raw.find('\0') == raw.size() - 1
 		? raw.data()
 		: nullptr;
 }
