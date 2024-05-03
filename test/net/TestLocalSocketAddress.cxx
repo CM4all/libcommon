@@ -17,6 +17,7 @@ TEST(LocalSocketAddress, Path1)
 	EXPECT_TRUE(a.IsDefined());
 	EXPECT_EQ(a.GetFamily(), AF_LOCAL);
 	EXPECT_EQ(ToString(a), path);
+	EXPECT_STREQ(a.GetLocalPath(), path);
 
 	const struct sockaddr *const sa = a;
 	const auto &sun = *(const struct sockaddr_un *)sa;
@@ -31,6 +32,7 @@ TEST(LocalSocketAddress, Path2)
 	EXPECT_TRUE(a.IsDefined());
 	EXPECT_EQ(a.GetFamily(), AF_LOCAL);
 	EXPECT_EQ(ToString(a), path);
+	EXPECT_STREQ(a.GetLocalPath(), path);
 
 	const struct sockaddr *const sa = a;
 	const auto &sun = *(const struct sockaddr_un *)sa;
@@ -47,6 +49,7 @@ TEST(LocalSocketAddress, Path)
 	EXPECT_TRUE(a.IsDefined());
 	EXPECT_EQ(a.GetFamily(), AF_LOCAL);
 	EXPECT_EQ(ToString(a), path);
+	EXPECT_STREQ(a.GetLocalPath(), path);
 
 	const auto &sun = *(const struct sockaddr_un *)a.GetAddress();
 	EXPECT_STREQ(sun.sun_path, path);
@@ -63,6 +66,7 @@ TEST(LocalSocketAddress, Abstract1)
 	EXPECT_TRUE(a.IsDefined());
 	EXPECT_EQ(a.GetFamily(), AF_LOCAL);
 	EXPECT_EQ(ToString(a), path);
+	EXPECT_EQ(a.GetLocalPath(), nullptr);
 
 	const struct sockaddr *const sa = a;
 	const auto &sun = *(const struct sockaddr_un *)sa;
@@ -84,6 +88,7 @@ TEST(LocalSocketAddress, Abstract)
 	EXPECT_TRUE(a.IsDefined());
 	EXPECT_EQ(a.GetFamily(), AF_LOCAL);
 	EXPECT_EQ(ToString(a), path);
+	EXPECT_EQ(a.GetLocalPath(), nullptr);
 
 	const auto &sun = *(const struct sockaddr_un *)a.GetAddress();
 
