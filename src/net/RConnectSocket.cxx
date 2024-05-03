@@ -19,9 +19,9 @@ ConnectWait(SocketDescriptor s, const SocketAddress address,
 	if (s.Connect(address))
 		return;
 
-	const auto connect_error = GetSocketError();
-	if (!IsSocketErrorConnectWouldBlock(connect_error))
-		throw MakeSocketError(connect_error, "Failed to connect");
+	if (const auto error = GetSocketError();
+	    !IsSocketErrorConnectWouldBlock(error))
+		throw MakeSocketError(error, "Failed to connect");
 
 	int w = s.WaitWritable(timeout.count());
 	if (w < 0)
