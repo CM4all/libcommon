@@ -115,7 +115,7 @@ SocketWrapper::ReadToBuffer(ForeignFifoBuffer<std::byte> &buffer) noexcept
 {
 	assert(IsValid());
 
-	return ReceiveToBuffer(GetSocket().Get(), buffer);
+	return ReceiveToBuffer(GetSocket(), buffer);
 }
 
 bool

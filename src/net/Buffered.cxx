@@ -3,24 +3,23 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Buffered.hxx"
+#include "SocketDescriptor.hxx"
 #include "util/ForeignFifoBuffer.hxx"
 
 #include <cassert>
 #include <cerrno>
-#include <cstdint>
-
-#include <sys/socket.h>
 
 ssize_t
-ReceiveToBuffer(int fd, ForeignFifoBuffer<std::byte> &buffer)
+ReceiveToBuffer(const SocketDescriptor s,
+		ForeignFifoBuffer<std::byte> &buffer) noexcept
 {
-	assert(fd >= 0);
+	assert(s.IsDefined());
 
 	auto w = buffer.Write();
 	if (w.empty())
 		return -2;
 
-	ssize_t nbytes = recv(fd, w.data(), w.size(), MSG_DONTWAIT);
+	ssize_t nbytes = s.ReadNoWait(w);
 	if (nbytes > 0)
 		buffer.Append((size_t)nbytes);
 
@@ -28,14 +27,16 @@ ReceiveToBuffer(int fd, ForeignFifoBuffer<std::byte> &buffer)
 }
 
 ssize_t
-SendFromBuffer(int fd, ForeignFifoBuffer<std::byte> &buffer)
+SendFromBuffer(const SocketDescriptor s,
+	       ForeignFifoBuffer<std::byte> &buffer) noexcept
 {
+	assert(s.IsDefined());
+
 	auto r = buffer.Read();
 	if (r.empty())
 		return -2;
 
-	ssize_t nbytes = send(fd, r.data(), r.size(),
-			      MSG_DONTWAIT|MSG_NOSIGNAL);
+	ssize_t nbytes = s.WriteNoWait(r);
 	if (nbytes >= 0)
 		buffer.Consume((size_t)nbytes);
 	else if (errno == EAGAIN)
