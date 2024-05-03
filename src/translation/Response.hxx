@@ -351,6 +351,8 @@ struct TranslateResponse {
 #if TRANSLATION_ENABLE_CACHE
 	bool uncached;
 
+	bool ignore_no_cache;
+
 	bool eager_cache;
 
 	bool auto_flush_cache;

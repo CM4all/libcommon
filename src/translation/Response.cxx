@@ -100,6 +100,7 @@ TranslateResponse::Clear() noexcept
 
 #if TRANSLATION_ENABLE_CACHE
 	uncached = false;
+	ignore_no_cache = false;
 	eager_cache = false;
 	auto_flush_cache = false;
 #endif
@@ -342,6 +343,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 
 #if TRANSLATION_ENABLE_CACHE
 	uncached = src.uncached;
+	ignore_no_cache = src.ignore_no_cache;
 	eager_cache = src.eager_cache;
 	auto_flush_cache = src.auto_flush_cache;
 #endif

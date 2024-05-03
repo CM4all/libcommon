@@ -1557,6 +1557,10 @@ public:
 		return Packet(TranslationCommand::UNCACHED);
 	}
 
+	auto &IgnoreNoCache() noexcept {
+		return Packet(TranslationCommand::IGNORE_NO_CACHE);
+	}
+
 	auto &EagerCache() noexcept {
 		return Packet(TranslationCommand::EAGER_CACHE);
 	}

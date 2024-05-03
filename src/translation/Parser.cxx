@@ -4244,6 +4244,22 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed GENERATOR packet");
 		response.generator = string_payload.data();
 		return;
+
+	case TranslationCommand::IGNORE_NO_CACHE:
+#if TRANSLATION_ENABLE_CACHE
+#if TRANSLATION_ENABLE_RADDRESS
+		if (resource_address == nullptr)
+			throw std::runtime_error("misplaced IGNORE_NO_CACHE packet");
+#endif
+
+		if (response.ignore_no_cache)
+			throw std::runtime_error("duplicate IGNORE_NO_CACHE packet");
+
+		response.ignore_no_cache = true;
+		return;
+#else // !TRANSLATION_ENABLE_CACHE
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

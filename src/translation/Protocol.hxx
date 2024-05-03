@@ -1259,6 +1259,12 @@ enum class TranslationCommand : uint16_t {
 	 * @see Net::Log::Attribute::GENERATOR
 	 */
 	GENERATOR = 259,
+
+	/**
+	 * Ignore the "Cache-Control:no-cache" request header,
+	 * i.e. don't allow the client to circumvent the HTTP cache.
+	 */
+	IGNORE_NO_CACHE = 260,
 };
 
 struct TranslationHeader {
