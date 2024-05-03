@@ -36,15 +36,16 @@ MakeListener(const SocketAddress address,
 {
 	constexpr int socktype = SOCK_STREAM;
 
-	SocketConfig config(address);
+	SocketConfig config{
+		.bind_address = AllocatedSocketAddress{address},
+		.listen = 64,
+		.reuse_port = reuse_port,
+		.free_bind = free_bind,
+		.pass_cred = true,
+	};
 
 	if (bind_to_device != nullptr)
 		config.interface = bind_to_device;
-
-	config.reuse_port = reuse_port;
-	config.free_bind = free_bind;
-	config.pass_cred = true;
-	config.listen = 64;
 
 	return config.Create(socktype);
 }

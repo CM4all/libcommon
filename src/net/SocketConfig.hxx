@@ -73,14 +73,6 @@ struct SocketConfig {
 	 */
 	bool v6only = false;
 
-	SocketConfig() = default;
-
-	explicit SocketConfig(SocketAddress _bind_address) noexcept
-		:bind_address(_bind_address) {}
-
-	explicit SocketConfig(AllocatedSocketAddress &&_bind_address) noexcept
-		:bind_address(std::move(_bind_address)) {}
-
 	/**
 	 * Apply fixups after configuration:
 	 *
