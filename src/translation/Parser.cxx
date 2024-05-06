@@ -4260,6 +4260,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else // !TRANSLATION_ENABLE_CACHE
 		break;
 #endif
+
+	case TranslationCommand::AUTO_COMPRESS_ONLY_TEXT:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (!payload.empty())
+			throw std::runtime_error{"malformed AUTO_COMPRESS_ONLY_TEXT packet"};
+
+		if (response.auto_compress_only_text)
+			throw std::runtime_error{"duplicate AUTO_COMPRESS_ONLY_TEXT packet"};
+
+		response.auto_compress_only_text = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

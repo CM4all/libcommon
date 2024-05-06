@@ -1265,6 +1265,11 @@ enum class TranslationCommand : uint16_t {
 	 * i.e. don't allow the client to circumvent the HTTP cache.
 	 */
 	IGNORE_NO_CACHE = 260,
+
+	/**
+	 * Apply #AUTO_GZIP and #AUTO_BROTLI only to text responses.
+	 */
+	AUTO_COMPRESS_ONLY_TEXT = 261,
 };
 
 struct TranslationHeader {

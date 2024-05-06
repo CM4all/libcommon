@@ -459,6 +459,11 @@ struct TranslateResponse {
 	bool auto_brotli;
 
 	/**
+	 * @see #TranslationCommand::AUTO_COMPRESS_ONLY_TEXT
+	 */
+	bool auto_compress_only_text;
+
+	/**
 	 * @see #TranslationCommand::AUTO_GZIPPED
 	 */
 	bool auto_gzipped;

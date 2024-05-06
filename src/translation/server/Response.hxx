@@ -322,6 +322,10 @@ public:
 		return Packet(TranslationCommand::AUTO_BROTLI);
 	}
 
+	auto &AutoCompressOnlyText() noexcept {
+		return Packet(TranslationCommand::AUTO_COMPRESS_ONLY_TEXT);
+	}
+
 	/**
 	 * Only for CONTENT_TYPE_LOOKUP responses.
 	 */

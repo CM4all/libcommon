@@ -167,6 +167,7 @@ TranslateResponse::Clear() noexcept
 #if TRANSLATION_ENABLE_RADDRESS
 	auto_gzip = false;
 	auto_brotli = false;
+	auto_compress_only_text = false;
 	auto_gzipped = false;
 	auto_brotli_path = false;
 #endif
@@ -428,6 +429,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 #if TRANSLATION_ENABLE_RADDRESS
 	auto_gzip = src.auto_gzip;
 	auto_brotli = src.auto_brotli;
+	auto_compress_only_text = src.auto_compress_only_text;
 	auto_gzipped = src.auto_gzipped;
 	auto_brotli_path = src.auto_brotli_path;
 #endif
