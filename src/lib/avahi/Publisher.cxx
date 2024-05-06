@@ -19,10 +19,15 @@
 
 #include <unistd.h>
 
+using std::string_view_literals::operator""sv;
+
 namespace Avahi {
 
 /**
- * Append the process id to the given prefix string.  This is used as
+ * Generate a Zeroconf service name from the specified application
+ * name.  This does two things:
+ *
+ * 1. append the process id to the given prefix string.  This is used as
  * a workaround for an avahi-daemon bug/problem: when a service gets
  * restarted, and then binds to a new port number (e.g. beng-proxy
  * with automatic port assignment), we don't get notified, and so we
@@ -30,17 +35,25 @@ namespace Avahi {
  * client name, we ensure that the exiting old process broadcasts
  * AVAHI_BROWSER_REMOVE, and the new process broadcasts
  * AVAHI_BROWSER_NEW.
+ *
+ * 2. append the host name.  This is used to disambiguate the service
+ * if you have a bunch of computers running the same software.
  */
 static std::string
-MakePidName(const char *prefix) noexcept
+MakeServiceName(const char *application_name) noexcept
 {
-	return fmt::format("{}[{}]", prefix, getpid());
+	char hostname_buffer[HOST_NAME_MAX];
+	const char *hostname = "<unknown>";
+	if (gethostname(hostname_buffer, sizeof(hostname_buffer)) == 0)
+		hostname = hostname_buffer;
+
+	return fmt::format("{}[{}] on {}"sv, application_name, getpid(), hostname);
 }
 
 Publisher::Publisher(Client &_client, const char *_name,
 		     ErrorHandler &_error_handler) noexcept
 	:error_handler(_error_handler),
-	 name(MakePidName(_name)),
+	 name(MakeServiceName(_name)),
 	 client(_client),
 	 defer_register_services(client.GetEventLoop(),
 				 BIND_THIS_METHOD(DeferredRegisterServices))
