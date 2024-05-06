@@ -1,7 +1,6 @@
 util_sources = [
   'AllocatedString.cxx',
   'DisposableBuffer.cxx',
-  'djb_hash.cxx',
   'Exception.cxx',
   'LeakDetector.cxx',
   'MimeType.cxx',
