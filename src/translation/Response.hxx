@@ -478,14 +478,15 @@ struct TranslateResponse {
 	bool no_home_authorized_keys;
 #endif
 
-	TranslateResponse() noexcept = default;
+	constexpr TranslateResponse() noexcept = default;
 	TranslateResponse(TranslateResponse &&) = default;
 	TranslateResponse &operator=(TranslateResponse &&) = default;
 
 	void Clear() noexcept;
 
 #if TRANSLATION_ENABLE_WANT
-	bool Wants(TranslationCommand cmd) const noexcept {
+	[[nodiscard]]
+	constexpr bool Wants(TranslationCommand cmd) const noexcept {
 		assert(protocol_version >= 1);
 
 		return std::find(want.begin(), want.end(), cmd) != want.end();
@@ -493,27 +494,29 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
-	[[gnu::pure]]
+	[[nodiscard]] [[gnu::pure]]
 	bool VaryContains(TranslationCommand cmd) const noexcept {
 		return std::find(vary.begin(), vary.end(), cmd) != vary.end();
 	}
 #endif
 
 #if TRANSLATION_ENABLE_SESSION
-	[[gnu::pure]]
-	bool HasAuth() const noexcept {
+	[[nodiscard]] [[gnu::pure]]
+	constexpr bool HasAuth() const noexcept {
 		return auth.data() != nullptr ||
 			auth_file != nullptr;
 	}
 
-	bool HasUntrusted() const noexcept {
+	[[nodiscard]]
+	constexpr bool HasUntrusted() const noexcept {
 		return untrusted != nullptr || untrusted_prefix != nullptr ||
 			untrusted_site_suffix != nullptr ||
 			untrusted_raw_site_suffix != nullptr;
 	}
 #endif
 
-	auto GetExpiresRelative(bool has_query) const noexcept {
+	[[nodiscard]]
+	constexpr auto GetExpiresRelative(bool has_query) const noexcept {
 		return has_query && expires_relative_with_query.count() > 0
 			? expires_relative_with_query
 			: expires_relative;
