@@ -9,7 +9,6 @@
 #pragma once
 
 #include <string_view>
-#include <utility>
 
 [[gnu::pure]]
 bool
