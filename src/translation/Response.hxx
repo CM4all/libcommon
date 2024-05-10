@@ -515,6 +515,12 @@ struct TranslateResponse {
 	}
 #endif
 
+#if TRANSLATION_ENABLE_RADDRESS
+	constexpr bool HasAutoCompress() const noexcept {
+		return auto_gzip || auto_brotli;
+	}
+#endif
+
 	[[nodiscard]]
 	constexpr auto GetExpiresRelative(bool has_query) const noexcept {
 		return has_query && expires_relative_with_query.count() > 0
