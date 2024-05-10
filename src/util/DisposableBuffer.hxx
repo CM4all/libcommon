@@ -6,8 +6,10 @@
 
 #include "DisposablePointer.hxx"
 
+#include <cstddef>
 #include <span>
 #include <string_view>
+#include <utility> // for std::forward
 
 /**
  * A #DisposablePointer wrapper which knows its size.  For convenience, it can
