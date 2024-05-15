@@ -12,6 +12,10 @@
  * provided.  Some implementations may do "delete this", but others
  * may be allocated from a custom allocator and may need different
  * ways to dispose of it.
+ *
+ * Unlike std::any, this class does not require the contained object
+ * to be copyable; quite contrary, it is designed to adopt ownership
+ * of the contained value.
  */
 class DisposablePointer {
 public:
