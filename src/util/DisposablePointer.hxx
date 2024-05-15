@@ -8,10 +8,10 @@
 
 /**
  * A generic object which is owned by somebody who doesn't know how to
- * dispose it; to do this, a function pointer for disposing it is
+ * dispose of it; to do this, a function pointer for disposing it is
  * provided.  Some implementations may do "delete this", but others
  * may be allocated from a custom allocator and may need different
- * ways to dispose it.
+ * ways to dispose of it.
  */
 class DisposablePointer {
 public:
