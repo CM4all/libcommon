@@ -671,9 +671,18 @@ public:
 	 * exists.
 	 */
 	constexpr iterator insert(reference item) noexcept {
+		return insert(ops.get_key(item), item);
+	}
+
+	/**
+	 * This insert() overloads passes the key as a separate
+	 * parameter; for example, this allows passing a key type with
+	 * a precomputed hash value.
+	 */
+	constexpr iterator insert(const auto &key, reference item) noexcept {
 		++counter;
 		auto &node = ToHook(item).item;
-		node.rotated_hash = ops.hash(ops.get_key(item));
+		node.rotated_hash = ops.hash(key);
 		root.insert(node);
 		return {&root, &node};
 	}
