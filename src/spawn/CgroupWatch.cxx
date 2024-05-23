@@ -41,13 +41,19 @@ CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
 	inotify.AddModifyWatch(ProcFdPath(OpenPath(group_fd, "memory.events.local")));
 }
 
+uint_least64_t
+CgroupMemoryWatch::GetMemoryUsage() const
+{
+	return ReadUint64(fd);
+}
+
 void
 CgroupMemoryWatch::OnInotify(int, unsigned, const char *)
 {
 	uint_least64_t value = UINT64_MAX;
 
 	try {
-		value = ReadUint64(fd);
+		value = GetMemoryUsage();
 	} catch (...) {
 		PrintException(std::current_exception());
 	}

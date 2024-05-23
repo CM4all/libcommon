@@ -31,6 +31,13 @@ public:
 		return inotify.GetEventLoop();
 	}
 
+	/**
+	 * Determines the current memory usage.
+	 *
+	 * Throws on error.
+	 */
+	uint_least64_t GetMemoryUsage() const;
+
 private:
 	/* virtual methods from class InotifyHandler */
 	void OnInotify(int wd, unsigned mask, const char *name) override;
