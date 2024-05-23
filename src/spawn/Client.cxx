@@ -576,6 +576,7 @@ SpawnServerClient::OnCgroupMemoryWarning(uint64_t memory_usage) noexcept
 {
 	if (handler != nullptr)
 		handler->OnMemoryWarning(memory_usage,
+					 config.systemd_scope_properties.memory_high,
 					 config.systemd_scope_properties.memory_max);
 }
 

@@ -10,5 +10,6 @@
 class SpawnServerClientHandler {
 public:
 	virtual void OnMemoryWarning(uint_least64_t memory_usage,
+				     uint_least64_t memory_high,
 				     uint_least64_t memory_max) noexcept = 0;
 };
