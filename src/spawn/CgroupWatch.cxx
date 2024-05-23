@@ -19,11 +19,11 @@ OpenMemoryUsage(FileDescriptor group_fd)
 	return OpenReadOnly(group_fd, "memory.current");
 }
 
-static uint64_t
+static uint_least64_t
 ReadUint64(FileDescriptor fd)
 {
 	return WithSmallTextFile<64>(fd, [](std::string_view contents){
-		const auto value = ParseInteger<uint64_t>(StripRight(contents));
+		const auto value = ParseInteger<uint_least64_t>(StripRight(contents));
 		if (!value)
 			throw std::runtime_error("Failed to parse cgroup file");
 
@@ -33,7 +33,7 @@ ReadUint64(FileDescriptor fd)
 
 CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
 				     FileDescriptor group_fd,
-				     BoundMethod<void(uint64_t value) noexcept> _callback)
+				     BoundMethod<void(uint_least64_t value) noexcept> _callback)
 	:fd(OpenMemoryUsage(group_fd)),
 	 inotify(event_loop, *this),
 	 callback(_callback)
@@ -51,7 +51,7 @@ CgroupMemoryWatch::OnInotify(int, unsigned, const char *)
 
 	next_time = now + std::chrono::seconds{10};
 
-	uint64_t value = UINT64_MAX;
+	uint_least64_t value = UINT64_MAX;
 
 	try {
 		value = ReadUint64(fd);

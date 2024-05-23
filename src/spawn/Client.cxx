@@ -572,7 +572,7 @@ try {
 #ifdef HAVE_LIBSYSTEMD
 
 inline void
-SpawnServerClient::OnCgroupMemoryWarning(uint64_t memory_usage) noexcept
+SpawnServerClient::OnCgroupMemoryWarning(uint_least64_t memory_usage) noexcept
 {
 	if (handler != nullptr)
 		handler->OnMemoryWarning(memory_usage,

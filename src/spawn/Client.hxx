@@ -154,7 +154,7 @@ private:
 
 	void Kill(ChildProcess &child_process, int signo) noexcept;
 
-	void OnCgroupMemoryWarning(uint64_t memory_usage) noexcept;
+	void OnCgroupMemoryWarning(uint_least64_t memory_usage) noexcept;
 
 public:
 	/* virtual methods from class SpawnService */

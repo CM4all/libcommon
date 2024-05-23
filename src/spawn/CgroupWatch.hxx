@@ -17,7 +17,7 @@ class CgroupMemoryWatch final : InotifyHandler {
 
 	Event::TimePoint next_time;
 
-	BoundMethod<void(uint64_t value) noexcept> callback;
+	BoundMethod<void(uint_least64_t value) noexcept> callback;
 
 public:
 	/**
@@ -28,7 +28,7 @@ public:
 	 */
 	CgroupMemoryWatch(EventLoop &event_loop,
 			  FileDescriptor group_fd,
-			  BoundMethod<void(uint64_t value) noexcept> _callback);
+			  BoundMethod<void(uint_least64_t value) noexcept> _callback);
 
 	auto &GetEventLoop() const noexcept {
 		return inotify.GetEventLoop();
