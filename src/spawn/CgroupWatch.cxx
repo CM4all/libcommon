@@ -44,13 +44,6 @@ CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
 void
 CgroupMemoryWatch::OnInotify(int, unsigned, const char *)
 {
-	const auto now = GetEventLoop().SteadyNow();
-	if (now < next_time)
-		// throttle
-		return;
-
-	next_time = now + std::chrono::seconds{10};
-
 	uint_least64_t value = UINT64_MAX;
 
 	try {

@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "event/Chrono.hxx"
 #include "event/InotifyEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
@@ -14,8 +13,6 @@ class CgroupMemoryWatch final : InotifyHandler {
 	UniqueFileDescriptor fd;
 
 	InotifyEvent inotify;
-
-	Event::TimePoint next_time;
 
 	BoundMethod<void(uint_least64_t value) noexcept> callback;
 
