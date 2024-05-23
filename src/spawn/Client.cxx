@@ -569,6 +569,17 @@ try {
 	Close();
 }
 
+uint_least64_t
+SpawnServerClient::GetMemoryUsage() const
+{
+#ifdef HAVE_LIBSYSTEMD
+	if (cgroup_memory_watch)
+		return cgroup_memory_watch->GetMemoryUsage();
+#endif
+
+	return 0;
+}
+
 #ifdef HAVE_LIBSYSTEMD
 
 inline void

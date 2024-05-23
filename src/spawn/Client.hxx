@@ -106,6 +106,14 @@ public:
 
 	UniqueSocketDescriptor Connect();
 
+	/**
+	 * Determines the current memory usage.  This may only be
+	 * called if a memory limit was configured.
+	 *
+	 * Throws on error.
+	 */
+	uint_least64_t GetMemoryUsage() const;
+
 private:
 	unsigned MakePid() noexcept {
 		++last_pid;
