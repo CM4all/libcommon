@@ -156,7 +156,7 @@ enum class Attribute : uint8_t {
 };
 
 /**
- * The record type.  Payload of #Attrbute::TYPE.
+ * The record type.  Payload of #Attribute::TYPE.
  */
 enum class Type : uint8_t {
 	/**
