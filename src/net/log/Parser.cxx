@@ -94,7 +94,7 @@ log_server_apply_attributes(Deserializer d)
 	Datagram datagram;
 
 	while (!d.empty()) {
-		const auto attr = Attribute(d.ReadByte());
+		const auto attr = static_cast<Attribute>(d.ReadByte());
 
 		switch (attr) {
 		case Attribute::NOP:
@@ -167,7 +167,7 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::TYPE:
-			datagram.type = Type(d.ReadByte());
+			datagram.type = static_cast<Type>(d.ReadByte());
 			break;
 
 		case Attribute::JSON:
