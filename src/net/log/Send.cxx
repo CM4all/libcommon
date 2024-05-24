@@ -173,6 +173,17 @@ Send(SocketDescriptor s, const Datagram &d)
 		PushString(v, d.generator);
 	}
 
+	struct {
+		Attribute attribute;
+		Net::Log::ContentType value;
+	} content_type;
+
+	if (d.content_type != ContentType{}) {
+		content_type.attribute = Attribute::CONTENT_TYPE;
+		content_type.value = d.content_type;
+		v.push_back(MakeIovecT(content_type));
+	}
+
 	Crc crc;
 
 	const auto begin = std::next(v.begin()), end = v.end();

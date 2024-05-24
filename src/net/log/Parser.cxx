@@ -181,6 +181,10 @@ log_server_apply_attributes(Deserializer d)
 		case Attribute::GENERATOR:
 			datagram.generator = d.ReadString();
 			break;
+
+		case Attribute::CONTENT_TYPE:
+			datagram.content_type = static_cast<ContentType>(d.ReadByte());
+			break;
 		}
 	}
 

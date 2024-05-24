@@ -4,6 +4,7 @@
 
 #include "OneLine.hxx"
 #include "Datagram.hxx"
+#include "ContentType.hxx"
 #include "http/Method.hxx"
 #include "net/Anonymize.hxx"
 #include "io/FileDescriptor.hxx"
@@ -171,6 +172,14 @@ try {
 		AppendFormat(b, "%llu", (unsigned long long)d.length);
 	else
 		b.Append('-');
+
+	if (options.show_content_type) {
+		if (const auto content_type = ToString(d.content_type);
+		    !content_type.empty())
+			AppendQuoted(b, content_type);
+		else
+			b.Append('-');
+	}
 
 	if (options.show_http_referer) {
 		b.Append(' ');

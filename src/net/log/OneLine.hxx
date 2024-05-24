@@ -48,6 +48,11 @@ struct OneLineOptions {
 	 * Show the HTTP "User-Agent" header?
 	 */
 	bool show_user_agent = true;
+
+	/**
+	 * Show the HTTP "Content-Type" response header?
+	 */
+	bool show_content_type = false;
 };
 
 /**

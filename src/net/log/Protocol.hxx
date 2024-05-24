@@ -153,6 +153,13 @@ enum class Attribute : uint8_t {
 	 * TranslationCommand::GENERATOR translation packet.
 	 */
 	GENERATOR = 18,
+
+	/**
+	 * A one-byte code for the Content-Type response header.
+	 *
+	 * @see #ContentType
+	 */
+	CONTENT_TYPE = 19,
 };
 
 /**

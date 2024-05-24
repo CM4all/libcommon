@@ -16,6 +16,8 @@ enum class HttpStatus : uint_least16_t;
 
 namespace Net::Log {
 
+enum class ContentType : uint8_t;
+
 struct Datagram {
 	TimePoint timestamp = TimePoint();
 
@@ -45,6 +47,8 @@ struct Datagram {
 	HttpStatus http_status = {};
 
 	Type type = Type::UNSPECIFIED;
+
+	ContentType content_type = {};
 
 	bool valid_length = false, valid_traffic = false;
 	bool valid_duration = false;

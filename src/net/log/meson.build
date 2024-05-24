@@ -1,5 +1,6 @@
 net_log = static_library(
   'net',
+  'ContentType.cxx',
   'String.cxx',
   'Parser.cxx',
   'OneLine.cxx',
