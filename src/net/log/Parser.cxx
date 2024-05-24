@@ -101,7 +101,7 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::TIMESTAMP:
-			datagram.timestamp = Net::Log::TimePoint(Net::Log::Duration(d.ReadU64()));
+			datagram.timestamp = TimePoint{Duration{d.ReadU64()}};
 			break;
 
 		case Attribute::REMOTE_HOST:

@@ -146,7 +146,7 @@ Serialize(void *buffer, std::size_t size, const Datagram &d)
 		w.WriteBE64(d.duration.count());
 	}
 
-	if (d.type != Net::Log::Type::UNSPECIFIED) {
+	if (d.type != Type::UNSPECIFIED) {
 		w.WriteAttribute(Attribute::TYPE);
 		w.WriteT(d.type);
 	}
