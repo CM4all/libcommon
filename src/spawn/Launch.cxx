@@ -16,6 +16,7 @@
 #include "system/ProcessName.hxx"
 #include "net/EasyMessage.hxx"
 #include "net/SocketPair.hxx"
+#include "io/Pipe.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
 #include "util/PrintException.hxx"
@@ -277,9 +278,7 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	 * If an error occurs during setup, the child process will
 	 * write an error message to this pipe.
 	 */
-	UniqueFileDescriptor error_pipe_r, error_pipe_w;
-	if (!UniqueFileDescriptor::CreatePipe(error_pipe_r, error_pipe_w))
-		throw MakeErrno("pipe() failed");
+	auto [error_pipe_r, error_pipe_w] = CreatePipe();
 
 	bool pid_namespace = true;
 
