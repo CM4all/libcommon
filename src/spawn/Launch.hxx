@@ -18,6 +18,12 @@ struct LaunchSpawnServerResult {
 	 * A seqpacket socket connection to the spawner.
 	 */
 	UniqueSocketDescriptor socket;
+
+	/**
+	 * An O_PATH file descriptor of the cgroup managed by the
+	 * spawner.
+	 */
+	UniqueFileDescriptor cgroup;
 };
 
 /**

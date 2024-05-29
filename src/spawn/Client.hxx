@@ -65,13 +65,13 @@ class SpawnServerClient final : public SpawnService {
 	std::unique_ptr<CgroupMemoryWatch> cgroup_memory_watch;
 #endif
 
+	const bool cgroups;
+
 	/**
 	 * Call UidGid::Verify() before sending the spawn request to the
 	 * server?
 	 */
 	const bool verify;
-
-	bool cgroups = false;
 
 	bool shutting_down = false;
 
@@ -79,6 +79,7 @@ public:
 	explicit SpawnServerClient(EventLoop &event_loop,
 				   const SpawnConfig &_config,
 				   UniqueSocketDescriptor _socket,
+				   FileDescriptor cgroup,
 				   bool _verify=true) noexcept;
 	~SpawnServerClient() noexcept;
 

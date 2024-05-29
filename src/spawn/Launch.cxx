@@ -14,6 +14,7 @@
 #include "system/Error.hxx"
 #include "system/Mount.hxx"
 #include "system/ProcessName.hxx"
+#include "net/EasyMessage.hxx"
 #include "net/SocketPair.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
@@ -235,6 +236,15 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 #endif // HAVE_LIBSYSTEMD
 
 	try {
+		EasySendMessage(socket, cgroup_state.group_fd);
+	} catch (...) {
+		WriteErrorPipe(error_pipe_w,
+			       "Failed to send cgroup fd: ",
+			       std::current_exception());
+		return EXIT_FAILURE;
+	}
+
+	try {
 		DropCapabilities();
 	} catch (...) {
 		fprintf(stderr, "Failed to drop capabilities: ");
@@ -330,8 +340,12 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook)
 	auto pidfd = LaunchSpawnServer(config, hook, std::move(for_server),
 				       [&]{ for_client.Close(); });
 
+	(void)for_client.WaitReadable(-1);
+	auto cgroup = EasyReceiveMessageWithOneFD(for_client);
+
 	return {
 		.pidfd = std::move(pidfd),
 		.socket = std::move(for_client),
+		.cgroup = std::move(cgroup),
 	};
 }

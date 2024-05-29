@@ -64,12 +64,22 @@ SpawnServerClient::ChildProcessGetKey::operator()(const ChildProcess &i) const n
 SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 				     const SpawnConfig &_config,
 				     UniqueSocketDescriptor _socket,
+				     FileDescriptor cgroup,
 				     bool _verify) noexcept
 	:config(_config),
 	 event(event_loop, BIND_THIS_METHOD(OnSocketEvent), _socket.Release()),
+	 cgroups(cgroup.IsDefined()),
 	 verify(_verify)
 {
 	event.ScheduleRead();
+
+#ifdef HAVE_LIBSYSTEMD
+	if (cgroup.IsDefined() &&
+	    config.systemd_scope_properties.HaveMemoryLimit())
+		cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>(event_loop,
+									  cgroup,
+									  BIND_THIS_METHOD(OnCgroupMemoryWarning));
+#endif
 }
 
 SpawnServerClient::~SpawnServerClient() noexcept
@@ -473,28 +483,12 @@ SpawnServerClient::HandleExitMessage(SpawnPayload payload)
 
 inline void
 SpawnServerClient::HandleMessage(std::span<const std::byte> payload,
-				 std::span<UniqueFileDescriptor> fds)
+				 [[maybe_unused]] std::span<UniqueFileDescriptor> fds)
 {
 	const auto cmd = (SpawnResponseCommand)payload.front();
 	payload = payload.subspan(1);
 
 	switch (cmd) {
-	case SpawnResponseCommand::CGROUPS_AVAILABLE:
-		cgroups = true;
-
-#ifdef HAVE_LIBSYSTEMD
-		if (!fds.empty() &&
-		    config.systemd_scope_properties.HaveMemoryLimit() &&
-		    !shutting_down)
-			cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>(GetEventLoop(),
-										  fds.front(),
-										  BIND_THIS_METHOD(OnCgroupMemoryWarning));
-#else
-		(void)fds;
-#endif
-
-		break;
-
 	case SpawnResponseCommand::EXIT:
 		HandleExitMessage(SpawnPayload(payload));
 		break;

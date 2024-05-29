@@ -953,26 +953,12 @@ try {
 	RemoveConnection();
 }
 
-static void
-AnnounceCgroup(SocketDescriptor s, FileDescriptor group_fd) noexcept
-{
-	static constexpr auto cmd = SpawnResponseCommand::CGROUPS_AVAILABLE;
-	EasySendMessage(s, ReferenceAsBytes(cmd), group_fd);
-}
-
 void
 RunSpawnServer(const SpawnConfig &config, const CgroupState &cgroup_state,
 	       bool has_mount_namespace,
 	       SpawnHook *hook,
 	       UniqueSocketDescriptor socket)
 {
-	if (cgroup_state.IsEnabled()) {
-		/* tell the client that the cgroups feature is available;
-		   there is no other way for the client to know if we don't
-		   tell him; see SpawnServerClient::SupportsCgroups() */
-		AnnounceCgroup(socket, cgroup_state.group_fd);
-	}
-
 	SpawnServerProcess process(config, cgroup_state, has_mount_namespace, hook);
 	process.AddConnection(std::move(socket));
 	process.Run();
