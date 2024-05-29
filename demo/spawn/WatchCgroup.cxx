@@ -12,8 +12,7 @@
 #include "util/StringCompare.hxx"
 #include "AllocatorPtr.hxx"
 
-#include <inttypes.h>
-#include <stdio.h>
+#include <fmt/core.h>
 
 struct Usage {};
 
@@ -28,7 +27,7 @@ public:
 
 private:
 	void OnCgroupWatch(uint64_t value) noexcept {
-		printf("%" PRIu64 "\n", value);
+		fmt::print("{}\n", value);
 	}
 };
 
@@ -55,9 +54,7 @@ try {
 
 	return EXIT_SUCCESS;
 } catch (Usage) {
-	fprintf(stderr, "Usage: WatchCgroup"
-		" SCOPE"
-		"\n");
+	fmt::print(stderr, "Usage: WatchCgroup SCOPE\n");
 	return EXIT_FAILURE;
 } catch (...) {
 	PrintException(std::current_exception());

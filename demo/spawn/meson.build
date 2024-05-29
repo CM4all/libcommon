@@ -48,5 +48,6 @@ executable(
     net_dep,
     system_dep,
     util_dep,
+    fmt_dep,
   ],
 )
