@@ -4,17 +4,27 @@
 
 #pragma once
 
+#include "net/UniqueSocketDescriptor.hxx"
+#include "io/UniqueFileDescriptor.hxx"
+
 struct SpawnConfig;
 class SpawnHook;
 class UniqueSocketDescriptor;
+
+struct LaunchSpawnServerResult {
+	UniqueFileDescriptor pidfd;
+
+	/**
+	 * A seqpacket socket connection to the spawner.
+	 */
+	UniqueSocketDescriptor socket;
+};
 
 /**
  * An overload which creates the socketpair automatically and returns
  * the connection (but discards the pidfd).
  *
  * Throws on error.
- *
- * @return a seqpacket socket connection to the spawner
  */
-UniqueSocketDescriptor
+LaunchSpawnServerResult
 LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook);

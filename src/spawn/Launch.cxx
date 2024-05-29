@@ -14,11 +14,9 @@
 #include "system/Error.hxx"
 #include "system/Mount.hxx"
 #include "system/ProcessName.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
 #include "net/SocketPair.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
-#include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
 
 #ifdef HAVE_LIBCAP
@@ -324,13 +322,16 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	return pidfd;
 }
 
-UniqueSocketDescriptor
+LaunchSpawnServerResult
 LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook)
 {
 	auto [for_client, for_server] = CreateSocketPairNonBlock(SOCK_SEQPACKET);
 
-	LaunchSpawnServer(config, hook, std::move(for_server),
-			  [&]{ for_client.Close(); });
+	auto pidfd = LaunchSpawnServer(config, hook, std::move(for_server),
+				       [&]{ for_client.Close(); });
 
-	return std::move(for_client);
+	return {
+		.pidfd = std::move(pidfd),
+		.socket = std::move(for_client),
+	};
 }
