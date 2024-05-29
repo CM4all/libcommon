@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
+#include <concepts>
 #include <cstdint>
 #include <array>
 #include <exception>
@@ -14,8 +15,6 @@
 #include <string_view>
 #include <tuple>
 #include <utility>
-
-#include <inttypes.h>
 
 namespace LoggerDetail {
 
@@ -63,55 +62,15 @@ struct ParamWrapper<std::exception_ptr> : ParamWrapper<std::string> {
 	explicit ParamWrapper(std::exception_ptr ep) noexcept;
 };
 
-template<>
-struct ParamWrapper<int> {
-	char data[16];
-	size_t size;
+template<std::integral T>
+struct ParamWrapper<T> {
+	fmt::format_int buffer;
 
-	ParamWrapper(int _value) noexcept
-		:size(sprintf(data, "%i", _value)) {}
-
-	std::string_view GetValue() const noexcept {
-		return {data, size};
-	}
-};
-
-template<>
-struct ParamWrapper<unsigned> {
-	char data[16];
-	size_t size;
-
-	ParamWrapper(int _value) noexcept
-		:size(sprintf(data, "%u", _value)) {}
+	ParamWrapper(T _value) noexcept
+		:buffer(_value) {}
 
 	std::string_view GetValue() const noexcept {
-		return {data, size};
-	}
-};
-
-template<>
-struct ParamWrapper<int64_t> {
-	char data[32];
-	size_t size;
-
-	ParamWrapper(int64_t _value) noexcept
-		:size(sprintf(data, "%" PRId64, _value)) {}
-
-	std::string_view GetValue() const noexcept {
-		return {data, size};
-	}
-};
-
-template<>
-struct ParamWrapper<uint64_t> {
-	char data[32];
-	size_t size;
-
-	ParamWrapper(uint64_t _value) noexcept
-		:size(sprintf(data, "%" PRIu64, _value)) {}
-
-	std::string_view GetValue() const noexcept {
-		return {data, size};
+		return buffer.c_str();
 	}
 };
 
