@@ -26,7 +26,7 @@
 
 #include <fmt/format.h>
 
-#include <functional>
+#include <concepts>
 
 #include <sched.h>
 #include <fcntl.h> // for AT_SYMLINK_NOFOLLOW
@@ -271,7 +271,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 static UniqueFileDescriptor
 LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 		  UniqueSocketDescriptor socket,
-		  std::function<void()> post_clone)
+		  std::invocable<> auto post_clone)
 {
 	/**
 	 * If an error occurs during setup, the child process will
