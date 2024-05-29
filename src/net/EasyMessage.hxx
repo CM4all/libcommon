@@ -12,7 +12,8 @@ class FileDescriptor;
 class UniqueFileDescriptor;
 
 /**
- * Sends a message with a contiguous payload and one file descriptor.
+ * Sends a message with a contiguous payload and one (optional) file
+ * descriptor.
  *
  * Throws on error.
  */
@@ -21,7 +22,8 @@ EasySendMessage(SocketDescriptor s, std::span<const std::byte> payload,
 		FileDescriptor fd);
 
 /**
- * Sends a message with a null byte payload and one file descriptor.
+ * Sends a message with a null byte payload and one (optional) file
+ * descriptor.
  *
  * Throws on error.
  */

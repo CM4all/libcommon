@@ -19,7 +19,8 @@ EasySendMessage(SocketDescriptor s, std::span<const std::byte> payload,
 	MessageHeader msg{v};
 
 	ScmRightsBuilder<1> srb(msg);
-	srb.push_back(fd.Get());
+	if (fd.IsDefined())
+		srb.push_back(fd.Get());
 	srb.Finish(msg);
 
 	SendMessage(s, msg, MSG_NOSIGNAL);
