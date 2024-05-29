@@ -27,6 +27,8 @@
 
 #include <fmt/format.h>
 
+#include <functional>
+
 #include <sched.h>
 #include <fcntl.h> // for AT_SYMLINK_NOFOLLOW
 #include <unistd.h>
@@ -253,7 +255,12 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	}
 }
 
-UniqueFileDescriptor
+/**
+ * Throws on error.
+ *
+ * @return a pidfd
+ */
+static UniqueFileDescriptor
 LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 		  UniqueSocketDescriptor socket,
 		  std::function<void()> post_clone)
