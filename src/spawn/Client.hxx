@@ -9,6 +9,7 @@
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "config.h"
 
@@ -18,10 +19,8 @@
 #include <span>
 
 struct PreparedChildProcess;
-class CgroupMemoryWatch;
 class SpawnPayload;
 class SpawnSerializer;
-class SpawnServerClientHandler;
 
 class SpawnServerClient final : public SpawnService {
 	struct ChildProcess;
@@ -59,11 +58,11 @@ class SpawnServerClient final : public SpawnService {
 
 	MultiReceiveMessage receive{16, 1024, CMSG_SPACE(sizeof(int)), 1};
 
-	SpawnServerClientHandler *handler = nullptr;
-
-#ifdef HAVE_LIBSYSTEMD
-	std::unique_ptr<CgroupMemoryWatch> cgroup_memory_watch;
-#endif
+	/**
+	 * An O_PATH file descriptor of the cgroup managed by the
+	 * spawner (delegated from systemd).
+	 */
+	UniqueFileDescriptor cgroup;
 
 	const bool cgroups;
 
@@ -79,7 +78,7 @@ public:
 	explicit SpawnServerClient(EventLoop &event_loop,
 				   const SpawnConfig &_config,
 				   UniqueSocketDescriptor _socket,
-				   FileDescriptor cgroup,
+				   bool _cgroups,
 				   bool _verify=true) noexcept;
 	~SpawnServerClient() noexcept;
 
@@ -99,21 +98,9 @@ public:
 		return cgroups;
 	}
 
-	void SetHandler(SpawnServerClientHandler &_handler) noexcept {
-		handler = &_handler;
-	}
-
 	void Shutdown() noexcept;
 
 	UniqueSocketDescriptor Connect();
-
-	/**
-	 * Determines the current memory usage.  This may only be
-	 * called if a memory limit was configured.
-	 *
-	 * Throws on error.
-	 */
-	uint_least64_t GetMemoryUsage() const;
 
 private:
 	unsigned MakePid() noexcept {
@@ -162,8 +149,6 @@ private:
 	void OnSocketEvent(unsigned events) noexcept;
 
 	void Kill(ChildProcess &child_process, int signo) noexcept;
-
-	void OnCgroupMemoryWarning(uint_least64_t memory_usage) noexcept;
 
 public:
 	/* virtual methods from class SpawnService */

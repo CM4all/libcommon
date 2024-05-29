@@ -3,9 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Client.hxx"
-#include "CgroupWatch.hxx"
 #include "ProcessHandle.hxx"
-#include "Handler.hxx"
 #include "IProtocol.hxx"
 #include "Builder.hxx"
 #include "Parser.hxx"
@@ -64,22 +62,14 @@ SpawnServerClient::ChildProcessGetKey::operator()(const ChildProcess &i) const n
 SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 				     const SpawnConfig &_config,
 				     UniqueSocketDescriptor _socket,
-				     FileDescriptor cgroup,
+				     bool _cgroups,
 				     bool _verify) noexcept
 	:config(_config),
 	 event(event_loop, BIND_THIS_METHOD(OnSocketEvent), _socket.Release()),
-	 cgroups(cgroup.IsDefined()),
+	 cgroups(_cgroups),
 	 verify(_verify)
 {
 	event.ScheduleRead();
-
-#ifdef HAVE_LIBSYSTEMD
-	if (cgroup.IsDefined() &&
-	    config.systemd_scope_properties.HaveMemoryLimit())
-		cgroup_memory_watch = std::make_unique<CgroupMemoryWatch>(event_loop,
-									  cgroup,
-									  BIND_THIS_METHOD(OnCgroupMemoryWarning));
-#endif
 }
 
 SpawnServerClient::~SpawnServerClient() noexcept
@@ -99,10 +89,6 @@ void
 SpawnServerClient::Shutdown() noexcept
 {
 	shutting_down = true;
-
-#ifdef HAVE_LIBSYSTEMD
-	cgroup_memory_watch.reset();
-#endif
 
 	ShutdownComplete();
 }
@@ -562,27 +548,3 @@ try {
 	PrintException(std::current_exception());
 	Close();
 }
-
-uint_least64_t
-SpawnServerClient::GetMemoryUsage() const
-{
-#ifdef HAVE_LIBSYSTEMD
-	if (cgroup_memory_watch)
-		return cgroup_memory_watch->GetMemoryUsage();
-#endif
-
-	return 0;
-}
-
-#ifdef HAVE_LIBSYSTEMD
-
-inline void
-SpawnServerClient::OnCgroupMemoryWarning(uint_least64_t memory_usage) noexcept
-{
-	if (handler != nullptr)
-		handler->OnMemoryWarning(memory_usage,
-					 config.systemd_scope_properties.memory_high,
-					 config.systemd_scope_properties.memory_max);
-}
-
-#endif
