@@ -5,6 +5,7 @@
 #pragma once
 
 #include "event/InotifyEvent.hxx"
+#include "event/PipeEvent.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <cstdint>
@@ -13,6 +14,11 @@ class CgroupMemoryWatch final : InotifyHandler {
 	UniqueFileDescriptor fd;
 
 	InotifyEvent inotify;
+
+	/**
+	 * Subscription for "memory.pressure".
+	 */
+	PipeEvent pressure;
 
 	BoundMethod<void(uint_least64_t value) noexcept> callback;
 
@@ -27,6 +33,8 @@ public:
 			  FileDescriptor group_fd,
 			  BoundMethod<void(uint_least64_t value) noexcept> _callback);
 
+	~CgroupMemoryWatch() noexcept;
+
 	auto &GetEventLoop() const noexcept {
 		return inotify.GetEventLoop();
 	}
@@ -39,6 +47,8 @@ public:
 	uint_least64_t GetMemoryUsage() const;
 
 private:
+	void OnPressure(unsigned events) noexcept;
+
 	/* virtual methods from class InotifyHandler */
 	void OnInotify(int wd, unsigned mask, const char *name) override;
 	void OnInotifyError(std::exception_ptr error) noexcept override;
