@@ -28,6 +28,10 @@ ParseDuration(const char *s)
 		resolution = std::chrono::hours{1};
 	else if (StringIsEqual(endptr, "d"))
 		resolution = std::chrono::hours{24};
+	else if (StringIsEqual(endptr, "ms"))
+		resolution = std::chrono::milliseconds{1};
+	else if (StringIsEqual(endptr, "us"))
+		resolution = std::chrono::microseconds{1};
 	else
 		throw std::invalid_argument{"Invalid unit"};
 
