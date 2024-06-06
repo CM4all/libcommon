@@ -10,8 +10,8 @@
 #include <cstdlib> // for strtoll()
 #include <stdexcept>
 
-static std::pair<std::chrono::system_clock::duration,
-		 std::chrono::system_clock::duration>
+std::pair<std::chrono::system_clock::duration,
+	  std::chrono::system_clock::duration>
 ParseDuration(const char *s)
 {
 	char *endptr;
