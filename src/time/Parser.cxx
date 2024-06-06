@@ -20,28 +20,15 @@ ParseDuration(const char *s)
 		throw std::invalid_argument{"Failed to parse number"};
 
 	std::chrono::system_clock::duration resolution;
-	switch (*endptr) {
-	case 's':
+	if (StringIsEqual(endptr, "s"))
 		resolution = std::chrono::seconds{1};
-		break;
-
-	case 'm':
+	else if (StringIsEqual(endptr, "m"))
 		resolution = std::chrono::minutes{1};
-		break;
-
-	case 'h':
+	else if (StringIsEqual(endptr, "h"))
 		resolution = std::chrono::hours{1};
-		break;
-
-	case 'd':
+	else if (StringIsEqual(endptr, "d"))
 		resolution = std::chrono::hours{24};
-		break;
-
-	default:
-		throw std::invalid_argument{"Invalid unit"};
-	}
-
-	if (endptr[1] != 0)
+	else
 		throw std::invalid_argument{"Invalid unit"};
 
 	return {
