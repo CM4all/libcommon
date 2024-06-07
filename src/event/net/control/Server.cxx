@@ -84,9 +84,12 @@ bool
 Server::OnUdpDatagram(std::span<const std::byte> payload,
 		      std::span<UniqueFileDescriptor> fds,
 		      SocketAddress address, int uid)
-{
+try {
 	control_server_decode(*this, payload.data(), payload.size(),
 			      fds, address, uid, handler);
+	return true;
+} catch (...) {
+	handler.OnControlError(std::current_exception());
 	return true;
 }
 
