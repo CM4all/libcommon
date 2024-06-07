@@ -64,7 +64,7 @@ public:
 	 * Obtains the underlying socket, which can be used to send
 	 * replies.
 	 */
-	SocketDescriptor GetSocket() noexcept {
+	SocketDescriptor GetSocket() const noexcept {
 		return event.GetSocket();
 	}
 
