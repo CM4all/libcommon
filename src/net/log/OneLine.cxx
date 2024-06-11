@@ -174,6 +174,7 @@ try {
 		b.Append('-');
 
 	if (options.show_content_type) {
+		b.Append(' ');
 		if (const auto content_type = ToString(d.content_type);
 		    !content_type.empty())
 			AppendQuoted(b, content_type);
