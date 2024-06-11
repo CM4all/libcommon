@@ -225,6 +225,7 @@ try {
 		AppendAnonymize(b, d.remote_host);
 	else
 		b.Append(d.remote_host);
+	b.Append(' ');
 
 	b.Append('[');
 	if (d.HasTimestamp())
