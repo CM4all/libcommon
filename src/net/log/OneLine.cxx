@@ -209,6 +209,14 @@ FormatOneLineMessage(char *buffer, size_t buffer_size,
 try {
 	StringBuilder b(buffer, buffer_size);
 
+	if (options.iso8601) {
+		if (d.HasTimestamp())
+			b.Append(FormatISO8601(ToSystem(d.timestamp)).c_str());
+		else
+			b.Append('-');
+		b.Append(' ');
+	}
+
 	if (options.show_site) {
 		b.Append(OptionalString(d.site));
 		b.Append(' ');
@@ -225,14 +233,16 @@ try {
 		AppendAnonymize(b, d.remote_host);
 	else
 		b.Append(d.remote_host);
-	b.Append(' ');
 
-	b.Append('[');
-	if (d.HasTimestamp())
-		AppendTimestamp(b, d.timestamp);
-	else
-		b.Append('-');
-	b.Append(']');
+	if (!options.iso8601) {
+		b.Append(' ');
+		b.Append('[');
+		if (d.HasTimestamp())
+			AppendTimestamp(b, d.timestamp);
+		else
+			b.Append('-');
+		b.Append(']');
+	}
 
 	if (d.message.data() != nullptr) {
 		b.Append(' ');
