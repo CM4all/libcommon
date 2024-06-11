@@ -219,6 +219,13 @@ try {
 		b.Append(' ');
 	}
 
+	if (d.remote_host == nullptr)
+		b.Append('-');
+	else if (options.anonymize)
+		AppendAnonymize(b, d.remote_host);
+	else
+		b.Append(d.remote_host);
+
 	b.Append('[');
 	if (d.HasTimestamp())
 		AppendTimestamp(b, d.timestamp);
