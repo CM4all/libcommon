@@ -268,14 +268,14 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 }
 
 const Mount *
-MountNamespaceOptions::FindMountHome() const noexcept
+MountNamespaceOptions::FindBindMountSource(const char *source) const noexcept
 {
-	assert(home != nullptr);
-	assert(*home == '/');
+	assert(source != nullptr);
+	assert(*source == '/');
 
 	/* skip the leading slash which is also skipped in
 	   Mount::Source */
-	const char *const source = home + 1;
+	++source;
 
 	for (const auto &i : mounts)
 		if (i.type == Mount::Type::BIND &&

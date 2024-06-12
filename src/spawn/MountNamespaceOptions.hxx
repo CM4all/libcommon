@@ -143,5 +143,10 @@ private:
 	}
 
 	[[gnu::pure]]
-	const Mount *FindMountHome() const noexcept;
+	const Mount *FindBindMountSource(const char *source) const noexcept;
+
+	[[gnu::pure]]
+	const Mount *FindMountHome() const noexcept {
+		return FindBindMountSource(home);
+	}
 };
