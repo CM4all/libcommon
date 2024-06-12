@@ -112,6 +112,15 @@ struct Mount : IntrusiveForwardListHook {
 
 	Mount(AllocatorPtr alloc, const Mount &src) noexcept;
 
+	/**
+	 * Compare the source path with the specified one and return
+	 * true if they are equal.
+	 *
+	 * @param path an absolute path
+	 */
+	[[gnu::pure]]
+	bool IsSourcePath(const char *path) const noexcept;
+
 #if TRANSLATION_ENABLE_EXPAND
 	bool IsExpandable() const noexcept {
 		return expand_source;

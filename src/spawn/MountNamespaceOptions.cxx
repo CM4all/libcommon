@@ -15,7 +15,6 @@
 #include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
 #include "util/ScopeExit.hxx"
-#include "util/StringAPI.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
@@ -273,13 +272,9 @@ MountNamespaceOptions::FindBindMountSource(const char *source) const noexcept
 	assert(source != nullptr);
 	assert(*source == '/');
 
-	/* skip the leading slash which is also skipped in
-	   Mount::Source */
-	++source;
-
 	for (const auto &i : mounts)
 		if (i.type == Mount::Type::BIND &&
-		    StringIsEqual(i.source, source))
+		    i.IsSourcePath(source))
 			return &i;
 
 	return nullptr;

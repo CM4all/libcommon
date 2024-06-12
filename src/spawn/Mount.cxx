@@ -13,6 +13,7 @@
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/SpanCast.hxx"
+#include "util/StringAPI.hxx"
 #include "util/StringSplit.hxx"
 #include "AllocatorPtr.hxx"
 
@@ -49,6 +50,19 @@ Mount::CloneAll(AllocatorPtr alloc, const IntrusiveForwardList<Mount> &src) noex
 		pos = dest.insert_after(pos, *alloc.New<Mount>(alloc, i));
 
 	return dest;
+}
+
+bool
+Mount::IsSourcePath(const char *path) const noexcept
+{
+	assert(path != nullptr);
+	assert(*path == '/');
+	assert(source != nullptr);
+
+	/* skip the leading slash which is also skipped in source */
+	++path;
+
+	return StringIsEqual(source, path);
 }
 
 #if TRANSLATION_ENABLE_EXPAND
