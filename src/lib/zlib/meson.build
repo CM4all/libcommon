@@ -2,7 +2,6 @@ zlib = dependency('zlib')
 
 zlib = static_library(
   'zlib',
-  'Error.cxx',
   'GunzipReader.cxx',
   'GzipOutputStream.cxx',
   include_directories: inc,
