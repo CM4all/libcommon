@@ -38,6 +38,10 @@ public:
 	explicit ThreadQueue(EventLoop &event_loop) noexcept;
 	~ThreadQueue() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return notify.GetEventLoop();
+	}
+
 	/**
 	 * If this mode is enabled, then the eventfd will be
 	 * unregistered whenever the queue is empty.

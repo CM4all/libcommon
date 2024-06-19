@@ -24,6 +24,10 @@ public:
 	Notify(EventLoop &event_loop, Callback _callback) noexcept;
 	~Notify() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	void Enable() noexcept {
 		event.ScheduleRead();
 	}
