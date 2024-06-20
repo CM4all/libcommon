@@ -293,6 +293,10 @@ public:
 		return Packet(TranslationCommand::REGEX_TAIL);
 	}
 
+	auto &RegexRaw() noexcept {
+		return Packet(TranslationCommand::REGEX_RAW);
+	}
+
 	auto &RegexUnescape() noexcept {
 		return Packet(TranslationCommand::REGEX_UNESCAPE);
 	}

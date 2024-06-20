@@ -4274,6 +4274,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::REGEX_RAW:
+#if TRANSLATION_ENABLE_EXPAND
+		if (!payload.empty())
+			throw std::runtime_error{"malformed REGEX_RAW packet"};
+
+		if (response.regex == nullptr)
+			throw std::runtime_error{"misplaced REGEX_RAW packet"};
+
+		if (response.regex_raw)
+			throw std::runtime_error{"duplicate REGEX_RAW packet"};
+
+		response.regex_raw = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

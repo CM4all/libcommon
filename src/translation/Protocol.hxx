@@ -1270,6 +1270,11 @@ enum class TranslationCommand : uint16_t {
 	 * Apply #AUTO_GZIP and #AUTO_BROTLI only to text responses.
 	 */
 	AUTO_COMPRESS_ONLY_TEXT = 261,
+
+	/**
+	 * Apply #REGEX to the raw URI, i.e. do not normalize it.
+	 */
+	REGEX_RAW = 262,
 };
 
 struct TranslationHeader {

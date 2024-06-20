@@ -112,7 +112,7 @@ TranslateResponse::Clear() noexcept
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND
-	regex_tail = regex_unescape = inverse_regex_unescape = false;
+	regex_tail = regex_raw = regex_unescape = inverse_regex_unescape = false;
 	expand_site = false;
 	expand_document_root = false;
 	expand_redirect = false;
@@ -357,6 +357,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 
 #if TRANSLATION_ENABLE_EXPAND
 	regex_tail = src.regex_tail;
+	regex_raw = src.regex_raw;
 	regex_unescape = src.regex_unescape;
 	inverse_regex_unescape = src.inverse_regex_unescape;
 	expand_site = src.expand_site;

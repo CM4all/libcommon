@@ -367,7 +367,7 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_EXPAND
-	bool regex_tail, regex_unescape, inverse_regex_unescape;
+	bool regex_tail, regex_raw, regex_unescape, inverse_regex_unescape;
 
 	bool expand_site;
 	bool expand_document_root;
