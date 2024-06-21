@@ -13,6 +13,7 @@
 #include "ExitListener.hxx"
 #include "system/Error.hxx"
 #include "net/SocketPair.hxx"
+#include "util/Cancellable.hxx"
 #include "util/PrintException.hxx"
 
 #include <stdexcept>
@@ -22,6 +23,33 @@
 #include <sys/signal.h>
 
 static constexpr size_t MAX_FDS = 8;
+
+class SpawnServerClient::SpawnQueueItem final
+	: public IntrusiveListHook<>, Cancellable
+{
+	const EnqueueCallback callback;
+
+public:
+	SpawnQueueItem(EnqueueCallback _callback,
+		       CancellablePointer &cancel_ptr) noexcept
+		:callback(_callback)
+	{
+		cancel_ptr = *this;
+	}
+
+	void RemoveAndInvoke() noexcept {
+		unlink();
+		auto _callback = callback;
+		delete this;
+		_callback();
+	}
+
+private:
+	void Cancel() noexcept override {
+		unlink();
+		delete this;
+	}
+};
 
 struct SpawnServerClient::ChildProcess final
 	: ChildProcessHandle, IntrusiveHashSetHook<IntrusiveHookMode::TRACK>
@@ -66,6 +94,7 @@ SpawnServerClient::SpawnServerClient(EventLoop &event_loop,
 				     bool _verify) noexcept
 	:config(_config),
 	 event(event_loop, BIND_THIS_METHOD(OnSocketEvent), _socket.Release()),
+	 defer_spawn_queue(event_loop, BIND_THIS_METHOD(OnDeferredSpawnQueue)),
 	 cgroups(_cgroups),
 	 verify(_verify)
 {
@@ -419,10 +448,36 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 	}
 
 	++n_pending_execs;
+	if (IsUnderPressure())
+		defer_spawn_queue.Cancel();
 
 	auto handle = std::make_unique<ChildProcess>(*this, pid);
 	processes.insert(*handle);
 	return handle;
+}
+
+void
+SpawnServerClient::Enqueue(EnqueueCallback callback, CancellablePointer &cancel_ptr) noexcept
+{
+	if (IsUnderPressure()) {
+		auto *item = new SpawnQueueItem(callback, cancel_ptr);
+		spawn_queue.push_back(*item);
+	} else
+		callback();
+}
+
+void
+SpawnServerClient::OnDeferredSpawnQueue() noexcept
+{
+	assert(!IsUnderPressure());
+
+	if (spawn_queue.empty())
+		return;
+
+	spawn_queue.front().RemoveAndInvoke();
+
+	if (!IsUnderPressure() && !spawn_queue.empty())
+		defer_spawn_queue.Schedule();
 }
 
 void
@@ -452,6 +507,9 @@ SpawnServerClient::HandleExecCompleteMessage(SpawnPayload payload)
 	assert(n_pending_execs >= n_complete);
 
 	n_pending_execs -= n_complete;
+
+	if (!IsUnderPressure() && !spawn_queue.empty())
+		defer_spawn_queue.Schedule();
 }
 
 inline void

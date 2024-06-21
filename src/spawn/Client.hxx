@@ -6,11 +6,13 @@
 
 #include "Interface.hxx"
 #include "Config.hxx"
+#include "event/DeferEvent.hxx"
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/IntrusiveHashSet.hxx"
+#include "util/IntrusiveList.hxx"
 #include "config.h"
 
 #include <forward_list>
@@ -37,6 +39,9 @@ class SpawnServerClient final : public SpawnService {
 
 	const SpawnConfig config;
 
+	class SpawnQueueItem;
+	IntrusiveList<SpawnQueueItem> spawn_queue;
+
 	using ChildProcessSet =
 		IntrusiveHashSet<ChildProcess, 1024,
 				 IntrusiveHashSetOperators<ChildProcess,
@@ -54,6 +59,8 @@ class SpawnServerClient final : public SpawnService {
 
 	SocketEvent event;
 
+	DeferEvent defer_spawn_queue;
+
 	MultiReceiveMessage receive{16, 1024, CMSG_SPACE(sizeof(int)), 1};
 
 	unsigned last_pid = 0;
@@ -63,6 +70,8 @@ class SpawnServerClient final : public SpawnService {
 	 * acknowledged.
 	 */
 	unsigned n_pending_execs = 0;
+
+	static constexpr unsigned THROTTLE_EXECS_THRESHOLD = 8;
 
 	/**
 	 * An O_PATH file descriptor of the cgroup managed by the
@@ -153,6 +162,12 @@ private:
 	 */
 	void ReceiveAndHandle();
 
+	bool IsUnderPressure() noexcept {
+		return n_pending_execs >= THROTTLE_EXECS_THRESHOLD;
+	}
+
+	void OnDeferredSpawnQueue() noexcept;
+
 	void OnSocketEvent(unsigned events) noexcept;
 
 	void Kill(ChildProcess &child_process, int signo) noexcept;
@@ -160,4 +175,5 @@ private:
 public:
 	/* virtual methods from class SpawnService */
 	std::unique_ptr<ChildProcessHandle> SpawnChildProcess(const char *name, PreparedChildProcess &&params) override;
+	void Enqueue(EnqueueCallback callback, CancellablePointer &cancel_ptr) noexcept override;
 };

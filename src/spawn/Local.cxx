@@ -90,3 +90,9 @@ LocalSpawnService::SpawnChildProcess(const char *name,
 						   std::move(pidfd),
 						   name);
 }
+
+void
+LocalSpawnService::Enqueue(EnqueueCallback callback, CancellablePointer &) noexcept
+{
+	callback();
+}
