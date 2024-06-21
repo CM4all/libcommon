@@ -59,6 +59,12 @@ class SpawnServerClient final : public SpawnService {
 	unsigned last_pid = 0;
 
 	/**
+	 * The number of EXEC commands that were sent but were not yet
+	 * acknowledged.
+	 */
+	unsigned n_pending_execs = 0;
+
+	/**
 	 * An O_PATH file descriptor of the cgroup managed by the
 	 * spawner (delegated from systemd).
 	 */
@@ -131,6 +137,7 @@ private:
 		  std::span<const FileDescriptor> fds);
 	void Send(const SpawnSerializer &s);
 
+	void HandleExecCompleteMessage(SpawnPayload payload);
 	void HandleOneExit(SpawnPayload &payload);
 	void HandleExitMessage(SpawnPayload payload);
 	void HandleMessage(std::span<const std::byte> payload,

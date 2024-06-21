@@ -418,6 +418,8 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 		std::throw_with_nested(std::runtime_error("Spawn server failed"));
 	}
 
+	++n_pending_execs;
+
 	auto handle = std::make_unique<ChildProcess>(*this, pid);
 	processes.insert(*handle);
 	return handle;
@@ -438,6 +440,18 @@ SpawnServerClient::Kill(ChildProcess &child, int signo) noexcept
 		event.ScheduleWrite();
 
 	kill_queue.push_front({child.pid, signo});
+}
+
+inline void
+SpawnServerClient::HandleExecCompleteMessage(SpawnPayload payload)
+{
+	assert(!payload.empty());
+	assert(payload.GetSize() % sizeof(unsigned) == 0);
+
+	const std::size_t n_complete = payload.GetSize() / sizeof(unsigned);
+	assert(n_pending_execs >= n_complete);
+
+	n_pending_execs -= n_complete;
 }
 
 inline void
@@ -476,6 +490,7 @@ SpawnServerClient::HandleMessage(std::span<const std::byte> payload,
 
 	switch (cmd) {
 	case SpawnResponseCommand::EXEC_COMPLETE:
+		HandleExecCompleteMessage(SpawnPayload{payload});
 		break;
 
 	case SpawnResponseCommand::EXIT:
