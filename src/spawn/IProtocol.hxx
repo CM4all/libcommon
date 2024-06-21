@@ -85,6 +85,13 @@ enum class SpawnExecCommand : uint8_t {
 };
 
 enum class SpawnResponseCommand : uint8_t {
+	/**
+	 * An EXEC request has completed.  This exists to allow the
+	 * #SpawnServerClient to count the number of pending requests,
+	 * which may then be used to throttle further requests.
+	 */
+	EXEC_COMPLETE,
+
 	EXIT,
 };
 

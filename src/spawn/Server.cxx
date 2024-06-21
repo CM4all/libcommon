@@ -156,6 +156,8 @@ class SpawnServerConnection final
 							   std::equal_to<unsigned>>>;
 	ChildIdMap children;
 
+	std::forward_list<unsigned> exec_complete_queue;
+
 	struct ExitQueueItem {
 		unsigned id;
 		int status;
@@ -192,6 +194,7 @@ private:
 	void HandleMessage(ReceiveMessageResult &&result);
 
 	void ReceiveAndHandle();
+	void FlushExecCompleteQueue();
 	void FlushExitQueue();
 
 	void OnSocketEvent(unsigned events) noexcept;
@@ -827,6 +830,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 	}
 
 	SpawnChild(id, name, std::move(p));
+
+	if (exec_complete_queue.empty())
+		event.ScheduleWrite();
+	exec_complete_queue.emplace_front(id);
 }
 
 inline void
@@ -909,6 +916,23 @@ SpawnServerConnection::ReceiveAndHandle()
 }
 
 inline void
+SpawnServerConnection::FlushExecCompleteQueue()
+{
+	if (exec_complete_queue.empty())
+		return;
+
+	SpawnSerializer s{SpawnResponseCommand::EXEC_COMPLETE};
+
+	for (std::size_t n = 0; n < 64 && !exec_complete_queue.empty(); ++n) {
+		const auto &i = exec_complete_queue.front();
+		s.WriteUnsigned(i);
+		exec_complete_queue.pop_front();
+	}
+
+	::Send<1>(socket, s);
+}
+
+inline void
 SpawnServerConnection::FlushExitQueue()
 {
 	if (exit_queue.empty())
@@ -941,8 +965,9 @@ try {
 
 	if (events & event.WRITE) {
 		FlushExitQueue();
+		FlushExecCompleteQueue();
 
-		if (exit_queue.empty())
+		if (exec_complete_queue.empty() && exit_queue.empty())
 			event.CancelWrite();
 	}
 

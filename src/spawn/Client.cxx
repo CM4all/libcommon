@@ -475,6 +475,9 @@ SpawnServerClient::HandleMessage(std::span<const std::byte> payload,
 	payload = payload.subspan(1);
 
 	switch (cmd) {
+	case SpawnResponseCommand::EXEC_COMPLETE:
+		break;
+
 	case SpawnResponseCommand::EXIT:
 		HandleExitMessage(SpawnPayload(payload));
 		break;
