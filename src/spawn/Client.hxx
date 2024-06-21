@@ -37,8 +37,6 @@ class SpawnServerClient final : public SpawnService {
 
 	const SpawnConfig config;
 
-	unsigned last_pid = 0;
-
 	using ChildProcessSet =
 		IntrusiveHashSet<ChildProcess, 1024,
 				 IntrusiveHashSetOperators<ChildProcess,
@@ -57,6 +55,8 @@ class SpawnServerClient final : public SpawnService {
 	SocketEvent event;
 
 	MultiReceiveMessage receive{16, 1024, CMSG_SPACE(sizeof(int)), 1};
+
+	unsigned last_pid = 0;
 
 	/**
 	 * An O_PATH file descriptor of the cgroup managed by the
