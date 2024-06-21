@@ -84,7 +84,7 @@ enum class SpawnExecCommand : uint8_t {
 	HOOK_INFO,
 };
 
-enum class SpawnResponseCommand : uint16_t {
+enum class SpawnResponseCommand : uint8_t {
 	EXIT,
 };
 
