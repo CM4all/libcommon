@@ -1275,6 +1275,18 @@ enum class TranslationCommand : uint16_t {
 	 * Apply #REGEX to the raw URI, i.e. do not normalize it.
 	 */
 	REGEX_RAW = 262,
+
+	/**
+	 * Allow only clients with addresses in the specified network;
+	 * all other addresses get a "403 Forbidden" response.
+	 *
+	 * The payload is a "struct sockaddr_in" or "struct
+	 * sockaddr_in6" plus one byte specifying the prefix length
+	 * (in bits).
+	 *
+	 * This packet may be sent more than once.
+	 */
+	ALLOW_REMOTE_NETWORK = 263,
 };
 
 struct TranslationHeader {

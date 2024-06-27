@@ -4291,6 +4291,21 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::ALLOW_REMOTE_NETWORK:
+#if TRANSLATION_ENABLE_HTTP
+		if (payload.size() < 2)
+			throw std::runtime_error{"malformed ALLOW_REMOTE_NETWORK packet"};
+
+		response.allow_remote_networks.Add(alloc,
+						   SocketAddress(reinterpret_cast<const struct sockaddr *>(payload.data() + 1), payload.size() - 1),
+						   static_cast<uint8_t>(payload.front()));
+
+		response.regex_raw = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

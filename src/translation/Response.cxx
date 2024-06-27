@@ -225,6 +225,7 @@ TranslateResponse::Clear() noexcept
 	expand_request_headers.Clear();
 	response_headers.Clear();
 	expand_response_headers.Clear();
+	allow_remote_networks.clear();
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
@@ -487,6 +488,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	expand_request_headers = KeyValueList(alloc, src.expand_request_headers);
 	response_headers = KeyValueList(alloc, src.response_headers);
 	expand_response_headers = KeyValueList(alloc, src.expand_response_headers);
+	allow_remote_networks = {alloc, src.allow_remote_networks};
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET

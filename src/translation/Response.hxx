@@ -2,11 +2,11 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef BENG_PROXY_TRANSLATE_RESPONSE_HXX
-#define BENG_PROXY_TRANSLATE_RESPONSE_HXX
+#pragma once
 
 #include "translation/Features.hxx"
 #if TRANSLATION_ENABLE_HTTP
+#include "net/NetworkList.hxx"
 #include "util/kvlist.hxx"
 #include "bp/ForwardHeaders.hxx"
 #endif
@@ -259,6 +259,8 @@ struct TranslateResponse {
 
 	KeyValueList response_headers;
 	KeyValueList expand_response_headers;
+
+	NetworkList allow_remote_networks;
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
@@ -577,5 +579,3 @@ struct TranslateResponse {
 	void Expand(AllocatorPtr alloc, const MatchData &match_data);
 #endif
 };
-
-#endif
