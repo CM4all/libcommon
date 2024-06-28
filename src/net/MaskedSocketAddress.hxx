@@ -6,6 +6,7 @@
 
 #include "AllocatedSocketAddress.hxx"
 
+#include <cstdint>
 #include <utility>
 
 class MaskedSocketAddress {
