@@ -117,7 +117,8 @@ MaskedSocketAddress::MaskedSocketAddress(const char *s)
 }
 
 bool
-MaskedSocketAddress::Matches(SocketAddress other) const noexcept
+MaskedSocketAddress::Matches(SocketAddress address, uint_least8_t prefix_length,
+			     SocketAddress other) noexcept
 {
 	if (address.IsNull() || !address.IsDefined() ||
 	    other.IsNull() || !other.IsDefined() ||

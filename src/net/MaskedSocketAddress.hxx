@@ -27,5 +27,11 @@ public:
 	explicit MaskedSocketAddress(const char *s);
 
 	[[gnu::pure]]
-	bool Matches(SocketAddress other) const noexcept;
+	static bool Matches(SocketAddress address, uint_least8_t prefix_length,
+			    SocketAddress other) noexcept;
+
+	[[gnu::pure]]
+	bool Matches(SocketAddress other) const noexcept {
+		return Matches(address, prefix_length, other);
+	}
 };
