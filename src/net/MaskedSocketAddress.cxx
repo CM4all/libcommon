@@ -21,7 +21,7 @@ operator==(const struct in6_addr &a, const struct in6_addr &b) noexcept
 }
 
 [[gnu::pure]]
-static unsigned
+static uint_least8_t
 MaximumPrefixLength(const SocketAddress address) noexcept
 {
 	switch (address.GetFamily()) {
@@ -40,7 +40,7 @@ MaximumPrefixLength(const SocketAddress address) noexcept
 [[gnu::pure]]
 static bool
 IsValidPrefixLength(const IPv4Address &address,
-		    unsigned prefix_length) noexcept
+		    uint_least8_t prefix_length) noexcept
 {
 	assert(prefix_length <= 32);
 	return address.GetNumericAddressBE() ==
@@ -51,7 +51,7 @@ IsValidPrefixLength(const IPv4Address &address,
 [[gnu::pure]]
 static bool
 IsValidPrefixLength(const IPv6Address &address,
-		    unsigned prefix_length) noexcept
+		    uint_least8_t prefix_length) noexcept
 {
 	assert(prefix_length <= 128);
 	return address.GetAddress() ==
@@ -62,7 +62,7 @@ IsValidPrefixLength(const IPv6Address &address,
 [[gnu::pure]]
 static bool
 IsValidPrefixLength(const SocketAddress address,
-		    unsigned prefix_length) noexcept
+		    uint_least8_t prefix_length) noexcept
 {
 	switch (address.GetFamily()) {
 	case AF_INET:
