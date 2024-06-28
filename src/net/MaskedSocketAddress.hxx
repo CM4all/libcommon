@@ -14,7 +14,7 @@ class MaskedSocketAddress {
 
 public:
 	template<typename A>
-	MaskedSocketAddress(A &&_address, unsigned _prefix_length)
+	MaskedSocketAddress(A &&_address, unsigned _prefix_length) noexcept
 		:address(std::forward<A>(_address)), prefix_length(_prefix_length) {}
 
 	/**
