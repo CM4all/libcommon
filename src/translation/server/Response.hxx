@@ -193,11 +193,7 @@ public:
 
 	Response &Packet(TranslationCommand cmd,
 			 SocketAddress address) noexcept {
-		return Packet(cmd,
-			      std::span<const std::byte>{
-				      (const std::byte *)address.GetAddress(),
-				      address.GetSize(),
-			      });
+		return Packet(cmd, static_cast<std::span<const std::byte>>(address));
 	}
 
 	/**
