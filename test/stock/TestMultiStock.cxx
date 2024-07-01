@@ -69,6 +69,22 @@ class MyStockClass final : public StockClass, public MultiStockClass {
 		void Cancel() noexcept override;
 	};
 
+	class NeverRequest final : Cancellable {
+		StockRequest request;
+
+	public:
+		NeverRequest(StockRequest _request, CancellablePointer &cancel_ptr) noexcept
+			:request(std::move(_request))
+		{
+			cancel_ptr = *this;
+		}
+
+	private:
+		void Cancel() noexcept override {
+			delete this;
+		}
+	};
+
 public:
 	/* virtual methods from class StockClass */
 	std::size_t GetLimit(const void *,
@@ -130,7 +146,7 @@ struct Partition {
 	 */
 	std::exception_ptr next_error;
 
-	bool defer_create = false;
+	bool defer_create = false, never_create = false;
 
 	Partition(Instance &_instance, const char *_key) noexcept
 		:instance(_instance), key(_key) {}
@@ -322,6 +338,11 @@ MyStockClass::Create(CreateStockItem c,
 	if (partition.defer_create) {
 		new DeferredRequest(partition, c, std::move(request),
 				    handler, cancel_ptr);
+		return;
+	}
+
+	if (partition.never_create) {
+		new NeverRequest(std::move(request), cancel_ptr);
 		return;
 	}
 
@@ -963,4 +984,58 @@ TEST(MultiStock, DiscardOldestIdle)
 	ASSERT_EQ(bar.waiting, 0);
 	ASSERT_EQ(bar.ready, 0);
 	ASSERT_EQ(bar.failed, 0);
+}
+
+TEST(MultiStock, TriggerDoubleCreateBug)
+{
+	Instance instance{2};
+
+	Partition foo{instance, "foo"};
+
+	/* create four leases for two "outer" items */
+	foo.Get(4);
+	instance.RunSome();
+
+	EXPECT_EQ(foo.factory_created, 2);
+	EXPECT_EQ(foo.factory_failed, 0);
+	EXPECT_EQ(foo.destroyed, 0);
+	EXPECT_EQ(foo.total, 4);
+	EXPECT_EQ(foo.waiting, 0);
+	EXPECT_EQ(foo.ready, 4);
+	EXPECT_EQ(foo.failed, 0);
+
+	/* request another item (waiting) */
+	foo.never_create = true;
+	foo.Get(1);
+	instance.RunSome();
+
+	EXPECT_EQ(foo.factory_created, 2);
+	EXPECT_EQ(foo.factory_failed, 0);
+	EXPECT_EQ(foo.destroyed, 0);
+	EXPECT_EQ(foo.total, 5);
+	EXPECT_EQ(foo.waiting, 1);
+	EXPECT_EQ(foo.ready, 4);
+	EXPECT_EQ(foo.failed, 0);
+
+	/* release one "outer" item, triggering a "create" for the
+           waiter */
+
+	foo.PutOuterDirty();
+	foo.PutOuterDirty();
+	foo.PutOuterDirty();
+	instance.RunSome();
+
+	/* release the second "outer" item, which used to trigger
+           another "create" for the waiter */
+
+	foo.PutOuterDirty();
+	instance.RunSome();
+
+	EXPECT_EQ(foo.factory_created, 2);
+	EXPECT_EQ(foo.factory_failed, 0);
+	EXPECT_EQ(foo.destroyed, 2);
+	EXPECT_EQ(foo.total, 1);
+	EXPECT_EQ(foo.waiting, 1);
+	EXPECT_EQ(foo.ready, 0);
+	EXPECT_EQ(foo.failed, 0);
 }
