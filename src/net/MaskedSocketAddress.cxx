@@ -20,9 +20,8 @@ operator==(const struct in6_addr &a, const struct in6_addr &b) noexcept
 	return memcmp(&a, &b, sizeof(a)) == 0;
 }
 
-[[gnu::pure]]
-static uint_least8_t
-MaximumPrefixLength(const SocketAddress address) noexcept
+uint_least8_t
+MaskedSocketAddress::MaximumPrefixLength(const SocketAddress address) noexcept
 {
 	switch (address.GetFamily()) {
 	case AF_INET:
@@ -59,19 +58,18 @@ IsValidPrefixLength(const IPv6Address &address,
 		 address).GetAddress();
 }
 
-[[gnu::pure]]
-static bool
-IsValidPrefixLength(const SocketAddress address,
-		    uint_least8_t prefix_length) noexcept
+bool
+MaskedSocketAddress::IsValidPrefixLength(const SocketAddress address,
+					 uint_least8_t prefix_length) noexcept
 {
 	switch (address.GetFamily()) {
 	case AF_INET:
-		return IsValidPrefixLength(IPv4Address::Cast(address),
-					   prefix_length);
+		return ::IsValidPrefixLength(IPv4Address::Cast(address),
+					     prefix_length);
 
 	case AF_INET6:
-		return IsValidPrefixLength(IPv6Address::Cast(address),
-					   prefix_length);
+		return ::IsValidPrefixLength(IPv6Address::Cast(address),
+					     prefix_length);
 
 	default:
 		return false;

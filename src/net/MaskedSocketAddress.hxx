@@ -27,6 +27,13 @@ public:
 	explicit MaskedSocketAddress(const char *s);
 
 	[[gnu::pure]]
+	static uint_least8_t MaximumPrefixLength(const SocketAddress address) noexcept;
+
+	[[gnu::pure]]
+	static bool IsValidPrefixLength(SocketAddress address,
+					uint_least8_t prefix_length) noexcept;
+
+	[[gnu::pure]]
 	static bool Matches(SocketAddress address, uint_least8_t prefix_length,
 			    SocketAddress other) noexcept;
 
