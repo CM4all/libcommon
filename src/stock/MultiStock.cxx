@@ -443,7 +443,8 @@ MultiStock::MapItem::ScheduleRetryWaiting() noexcept
 	if (waiting.empty())
 		return false;
 
-	retry_event.Schedule();
+	if (!get_cancel_ptr)
+		retry_event.Schedule();
 	return true;
 }
 
