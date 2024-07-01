@@ -374,8 +374,8 @@ public:
 	auto &AllowRemoteNetwork(SocketAddress address,
 				 const uint8_t &prefix_length) noexcept {
 		return MultiPacket(TranslationCommand::ALLOW_REMOTE_NETWORK,
-				   static_cast<std::span<const std::byte>>(address),
-				   std::span{&prefix_length, 1});
+				   std::span{&prefix_length, 1},
+				   static_cast<std::span<const std::byte>>(address));
 	}
 
 	struct RedirectContext {
