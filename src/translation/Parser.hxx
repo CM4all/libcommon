@@ -263,6 +263,10 @@ private:
 
 	void HandleMountListenStream(std::span<const std::byte> payload);
 
+#if TRANSLATION_ENABLE_HTTP
+	void HandleAllowRemoteNetwork(std::span<const std::byte> payload);
+#endif
+
 	Result HandlePacket(TranslationCommand command,
 			    std::span<const std::byte> payload);
 };

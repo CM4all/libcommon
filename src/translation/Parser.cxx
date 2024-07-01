@@ -1114,6 +1114,25 @@ TranslateParser::HandleMountListenStream(std::span<const std::byte> payload)
 
 #endif // TRANSLATION_ENABLE_SPAWN
 
+#if TRANSLATION_ENABLE_HTTP
+
+inline void
+TranslateParser::HandleAllowRemoteNetwork(std::span<const std::byte> payload)
+{
+	if (payload.size() < 2)
+		throw std::runtime_error{"malformed ALLOW_REMOTE_NETWORK packet"};
+
+	const uint_least8_t prefix_length = static_cast<uint8_t>(payload.front());
+	const SocketAddress address{
+		reinterpret_cast<const struct sockaddr *>(payload.data() + 1),
+		static_cast<SocketAddress::size_type>(payload.size() - 1),
+	};
+
+	response.allow_remote_networks.Add(alloc, address, prefix_length);
+}
+
+#endif // TRANSLATION_ENABLE_HTTP
+
 static bool
 CheckProbeSuffix(std::string_view payload) noexcept
 {
@@ -4294,12 +4313,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::ALLOW_REMOTE_NETWORK:
 #if TRANSLATION_ENABLE_HTTP
-		if (payload.size() < 2)
-			throw std::runtime_error{"malformed ALLOW_REMOTE_NETWORK packet"};
-
-		response.allow_remote_networks.Add(alloc,
-						   SocketAddress(reinterpret_cast<const struct sockaddr *>(payload.data() + 1), payload.size() - 1),
-						   static_cast<uint8_t>(payload.front()));
+		HandleAllowRemoteNetwork(payload);
 		return;
 #else
 		break;
