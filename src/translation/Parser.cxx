@@ -4300,8 +4300,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		response.allow_remote_networks.Add(alloc,
 						   SocketAddress(reinterpret_cast<const struct sockaddr *>(payload.data() + 1), payload.size() - 1),
 						   static_cast<uint8_t>(payload.front()));
-
-		response.regex_raw = true;
 		return;
 #else
 		break;
