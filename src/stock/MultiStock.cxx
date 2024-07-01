@@ -423,6 +423,7 @@ inline void
 MultiStock::MapItem::RetryWaiting() noexcept
 {
 	assert(!waiting.empty());
+	assert(!get_cancel_ptr);
 
 	if (auto *i = FindUsable()) {
 		FinishWaiting(*i);
