@@ -4,25 +4,20 @@
 #pragma once
 
 #include "net/SocketAddress.hxx"
-#include "net/FormatAddress.hxx"
 
 #include <fmt/format.h>
 
 #include <concepts>
 
-template<std::convertible_to<SocketAddress> T>
-struct fmt::formatter<T> : formatter<string_view>
+class SocketAddress;
+
+template<>
+struct fmt::formatter<SocketAddress> : formatter<string_view>
 {
-	template<typename FormatContext>
-	auto format(SocketAddress address, FormatContext &ctx) {
-		char buffer[256];
-		std::string_view s;
+	auto format(SocketAddress address, format_context &ctx) -> format_context::iterator;
+};
 
-		if (ToString(std::span{buffer}, address))
-			s = buffer;
-		else
-			s = "?";
-
-		return formatter<string_view>::format(s, ctx);
-	}
+template<std::convertible_to<SocketAddress> T>
+struct fmt::formatter<T> : formatter<SocketAddress>
+{
 };
