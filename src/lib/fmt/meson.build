@@ -5,6 +5,7 @@ libfmt = dependency('fmt', version: '>= 9',
 
 fmt = static_library(
   'fmt',
+  'ExceptionFormatter.cxx',
   'RuntimeError.cxx',
   'SocketAddressFormatter.cxx',
   'SystemError.cxx',
