@@ -13,7 +13,7 @@
 #include <string_view>
 
 template<std::unsigned_integral T>
-[[nodiscard]] [[gnu::pure]]
+[[nodiscard]]
 constexpr std::pair<T, const char *>
 ParseDecimalU(const char *p, const char *const end)
 {
@@ -43,7 +43,7 @@ ParseDecimalU(const char *p, const char *const end)
 	return {value, p};
 }
 
-[[nodiscard]] [[gnu::pure]]
+[[nodiscard]]
 constexpr IPv4Address
 ParseIPv4Address(const char *s, const char *const end)
 {
