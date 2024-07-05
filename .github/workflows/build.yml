@@ -64,6 +64,7 @@ jobs:
              -Dwas=enabled \
              -Djson=enabled \
              -Dtest=enabled \
+             --wrap-mode=nofallback \
              --force-fallback-for=fmt,nlohmann_json,libcm4all-was-protocol,libcm4all-was-simple \
              output
         # Note: io_uring is disabled because the liburing version in
