@@ -66,7 +66,7 @@ jobs:
              -Djson=enabled \
              -Dtest=enabled \
              --wrap-mode=nofallback \
-             --force-fallback-for=nlohmann_json,libcm4all-was-protocol,libcm4all-was-simple \
+             --force-fallback-for=nlohmann_json,libcm4all-was-protocol,libcm4all-was-simple,libcm4all-http \
              output
         # Note: io_uring is disabled because the liburing version in
         # Ubuntu is broken; it redefines "struct open_how"
