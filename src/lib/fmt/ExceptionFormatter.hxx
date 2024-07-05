@@ -10,5 +10,5 @@
 template<>
 struct fmt::formatter<std::exception_ptr> : formatter<string_view>
 {
-	auto format(std::exception_ptr e, format_context &ctx) -> format_context::iterator;
+	auto format(std::exception_ptr e, format_context &ctx) const -> format_context::iterator;
 };

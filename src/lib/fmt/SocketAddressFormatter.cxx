@@ -4,7 +4,10 @@
 #include "SocketAddressFormatter.hxx"
 #include "net/FormatAddress.hxx"
 
-auto fmt::formatter<SocketAddress>::format(SocketAddress address, format_context &ctx) -> format_context::iterator {
+auto
+fmt::formatter<SocketAddress>::format(SocketAddress address, format_context &ctx) const
+ -> format_context::iterator
+{
 	char buffer[256];
 	std::string_view s;
 
