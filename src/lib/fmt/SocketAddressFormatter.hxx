@@ -9,8 +9,6 @@
 
 #include <concepts>
 
-class SocketAddress;
-
 template<>
 struct fmt::formatter<SocketAddress> : formatter<string_view>
 {
