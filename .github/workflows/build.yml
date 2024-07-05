@@ -30,6 +30,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             meson \
             ccache \
+            libfmt-dev \
             libavahi-client-dev \
             libsystemd-dev \
             libdbus-1-dev \
@@ -65,7 +66,7 @@ jobs:
              -Djson=enabled \
              -Dtest=enabled \
              --wrap-mode=nofallback \
-             --force-fallback-for=fmt,nlohmann_json,libcm4all-was-protocol,libcm4all-was-simple \
+             --force-fallback-for=nlohmann_json,libcm4all-was-protocol,libcm4all-was-simple \
              output
         # Note: io_uring is disabled because the liburing version in
         # Ubuntu is broken; it redefines "struct open_how"
