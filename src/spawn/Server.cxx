@@ -964,8 +964,8 @@ try {
 	}
 
 	if (events & event.WRITE) {
-		FlushExitQueue();
 		FlushExecCompleteQueue();
+		FlushExitQueue();
 
 		if (exec_complete_queue.empty() && exit_queue.empty())
 			event.CancelWrite();
