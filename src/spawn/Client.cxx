@@ -4,6 +4,7 @@
 
 #include "Client.hxx"
 #include "ProcessHandle.hxx"
+#include "CompletionHandler.hxx"
 #include "IProtocol.hxx"
 #include "Builder.hxx"
 #include "Parser.hxx"
@@ -60,6 +61,8 @@ struct SpawnServerClient::ChildProcess final
 
 	const unsigned pid;
 
+	SpawnCompletionHandler *completion_handler = nullptr;
+
 	ExitListener *listener = nullptr;
 
 	ChildProcess(SpawnServerClient &_client, unsigned _pid) noexcept
@@ -68,6 +71,13 @@ struct SpawnServerClient::ChildProcess final
 	~ChildProcess() noexcept override {
 		if (is_linked())
 			Kill(SIGTERM);
+	}
+
+	/* virtual methods from class ChildProcessHandle */
+	void SetCompletionHandler(SpawnCompletionHandler &_completion_handler) noexcept override {
+		assert(!completion_handler);
+
+		completion_handler = &_completion_handler;
 	}
 
 	void SetExitListener(ExitListener &_listener) noexcept override {
@@ -512,7 +522,21 @@ SpawnServerClient::HandleExecCompleteMessage(SpawnPayload payload)
 		payload.ReadUnsigned(pid);
 		const char *error = payload.ReadString();
 
-		// TODO pass error condition to completion handler
+		if (const auto i = processes.find(pid); i != processes.end()) {
+			// TODO forward errors
+			if (i->completion_handler) {
+				if (*error == 0)
+					i->completion_handler->OnSpawnSuccess();
+				else
+					i->completion_handler->OnSpawnError(std::make_exception_ptr(std::runtime_error{error}));
+
+				/* if there is a completion handler,
+				   don't log error message to
+				   stderr */
+				continue;
+			}
+		}
+
 		if (*error != 0)
 			fmt::print(stderr, "Failed to spawn child process {}: {}\n",
 					   pid, error);

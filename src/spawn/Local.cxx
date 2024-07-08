@@ -4,6 +4,7 @@
 
 #include "Local.hxx"
 #include "ProcessHandle.hxx"
+#include "CompletionHandler.hxx"
 #include "PidfdEvent.hxx"
 #include "ExitListener.hxx"
 #include "Config.hxx"
@@ -50,6 +51,12 @@ private:
 	void OnChildProcessExit(int status) noexcept override;
 
 	/* virtual methods from class ChildProcessHandle */
+	void SetCompletionHandler(SpawnCompletionHandler &handler) noexcept override {
+		assert(pidfd);
+
+		handler.OnSpawnSuccess();
+	}
+
 	void SetExitListener(ExitListener &listener) noexcept override {
 		assert(pidfd);
 

@@ -4,6 +4,7 @@
 
 #pragma once
 
+class SpawnCompletionHandler;
 class ExitListener;
 
 /**
@@ -18,6 +19,7 @@ public:
 	 */
 	virtual ~ChildProcessHandle() noexcept = default;
 
+	virtual void SetCompletionHandler(SpawnCompletionHandler &handler) noexcept = 0;
 	virtual void SetExitListener(ExitListener &listener) noexcept = 0;
 
 	/**
