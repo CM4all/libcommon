@@ -16,6 +16,8 @@
 #include "util/Cancellable.hxx"
 #include "util/PrintException.hxx"
 
+#include <fmt/core.h>
+
 #include <stdexcept>
 
 #include <assert.h>
@@ -501,12 +503,20 @@ inline void
 SpawnServerClient::HandleExecCompleteMessage(SpawnPayload payload)
 {
 	assert(!payload.empty());
-	assert(payload.GetSize() % sizeof(unsigned) == 0);
 
-	const std::size_t n_complete = payload.GetSize() / sizeof(unsigned);
-	assert(n_pending_execs >= n_complete);
+	while (!payload.empty()) {
+		assert(n_pending_execs > 0);
+		--n_pending_execs;
 
-	n_pending_execs -= n_complete;
+		unsigned pid;
+		payload.ReadUnsigned(pid);
+		const char *error = payload.ReadString();
+
+		// TODO pass error condition to completion handler
+		if (*error != 0)
+			fmt::print(stderr, "Failed to spawn child process {}: {}\n",
+					   pid, error);
+	}
 
 	if (!IsUnderPressure() && !spawn_queue.empty())
 		defer_spawn_queue.Schedule();

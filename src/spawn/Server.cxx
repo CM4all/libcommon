@@ -156,7 +156,12 @@ class SpawnServerConnection final
 							   std::equal_to<unsigned>>>;
 	ChildIdMap children;
 
-	std::forward_list<unsigned> exec_complete_queue;
+	struct ExecCompleteItem {
+		unsigned id;
+		std::string error;
+	};
+
+	std::forward_list<ExecCompleteItem> exec_complete_queue;
 
 	struct ExitQueueItem {
 		unsigned id;
@@ -183,10 +188,10 @@ public:
 private:
 	void RemoveConnection() noexcept;
 
-	void SendExecComplete(unsigned id) noexcept;
+	void SendExecComplete(unsigned id, std::string &&error) noexcept;
 	void SendExit(unsigned id, int status) noexcept;
 	void SpawnChild(unsigned id, const char *name,
-			PreparedChildProcess &&p) noexcept;
+			PreparedChildProcess &&p);
 
 	void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
 	void HandleOneKill(SpawnPayload &payload);
@@ -360,12 +365,12 @@ SpawnServerConnection::RemoveConnection() noexcept
 }
 
 inline void
-SpawnServerConnection::SendExecComplete(unsigned id) noexcept
+SpawnServerConnection::SendExecComplete(unsigned id, std::string &&error) noexcept
 {
 	if (exec_complete_queue.empty())
 		event.ScheduleWrite();
 
-	exec_complete_queue.emplace_front(id);
+	exec_complete_queue.emplace_front(id, std::move(error));
 }
 
 void
@@ -399,51 +404,33 @@ PrepareNamedTmpfs(TmpfsManager &tmpfs_manager,
 
 inline void
 SpawnServerConnection::SpawnChild(unsigned id, const char *name,
-				  PreparedChildProcess &&p) noexcept
+				  PreparedChildProcess &&p)
 {
 	const auto &config = process.GetConfig();
 
 	if (!p.uid_gid.IsEmpty()) {
-		try {
-			if (!process.Verify(p))
-				config.Verify(p.uid_gid);
-		} catch (...) {
-			PrintException(std::current_exception());
-			SendExit(id, W_EXITCODE(0xff, 0));
-			return;
-		}
+		if (!process.Verify(p))
+			config.Verify(p.uid_gid);
 	}
 
 	if (p.uid_gid.IsEmpty()) {
-		if (config.default_uid_gid.IsEmpty()) {
-			logger(1, "No uid/gid specified");
-			SendExit(id, W_EXITCODE(0xff, 0));
-			return;
-		}
+		if (config.default_uid_gid.IsEmpty())
+			throw std::invalid_argument{"No uid/gid specified"};
 
 		p.uid_gid = config.default_uid_gid;
 	}
 
 	std::forward_list<SharedLease> leases;
 
-	UniqueFileDescriptor pid;
+	std::forward_list<UniqueFileDescriptor> fds;
+	if (auto &tmpfs_manager = process.GetTmpfsManager())
+                PrepareNamedTmpfs(*tmpfs_manager,
+                                  p.ns.mount, leases, fds);
 
-	try {
-		std::forward_list<UniqueFileDescriptor> fds;
-		if (auto &tmpfs_manager = process.GetTmpfsManager())
-			PrepareNamedTmpfs(*tmpfs_manager,
-					  p.ns.mount, leases, fds);
-
-		pid = SpawnChildProcess(std::move(p),
-					process.GetCgroupState(),
-					config.cgroups_writable_by_gid > 0,
-					process.IsSysAdmin()).first;
-	} catch (...) {
-		logger(1, "Failed to spawn child process: ",
-		       GetFullMessage(std::current_exception()).c_str());
-		SendExit(id, W_EXITCODE(0xff, 0));
-		return;
-	}
+	auto pid = SpawnChildProcess(std::move(p),
+				     process.GetCgroupState(),
+				     config.cgroups_writable_by_gid > 0,
+				     process.IsSysAdmin()).first;
 
 	auto *child = new SpawnServerChild(GetEventLoop(), *this,
 					   std::move(leases),
@@ -839,9 +826,13 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 		}
 	}
 
-	SpawnChild(id, name, std::move(p));
-
-	SendExecComplete(id);
+	try {
+		SpawnChild(id, name, std::move(p));
+		SendExecComplete(id, {});
+	} catch (...) {
+		SendExecComplete(id, GetFullMessage(std::current_exception()));
+		SendExit(id, W_EXITCODE(0xff, 0));
+	}
 }
 
 inline void
@@ -933,7 +924,8 @@ SpawnServerConnection::FlushExecCompleteQueue()
 
 	for (std::size_t n = 0; n < 64 && !exec_complete_queue.empty(); ++n) {
 		const auto &i = exec_complete_queue.front();
-		s.WriteUnsigned(i);
+		s.WriteUnsigned(i.id);
+		s.WriteString(i.error);
 		exec_complete_queue.pop_front();
 	}
 
