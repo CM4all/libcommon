@@ -183,6 +183,7 @@ public:
 private:
 	void RemoveConnection() noexcept;
 
+	void SendExecComplete(unsigned id) noexcept;
 	void SendExit(unsigned id, int status) noexcept;
 	void SpawnChild(unsigned id, const char *name,
 			PreparedChildProcess &&p) noexcept;
@@ -356,6 +357,15 @@ inline void
 SpawnServerConnection::RemoveConnection() noexcept
 {
 	process.RemoveConnection(*this);
+}
+
+inline void
+SpawnServerConnection::SendExecComplete(unsigned id) noexcept
+{
+	if (exec_complete_queue.empty())
+		event.ScheduleWrite();
+
+	exec_complete_queue.emplace_front(id);
 }
 
 void
@@ -831,9 +841,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 	SpawnChild(id, name, std::move(p));
 
-	if (exec_complete_queue.empty())
-		event.ScheduleWrite();
-	exec_complete_queue.emplace_front(id);
+	SendExecComplete(id);
 }
 
 inline void
