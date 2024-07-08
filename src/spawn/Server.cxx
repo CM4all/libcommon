@@ -397,8 +397,8 @@ SpawnServerConnection::SpawnChild(unsigned id, const char *name,
 		try {
 			if (!process.Verify(p))
 				config.Verify(p.uid_gid);
-		} catch (const std::exception &e) {
-			PrintException(e);
+		} catch (...) {
+			PrintException(std::current_exception());
 			SendExit(id, W_EXITCODE(0xff, 0));
 			return;
 		}
