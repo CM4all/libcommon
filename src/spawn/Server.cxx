@@ -30,7 +30,6 @@
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
-#include "util/PrintException.hxx"
 #include "util/Exception.hxx"
 #include "util/SharedLease.hxx"
 

@@ -11,9 +11,9 @@
 #include "lib/dbus/PendingCall.hxx"
 #include "lib/dbus/Error.hxx"
 #include "lib/dbus/ScopeMatch.hxx"
+#include "lib/fmt/ExceptionFormatter.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"
-#include "util/PrintException.hxx"
 
 #include <systemd/sd-daemon.h>
 
@@ -131,8 +131,8 @@ CreateSystemdScope(const char *name, const char *description,
 		try {
 			Systemd::ResetFailedUnit(connection, name);
 		} catch (...) {
-			fprintf(stderr, "Failed to reset unit %s: ", name);
-			PrintException(std::current_exception());
+			fmt::print("Failed to reset unit {:?}: {}",
+				   name, std::current_exception());
 		}
 
 		if (!Systemd::WaitUnitRemoved(connection, name, 2000)) {
@@ -145,14 +145,14 @@ CreateSystemdScope(const char *name, const char *description,
 			   problem affecting everything, but this
 			   kludge only solves the infamous spawner
 			   failures caused by this */
-			fprintf(stderr, "Old unit %s didn't disappear; attempting to stop it\n",
-				name);
+			fmt::print(stderr, "Old unit {:?} didn't disappear; attempting to stop it\n",
+				   name);
 			try {
 				Systemd::StopUnit(connection, name);
 				Systemd::WaitUnitRemoved(connection, name, -1);
 			} catch (...) {
-				fprintf(stderr, "Failed to stop unit %s: ", name);
-				PrintException(std::current_exception());
+				fmt::print(stderr, "Failed to stop unit {:?}: ",
+					   name, std::current_exception());
 			}
 		}
 

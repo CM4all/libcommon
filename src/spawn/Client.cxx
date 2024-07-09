@@ -12,10 +12,10 @@
 #include "CgroupOptions.hxx"
 #include "Mount.hxx"
 #include "ExitListener.hxx"
+#include "lib/fmt/ExceptionFormatter.hxx"
 #include "system/Error.hxx"
 #include "net/SocketPair.hxx"
 #include "util/Cancellable.hxx"
-#include "util/PrintException.hxx"
 
 #include <fmt/core.h>
 
@@ -147,7 +147,7 @@ void
 SpawnServerClient::CheckOrAbort() noexcept
 {
 	if (!event.IsDefined()) {
-		fprintf(stderr, "SpawnChildProcess: the spawner is gone, emergency!\n");
+		fmt::print(stderr, "SpawnChildProcess: the spawner is gone, emergency!\n");
 		_exit(EXIT_FAILURE);
 	}
 }
@@ -627,7 +627,7 @@ SpawnServerClient::ReceiveAndHandle()
 		try {
 			HandleMessage(i.payload, i.fds);
 		} catch (...) {
-			PrintException(std::current_exception());
+			fmt::print(stderr, "{}", std::current_exception());
 		}
 	}
 
@@ -654,7 +654,6 @@ try {
 	if (events & event.READ)
 		ReceiveAndHandle();
 } catch (...) {
-	fprintf(stderr, "Spawner error: ");
-	PrintException(std::current_exception());
+	fmt::print(stderr, "Spawner error: {}", std::current_exception());
 	Close();
 }

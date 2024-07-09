@@ -289,8 +289,8 @@ try {
 			   failure to set up the filter are fatal */
 			throw;
 
-		fprintf(stderr, "Failed to setup seccomp filter for '%s': %s\n",
-			path, e.what());
+		fmt::print(stderr, "Failed to setup seccomp filter for {:?}: {}\n",
+			   path, e.what());
 	}
 #endif // HAVE_LIBSECCOMP
 

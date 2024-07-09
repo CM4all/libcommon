@@ -9,6 +9,7 @@
 #include "Systemd.hxx"
 #include "CgroupState.hxx"
 #include "Server.hxx"
+#include "lib/fmt/ExceptionFormatter.hxx"
 #include "spawn/config.h"
 #include "system/linux/clone3.h"
 #include "system/Error.hxx"
@@ -19,7 +20,6 @@
 #include "io/Pipe.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
-#include "util/PrintException.hxx"
 
 #ifdef HAVE_LIBCAP
 #include "lib/cap/State.hxx"
@@ -204,8 +204,8 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 					throw MakeErrno("Failed to chmod() the cgroup");
 		} catch (...) {
 			if (config.systemd_scope_optional) {
-				fprintf(stderr, "Failed to create systemd scope: ");
-				PrintException(std::current_exception());
+				fmt::print(stderr, "Failed to create systemd scope: {}\n",
+					   std::current_exception());
 			} else {
 				WriteErrorPipe(error_pipe_w,
 					       "Failed to create systemd scope: ",
@@ -248,8 +248,8 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	try {
 		DropCapabilities();
 	} catch (...) {
-		fprintf(stderr, "Failed to drop capabilities: ");
-		PrintException(std::current_exception());
+		fmt::print(stderr, "Failed to drop capabilities: {}\n",
+			   std::current_exception());
 	}
 
 	error_pipe_w.Close();
@@ -259,7 +259,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 			       hook, std::move(socket));
 		return EXIT_SUCCESS;
 	} catch (...) {
-		PrintException(std::current_exception());
+		fmt::print(stderr, "{}\n", std::current_exception());
 		return EXIT_FAILURE;
 	}
 }
@@ -296,8 +296,8 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	int pid = clone3(&ca, sizeof(ca));
 	if (pid < 0) {
 		/* try again without CLONE_NEWPID */
-		fprintf(stderr, "Failed to create spawner PID namespace (%s), trying without\n",
-			strerror(-pid));
+		fmt::print(stderr, "Failed to create spawner PID namespace ({}), trying without\n",
+			   strerror(-pid));
 		pid_namespace = false;
 
 		ca.flags &= ~(CLONE_NEWPID | CLONE_NEWNS);
