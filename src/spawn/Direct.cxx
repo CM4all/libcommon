@@ -9,6 +9,7 @@
 #include "Init.hxx"
 #include "spawn/config.h"
 #include "accessory/Client.hxx"
+#include "lib/fmt/ExceptionFormatter.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
@@ -340,7 +341,18 @@ try {
 	}
 
 	if (p.exec_function != nullptr) {
-		_exit(p.exec_function(std::move(p)));
+		/* close the error pipe; usually this is done
+		   implicitly by execve() by O_CLOEXEC, but if we
+		   don't execute another program, we need to do it
+		   manually */
+		error_pipe_w.Close();
+
+		try {
+			_exit(p.exec_function(std::move(p)));
+		} catch (...) {
+			fmt::print(stderr, "{}\n", std::current_exception());
+			_exit(EXIT_FAILURE);
+		}
 	} else {
 		if (p.exec_fd.IsDefined())
 			execveat(p.exec_fd.Get(), "",
