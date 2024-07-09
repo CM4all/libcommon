@@ -3,6 +3,7 @@
 
 #include "net/EasyMessage.hxx"
 #include "net/SocketPair.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "system/linux/kcmp.h"
 #include "io/Pipe.hxx"
@@ -61,4 +62,8 @@ TEST(EasyMessage, OneFD)
 	// throws EAGAIN
 	EXPECT_THROW(EasyReceiveMessageWithOneFD(a), std::system_error);
 	EXPECT_THROW(EasyReceiveMessageWithOneFD(b), std::system_error);
+
+	// close one end
+	a.Close();
+	EXPECT_THROW(EasyReceiveMessageWithOneFD(b), SocketClosedPrematurelyError);
 }

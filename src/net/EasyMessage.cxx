@@ -7,6 +7,7 @@
 #include "SendMessage.hxx"
 #include "ScmRightsBuilder.hxx"
 #include "SocketDescriptor.hxx"
+#include "SocketProtocolError.hxx"
 #include "io/Iovec.hxx"
 
 #include <cstdint>
@@ -38,6 +39,9 @@ EasyReceiveMessageWithOneFD(SocketDescriptor s)
 {
 	ReceiveMessageBuffer<1, 4> buffer;
 	auto d = ReceiveMessage(s, buffer, 0);
+	if (d.payload.empty())
+		throw SocketClosedPrematurelyError{};
+
 	if (d.fds.empty())
 		return {};
 
