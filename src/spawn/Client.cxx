@@ -627,7 +627,7 @@ SpawnServerClient::ReceiveAndHandle()
 		try {
 			HandleMessage(i.payload, i.fds);
 		} catch (...) {
-			fmt::print(stderr, "{}", std::current_exception());
+			fmt::print(stderr, "{}\n", std::current_exception());
 		}
 	}
 
@@ -654,6 +654,6 @@ try {
 	if (events & event.READ)
 		ReceiveAndHandle();
 } catch (...) {
-	fmt::print(stderr, "Spawner error: {}", std::current_exception());
+	fmt::print(stderr, "Spawner error: {}\n", std::current_exception());
 	Close();
 }

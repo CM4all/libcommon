@@ -131,7 +131,7 @@ CreateSystemdScope(const char *name, const char *description,
 		try {
 			Systemd::ResetFailedUnit(connection, name);
 		} catch (...) {
-			fmt::print("Failed to reset unit {:?}: {}",
+			fmt::print("Failed to reset unit {:?}: {}\n",
 				   name, std::current_exception());
 		}
 
@@ -151,7 +151,7 @@ CreateSystemdScope(const char *name, const char *description,
 				Systemd::StopUnit(connection, name);
 				Systemd::WaitUnitRemoved(connection, name, -1);
 			} catch (...) {
-				fmt::print(stderr, "Failed to stop unit {:?}: ",
+				fmt::print(stderr, "Failed to stop unit {:?}: {}\n",
 					   name, std::current_exception());
 			}
 		}
