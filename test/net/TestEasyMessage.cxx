@@ -67,3 +67,20 @@ TEST(EasyMessage, OneFD)
 	a.Close();
 	EXPECT_THROW(EasyReceiveMessageWithOneFD(b), SocketClosedPrematurelyError);
 }
+
+TEST(EasyMessage, Error)
+{
+	auto [a, b] = CreateSocketPairNonBlock(SOCK_SEQPACKET);
+
+	// throws EAGAIN
+	EXPECT_THROW(EasyReceiveMessageWithOneFD(a), std::system_error);
+	EXPECT_THROW(EasyReceiveMessageWithOneFD(b), std::system_error);
+
+	// send error, receive error
+	EasySendError(a, "hello"sv);
+	EXPECT_THROW(EasyReceiveMessageWithOneFD(b), std::runtime_error);
+
+	// throws EAGAIN
+	EXPECT_THROW(EasyReceiveMessageWithOneFD(a), std::system_error);
+	EXPECT_THROW(EasyReceiveMessageWithOneFD(b), std::system_error);
+}

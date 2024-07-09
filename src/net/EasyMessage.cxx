@@ -9,8 +9,13 @@
 #include "SocketDescriptor.hxx"
 #include "SocketProtocolError.hxx"
 #include "io/Iovec.hxx"
+#include "util/Exception.hxx"
+#include "util/SpanCast.hxx"
 
 #include <cstdint>
+
+static constexpr std::byte SUCCESS{};
+static constexpr std::byte ERROR{1};
 
 void
 EasySendMessage(SocketDescriptor s, std::span<const std::byte> payload,
@@ -34,16 +39,35 @@ EasySendMessage(SocketDescriptor s, FileDescriptor fd)
 	EasySendMessage(s, dummy_payload, fd);
 }
 
+void
+EasySendError(SocketDescriptor s, std::string_view text)
+{
+	const struct iovec v[] = {MakeIovecT(ERROR), MakeIovec(AsBytes(text))};
+	MessageHeader msg{v};
+	SendMessage(s, msg, MSG_NOSIGNAL);
+}
+
+void
+EasySendError(SocketDescriptor s, std::exception_ptr error)
+{
+	// TODO add special case for std:;system_error / errno
+	EasySendError(s, GetFullMessage(error));
+}
+
 UniqueFileDescriptor
 EasyReceiveMessageWithOneFD(SocketDescriptor s)
 {
-	ReceiveMessageBuffer<1, 4> buffer;
+	ReceiveMessageBuffer<256, 4> buffer;
 	auto d = ReceiveMessage(s, buffer, 0);
 	if (d.payload.empty())
 		throw SocketClosedPrematurelyError{};
 
-	if (d.fds.empty())
+	if (d.fds.empty()) {
+		if (d.payload.size() > 1 && d.payload.front() == ERROR)
+			throw std::runtime_error{std::string{ToStringView(d.payload.subspan(1))}};
+
 		return {};
+	}
 
 	return std::move(d.fds.front());
 }

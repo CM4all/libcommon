@@ -5,7 +5,9 @@
 #pragma once
 
 #include <cstdint>
+#include <exception>
 #include <span>
+#include <string_view>
 
 class SocketDescriptor;
 class FileDescriptor;
@@ -29,6 +31,26 @@ EasySendMessage(SocketDescriptor s, std::span<const std::byte> payload,
  */
 void
 EasySendMessage(SocketDescriptor s, FileDescriptor fd);
+
+/**
+ * Sends a message with the specified error message.  The function
+ * EasyReceiveMessageWithOneFD() will decode and rethrow it as a
+ * std::runtime_error.
+ *
+ * Throws on error.
+ */
+void
+EasySendError(SocketDescriptor s, std::string_view text);
+
+/**
+ * Sends a message with information about the specified exception.
+ * The function EasyReceiveMessageWithOneFD() will decode and rethrow
+ * it.
+ *
+ * Throws on error.
+ */
+void
+EasySendError(SocketDescriptor s, std::exception_ptr error);
 
 /**
  * Receive a message sent by EasySendMessage() (with a null byte
