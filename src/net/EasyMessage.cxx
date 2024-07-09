@@ -35,8 +35,7 @@ EasySendMessage(SocketDescriptor s, std::span<const std::byte> payload,
 void
 EasySendMessage(SocketDescriptor s, FileDescriptor fd)
 {
-	static constexpr std::byte dummy_payload[1]{};
-	EasySendMessage(s, dummy_payload, fd);
+	EasySendMessage(s, ReferenceAsBytes(SUCCESS), fd);
 }
 
 void
