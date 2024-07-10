@@ -13,7 +13,7 @@ Setup(CurlEasy &easy)
 	easy.SetUserAgent(PACKAGE " " VERSION);
 	easy.SetNoProgress();
 	easy.SetNoSignal();
-	easy.SetConnectTimeout(10);
+	easy.SetConnectTimeout(std::chrono::seconds{10});
 }
 
 } // namespace Curl
