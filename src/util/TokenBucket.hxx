@@ -20,6 +20,13 @@ public:
 	}
 
 	/**
+	 * Has the rate limiter reached the zero?
+	 */
+	constexpr bool IsZero(double now) const noexcept {
+		return now >= zero_time;
+	}
+
+	/**
 	 * @return true if the given transmission is conforming, false
 	 * to discard it
 	 */
