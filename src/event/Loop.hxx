@@ -29,7 +29,13 @@ class DeferEvent;
 class SocketEvent;
 
 /**
- * A non-blocking I/O event loop.
+ * An event loop that polls for events on file/socket descriptors.
+ *
+ * This class is not thread-safe, all methods must be called from the
+ * thread that runs it, except where explicitly documented as
+ * thread-safe.
+ *
+ * @see SocketEvent, TimerEvent, DeferEvent
  */
 class EventLoop final
 {
@@ -120,6 +126,9 @@ class EventLoop final
 	ClockCache<std::chrono::system_clock> system_clock_cache;
 
 public:
+	/**
+	 * Throws on error.
+	 */
 #ifdef HAVE_THREADED_EVENT_LOOP
 	explicit EventLoop(ThreadId _thread);
 
@@ -186,6 +195,12 @@ public:
 		system_clock_cache.flush();
 	}
 
+	/**
+	 * Stop execution of this #EventLoop at the next chance.
+	 *
+	 * This method is not thread-safe.  For stopping the
+	 * #EventLoop from within another thread, use InjectBreak().
+	 */
 	void Break() noexcept {
 		quit = true;
 	}
@@ -232,6 +247,9 @@ public:
 	void Insert(FineTimerEvent &t) noexcept;
 #endif // NO_FINE_TIMER_EVENT
 
+	/**
+	 * Schedule a call to DeferEvent::RunDeferred().
+	 */
 	void AddDefer(DeferEvent &e) noexcept;
 	void AddIdle(DeferEvent &e) noexcept;
 
@@ -252,6 +270,10 @@ public:
 	void RemoveInject(InjectEvent &d) noexcept;
 #endif
 
+	/**
+	 * The main function of this class.  It will loop until
+	 * Break() gets called.  Can be called only once.
+	 */
 	void Run() noexcept;
 
 private:
