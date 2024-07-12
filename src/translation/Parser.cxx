@@ -1131,6 +1131,22 @@ TranslateParser::HandleAllowRemoteNetwork(std::span<const std::byte> payload)
 	response.allow_remote_networks.Add(alloc, address, prefix_length);
 }
 
+inline void
+TranslateParser::HandleTokenBucketParams(TranslateTokenBucketParams &params,
+					 const char *packet_name,
+					 std::span<const std::byte> payload)
+{
+	if (params.IsDefined())
+		throw FmtRuntimeError("duplicate {} packet", packet_name);
+
+	if (payload.size() != sizeof(params))
+		throw FmtRuntimeError("malformed {} packet", packet_name);
+
+	memcpy(&params, payload.data(), sizeof(params));
+	if (!params.IsValid())
+		throw FmtRuntimeError("malformed {} packet", packet_name);
+}
+
 #endif // TRANSLATION_ENABLE_HTTP
 
 static bool
@@ -4314,6 +4330,18 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::ALLOW_REMOTE_NETWORK:
 #if TRANSLATION_ENABLE_HTTP
 		HandleAllowRemoteNetwork(payload);
+		return;
+#else
+		break;
+#endif
+
+case TranslationCommand::RATE_LIMIT_SITE_REQUESTS:
+#if TRANSLATION_ENABLE_HTTP
+		if (response.site == nullptr)
+			throw std::runtime_error{"misplaced RATE_LIMIT_SITE_REQUESTS packet"};
+
+		HandleTokenBucketParams(response.rate_limit_site_requests,
+					"RATE_LIMIT_SITE_REQUESTS", payload);
 		return;
 #else
 		break;

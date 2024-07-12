@@ -42,6 +42,23 @@ class AllocatorPtr;
 class UniqueRegex;
 class MatchData;
 
+struct TranslateTokenBucketParams {
+	float rate, burst;
+
+	void Clear() noexcept {
+		rate = -1;
+	}
+
+	bool IsDefined() const noexcept {
+		return rate > 0;
+	}
+
+	bool IsValid() const noexcept {
+		// TODO check std::isfinite()?
+		return rate > 0 && burst > 0;
+	}
+};
+
 struct TranslateResponse {
 	/**
 	 * The protocol version from the BEGIN packet.
@@ -321,6 +338,10 @@ struct TranslateResponse {
 		uint64_t mtime;
 		const char *path;
 	} validate_mtime;
+
+#if TRANSLATION_ENABLE_HTTP
+	TranslateTokenBucketParams rate_limit_site_requests;
+#endif
 
 	/**
 	 * From #TranslationCommand::TIMEOUT.  Zero if unset.

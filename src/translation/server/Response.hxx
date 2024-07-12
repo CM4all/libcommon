@@ -378,6 +378,12 @@ public:
 				   static_cast<std::span<const std::byte>>(address));
 	}
 
+	auto &RateLimitSiteRequests(const float &rate, const float &burst) noexcept {
+		return MultiPacket(TranslationCommand::RATE_LIMIT_SITE_REQUESTS,
+				   std::span{&rate, 1},
+				   std::span{&burst, 1});
+	}
+
 	struct RedirectContext {
 		Response &response;
 

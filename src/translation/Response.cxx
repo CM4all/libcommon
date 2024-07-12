@@ -255,6 +255,10 @@ TranslateResponse::Clear() noexcept
 
 	validate_mtime.mtime = 0;
 	validate_mtime.path = nullptr;
+
+#if TRANSLATION_ENABLE_HTTP
+	rate_limit_site_requests.Clear();
+#endif
 }
 
 static std::span<const char *const>
@@ -518,6 +522,10 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 
 	validate_mtime.mtime = src.validate_mtime.mtime;
 	validate_mtime.path = alloc.CheckDup(src.validate_mtime.path);
+
+#if TRANSLATION_ENABLE_HTTP
+	rate_limit_site_requests = src.rate_limit_site_requests;
+#endif
 }
 
 void

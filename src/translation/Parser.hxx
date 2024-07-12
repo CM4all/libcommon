@@ -28,6 +28,7 @@
 #include <string_view>
 
 struct TranslateResponse;
+struct TranslateTokenBucketParams;
 struct FileAddress;
 struct CgiAddress;
 struct HttpAddress;
@@ -265,6 +266,9 @@ private:
 
 #if TRANSLATION_ENABLE_HTTP
 	void HandleAllowRemoteNetwork(std::span<const std::byte> payload);
+	void HandleTokenBucketParams(TranslateTokenBucketParams &params,
+				     const char *packet_name,
+				     std::span<const std::byte> payload);
 #endif
 
 	Result HandlePacket(TranslationCommand command,

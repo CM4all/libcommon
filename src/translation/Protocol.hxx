@@ -1287,6 +1287,12 @@ enum class TranslationCommand : uint16_t {
 	 * This packet may be sent more than once.
 	 */
 	ALLOW_REMOTE_NETWORK = 263,
+
+	/**
+	 * Configure a rate limit for all requests of this site.
+	 * Payload is two 32-bit floats: rate and burst.
+	 */
+	RATE_LIMIT_SITE_REQUESTS = 264,
 };
 
 struct TranslationHeader {
