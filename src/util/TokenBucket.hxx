@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <algorithm>
+#include <algorithm> // for std::min()
 
 /**
  * An implementation of the "token bucket" rate limiter algorithm.
