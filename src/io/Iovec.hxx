@@ -23,7 +23,7 @@ MakeIovec(std::span<T> s) noexcept
 
 template<typename T>
 constexpr struct iovec
-MakeIovecT(const T &t) noexcept
+MakeIovecT(T &t) noexcept
 {
 	return MakeIovec(std::span{&t, 1});
 }
@@ -33,7 +33,7 @@ inline auto
 MakeIovecStatic() noexcept
 {
 	static constexpr T value = _value;
-	return MakeIovecT<T>(value);
+	return MakeIovecT<const T>(value);
 }
 
 constexpr std::span<std::byte>
