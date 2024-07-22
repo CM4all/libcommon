@@ -33,7 +33,7 @@ inline auto
 MakeIovecStatic() noexcept
 {
 	static constexpr T value = _value;
-	return MakeIovecT<const T>(value);
+	return MakeIovecT(value);
 }
 
 constexpr std::span<std::byte>
