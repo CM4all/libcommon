@@ -2,8 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef EXPIRY_HXX
-#define EXPIRY_HXX
+#pragma once
 
 #include <chrono>
 
@@ -64,29 +63,5 @@ public:
 		return value - now.value;
 	}
 
-	constexpr bool operator==(Expiry other) const noexcept {
-		return value == other.value;
-	}
-
-	constexpr bool operator!=(Expiry other) const noexcept {
-		return value != other.value;
-	}
-
-	constexpr bool operator<(Expiry other) const noexcept {
-		return value < other.value;
-	}
-
-	constexpr bool operator<=(Expiry other) const noexcept {
-		return value <= other.value;
-	}
-
-	constexpr bool operator>(Expiry other) const noexcept {
-		return value > other.value;
-	}
-
-	constexpr bool operator>=(Expiry other) const noexcept {
-		return value >= other.value;
-	}
+	friend constexpr auto operator<=>(const Expiry &, const Expiry &) noexcept = default;
 };
-
-#endif
