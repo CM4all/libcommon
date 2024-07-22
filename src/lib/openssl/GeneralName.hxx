@@ -160,10 +160,6 @@ public:
 			return sk == other.sk && i == other.i;
 		}
 
-		constexpr bool operator!=(const_iterator other) const noexcept {
-			return !(*this == other);
-		}
-
 		GeneralName operator*() const noexcept {
 			return (*sk)[i];
 		}
