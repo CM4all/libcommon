@@ -381,10 +381,6 @@ public:
 			return row == other.row;
 		}
 
-		constexpr bool operator!=(const RowIterator &other) const noexcept {
-			return row != other.row;
-		}
-
 		RowIterator &operator++() noexcept {
 			++row;
 			return *this;
