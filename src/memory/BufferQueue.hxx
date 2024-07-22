@@ -74,10 +74,6 @@ public:
 		bool operator==(const const_iterator &other) const noexcept {
 			return i == other.i;
 		}
-
-		bool operator!=(const const_iterator &other) const noexcept {
-			return !(*this == other);
-		}
 	};
 
 	const_iterator begin() const noexcept {
