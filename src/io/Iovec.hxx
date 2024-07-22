@@ -5,6 +5,7 @@
 #pragma once
 
 #include <span>
+#include <type_traits> // for std::has_unique_object_representations_v
 
 #include <sys/uio.h>
 
@@ -15,6 +16,7 @@ MakeIovec(std::span<const std::byte> s) noexcept
 }
 
 template<typename T>
+requires std::has_unique_object_representations_v<T>
 constexpr struct iovec
 MakeIovec(std::span<T> s) noexcept
 {
@@ -22,6 +24,7 @@ MakeIovec(std::span<T> s) noexcept
 }
 
 template<typename T>
+requires std::has_unique_object_representations_v<T>
 constexpr struct iovec
 MakeIovecT(T &t) noexcept
 {
@@ -29,6 +32,7 @@ MakeIovecT(T &t) noexcept
 }
 
 template<typename T, T _value>
+requires std::has_unique_object_representations_v<T>
 inline auto
 MakeIovecStatic() noexcept
 {
