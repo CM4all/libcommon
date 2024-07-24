@@ -188,6 +188,11 @@ struct PreparedChildProcess {
 		env.push_back(p);
 	}
 
+	void PutEnv(std::string &&s) noexcept {
+		strings.emplace_front(std::move(s));
+		PutEnv(strings.front().c_str());
+	}
+
 	void SetEnv(std::string_view name, std::string_view value) noexcept;
 
 	const char *GetEnv(std::string_view name) const noexcept;

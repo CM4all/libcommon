@@ -28,8 +28,7 @@ PreparedChildProcess::SetEnv(std::string_view name, std::string_view value) noex
 {
 	assert(!name.empty());
 
-	strings.emplace_front(fmt::format("{}={}", name, value));
-	PutEnv(strings.front().c_str());
+	PutEnv(fmt::format("{}={}", name, value));
 }
 
 const char *
