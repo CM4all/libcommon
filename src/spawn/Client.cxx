@@ -429,8 +429,10 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 std::unique_ptr<ChildProcessHandle>
 SpawnServerClient::SpawnChildProcess(const char *name,
 				     PreparedChildProcess &&p)
-{
+try {
 	assert(!shutting_down);
+
+	++stats.spawned;
 
 	/* this check is performed again on the server (which is obviously
 	   necessary, and the only way to have it secure); this one is
@@ -467,6 +469,9 @@ SpawnServerClient::SpawnChildProcess(const char *name,
 	auto handle = std::make_unique<ChildProcess>(*this, pid);
 	processes.insert(*handle);
 	return handle;
+} catch (...) {
+	++stats.errors;
+	throw;
 }
 
 void
@@ -526,10 +531,12 @@ SpawnServerClient::HandleExecCompleteMessage(SpawnPayload payload)
 		if (const auto i = processes.find(pid); i != processes.end()) {
 			// TODO forward errors
 			if (i->completion_handler) {
-				if (*error == 0)
+				if (*error == 0) {
 					i->completion_handler->OnSpawnSuccess();
-				else
+				} else {
+					++stats.errors;
 					i->completion_handler->OnSpawnError(std::make_exception_ptr(std::runtime_error{error}));
+				}
 
 				/* if there is a completion handler,
 				   don't log error message to

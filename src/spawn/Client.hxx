@@ -6,6 +6,7 @@
 
 #include "Interface.hxx"
 #include "Config.hxx"
+#include "Stats.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/SocketEvent.hxx"
 #include "net/MultiReceiveMessage.hxx"
@@ -47,7 +48,9 @@ class SpawnServerClient final : public SpawnService {
 				 IntrusiveHashSetOperators<ChildProcess,
 							   ChildProcessGetKey,
 							   std::hash<unsigned>,
-							   std::equal_to<unsigned>>>;
+							   std::equal_to<unsigned>>,
+				 IntrusiveHashSetBaseHookTraits<ChildProcess>,
+				 IntrusiveHashSetOptions{.constant_time_size=true}>;
 
 	ChildProcessSet processes;
 
@@ -62,6 +65,8 @@ class SpawnServerClient final : public SpawnService {
 	DeferEvent defer_spawn_queue;
 
 	MultiReceiveMessage receive{16, 1024, CMSG_SPACE(sizeof(int)), 1};
+
+	mutable SpawnStats stats{};
 
 	unsigned last_pid = 0;
 
@@ -105,6 +110,11 @@ public:
 	 */
 	bool SupportsCgroups() const noexcept {
 		return cgroups;
+	}
+
+	const SpawnStats &GetStats() const noexcept {
+		stats.alive = processes.size();
+		return stats;
 	}
 
 	void Shutdown() noexcept;
