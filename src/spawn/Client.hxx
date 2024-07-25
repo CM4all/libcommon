@@ -10,7 +10,6 @@
 #include "event/SocketEvent.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
-#include "io/UniqueFileDescriptor.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
 #include "config.h"
@@ -23,6 +22,7 @@
 struct PreparedChildProcess;
 class SpawnPayload;
 class SpawnSerializer;
+class UniqueFileDescriptor;
 
 class SpawnServerClient final : public SpawnService {
 	struct ChildProcess;
@@ -72,12 +72,6 @@ class SpawnServerClient final : public SpawnService {
 	unsigned n_pending_execs = 0;
 
 	static constexpr unsigned THROTTLE_EXECS_THRESHOLD = 8;
-
-	/**
-	 * An O_PATH file descriptor of the cgroup managed by the
-	 * spawner (delegated from systemd).
-	 */
-	UniqueFileDescriptor cgroup;
 
 	const bool cgroups;
 
