@@ -15,6 +15,7 @@
 #include "lib/fmt/ExceptionFormatter.hxx"
 #include "system/Error.hxx"
 #include "net/SocketPair.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "util/Cancellable.hxx"
 
 #include <fmt/core.h>

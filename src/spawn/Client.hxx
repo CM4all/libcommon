@@ -8,7 +8,6 @@
 #include "Config.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/SocketEvent.hxx"
-#include "net/UniqueSocketDescriptor.hxx"
 #include "net/MultiReceiveMessage.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
@@ -23,6 +22,7 @@ struct PreparedChildProcess;
 class SpawnPayload;
 class SpawnSerializer;
 class UniqueFileDescriptor;
+class UniqueSocketDescriptor;
 
 class SpawnServerClient final : public SpawnService {
 	struct ChildProcess;
