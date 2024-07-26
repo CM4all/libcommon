@@ -21,7 +21,7 @@ private:
 public:
 	constexpr const auto &Update(std::span<const std::byte> b) noexcept {
 		for (auto i : b)
-			state = Update(state, (uint8_t)i);
+			state = Update(state, static_cast<uint8_t>(i));
 		return *this;
 	}
 
