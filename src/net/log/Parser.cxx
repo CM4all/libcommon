@@ -206,13 +206,13 @@ ParseDatagram(std::span<const std::byte> d)
 			throw ProtocolError();
 
 		auto &expected_crc =
-			*(const Crc::value_type *)(const void *)
+			*(const PackedBE32 *)
 			(d.data() + d.size() - sizeof(Crc::value_type));
 		d = d.first(d.size() - sizeof(expected_crc));
 
 		Crc crc;
 		crc.Update(d);
-		if (crc.Finish() != FromBE32(expected_crc))
+		if (crc.Finish() != expected_crc)
 			throw ProtocolError();
 
 		return log_server_apply_attributes(d);

@@ -6,7 +6,7 @@
 #include "Datagram.hxx"
 #include "Protocol.hxx"
 #include "Crc.hxx"
-#include "util/ByteOrder.hxx"
+#include "util/PackedBigEndian.hxx"
 
 #include <sys/socket.h>
 #include <string.h>
@@ -62,15 +62,15 @@ public:
 	}
 
 	void WriteBE16(uint16_t value) {
-		WriteT<uint16_t>(ToBE16(value));
+		WriteT(PackedBE16{value});
 	}
 
 	void WriteBE32(uint32_t value) {
-		WriteT<uint32_t>(ToBE32(value));
+		WriteT(PackedBE32{value});
 	}
 
 	void WriteBE64(uint64_t value) {
-		WriteT<uint64_t>(ToBE64(value));
+		WriteT(PackedBE64{value});
 	}
 
 	void WriteString(const char *value) {
