@@ -513,6 +513,8 @@ SpawnServerClient::Kill(ChildProcess &child, int signo) noexcept
 		event.ScheduleWrite();
 
 	kill_queue.push_front({child.pid, signo});
+
+	++stats.killed;
 }
 
 inline void
@@ -561,6 +563,8 @@ SpawnServerClient::HandleOneExit(SpawnPayload &payload)
 	int status;
 	payload.ReadUnsigned(pid);
 	payload.ReadInt(status);
+
+	++stats.exited;
 
 	auto i = processes.find(pid);
 	if (i == processes.end())

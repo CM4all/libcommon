@@ -19,6 +19,17 @@ struct SpawnStats {
 	uint_least64_t errors;
 
 	/**
+	 * The number of signals that were sent to processes (via
+         * ChildProcessHandle::Kill()).
+	 */
+	uint_least64_t killed;
+
+	/**
+	 * The number of processes that have exited.
+	 */
+	uint_least64_t exited;
+
+	/**
 	 * How many child processse are alive right now?
 	 */
 	std::size_t alive;
