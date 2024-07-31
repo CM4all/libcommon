@@ -1241,9 +1241,9 @@ enum class TranslationCommand : uint16_t {
 	 * byte.
 	 *
 	 * Once the socket becomes ready, a request echoing the
-	 * #LISTEN_STREAM packet is sent to the translation server who
-	 * may then describe a process to be spawned (with the
-	 * listener socket on fd=0).
+	 * #MOUNT_LISTEN_STREAM packet is sent to the translation
+	 * server who may then describe a process to be spawned (with
+	 * the listener socket on fd=0).
 	 *
 	 * Multiple processes with the same payload may share the same
 	 * socket.
