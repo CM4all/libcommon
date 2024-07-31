@@ -1293,6 +1293,13 @@ enum class TranslationCommand : uint16_t {
 	 * Payload is two 32-bit floats: rate and burst.
 	 */
 	RATE_LIMIT_SITE_REQUESTS = 264,
+
+	/**
+	 * This response to #MOUNT_LISTEN_STREAM turns the socket into
+         * a listener accepting HTTP connections.  This packet may be
+         * followed by #LISTENER_TAG.
+	 */
+	ACCEPT_HTTP = 265,
 };
 
 struct TranslationHeader {

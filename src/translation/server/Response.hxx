@@ -1682,6 +1682,10 @@ public:
 		return PacketT(TranslationCommand::TIMEOUT, seconds);
 	}
 
+	auto &AcceptHttp() noexcept {
+		return Packet(TranslationCommand::ACCEPT_HTTP);
+	}
+
 	std::span<std::byte> Finish() noexcept;
 
 private:

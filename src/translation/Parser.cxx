@@ -4335,13 +4335,27 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		break;
 #endif
 
-case TranslationCommand::RATE_LIMIT_SITE_REQUESTS:
+	case TranslationCommand::RATE_LIMIT_SITE_REQUESTS:
 #if TRANSLATION_ENABLE_HTTP
 		if (response.site == nullptr)
 			throw std::runtime_error{"misplaced RATE_LIMIT_SITE_REQUESTS packet"};
 
 		HandleTokenBucketParams(response.rate_limit_site_requests,
 					"RATE_LIMIT_SITE_REQUESTS", payload);
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::ACCEPT_HTTP:
+#if TRANSLATION_ENABLE_HTTP
+		if (!payload.empty())
+			throw std::runtime_error("malformed ACCEPT_HTTP packet");
+
+		if (response.accept_http)
+			throw std::runtime_error("duplicate ACCEPT_HTTP packet");
+
+		response.accept_http = true;
 		return;
 #else
 		break;

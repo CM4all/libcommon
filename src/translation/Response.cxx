@@ -155,6 +155,7 @@ TranslateResponse::Clear() noexcept
 	anchor_absolute = false;
 #endif
 #if TRANSLATION_ENABLE_HTTP
+	accept_http = false;
 	tiny_image = false;
 	transparent_chain = false;
 	break_chain = false;
@@ -423,6 +424,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	anchor_absolute = src.anchor_absolute;
 #endif
 #if TRANSLATION_ENABLE_HTTP
+	accept_http = src.accept_http;
 	tiny_image = src.tiny_image;
 	transparent_chain = src.transparent_chain;
 	break_chain = src.break_chain;

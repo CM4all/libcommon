@@ -450,6 +450,7 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
+	bool accept_http;
 	bool tiny_image;
 
 	bool transparent_chain;
