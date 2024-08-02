@@ -43,7 +43,7 @@ SimpleMultiServer::OnUdpDatagram(std::span<const std::byte> payload,
 			throw WasProtocolError{"Malformed Multi-WAS NEW datagram"};
 
 		handler.OnMultiWasNew(*this,
-				      {UniqueSocketDescriptor{fds[0].Release()}, std::move(fds[1]), std::move(fds[2])});
+				      {UniqueSocketDescriptor{std::move(fds[0])}, std::move(fds[1]), std::move(fds[2])});
 		break;
 	}
 

@@ -78,7 +78,7 @@ public:
 	}
 
 	UniqueSocketDescriptor GetSocket() {
-		return UniqueSocketDescriptor{Get().Release()};
+		return UniqueSocketDescriptor{Get()};
 	}
 
 	/**
@@ -543,15 +543,15 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 
 		case SpawnExecCommand::RETURN_STDERR:
-			p.return_stderr = UniqueSocketDescriptor{fds.Get().Release()};
+			p.return_stderr = UniqueSocketDescriptor{fds.Get()};
 			break;
 
 		case SpawnExecCommand::RETURN_PIDFD:
-			p.return_pidfd = UniqueSocketDescriptor{fds.Get().Release()};
+			p.return_pidfd = UniqueSocketDescriptor{fds.Get()};
 			break;
 
 		case SpawnExecCommand::RETURN_CGROUP:
-			p.return_cgroup = UniqueSocketDescriptor{fds.Get().Release()};
+			p.return_cgroup = UniqueSocketDescriptor{fds.Get()};
 			break;
 
 		case SpawnExecCommand::CONTROL:
