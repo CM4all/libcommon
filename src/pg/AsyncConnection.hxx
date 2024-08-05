@@ -218,6 +218,16 @@ public:
 	}
 
 	/**
+	 * Returns true if a query is currently in progress.  In this
+         * case, RequestCancel() may be called.
+	 *
+	 * Note that this is not the strict opposite of IsIdle().
+	 */
+	bool IsBusy() const noexcept {
+		return result_handler != nullptr;
+	}
+
+	/**
 	 * Call this after catching a fatal connection error.  This
 	 * will close the connection, notify the handler and schedule
 	 * a reconnect.
