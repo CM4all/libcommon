@@ -126,12 +126,10 @@ public:
 
 private:
 	void InvokeDone() noexcept {
-		ReleaseSocket();
 		handler.OnWasControlDone();
 	}
 
 	void InvokeError(std::exception_ptr ep) noexcept {
-		ReleaseSocket();
 		handler.OnWasControlError(ep);
 	}
 
