@@ -39,7 +39,7 @@ SharedConnection::CancelQuery(SharedConnectionQuery &query) noexcept
 		   usually not idle, but maybe it's waiting for
 		   something else inbetween two queries, so we need to
 		   check anyway */
-		if (!connection.IsIdle())
+		if (connection.IsBusy())
 			connection.RequestCancel();
 
 		/* submit the next query (outside of this caller
