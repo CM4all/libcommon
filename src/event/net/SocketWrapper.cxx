@@ -89,7 +89,7 @@ SocketWrapper::Close() noexcept
 	write_timeout_event.Cancel();
 }
 
-void
+SocketDescriptor
 SocketWrapper::Abandon() noexcept
 {
 	assert(IsValid());
@@ -97,17 +97,7 @@ SocketWrapper::Abandon() noexcept
 	socket_event.Cancel();
 	write_timeout_event.Cancel();
 
-	socket_event.ReleaseSocket();
-}
-
-int
-SocketWrapper::AsFD() noexcept
-{
-	assert(IsValid());
-
-	const int result = GetSocket().Get();
-	Abandon();
-	return result;
+	return socket_event.ReleaseSocket();
 }
 
 ssize_t

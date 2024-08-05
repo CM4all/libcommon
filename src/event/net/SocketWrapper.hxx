@@ -99,13 +99,17 @@ public:
 	 * Just like Close(), but do not actually close the
 	 * socket.  The caller is responsible for closing the socket (or
 	 * scheduling it for reuse).
+	 *
+	 * @return the socket that is now owned by the caller
 	 */
-	void Abandon() noexcept;
+	SocketDescriptor Abandon() noexcept;
 
 	/**
 	 * Returns the socket descriptor and calls socket_wrapper_abandon().
 	 */
-	int AsFD() noexcept;
+	int AsFD() noexcept {
+		return Abandon().Get();
+	}
 
 	bool IsValid() const noexcept {
 		return socket_event.IsDefined();

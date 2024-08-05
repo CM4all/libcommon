@@ -395,13 +395,13 @@ public:
 	 * socket.  The caller is responsible for closing the socket (or
 	 * scheduling it for reuse).
 	 */
-	void Abandon() noexcept {
+	SocketDescriptor Abandon() noexcept {
 		assert(!ended);
 		assert(!destroyed);
 
 		defer_read.Cancel();
 		defer_write.Cancel();
-		base.Abandon();
+		return base.Abandon();
 	}
 
 	/**
