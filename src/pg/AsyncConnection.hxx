@@ -209,8 +209,8 @@ public:
 	 * Returns true when no asynchronous query is in progress.  In
 	 * this case, SendQuery() may be called.
 	 */
-	[[gnu::pure]]
-	bool IsIdle() const {
+	[[nodiscard]] [[gnu::pure]]
+	bool IsIdle() const noexcept {
 		assert(IsDefined());
 
 		return state == State::READY && result_handler == nullptr &&
