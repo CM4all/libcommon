@@ -229,7 +229,7 @@ BasicStock::GetIdle() noexcept
 }
 
 bool
-BasicStock::GetIdle(StockRequest &request,
+BasicStock::GetIdle(StockRequest &discard_request,
 		    StockGetHandler &get_handler) noexcept
 {
 	auto *item = GetIdle();
@@ -240,7 +240,7 @@ BasicStock::GetIdle(StockRequest &request,
 	/* destroy the request before invoking the handler, because
 	   the handler may destroy the memory pool, which may
 	   invalidate the request's memory region */
-	request.reset();
+	discard_request.reset();
 
 	get_handler.OnStockItemReady(*item);
 	return true;

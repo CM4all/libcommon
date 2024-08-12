@@ -201,8 +201,11 @@ protected:
 	/**
 	 * @param request a request that shall be destroyed before
 	 * invoking the handler (to avoid use-after-free bugs)
+	 *
+	 * @param discard_request a #StockRequest that shall be
+         * discarded before invoking the #StockGetHandler
 	 */
-	bool GetIdle(StockRequest &request,
+	bool GetIdle(StockRequest &discard_request,
 		     StockGetHandler &handler) noexcept;
 
 	/**
