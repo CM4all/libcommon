@@ -87,6 +87,11 @@ class MyStockClass final : public StockClass, public MultiStockClass {
 
 public:
 	/* virtual methods from class StockClass */
+	void Create(CreateStockItem c, StockRequest request,
+		    StockGetHandler &handler,
+		    CancellablePointer &cancel_ptr) override;
+
+	/* virtual methods from class MultiStockClass */
 	std::size_t GetLimit(const void *,
 			     std::size_t _limit) const noexcept override {
 		return _limit;
@@ -96,11 +101,6 @@ public:
 		return std::chrono::hours{1};
 	}
 
-	void Create(CreateStockItem c, StockRequest request,
-		    StockGetHandler &handler,
-		    CancellablePointer &cancel_ptr) override;
-
-	/* virtual methods from class MultiStockClass */
 	StockItem *Create(CreateStockItem c, StockItem &outer_item) override {
 		return new MyInnerStockItem(c, outer_item);
 	}
