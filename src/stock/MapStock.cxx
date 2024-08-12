@@ -53,7 +53,7 @@ StockMap::Erase(Item &item) noexcept
 }
 
 Stock &
-StockMap::GetStock(const char *uri, void *request) noexcept
+StockMap::GetStock(const char *uri, const void *request) noexcept
 {
 	auto [position, inserted] = map.insert_check(uri);
 	if (inserted) {

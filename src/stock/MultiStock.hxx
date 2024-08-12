@@ -398,5 +398,5 @@ public:
 
 private:
 	[[gnu::pure]]
-	MapItem &MakeMapItem(const char *uri, void *request) noexcept;
+	MapItem &MakeMapItem(const char *uri, const void *request) noexcept;
 };

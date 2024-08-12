@@ -624,8 +624,8 @@ MultiStock::DiscardOldestIdle(std::size_t n_requested) noexcept
 	return n_removed;
 }
 
-MultiStock::MapItem &
-MultiStock::MakeMapItem(const char *uri, void *request) noexcept
+inline MultiStock::MapItem &
+MultiStock::MakeMapItem(const char *uri, const void *request) noexcept
 {
 	auto [i, inserted] = map.insert_check(uri);
 	if (inserted) {

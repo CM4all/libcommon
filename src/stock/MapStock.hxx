@@ -130,7 +130,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	Stock &GetStock(const char *uri, void *request) noexcept;
+	Stock &GetStock(const char *uri, const void *request) noexcept;
 
 	/**
 	 * Set the "sticky" flag.  Sticky stocks will not be deleted
