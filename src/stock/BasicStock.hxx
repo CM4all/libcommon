@@ -221,15 +221,6 @@ protected:
 		       StockGetHandler &get_handler,
 		       CancellablePointer &cancel_ptr) noexcept;
 
-	/**
-	 * Obtains an item from the stock without going through the
-	 * callback.  This requires a stock class which finishes the
-	 * create() method immediately.
-	 *
-	 * Throws exception on error.
-	 */
-	StockItem *GetNow(StockRequest request);
-
 	PutAction Put(StockItem &item, PutAction action) noexcept override;
 
 	/**
