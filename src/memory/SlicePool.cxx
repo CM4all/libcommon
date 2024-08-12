@@ -92,8 +92,9 @@ SliceArea::Delete() noexcept
 	}
 #endif
 
+	const std::size_t free_size = pool.area_size;
 	this->~SliceArea();
-	FreePages(this, pool.area_size);
+	FreePages(this, free_size);
 }
 
 inline void *
