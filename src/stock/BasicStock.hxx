@@ -189,7 +189,7 @@ private:
 			UnscheduleCleanup();
 	}
 
-public:
+protected:
 	/**
 	 * Borrow an idle item.
 	 *
