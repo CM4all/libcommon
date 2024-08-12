@@ -223,7 +223,7 @@ public:
 	 *
 	 * Note that this is not the strict opposite of IsIdle().
 	 */
-	bool IsBusy() const noexcept {
+	bool IsRequestPending() const noexcept {
 		return result_handler != nullptr;
 	}
 
