@@ -38,7 +38,7 @@ MakeListener(const SocketAddress address,
 
 	SocketConfig config{
 		.bind_address = AllocatedSocketAddress{address},
-		.listen = 64,
+		.listen = 256,
 		.reuse_port = reuse_port,
 		.free_bind = free_bind,
 		.pass_cred = true,
