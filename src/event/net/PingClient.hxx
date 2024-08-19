@@ -42,6 +42,10 @@ public:
 	[[gnu::const]]
 	static bool IsAvailable() noexcept;
 
+	auto &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	void Start(SocketAddress address) noexcept;
 
 	void Cancel() noexcept {
