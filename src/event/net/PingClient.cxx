@@ -7,6 +7,7 @@
 #include "net/SocketAddress.hxx"
 #include "net/SocketError.hxx"
 #include "net/SendMessage.hxx"
+#include "net/StaticSocketAddress.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Iovec.hxx"
 
@@ -166,15 +167,11 @@ MakeIdent(SocketDescriptor fd)
 	if (!fd.Bind(IPv4Address(0)))
 		throw MakeSocketError("Failed to bind ICMP socket");
 
-	struct sockaddr_in sin;
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = 0;
-	socklen_t sin_length = sizeof(sin);
-
-	if (getsockname(fd.Get(), (struct sockaddr *)&sin, &sin_length) < 0)
+	const auto address = fd.GetLocalAddress();
+	if (!address.IsDefined())
 		throw MakeSocketError("Failed to inspect ICMP socket");
 
-	return sin.sin_port;
+	return address.GetPort();
 }
 
 static void
