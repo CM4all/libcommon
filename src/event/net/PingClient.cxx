@@ -95,7 +95,7 @@ PingClient::Read() noexcept
 	msg.msg_control = ans_data;
 	msg.msg_controllen = sizeof(ans_data);
 
-	int cc = recvmsg(event.GetSocket().Get(), &msg, MSG_DONTWAIT);
+	int cc = event.GetSocket().Receive(msg, MSG_DONTWAIT);
 	if (cc >= 0) {
 		if (parse_reply(&msg, cc, ident)) {
 			event.Close();
