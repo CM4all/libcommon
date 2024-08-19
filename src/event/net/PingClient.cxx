@@ -12,6 +12,7 @@
 #include "io/Iovec.hxx"
 
 #include <cassert>
+#include <stdexcept>
 
 #include <sys/socket.h>
 #include <errno.h>
@@ -171,7 +172,13 @@ MakeIdent(SocketDescriptor fd)
 	if (!address.IsDefined())
 		throw MakeSocketError("Failed to inspect ICMP socket");
 
-	return address.GetPort();
+	switch (address.GetFamily()) {
+	case AF_INET:
+		return IPv4Address::Cast(address).GetPortBE();
+
+	default:
+		throw std::runtime_error{"Unsupported address family"};
+	}
 }
 
 static void
