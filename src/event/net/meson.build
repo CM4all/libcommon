@@ -4,6 +4,7 @@ event_net_sources = [
   'UdpListener.cxx',
   'MultiUdpListener.cxx',
   'SocketWrapper.cxx',
+  'PingClient.cxx',
   'PrometheusExporterListener.cxx',
 ]
 
