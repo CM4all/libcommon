@@ -36,6 +36,12 @@ public:
 		event.Close();
 	}
 
+	/**
+	 * Is the #PingClient class available?
+	 */
+	[[gnu::const]]
+	static bool IsAvailable() noexcept;
+
 	void Start(SocketAddress address) noexcept;
 
 	void Cancel() noexcept {
@@ -50,10 +56,3 @@ private:
 
 	void Read() noexcept;
 };
-
-/**
- * Is the "ping" client available?
- */
-[[gnu::const]]
-bool
-ping_available() noexcept;

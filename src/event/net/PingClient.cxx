@@ -141,7 +141,7 @@ PingClient::OnTimeout() noexcept
  */
 
 bool
-ping_available(void) noexcept
+PingClient::IsAvailable() noexcept
 {
 	int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
 	if (fd < 0)
