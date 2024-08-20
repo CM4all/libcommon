@@ -26,7 +26,6 @@
 PingClient::PingClient(EventLoop &event_loop,
 		       PingClientHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(EventCallback)),
-	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout)),
 	 handler(_handler)
 {
 }
@@ -35,7 +34,6 @@ inline void
 PingClient::ScheduleRead() noexcept
 {
 	event.ScheduleRead();
-	timeout_event.Schedule(std::chrono::seconds(10));
 }
 
 static bool
@@ -73,12 +71,10 @@ PingClient::Read() noexcept
 	if (cc >= 0) {
 		if (parse_reply(header, payload, cc, ident)) {
 			event.Close();
-			timeout_event.Cancel();
 			handler.PingResponse();
 		}
 	} else if (const auto e = GetSocketError(); !IsSocketErrorReceiveWouldBlock(e)) {
 		event.Close();
-		timeout_event.Cancel();
 		handler.PingError(std::make_exception_ptr(MakeSocketError(e, "Failed to receive ping reply")));
 	}
 }
@@ -95,15 +91,6 @@ PingClient::EventCallback(unsigned) noexcept
 	assert(event.IsDefined());
 
 	Read();
-}
-
-inline void
-PingClient::OnTimeout() noexcept
-{
-	assert(event.IsDefined());
-
-	event.Close();
-	handler.PingTimeout();
 }
 
 /*

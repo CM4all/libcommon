@@ -20,10 +20,6 @@ public:
 		printf("ok\n");
 	}
 
-	void PingTimeout() noexcept override {
-		fprintf(stderr, "timeout\n");
-	}
-
 	void PingError(std::exception_ptr ep) noexcept override {
 		PrintException(ep);
 	}
