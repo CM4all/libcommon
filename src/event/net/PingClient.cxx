@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "PingClient.hxx"
-#include "net/in_cksum.hxx"
+#include "net/InetChecksum.hxx"
 #include "net/IPv4Address.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/SocketError.hxx"
@@ -47,7 +47,7 @@ parse_reply(const struct msghdr &msg, size_t cc, uint16_t ident) noexcept
 		return false;
 
 	return icp.type == ICMP_ECHOREPLY && icp.un.echo.id == ident &&
-	       in_cksum({buf, cc}, 0) == 0;
+	       InetChecksum{}.Update({buf, cc}).Finish() == 0;
 }
 
 inline void
@@ -164,7 +164,7 @@ SendPing(SocketDescriptor fd, SocketAddress address, uint16_t ident)
 		},
 	};
 
-	header.checksum = in_cksum(std::span{payload}, in_cksum(ReferenceAsBytes(header), 0));
+	header.checksum = InetChecksum{}.UpdateT(header).Update(payload).Finish();
 
 	const std::array iov{MakeIovecT(header), MakeIovec(payload)};
 
