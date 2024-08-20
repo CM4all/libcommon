@@ -70,7 +70,7 @@ Client::Send(Command cmd,
 	try {
 		SendMessage(socket, msg, 0);
 	} catch (const std::system_error &e) {
-		if (IsSocketError(e) && e.code().value() == ENETUNREACH) {
+		if (IsSocketError(e, ENETUNREACH)) {
 			/* ENETUNREACH can happen when the outgoing
 			   network interface gets a new address which
 			   invalidates our socket which was
