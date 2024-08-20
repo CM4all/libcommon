@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ServerSocket.hxx"
+#include "util/IntrusiveList.hxx"
 
 class PrometheusExporterHandler;
 
@@ -16,10 +17,14 @@ class PrometheusExporterHandler;
 class PrometheusExporterListener final : ServerSocket {
 	PrometheusExporterHandler &handler;
 
+	class Connection;
+	IntrusiveList<Connection> connections;
+
 public:
 	PrometheusExporterListener(EventLoop &event_loop,
 				   UniqueSocketDescriptor _fd,
 				   PrometheusExporterHandler &_handler) noexcept;
+	~PrometheusExporterListener() noexcept;
 
 	using ServerSocket::GetEventLoop;
 
