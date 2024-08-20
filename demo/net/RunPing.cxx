@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "event/Loop.hxx"
+#include "event/ShutdownListener.hxx"
 #include "event/net/PingClient.hxx"
 #include "net/AllocatedSocketAddress.hxx"
 #include "net/Parser.hxx"
@@ -14,14 +15,29 @@
 static bool success;
 
 class MyPingClientHandler final : public PingClientHandler {
+	ShutdownListener shutdown_listener;
+
 public:
+	explicit MyPingClientHandler(EventLoop &event_loop) noexcept
+		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown))
+	{
+		shutdown_listener.Enable();
+	}
+
 	void PingResponse() noexcept override {
 		success = true;
 		printf("ok\n");
+		shutdown_listener.Disable();
 	}
 
 	void PingError(std::exception_ptr ep) noexcept override {
 		PrintException(ep);
+		shutdown_listener.Disable();
+	}
+
+private:
+	void OnShutdown() noexcept {
+		shutdown_listener.GetEventLoop().Break();
 	}
 };
 
@@ -37,7 +53,7 @@ try {
 
 	EventLoop event_loop;
 
-	MyPingClientHandler handler;
+	MyPingClientHandler handler{event_loop};
 	PingClient client(event_loop, handler);
 	client.Start(address);
 
