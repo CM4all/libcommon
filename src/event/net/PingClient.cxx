@@ -166,6 +166,7 @@ PingClient::Start(SocketAddress address) noexcept
 
 		SendPing(event.GetSocket(), address, ident, ++sequence);
 	} catch (...) {
+		event.Close();
 		handler.PingError(std::current_exception());
 		return;
 	}
