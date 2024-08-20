@@ -515,30 +515,49 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		? params.cgroup->name
 		: nullptr;
 
-	UniqueFileDescriptor cgroup_fd;
-	if (params.cgroup != nullptr) {
-		const ScopeUmask scope_umask{
-			cgroups_group_writable ? mode_t{0002} : mode_t{0022}
-		};
+	long pid;
+	for (unsigned retries = 2;;) {
+		try {
+			UniqueFileDescriptor cgroup_fd;
+			if (params.cgroup != nullptr) {
+				const ScopeUmask scope_umask{
+					cgroups_group_writable ? mode_t{0002} : mode_t{0022}
+				};
 
-		cgroup_fd = params.cgroup->Create2(cgroup_state,
-						   params.cgroup_session);
-		if (cgroup_fd.IsDefined()) {
-			ca.flags |= CLONE_INTO_CGROUP;
-			ca.cgroup = cgroup_fd.Get();
+				cgroup_fd = params.cgroup->Create2(cgroup_state,
+								   params.cgroup_session);
+				if (cgroup_fd.IsDefined()) {
+					ca.flags |= CLONE_INTO_CGROUP;
+					ca.cgroup = cgroup_fd.Get();
+				}
+			}
 
 			if (params.return_cgroup.IsDefined())
-				EasySendMessage(params.return_cgroup,
-						cgroup_fd);
+				params.return_cgroup.Close();
+
+			pid = clone3(&ca, sizeof(ca));
+			if (pid < 0)
+				throw MakeErrno("clone() failed");
+
+			if (cgroup_fd.IsDefined() && params.return_cgroup.IsDefined())
+				EasySendMessage(params.return_cgroup, cgroup_fd);
+
+			break;
+		} catch (const std::system_error &e) {
+			if (IsFileNotFound(e) && retries-- > 0)
+				/* this can happen if the existing
+                                   cgroup was deleted by the
+                                   spawn-reaper daemon after it was
+                                   opened by us; setting up the cgroup
+                                   or even clone3() can fail with this
+                                   error (even though ENOENT is not
+                                   documented for clone3()) -
+                                   workaround: retry this part */
+				continue;
+
+			throw;
 		}
 	}
-
-	if (params.return_cgroup.IsDefined())
-		params.return_cgroup.Close();
-
-	long pid = clone3(&ca, sizeof(ca));
-	if (pid < 0)
-		throw MakeErrno("clone() failed");
 
 	if (pid == 0) {
 		userns_map_pipe_w.Close();
