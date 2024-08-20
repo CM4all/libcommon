@@ -24,6 +24,7 @@ class PingClient final {
 	PingClientHandler &handler;
 
 	uint16_t ident;
+	uint16_t sequence = 0;
 
 public:
 	PingClient(EventLoop &event_loop,

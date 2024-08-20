@@ -39,12 +39,13 @@ PingClient::ScheduleRead() noexcept
 
 static bool
 parse_reply(const struct icmphdr &header, const std::byte *payload,
-	    size_t nbytes, uint16_t ident) noexcept
+	    size_t nbytes, uint16_t ident, uint16_t sequence) noexcept
 {
 	if (nbytes < sizeof(header))
 		return false;
 
 	return header.type == ICMP_ECHOREPLY && header.un.echo.id == ident &&
+	       FromBE16(header.un.echo.sequence) == sequence &&
 	       InetChecksum{}.UpdateT(header).Update({payload, nbytes - sizeof(header)}).Finish() == 0;
 }
 
@@ -60,7 +61,7 @@ PingClient::Read() noexcept
 
 	int cc = event.GetSocket().Receive(msg, MSG_DONTWAIT);
 	if (cc >= 0) {
-		if (parse_reply(header, payload, cc, ident)) {
+		if (parse_reply(header, payload, cc, ident, sequence)) {
 			event.Close();
 			handler.PingResponse();
 		}
@@ -129,7 +130,8 @@ MakeIdent(SocketDescriptor fd)
 }
 
 static void
-SendPing(SocketDescriptor fd, SocketAddress address, uint16_t ident)
+SendPing(SocketDescriptor fd, SocketAddress address,
+	 uint16_t ident, uint16_t sequence)
 {
 	static constexpr std::byte payload[8]{};
 
@@ -138,7 +140,7 @@ SendPing(SocketDescriptor fd, SocketAddress address, uint16_t ident)
 		.un = {
 			.echo = {
 				.id = ident,
-				.sequence = ToBE16(1),
+				.sequence = ToBE16(sequence),
 			},
 		},
 	};
@@ -158,7 +160,7 @@ PingClient::Start(SocketAddress address) noexcept
 	try {
 		event.Open(CreateIcmp().Release());
 		ident = MakeIdent(event.GetSocket());
-		SendPing(event.GetSocket(), address, ident);
+		SendPing(event.GetSocket(), address, ident, ++sequence);
 	} catch (...) {
 		handler.PingError(std::current_exception());
 		return;
