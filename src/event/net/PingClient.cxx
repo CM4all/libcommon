@@ -152,20 +152,18 @@ MakeIdent(SocketDescriptor fd)
 static void
 SendPing(SocketDescriptor fd, SocketAddress address, uint16_t ident)
 {
-	struct {
-		struct icmphdr header;
-		char data[8];
-	} packet;
+	struct icmphdr header;
+	std::byte data[8];
 
-	packet.header.type = ICMP_ECHO;
-	packet.header.code = 0;
-	packet.header.checksum = 0;
-	packet.header.un.echo.sequence = htons(1);
-	packet.header.un.echo.id = ident;
-	memset(packet.data, 0, sizeof(packet.data));
-	packet.header.checksum = in_cksum(ReferenceAsBytes(packet), 0);
+	header.type = ICMP_ECHO;
+	header.code = 0;
+	header.checksum = 0;
+	header.un.echo.sequence = htons(1);
+	header.un.echo.id = ident;
+	memset(data, 0, sizeof(data));
+	header.checksum = in_cksum(std::span{data}, in_cksum(ReferenceAsBytes(header), 0));
 
-	const std::array iov{MakeIovecT(packet)};
+	const std::array iov{MakeIovecT(header), MakeIovec(data)};
 
 	SendMessage(fd,
 		    MessageHeader(iov)
