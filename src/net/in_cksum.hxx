@@ -46,6 +46,7 @@
 
 #include <netinet/in.h> // for htons()
 
+[[gnu::pure]]
 constexpr uint16_t
 in_cksum(const uint16_t *addr, std::size_t len, uint16_t csum) noexcept
 {
@@ -78,6 +79,7 @@ in_cksum(const uint16_t *addr, std::size_t len, uint16_t csum) noexcept
 	return (answer);
 }
 
+[[gnu::pure]]
 inline uint16_t
 in_cksum(std::span<const std::byte> src, uint16_t csum) noexcept
 {
