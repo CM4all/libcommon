@@ -44,13 +44,21 @@ public:
 		return event.GetEventLoop();
 	}
 
+	bool IsPending() const noexcept {
+		return event.GetScheduledFlags() != 0;
+	}
+
 	void Start(SocketAddress address) noexcept;
 
 	void Cancel() noexcept {
-		event.Close();
+		event.Cancel();
 	}
 
 private:
+	bool CanReuseSocket() const noexcept {
+		return event.IsDefined();
+	}
+
 	void ScheduleRead() noexcept;
 	void EventCallback(unsigned events) noexcept;
 

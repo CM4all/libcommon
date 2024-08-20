@@ -62,7 +62,7 @@ PingClient::Read() noexcept
 	int cc = event.GetSocket().Receive(msg, MSG_DONTWAIT);
 	if (cc >= 0) {
 		if (parse_reply(header, payload, cc, ident, sequence)) {
-			event.Close();
+			event.Cancel();
 			handler.PingResponse();
 		}
 	} else if (const auto e = GetSocketError(); !IsSocketErrorReceiveWouldBlock(e)) {
@@ -158,8 +158,12 @@ void
 PingClient::Start(SocketAddress address) noexcept
 {
 	try {
-		event.Open(CreateIcmp().Release());
-		ident = MakeIdent(event.GetSocket());
+		if (!CanReuseSocket()) {
+			event.Close();
+			event.Open(CreateIcmp().Release());
+			ident = MakeIdent(event.GetSocket());
+		}
+
 		SendPing(event.GetSocket(), address, ident, ++sequence);
 	} catch (...) {
 		handler.PingError(std::current_exception());
