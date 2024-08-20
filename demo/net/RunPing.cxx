@@ -9,7 +9,8 @@
 #include "net/Parser.hxx"
 #include "util/PrintException.hxx"
 
-#include <stdio.h>
+#include <fmt/core.h>
+
 #include <stdlib.h>
 
 static bool success;
@@ -44,7 +45,7 @@ private:
 	// virtual methods from class PingClientHandler
 	void PingResponse() noexcept override {
 		success = true;
-		printf("ok\n");
+		fmt::print("ok\n");
 		shutdown_listener.Disable();
 	}
 
@@ -58,7 +59,7 @@ int
 main(int argc, char **argv) noexcept
 try {
 	if (argc != 2) {
-		fprintf(stderr, "usage: run-ping IP\n");
+		fmt::print("usage: {} IP\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
