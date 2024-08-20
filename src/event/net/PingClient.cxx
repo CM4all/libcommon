@@ -39,14 +39,14 @@ PingClient::ScheduleRead() noexcept
 }
 
 static bool
-parse_reply(struct msghdr *msg, size_t cc, uint16_t ident) noexcept
+parse_reply(const struct msghdr &msg, size_t cc, uint16_t ident) noexcept
 {
-	const void *buf = (const void *)msg->msg_iov->iov_base;
-	const struct icmphdr *icp = (const struct icmphdr *)buf;
-	if (cc < sizeof(*icp))
+	const void *buf = (const void *)msg.msg_iov->iov_base;
+	const struct icmphdr &icp = *(const struct icmphdr *)buf;
+	if (cc < sizeof(icp))
 		return false;
 
-	return icp->type == ICMP_ECHOREPLY && icp->un.echo.id == ident;
+	return icp.type == ICMP_ECHOREPLY && icp.un.echo.id == ident;
 }
 
 inline void
@@ -69,7 +69,7 @@ PingClient::Read() noexcept
 
 	int cc = event.GetSocket().Receive(msg, MSG_DONTWAIT);
 	if (cc >= 0) {
-		if (parse_reply(&msg, cc, ident)) {
+		if (parse_reply(msg, cc, ident)) {
 			event.Close();
 			timeout_event.Cancel();
 			handler.PingResponse();
