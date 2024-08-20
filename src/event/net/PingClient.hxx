@@ -21,12 +21,12 @@ public:
  * reply.
  */
 class PingClient final {
-	uint16_t ident;
-
 	SocketEvent event;
 	CoarseTimerEvent timeout_event;
 
 	PingClientHandler &handler;
+
+	uint16_t ident;
 
 public:
 	PingClient(EventLoop &event_loop,
