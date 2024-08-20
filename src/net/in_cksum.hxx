@@ -40,14 +40,16 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include <netinet/in.h> // for htons()
 
-constexpr u_short
-in_cksum(const u_short *addr, int len, u_short csum) noexcept
+constexpr uint16_t
+in_cksum(const uint16_t *addr, int len, uint16_t csum) noexcept
 {
 	int nleft = len;
-	const u_short *w = addr;
-	u_short answer;
+	const uint16_t *w = addr;
+	uint16_t answer;
 	int sum = csum;
 
 	/*
@@ -63,7 +65,7 @@ in_cksum(const u_short *addr, int len, u_short csum) noexcept
 
 	/* mop up an odd byte, if necessary */
 	if (nleft == 1)
-		sum += htons(*(const u_char *)w << 8);
+		sum += htons(*(const uint8_t *)w << 8);
 
 	/*
 	 * add back carry outs from top 16 bits to low 16 bits
