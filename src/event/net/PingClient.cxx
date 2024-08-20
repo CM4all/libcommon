@@ -5,6 +5,7 @@
 #include "PingClient.hxx"
 #include "net/InetChecksum.hxx"
 #include "net/IPv4Address.hxx"
+#include "net/MsgHdr.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/SocketError.hxx"
 #include "net/SendMessage.hxx"
@@ -55,11 +56,7 @@ PingClient::Read() noexcept
 
 	std::array iov{MakeIovecT(header), MakeIovec(payload)};
 
-	struct msghdr msg;
-	memset(&msg, 0, sizeof(msg));
-
-	msg.msg_iov = iov.data();
-	msg.msg_iovlen = iov.size();
+	auto msg = MakeMsgHdr(iov);
 
 	int cc = event.GetSocket().Receive(msg, MSG_DONTWAIT);
 	if (cc >= 0) {
