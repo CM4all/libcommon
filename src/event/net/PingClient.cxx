@@ -39,22 +39,23 @@ PingClient::ScheduleRead() noexcept
 }
 
 static bool
-parse_reply(const struct msghdr &msg, size_t cc, uint16_t ident) noexcept
+parse_reply(const struct icmphdr &header, const std::byte *payload,
+	    size_t nbytes, uint16_t ident) noexcept
 {
-	const std::byte *buf = reinterpret_cast<const std::byte *>(msg.msg_iov->iov_base);
-	const struct icmphdr &icp = *(const struct icmphdr *)(const void *)buf;
-	if (cc < sizeof(icp))
+	if (nbytes < sizeof(header))
 		return false;
 
-	return icp.type == ICMP_ECHOREPLY && icp.un.echo.id == ident &&
-	       InetChecksum{}.Update({buf, cc}).Finish() == 0;
+	return header.type == ICMP_ECHOREPLY && header.un.echo.id == ident &&
+	       InetChecksum{}.UpdateT(header).Update({payload, nbytes - sizeof(header)}).Finish() == 0;
 }
 
 inline void
 PingClient::Read() noexcept
 {
-	char buffer[1024];
-	auto iov = MakeIovecT(buffer);
+	struct icmphdr header;
+	std::byte payload[8];
+
+	std::array iov{MakeIovecT(header), MakeIovec(payload)};
 
 	struct msghdr msg;
 	memset(&msg, 0, sizeof(msg));
@@ -62,15 +63,15 @@ PingClient::Read() noexcept
 	char addrbuf[128];
 	msg.msg_name = addrbuf;
 	msg.msg_namelen = sizeof(addrbuf);
-	msg.msg_iov = &iov;
-	msg.msg_iovlen = 1;
+	msg.msg_iov = iov.data();
+	msg.msg_iovlen = iov.size();
 	char ans_data[4096];
 	msg.msg_control = ans_data;
 	msg.msg_controllen = sizeof(ans_data);
 
 	int cc = event.GetSocket().Receive(msg, MSG_DONTWAIT);
 	if (cc >= 0) {
-		if (parse_reply(msg, cc, ident)) {
+		if (parse_reply(header, payload, cc, ident)) {
 			event.Close();
 			timeout_event.Cancel();
 			handler.PingResponse();
