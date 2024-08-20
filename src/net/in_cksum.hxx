@@ -41,14 +41,15 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef> // for std::size_t
 #include <span>
 
 #include <netinet/in.h> // for htons()
 
 constexpr uint16_t
-in_cksum(const uint16_t *addr, int len, uint16_t csum) noexcept
+in_cksum(const uint16_t *addr, std::size_t len, uint16_t csum) noexcept
 {
-	int nleft = len;
+	std::size_t nleft = len;
 	const uint16_t *w = addr;
 	uint16_t answer;
 	int sum = csum;
