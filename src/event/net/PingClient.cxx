@@ -41,12 +41,13 @@ PingClient::ScheduleRead() noexcept
 static bool
 parse_reply(const struct msghdr &msg, size_t cc, uint16_t ident) noexcept
 {
-	const void *buf = (const void *)msg.msg_iov->iov_base;
-	const struct icmphdr &icp = *(const struct icmphdr *)buf;
+	const std::byte *buf = reinterpret_cast<const std::byte *>(msg.msg_iov->iov_base);
+	const struct icmphdr &icp = *(const struct icmphdr *)(const void *)buf;
 	if (cc < sizeof(icp))
 		return false;
 
-	return icp.type == ICMP_ECHOREPLY && icp.un.echo.id == ident;
+	return icp.type == ICMP_ECHOREPLY && icp.un.echo.id == ident &&
+	       in_cksum({buf, cc}, 0) == 0;
 }
 
 inline void
