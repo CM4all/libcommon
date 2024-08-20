@@ -12,6 +12,7 @@
 #include "net/StaticSocketAddress.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Iovec.hxx"
+#include "util/ByteOrder.hxx"
 #include "util/SpanCast.hxx"
 
 #include <cassert>
@@ -20,7 +21,6 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <string.h>
-#include <netinet/in.h>
 #include <netinet/ip_icmp.h>
 #include <unistd.h>
 
@@ -138,7 +138,7 @@ SendPing(SocketDescriptor fd, SocketAddress address, uint16_t ident)
 		.un = {
 			.echo = {
 				.id = ident,
-				.sequence = htons(1),
+				.sequence = ToBE16(1),
 			},
 		},
 	};
