@@ -58,9 +58,6 @@ PingClient::Read() noexcept
 	struct msghdr msg;
 	memset(&msg, 0, sizeof(msg));
 
-	char addrbuf[128];
-	msg.msg_name = addrbuf;
-	msg.msg_namelen = sizeof(addrbuf);
 	msg.msg_iov = iov.data();
 	msg.msg_iovlen = iov.size();
 
