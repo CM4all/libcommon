@@ -42,7 +42,7 @@
 
 #include <netinet/in.h> // for htons()
 
-inline u_short
+constexpr u_short
 in_cksum(const u_short *addr, int len, u_short csum) noexcept
 {
 	int nleft = len;
