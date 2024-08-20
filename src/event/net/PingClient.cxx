@@ -74,11 +74,8 @@ PingClient::Read() noexcept
 			event.Close();
 			timeout_event.Cancel();
 			handler.PingResponse();
-		} else
-			ScheduleRead();
-	} else if (const auto e = GetSocketError(); IsSocketErrorReceiveWouldBlock(e)) {
-		ScheduleRead();
-	} else {
+		}
+	} else if (const auto e = GetSocketError(); !IsSocketErrorReceiveWouldBlock(e)) {
 		event.Close();
 		timeout_event.Cancel();
 		handler.PingError(std::make_exception_ptr(MakeSocketError(e, "Failed to receive ping reply")));
