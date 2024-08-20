@@ -63,9 +63,6 @@ PingClient::Read() noexcept
 	msg.msg_namelen = sizeof(addrbuf);
 	msg.msg_iov = iov.data();
 	msg.msg_iovlen = iov.size();
-	char ans_data[4096];
-	msg.msg_control = ans_data;
-	msg.msg_controllen = sizeof(ans_data);
 
 	int cc = event.GetSocket().Receive(msg, MSG_DONTWAIT);
 	if (cc >= 0) {
