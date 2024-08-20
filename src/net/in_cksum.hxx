@@ -40,11 +40,11 @@
 
 #pragma once
 
+#include "util/ByteOrder.hxx" // for ToBE16()
+
 #include <cstdint>
 #include <cstddef> // for std::size_t
 #include <span>
-
-#include <netinet/in.h> // for htons()
 
 [[gnu::pure]]
 constexpr uint16_t
@@ -68,7 +68,7 @@ in_cksum(const uint16_t *addr, std::size_t len, uint16_t csum) noexcept
 
 	/* mop up an odd byte, if necessary */
 	if (nleft == 1)
-		sum += htons(*(const uint8_t *)w << 8);
+		sum += ToBE16(*(const uint8_t *)w << 8);
 
 	/*
 	 * add back carry outs from top 16 bits to low 16 bits
