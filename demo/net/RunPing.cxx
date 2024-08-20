@@ -14,16 +14,34 @@
 
 static bool success;
 
-class MyPingClientHandler final : public PingClientHandler {
+class Instance final : PingClientHandler {
+	EventLoop event_loop;
+
 	ShutdownListener shutdown_listener;
 
+	PingClient client{event_loop, *this};
+
 public:
-	explicit MyPingClientHandler(EventLoop &event_loop) noexcept
+	Instance() noexcept
 		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown))
 	{
 		shutdown_listener.Enable();
 	}
 
+	void Start(SocketAddress address) noexcept {
+		client.Start(address);
+	}
+
+	void Run() noexcept {
+		event_loop.Run();
+	}
+
+private:
+	void OnShutdown() noexcept {
+		client.Cancel();
+	}
+
+	// virtual methods from class PingClientHandler
 	void PingResponse() noexcept override {
 		success = true;
 		printf("ok\n");
@@ -33,11 +51,6 @@ public:
 	void PingError(std::exception_ptr ep) noexcept override {
 		PrintException(ep);
 		shutdown_listener.Disable();
-	}
-
-private:
-	void OnShutdown() noexcept {
-		shutdown_listener.GetEventLoop().Break();
 	}
 };
 
@@ -51,13 +64,9 @@ try {
 
 	const auto address = ParseSocketAddress(argv[1], 0, false);
 
-	EventLoop event_loop;
-
-	MyPingClientHandler handler{event_loop};
-	PingClient client(event_loop, handler);
-	client.Start(address);
-
-	event_loop.Run();
+	Instance instance;
+	instance.Start(address);
+	instance.Run();
 
 	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 } catch (const std::exception &e) {
