@@ -41,6 +41,7 @@
 #pragma once
 
 #include <cstdint>
+#include <span>
 
 #include <netinet/in.h> // for htons()
 
@@ -74,4 +75,11 @@ in_cksum(const uint16_t *addr, int len, uint16_t csum) noexcept
 	sum += (sum >> 16);			/* add carry */
 	answer = ~sum;				/* truncate to 16 bits */
 	return (answer);
+}
+
+inline uint16_t
+in_cksum(std::span<const std::byte> src, uint16_t csum) noexcept
+{
+	return in_cksum(reinterpret_cast<const uint16_t *>(src.data()),
+			src.size(), csum);
 }

@@ -11,6 +11,7 @@
 #include "net/StaticSocketAddress.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Iovec.hxx"
+#include "util/SpanCast.hxx"
 
 #include <cassert>
 #include <stdexcept>
@@ -164,7 +165,7 @@ SendPing(SocketDescriptor fd, SocketAddress address, uint16_t ident)
 	packet.header.un.echo.sequence = htons(1);
 	packet.header.un.echo.id = ident;
 	memset(packet.data, 0, sizeof(packet.data));
-	packet.header.checksum = in_cksum((u_short *)&packet, sizeof(packet), 0);
+	packet.header.checksum = in_cksum(ReferenceAsBytes(packet), 0);
 
 	const std::array iov{MakeIovecT(packet)};
 
