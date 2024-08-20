@@ -153,17 +153,16 @@ static void
 SendPing(SocketDescriptor fd, SocketAddress address, uint16_t ident)
 {
 	struct icmphdr header;
-	std::byte data[8];
+	static constexpr std::byte payload[8]{};
 
 	header.type = ICMP_ECHO;
 	header.code = 0;
 	header.checksum = 0;
 	header.un.echo.sequence = htons(1);
 	header.un.echo.id = ident;
-	memset(data, 0, sizeof(data));
-	header.checksum = in_cksum(std::span{data}, in_cksum(ReferenceAsBytes(header), 0));
+	header.checksum = in_cksum(std::span{payload}, in_cksum(ReferenceAsBytes(header), 0));
 
-	const std::array iov{MakeIovecT(header), MakeIovec(data)};
+	const std::array iov{MakeIovecT(header), MakeIovec(payload)};
 
 	SendMessage(fd,
 		    MessageHeader(iov)
