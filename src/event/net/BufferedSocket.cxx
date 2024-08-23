@@ -644,15 +644,11 @@ BufferedSocket::OnSocketHangup() noexcept
 bool
 BufferedSocket::OnSocketError(int error) noexcept
 {
-	if (error == EPIPE || error == ECONNRESET) {
+	if (IsSocketErrorClosed(error)) {
 		/* this happens when the peer does a shutdown(SHUT_RD)
 		   because he's not interested in more data; now our
 		   handler gets a chance to say "that's ok, but I want
 		   to continue reading" */
-		/* TODO: how can we exclude ECONNRESET from this
-		   check?  It happened in tests after one send() had
-		   returned -EPIPE, and EPOLLOUT had already been
-		   removed from the mask */
 
 		const auto result = handler->OnBufferedBroken();
 		switch (result) {
