@@ -8,18 +8,21 @@
 
 class SocketProtocolError : public std::runtime_error {
 public:
-	SocketProtocolError(const char *msg) noexcept
-		:std::runtime_error(msg) {}
+	using std::runtime_error::runtime_error;
 };
 
 class SocketClosedPrematurelyError : public SocketProtocolError {
 public:
+	using SocketProtocolError::SocketProtocolError;
+
 	SocketClosedPrematurelyError() noexcept
 		:SocketProtocolError("Peer closed the socket prematurely") {}
 };
 
 class SocketBufferFullError : public SocketProtocolError {
 public:
+	using SocketProtocolError::SocketProtocolError;
+
 	SocketBufferFullError() noexcept
 		:SocketProtocolError("Socket buffer overflow") {}
 };
