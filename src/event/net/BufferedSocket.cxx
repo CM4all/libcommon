@@ -643,7 +643,7 @@ BufferedSocket::OnSocketHangup() noexcept
 
 bool
 BufferedSocket::OnSocketError(int error) noexcept
-{
+try {
 	if (IsSocketErrorClosed(error)) {
 		/* this happens when the peer does a shutdown(SHUT_RD)
 		   because he's not interested in more data; now our
@@ -673,8 +673,9 @@ BufferedSocket::OnSocketError(int error) noexcept
 		}
 	}
 
-	handler->OnBufferedError(std::make_exception_ptr(MakeSocketError(error,
-									 "Socket error")));
+	throw MakeSocketError(error, "Socket error");
+} catch (...) {
+	handler->OnBufferedError(std::current_exception());
 	return false;
 }
 
@@ -765,12 +766,17 @@ BufferedSocket::HandleWriteError() noexcept
 		ScheduleWrite();
 		return WRITE_BLOCKING;
 	} else if (IsSocketErrorClosed(e)) {
-		enum write_result r = handler->OnBufferedBroken();
+		try {
+			enum write_result r = handler->OnBufferedBroken();
 
-		if (r == WRITE_BROKEN)
-			UnscheduleWrite();
+			if (r == WRITE_BROKEN)
+				UnscheduleWrite();
 
-		return r;
+			return r;
+		} catch (...) {
+			handler->OnBufferedError(std::current_exception());
+			return WRITE_DESTROYED;
+		}
 	} else
 		return WRITE_ERRNO;
 }

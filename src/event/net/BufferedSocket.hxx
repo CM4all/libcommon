@@ -272,12 +272,15 @@ public:
 	 * of) the socket.  It may be possible for us to continue reading
 	 * from the socket.
 	 *
+	 * Exceptions thrown by this method are passed to
+	 * OnBufferedError().
+	 *
 	 * @return #WRITE_BROKEN to continue reading from the socket (by
 	 * returning #WRITE_BROKEN), #WRITE_ERRNO if the caller shall
 	 * close the socket with the error, #WRITE_DESTROYED if the
 	 * function has destroyed the #BufferedSocket
 	 */
-	virtual enum write_result OnBufferedBroken() noexcept {
+	virtual enum write_result OnBufferedBroken() {
 		return WRITE_ERRNO;
 	}
 
