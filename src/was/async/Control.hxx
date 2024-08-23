@@ -145,6 +145,8 @@ private:
 	bool OnBufferedClosed() noexcept override;
 	bool OnBufferedWrite() override;
 	bool OnBufferedDrained() noexcept override;
+	[[noreturn]]
+	enum write_result OnBufferedBroken() override;
 	void OnBufferedError(std::exception_ptr e) noexcept override;
 };
 

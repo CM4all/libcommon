@@ -126,6 +126,12 @@ Control::OnBufferedDrained() noexcept
 	return handler.OnWasControlDrained();
 }
 
+enum write_result
+Control::OnBufferedBroken()
+{
+	throw SocketClosedPrematurelyError{"WAS control socket closed by peer"};
+}
+
 void
 Control::OnBufferedError(std::exception_ptr e) noexcept
 {
