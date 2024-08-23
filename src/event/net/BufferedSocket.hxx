@@ -672,6 +672,8 @@ public:
 private:
 	void ClosedPrematurely() noexcept;
 
+	enum write_result HandleWriteError() noexcept;
+
 	/**
 	 * @return false if the #BufferedSocket has been destroyed
 	 */

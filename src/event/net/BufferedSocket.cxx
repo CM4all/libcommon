@@ -758,24 +758,30 @@ BufferedSocket::Read() noexcept
 	return TryRead();
 }
 
+inline enum write_result
+BufferedSocket::HandleWriteError() noexcept
+{
+	if (const auto e = GetSocketError(); IsSocketErrorSendWouldBlock(e)) [[likely]] {
+		ScheduleWrite();
+		return WRITE_BLOCKING;
+	} else if (IsSocketErrorClosed(e)) {
+		enum write_result r = handler->OnBufferedBroken();
+
+		if (r == WRITE_BROKEN)
+			UnscheduleWrite();
+
+		return r;
+	} else
+		return WRITE_ERRNO;
+}
+
 ssize_t
 BufferedSocket::Write(std::span<const std::byte> src) noexcept
 {
 	ssize_t nbytes = base.Write(src);
 
-	if (nbytes < 0) [[unlikely]] {
-		if (const auto e = GetSocketError(); IsSocketErrorSendWouldBlock(e)) [[likely]] {
-			ScheduleWrite();
-			return WRITE_BLOCKING;
-		} else if (IsSocketErrorClosed(e)) {
-			enum write_result r = handler->OnBufferedBroken();
-
-			if (r == WRITE_BROKEN)
-				UnscheduleWrite();
-
-			nbytes = ssize_t(r);
-		}
-	}
+	if (nbytes < 0) [[unlikely]]
+		return static_cast<ssize_t>(HandleWriteError());
 
 	return nbytes;
 }
@@ -785,18 +791,8 @@ BufferedSocket::WriteV(std::span<const struct iovec> v) noexcept
 {
 	ssize_t nbytes = base.WriteV(v);
 
-	if (nbytes < 0) [[unlikely]] {
-		if (const auto e = GetSocketError(); IsSocketErrorSendWouldBlock(e)) [[likely]] {
-			ScheduleWrite();
-			return WRITE_BLOCKING;
-		} else if (IsSocketErrorClosed(e)) {
-			enum write_result r = handler->OnBufferedBroken();
-			if (r == WRITE_BROKEN)
-				UnscheduleWrite();
-
-			nbytes = ssize_t(r);
-		}
-	}
+	if (nbytes < 0) [[unlikely]]
+		return static_cast<ssize_t>(HandleWriteError());
 
 	return nbytes;
 }
