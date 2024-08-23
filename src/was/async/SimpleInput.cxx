@@ -4,7 +4,7 @@
 
 #include "SimpleInput.hxx"
 #include "Buffer.hxx"
-#include "Error.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
 #include "util/DisposableBuffer.hxx"
@@ -76,7 +76,7 @@ SimpleInput::Premature(std::size_t nbytes)
 		if (nbytes == 0)
 			return;
 		else
-			throw WasProtocolError("Malformed PREMATURE packet");
+			throw SocketProtocolError{"Malformed PREMATURE packet"};
 	}
 
 	const std::size_t fill = buffer->GetFill();
@@ -84,7 +84,7 @@ SimpleInput::Premature(std::size_t nbytes)
 	if (fill > nbytes)
 		/* we have already received more data than that, which
 		   should not be possible */
-		throw WasProtocolError("Too much data on WAS pipe");
+		throw SocketProtocolError{"Too much data on WAS pipe"};
 
 	std::size_t discard = nbytes - fill;
 

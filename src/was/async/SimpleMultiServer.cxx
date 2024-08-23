@@ -3,9 +3,9 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "SimpleMultiServer.hxx"
-#include "Error.hxx"
 #include "Socket.hxx"
 #include "net/SocketAddress.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
@@ -30,7 +30,7 @@ SimpleMultiServer::OnUdpDatagram(std::span<const std::byte> payload,
 
 	if (payload.size() < sizeof(h) ||
 	    payload.size() != sizeof(h) + h.length)
-		throw WasProtocolError{"Malformed Multi-WAS datagram"};
+		throw SocketProtocolError{"Malformed Multi-WAS datagram"};
 
 	const auto cmd = (enum multi_was_command)h.command;
 
@@ -40,7 +40,7 @@ SimpleMultiServer::OnUdpDatagram(std::span<const std::byte> payload,
 
 	case MULTI_WAS_COMMAND_NEW:
 		if (fds.size() != 3 || h.length != 0)
-			throw WasProtocolError{"Malformed Multi-WAS NEW datagram"};
+			throw SocketProtocolError{"Malformed Multi-WAS NEW datagram"};
 
 		handler.OnMultiWasNew(*this,
 				      {UniqueSocketDescriptor{std::move(fds[0])}, std::move(fds[1]), std::move(fds[2])});

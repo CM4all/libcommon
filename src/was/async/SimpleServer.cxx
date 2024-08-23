@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "SimpleServer.hxx"
-#include "Error.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringFormat.hxx"
 #include "util/StringSplit.hxx"
@@ -70,7 +70,7 @@ SimpleServer::AbortError(std::exception_ptr error) noexcept
 void
 SimpleServer::AbortProtocolError(const char *msg) noexcept
 {
-	AbortError(std::make_exception_ptr(WasProtocolError(msg)));
+	AbortError(std::make_exception_ptr(SocketProtocolError{msg}));
 }
 
 /*

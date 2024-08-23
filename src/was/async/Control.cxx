@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Control.hxx"
-#include "Error.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "system/Error.hxx"
 #include "util/SpanCast.hxx"
 
@@ -40,7 +40,7 @@ Control::ReleaseSocket() noexcept
 void
 Control::InvokeError(const char *msg) noexcept
 {
-	InvokeError(std::make_exception_ptr(WasProtocolError(msg)));
+	InvokeError(std::make_exception_ptr(SocketProtocolError{msg}));
 }
 
 BufferedResult
