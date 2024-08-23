@@ -41,7 +41,7 @@ BufferedSocketHandler::OnBufferedTimeout() noexcept
 	return false;
 }
 
-void
+inline void
 BufferedSocket::ClosedPrematurely() noexcept
 {
 	handler->OnBufferedError(std::make_exception_ptr(SocketClosedPrematurelyError()));
