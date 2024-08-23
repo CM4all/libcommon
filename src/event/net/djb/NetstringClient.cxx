@@ -4,8 +4,7 @@
 
 #include "NetstringClient.hxx"
 #include "net/SocketProtocolError.hxx"
-
-#include <stdexcept>
+#include "net/TimeoutError.hxx"
 
 static constexpr auto send_timeout = std::chrono::seconds(10);
 static constexpr auto recv_timeout = std::chrono::minutes(1);
@@ -91,5 +90,5 @@ try {
 void
 NetstringClient::OnTimeout() noexcept
 {
-	handler.OnNetstringError(std::make_exception_ptr(std::runtime_error("Connect timeout")));
+	handler.OnNetstringError(std::make_exception_ptr(TimeoutError{"Connect timeout"}));
 }
