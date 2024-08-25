@@ -90,9 +90,18 @@ Control::OnBufferedWrite()
 
 	ssize_t nbytes = socket.Write(r);
 	if (nbytes <= 0) {
-		if (nbytes == WRITE_ERRNO)
+		switch (static_cast<write_result>(nbytes)) {
+		case WRITE_SOURCE_EOF:
+		case WRITE_BLOCKING:
+			return true;
+
+		case WRITE_ERRNO:
 			throw MakeErrno("WAS control send error");
-		return true;
+
+		case WRITE_DESTROYED:
+		case WRITE_BROKEN:
+			return false;
+		}
 	}
 
 	output_buffer.Consume(nbytes);
