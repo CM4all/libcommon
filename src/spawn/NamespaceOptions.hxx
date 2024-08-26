@@ -65,7 +65,7 @@ struct NamespaceOptions {
 
 	MountNamespaceOptions mount;
 
-	NamespaceOptions() = default;
+	NamespaceOptions() noexcept = default;
 
 	constexpr NamespaceOptions(ShallowCopy shallow_copy,
 				   const NamespaceOptions &src) noexcept
@@ -82,11 +82,11 @@ struct NamespaceOptions {
 	{
 	}
 
-	NamespaceOptions(AllocatorPtr alloc, const NamespaceOptions &src);
+	NamespaceOptions(AllocatorPtr alloc, const NamespaceOptions &src) noexcept;
 
 #if TRANSLATION_ENABLE_EXPAND
 	[[gnu::pure]]
-	bool IsExpandable() const;
+	bool IsExpandable() const noexcept;
 
 	/**
 	 * Throws std::runtime_error on error.
@@ -138,9 +138,9 @@ struct NamespaceOptions {
 	 */
 	void ApplyNetwork() const;
 
-	char *MakeId(char *p) const;
+	char *MakeId(char *p) const noexcept;
 
-	const char *GetJailedHome() const {
+	const char *GetJailedHome() const noexcept {
 		return mount.GetJailedHome();
 	}
 };

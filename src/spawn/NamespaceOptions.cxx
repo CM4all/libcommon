@@ -18,7 +18,7 @@
 #include <string.h>
 
 NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
-				   const NamespaceOptions &src)
+				   const NamespaceOptions &src) noexcept
 	:enable_user(src.enable_user),
 	 enable_pid(src.enable_pid),
 	 enable_cgroup(src.enable_cgroup),
@@ -35,7 +35,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 #if TRANSLATION_ENABLE_EXPAND
 
 bool
-NamespaceOptions::IsExpandable() const
+NamespaceOptions::IsExpandable() const noexcept
 {
 	return mount.IsExpandable();
 }
@@ -140,7 +140,7 @@ NamespaceOptions::ApplyNetwork() const
 }
 
 char *
-NamespaceOptions::MakeId(char *p) const
+NamespaceOptions::MakeId(char *p) const noexcept
 {
 	if (enable_user)
 		p = (char *)mempcpy(p, ";uns", 4);
