@@ -20,7 +20,7 @@ class SmallTextFileBuffer {
 public:
 	explicit SmallTextFileBuffer(auto &&file) {
 		fill = WithReadOnly(file, [this](auto fd){
-			const auto nbytes = fd.ReadAt(0, buffer.data(), buffer.size());
+			const auto nbytes = fd.ReadAt(0, std::as_writable_bytes(std::span(buffer)));
 			if (nbytes < 0)
 				throw MakeErrno("Failed to read file");
 
