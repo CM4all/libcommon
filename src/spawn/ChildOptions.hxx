@@ -136,6 +136,18 @@ struct ChildOptions {
 	 */
 	UniqueFileDescriptor OpenStderrPath() const;
 
+	const char *GetHome() const noexcept {
+		return ns.mount.home;
+	}
+
+	bool HasHome() const noexcept {
+		return GetHome() != nullptr;
+	}
+
+	const char *GetJailedHome() const noexcept {
+		return ns.mount.GetJailedHome();
+	}
+
 	/**
 	 * Throws error.
 	 *

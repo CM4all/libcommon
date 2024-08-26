@@ -197,6 +197,18 @@ struct PreparedChildProcess {
 
 	const char *GetEnv(std::string_view name) const noexcept;
 
+	const char *GetHome() const noexcept {
+		return ns.mount.home;
+	}
+
+	bool HasHome() const noexcept {
+		return GetHome() != nullptr;
+	}
+
+	const char *GetJailedHome() const noexcept {
+		return ns.mount.GetJailedHome();
+	}
+
 	/**
 	 * Finish this object and return the executable path.
 	 */

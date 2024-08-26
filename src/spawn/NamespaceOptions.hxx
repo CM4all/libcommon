@@ -139,8 +139,4 @@ struct NamespaceOptions {
 	void ApplyNetwork() const;
 
 	char *MakeId(char *p) const noexcept;
-
-	const char *GetJailedHome() const noexcept {
-		return mount.GetJailedHome();
-	}
 };
