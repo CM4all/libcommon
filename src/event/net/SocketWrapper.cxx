@@ -121,8 +121,7 @@ SocketWrapper::Write(std::span<const std::byte> src) noexcept
 {
 	assert(IsValid());
 
-	return send(GetSocket().Get(), src.data(), src.size(),
-		    MSG_DONTWAIT|MSG_NOSIGNAL);
+	return GetSocket().Send(src, MSG_DONTWAIT);
 }
 
 ssize_t
@@ -130,9 +129,7 @@ SocketWrapper::WriteV(std::span<const struct iovec> v) noexcept
 {
 	assert(IsValid());
 
-	auto m = MakeMsgHdr(v);
-
-	return sendmsg(GetSocket().Get(), &m, MSG_DONTWAIT|MSG_NOSIGNAL);
+	return GetSocket().Send(v, MSG_DONTWAIT);
 }
 
 ssize_t

@@ -141,9 +141,7 @@ Connection::TryWrite() noexcept
 {
 	assert(state == State::RESPONSE);
 
-	ssize_t nbytes = send(event.GetSocket().Get(),
-			      output.data(), output.size(),
-			      MSG_DONTWAIT|MSG_NOSIGNAL);
+	ssize_t nbytes = event.GetSocket().Send(output, MSG_DONTWAIT);
 	if (nbytes < 0) {
 		if (errno == EAGAIN) [[likely]] {
 			event.ScheduleWrite();
