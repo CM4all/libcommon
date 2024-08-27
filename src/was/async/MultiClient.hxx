@@ -37,6 +37,14 @@ public:
 	}
 
 	/**
+	 * Open a new WAS connection.
+	 *
+	 * This method is non-blocking; if the socket buffer is full
+         * (EAGAIN), an exception is thrown.  Usually, the socket
+         * buffer is large enough for this to never happen, unless the
+         * load is extremely high, and then it's better to fail than
+         * to add more load.
+	 *
 	 * @return a #WasSocket with input/output in non-blocking mode
 	 */
 	WasSocket Connect();

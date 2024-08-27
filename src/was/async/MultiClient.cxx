@@ -43,7 +43,7 @@ SendMultiNew(SocketDescriptor s, WasSocket &&socket)
 	b.push_back(socket.output.Get());
 	b.Finish(msg);
 
-	SendMessage(s, msg, MSG_NOSIGNAL);
+	SendMessage(s, msg, MSG_NOSIGNAL|MSG_DONTWAIT);
 }
 
 MultiClient::MultiClient(EventLoop &event_loop, UniqueSocketDescriptor socket,
