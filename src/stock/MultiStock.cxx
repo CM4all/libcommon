@@ -205,10 +205,17 @@ MultiStock::OuterItem::ItemIdleDisconnect(StockItem &item) noexcept
 	assert(item.is_idle);
 	assert(!idle.empty());
 
+	const bool was_unclean = item.unclean;
+
 	idle.erase_and_dispose(idle.iterator_to(item), DeleteDisposer{});
 
 	if (ShouldDelete())
 		parent.RemoveItem(*this);
+	else if (was_unclean)
+		/* if there are waiters for this unclean item (because
+		   the concurrency limit was reached), we can now
+		   create new lease for them */
+		parent.OnLeaseReleased(*this);
 }
 
 void
