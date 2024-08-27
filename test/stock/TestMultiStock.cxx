@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 
+#include <forward_list>
 #include <list>
 
 namespace {
@@ -35,6 +36,8 @@ struct MyStockItem final : StockItem {
 struct MyInnerStockItem final : StockItem {
 	StockItem &outer_item;
 
+	bool stopping = false;
+
 	MyInnerStockItem(CreateStockItem c, StockItem &_outer_item) noexcept
 		:StockItem(c), outer_item(_outer_item) {}
 
@@ -44,6 +47,7 @@ struct MyInnerStockItem final : StockItem {
 	}
 
 	bool Release() noexcept override {
+		unclean = std::exchange(stopping, false);
 		return true;
 	}
 };
@@ -1038,4 +1042,142 @@ TEST(MultiStock, TriggerDoubleCreateBug)
 	EXPECT_EQ(foo.waiting, 1);
 	EXPECT_EQ(foo.ready, 0);
 	EXPECT_EQ(foo.failed, 0);
+}
+
+/**
+ * Unit test to verify that #MultiStock obeys the concurrency limit
+ * even in the presence of "unclean" idle items.
+ */
+TEST(MultiStock, Unclean)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+
+	foo.Get(5);
+
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 5);
+	ASSERT_EQ(foo.waiting, 3);
+	ASSERT_EQ(foo.ready, 2);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* make all inner items "unclean"; returning it will not allow
+           it to be reused (yet) */
+	std::forward_list<MyInnerStockItem *> unclean;
+	for (auto &i : foo.leases) {
+		if (i.item != nullptr) {
+			i.item->stopping = true;
+			unclean.push_front(i.item);
+		}
+	}
+
+	ASSERT_EQ(std::distance(unclean.begin(), unclean.end()), 2U);
+
+	foo.PutReady(2);
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 3);
+	ASSERT_EQ(foo.waiting, 3);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
+
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 3);
+	ASSERT_EQ(foo.waiting, 3);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* attempt to get another lease */
+
+	foo.Get(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 4);
+	ASSERT_EQ(foo.waiting, 4);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* clear the "unclean" flags; this should allow the remaining
+	   requests to be completed */
+
+	auto &unclean1 = *unclean.front();
+	unclean.pop_front();
+
+	unclean1.ClearUncleanFlag();
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 4);
+	ASSERT_EQ(foo.waiting, 3);
+	ASSERT_EQ(foo.ready, 1);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* destroy the second unclean item; this will allow creating a
+           new inner item */
+
+	auto &unclean2 = *unclean.front();
+	unclean.pop_front();
+	ASSERT_TRUE(unclean.empty());
+
+	unclean2.InvokeIdleDisconnect();
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 4);
+	ASSERT_EQ(foo.waiting, 2);
+	ASSERT_EQ(foo.ready, 2);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* return all items, flushing the "waiting" list */
+
+	foo.PutReady(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 3);
+	ASSERT_EQ(foo.waiting, 1);
+	ASSERT_EQ(foo.ready, 2);
+	ASSERT_EQ(foo.failed, 0);
+
+	foo.PutReady(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 2);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 2);
+	ASSERT_EQ(foo.failed, 0);
+
+	foo.PutReady(2);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
 }
