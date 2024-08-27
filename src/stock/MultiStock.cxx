@@ -85,6 +85,8 @@ inline void
 MultiStock::OuterItem::CreateLease(MultiStockClass &_inner_class,
 				   StockGetHandler &handler) noexcept
 try {
+	assert(CanCreateLease());
+
 	auto *lease = _inner_class.Create({*this}, shared_item);
 	lease->InvokeCreateSuccess(handler);
 } catch (...) {
@@ -144,14 +146,21 @@ MultiStock::OuterItem::GetIdle(StockGetHandler &handler) noexcept
 	return true;
 }
 
-void
+bool
 MultiStock::OuterItem::GetLease(MultiStockClass &_inner_class,
 				 StockGetHandler &handler) noexcept
 {
 	assert(CanUse());
 
-	if (!GetIdle(handler))
+	if (GetIdle(handler))
+		return true;
+
+	if (CanCreateLease()) {
 		CreateLease(_inner_class, handler);
+		return true;
+	}
+
+	return false;
 }
 
 const char *
@@ -338,8 +347,8 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 			 CancellablePointer &cancel_ptr) noexcept
 {
 	if (auto *i = FindUsable()) {
-		i->GetLease(inner_class, get_handler);
-		return;
+		if (i->GetLease(inner_class, get_handler))
+			return;
 	}
 
 	get_concurrency = concurrency;
@@ -408,10 +417,8 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 	assert(!waiting.empty());
 	assert(!retry_event.IsPending());
 
-	auto &w = waiting.front();
-
+	auto &w = waiting.pop_front();
 	auto &get_handler = w.handler;
-	waiting.pop_front_and_dispose(DeleteDisposer{});
 
 	/* do it again until no more usable items are
 	   found */
@@ -423,7 +430,15 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		   really needed */
 		DeleteEmptyItems(&item);
 
-	item.GetLease(inner_class, get_handler);
+	if (item.GetLease(inner_class, get_handler))
+		delete &w;
+	else {
+		/* currently, no lease is available (probably because
+		   we're waiting for "unclean" idle items); wait some
+		   more (for ItemUncleanFlagCleared() to be called) */
+		waiting.push_front(w);
+		retry_event.Cancel();
+	}
 }
 
 inline void

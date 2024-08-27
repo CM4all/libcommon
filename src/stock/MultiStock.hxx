@@ -92,6 +92,10 @@ class MultiStock {
 			return busy.size() >= limit;
 		}
 
+		bool CanCreateLease() const noexcept {
+			return idle.size() + busy.size() < limit;
+		}
+
 		bool IsBusy() const noexcept {
 			return !busy.empty();
 		}
@@ -115,7 +119,13 @@ class MultiStock {
 		void CreateLease(MultiStockClass &_cls,
 				 StockGetHandler &handler) noexcept;
 
-		void GetLease(MultiStockClass &_cls,
+		/**
+		 * @return true if a lease was submitted to the
+		 * #StockGetHandler, false if the limit has been
+		 * reached
+		 */
+		[[nodiscard]]
+		bool GetLease(MultiStockClass &_cls,
 			      StockGetHandler &handler) noexcept;
 
 	private:
