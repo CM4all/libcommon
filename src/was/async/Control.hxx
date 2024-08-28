@@ -36,6 +36,7 @@ public:
 	}
 
 	virtual void OnWasControlDone() noexcept = 0;
+	virtual void OnWasControlHangup() noexcept = 0;
 	virtual void OnWasControlError(std::exception_ptr ep) noexcept = 0;
 };
 

@@ -313,6 +313,14 @@ SimpleServer::OnWasControlDone() noexcept
 }
 
 void
+SimpleServer::OnWasControlHangup() noexcept
+{
+	assert(!control.IsDefined());
+
+	Closed();
+}
+
+void
 SimpleServer::OnWasControlError(std::exception_ptr error) noexcept
 {
 	assert(control.IsDefined());
@@ -327,6 +335,12 @@ SimpleServer::OnWasInput(DisposableBuffer body) noexcept
 
 	request.request->body = std::move(body);
 	SubmitRequest();
+}
+
+void
+SimpleServer::OnWasInputHangup() noexcept
+{
+	Closed();
 }
 
 void

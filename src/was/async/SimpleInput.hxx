@@ -19,6 +19,7 @@ class Buffer;
 class SimpleInputHandler {
 public:
 	virtual void OnWasInput(DisposableBuffer input) noexcept = 0;
+	virtual void OnWasInputHangup() noexcept = 0;
 	virtual void OnWasInputError(std::exception_ptr error) noexcept = 0;
 };
 

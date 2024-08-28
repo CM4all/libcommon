@@ -135,8 +135,14 @@ SimpleInput::TryRead()
 void
 SimpleInput::OnPipeReady(unsigned events) noexcept
 try {
-	if (events & (SocketEvent::HANGUP|SocketEvent::ERROR))
-		throw std::runtime_error("Hangup on WAS pipe");
+	if (events & SocketEvent::ERROR)
+		throw std::runtime_error("Error on WAS pipe");
+
+	if (events & SocketEvent::HANGUP) {
+		Close();
+		handler.OnWasInputHangup();
+		return;
+	}
 
 	assert(buffer);
 
