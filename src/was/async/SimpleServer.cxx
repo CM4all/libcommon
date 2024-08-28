@@ -258,7 +258,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		{
 			auto length_p = (const uint64_t *)(const void *)payload.data();
 			if (payload.size() != sizeof(*length_p)) {
-				AbortError(std::make_exception_ptr("malformed PREMATURE packet"));
+				AbortProtocolError("malformed PREMATURE packet");
 				return false;
 			}
 
