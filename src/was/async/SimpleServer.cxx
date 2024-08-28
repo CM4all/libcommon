@@ -309,13 +309,13 @@ SimpleServer::OnWasControlDrained() noexcept
 void
 SimpleServer::OnWasControlDone() noexcept
 {
-	assert(!control.IsDefined());
+	assert(control.IsDefined());
 }
 
 void
 SimpleServer::OnWasControlError(std::exception_ptr error) noexcept
 {
-	assert(!control.IsDefined());
+	assert(control.IsDefined());
 
 	AbortError(error);
 }
