@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "SimpleServer.hxx"
+#include "Socket.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringFormat.hxx"

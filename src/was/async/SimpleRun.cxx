@@ -5,6 +5,7 @@
 #include "SimpleRun.hxx"
 #include "SimpleServer.hxx"
 #include "SimpleMultiServer.hxx"
+#include "Socket.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
 #include "util/Cast.hxx"

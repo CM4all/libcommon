@@ -6,14 +6,14 @@
 
 #include "SimpleHandler.hxx"
 #include "Control.hxx"
-#include "Socket.hxx"
 #include "SimpleInput.hxx"
 #include "SimpleOutput.hxx"
 #include "http/Method.hxx"
 #include "util/Cancellable.hxx"
-#include "util/DisposableBuffer.hxx"
 
 #include <optional>
+
+struct WasSocket;
 
 namespace Was {
 
