@@ -82,6 +82,12 @@ public:
 		return control.GetEventLoop();
 	}
 
+	void Close() noexcept {
+		control.Close();
+		input.Close();
+		output.Close();
+	}
+
 	bool SendResponse(SimpleResponse &&response) noexcept;
 
 private:

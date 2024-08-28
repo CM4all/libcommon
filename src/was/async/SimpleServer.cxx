@@ -58,6 +58,7 @@ void
 SimpleServer::Closed() noexcept
 {
 	CancelRequest();
+	Close();
 	handler.OnWasClosed(*this);
 }
 
@@ -65,6 +66,7 @@ void
 SimpleServer::AbortError(std::exception_ptr error) noexcept
 {
 	CancelRequest();
+	Close();
 	handler.OnWasError(*this, error);
 }
 

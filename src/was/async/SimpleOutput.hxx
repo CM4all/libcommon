@@ -36,6 +36,11 @@ public:
 		return event.GetEventLoop();
 	}
 
+	void Close() noexcept {
+		event.Close();
+		defer_write.Cancel();
+	}
+
 	bool IsActive() const noexcept {
 		return buffer;
 	}

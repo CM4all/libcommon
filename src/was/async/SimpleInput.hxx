@@ -39,6 +39,11 @@ public:
 		return event.GetEventLoop();
 	}
 
+	void Close() noexcept {
+		event.Close();
+		defer_read.Cancel();
+	}
+
 	bool IsActive() const noexcept {
 		return buffer != nullptr;
 	}
