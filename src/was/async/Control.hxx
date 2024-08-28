@@ -69,7 +69,10 @@ public:
 	}
 
 	void Close() noexcept {
-		socket.Close();
+		if (socket.IsValid()) {
+			socket.Close();
+			socket.Destroy();
+		}
 	}
 
 	/**
