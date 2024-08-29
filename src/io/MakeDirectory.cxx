@@ -128,7 +128,7 @@ MakeNestedDirectory(FileDescriptor parent_fd, const char *path,
 	if (path_length >= sizeof(copy))
 		throw MakeErrno(ENAMETOOLONG, "Path too long");
 
-	strcpy(copy, path);
+	memcpy(copy, path, path_length + 1);
 	return RecursiveMakeNestedDirectory(parent_fd, copy, path_length,
 					    options);
 }
