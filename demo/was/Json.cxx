@@ -9,6 +9,7 @@
 #include "event/Loop.hxx"
 #include "uri/MapQueryString.hxx"
 #include "util/PrintException.hxx"
+#include "DefaultFifoBuffer.hxx"
 
 #include <nlohmann/json.hpp>
 
@@ -23,6 +24,9 @@ MyHandler(Was::SimpleRequest request)
 int
 main(int, char **) noexcept
 try {
+	[[maybe_unused]]
+	const ScopeInitDefaultFifoBuffer init_default_fifo_buffer;
+
 	EventLoop event_loop;
 
 	Was::Run(event_loop, MyHandler);

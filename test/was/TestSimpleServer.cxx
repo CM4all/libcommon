@@ -172,6 +172,9 @@ MyRequestHandler::OnRequest(Was::SimpleServer &server, Was::SimpleRequest &&requ
 
 TEST(WasSimpleServer, Basic)
 {
+	[[maybe_unused]]
+	const ScopeInitDefaultFifoBuffer init_default_fifo_buffer;
+
 	auto [for_client, for_server] = WasSocket::CreatePair();
 
 	EventLoop event_loop;
@@ -223,6 +226,9 @@ TEST(WasSimpleServer, Basic)
 
 TEST(WasSimpleServer, Cancel)
 {
+	[[maybe_unused]]
+	const ScopeInitDefaultFifoBuffer init_default_fifo_buffer;
+
 	auto [for_client, for_server] = WasSocket::CreatePair();
 
 	EventLoop event_loop;
@@ -281,6 +287,9 @@ TEST(WasSimpleServer, Cancel)
 
 TEST(WasSimpleServer, ServerClose)
 {
+	[[maybe_unused]]
+	const ScopeInitDefaultFifoBuffer init_default_fifo_buffer;
+
 	auto [for_client, for_server] = WasSocket::CreatePair();
 
 	EventLoop event_loop;

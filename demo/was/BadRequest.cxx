@@ -7,6 +7,7 @@
 #include "event/Loop.hxx"
 #include "uri/MapQueryString.hxx"
 #include "util/PrintException.hxx"
+#include "DefaultFifoBuffer.hxx"
 
 static Co::Task<Was::SimpleResponse>
 MyHandler(Was::SimpleRequest)
@@ -17,6 +18,9 @@ MyHandler(Was::SimpleRequest)
 int
 main(int, char **) noexcept
 try {
+	[[maybe_unused]]
+	const ScopeInitDefaultFifoBuffer init_default_fifo_buffer;
+
 	EventLoop event_loop;
 
 	Was::Run(event_loop, MyHandler);

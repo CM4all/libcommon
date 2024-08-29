@@ -6,6 +6,7 @@
 #include "was/async/SimpleServer.hxx"
 #include "event/Loop.hxx"
 #include "util/PrintException.hxx"
+#include "DefaultFifoBuffer.hxx"
 
 class MyHandler final : public Was::SimpleRequestHandler {
 public:
@@ -23,6 +24,9 @@ public:
 int
 main(int, char **) noexcept
 try {
+	[[maybe_unused]]
+	const ScopeInitDefaultFifoBuffer init_default_fifo_buffer;
+
 	EventLoop event_loop;
 	MyHandler h;
 

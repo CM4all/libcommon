@@ -53,3 +53,13 @@ public:
 	void CycleIfEmpty() noexcept {
 	}
 };
+
+/**
+ * Perform global initialization for #DefaultFifoBuffer.  An instance
+ * of this class should usually be placed in main() before using
+ * #DefaultFifoBuffer.
+ *
+ * This implementation does nothing, but other implementations of
+ * #DefaultFifoBuffer may require global initialization.
+ */
+class ScopeInitDefaultFifoBuffer {};

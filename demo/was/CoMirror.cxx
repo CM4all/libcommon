@@ -5,6 +5,7 @@
 #include "was/async/CoRun.hxx"
 #include "event/Loop.hxx"
 #include "util/PrintException.hxx"
+#include "DefaultFifoBuffer.hxx"
 
 static Co::Task<Was::SimpleResponse>
 MyHandler(Was::SimpleRequest request)
@@ -19,6 +20,9 @@ MyHandler(Was::SimpleRequest request)
 int
 main(int, char **) noexcept
 try {
+	[[maybe_unused]]
+	const ScopeInitDefaultFifoBuffer init_default_fifo_buffer;
+
 	EventLoop event_loop;
 
 	Was::Run(event_loop, MyHandler);
