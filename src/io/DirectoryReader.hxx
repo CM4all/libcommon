@@ -30,5 +30,6 @@ public:
 			: nullptr;
 	}
 
+	[[gnu::pure]]
 	FileDescriptor GetFileDescriptor() const noexcept;
 };
