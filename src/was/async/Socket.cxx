@@ -29,8 +29,8 @@ WasSocket::CreatePair()
 	/* allocate 256 kB for each pipe to reduce the system call and
 	   latency overhead for splicing */
 	static constexpr int PIPE_BUFFER_SIZE = 256 * 1024;
-	fcntl(result.first.input.Get(), F_SETPIPE_SZ, PIPE_BUFFER_SIZE);
-	fcntl(result.first.output.Get(), F_SETPIPE_SZ, PIPE_BUFFER_SIZE);
+	result.first.input.SetPipeCapacity(PIPE_BUFFER_SIZE);
+	result.first.output.SetPipeCapacity(PIPE_BUFFER_SIZE);
 
 	return result;
 }
