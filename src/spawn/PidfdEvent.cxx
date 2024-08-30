@@ -130,7 +130,11 @@ PidfdEvent::Kill(int signo) noexcept
 
 	if (my_pidfd_send_signal(event.GetFileDescriptor().Get(),
 				 signo, nullptr, 0) < 0) {
-		logger(1, "failed to kill child process: ", strerror(errno));
+		const int e = errno;
+		/* do not log ESRCH, which can occur when ZombieReaper
+                   won the race and has reaped this process already */
+		if (e != ESRCH)
+			logger(1, "failed to kill child process: ", strerror(e));
 		return false;
 	}
 
