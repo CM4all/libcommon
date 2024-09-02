@@ -15,6 +15,21 @@
 #include <cassert>
 #include <numeric> // for std::accumulate()
 
+template<typename Operators, typename Item>
+concept IntrusiveHashArrayTrieOperatorsConcept = requires(const Operators &ops,
+							  const Item &c, const Item &c2)
+{
+	{ ops.get_key(c) } noexcept;
+
+	/* note: no "noexcept" here because std::hash is not
+           noexcept */
+	{ ops.hash(ops.get_key(c)) } -> std::same_as<std::size_t>;
+
+	/* note: no "noexcept" here because std::equal_to is not
+           noexcept */
+	{ ops.equal(ops.get_key(c), ops.get_key(c2)) } -> std::same_as<bool>;
+};
+
 struct IntrusiveHashArrayTrieOptions {
 	bool constant_time_size = false;
 };
@@ -219,7 +234,7 @@ template<IntrusiveHookMode _mode=IntrusiveHookMode::NORMAL,
 class IntrusiveHashArrayTrieHook {
 	template<typename, typename> friend struct IntrusiveHashArrayTrieBaseHookTraits;
 	template<auto> friend struct IntrusiveHashArrayTrieMemberHookTraits;
-	template<typename T, typename, typename, IntrusiveHashArrayTrieOptions> friend class IntrusiveHashArrayTrie;
+	template<typename T, IntrusiveHashArrayTrieOperatorsConcept<T>, typename, IntrusiveHashArrayTrieOptions> friend class IntrusiveHashArrayTrie;
 
 	static constexpr IntrusiveHookMode mode = _mode;
 
@@ -348,7 +363,7 @@ struct IntrusiveHashArrayTrieOperators {
  * `equal`
  */
 template<typename T,
-	 typename Operators,
+	 IntrusiveHashArrayTrieOperatorsConcept<T> Operators,
 	 typename HookTraits=IntrusiveHashArrayTrieBaseHookTraits<T>,
 	 IntrusiveHashArrayTrieOptions options=IntrusiveHashArrayTrieOptions{}>
 class IntrusiveHashArrayTrie {
