@@ -3311,7 +3311,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::FORBID_USER_NS:
-#if TRANSLATION_ENABLE_SPAWN
+#if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBSECCOMP)
 		if (child_options == nullptr || child_options->forbid_user_ns)
 			throw std::runtime_error("misplaced FORBID_USER_NS packet");
 
@@ -3568,7 +3568,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::FORBID_MULTICAST:
-#if TRANSLATION_ENABLE_SPAWN
+#if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBSECCOMP)
 		if (child_options == nullptr || child_options->forbid_multicast)
 			throw std::runtime_error("misplaced FORBID_MULTICAST packet");
 
@@ -3582,7 +3582,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::FORBID_BIND:
-#if TRANSLATION_ENABLE_SPAWN
+#if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBSECCOMP)
 		if (child_options == nullptr || child_options->forbid_bind)
 			throw std::runtime_error("misplaced FORBID_BIND packet");
 

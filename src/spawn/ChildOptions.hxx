@@ -5,6 +5,7 @@
 #ifndef BENG_PROXY_CHILD_OPTIONS_HXX
 #define BENG_PROXY_CHILD_OPTIONS_HXX
 
+#include "spawn/config.h"
 #include "translation/Features.hxx"
 #include "adata/ExpandableStringList.hxx"
 #include "CgroupOptions.hxx"
@@ -81,11 +82,13 @@ struct ChildOptions {
 	 */
 	bool stderr_pond = false;
 
+#ifdef HAVE_LIBSECCOMP
 	bool forbid_user_ns = false;
 
 	bool forbid_multicast = false;
 
 	bool forbid_bind = false;
+#endif // HAVE_LIBSECCOMP
 
 	bool no_new_privs = false;
 
@@ -106,9 +109,11 @@ struct ChildOptions {
 		 stderr_null(src.stderr_null),
 		 stderr_jailed(src.stderr_jailed),
 		 stderr_pond(src.stderr_pond),
+#ifdef HAVE_LIBSECCOMP
 		 forbid_user_ns(src.forbid_user_ns),
 		 forbid_multicast(src.forbid_multicast),
 		 forbid_bind(src.forbid_bind),
+#endif // HAVE_LIBSECCOMP
 		 no_new_privs(src.no_new_privs) {}
 
 	ChildOptions(AllocatorPtr alloc, const ChildOptions &src) noexcept;
