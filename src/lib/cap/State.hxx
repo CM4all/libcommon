@@ -2,8 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef CAPABILITY_STATE_HXX
-#define CAPABILITY_STATE_HXX
+#pragma once
 
 #include <span>
 #include <utility>
@@ -16,23 +15,23 @@
 class CapabilityState {
 	cap_t value = nullptr;
 
-	explicit CapabilityState(cap_t _value):value(_value) {}
+	explicit CapabilityState(cap_t _value) noexcept:value(_value) {}
 
 public:
-	CapabilityState(const CapabilityState &src)
+	CapabilityState(const CapabilityState &src) noexcept
 		:value(src.value != nullptr
 		       ? cap_dup(src.value)
 		       : nullptr) {}
 
-	CapabilityState(CapabilityState &&src)
+	CapabilityState(CapabilityState &&src) noexcept
 		:value(std::exchange(src.value, nullptr)) {}
 
-	~CapabilityState() {
+	~CapabilityState() noexcept {
 		if (value != nullptr)
 			cap_free(value);
 	}
 
-	static CapabilityState Empty() {
+	static CapabilityState Empty() noexcept {
 		return CapabilityState(cap_init());
 	}
 
@@ -50,21 +49,21 @@ public:
 	 */
 	static CapabilityState FromText(const char *text);
 
-	CapabilityState &operator=(const CapabilityState &src) {
+	CapabilityState &operator=(const CapabilityState &src) noexcept {
 		value = src.value != nullptr ? cap_dup(src.value) : nullptr;
 		return *this;
 	}
 
-	CapabilityState &operator=(CapabilityState &&src) {
+	CapabilityState &operator=(CapabilityState &&src) noexcept {
 		std::swap(value, src.value);
 		return *this;
 	}
 
-	void Clear() {
+	void Clear() noexcept {
 		cap_clear(value);
 	}
 
-	void ClearFlag(cap_flag_t flag) {
+	void ClearFlag(cap_flag_t flag) noexcept {
 		cap_clear_flag(value, flag);
 	}
 
@@ -81,5 +80,3 @@ public:
 	 */
 	void Install();
 };
-
-#endif
