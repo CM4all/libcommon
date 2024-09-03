@@ -419,6 +419,11 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 		s.Write(SpawnExecCommand::FORBID_BIND);
 #endif // HAVE_LIBSECCOMP
 
+#ifdef HAVE_LIBCAP
+	if (p.cap_sys_resource)
+		s.Write(SpawnExecCommand::CAP_SYS_RESOURCE);
+#endif // HAVE_LIBCAP
+
 	if (p.no_new_privs)
 		s.Write(SpawnExecCommand::NO_NEW_PRIVS);
 

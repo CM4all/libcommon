@@ -755,6 +755,12 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 			break;
 #endif // HAVE_LIBSECCOMP
 
+#ifdef HAVE_LIBCAP
+		case SpawnExecCommand::CAP_SYS_RESOURCE:
+			p.cap_sys_resource = true;
+			break;
+#endif // HAVE_LIBCAP
+
 		case SpawnExecCommand::NO_NEW_PRIVS:
 			p.no_new_privs = true;
 			break;

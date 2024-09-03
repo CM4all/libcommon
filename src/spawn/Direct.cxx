@@ -29,6 +29,10 @@
 #include "SyscallFilter.hxx"
 #endif
 
+#ifdef HAVE_LIBCAP
+#include "lib/cap/State.hxx"
+#endif
+
 #ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-journal.h>
 #endif
@@ -255,6 +259,23 @@ try {
 	   Linux kernel may not have that feature yet */
 	if (p.ns.mount.pivot_root != nullptr)
 		CoreScheduling::Create(0);
+
+#ifdef HAVE_LIBCAP
+	if (p.cap_sys_resource) {
+		/* make CAP_SYS_RESOURCE inheritable and then add it
+                   to the ambient set so execve() does not drop it */
+
+		{
+			static constexpr cap_value_t caps[] = {CAP_SYS_RESOURCE};
+			auto state = CapabilityState::Current();
+			state.SetFlag(CAP_INHERITABLE, caps, CAP_SET);
+			state.Install();
+		}
+
+		if (cap_set_ambient(CAP_SYS_RESOURCE, CAP_SET) < 0)
+			throw MakeErrno("cap_set_ambient() failed");
+	}
+#endif // HAVE_LIBCAP
 
 	if (p.no_new_privs)
 		prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);

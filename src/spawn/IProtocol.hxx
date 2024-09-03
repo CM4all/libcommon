@@ -71,6 +71,9 @@ enum class SpawnExecCommand : uint8_t {
 	FORBID_MULTICAST,
 	FORBID_BIND,
 #endif // HAVE_LIBSECCOMP
+#ifdef HAVE_LIBCAP
+	CAP_SYS_RESOURCE,
+#endif // HAVE_LIBCAP
 	NO_NEW_PRIVS,
 	CGROUP,
 	CGROUP_SESSION,

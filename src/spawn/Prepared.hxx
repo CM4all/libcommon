@@ -144,6 +144,14 @@ struct PreparedChildProcess {
 	bool forbid_bind = false;
 #endif // HAVE_LIBSECCOMP
 
+#ifdef HAVE_LIBCAP
+	/**
+	 * Grant the new child process the CAP_SYS_RESOURCE
+	 * capability, allowing it to ignore filesystem quotas.
+	 */
+	bool cap_sys_resource = false;
+#endif // HAVE_LIBCAP
+
 	bool no_new_privs = false;
 
 	/**

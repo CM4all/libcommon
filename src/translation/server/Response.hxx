@@ -1104,6 +1104,11 @@ public:
 			return *this;
 		}
 
+		auto CapSysResource() noexcept {
+			response.Packet(TranslationCommand::CAP_SYS_RESOURCE);
+			return *this;
+		}
+
 		auto NoNewPrivs() noexcept {
 			response.Packet(TranslationCommand::NO_NEW_PRIVS);
 			return *this;

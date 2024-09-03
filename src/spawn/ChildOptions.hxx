@@ -90,6 +90,14 @@ struct ChildOptions {
 	bool forbid_bind = false;
 #endif // HAVE_LIBSECCOMP
 
+#ifdef HAVE_LIBCAP
+	/**
+	 * Grant the new child process the CAP_SYS_RESOURCE
+	 * capability, allowing it to ignore filesystem quotas.
+	 */
+	bool cap_sys_resource = false;
+#endif // HAVE_LIBCAP
+
 	bool no_new_privs = false;
 
 	ChildOptions() noexcept = default;
@@ -114,6 +122,9 @@ struct ChildOptions {
 		 forbid_multicast(src.forbid_multicast),
 		 forbid_bind(src.forbid_bind),
 #endif // HAVE_LIBSECCOMP
+#ifdef HAVE_LIBCAP
+		 cap_sys_resource(src.cap_sys_resource),
+#endif // HAVE_LIBCAP
 		 no_new_privs(src.no_new_privs) {}
 
 	ChildOptions(AllocatorPtr alloc, const ChildOptions &src) noexcept;

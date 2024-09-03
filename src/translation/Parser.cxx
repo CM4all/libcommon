@@ -4360,6 +4360,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::CAP_SYS_RESOURCE:
+#if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBCAP)
+		if (child_options == nullptr || child_options->cap_sys_resource)
+			throw std::runtime_error("misplaced CAP_SYS_RESOURCE packet");
+
+		if (!payload.empty())
+			throw std::runtime_error("malformed CAP_SYS_RESOURCE packet");
+
+		child_options->cap_sys_resource = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

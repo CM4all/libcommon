@@ -16,6 +16,8 @@
 #include "pexpand.hxx"
 #endif
 
+#include <stdexcept>
+
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -43,6 +45,9 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 	 forbid_multicast(src.forbid_multicast),
 	 forbid_bind(src.forbid_bind),
 #endif // HAVE_LIBSECCOMP
+#ifdef HAVE_LIBCAP
+	 cap_sys_resource(src.cap_sys_resource),
+#endif // HAVE_LIBCAP
 	 no_new_privs(src.no_new_privs)
 {
 }
@@ -50,6 +55,10 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 void
 ChildOptions::Check() const
 {
+#ifdef HAVE_LIBCAP
+	if (cap_sys_resource && ns.enable_user)
+		throw std::runtime_error{"CAP_SYS_RESOURCE is not possible with USER_NAMESPACE"};
+#endif
 }
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -137,6 +146,14 @@ ChildOptions::MakeId(char *p) const noexcept
 	}
 #endif // HAVE_LIBSECCOMP
 
+#ifdef HAVE_LIBCAP
+	if (cap_sys_resource) {
+		*p++ = ';';
+		*p++ = 's';
+		*p++ = 'r';
+	}
+#endif // HAVE_LIBCAP
+
 	if (no_new_privs) {
 		*p++ = ';';
 		*p++ = 'n';
@@ -191,6 +208,9 @@ ChildOptions::CopyTo(PreparedChildProcess &dest, FdHolder &close_fds) const
 	dest.forbid_multicast = forbid_multicast;
 	dest.forbid_bind = forbid_bind;
 #endif // HAVE_LIBSECCOMP
+#ifdef HAVE_LIBCAP
+	dest.cap_sys_resource = cap_sys_resource;
+#endif // HAVE_LIBCAP
 	dest.no_new_privs = no_new_privs;
 
 #ifdef HAVE_LIBSECCOMP

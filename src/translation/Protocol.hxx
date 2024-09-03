@@ -1300,6 +1300,12 @@ enum class TranslationCommand : uint16_t {
          * followed by #LISTENER_TAG.
 	 */
 	ACCEPT_HTTP = 265,
+
+	/**
+	 * Grant the new child process the CAP_SYS_RESOURCE
+	 * capability, allowing it to ignore filesystem quotas.
+	 */
+	CAP_SYS_RESOURCE = 266,
 };
 
 struct TranslationHeader {
