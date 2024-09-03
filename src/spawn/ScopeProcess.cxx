@@ -34,8 +34,6 @@ DropCapabilities()
 #endif // HAVE_LIBCAP
 }
 
-#ifdef HAVE_LIBSECCOMP
-
 /**
  * Install a very strict seccomp filter which allows only very few
  * system calls.
@@ -43,6 +41,7 @@ DropCapabilities()
 static void
 LimitSysCalls()
 {
+#ifdef HAVE_LIBSECCOMP
 	using Seccomp::Arg;
 
 	Seccomp::Filter sf{SCMP_ACT_KILL};
@@ -64,9 +63,8 @@ LimitSysCalls()
 	}
 
 	sf.Load();
-}
-
 #endif // HAVE_LIBSECCOMP
+}
 
 SystemdScopeProcess
 StartSystemdScopeProcess(const bool pid_namespace)
@@ -106,9 +104,7 @@ StartSystemdScopeProcess(const bool pid_namespace)
 		signal(SIGUSR1, SIG_IGN);
 		signal(SIGUSR2, SIG_IGN);
 
-#ifdef HAVE_LIBSECCOMP
 		LimitSysCalls();
-#endif
 
 		std::byte dummy;
 		[[maybe_unused]]
