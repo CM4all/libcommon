@@ -11,6 +11,10 @@
 #include "io/linux/ProcFdinfo.hxx"
 #include "util/Sanitizer.hxx"
 
+#ifdef HAVE_LIBCAP
+#include "lib/cap/State.hxx"
+#endif
+
 #ifdef HAVE_LIBSECCOMP
 #include "SeccompFilter.hxx"
 #endif
@@ -20,6 +24,15 @@
 #include <limits.h> // for UINT_MAX
 #include <signal.h>
 #include <unistd.h> // for _exit()
+
+static void
+DropCapabilities()
+{
+#ifdef HAVE_LIBCAP
+	CapabilityState state = CapabilityState::Empty();
+	state.Install();
+#endif // HAVE_LIBCAP
+}
 
 #ifdef HAVE_LIBSECCOMP
 
@@ -76,6 +89,7 @@ StartSystemdScopeProcess(const bool pid_namespace)
 
 	if (p.local_pid == 0) {
 		SetProcessName("scope");
+		DropCapabilities();
 
 		pipe_r.CheckDuplicate(FileDescriptor{STDIN_FILENO});
 		pipe_r.Release();
