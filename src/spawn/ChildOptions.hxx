@@ -35,6 +35,14 @@ struct ChildOptions {
 	 */
 	std::string_view tag{};
 
+	/**
+	 * Change to this new root directory.  This feature should be
+	 * used for directories which cannot support
+	 * NamespaceOptions::pivot_root because no "put_old"
+	 * subdirectory is guaranteed to exist.
+	 */
+	const char *chroot = nullptr;
+
 	const char *chdir = nullptr;
 
 	/**

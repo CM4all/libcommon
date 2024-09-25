@@ -179,6 +179,7 @@ ChildOptions::CopyTo(PreparedChildProcess &dest, FdHolder &close_fds) const
 {
 	dest.umask = umask;
 
+	dest.chroot = chroot;
 	dest.chdir = chdir;
 
 	if (stderr_jailed) {
