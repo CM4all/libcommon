@@ -213,9 +213,8 @@ struct PreparedChildProcess {
 		return GetHome() != nullptr;
 	}
 
-	const char *GetJailedHome() const noexcept {
-		return ns.mount.GetJailedHome();
-	}
+	[[gnu::pure]]
+	const char *GetJailedHome() const noexcept;
 
 	/**
 	 * Finish this object and return the executable path.

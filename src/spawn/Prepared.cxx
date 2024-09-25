@@ -47,6 +47,32 @@ PreparedChildProcess::GetEnv(std::string_view name) const noexcept
 }
 
 const char *
+PreparedChildProcess::GetJailedHome() const noexcept
+{
+	const char *home = ns.mount.GetJailedHome();
+	if (home != nullptr && chroot != nullptr) {
+		const char *suffix = StringAfterPrefix(home, chroot);
+		if (suffix == nullptr)
+			return nullptr;
+
+		switch (*suffix) {
+		case '\0':
+			home = "/";
+			break;
+
+		case '/':
+			home = suffix;
+			break;
+
+		default:
+			return nullptr;
+		}
+	}
+
+	return home;
+}
+
+const char *
 PreparedChildProcess::Finish() noexcept
 {
 	assert(!args.empty());
