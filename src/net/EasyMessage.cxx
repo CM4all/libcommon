@@ -50,7 +50,7 @@ void
 EasySendError(SocketDescriptor s, std::exception_ptr error)
 {
 	// TODO add special case for std:;system_error / errno
-	EasySendError(s, GetFullMessage(error));
+	EasySendError(s, GetFullMessage(std::move(error)));
 }
 
 UniqueFileDescriptor
