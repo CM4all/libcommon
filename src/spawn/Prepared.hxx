@@ -171,6 +171,7 @@ struct PreparedChildProcess {
 	 */
 	std::forward_list<std::string> strings;
 
+	[[nodiscard]]
 	PreparedChildProcess() noexcept;
 	~PreparedChildProcess() noexcept;
 
