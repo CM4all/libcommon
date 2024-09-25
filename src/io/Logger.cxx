@@ -16,7 +16,7 @@
 unsigned LoggerDetail::max_level = 1;
 
 LoggerDetail::ParamWrapper<std::exception_ptr>::ParamWrapper(std::exception_ptr ep) noexcept
-	:ParamWrapper<std::string>(GetFullMessage(ep)) {}
+	:ParamWrapper<std::string>(GetFullMessage(std::move(ep))) {}
 
 static struct iovec
 MakeIovec(std::string_view s) noexcept
