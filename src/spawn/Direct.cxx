@@ -202,9 +202,6 @@ try {
 		   will apply the resource limits */
 		p.rlimits.Apply(0);
 
-	if (p.chroot != nullptr && chroot(p.chroot) < 0)
-		throw FmtErrno("chroot({:?}) failed", p.chroot);
-
 	if (userns_create_pipe_w.IsDefined()) {
 		/* user namespace allocation was postponed to allow
 		   mounting /proc with a reassociated PID namespace
@@ -221,6 +218,12 @@ try {
 		   the parent */
 		WakeUpPipe(std::move(userns_create_pipe_w));
 	}
+
+	/* call chroot() after creating a new user namespace because
+	   the Linux kernel doesn't allow unshare(CLONE_NEWUSER) if
+	   the calling process is chrooted */
+	if (p.chroot != nullptr && chroot(p.chroot) < 0)
+		throw FmtErrno("chroot({:?}) failed", p.chroot);
 
 	/* wait for the parent to set us up */
 	if (wait_pipe_r.IsDefined() && !WaitForPipe(wait_pipe_r))
