@@ -1306,6 +1306,11 @@ enum class TranslationCommand : uint16_t {
 	 * capability, allowing it to ignore filesystem quotas.
 	 */
 	CAP_SYS_RESOURCE = 266,
+
+	/**
+	 * chroot() into this directory.
+	 */
+	CHROOT = 267,
 };
 
 struct TranslationHeader {

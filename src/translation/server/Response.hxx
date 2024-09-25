@@ -906,6 +906,13 @@ public:
 		}
 
 		template<typename... Types>
+		auto Chroot(Types... path) noexcept {
+			response.StringPacket(TranslationCommand::CHROOT,
+					      path...);
+			return *this;
+		}
+
+		template<typename... Types>
 		auto Chdir(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::CHDIR,
 					      value...);

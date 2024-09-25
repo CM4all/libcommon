@@ -4374,6 +4374,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::CHROOT:
+#if TRANSLATION_ENABLE_SPAWN
+		if (!IsValidAbsolutePath(string_payload))
+			throw std::runtime_error("malformed CHROOT packet");
+
+		if (child_options == nullptr || child_options->chroot != nullptr)
+			throw std::runtime_error("misplaced CHROOT packet");
+
+		child_options->chroot = string_payload.data();
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
