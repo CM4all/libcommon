@@ -208,6 +208,10 @@ struct PreparedChildProcess {
 	[[gnu::pure]]
 	const char *GetEnv(std::string_view name) const noexcept;
 
+	bool HasEnv(std::string_view name) const noexcept {
+		return GetEnv(name) != nullptr;
+	}
+
 	const char *GetHome() const noexcept {
 		return ns.mount.home;
 	}
