@@ -26,7 +26,7 @@ Push(lua_State *L, std::exception_ptr e) noexcept
 {
 	assert(e);
 
-	lua_pushstring(L, GetFullMessage(e).c_str());
+	lua_pushstring(L, GetFullMessage(std::move(e)).c_str());
 }
 
 void
