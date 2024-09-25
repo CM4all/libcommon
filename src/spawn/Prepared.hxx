@@ -205,6 +205,7 @@ struct PreparedChildProcess {
 
 	void SetEnv(std::string_view name, std::string_view value) noexcept;
 
+	[[gnu::pure]]
 	const char *GetEnv(std::string_view name) const noexcept;
 
 	const char *GetHome() const noexcept {
