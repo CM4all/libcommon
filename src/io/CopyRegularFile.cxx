@@ -58,7 +58,8 @@ CopyRegularFile(FileDescriptor src, FileDescriptor dst, off_t size)
 
 	posix_fadvise(src.Get(), 0, size, POSIX_FADV_SEQUENTIAL);
 
-	fallocate(dst.Get(), FALLOC_FL_KEEP_SIZE, 0, size);
+	if (size > 32768)
+		fallocate(dst.Get(), FALLOC_FL_KEEP_SIZE, 0, size);
 
 	while (size > 0) {
 		std::array<std::byte, 65536> buffer;
