@@ -5,6 +5,7 @@
 #include "Connection.hxx"
 #include "Result.hxx"
 #include "lib/fmt/RuntimeError.hxx"
+#include "lib/fmt/ToBuffer.hxx"
 #include "lua/Assert.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
@@ -400,9 +401,10 @@ PgRequest::SendQuery(Pg::AsyncConnection &c)
 
 			case LUA_TNUMBER:
 				number_buffers.emplace_front();
-				snprintf(number_buffers.front().data(),
-					 number_buffers.front().capacity(),
-					 "%g", (double)lua_tonumber(L, -1));
+				// fmt will format floating point numbers that represent integers precisely as an integer,
+				// i.e. without a period and without an exponent (like in scientific notation).
+				// This is necessary, because if you pass e.g. "1e+4" for an int in a query, postgres will complain.
+				FmtToBuffer(number_buffers.front(), "{}",  lua_tonumber(L, -1));
 				p[i] = number_buffers.front().c_str();
 				break;
 
