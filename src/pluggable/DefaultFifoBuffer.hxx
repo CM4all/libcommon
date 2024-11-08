@@ -28,7 +28,7 @@ public:
 	}
 
 	void Allocate() noexcept {
-		SetBuffer(new std::byte[SIZE], SIZE);
+		SetBuffer({new std::byte[SIZE], SIZE});
 	}
 
 	void Free() noexcept {
