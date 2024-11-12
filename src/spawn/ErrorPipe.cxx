@@ -34,10 +34,10 @@ WriteErrorPipe(FileDescriptor p, std::string_view prefix,
 void
 ReadErrorPipe(FileDescriptor p)
 {
-	char buffer[1024];
-	ssize_t nbytes = p.Read(buffer, sizeof(buffer) - 1);
+	std::array<char, 1024> buffer;
+	ssize_t nbytes = p.Read(std::as_writable_bytes(std::span{buffer}.first(buffer.size() - 1)));
 	if (nbytes > 0) {
 		buffer[nbytes] = 0;
-		throw std::runtime_error{buffer};
+		throw std::runtime_error{buffer.data()};
 	}
 }
