@@ -12,7 +12,7 @@
 static WriteFileResult
 TryWrite(FileDescriptor fd, std::span<const std::byte> value) noexcept
 {
-	ssize_t nbytes = fd.Write(value.data(), value.size());
+	ssize_t nbytes = fd.Write(value);
 	if (nbytes < 0)
 		return WriteFileResult::ERROR;
 	else if (std::span<const std::byte>::size_type(nbytes) == value.size())
