@@ -36,13 +36,7 @@ public:
 		event.Cancel();
 	}
 
-	void Signal() noexcept {
-		if (!pending.exchange(true)) {
-			static constexpr uint64_t value = 1;
-			(void)event.GetFileDescriptor()
-				.Write(&value, sizeof(value));
-		}
-	}
+	void Signal() noexcept;
 
 private:
 	void EventFdCallback(unsigned events) noexcept;

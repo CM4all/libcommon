@@ -19,6 +19,16 @@ Notify::~Notify() noexcept
 	event.Close();
 }
 
+void
+Notify::Signal() noexcept
+{
+	if (!pending.exchange(true)) {
+		static constexpr uint64_t value = 1;
+		(void)event.GetFileDescriptor()
+			.Write(&value, sizeof(value));
+	}
+}
+
 inline void
 Notify::EventFdCallback(unsigned) noexcept
 {
