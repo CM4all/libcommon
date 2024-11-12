@@ -9,11 +9,10 @@
 #include "io/Logger.hxx"
 
 #include <cassert>
-#include <chrono>
 
 #include <signal.h>
 
-static constexpr auto child_kill_timeout = std::chrono::minutes(1);
+static constexpr Event::Duration child_kill_timeout = std::chrono::minutes(1);
 
 class ChildProcessRegistry::KilledChildProcess final
 	: public AutoUnlinkIntrusiveListHook, ExitListener
