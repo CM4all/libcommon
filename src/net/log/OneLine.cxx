@@ -9,6 +9,7 @@
 #include "net/Anonymize.hxx"
 #include "io/FileDescriptor.hxx"
 #include "time/ISO8601.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StringBuffer.hxx"
 #include "util/StringBuilder.hxx"
 
@@ -286,7 +287,8 @@ LogOneLine(FileDescriptor fd, const Datagram &d,
 		return true;
 
 	*end++ = '\n';
-	return fd.Write(buffer, end - buffer) >= 0;
+	const std::string_view line{buffer, end};
+	return fd.Write(AsBytes(line)) >= 0;
 }
 
 } // namespace Net::Log
