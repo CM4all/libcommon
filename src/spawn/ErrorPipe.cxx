@@ -21,7 +21,7 @@ WriteErrorPipe(FileDescriptor p, std::string_view prefix,
 	};
 
 	[[maybe_unused]]
-	auto nbytes = writev(p.Get(), v.data(), v.size());
+	auto nbytes = p.Write(v);
 }
 
 void
