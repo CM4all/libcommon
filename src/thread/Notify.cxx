@@ -5,6 +5,7 @@
 #include "Notify.hxx"
 #include "system/LinuxFD.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "util/SpanCast.hxx"
 
 Notify::Notify(EventLoop &event_loop, Callback _callback) noexcept
 	:callback(_callback),
@@ -25,7 +26,7 @@ Notify::Signal() noexcept
 	if (!pending.exchange(true)) {
 		static constexpr uint64_t value = 1;
 		(void)event.GetFileDescriptor()
-			.Write(&value, sizeof(value));
+			.Write(ReferenceAsBytes(value));
 	}
 }
 
