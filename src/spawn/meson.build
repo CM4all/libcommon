@@ -1,9 +1,15 @@
 spawn_config = configuration_data()
 spawn_config.set('HAVE_LIBCAP', cap_dep.found())
 
+spawn_options_sources = [
+  'CgroupState.cxx',
+]
+
+spawn_options_dependencies = [
+]
+
 spawn_sources = [
   'CgroupKill.cxx',
-  'CgroupState.cxx',
   'ZombieReaper.cxx',
 ]
 
@@ -105,7 +111,7 @@ if get_variable('libcommon_enable_spawn_daemon', false)
   # Enable the client implementation for the spawn daemon (package
   # "cm4all-spawn").
 
-  spawn_sources += [
+  spawn_options_sources += [
     'accessory/Client.cxx',
   ]
 endif
@@ -122,7 +128,7 @@ if get_variable('libcommon_enable_spawn_options', false)
   # Enable the structs ChildOptions and PreparedChildProcess (which in
   # turn need an AllocatorPtr implementation).
 
-  spawn_sources += [
+  spawn_options_sources += [
     'CgroupOptions.cxx',
     'ChildOptions.cxx',
     'Mount.cxx',
@@ -141,7 +147,7 @@ if get_variable('libcommon_enable_spawn_options', false)
     'VfsBuilder.cxx',
   ]
 
-  spawn_dependencies += [
+  spawn_options_dependencies += [
     alloc_dep,
     adata_dep,
   ]
@@ -160,11 +166,33 @@ endif
 
 configure_file(output: 'config.h', configuration: spawn_config)
 
+spawn_options = static_library(
+  'spawn_options',
+  spawn_options_sources,
+  include_directories: inc,
+  dependencies: [
+    util_dep,
+    io_linux_dep,
+    cap_dep,
+    fmt_dep,
+  ],
+)
+
+spawn_options_dep = declare_dependency(
+  link_with: spawn_options,
+  dependencies: spawn_options_dependencies + [
+    system_dep,
+    io_dep,
+    net_dep,
+  ],
+)
+
 spawn = static_library(
   'spawn',
   spawn_sources,
   include_directories: inc,
   dependencies: spawn_internal_dependencies + [
+    spawn_options_dep,
     util_dep,
     io_linux_dep,
     cap_dep,
