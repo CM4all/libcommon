@@ -89,9 +89,12 @@ SimpleInput::Premature(std::size_t nbytes)
 	std::size_t discard = nbytes - fill;
 
 	while (discard > 0) {
-		char dummy[4096];
-		auto n = GetPipe().Read(dummy,
-					std::min(sizeof(dummy), discard));
+		std::byte dummy[4096];
+		std::span<std::byte> dest = dummy;
+		if (dest.size() > discard)
+			dest = dest.first(discard);
+
+		auto n = GetPipe().Read(dest);
 		if (n < 0)
 			throw MakeErrno("Read error on WAS pipe");
 
