@@ -11,12 +11,22 @@
  */
 template<typename T>
 requires std::is_standard_layout_v<T> && std::is_trivially_copyable_v<T>
+[[gnu::nonnull]]
+static inline T &
+LoadUnaligned(T &value, const void *src) noexcept
+{
+	std::memcpy(&value, src, sizeof(value));
+	return value;
+}
+
+template<typename T>
+requires std::is_standard_layout_v<T> && std::is_trivially_copyable_v<T>
 [[nodiscard]] [[gnu::pure]] [[gnu::nonnull]]
 static inline T
 LoadUnaligned(const void *src) noexcept
 {
 	T value;
-	std::memcpy(&value, src, sizeof(value));
+	LoadUnaligned(value, src);
 	return value;
 }
 
