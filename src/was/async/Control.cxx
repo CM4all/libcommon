@@ -6,6 +6,7 @@
 #include "net/SocketProtocolError.hxx"
 #include "system/Error.hxx"
 #include "util/SpanCast.hxx"
+#include "util/Unaligned.hxx"
 
 #include <was/protocol.h>
 
@@ -53,25 +54,31 @@ Control::OnBufferedData()
 
 	while (true) {
 		auto r = socket.ReadBuffer();
-		const auto header = (const struct was_header *)(const void *)r.data();
-		if (r.size() < sizeof(*header) ||
-		    r.size() < sizeof(*header) + header->length) {
-			/* not enough data yet */
-			if (!InvokeDrained())
-				return BufferedResult::DESTROYED;
 
-			return BufferedResult::MORE;
-		}
+		struct was_header header;
+		if (r.size() < sizeof(header))
+			break;
 
-		const std::byte *payload = (const std::byte *)(header + 1);
+		LoadUnaligned(header, r.data());
+		r = r.subspan(sizeof(header));
+		if (r.size() < header.length)
+			break;
 
-		socket.KeepConsumed(sizeof(*header) + header->length);
+		const auto payload = r.first(header.length);
 
-		bool success = handler.OnWasControlPacket(was_command(header->command),
-							  {payload, header->length});
+		socket.KeepConsumed(sizeof(header) + payload.size());
+
+		bool success = handler.OnWasControlPacket(was_command(header.command),
+							  payload);
 		if (!success)
 			return BufferedResult::DESTROYED;
 	}
+
+	/* not enough data yet */
+	if (!InvokeDrained())
+		return BufferedResult::DESTROYED;
+
+	return BufferedResult::MORE;
 }
 
 bool
@@ -168,18 +175,20 @@ Control::Start(enum was_command cmd, size_t payload_length) noexcept
 {
 	assert(!done);
 
+	const struct was_header header{
+		.length = static_cast<uint16_t>(payload_length),
+		.command = static_cast<uint16_t>(cmd),
+	};
+
 	output_buffer.AllocateIfNull();
 	auto w = output_buffer.Write();
-	struct was_header *header = (struct was_header *)(void *)w.data();
-	if (w.size() < sizeof(*header) + payload_length) {
+	if (w.size() < sizeof(header) + payload_length) {
 		InvokeError("control output is too large");
 		return nullptr;
 	}
 
-	header->command = cmd;
-	header->length = payload_length;
-
-	return reinterpret_cast<std::byte *>(header + 1);
+	StoreUnaligned(w.data(), header);
+	return w.data() + sizeof(header);
 }
 
 void
