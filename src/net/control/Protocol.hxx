@@ -57,7 +57,7 @@ enum class Command {
     NODE_STATUS = 4,
 
     /**
-     * Dump all memory pools.
+     * Deprecated.
      */
     DUMP_POOLS = 5,
 
