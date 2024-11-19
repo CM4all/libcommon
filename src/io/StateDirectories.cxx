@@ -45,7 +45,7 @@ static FileDescriptor
 OpenReadOnlyNoFollow(FileDescriptor directory, const char *path)
 {
 	static constexpr struct open_how how{
-		.flags = O_RDONLY|O_NOFOLLOW|O_NOCTTY|O_CLOEXEC,
+		.flags = O_RDONLY|O_NOFOLLOW|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
 		.resolve = RESOLVE_IN_ROOT|RESOLVE_NO_MAGICLINKS|RESOLVE_NO_SYMLINKS,
 	};
 

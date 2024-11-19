@@ -12,7 +12,7 @@
 #include <fcntl.h>
 
 static constexpr struct open_how ro_beneath{
-	.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC,
+	.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
 	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
 };
 
@@ -37,7 +37,7 @@ OpenReadOnlyBeneath(FileAt file)
 }
 
 static constexpr struct open_how directory_beneath{
-	.flags = O_DIRECTORY|O_RDONLY|O_NOCTTY|O_CLOEXEC,
+	.flags = O_DIRECTORY|O_RDONLY|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
 	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
 };
 

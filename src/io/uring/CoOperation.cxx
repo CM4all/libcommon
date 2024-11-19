@@ -79,7 +79,7 @@ CoOpenOperation::CoOpenOperation(struct io_uring_sqe &s,
 				 int flags, mode_t mode) noexcept
 {
 	io_uring_prep_openat(&s, directory_fd.Get(), path,
-			     flags|O_NOCTTY|O_CLOEXEC, mode);
+			     flags|O_NOCTTY|O_CLOEXEC|O_NONBLOCK, mode);
 }
 
 CoOperation<CoOpenOperation>

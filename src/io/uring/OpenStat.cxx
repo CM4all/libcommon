@@ -16,7 +16,7 @@
 #include <linux/openat2.h> //  for RESOLVE_*
 
 static constexpr struct open_how ro_beneath{
-	.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC,
+	.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
 	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
 };
 
@@ -31,7 +31,7 @@ OpenStat::StartOpenStat(FileAt file,
 	auto &s = queue.RequireSubmitEntry();
 
 	io_uring_prep_openat(&s, file.directory.Get(), file.name,
-			     flags|O_NOCTTY|O_CLOEXEC, mode);
+			     flags|O_NOCTTY|O_CLOEXEC|O_NONBLOCK, mode);
 	queue.Push(s, *this);
 }
 
