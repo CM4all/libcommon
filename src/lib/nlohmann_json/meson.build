@@ -7,9 +7,14 @@ if not nlohmann_json.found()
   subdir_done()
 endif
 
+nlohmann_json_compile_args = []
+if not get_variable('libcommon_json_io', false)
+  nlohmann_json_compile_args += '-DJSON_NO_IO'
+endif
+
 nlohmann_json_dep = declare_dependency(
   # no iostreams, please
-  compile_args: '-DJSON_NO_IO',
+  compile_args: nlohmann_json_compile_args,
   dependencies: nlohmann_json,
 )
 
