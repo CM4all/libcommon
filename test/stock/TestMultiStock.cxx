@@ -1181,3 +1181,90 @@ TEST(MultiStock, Unclean)
 	ASSERT_EQ(foo.ready, 0);
 	ASSERT_EQ(foo.failed, 0);
 }
+
+/**
+ * Regression test for a specific MultiStock bug that led to a stalled
+ * "waiting" list when ScheduleRetryWaiting() gets intercepted by
+ * DiscardOldestIdle().
+ */
+TEST(MultiStock, UncleanDiscardOldestIdleBug)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+
+	/* attempt to get 3 leases - one more than the limit of 2 */
+	foo.Get(3);
+
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 3);
+	ASSERT_EQ(foo.waiting, 1);
+	ASSERT_EQ(foo.ready, 2);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* make all inner items "unclean"; returning it will not allow
+           it to be reused (yet) */
+	std::forward_list<MyInnerStockItem *> unclean;
+	for (auto &i : foo.leases) {
+		if (i.item != nullptr) {
+			i.item->stopping = true;
+			unclean.push_front(i.item);
+		}
+	}
+
+	ASSERT_EQ(std::distance(unclean.begin(), unclean.end()), 2U);
+
+	foo.PutReady();
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 1);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* this call used to discard the "unclean" item that was being
+	   waited on; that means the "waiting" list was never again
+	   retried because retry_event was never scheduled */
+	instance.multi_stock.DiscardOldestIdle(2);
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 1);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
+
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 1);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.failed, 0);
+
+	/* clear the unclean flag of one item; this will finally allow
+	   it to be reused */
+	auto &unclean1 = *unclean.front();
+	unclean.pop_front();
+
+	unclean1.ClearUncleanFlag();
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 1);
+	ASSERT_EQ(foo.failed, 0);
+}
