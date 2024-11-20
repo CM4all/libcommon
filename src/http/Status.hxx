@@ -19,6 +19,12 @@ enum class HttpStatus : uint_least16_t {
 	CONTINUE = 100,
 	SWITCHING_PROTOCOLS = 101,
 
+	// added in RFC 2518, removed in RFC 4918 (WebDAV)
+	PROCESSING = 102,
+
+	// added in RFC 2518, removed in RFC 4918 (WebDAV)
+	EARLY_HINTS = 103,
+
 	OK = 200,
 	CREATED = 201,
 	ACCEPTED = 202,
@@ -32,13 +38,24 @@ enum class HttpStatus : uint_least16_t {
 	 */
 	MULTI_STATUS = 207,
 
+	/**
+	 * @see RFC 5842 (Binding Extensiosn to WebDAV)
+	 */
+	ALREADY_REPORTED = 208,
+
+	/**
+	 * @see RFC 3229 (Delta Encoding in HTTP)
+	 */
+	IM_USED = 226,
+
 	MULTIPLE_CHOICES = 300,
 	MOVED_PERMANENTLY = 301,
 	FOUND = 302,
 	SEE_OTHER = 303,
 	NOT_MODIFIED = 304,
-	USE_PROXY = 305,
+	USE_PROXY = 305, // deprecated in RFC 7231
 	TEMPORARY_REDIRECT = 307,
+	PERMANENT_REDIRECT = 308, // RFC 9110 (HTTP Semantics)
 	BAD_REQUEST = 400,
 	UNAUTHORIZED = 401,
 	PAYMENT_REQUIRED = 402,
@@ -64,6 +81,11 @@ enum class HttpStatus : uint_least16_t {
 	I_M_A_TEAPOT = 418,
 
 	/**
+	 * @see RFC 9110 (HTTP Semantics)
+	 */
+	MISDIRECTED_REQUEST = 421,
+
+	/**
 	 * @see RFC 4918 (WebDAV)
 	 */
 	UNPROCESSABLE_ENTITY = 422,
@@ -77,6 +99,11 @@ enum class HttpStatus : uint_least16_t {
 	 * @see RFC 4918 (WebDAV)
 	 */
 	FAILED_DEPENDENCY = 424,
+
+	/**
+	 * @see RFC 8470 (Using Early Data in HTTP)
+	 */
+	TOO_EARLY = 425,
 
 	/**
 	 * @see RFC 7231 (HTTP 1.1)
@@ -111,9 +138,24 @@ enum class HttpStatus : uint_least16_t {
 	HTTP_VERSION_NOT_SUPPORTED = 505,
 
 	/**
+	 * @see RFC 2295 (Transparent Content Negotiation in HTTP)
+	 */
+	VARIANT_ALSO_NEGOTIATES = 506,
+
+	/**
 	 * @see RFC 4918 (WebDAV)
 	 */
 	INSUFFICIENT_STORAGE = 507,
+
+	/**
+	 * @see RFC 5842 (Binding Extensions to WebDAV)
+	 */
+	LOOP_DETECTED = 508,
+
+	/**
+	 * @see RFC 2774 (An HTTP Extension Framework)
+	 */
+	NOT_EXTENDED = 510,
 
 	/**
 	 * @see RFC 6585 (Additional HTTP Status Codes)
