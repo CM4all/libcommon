@@ -405,6 +405,12 @@ MultiStock::MapItem::DeleteEmptyItems(const OuterItem *except) noexcept
 std::size_t
 MultiStock::MapItem::DiscardUnused() noexcept
 {
+	if (!waiting.empty())
+		/* if there are waiters, the items are not actually
+                   unused; they have just not yet been submitted to
+                   the waiters */
+		return 0;
+
 	return items.remove_and_dispose_if([](const auto &item){
 		return !item.IsBusy();
 	}, DeleteDisposer{});
