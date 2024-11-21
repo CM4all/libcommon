@@ -560,7 +560,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			if (pid < 0)
 				throw MakeErrno("clone() failed");
 
-			if (cgroup_fd.IsDefined() && params.return_cgroup.IsDefined())
+			if (pid > 0 && cgroup_fd.IsDefined() && params.return_cgroup.IsDefined())
 				EasySendMessage(params.return_cgroup, cgroup_fd);
 
 			break;
