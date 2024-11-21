@@ -556,9 +556,6 @@ SpawnChildProcess(PreparedChildProcess &&params,
 				}
 			}
 
-			if (params.return_cgroup.IsDefined())
-				params.return_cgroup.Close();
-
 			pid = clone3(&ca, sizeof(ca));
 			if (pid < 0)
 				throw MakeErrno("clone() failed");
@@ -582,6 +579,9 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			throw;
 		}
 	}
+
+	if (params.return_cgroup.IsDefined())
+		params.return_cgroup.Close();
 
 	if (pid == 0) {
 		userns_map_pipe_w.Close();
