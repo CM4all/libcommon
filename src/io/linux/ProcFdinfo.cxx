@@ -14,7 +14,7 @@
 
 using std::string_view_literals::operator""sv;
 
-unsigned
+int
 ReadPidfdPid(FileDescriptor pidfd)
 {
 	assert(pidfd.IsDefined());

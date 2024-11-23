@@ -11,6 +11,9 @@ class FileDescriptor;
  * line in /proc/self/fdinfo/PIDFD.
  *
  * Throws on error.
+ *
+ * @return the PID (or -1 if the process has already exited and has
+ * been reaped)
  */
-unsigned
+int
 ReadPidfdPid(FileDescriptor pidfd);
