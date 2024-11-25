@@ -149,6 +149,7 @@ endif
 subdir('src/net')
 subdir('src/net/control')
 subdir('src/net/djb')
+subdir('src/net/linux')
 subdir('src/net/log')
 
 if not get_option('fuzzer')
