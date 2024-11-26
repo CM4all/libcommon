@@ -13,7 +13,7 @@
 #include "Mount.hxx"
 #include "ExitListener.hxx"
 #include "lib/fmt/ExceptionFormatter.hxx"
-#include "system/Error.hxx"
+#include "net/SocketError.hxx"
 #include "net/SocketPair.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/Cancellable.hxx"
@@ -655,8 +655,8 @@ inline void
 SpawnServerClient::OnSocketEvent(unsigned events) noexcept
 try {
 	if (events & event.ERROR)
-		throw MakeErrno(event.GetSocket().GetError(),
-				"Spawner socket error");
+		throw MakeSocketError(event.GetSocket().GetError(),
+				      "Spawner socket error");
 
 	if (events & event.HANGUP)
 		throw std::runtime_error("Spawner hung up");

@@ -25,6 +25,7 @@
 #include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/ReceiveMessage.hxx"
+#include "net/SocketError.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/DeleteDisposer.hxx"
@@ -961,7 +962,7 @@ inline void
 SpawnServerConnection::OnSocketEvent(unsigned events) noexcept
 try {
 	if (events & event.ERROR)
-		throw MakeErrno(socket.GetError(), "Spawner socket error");
+		throw MakeSocketError(socket.GetError(), "Spawner socket error");
 
 	if (events & event.HANGUP) {
 		RemoveConnection();
