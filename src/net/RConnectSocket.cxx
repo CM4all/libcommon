@@ -24,14 +24,12 @@ ConnectWait(SocketDescriptor s, const SocketAddress address,
 	    !IsSocketErrorConnectWouldBlock(error))
 		throw MakeSocketError(error, "Failed to connect");
 
-	int w = s.WaitWritable(timeout.count());
-	if (w < 0)
+	if (int w = s.WaitWritable(timeout.count()); w < 0)
 		throw MakeSocketError("Connect wait error");
 	else if (w == 0)
 		throw TimeoutError{"Connect timeout"};
 
-	int err = s.GetError();
-	if (err != 0)
+	if (int err = s.GetError(); err != 0)
 		throw MakeSocketError(err, "Failed to connect");
 }
 
