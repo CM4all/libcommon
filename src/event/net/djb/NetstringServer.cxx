@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "NetstringServer.hxx"
-#include "system/Error.hxx"
+#include "net/SocketError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/Compiler.h"
 
@@ -54,7 +54,7 @@ void
 NetstringServer::OnEvent(unsigned flags) noexcept
 try {
 	if (flags & SocketEvent::ERROR)
-		throw MakeErrno(GetSocket().GetError(), "Socket error");
+		throw MakeSocketError(GetSocket().GetError(), "Socket error");
 
 	if (flags & SocketEvent::HANGUP) {
 		OnDisconnect();
