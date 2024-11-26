@@ -71,6 +71,9 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	value_position = 0;
 
 	size_t vbytes = header_position - (colon - header_buffer) - 1;
+	if (vbytes > size + 1)
+		throw std::runtime_error("Garbage received after netstring");
+
 	memcpy(value.data(), colon + 1, vbytes);
 	return ValueData(vbytes);
 }
