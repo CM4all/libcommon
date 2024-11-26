@@ -29,7 +29,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 {
 	ssize_t nbytes = fd.Read(std::as_writable_bytes(std::span{header_buffer}.subspan(header_position)));
 	if (nbytes < 0) {
-		switch (errno) {
+		switch (const int e = errno) {
 		case EAGAIN:
 		case EINTR:
 			return Result::MORE;
@@ -38,7 +38,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 			return Result::CLOSED;
 
 		default:
-			throw MakeErrno("read() failed");
+			throw MakeErrno(e, "read() failed");
 		}
 	}
 
@@ -101,7 +101,7 @@ NetstringInput::ReceiveValue(FileDescriptor fd)
 {
 	ssize_t nbytes = fd.Read(std::span{value}.subspan(value_position));
 	if (nbytes < 0) {
-		switch (errno) {
+		switch (const int e = errno) {
 		case EAGAIN:
 		case EINTR:
 			return Result::MORE;
@@ -110,7 +110,7 @@ NetstringInput::ReceiveValue(FileDescriptor fd)
 			return Result::CLOSED;
 
 		default:
-			throw MakeErrno("read() failed");
+			throw MakeErrno(e, "read() failed");
 		}
 	}
 
