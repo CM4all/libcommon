@@ -146,7 +146,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		if (!writable_proc)
 			flags |= MS_RDONLY;
 
-		MountOrThrow("proc", "/proc", "proc", flags, nullptr);
+		MountOrThrow("proc", "/proc", "proc", flags, "hidepid=1,subset=pid");
 	}
 
 	if (mount_dev) {
