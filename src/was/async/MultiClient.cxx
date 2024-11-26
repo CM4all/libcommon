@@ -4,10 +4,10 @@
 
 #include "MultiClient.hxx"
 #include "Socket.hxx"
-#include "system/Error.hxx"
 #include "net/ScmRightsBuilder.hxx"
 #include "net/SendMessage.hxx"
 #include "net/SocketDescriptor.hxx"
+#include "net/SocketError.hxx"
 #include "io/Iovec.hxx"
 
 #include <was/protocol.h>
@@ -76,8 +76,8 @@ void
 MultiClient::OnSocketReady(unsigned events) noexcept
 try {
 	if (events & SocketEvent::ERROR)
-		throw MakeErrno(event.GetSocket().GetError(),
-				"Error on MultiWAS socket");
+		throw MakeSocketError(event.GetSocket().GetError(),
+				      "Error on MultiWAS socket");
 
 	if (events & SocketEvent::HANGUP) {
 		event.Close();
