@@ -6,6 +6,10 @@ net_djb = static_library(
   include_directories: inc,
   dependencies: [
     fmt_dep,
+    system_dep,
+    net_dep,
+    io_dep,
+    util_dep,
   ],
 )
 
