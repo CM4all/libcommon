@@ -19,10 +19,24 @@ class NetstringInput {
 	bool finished = false;
 #endif
 
+	/**
+	 * A small buffer with enough space for the header.  What
+         * remains in this buffer after the header (i.e. after the
+         * colon) will be copied to #value.
+	 */
 	char header_buffer[32];
+
+	/**
+	 * How many chars have been received into #header_buffer
+         * already?
+	 */
 	size_t header_position = 0;
 
 	AllocatedArray<std::byte> value;
+
+	/**
+	 * How many bytes have been received into #value already?
+	 */
 	size_t value_position;
 
 	const size_t max_size;

@@ -21,6 +21,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	assert(IsReceivingHeader());
 	assert(header_position < sizeof(header_buffer));
 
+	/* receive more data */
 	ssize_t nbytes = fd.Read(std::as_writable_bytes(std::span{header_buffer}.subspan(header_position)));
 	if (nbytes < 0) {
 		switch (const int e = errno) {
@@ -42,6 +43,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	header_position += nbytes;
 	const char *const header_end = header_buffer + header_position;
 
+	/* parse the message size from the Netstring header */
 	std::size_t size;
 	auto [end, error] = std::from_chars(header_buffer, header_end,
 					    size, 10);
@@ -50,18 +52,25 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 
 	if (end == header_end) {
 		/* no colon received yet */
+
 		if (header_position == sizeof(header_buffer))
+			/* but we have no more space in the buffer -
+                           fail */
 			throw SocketProtocolError{"Malformed netstring"};
 
+		/* receive more data later */
 		return Result::MORE;
 	}
 
+	/* after the message size, there must be a colon, which is
+           where std::from_chars() must have stopped parsing */
 	if (*end != ':')
 		throw SocketProtocolError{"Malformed netstring"};
 
 	if (size > max_size)
 		throw SocketMessageTooLargeError{fmt::format("Netstring is too large: {}", size)};
 
+	/* the rest after the colon will be copied to value */
 	const std::string_view rest{end + 1, header_end};
 	if (rest.size() > size + 1)
 		throw SocketGarbageReceivedError{"Garbage received after netstring"};
