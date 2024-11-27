@@ -6,24 +6,14 @@
 #include "net/SocketProtocolError.hxx"
 #include "io/FileDescriptor.hxx"
 #include "system/Error.hxx"
-#include "util/CharUtil.hxx"
 #include "util/Compiler.h"
-#include "util/StringVerify.hxx"
 
 #include <fmt/core.h>
 
-#include <string_view>
+#include <charconv>
 
-#include <unistd.h>
 #include <string.h>
 #include <errno.h>
-
-[[gnu::pure]]
-static constexpr bool
-OnlyDigits(std::string_view s) noexcept
-{
-	return CheckChars(s, IsDigitASCII);
-}
 
 inline NetstringInput::Result
 NetstringInput::ReceiveHeader(FileDescriptor fd)
@@ -47,20 +37,23 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 		return Result::CLOSED;
 
 	header_position += nbytes;
+	const char *const header_end = header_buffer + header_position;
 
-	char *colon = (char *)memchr(header_buffer + 1, ':', header_position - 1);
-	if (colon == nullptr) {
-		if (header_position == sizeof(header_buffer) ||
-		    !OnlyDigits({header_buffer, header_position}))
+	std::size_t size;
+	auto [end, error] = std::from_chars(header_buffer, header_end,
+					    size, 10);
+	if (end == header_buffer || error != std::errc{})
+		throw SocketProtocolError{"Malformed netstring"};
+
+	if (end == header_end) {
+		/* no colon received yet */
+		if (header_position == sizeof(header_buffer))
 			throw SocketProtocolError{"Malformed netstring"};
 
 		return Result::MORE;
 	}
 
-	*colon = 0;
-	char *endptr;
-	size_t size = strtoul(header_buffer, &endptr, 10);
-	if (endptr != colon)
+	if (*end != ':')
 		throw SocketProtocolError{"Malformed netstring"};
 
 	if (size > max_size)
@@ -71,11 +64,11 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	state = State::VALUE;
 	value_position = 0;
 
-	size_t vbytes = header_position - (colon - header_buffer) - 1;
+	size_t vbytes = header_position - (end - header_buffer) - 1;
 	if (vbytes > size + 1)
 		throw SocketGarbageReceivedError{"Garbage received after netstring"};
 
-	memcpy(value.data(), colon + 1, vbytes);
+	memcpy(value.data(), end + 1, vbytes);
 	return ValueData(vbytes);
 }
 
