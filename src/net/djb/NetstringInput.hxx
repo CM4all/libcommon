@@ -15,13 +15,6 @@ class FileDescriptor;
  * A netstring input buffer.
  */
 class NetstringInput {
-	enum class State {
-		HEADER,
-		VALUE,
-	};
-
-	State state = State::HEADER;
-
 #ifndef NDEBUG
 	bool finished = false;
 #endif
@@ -56,6 +49,10 @@ public:
 	}
 
 private:
+	bool IsReceivingHeader() const noexcept {
+		return value == nullptr;
+	}
+
 	Result ReceiveHeader(FileDescriptor fd);
 	Result ValueData(size_t nbytes);
 	Result ReceiveValue(FileDescriptor fd);

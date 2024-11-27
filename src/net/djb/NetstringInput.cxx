@@ -6,7 +6,6 @@
 #include "net/SocketProtocolError.hxx"
 #include "io/FileDescriptor.hxx"
 #include "system/Error.hxx"
-#include "util/Compiler.h"
 
 #include <fmt/core.h>
 
@@ -19,6 +18,7 @@
 inline NetstringInput::Result
 NetstringInput::ReceiveHeader(FileDescriptor fd)
 {
+	assert(IsReceivingHeader());
 	assert(header_position < sizeof(header_buffer));
 
 	ssize_t nbytes = fd.Read(std::as_writable_bytes(std::span{header_buffer}.subspan(header_position)));
@@ -68,7 +68,6 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 
 	/* allocate one extra byte for the trailing comma */
 	value.ResizeDiscard(size + 1);
-	state = State::VALUE;
 	value_position = 0;
 
 	memcpy(value.data(), rest.data(), rest.size());
@@ -78,7 +77,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 NetstringInput::Result
 NetstringInput::ValueData(size_t nbytes)
 {
-	assert(state == State::VALUE);
+	assert(!IsReceivingHeader());
 
 	value_position += nbytes;
 
@@ -127,13 +126,8 @@ NetstringInput::Receive(FileDescriptor fd)
 {
 	assert(!finished);
 
-	switch (state) {
-	case State::HEADER:
+	if (IsReceivingHeader())
 		return ReceiveHeader(fd);
-
-	case State::VALUE:
+	else
 		return ReceiveValue(fd);
-	}
-
-	gcc_unreachable();
 }
