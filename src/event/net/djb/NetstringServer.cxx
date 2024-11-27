@@ -61,7 +61,7 @@ try {
 		return;
 	}
 
-	if (input.IsFinished()) {
+	if (IsRequestReceived()) {
 		/* TODO: was garbage received or did the peer just
 		   close the socket?  Maybe use EPOLLRDHUP? */
 		OnDisconnect();

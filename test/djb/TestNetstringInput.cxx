@@ -26,9 +26,7 @@ TEST(NetstringInput, Empty)
 {
 	const auto fd = CreatePipeWithData("0:,"sv);
 	NetstringInput ni{0};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(fd), NetstringInput::Result::FINISHED);
-	EXPECT_TRUE(ni.IsFinished());
 	EXPECT_EQ(ToStringView(ni.GetValue()), ""sv);
 }
 
@@ -36,9 +34,7 @@ TEST(NetstringInput, One)
 {
 	const auto fd = CreatePipeWithData("1:a,"sv);
 	NetstringInput ni{1};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(fd), NetstringInput::Result::FINISHED);
-	EXPECT_TRUE(ni.IsFinished());
 	EXPECT_EQ(ToStringView(ni.GetValue()), "a"sv);
 }
 
@@ -46,9 +42,7 @@ TEST(NetstringInput, Two)
 {
 	const auto fd = CreatePipeWithData("2:ab,"sv);
 	NetstringInput ni{2};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(fd), NetstringInput::Result::FINISHED);
-	EXPECT_TRUE(ni.IsFinished());
 	EXPECT_EQ(ToStringView(ni.GetValue()), "ab"sv);
 }
 
@@ -56,7 +50,6 @@ TEST(NetstringInput, TooLarge)
 {
 	const auto fd = CreatePipeWithData("2:ab,"sv);
 	NetstringInput ni{1};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_THROW(ni.Receive(fd), SocketMessageTooLargeError);
 }
 
@@ -64,7 +57,6 @@ TEST(NetstringInput, TooLarge32)
 {
 	const auto fd = CreatePipeWithData("4294967296:"sv);
 	NetstringInput ni{4294967295};
-	EXPECT_FALSE(ni.IsFinished());
 
 	if constexpr (sizeof(std::size_t) > 4)
 		EXPECT_THROW(ni.Receive(fd), SocketMessageTooLargeError);
@@ -76,7 +68,6 @@ TEST(NetstringInput, TooLarge64)
 {
 	const auto fd = CreatePipeWithData("18446744073709551616:"sv);
 	NetstringInput ni{4294967295};
-	EXPECT_FALSE(ni.IsFinished());
 
 	if constexpr (sizeof(std::size_t) > 8)
 		EXPECT_THROW(ni.Receive(fd), SocketMessageTooLargeError);
@@ -106,7 +97,6 @@ TEST(NetstringInput, Malformed)
 	for (const std::string_view i : tests) {
 		const auto fd = CreatePipeWithData(i);
 		NetstringInput ni{4294967295};
-		EXPECT_FALSE(ni.IsFinished());
 		EXPECT_THROW(ni.Receive(fd), SocketProtocolError);
 	}
 }
@@ -115,9 +105,7 @@ TEST(NetstringInput, NoInput)
 {
 	const auto fd = CreatePipeWithData(""sv);
 	NetstringInput ni{16384};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(fd), NetstringInput::Result::CLOSED);
-	EXPECT_FALSE(ni.IsFinished());
 }
 
 TEST(NetstringInput, ClosedPrematurely)
@@ -133,11 +121,8 @@ TEST(NetstringInput, ClosedPrematurely)
 	for (const std::string_view i : tests) {
 		const auto fd = CreatePipeWithData(i);
 		NetstringInput ni{16384};
-		EXPECT_FALSE(ni.IsFinished());
 		EXPECT_EQ(ni.Receive(fd), NetstringInput::Result::MORE);
-		EXPECT_FALSE(ni.IsFinished());
 		EXPECT_EQ(ni.Receive(fd), NetstringInput::Result::CLOSED);
-		EXPECT_FALSE(ni.IsFinished());
 	}
 }
 
@@ -148,11 +133,8 @@ TEST(NetstringInput, Long)
 {
 	const auto fd = CreatePipeWithData("62:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz,"sv);
 	NetstringInput ni{16384};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(fd), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(fd), NetstringInput::Result::FINISHED);
-	EXPECT_TRUE(ni.IsFinished());
 	EXPECT_EQ(ToStringView(ni.GetValue()), "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"sv);
 }
 
@@ -161,29 +143,22 @@ TEST(NetstringInput, Incremental)
 	auto [r, w] = CreatePipeNonBlock();
 
 	NetstringInput ni{16384};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("16:0123"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("456789abcd"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("ef"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes(","sv));
 	w.Close();
 
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::FINISHED);
-	EXPECT_TRUE(ni.IsFinished());
 	EXPECT_EQ(ToStringView(ni.GetValue()), "0123456789abcdef"sv);
 }
 
@@ -192,43 +167,32 @@ TEST(NetstringInput, IncrementalHeader)
 	auto [r, w] = CreatePipeNonBlock();
 
 	NetstringInput ni{16384};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("1"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("6"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes(":"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("0123"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("456789abcd"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("ef"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes(","sv));
 	w.Close();
 
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::FINISHED);
-	EXPECT_TRUE(ni.IsFinished());
 	EXPECT_EQ(ToStringView(ni.GetValue()), "0123456789abcdef"sv);
 }
 
@@ -237,20 +201,15 @@ TEST(NetstringInput, LongIncremental)
 	auto [r, w] = CreatePipeNonBlock();
 
 	NetstringInput ni{16384};
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("62:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"sv));
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::MORE);
-	EXPECT_FALSE(ni.IsFinished());
 
 	w.FullWrite(AsBytes("abcdefghijklmnopqrstuvwxyz,"sv));
 	w.Close();
 
 	EXPECT_EQ(ni.Receive(r), NetstringInput::Result::FINISHED);
-	EXPECT_TRUE(ni.IsFinished());
 	EXPECT_EQ(ToStringView(ni.GetValue()), "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"sv);
 }

@@ -46,12 +46,8 @@ public:
 	 */
 	Result Receive(FileDescriptor fd);
 
-	bool IsFinished() const noexcept {
-		return state == State::FINISHED;
-	}
-
 	AllocatedArray<std::byte> &GetValue() noexcept {
-		assert(IsFinished());
+		assert(state == State::FINISHED);
 
 		return value;
 	}

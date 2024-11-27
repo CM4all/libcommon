@@ -62,6 +62,13 @@ protected:
 	virtual void OnDisconnect() noexcept = 0;
 
 private:
+	bool IsRequestReceived() const noexcept {
+		/* the timeout gets canceled as soon as the request
+                   has been fully received, therefore we can use this
+                   field here */
+		return !timeout_event.IsPending();
+	}
+
 	void OnEvent(unsigned events) noexcept;
 	void OnTimeout() noexcept;
 };
