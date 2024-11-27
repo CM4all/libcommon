@@ -62,7 +62,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	if (endptr != colon)
 		throw std::runtime_error("Malformed netstring");
 
-	if (size >= max_size)
+	if (size > max_size)
 		throw FmtRuntimeError("Netstring is too large: {}", size);
 
 	/* allocate one extra byte for the trailing comma */
