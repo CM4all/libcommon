@@ -18,10 +18,13 @@ class NetstringInput {
 	enum class State {
 		HEADER,
 		VALUE,
-		FINISHED,
 	};
 
 	State state = State::HEADER;
+
+#ifndef NDEBUG
+	bool finished = false;
+#endif
 
 	char header_buffer[32];
 	size_t header_position = 0;
@@ -47,7 +50,7 @@ public:
 	Result Receive(FileDescriptor fd);
 
 	AllocatedArray<std::byte> &GetValue() noexcept {
-		assert(state == State::FINISHED);
+		assert(finished);
 
 		return value;
 	}

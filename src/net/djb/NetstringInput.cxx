@@ -89,7 +89,9 @@ NetstringInput::ValueData(size_t nbytes)
 		/* erase the trailing comma */
 		value.SetSize(value.size() - 1);
 
-		state = State::FINISHED;
+#ifndef NDEBUG
+		finished = true;
+#endif
 		return Result::FINISHED;
 	}
 
@@ -123,11 +125,9 @@ NetstringInput::ReceiveValue(FileDescriptor fd)
 NetstringInput::Result
 NetstringInput::Receive(FileDescriptor fd)
 {
-	switch (state) {
-	case State::FINISHED:
-		assert(false);
-		gcc_unreachable();
+	assert(!finished);
 
+	switch (state) {
 	case State::HEADER:
 		return ReceiveHeader(fd);
 
