@@ -8,6 +8,7 @@
 #include "system/Error.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
+#include "util/StringVerify.hxx"
 
 #include <fmt/core.h>
 
@@ -18,14 +19,10 @@
 #include <errno.h>
 
 [[gnu::pure]]
-static bool
+static constexpr bool
 OnlyDigits(std::string_view s) noexcept
 {
-	for (char ch : s)
-		if (!IsDigitASCII(ch))
-			return false;
-
-	return true;
+	return CheckChars(s, IsDigitASCII);
 }
 
 inline NetstringInput::Result
