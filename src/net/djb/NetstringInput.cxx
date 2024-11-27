@@ -3,11 +3,13 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "NetstringInput.hxx"
-#include "lib/fmt/RuntimeError.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "io/FileDescriptor.hxx"
 #include "system/Error.hxx"
 #include "util/CharUtil.hxx"
 #include "util/Compiler.h"
+
+#include <fmt/core.h>
 
 #include <unistd.h>
 #include <string.h>
@@ -51,7 +53,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	if (colon == nullptr) {
 		if (header_position == sizeof(header_buffer) ||
 		    !OnlyDigits(header_buffer, header_position))
-			throw std::runtime_error("Malformed netstring");
+			throw SocketProtocolError{"Malformed netstring"};
 
 		return Result::MORE;
 	}
@@ -60,10 +62,10 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	char *endptr;
 	size_t size = strtoul(header_buffer, &endptr, 10);
 	if (endptr != colon)
-		throw std::runtime_error("Malformed netstring");
+		throw SocketProtocolError{"Malformed netstring"};
 
 	if (size > max_size)
-		throw FmtRuntimeError("Netstring is too large: {}", size);
+		throw SocketProtocolError{fmt::format("Netstring is too large: {}", size)};
 
 	/* allocate one extra byte for the trailing comma */
 	value.ResizeDiscard(size + 1);
@@ -72,7 +74,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 
 	size_t vbytes = header_position - (colon - header_buffer) - 1;
 	if (vbytes > size + 1)
-		throw std::runtime_error("Garbage received after netstring");
+		throw SocketProtocolError{"Garbage received after netstring"};
 
 	memcpy(value.data(), colon + 1, vbytes);
 	return ValueData(vbytes);
@@ -87,7 +89,7 @@ NetstringInput::ValueData(size_t nbytes)
 
 	if (value_position >= value.size()) {
 		if (value.back() != std::byte{','})
-			throw std::runtime_error("Malformed netstring");
+			throw SocketProtocolError{"Malformed netstring"};
 
 		/* erase the trailing comma */
 		value.SetSize(value.size() - 1);
