@@ -11,6 +11,16 @@ public:
 	using std::runtime_error::runtime_error;
 };
 
+class SocketMessageTooLargeError : public SocketProtocolError {
+public:
+	using SocketProtocolError::SocketProtocolError;
+};
+
+class SocketGarbageReceivedError : public SocketProtocolError {
+public:
+	using SocketProtocolError::SocketProtocolError;
+};
+
 class SocketClosedPrematurelyError : public SocketProtocolError {
 public:
 	using SocketProtocolError::SocketProtocolError;

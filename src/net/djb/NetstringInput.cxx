@@ -64,7 +64,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 		throw SocketProtocolError{"Malformed netstring"};
 
 	if (size > max_size)
-		throw SocketProtocolError{fmt::format("Netstring is too large: {}", size)};
+		throw SocketMessageTooLargeError{fmt::format("Netstring is too large: {}", size)};
 
 	/* allocate one extra byte for the trailing comma */
 	value.ResizeDiscard(size + 1);
@@ -73,7 +73,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 
 	size_t vbytes = header_position - (colon - header_buffer) - 1;
 	if (vbytes > size + 1)
-		throw SocketProtocolError{"Garbage received after netstring"};
+		throw SocketGarbageReceivedError{"Garbage received after netstring"};
 
 	memcpy(value.data(), colon + 1, vbytes);
 	return ValueData(vbytes);
