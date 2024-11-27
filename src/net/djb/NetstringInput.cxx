@@ -11,6 +11,7 @@
 #include <fmt/core.h>
 
 #include <charconv>
+#include <string_view>
 
 #include <string.h>
 #include <errno.h>
@@ -18,6 +19,8 @@
 inline NetstringInput::Result
 NetstringInput::ReceiveHeader(FileDescriptor fd)
 {
+	assert(header_position < sizeof(header_buffer));
+
 	ssize_t nbytes = fd.Read(std::as_writable_bytes(std::span{header_buffer}.subspan(header_position)));
 	if (nbytes < 0) {
 		switch (const int e = errno) {
@@ -59,17 +62,17 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	if (size > max_size)
 		throw SocketMessageTooLargeError{fmt::format("Netstring is too large: {}", size)};
 
+	const std::string_view rest{end + 1, header_end};
+	if (rest.size() > size + 1)
+		throw SocketGarbageReceivedError{"Garbage received after netstring"};
+
 	/* allocate one extra byte for the trailing comma */
 	value.ResizeDiscard(size + 1);
 	state = State::VALUE;
 	value_position = 0;
 
-	size_t vbytes = header_position - (end - header_buffer) - 1;
-	if (vbytes > size + 1)
-		throw SocketGarbageReceivedError{"Garbage received after netstring"};
-
-	memcpy(value.data(), end + 1, vbytes);
-	return ValueData(vbytes);
+	memcpy(value.data(), rest.data(), rest.size());
+	return ValueData(rest.size());
 }
 
 NetstringInput::Result
