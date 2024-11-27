@@ -11,16 +11,18 @@
 
 #include <fmt/core.h>
 
+#include <string_view>
+
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
 
 [[gnu::pure]]
 static bool
-OnlyDigits(const char *p, size_t size) noexcept
+OnlyDigits(std::string_view s) noexcept
 {
-	for (size_t i = 0; i != size; ++i)
-		if (!IsDigitASCII(p[i]))
+	for (char ch : s)
+		if (!IsDigitASCII(ch))
 			return false;
 
 	return true;
@@ -52,7 +54,7 @@ NetstringInput::ReceiveHeader(FileDescriptor fd)
 	char *colon = (char *)memchr(header_buffer + 1, ':', header_position - 1);
 	if (colon == nullptr) {
 		if (header_position == sizeof(header_buffer) ||
-		    !OnlyDigits(header_buffer, header_position))
+		    !OnlyDigits({header_buffer, header_position}))
 			throw SocketProtocolError{"Malformed netstring"};
 
 		return Result::MORE;
