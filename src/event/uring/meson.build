@@ -9,6 +9,7 @@ event_uring = static_library(
   include_directories: inc,
   dependencies: [
     liburing,
+    event_dep,
   ],
 )
 
@@ -16,5 +17,6 @@ event_uring_dep = declare_dependency(
   link_with: event_uring,
   dependencies: [
     uring_dep,
+    event_dep,
   ],
 )
