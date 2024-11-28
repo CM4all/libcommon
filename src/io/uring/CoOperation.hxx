@@ -138,4 +138,27 @@ public:
 
 using CoWrite = CoOperation<CoWriteOperation>;
 
+/**
+ * Performs the unlink() or unlinkat() system call.
+ *
+ * @return 0 on success or a negative errno value on error (no
+ * exceptions thrown on error)
+ */
+class CoUnlinkOperation final {
+public:
+	CoUnlinkOperation(struct io_uring_sqe &sqe,
+			  const char *path,
+			  int flags=0) noexcept;
+
+	CoUnlinkOperation(struct io_uring_sqe &sqe,
+			  FileDescriptor directory_fd, const char *path,
+			  int flags=0) noexcept;
+
+	int GetValue(int value) const noexcept {
+		return value;
+	}
+};
+
+using CoUnlink = CoOperation<CoUnlinkOperation>;
+
 } // namespace Uring

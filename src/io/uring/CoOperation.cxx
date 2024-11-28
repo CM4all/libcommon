@@ -130,4 +130,18 @@ CoWriteOperation::GetValue(int value) const
 	return value;
 }
 
+CoUnlinkOperation::CoUnlinkOperation(struct io_uring_sqe &sqe,
+				     const char *path,
+				     int flags) noexcept
+{
+	io_uring_prep_unlink(&sqe, path, flags);
+}
+
+CoUnlinkOperation::CoUnlinkOperation(struct io_uring_sqe &sqe,
+				     FileDescriptor directory_fd, const char *path,
+				     int flags) noexcept
+{
+	io_uring_prep_unlinkat(&sqe, directory_fd.Get(), path, flags);
+}
+
 } // namespace Uring
