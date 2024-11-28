@@ -1890,6 +1890,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::VARY:
 #if TRANSLATION_ENABLE_CACHE
 		if (payload.empty() ||
+		    payload.size() > 16 * sizeof(response.vary.front()) ||
 		    payload.size() % sizeof(response.vary.front()) != 0)
 			throw std::runtime_error("malformed VARY packet");
 
@@ -1900,6 +1901,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::INVALIDATE:
 #if TRANSLATION_ENABLE_CACHE
 		if (payload.empty() ||
+		    payload.size() > 16 * sizeof(response.invalidate.front()) ||
 		    payload.size() % sizeof(response.invalidate.front()) != 0)
 			throw std::runtime_error("malformed INVALIDATE packet");
 
