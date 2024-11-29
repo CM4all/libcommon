@@ -241,7 +241,7 @@ SocketDescriptor::GetPeerCredentials() const noexcept
 
 #ifdef __linux__
 
-#ifndef SO_PEERCRED
+#ifndef SO_PEERPIDFD
 #define SO_PEERPIDFD 77
 #endif
 
