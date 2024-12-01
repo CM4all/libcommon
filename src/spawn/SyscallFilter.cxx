@@ -16,6 +16,20 @@
 #define __NR_clone3 435
 #endif
 
+#ifndef __SNR_listmount
+#ifndef __NR_listmount
+#include "system/linux/listmount.h"
+#endif
+#define __SNR_listmount __NR_listmount
+#endif
+
+#ifndef __SNR_statmount
+#ifndef __NR_statmount
+#include "system/linux/statmount.h"
+#endif
+#define __SNR_statmount __NR_statmount
+#endif
+
 /**
  * The system calls which are disabled unconditionally and fail by
  * returning ENOSYS.
@@ -91,6 +105,9 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(ustat),
 	SCMP_SYS(vm86),
 	SCMP_SYS(vm86old),
+
+	SCMP_SYS(listmount),
+	SCMP_SYS(statmount),
 
 	/* we used to forbid quotactl(), but on one hand, we need it
 	   for certain internal services, and on the other hand,
