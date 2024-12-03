@@ -13,6 +13,7 @@ test(
       gtest,
       event_dep,
       coroutines_dep,
+      event_co_dep,
     ],
   ),
 )

@@ -5,7 +5,7 @@
 #include "co/Cache.hxx"
 #include "co/Task.hxx"
 #include "co/InvokeTask.hxx"
-#include "co/Sleep.hxx"
+#include "event/co/Sleep.hxx"
 #include "event/Loop.hxx"
 
 #include <gtest/gtest.h>

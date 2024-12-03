@@ -3,7 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "was/async/CoRun.hxx"
-#include "co/Sleep.hxx"
+#include "event/co/Sleep.hxx"
 #include "event/Loop.hxx"
 #include "util/PrintException.hxx"
 #include "DefaultFifoBuffer.hxx"

@@ -154,6 +154,7 @@ subdir('src/net/log')
 
 if not get_option('fuzzer')
   subdir('src/event')
+  subdir('src/event/co')
   subdir('src/event/net')
   subdir('src/event/net/control')
   subdir('src/event/net/djb')

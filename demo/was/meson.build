@@ -23,6 +23,7 @@ if coroutines_dep.found()
     include_directories: inc,
     dependencies: [
       was_server_async_dep,
+      event_co_dep,
     ],
   )
 

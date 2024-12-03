@@ -4,11 +4,9 @@
 
 #pragma once
 
-#include "Compat.hxx"
-#include "AwaitableHelper.hxx"
+#include "co/Compat.hxx"
+#include "co/AwaitableHelper.hxx"
 #include "event/FineTimerEvent.hxx"
-
-#include <cassert>
 
 namespace Co {
 

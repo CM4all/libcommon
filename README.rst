@@ -61,6 +61,7 @@ Each directory below ``src`` contains a sub-library:
 - ``adata``: data structures using our pool allocator
 - ``co``: C++20 Coroutines
 - ``event``: a non-blocking I/O event loop
+- ``event/co``: integration of C++20 Coroutines into our event loop
 - ``event/net``: non-blocking networking libraries
 - ``event/systemd``: non-blocking systemd clients
 - ``event/uring``: integration of io_uring in the event loop
