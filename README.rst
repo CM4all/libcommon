@@ -84,14 +84,22 @@ Each directory below ``src`` contains a sub-library:
   <https://libsodium.org/>`__
 - ``memory``: memory allocators
 - ``net``: networking/socket utilities
+- ``net/control``: the control protocol (a datagram-based protocol to
+  control several of our daemons)
+- ``net/djb``: implementations of protocols designed by
+  `D. J. Bernstein <https://cr.yp.to/>`__
+- ``net/linux``: Linux-specific networking utilities
+- ``net/log``: our multicast-based logging protocol
 - ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers
 - ``spawn``: a process spawner
 - ``stock``: manage stocks of reusable objects (e.g. for connection
   pooling)
 - ``system``: operating system utilities
+- ``system/linux``: Linux-specific utilities, e.g. system call wrappers
 - ``thread``: helpers for multi-threaded applications
 - ``time``: dealing with date and time
 - ``translation``: implementation of the CM4all translation protocol
+- ``translation/server``: non-blocking translation server framework
 - ``uri``: URI utilities
 - ``util``: generic utilities
 - ``was``: helpers for `libwas <https://github.com/CM4all/libwas>`__
