@@ -16,7 +16,8 @@ namespace Co {
  * never "ready", it always suspends waiters.  All waiters can be
  * resumed with one method call.
  *
- * This object must remain valid until all waiters have been resumed.
+ * This object must remain valid until all waiters have been resumed
+ * (or canceled).
  *
  * This is similar to #MultiAwaitable, but there is no internal task.
  */
@@ -76,6 +77,10 @@ class MultiResume final {
 public:
 	[[nodiscard]]
 	MultiResume() noexcept = default;
+
+	~MultiResume() noexcept {
+		assert(requests.empty());
+	}
 
 	/**
 	 * Creates a new awaitable
