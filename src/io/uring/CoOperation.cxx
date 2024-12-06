@@ -40,7 +40,7 @@ CoOpenOperation::GetValue(int value)
 	if (value < 0)
 		throw MakeErrno(-value, "Failed to open file");
 
-	return UniqueFileDescriptor(std::exchange(value, -1));
+	return UniqueFileDescriptor{value};
 }
 
 CoCloseOperation::CoCloseOperation(struct io_uring_sqe &s,
