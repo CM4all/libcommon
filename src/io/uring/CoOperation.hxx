@@ -100,11 +100,13 @@ public:
 	UniqueFileDescriptor GetValue(int value);
 };
 
-CoOperation<CoOpenOperation>
+using CoOpen = CoOperation<CoOpenOperation>;
+
+CoOpen
 CoOpenReadOnly(Queue &queue,
 	       FileDescriptor directory_fd, const char *path) noexcept;
 
-CoOperation<CoOpenOperation>
+CoOpen
 CoOpenReadOnly(Queue &queue, const char *path) noexcept;
 
 class CoCloseOperation final {

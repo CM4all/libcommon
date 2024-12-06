@@ -82,13 +82,13 @@ CoOpenOperation::CoOpenOperation(struct io_uring_sqe &s,
 			     flags|O_NOCTTY|O_CLOEXEC|O_NONBLOCK, mode);
 }
 
-CoOperation<CoOpenOperation>
+CoOpen
 CoOpenReadOnly(Queue &queue, FileDescriptor directory_fd, const char *path) noexcept
 {
 	return {queue, directory_fd, path, O_RDONLY, 0};
 }
 
-CoOperation<CoOpenOperation>
+CoOpen
 CoOpenReadOnly(Queue &queue, const char *path) noexcept
 {
 	return CoOpenReadOnly(queue, FileDescriptor(AT_FDCWD), path);
