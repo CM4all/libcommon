@@ -20,6 +20,9 @@ namespace Co {
  * (or canceled).
  *
  * This is similar to #MultiAwaitable, but there is no internal task.
+ *
+ * A #MultiResume can be reused.  Any waiters added after entering
+ * ResumeAll() will be resumed in the next ResumeAll() call.
  */
 class MultiResume final {
 	struct Awaitable final : IntrusiveListHook<IntrusiveHookMode::TRACK> {
