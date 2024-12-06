@@ -96,4 +96,8 @@ public:
 			anchor->AddLease();
 		return *this;
 	}
+
+	explicit constexpr operator bool() const noexcept {
+		return anchor != nullptr;
+	}
 };
