@@ -73,7 +73,7 @@ private:
 		return !IsUringPending();
 	}
 
-	decltype(auto) TakeValue() noexcept {
+	decltype(auto) TakeValue() noexcept(noexcept(base.GetValue(result))) {
 		return base.GetValue(result);
 	}
 };
