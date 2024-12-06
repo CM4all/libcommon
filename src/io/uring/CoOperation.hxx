@@ -127,11 +127,36 @@ public:
 
 using CoRead = CoOperation<CoReadOperation>;
 
-class CoWriteOperation final {
+/**
+ * Perform a write().  Returns a negative errno value on error.
+ */
+class CoBaseWriteOperation {
 public:
-	CoWriteOperation(struct io_uring_sqe &sqe, FileDescriptor fd,
-			 std::span<const std::byte> src,
-			 off_t offset, int flags=0) noexcept;
+	CoBaseWriteOperation(struct io_uring_sqe &sqe, FileDescriptor fd,
+			     std::span<const std::byte> src,
+			     off_t offset, int flags=0) noexcept;
+};
+
+/**
+ * Perform a write().  Returns a negative errno value on error.
+ */
+class CoTryWriteOperation final : CoBaseWriteOperation {
+public:
+	using CoBaseWriteOperation::CoBaseWriteOperation;
+
+	ssize_t GetValue(int value) const noexcept {
+		return static_cast<ssize_t>(value);
+	}
+};
+
+using CoTryWrite = CoOperation<CoTryWriteOperation>;
+
+/**
+ * Perform a write().  Throws on error.
+ */
+class CoWriteOperation final : CoBaseWriteOperation {
+public:
+	using CoBaseWriteOperation::CoBaseWriteOperation;
 
 	std::size_t GetValue(int value) const;
 };
