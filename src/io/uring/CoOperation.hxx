@@ -78,7 +78,7 @@ private:
 	}
 };
 
-class CoStatxOperation final : public CoOperationBase {
+class CoStatxOperation final {
 	struct statx stx;
 
 public:
@@ -91,7 +91,7 @@ public:
 
 using CoStatx = CoOperation<CoStatxOperation>;
 
-class CoOpenOperation final : public CoOperationBase {
+class CoOpenOperation final {
 public:
 	CoOpenOperation(struct io_uring_sqe &sqe,
 			FileDescriptor directory_fd, const char *path,
@@ -107,7 +107,7 @@ CoOpenReadOnly(Queue &queue,
 CoOperation<CoOpenOperation>
 CoOpenReadOnly(Queue &queue, const char *path) noexcept;
 
-class CoCloseOperation final : public CoOperationBase {
+class CoCloseOperation final {
 public:
 	CoCloseOperation(struct io_uring_sqe &sqe, FileDescriptor fd) noexcept;
 
