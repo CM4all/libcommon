@@ -9,6 +9,7 @@ test(
     'TestCoCache.cxx',
     'TestMultiAwaitable.cxx',
     'TestMultiResume.cxx',
+    'TestMultiValue.cxx',
     include_directories: inc,
     dependencies: [
       gtest,
