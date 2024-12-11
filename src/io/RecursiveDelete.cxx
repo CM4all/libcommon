@@ -4,19 +4,13 @@
 
 #include "RecursiveDelete.hxx"
 #include "DirectoryReader.hxx"
+#include "FileName.hxx"
 #include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "lib/fmt/SystemError.hxx"
 
 #include <fcntl.h>
 #include <unistd.h>
-
-[[gnu::pure]]
-static bool
-IsSpecialFilename(const char *s) noexcept
-{
-    return s[0]=='.' && (s[1] == 0 || (s[1] == '.' && s[2] == 0));
-}
 
 static void
 ClearDirectory(UniqueFileDescriptor &&fd)

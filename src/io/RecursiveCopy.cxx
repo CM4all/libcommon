@@ -4,6 +4,7 @@
 
 #include "RecursiveCopy.hxx"
 #include "CopyRegularFile.hxx"
+#include "FileName.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "MakeDirectory.hxx"
 #include "DirectoryReader.hxx"
@@ -130,13 +131,6 @@ CopyRegularFile(FileDescriptor src,
 		CopyRegularFile(src, dst, size);
 
 	return dst;
-}
-
-[[gnu::pure]]
-static bool
-IsSpecialFilename(const char *s) noexcept
-{
-	return s[0] == '.' && (s[1] == 0 || (s[1] == '.' && s[2] == 0));
 }
 
 /**
