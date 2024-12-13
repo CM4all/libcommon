@@ -60,3 +60,28 @@ OpenDirectoryBeneath(FileAt file)
 
 	return fd;
 }
+
+static constexpr struct open_how path_beneath{
+	.flags = O_PATH|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
+	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
+};
+
+UniqueFileDescriptor
+TryOpenPathBeneath(FileAt file) noexcept
+{
+	assert(file.directory.IsDefined());
+
+	int fd = openat2(file.directory.Get(), file.name,
+			 &path_beneath, sizeof(path_beneath));
+	return UniqueFileDescriptor{fd};
+}
+
+UniqueFileDescriptor
+OpenPathBeneath(FileAt file)
+{
+	auto fd = TryOpenPathBeneath(file);
+	if (!fd.IsDefined())
+		throw FmtErrno("Failed to open {:?}", file.name);
+
+	return fd;
+}

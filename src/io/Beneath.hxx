@@ -17,3 +17,9 @@ TryOpenDirectoryBeneath(FileAt file) noexcept;
 
 UniqueFileDescriptor
 OpenDirectoryBeneath(FileAt file);
+
+UniqueFileDescriptor
+TryOpenPathBeneath(FileAt file) noexcept;
+
+UniqueFileDescriptor
+OpenPathBeneath(FileAt file);
