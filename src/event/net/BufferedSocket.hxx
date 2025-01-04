@@ -7,7 +7,6 @@
 #include "DefaultFifoBuffer.hxx"
 #include "SocketWrapper.hxx"
 #include "event/DeferEvent.hxx"
-#include "util/Compiler.h"
 #include "util/DestructObserver.hxx"
 #include "util/LeakDetector.hxx"
 
@@ -174,10 +173,8 @@ public:
 	 * Exceptions thrown by this method are passed to
 	 * OnBufferedError().
 	 */
-	virtual DirectResult OnBufferedDirect([[maybe_unused]] SocketDescriptor fd,
-					      [[maybe_unused]] FdType fd_type) {
-		gcc_unreachable();
-	}
+	virtual DirectResult OnBufferedDirect(SocketDescriptor fd,
+					      FdType fd_type);
 
 	/**
 	 * The peer has closed the socket.  There may still be data

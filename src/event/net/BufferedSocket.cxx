@@ -24,6 +24,17 @@ BufferedSocket::~BufferedSocket() noexcept = default;
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=noreturn"
 #endif
 
+DirectResult
+BufferedSocketHandler::OnBufferedDirect([[maybe_unused]] SocketDescriptor fd,
+					[[maybe_unused]] FdType fd_type)
+{
+	/* not reachable if nobody calls
+           BufferedSocket::SetDirect(true) */
+#ifdef __GNUC__
+	__builtin_unreachable();
+#endif
+}
+
 bool
 BufferedSocketHandler::OnBufferedEnd()
 {
@@ -253,7 +264,9 @@ BufferedSocket::SubmitFromBuffer() noexcept
 	case BufferedResult::AGAIN:
 		/* unreachable, has been handled by InvokeData() */
 		assert(false);
-		gcc_unreachable();
+#ifdef __GNUC__
+		__builtin_unreachable();
+#endif
 
 	case BufferedResult::DESTROYED:
 		/* the BufferedSocket object has been destroyed by the
@@ -263,7 +276,9 @@ BufferedSocket::SubmitFromBuffer() noexcept
 	}
 
 	assert(false);
-	gcc_unreachable();
+#ifdef __GNUC__
+	__builtin_unreachable();
+#endif
 }
 
 /**
@@ -348,7 +363,9 @@ BufferedSocket::SubmitDirect() noexcept
 	}
 
 	assert(false);
-	gcc_unreachable();
+#ifdef __GNUC__
+	__builtin_unreachable();
+#endif
 }
 
 inline BufferedSocket::FillBufferResult
@@ -669,7 +686,9 @@ try {
 		case WRITE_BLOCKING:
 		case WRITE_SOURCE_EOF:
 			/* these enum values are not allowed here */
-			gcc_unreachable();
+#ifdef __GNUC__
+			__builtin_unreachable();
+#endif
 		}
 	}
 
