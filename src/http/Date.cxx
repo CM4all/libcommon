@@ -4,7 +4,6 @@
 
 #include "Date.hxx"
 #include "time/gmtime.hxx"
-#include "util/Compiler.h"
 #include "util/CharUtil.hxx"
 #include "util/DecimalFormat.hxx"
 
@@ -104,7 +103,7 @@ parse_4digit(const char *p) noexcept
 		+ (p[2] - '0') * 10 + (p[3] - '0');
 }
 
-#if GCC_CHECK_VERSION(4,6)
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
@@ -121,7 +120,7 @@ parse_month_name(const char *p) noexcept
 	return -1;
 }
 
-#if GCC_CHECK_VERSION(4,6)
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
 
