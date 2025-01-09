@@ -10,6 +10,8 @@
 #include "net/ScmRightsBuilder.hxx"
 #include "net/MsgHdr.hxx"
 #include "net/SocketError.hxx"
+#include "net/SocketProtocolError.hxx"
+#include "net/TimeoutError.hxx"
 #include "net/IPv4Address.hxx"
 #include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
@@ -106,7 +108,7 @@ Client::Receive() const
 		throw MakeSocketError("poll() failed");
 
 	if (result == 0)
-		throw std::runtime_error("Timeout");
+		throw TimeoutError{};
 
 	Header header;
 	char payload[4096];
@@ -123,11 +125,11 @@ Client::Receive() const
 		throw MakeSocketError("recvmsg() failed");
 
 	if (size_t(nbytes) < sizeof(header))
-		throw std::runtime_error("Short receive");
+		throw SocketProtocolError{"Short receive"};
 
 	size_t payload_length = FromBE16(header.length);
 	if (sizeof(header) + payload_length > size_t(nbytes))
-		throw std::runtime_error("Truncated datagram");
+		throw SocketMessageTooLargeError{"Truncated datagram"};
 
 	return std::make_pair(static_cast<Command>(FromBE16(header.command)),
 			      std::string(payload, payload_length));
