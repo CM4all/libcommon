@@ -10,6 +10,8 @@
 #include "system/Error.hxx"
 #include "io/linux/UserNamespace.hxx"
 
+#include <fmt/core.h>
+
 #include <set>
 
 #include <assert.h>
@@ -168,10 +170,8 @@ NamespaceOptions::MakeId(char *p) const noexcept
 	if (enable_ipc)
 		p = (char *)mempcpy(p, ";ins", 4);
 
-	if (mapped_uid > 0) {
-		p = (char *)mempcpy(p, ";mu", 3);
-		p += sprintf(p, "%u", (unsigned)mapped_uid);
-	}
+	if (mapped_uid > 0)
+		p = fmt::format_to(p, ";mu{}", mapped_uid);
 
 	p = mount.MakeId(p);
 

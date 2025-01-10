@@ -43,10 +43,10 @@ char *
 UidGid::MakeId(char *p) const noexcept
 {
 	if (uid != 0)
-		p += sprintf(p, ";uid%u", int(uid));
+		p = fmt::format_to(p, ";uid{}", uid);
 
 	if (gid != 0)
-		p += sprintf(p, ";gid%u", int(gid));
+		p = fmt::format_to(p, ";gid{}", gid);
 
 	return p;
 }

@@ -88,7 +88,7 @@ char *
 ChildOptions::MakeId(char *p) const noexcept
 {
 	if (umask >= 0)
-		p += sprintf(p, ";u%o", umask);
+		p = fmt::format_to(p, ";u{:o}", umask);
 
 	if (chdir != nullptr) {
 		*p++ = ';';
