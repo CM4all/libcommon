@@ -263,14 +263,6 @@ TranslateParser::FinishView()
 	WidgetView *v = view;
 	if (view == nullptr) {
 		v = &response.views.front();
-
-		const ResourceAddress *address = &response.address;
-		if (address->IsDefined() && !v->address.IsDefined()) {
-			/* no address yet: copy address from response */
-			v->address.CopyFrom(alloc, *address);
-			v->filter_4xx = response.filter_4xx;
-		}
-
 		v->request_header_forward = response.request_header_forward;
 		v->response_header_forward = response.response_header_forward;
 	} else {
