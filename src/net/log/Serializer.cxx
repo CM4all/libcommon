@@ -16,18 +16,18 @@ namespace Net::Log {
 namespace {
 
 class BufferWriter {
-	uint8_t *const begin, *const end;
-	uint8_t *p;
+	std::byte *const begin, *const end;
+	std::byte *p;
 
 public:
-	BufferWriter(uint8_t *_begin, uint8_t *_end) noexcept
+	BufferWriter(std::byte *_begin, std::byte *_end) noexcept
 		:begin(_begin), end(_end), p(begin) {}
 
-	BufferWriter(uint8_t *_begin, std::size_t size) noexcept
+	BufferWriter(std::byte *_begin, std::size_t size) noexcept
 		:BufferWriter(_begin, _begin + size) {}
 
 	BufferWriter(void *_p, std::size_t size) noexcept
-		:BufferWriter((uint8_t *)_p, size) {}
+		:BufferWriter((std::byte *)_p, size) {}
 
 	std::size_t size() const noexcept {
 		return p - begin;
@@ -53,8 +53,8 @@ public:
 		*WriteT<T>() = value;
 	}
 
-	void WriteByte(uint8_t value) {
-		WriteT<uint8_t>(value);
+	void WriteByte(std::byte value) {
+		WriteT<std::byte>(value);
 	}
 
 	void WriteAttribute(Attribute value) {
@@ -113,7 +113,7 @@ Serialize(void *buffer, std::size_t size, const Datagram &d)
 
 	if (d.HasHttpMethod()) {
 		w.WriteAttribute(Attribute::HTTP_METHOD);
-		w.WriteByte((uint8_t)d.http_method);
+		w.WriteByte((std::byte)d.http_method);
 	}
 
 	w.WriteOptionalString(Attribute::HTTP_URI, d.http_uri);
