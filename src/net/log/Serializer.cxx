@@ -26,8 +26,8 @@ public:
 	BufferWriter(std::byte *_begin, std::size_t size) noexcept
 		:BufferWriter(_begin, _begin + size) {}
 
-	BufferWriter(void *_p, std::size_t size) noexcept
-		:BufferWriter((std::byte *)_p, size) {}
+	BufferWriter(std::span<std::byte> dest) noexcept
+		:BufferWriter(dest.data(), dest.size()) {}
 
 	std::size_t size() const noexcept {
 		return p - begin;
@@ -95,9 +95,9 @@ public:
 }
 
 std::size_t
-Serialize(void *buffer, std::size_t size, const Datagram &d)
+Serialize(std::span<std::byte> dest, const Datagram &d)
 {
-	BufferWriter w(buffer, size);
+	BufferWriter w{dest};
 
 	w.WriteBE32(MAGIC_V2);
 
@@ -160,7 +160,7 @@ Serialize(void *buffer, std::size_t size, const Datagram &d)
 	}
 
 	Crc crc;
-	crc.Update({(const std::byte *)buffer + 4, w.size() - 4});
+	crc.Update(dest.first(w.size()).subspan(4));
 
 	w.WriteBE32(crc.Finish());
 

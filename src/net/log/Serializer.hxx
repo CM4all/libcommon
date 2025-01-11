@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstddef>
+#include <span>
 
 namespace Net::Log {
 
@@ -22,6 +23,6 @@ class BufferTooSmall {};
  * @return the actual size of the buffer
  */
 std::size_t
-Serialize(void *buffer, std::size_t size, const Datagram &d);
+Serialize(std::span<std::byte> dest, const Datagram &d);
 
 } // namespace Net::Log

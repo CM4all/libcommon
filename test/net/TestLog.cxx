@@ -67,14 +67,14 @@ TEST(Log, Serializer)
 	Net::Log::Datagram d;
 
 	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
-	size_t size = Net::Log::Serialize(buffer.data(), sizeof(buffer), d);
+	size_t size = Net::Log::Serialize(buffer, d);
 	ASSERT_EQ(size, 8u);
 	EXPECT_EQ(memcmp(buffer.data(), "\x63\x04\x61\x03", 4), 0);
 	EXPECT_TRUE(Net::Log::ParseDatagram(std::span{buffer}.first(size)) == d);
 
 	d.message = "foo";
 	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
-	size = Net::Log::Serialize(buffer.data(), buffer.size(), d);
+	size = Net::Log::Serialize(buffer, d);
 	ASSERT_EQ(size, 13u);
 	EXPECT_EQ(memcmp(buffer.data(), "\x63\x04\x61\x03" "\x0d" "foo\0", 9), 0);
 	EXPECT_TRUE(Net::Log::ParseDatagram(std::span{buffer}.first(size)) == d);
@@ -89,7 +89,7 @@ TEST(Log, Serializer)
 	d.http_status = HttpStatus::NO_CONTENT;
 	d.type = Net::Log::Type::SSH;
 	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
-	size = Net::Log::Serialize(buffer.data(), buffer.size(), d);
+	size = Net::Log::Serialize(buffer, d);
 	EXPECT_TRUE(Net::Log::ParseDatagram(std::span{buffer}.first(size)) == d);
 
 	d.timestamp = Net::Log::FromSystem(std::chrono::system_clock::now());
@@ -101,7 +101,7 @@ TEST(Log, Serializer)
 	d.valid_duration = true;
 	d.duration = Net::Log::Duration(3);
 	std::fill(buffer.begin(), buffer.end(), std::byte{0xff});
-	size = Net::Log::Serialize(buffer.data(), buffer.size(), d);
+	size = Net::Log::Serialize(buffer, d);
 	EXPECT_TRUE(Net::Log::ParseDatagram(std::span{buffer}.first(size)) == d);
 }
 
