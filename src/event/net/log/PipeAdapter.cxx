@@ -4,7 +4,7 @@
 
 #include "PipeAdapter.hxx"
 #include "event/Loop.hxx"
-#include "net/log/Send.hxx"
+#include "net/log/Sink.hxx"
 #include "time/Cast.hxx"
 
 namespace Net::Log {
@@ -35,11 +35,7 @@ PipeAdapter::OnPipeLine(std::span<char> line) noexcept
 
 	datagram.message = {line.data(), line.size()};
 
-	try {
-		Send(socket, datagram);
-	} catch (...) {
-		// TODO: log this error?
-	}
+	sink.Log(datagram);
 
 	return true;
 }

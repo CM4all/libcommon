@@ -4,12 +4,13 @@
 
 #pragma once
 
-#include "net/SocketDescriptor.hxx"
 #include "net/log/Datagram.hxx"
 #include "event/PipeLineReader.hxx"
 #include "util/TokenBucket.hxx"
 
 namespace Net::Log {
+
+class Sink;
 
 /**
  * Reads lines from a pipe and sends them to a Pond server.  This can
@@ -21,7 +22,7 @@ namespace Net::Log {
 class PipeAdapter final : PipeLineReaderHandler {
 	PipeLineReader line_reader;
 
-	SocketDescriptor socket;
+	Sink &sink;
 
 	Datagram datagram;
 
@@ -36,9 +37,9 @@ public:
 	 * (owned by caller)
 	 */
 	PipeAdapter(EventLoop &event_loop, UniqueFileDescriptor _pipe,
-		    SocketDescriptor _socket, Net::Log::Type type) noexcept
+		    Sink &_sink, Net::Log::Type type) noexcept
 		:line_reader(event_loop, std::move(_pipe), *this),
-		 socket(_socket),
+		 sink(_sink),
 		 datagram{.type=type} {}
 
 	EventLoop &GetEventLoop() const noexcept {
