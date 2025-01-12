@@ -22,12 +22,6 @@ Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 }
 
 void
-Control::ScheduleWrite() noexcept
-{
-	socket.ScheduleWrite();
-}
-
-void
 Control::ReleaseSocket() noexcept
 {
 	assert(socket.IsConnected());
@@ -122,7 +116,7 @@ Control::OnBufferedWrite()
 			return false;
 		}
 	} else
-		ScheduleWrite();
+		socket.ScheduleWrite();
 
 	return true;
 }

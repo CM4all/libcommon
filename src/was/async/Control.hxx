@@ -120,8 +120,6 @@ private:
 	std::byte *Start(enum was_command cmd, size_t payload_length) noexcept;
 	void Finish(size_t payload_length) noexcept;
 
-	void ScheduleWrite() noexcept;
-
 public:
 	/**
 	 * Release the socket held by this object.
