@@ -18,7 +18,8 @@ Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 {
 	socket.Init(_fd, FD_SOCKET, write_timeout, *this);
 
-	socket.ScheduleRead();
+	if (!socket.HasUring())
+		socket.ScheduleRead();
 }
 
 void

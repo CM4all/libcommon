@@ -61,6 +61,12 @@ public:
 	Control(EventLoop &event_loop, SocketDescriptor _fd,
 		ControlHandler &_handler) noexcept;
 
+#ifdef HAVE_URING
+	void EnableUring(Uring::Queue &uring_queue) {
+		socket.EnableUring(uring_queue);
+	}
+#endif
+
 	auto &GetEventLoop() const noexcept {
 		return socket.GetEventLoop();
 	}
