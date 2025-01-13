@@ -758,6 +758,29 @@ BufferedSocket::Reinit(Event::Duration _write_timeout,
 }
 
 void
+BufferedSocket::Close() noexcept
+{
+	assert(!ended);
+	assert(!destroyed);
+
+	defer_read.Cancel();
+	defer_write.Cancel();
+	base.Close();
+}
+
+SocketDescriptor
+BufferedSocket::Abandon() noexcept
+{
+	assert(!ended);
+	assert(!destroyed);
+
+	defer_read.Cancel();
+	defer_write.Cancel();
+	return base.Abandon();
+}
+
+
+void
 BufferedSocket::Destroy() noexcept
 {
 	assert(!base.IsValid());

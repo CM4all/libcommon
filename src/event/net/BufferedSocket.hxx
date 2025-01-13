@@ -381,28 +381,14 @@ public:
 	 * Close the physical socket, but do not destroy the input buffer.  To
 	 * do the latter, call Destroy().
 	 */
-	void Close() noexcept {
-		assert(!ended);
-		assert(!destroyed);
-
-		defer_read.Cancel();
-		defer_write.Cancel();
-		base.Close();
-	}
+	void Close() noexcept;
 
 	/**
 	 * Just like Close(), but do not actually close the
 	 * socket.  The caller is responsible for closing the socket (or
 	 * scheduling it for reuse).
 	 */
-	SocketDescriptor Abandon() noexcept {
-		assert(!ended);
-		assert(!destroyed);
-
-		defer_read.Cancel();
-		defer_write.Cancel();
-		return base.Abandon();
-	}
+	SocketDescriptor Abandon() noexcept;
 
 	/**
 	 * Destroy the object.  Prior to that, the socket must be removed by
