@@ -1,5 +1,10 @@
 liburing = dependency('liburing',
                       required: get_variable('libcommon_require_uring', false))
+
+uring_config = configuration_data()
+uring_config.set('HAVE_URING', liburing.found())
+configure_file(output: 'config.h', configuration: uring_config)
+
 if not liburing.found()
   uring_dep = dependency('', required: false)
   subdir_done()
@@ -32,7 +37,6 @@ uring = static_library(
 )
 
 uring_dep = declare_dependency(
-  compile_args: ['-DHAVE_URING'],
   link_with: uring,
   dependencies: [
     liburing,
