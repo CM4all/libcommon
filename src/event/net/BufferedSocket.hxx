@@ -643,6 +643,19 @@ public:
 		defer_read.Schedule();
 	}
 
+	/**
+	 * Like DeferRead(), but call in the next #EventLoop
+	 * iteration.
+	 *
+	 * @see DeferEvent::ScheduleNext()
+	 */
+	void DeferNextRead() noexcept {
+		assert(!ended);
+		assert(!destroyed);
+
+		defer_read.Schedule();
+	}
+
 	void ScheduleRead() noexcept;
 
 	void UnscheduleRead() noexcept {
@@ -656,6 +669,17 @@ public:
 	void DeferWrite() noexcept {
 		if (!base.IsWritePending())
 			defer_write.Schedule();
+	}
+
+	/**
+	 * Like DeferWrite(), but call in the next #EventLoop
+	 * iteration.
+	 *
+	 * @see DeferEvent::ScheduleNext()
+	 */
+	void DeferNextWrite() noexcept {
+		if (!base.IsWritePending())
+			defer_write.ScheduleNext();
 	}
 
 	void ScheduleWrite() noexcept {
