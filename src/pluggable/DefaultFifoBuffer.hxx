@@ -52,6 +52,15 @@ public:
 
 	void CycleIfEmpty() noexcept {
 	}
+
+	void MoveFromAllowBothNull(DefaultFifoBuffer &src) noexcept {
+		if (empty())
+			/* optimized special case: swap buffer pointers instead of
+			   copying data */
+			swap(src);
+		else
+			MoveFrom(src);
+	}
 };
 
 /**

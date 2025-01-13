@@ -7,8 +7,13 @@
 #include "DefaultFifoBuffer.hxx"
 #include "SocketWrapper.hxx"
 #include "event/DeferEvent.hxx"
+#include "io/uring/config.h" // for HAVE_URING
 #include "util/DestructObserver.hxx"
 #include "util/LeakDetector.hxx"
+
+#ifdef HAVE_URING
+namespace Uring { class Queue; }
+#endif
 
 #include <cassert>
 #include <exception>
@@ -311,6 +316,11 @@ public:
 class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	SocketWrapper base;
 
+#ifdef HAVE_URING
+	class UringReceive;
+	UringReceive *uring_receive = nullptr;
+#endif
+
 	/**
 	 * The write timeout; a negative value disables the timeout.
 	 */
@@ -357,6 +367,18 @@ public:
 
 	EventLoop &GetEventLoop() const noexcept {
 		return defer_read.GetEventLoop();
+	}
+
+#ifdef HAVE_URING
+	void EnableUring(Uring::Queue &uring_queue);
+#endif
+
+	bool HasUring() const noexcept {
+#ifdef HAVE_URING
+		return uring_receive != nullptr;
+#else
+		return false;
+#endif
 	}
 
 	/**

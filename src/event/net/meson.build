@@ -20,6 +20,7 @@ event_net = static_library(
   include_directories: inc,
   dependencies: [
     fmt_dep,
+    get_variable('uring_dep', dependency('', required: false)),
   ],
 )
 

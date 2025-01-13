@@ -8,3 +8,10 @@ executable(
   include_directories: inc,
   dependencies: [uring_dep],
 )
+
+executable(
+  'UringNetCat',
+  'UringNetCat.cxx',
+  include_directories: inc,
+  dependencies: [event_net_dep, event_uring_dep],
+)

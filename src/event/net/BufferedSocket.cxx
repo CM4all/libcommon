@@ -8,7 +8,95 @@
 #include "net/SocketProtocolError.hxx"
 #include "net/TimeoutError.hxx"
 
+#ifdef HAVE_URING
+#include "io/uring/Operation.hxx"
+#include "io/uring/Queue.hxx"
+#endif
+
 #include <sys/uio.h> // for struct iovec
+
+#ifdef HAVE_URING
+
+class BufferedSocket::UringReceive final : Uring::Operation {
+	BufferedSocket &parent;
+	Uring::Queue &queue;
+	DefaultFifoBuffer buffer;
+
+	bool released = false;
+
+public:
+	UringReceive(BufferedSocket &_parent, Uring::Queue &_queue) noexcept
+		:parent(_parent), queue(_queue) {}
+
+	void Release() noexcept {
+		assert(!released);
+
+		if (IsUringPending()) {
+			if (auto *s = queue.GetSubmitEntry()) {
+				io_uring_prep_cancel_fd(s, parent.GetSocket().Get(), 0);
+				io_uring_sqe_set_data(s, nullptr);
+				queue.Submit();
+			}
+
+			released = true;
+		} else
+			delete this;
+	}
+
+	void Start();
+
+	bool MoveBuffer() noexcept {
+		if (buffer.empty())
+			return false;
+
+		parent.input.MoveFromAllowBothNull(buffer);
+		return true;
+	}
+
+private:
+	void OnUringCompletion(int res) noexcept override;
+};
+
+inline void
+BufferedSocket::UringReceive::Start()
+{
+	assert(!released);
+	assert(buffer.empty());
+	assert(parent.IsValid());
+	assert(parent.IsConnected());
+
+	if (IsUringPending())
+		return;
+
+	buffer.AllocateIfNull();
+
+	auto w = buffer.Write();
+	assert(!w.empty());
+
+	auto &s = queue.RequireSubmitEntry();
+	io_uring_prep_recv(&s, parent.GetSocket().Get(), w.data(), w.size(), 0);
+	queue.Push(s, *this);
+}
+
+void
+BufferedSocket::UringReceive::OnUringCompletion(int res) noexcept
+{
+	if (released) [[unlikely]] {
+		delete this;
+		return;
+	}
+
+	if (res > 0) [[likely]] {
+		buffer.Append(static_cast<std::size_t>(res));
+		parent.DeferRead();
+	} else if (res == 0) {
+		(void)parent.ClosedByPeer();
+	} else {
+		parent.OnSocketError(-res);
+	}
+}
+
+#endif
 
 BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
 	:base(_event_loop, *this),
@@ -17,7 +105,26 @@ BufferedSocket::BufferedSocket(EventLoop &_event_loop) noexcept
 {
 }
 
-BufferedSocket::~BufferedSocket() noexcept = default;
+BufferedSocket::~BufferedSocket() noexcept
+{
+#ifdef HAVE_URING
+	if (uring_receive != nullptr)
+		uring_receive->Release();
+#endif
+}
+
+#ifdef HAVE_URING
+
+void
+BufferedSocket::EnableUring(Uring::Queue &uring_queue)
+{
+	assert(uring_receive == nullptr);
+
+	uring_receive = new UringReceive(*this, uring_queue);
+	uring_receive->Start();
+}
+
+#endif
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -233,7 +340,8 @@ BufferedSocket::SubmitFromBuffer() noexcept
 
 			/* try to refill the buffer, now that it's
 			   become empty */
-			base.ScheduleRead();
+			if (!HasUring())
+				base.ScheduleRead();
 		} else if (IsFull()) {
 			if (IsConnected())
 				UnscheduleRead();
@@ -257,7 +365,8 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		/* reschedule the read event just in case the buffer
 		   was full before and some data has now been
 		   consumed */
-		base.ScheduleRead();
+		if (!HasUring())
+			base.ScheduleRead();
 
 		return BufferedReadResult::OK;
 
@@ -426,6 +535,56 @@ BufferedSocket::TryRead2() noexcept
 
 #ifndef NDEBUG
 	DestructObserver destructed{*this};
+#endif
+
+#ifdef HAVE_URING
+	if (uring_receive != nullptr) {
+		uring_receive->MoveBuffer();
+
+		while (true) {
+			if (input.empty()) {
+				if (IsConnected()) {
+					uring_receive->Start();
+					return BufferedReadResult::OK;
+				} else {
+					return Ended()
+						? BufferedReadResult::DISCONNECTED
+						: BufferedReadResult::DESTROYED;
+				}
+			}
+
+			switch (const auto result = SubmitFromBuffer()) {
+			case BufferedReadResult::OK:
+				assert(!destructed);
+				assert(IsValid());
+				assert(IsConnected());
+
+				if (!uring_receive->MoveBuffer()) {
+					if (IsConnected())
+						uring_receive->Start();
+					return result;
+				}
+
+				break;
+
+			case BufferedReadResult::BLOCKING:
+				assert(!destructed);
+				assert(IsValid());
+				assert(IsConnected());
+				return result;
+
+			case BufferedReadResult::DISCONNECTED:
+				assert(!destructed);
+				assert(IsValid());
+				assert(!IsConnected());
+				return result;
+
+			case BufferedReadResult::DESTROYED:
+				assert(destructed || !IsValid());
+				return result;
+			}
+		}
+	}
 #endif
 
 	if (!IsConnected()) {
@@ -763,6 +922,13 @@ BufferedSocket::Close() noexcept
 	assert(!ended);
 	assert(!destroyed);
 
+#ifdef HAVE_URING
+	if (uring_receive != nullptr) {
+		uring_receive->Release();
+		uring_receive = nullptr;
+	}
+#endif
+
 	defer_read.Cancel();
 	defer_write.Cancel();
 	base.Close();
@@ -773,6 +939,13 @@ BufferedSocket::Abandon() noexcept
 {
 	assert(!ended);
 	assert(!destroyed);
+
+#ifdef HAVE_URING
+	if (uring_receive != nullptr) {
+		uring_receive->Release();
+		uring_receive = nullptr;
+	}
+#endif
 
 	defer_read.Cancel();
 	defer_write.Cancel();
@@ -876,6 +1049,7 @@ BufferedSocket::ScheduleRead() noexcept
 {
 	assert(!ended);
 	assert(!destroyed);
+	assert(!HasUring());
 
 	if (!in_data_handler && !input.empty())
 		/* deferred call to Read() to deliver data from the buffer */
