@@ -849,15 +849,6 @@ BufferedSocket::WriteFrom(FileDescriptor other_fd, FdType other_fd_type,
 }
 
 void
-BufferedSocket::DeferRead() noexcept
-{
-	assert(!ended);
-	assert(!destroyed);
-
-	defer_read.Schedule();
-}
-
-void
 BufferedSocket::ScheduleRead() noexcept
 {
 	assert(!ended);

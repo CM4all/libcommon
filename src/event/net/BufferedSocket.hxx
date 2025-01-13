@@ -636,7 +636,12 @@ public:
 	/**
 	 * Defer a call to Read().
 	 */
-	void DeferRead() noexcept;
+	void DeferRead() noexcept {
+		assert(!ended);
+		assert(!destroyed);
+
+		defer_read.Schedule();
+	}
 
 	void ScheduleRead() noexcept;
 
