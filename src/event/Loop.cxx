@@ -169,6 +169,14 @@ EventLoop::AddIdle(DeferEvent &e) noexcept
 }
 
 void
+EventLoop::AddNext(DeferEvent &e) noexcept
+{
+	assert(IsInside());
+
+	next.push_back(e);
+}
+
+void
 EventLoop::RunDeferred() noexcept
 {
 	while (!defer.empty() && !quit) {
@@ -255,7 +263,7 @@ EventLoop::Run() noexcept
 
 		/* invoke timers */
 
-		const auto timeout = HandleTimers();
+		Event::Duration timeout = HandleTimers();
 		if (quit)
 			break;
 
@@ -295,7 +303,13 @@ EventLoop::Run() noexcept
 			return;
 
 		if (ready_sockets.empty()) {
+			if (!next.empty())
+				timeout = Event::Duration{0};
+
 			Wait(timeout);
+
+			idle.splice(std::next(idle.begin()), next);
+
 			FlushClockCaches();
 		}
 
