@@ -26,7 +26,11 @@ public:
 
 	~MysqlStatement() noexcept {
 		if (stmt != nullptr)
-			mysql_stmt_close(stmt);
+			mysql_stmt_close(stmt); // This implies mysql_stmt_free_result
+	}
+
+	void FreeResult() noexcept {
+		mysql_stmt_free_result(stmt);
 	}
 
 	MysqlStatement &operator=(MysqlStatement &&src) noexcept {
