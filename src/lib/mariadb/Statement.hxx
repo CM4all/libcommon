@@ -67,6 +67,8 @@ public:
 
 	bool Fetch();
 
+	void FetchAll();
+
 	void FetchColumn(MYSQL_BIND &bind, unsigned int column,
 			 unsigned long offset=0);
 };

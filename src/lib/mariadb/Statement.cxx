@@ -81,6 +81,11 @@ MysqlStatement::Fetch()
 	}
 }
 
+void MysqlStatement::FetchAll()
+{
+	while (mysql_stmt_fetch(stmt) == 0);
+}
+
 void
 MysqlStatement::FetchColumn(MYSQL_BIND &bind, unsigned int column,
 			    unsigned long offset)
