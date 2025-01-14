@@ -43,6 +43,10 @@ public:
 		return stmt != nullptr;
 	}
 
+	/* Note that you must not `Prepare` a query (from any MysqlStatement) is in progress.
+	 * First you must either fetch all rows manually, call `FetchAll`, `FreeResult` or `Free`.
+	 * Destroying the MysqlStatement in progress is also enough, as it calls `Free`.
+	 */
 	void Prepare(std::string_view sql);
 
 	[[gnu::pure]]
