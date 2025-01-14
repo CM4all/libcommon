@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "util/AllocatedArray.hxx"
+
 #include <mysql.h>
 
 #include <array>
@@ -103,7 +105,7 @@ template<typename... Args>
 MysqlResultBind(Args&&... args) -> MysqlResultBind<sizeof...(Args)>;
 
 template <std::size_t size>
-class MysqlStringBuffer {
+class MysqlStaticStringBuffer {
 	std::array<char, size> value;
 
 	unsigned long length;
@@ -119,5 +121,28 @@ public:
 	constexpr operator std::string_view() const noexcept {
 		assert(length <= size);
 		return {value.data(), length};
+	}
+};
+
+class MysqlDynamicStringBuffer {
+	AllocatedArray<char> buffer;
+	unsigned long length;
+
+public:
+	MysqlDynamicStringBuffer(size_t cap)
+		: buffer(cap)
+	{
+	}
+
+	void Bind(MYSQL_BIND& bind) noexcept {
+		bind.buffer_type = MYSQL_TYPE_STRING;
+		bind.buffer = buffer.data();
+		bind.buffer_length = buffer.size();
+		bind.length = &length;
+	}
+
+	operator std::string_view() const noexcept {
+		assert(length <= buffer.size());
+		return {buffer.data(), length};
 	}
 };
