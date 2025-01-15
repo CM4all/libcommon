@@ -63,6 +63,12 @@ public:
 
 	void Execute();
 
+	void Execute(const MYSQL_BIND *bind)
+	{
+		BindParam(bind);
+		Execute();
+	}
+
 	void StoreResult();
 
 	MysqlResult ResultMetadata();
