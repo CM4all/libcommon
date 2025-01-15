@@ -7,6 +7,7 @@
 #include <mysql.h>
 
 #include <array>
+#include <cassert>
 #include <string_view>
 #include <span>
 
@@ -116,6 +117,7 @@ public:
 	}
 
 	constexpr operator std::string_view() const noexcept {
+		assert(length <= size);
 		return {value.data(), length};
 	}
 };
