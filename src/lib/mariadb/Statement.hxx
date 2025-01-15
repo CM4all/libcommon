@@ -59,7 +59,7 @@ public:
 		return mysql_stmt_field_count(stmt);
 	}
 
-	void BindParam(MYSQL_BIND *bnd);
+	void BindParam(const MYSQL_BIND *bind);
 
 	void Execute();
 
@@ -67,7 +67,7 @@ public:
 
 	MysqlResult ResultMetadata();
 
-	void BindResult(MYSQL_BIND *bnd);
+	void BindResult(const MYSQL_BIND *bind);
 
 	bool Fetch();
 

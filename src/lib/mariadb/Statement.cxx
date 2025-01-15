@@ -24,9 +24,11 @@ MysqlStatement::Prepare(std::string_view sql)
 }
 
 void
-MysqlStatement::BindParam(MYSQL_BIND *bnd)
+MysqlStatement::BindParam(const MYSQL_BIND *bind)
 {
-	if (mysql_stmt_bind_param(stmt, bnd) != 0)
+	// This const_cast should be fine, because mysql_stmt_bind_param copies all the data in bind
+	// to an internal buffer.
+	if (mysql_stmt_bind_param(stmt, const_cast<MYSQL_BIND*>(bind)) != 0)
 		throw MysqlError{*stmt, "mysql_stmt_bind_param() failed"};
 }
 
@@ -59,9 +61,9 @@ MysqlStatement::ResultMetadata()
 }
 
 void
-MysqlStatement::BindResult(MYSQL_BIND *bnd)
+MysqlStatement::BindResult(const MYSQL_BIND *bind)
 {
-	if (mysql_stmt_bind_result(stmt, bnd) != 0)
+	if (mysql_stmt_bind_result(stmt, const_cast<MYSQL_BIND*>(bind)) != 0)
 		throw MysqlError{*stmt, "mysql_stmt_bind_result() failed"};
 }
 
