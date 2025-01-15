@@ -26,7 +26,11 @@ public:
 
 	~MysqlStatement() noexcept {
 		if (stmt != nullptr)
-			mysql_stmt_close(stmt);
+			mysql_stmt_close(stmt); // This implies mysql_stmt_free_result
+	}
+
+	void FreeResult() noexcept {
+		mysql_stmt_free_result(stmt);
 	}
 
 	MysqlStatement &operator=(MysqlStatement &&src) noexcept {
@@ -39,6 +43,10 @@ public:
 		return stmt != nullptr;
 	}
 
+	/* Note that you must not `Prepare` a query (from any MysqlStatement) is in progress.
+	 * First you must either fetch all rows manually, call `FetchAll`, `FreeResult` or `Free`.
+	 * Destroying the MysqlStatement in progress is also enough, as it calls `Free`.
+	 */
 	void Prepare(std::string_view sql);
 
 	[[gnu::pure]]
@@ -51,17 +59,25 @@ public:
 		return mysql_stmt_field_count(stmt);
 	}
 
-	void BindParam(MYSQL_BIND *bnd);
+	void BindParam(const MYSQL_BIND *bind);
 
 	void Execute();
+
+	void Execute(const MYSQL_BIND *bind)
+	{
+		BindParam(bind);
+		Execute();
+	}
 
 	void StoreResult();
 
 	MysqlResult ResultMetadata();
 
-	void BindResult(MYSQL_BIND *bnd);
+	void BindResult(const MYSQL_BIND *bind);
 
 	bool Fetch();
+
+	void FetchAll();
 
 	void FetchColumn(MYSQL_BIND &bind, unsigned int column,
 			 unsigned long offset=0);
