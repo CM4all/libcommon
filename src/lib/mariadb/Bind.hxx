@@ -30,11 +30,11 @@ inline void PrepareParamBind(MYSQL_BIND& bind, std::string_view str)
 	// which makes use of temporary MYSQL_BIND objects safe.
 }
 
-inline void PrepareParamBind(MYSQL_BIND& bind, long long& v)
+inline void PrepareParamBind(MYSQL_BIND& bind, const long long& v)
 {
 	// Length is set by mariadb
 	bind.buffer_type = MYSQL_TYPE_LONGLONG;
-	bind.buffer = &v;
+	bind.buffer = const_cast<long long*>(&v);
 }
 
 inline void PrepareResultBind(MYSQL_BIND& bind, long long& v)
@@ -44,11 +44,11 @@ inline void PrepareResultBind(MYSQL_BIND& bind, long long& v)
 	bind.buffer = &v;
 }
 
-inline void PrepareParamBind(MYSQL_BIND& bind, unsigned long long& v)
+inline void PrepareParamBind(MYSQL_BIND& bind, const unsigned long long& v)
 {
 	// Length is set by mariadb
 	bind.buffer_type = MYSQL_TYPE_LONGLONG;
-	bind.buffer = &v;
+	bind.buffer = const_cast<unsigned long long*>(&v);
 	bind.is_unsigned = true;
 }
 
