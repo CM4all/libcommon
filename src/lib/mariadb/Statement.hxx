@@ -59,7 +59,8 @@ public:
 		return mysql_stmt_field_count(stmt);
 	}
 
-	uint64_t GetAffectedRows() const noexcept {
+	[[gnu::pure]]
+	unsigned long long GetAffectedRows() const noexcept {
 		return mysql_stmt_affected_rows(stmt);
 	}
 
