@@ -59,6 +59,10 @@ public:
 		return mysql_stmt_field_count(stmt);
 	}
 
+	uint64_t GetAffectedRows() const noexcept {
+		return mysql_stmt_affected_rows(stmt);
+	}
+
 	void BindParam(const MYSQL_BIND *bind);
 
 	void Execute();
