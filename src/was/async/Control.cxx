@@ -14,7 +14,7 @@ namespace Was {
 
 Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 		 ControlHandler &_handler) noexcept
-	:socket(event_loop), handler(_handler)
+	:socket(event_loop), handler(&_handler)
 {
 	socket.Init(_fd, FD_SOCKET, write_timeout, *this);
 
@@ -62,8 +62,8 @@ Control::OnBufferedData()
 
 		socket.KeepConsumed(sizeof(header) + payload.size());
 
-		bool success = handler.OnWasControlPacket(was_command(header.command),
-							  payload);
+		bool success = handler->OnWasControlPacket(was_command(header.command),
+							   payload);
 		if (!success)
 			return BufferedResult::DESTROYED;
 	}
@@ -79,7 +79,7 @@ bool
 Control::OnBufferedClosed() noexcept
 {
 	Close();
-	handler.OnWasControlHangup();
+	handler->OnWasControlHangup();
 	return false;
 }
 
@@ -124,7 +124,7 @@ Control::OnBufferedWrite()
 bool
 Control::OnBufferedDrained() noexcept
 {
-	return handler.OnWasControlDrained();
+	return handler->OnWasControlDrained();
 }
 
 enum write_result

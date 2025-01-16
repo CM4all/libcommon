@@ -53,7 +53,7 @@ class Control final : BufferedSocketHandler {
 
 	bool done = false;
 
-	ControlHandler &handler;
+	ControlHandler *handler;
 
 	DefaultFifoBuffer output_buffer;
 
@@ -63,6 +63,13 @@ public:
 
 	auto &GetEventLoop() const noexcept {
 		return socket.GetEventLoop();
+	}
+
+	/**
+	 * Install a different handler.  From then on, all
+	 */
+	void SetHandler(ControlHandler &_handler) noexcept {
+		handler = &_handler;
 	}
 
 	bool IsDefined() const noexcept {
@@ -128,17 +135,17 @@ public:
 
 private:
 	void InvokeDone() noexcept {
-		handler.OnWasControlDone();
+		handler->OnWasControlDone();
 	}
 
 	void InvokeError(std::exception_ptr ep) noexcept {
-		handler.OnWasControlError(ep);
+		handler->OnWasControlError(ep);
 	}
 
 	void InvokeError(const char *msg) noexcept;
 
 	bool InvokeDrained() noexcept {
-		return handler.OnWasControlDrained();
+		return handler->OnWasControlDrained();
 	}
 
 	/* virtual methods from class BufferedSocketHandler */
