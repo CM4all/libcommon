@@ -66,7 +66,7 @@ public:
 	}
 
 	/**
-	 * Install a different handler.  From then on, all
+	 * Install a different handler.
 	 */
 	void SetHandler(ControlHandler &_handler) noexcept {
 		handler = &_handler;
