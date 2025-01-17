@@ -23,8 +23,8 @@ class Manager final : public Queue {
 
 public:
 	explicit Manager(EventLoop &event_loop,
-			 unsigned entries=1024)
-		:Queue(entries, 0),
+			 unsigned entries=1024, unsigned flags=0)
+		:Queue(entries, flags),
 		 event(event_loop, BIND_THIS_METHOD(OnReady),
 		       GetFileDescriptor()),
 		 defer_submit_event(event_loop,
