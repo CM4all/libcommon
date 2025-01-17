@@ -33,7 +33,7 @@ public:
 
 		if (IsUringPending()) {
 			if (auto *s = queue.GetSubmitEntry()) {
-				io_uring_prep_cancel_fd(s, parent.GetSocket().Get(), 0);
+				io_uring_prep_cancel(s, GetUringData(), 0);
 				io_uring_sqe_set_data(s, nullptr);
 				queue.Submit();
 			}
