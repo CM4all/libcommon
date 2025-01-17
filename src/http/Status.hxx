@@ -7,6 +7,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <string_view>
 
 enum class HttpStatus : uint_least16_t {
 	/**
@@ -163,7 +164,7 @@ enum class HttpStatus : uint_least16_t {
 	NETWORK_AUTHENTICATION_REQUIRED = 511,
 };
 
-extern const std::array<std::array<const char *, 60>, 6> http_status_to_string_data;
+extern const std::array<std::array<std::string_view, 60>, 6> http_status_to_string_data;
 
 static inline bool
 http_status_is_valid(HttpStatus _status) noexcept
@@ -172,10 +173,11 @@ http_status_is_valid(HttpStatus _status) noexcept
 
 	return (status / 100) < http_status_to_string_data.size() &&
 		status % 100 < http_status_to_string_data.front().size() &&
-		http_status_to_string_data[status / 100][status % 100] != nullptr;
+	       !http_status_to_string_data[status / 100][status % 100].empty();
 }
 
-static inline const char *
+[[gnu::const]]
+static inline std::string_view
 http_status_to_string(HttpStatus _status) noexcept
 {
 	assert(http_status_is_valid(_status));

@@ -6,7 +6,7 @@
 
 static constexpr struct {
 	HttpStatus status;
-	const char *text;
+	std::string_view text;
 } http_status_to_string_input[] = {
 	{ HttpStatus::CONTINUE, "100 Continue" },
 	{ HttpStatus::SWITCHING_PROTOCOLS, "101 Switching Protocols" },
@@ -83,7 +83,7 @@ static constexpr struct {
 static constexpr auto
 MakeHttpStatusToStringData() noexcept
 {
-	std::array<std::array<const char *, 60>, 6> result{};
+	std::array<std::array<std::string_view, 60>, 6> result{};
 
 	for (const auto &i : http_status_to_string_input) {
 		const auto status = static_cast<unsigned>(i.status);
@@ -93,5 +93,5 @@ MakeHttpStatusToStringData() noexcept
 	return result;
 }
 
-constinit const std::array<std::array<const char *, 60>, 6> http_status_to_string_data =
+constinit const std::array<std::array<std::string_view, 60>, 6> http_status_to_string_data =
 	MakeHttpStatusToStringData();
