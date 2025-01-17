@@ -371,6 +371,13 @@ public:
 
 #ifdef HAVE_URING
 	void EnableUring(Uring::Queue &uring_queue);
+
+	/**
+	 * Returns the io_uring queue that was passed to
+	 * EnableUring(), or nullptr if io_uring was not enabled.
+	 */
+	[[gnu::pure]]
+	Uring::Queue *GetUringQueue() const noexcept;
 #endif
 
 	bool HasUring() const noexcept {

@@ -28,6 +28,10 @@ public:
 	UringReceive(BufferedSocket &_parent, Uring::Queue &_queue) noexcept
 		:parent(_parent), queue(_queue) {}
 
+	auto &GetQueue() const noexcept {
+		return queue;
+	}
+
 	void Release() noexcept {
 		assert(!released);
 
@@ -127,6 +131,14 @@ BufferedSocket::EnableUring(Uring::Queue &uring_queue)
 
 	uring_receive = new UringReceive(*this, uring_queue);
 	uring_receive->Start();
+}
+
+Uring::Queue *
+BufferedSocket::GetUringQueue() const noexcept
+{
+	return uring_receive != nullptr
+		? &uring_receive->GetQueue()
+		: nullptr;
 }
 
 #endif
