@@ -81,9 +81,11 @@ BufferedSocket::UringReceive::Start()
 	auto &s = queue.RequireSubmitEntry();
 	io_uring_prep_recv(&s, parent.GetSocket().Get(), w.data(), w.size(), 0);
 
-	/* always go async; this way, the overhead for the operation
-           does not cause latency in the main thread */
-	io_uring_sqe_set_flags(&s, IOSQE_ASYNC);
+	/* always assume the socket is currently empty; this is the
+	   common case and specifying this flag reduces the overhead
+	   for checking synchronously in this thread */
+	// TODO check IORING_CQE_F_SOCK_NONEMPTY
+	s.ioprio |= IORING_RECVSEND_POLL_FIRST;
 
 	queue.Push(s, *this);
 }
