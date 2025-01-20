@@ -26,7 +26,7 @@ Manager::Submit()
 	defer_submit_event.ScheduleIdle();
 }
 
-void
+inline void
 Manager::OnReady(unsigned) noexcept
 {
 	try {
