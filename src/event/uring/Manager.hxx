@@ -17,7 +17,7 @@ class Manager final : public Queue {
 	 * Responsible for invoking Queue::Submit() only once per
 	 * #EventLoop iteration.
 	 */
-	DeferEvent defer_submit_event;
+	DeferEvent defer_submit_event{GetEventLoop(), BIND_THIS_METHOD(DeferredSubmit)};
 
 	bool volatile_event = false;
 
