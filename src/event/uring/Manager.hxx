@@ -24,6 +24,8 @@ class Manager final : public Queue {
 public:
 	explicit Manager(EventLoop &event_loop,
 			 unsigned entries=1024, unsigned flags=0);
+	explicit Manager(EventLoop &event_loop,
+			 unsigned entries, struct io_uring_params &params);
 
 	EventLoop &GetEventLoop() const noexcept {
 		return event.GetEventLoop();

@@ -15,6 +15,14 @@ Manager::Manager(EventLoop &event_loop,
 	event.ScheduleRead();
 }
 
+Manager::Manager(EventLoop &event_loop,
+		 unsigned entries, struct io_uring_params &params)
+	:Queue(entries, params),
+	 event(event_loop, BIND_THIS_METHOD(OnReady), GetFileDescriptor())
+{
+	event.ScheduleRead();
+}
+
 void
 Manager::Submit()
 {
