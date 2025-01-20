@@ -26,16 +26,22 @@ Manager::Submit()
 	defer_submit_event.ScheduleIdle();
 }
 
-inline void
-Manager::OnReady(unsigned) noexcept
+void
+Manager::DispatchCompletions() noexcept
 {
 	try {
-		DispatchCompletions();
+		Queue::DispatchCompletions();
 	} catch (...) {
 		PrintException(std::current_exception());
 	}
 
 	CheckVolatileEvent();
+}
+
+inline void
+Manager::OnReady(unsigned) noexcept
+{
+	DispatchCompletions();
 }
 
 void

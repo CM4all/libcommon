@@ -39,6 +39,7 @@ private:
 			event.Cancel();
 	}
 
+	void DispatchCompletions() noexcept;
 	void OnReady(unsigned events) noexcept;
 	void DeferredSubmit() noexcept;
 };
