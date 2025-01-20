@@ -30,11 +30,8 @@ public:
 		CheckVolatileEvent();
 	}
 
-	void Submit() override {
-		/* defer in "idle" mode to allow accumulation of more
-		   events */
-		defer_submit_event.ScheduleIdle();
-	}
+	// virtual methods from class Uring::Queue
+	void Submit() override;
 
 private:
 	void CheckVolatileEvent() noexcept {

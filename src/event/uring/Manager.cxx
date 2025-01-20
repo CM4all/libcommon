@@ -19,6 +19,14 @@ Manager::Manager(EventLoop &event_loop,
 }
 
 void
+Manager::Submit()
+{
+	/* defer in "idle" mode to allow accumulation of more
+	   events */
+	defer_submit_event.ScheduleIdle();
+}
+
+void
 Manager::OnReady(unsigned) noexcept
 {
 	try {
