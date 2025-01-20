@@ -10,10 +10,10 @@ namespace Uring {
 Manager::Manager(EventLoop &event_loop,
 		 unsigned entries, unsigned flags)
 	:Queue(entries, flags),
-	event(event_loop, BIND_THIS_METHOD(OnReady),
-			  GetFileDescriptor()),
-	defer_submit_event(event_loop,
-			   BIND_THIS_METHOD(DeferredSubmit))
+	 event(event_loop, BIND_THIS_METHOD(OnReady),
+	       GetFileDescriptor()),
+	 defer_submit_event(event_loop,
+			    BIND_THIS_METHOD(DeferredSubmit))
 {
 	event.ScheduleRead();
 }
