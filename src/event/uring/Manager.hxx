@@ -25,6 +25,10 @@ public:
 	explicit Manager(EventLoop &event_loop,
 			 unsigned entries=1024, unsigned flags=0);
 
+	EventLoop &GetEventLoop() const noexcept {
+		return event.GetEventLoop();
+	}
+
 	void SetVolatile() noexcept {
 		volatile_event = true;
 		CheckVolatileEvent();
