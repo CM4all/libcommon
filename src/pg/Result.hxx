@@ -97,7 +97,7 @@ public:
 	[[gnu::pure]]
 	unsigned GetAffectedRows() const noexcept {
 		assert(IsDefined());
-		assert(IsCommandSuccessful());
+		assert(IsCommandSuccessful() || IsQuerySuccessful());
 
 		return std::strtoul(::PQcmdTuples(result), nullptr, 10);
 	}
