@@ -12,8 +12,8 @@
  * and a precalculated hash.
  */
 struct StockKey {
-	std::string_view value;
 	std::size_t hash;
+	std::string_view value;
 
 	/**
 	 * Construct a key with the default hash function.
@@ -21,7 +21,7 @@ struct StockKey {
 	explicit StockKey(std::string_view _value) noexcept;
 
 	explicit constexpr StockKey(std::string_view _value, std::size_t _hash) noexcept
-		:value(_value), hash(_hash) {}
+		:hash(_hash), value(_value) {}
 
 	constexpr bool operator==(const StockKey &) const noexcept = default;
 };

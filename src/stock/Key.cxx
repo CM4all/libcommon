@@ -7,4 +7,4 @@
 #include "util/SpanCast.hxx"
 
 StockKey::StockKey(std::string_view _value) noexcept
-	:value(_value), hash(djb_hash(AsBytes(_value))) {}
+	:hash(djb_hash(AsBytes(_value))), value(_value) {}
