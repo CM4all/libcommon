@@ -50,7 +50,7 @@ class StockMap {
 		struct GetKeyFunction {
 			[[gnu::pure]]
 			std::string_view operator()(const Item &item) const noexcept {
-				return item.GetName();
+				return item.GetNameView();
 			}
 		};
 	};
