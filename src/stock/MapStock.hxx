@@ -28,10 +28,6 @@ class StockMap {
 		explicit Item(StockMap &_map, Args&&... args) noexcept
 			:Stock(std::forward<Args>(args)...), map(_map) {}
 
-		template<typename... Args>
-		explicit Item(Args&&... args) noexcept
-			:Stock(std::forward<Args>(args)...) {}
-
 	protected:
 		virtual void OnEmpty() noexcept override {
 			defer_empty.Schedule();
