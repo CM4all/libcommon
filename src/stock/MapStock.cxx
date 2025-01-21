@@ -5,7 +5,7 @@
 #include "MapStock.hxx"
 #include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
-#include "util/StringAPI.hxx"
+#include "util/SpanCast.hxx"
 
 void
 StockMap::Item::OnDeferredEmpty() noexcept
@@ -15,20 +15,15 @@ StockMap::Item::OnDeferredEmpty() noexcept
 }
 
 inline size_t
-StockMap::Item::Hash::operator()(const char *key) const noexcept
+StockMap::Item::Hash::operator()(std::string_view key) const noexcept
 {
-	assert(key != nullptr);
-
-	return djb_hash_string(key);
+	return djb_hash(AsBytes(key));
 }
 
 inline bool
-StockMap::Item::Equal::operator()(const char *a, const char *b) const noexcept
+StockMap::Item::Equal::operator()(std::string_view a, std::string_view b) const noexcept
 {
-	assert(a != nullptr);
-	assert(b != nullptr);
-
-	return StringIsEqual(a, b);
+	return a == b;
 }
 
 StockMap::StockMap(EventLoop &_event_loop, StockClass &_cls,
@@ -53,7 +48,7 @@ StockMap::Erase(Item &item) noexcept
 }
 
 Stock &
-StockMap::GetStock(const char *uri, const void *request) noexcept
+StockMap::GetStock(std::string_view uri, const void *request) noexcept
 {
 	auto [position, inserted] = map.insert_check(uri);
 	if (inserted) {

@@ -8,7 +8,7 @@
 #include "Item.hxx"
 #include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
-#include "util/StringAPI.hxx"
+#include "util/SpanCast.hxx"
 
 #include <cassert>
 
@@ -585,17 +585,15 @@ MultiStock::MapItem::OnLeaseReleased(OuterItem &item) noexcept
 }
 
 inline std::size_t
-MultiStock::MapItem::Hash::operator()(const char *key) const noexcept
+MultiStock::MapItem::Hash::operator()(std::string_view key) const noexcept
 {
-	assert(key != nullptr);
-
-	return djb_hash_string(key);
+	return djb_hash(AsBytes(key));
 }
 
 inline bool
-MultiStock::MapItem::Equal::operator()(const char *a, const char *b) const noexcept
+MultiStock::MapItem::Equal::operator()(std::string_view a, std::string_view b) const noexcept
 {
-	return StringIsEqual(a, b);
+	return a == b;
 }
 
 MultiStock::MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
@@ -653,7 +651,7 @@ MultiStock::DiscardOldestIdle(std::size_t n_requested) noexcept
 }
 
 inline MultiStock::MapItem &
-MultiStock::MakeMapItem(const char *uri, const void *request) noexcept
+MultiStock::MakeMapItem(std::string_view uri, const void *request) noexcept
 {
 	auto [i, inserted] = map.insert_check(uri);
 	if (inserted) {
@@ -675,7 +673,7 @@ MultiStock::MakeMapItem(const char *uri, const void *request) noexcept
 }
 
 void
-MultiStock::Get(const char *uri, StockRequest request,
+MultiStock::Get(std::string_view uri, StockRequest request,
 		std::size_t concurrency,
 		StockGetHandler &handler,
 		CancellablePointer &cancel_ptr) noexcept

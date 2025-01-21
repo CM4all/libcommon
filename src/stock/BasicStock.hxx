@@ -98,6 +98,10 @@ public:
 		return cls;
 	}
 
+	std::string_view GetNameView() const noexcept {
+		return name;
+	}
+
 	const char *GetName() const noexcept override {
 		return name.c_str();
 	}

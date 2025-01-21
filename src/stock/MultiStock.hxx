@@ -306,18 +306,18 @@ class MultiStock {
 	public:
 		struct Hash {
 			[[gnu::pure]]
-			std::size_t operator()(const char *key) const noexcept;
+			std::size_t operator()(std::string_view key) const noexcept;
 		};
 
 		struct Equal {
 			[[gnu::pure]]
-			bool operator()(const char *a, const char *b) const noexcept;
+			bool operator()(std::string_view a, std::string_view b) const noexcept;
 		};
 
 		struct GetKey {
 			[[gnu::pure]]
-			const char *operator()(const MapItem &item) const noexcept {
-				return item.GetName();
+			std::string_view operator()(const MapItem &item) const noexcept {
+				return item.name;
 			}
 		};
 	};
@@ -401,12 +401,12 @@ public:
 		});
 	}
 
-	void Get(const char *uri, StockRequest request,
+	void Get(std::string_view uri, StockRequest request,
 		 std::size_t concurrency,
 		 StockGetHandler &handler,
 		 CancellablePointer &cancel_ptr) noexcept;
 
 private:
 	[[gnu::pure]]
-	MapItem &MakeMapItem(const char *uri, const void *request) noexcept;
+	MapItem &MakeMapItem(std::string_view uri, const void *request) noexcept;
 };

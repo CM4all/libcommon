@@ -39,17 +39,17 @@ class StockMap {
 	public:
 		struct Hash {
 			[[gnu::pure]]
-			size_t operator()(const char *key) const noexcept;
+			size_t operator()(std::string_view key) const noexcept;
 		};
 
 		struct Equal {
 			[[gnu::pure]]
-			bool operator()(const char *a, const char *b) const noexcept;
+			bool operator()(std::string_view a, std::string_view b) const noexcept;
 		};
 
 		struct GetKeyFunction {
 			[[gnu::pure]]
-			const char *operator()(const Item &item) const noexcept {
+			std::string_view operator()(const Item &item) const noexcept {
 				return item.GetName();
 			}
 		};
@@ -126,7 +126,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	Stock &GetStock(const char *uri, const void *request) noexcept;
+	Stock &GetStock(std::string_view uri, const void *request) noexcept;
 
 	/**
 	 * Set the "sticky" flag.  Sticky stocks will not be deleted
@@ -134,7 +134,7 @@ public:
 	 */
 	void SetSticky(Stock &stock, bool sticky) noexcept;
 
-	void Get(const char *uri, StockRequest &&request,
+	void Get(std::string_view uri, StockRequest &&request,
 		 StockGetHandler &handler,
 		 CancellablePointer &cancel_ptr) noexcept {
 		Stock &stock = GetStock(uri, request.get());
@@ -148,7 +148,7 @@ public:
 	 *
 	 * Throws exception on error.
 	 */
-	StockItem *GetNow(const char *uri, StockRequest &&request) {
+	StockItem *GetNow(std::string_view uri, StockRequest &&request) {
 		Stock &stock = GetStock(uri, request.get());
 		return stock.GetNow(std::move(request));
 	}
