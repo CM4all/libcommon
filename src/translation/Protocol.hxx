@@ -54,7 +54,10 @@ enum class TranslationCommand : uint16_t {
 	QUERY_STRING = 38,
 	PIPE = 39,
 	BASE = 40,
+
+	/** deprecated */
 	DELEGATE = 41,
+
 	INVALIDATE = 42,
 	LOCAL_ADDRESS = 43,
 	LOCAL_ADDRESS_STRING = 44,

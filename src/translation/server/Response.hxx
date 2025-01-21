@@ -1473,11 +1473,6 @@ public:
 			return *this;
 		}
 
-		ChildContext Delegate(std::string_view helper) noexcept {
-			response.StringPacket(TranslationCommand::DELEGATE, helper);
-			return ChildContext(response);
-		}
-
 		template<typename P>
 		auto DirectoryIndex(P payload) noexcept {
 			response.Packet(TranslationCommand::DIRECTORY_INDEX,

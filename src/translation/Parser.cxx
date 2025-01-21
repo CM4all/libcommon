@@ -16,7 +16,6 @@
 #if TRANSLATION_ENABLE_RADDRESS
 #include "translation/Layout.hxx"
 #include "file/Address.hxx"
-#include "delegate/Address.hxx"
 #include "http/local/Address.hxx"
 #include "http/Address.hxx"
 #include "cgi/Address.hxx"
@@ -388,8 +387,7 @@ FinishTranslateResponse(AllocatorPtr alloc,
 	} else if (response.address.type == ResourceAddress::Type::LOCAL) {
 		auto &file = response.address.GetFile();
 
-		if (file.delegate != nullptr) {
-		} else if (response.base != nullptr) {
+		if (response.base != nullptr) {
 			if (response.easy_base) {
 				if (file.expand_path)
 					throw std::runtime_error("Cannot use EASY_BASE with EXPAND_PATH");
@@ -1777,9 +1775,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		if (cgi_address != nullptr)
 			cgi_address->document_root = string_payload.data();
-		else if (file_address != nullptr &&
-			 file_address->delegate != nullptr)
-			file_address->document_root = string_payload.data();
 		else
 			response.document_root = string_payload.data();
 		return;
@@ -1798,10 +1793,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (cgi_address != nullptr) {
 			cgi_address->document_root = string_payload.data();
 			cgi_address->expand_document_root = true;
-		} else if (file_address != nullptr &&
-			   file_address->delegate != nullptr) {
-			file_address->document_root = string_payload.data();
-			file_address->expand_document_root = true;
 		} else {
 			response.document_root = string_payload.data();
 			response.expand_document_root = true;
@@ -2046,19 +2037,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::DELEGATE:
-#if TRANSLATION_ENABLE_RADDRESS
-		if (file_address == nullptr)
-			throw std::runtime_error("misplaced DELEGATE packet");
-
-		if (!IsValidAbsolutePath(string_payload))
-			throw std::runtime_error("malformed DELEGATE packet");
-
-		file_address->delegate = alloc.New<DelegateAddress>(string_payload.data());
-		SetChildOptions(file_address->delegate->child_options);
-		return;
-#else
-		break;
-#endif
+		throw std::runtime_error{"deprecated DELEGATE packet"};
 
 	case TranslationCommand::APPEND:
 		if (!IsValidNonEmptyString(string_payload))
