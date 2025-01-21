@@ -8,9 +8,149 @@
 #include "util/SpanCast.hxx"
 #include "util/Unaligned.hxx"
 
+#ifdef HAVE_URING
+#include "io/uring/Operation.hxx"
+#include "io/uring/Queue.hxx"
+#endif
+
 #include <was/protocol.h>
 
+#include <cassert>
+
 namespace Was {
+
+#ifdef HAVE_URING
+
+class Control::UringSend final : Uring::Operation {
+	Control &parent;
+	Uring::Queue &queue;
+
+	DefaultFifoBuffer buffer;
+
+	bool canceled = false;
+
+public:
+	[[nodiscard]]
+	UringSend(Control &_parent,
+		  Uring::Queue &_queue) noexcept
+		:parent(_parent), queue(_queue)
+	{
+	}
+
+	void Start(DefaultFifoBuffer &src);
+
+	void Cancel() noexcept;
+
+private:
+	void OnUringCompletion(int res) noexcept override;
+};
+
+void
+Control::UringSend::Start(DefaultFifoBuffer &src)
+{
+	assert(!canceled);
+	assert(parent.uring_send == this);
+
+	if (IsUringPending())
+		return;
+
+	buffer.MoveFromAllowBothNull(src);
+	src.FreeIfEmpty();
+
+	const auto r = buffer.Read();
+	if (r.empty()) {
+		buffer.FreeIfEmpty();
+		parent.OnUringSendDone(true);
+		return;
+	}
+
+	auto &s = queue.RequireSubmitEntry();
+	io_uring_prep_send(&s, parent.socket.GetSocket().Get(),
+			   r.data(), r.size(), 0);
+
+	/* always go async; this way, the overhead for the operation
+           does not cause latency in the main thread */
+	io_uring_sqe_set_flags(&s, IOSQE_ASYNC);
+
+	queue.Push(s, *this);
+}
+
+void
+Control::UringSend::Cancel() noexcept
+{
+	assert(!canceled);
+	assert(parent.uring_send == this);
+
+	parent.uring_send = nullptr;
+
+	if (IsUringPending()) {
+		canceled = true;
+
+		auto &s = queue.RequireSubmitEntry();
+		io_uring_prep_cancel(&s, GetUringData(), 0);
+		io_uring_sqe_set_data(&s, nullptr);
+		io_uring_sqe_set_flags(&s, IOSQE_CQE_SKIP_SUCCESS);
+		queue.Submit();
+	} else {
+		delete this;
+	}
+}
+
+void
+Control::UringSend::OnUringCompletion(int res) noexcept
+{
+	if (canceled) [[unlikely]] {
+		delete this;
+		return;
+	}
+
+	assert(parent.uring_send == this);
+
+	if (res < 0) [[unlikely]] {
+		parent.OnUringSendError(-res);
+		return;
+	}
+
+	buffer.Consume(res);
+	parent.OnUringSendDone(buffer.empty());
+}
+
+void
+Control::EnableUring(Uring::Queue &uring_queue)
+{
+	assert(uring_send == nullptr);
+	assert(output_buffer.empty());
+
+	socket.EnableUring(uring_queue);
+
+	uring_send = new UringSend(*this, uring_queue);
+}
+
+inline void
+Control::CancelUringSend() noexcept
+{
+	if (uring_send != nullptr) {
+		uring_send->Cancel();
+		assert(uring_send == nullptr);
+	}
+}
+
+inline void
+Control::OnUringSendDone(bool empty) noexcept
+{
+	if (!empty || !output_buffer.empty())
+		uring_send->Start(output_buffer);
+	else if (done)
+		InvokeDone();
+}
+
+inline void
+Control::OnUringSendError(int error) noexcept
+{
+	InvokeError(std::make_exception_ptr(MakeErrno(error, "Send failed")));
+}
+
+#endif
 
 Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 		 ControlHandler &_handler) noexcept
@@ -22,10 +162,21 @@ Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
 		socket.ScheduleRead();
 }
 
+Control::~Control() noexcept
+{
+#ifdef HAVE_URING
+	CancelUringSend();
+#endif
+}
+
 void
 Control::ReleaseSocket() noexcept
 {
 	assert(socket.IsConnected());
+
+#ifdef HAVE_URING
+	CancelUringSend();
+#endif
 
 	output_buffer.FreeIfDefined();
 
@@ -87,6 +238,14 @@ Control::OnBufferedClosed() noexcept
 bool
 Control::OnBufferedWrite()
 {
+#ifdef HAVE_URING
+	if (uring_send != nullptr) {
+		assert(!output_buffer.empty());
+		uring_send->Start(output_buffer);
+		return true;
+	}
+#endif
+
 	auto r = output_buffer.Read();
 	assert(!r.empty());
 
@@ -138,6 +297,19 @@ void
 Control::OnBufferedError(std::exception_ptr e) noexcept
 {
 	InvokeError(e);
+}
+
+void
+Control::Close() noexcept
+{
+#ifdef HAVE_URING
+	CancelUringSend();
+#endif
+
+	if (socket.IsValid()) {
+		socket.Close();
+		socket.Destroy();
+	}
 }
 
 /*

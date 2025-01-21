@@ -57,14 +57,22 @@ class Control final : BufferedSocketHandler {
 
 	DefaultFifoBuffer output_buffer;
 
+#ifdef HAVE_URING
+	class UringSend;
+	UringSend *uring_send = nullptr;
+
+	void CancelUringSend() noexcept;
+	void OnUringSendDone(bool empty) noexcept;
+	void OnUringSendError(int error) noexcept;
+#endif
+
 public:
 	Control(EventLoop &event_loop, SocketDescriptor _fd,
 		ControlHandler &_handler) noexcept;
+	~Control() noexcept;
 
 #ifdef HAVE_URING
-	void EnableUring(Uring::Queue &uring_queue) {
-		socket.EnableUring(uring_queue);
-	}
+	void EnableUring(Uring::Queue &uring_queue);
 
 	[[gnu::pure]]
 	Uring::Queue *GetUringQueue() const noexcept {
@@ -87,12 +95,7 @@ public:
 		return socket.IsValid();
 	}
 
-	void Close() noexcept {
-		if (socket.IsValid()) {
-			socket.Close();
-			socket.Destroy();
-		}
-	}
+	void Close() noexcept;
 
 	bool Send(enum was_command cmd,
 		  std::span<const std::byte> payload={}) noexcept;
