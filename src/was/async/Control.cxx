@@ -140,26 +140,6 @@ Control::OnBufferedError(std::exception_ptr e) noexcept
 	InvokeError(e);
 }
 
-bool
-Control::FlushOutput() noexcept
-{
-	if (output_buffer.empty())
-		return true;
-
-	try {
-		if (!OnBufferedWrite())
-			return false;
-	} catch (...) {
-		InvokeError(std::current_exception());
-		return false;
-	}
-
-	if (!output_buffer.empty())
-		InvokeError("Failed to flush control channel");
-
-	return true;
-}
-
 /*
  * constructor
  *

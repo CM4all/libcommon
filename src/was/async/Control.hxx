@@ -94,15 +94,6 @@ public:
 		}
 	}
 
-	/**
-	 * Flush the output buffer now.
-	 *
-	 * @return true if all data has been sent successfully and the
-	 * output buffer is empty, false if
-	 * ControlHandler::OnWasControlError() has been called
-	 */
-	bool FlushOutput() noexcept;
-
 	bool Send(enum was_command cmd,
 		  std::span<const std::byte> payload={}) noexcept;
 
