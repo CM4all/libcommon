@@ -65,6 +65,11 @@ public:
 	void EnableUring(Uring::Queue &uring_queue) {
 		socket.EnableUring(uring_queue);
 	}
+
+	[[gnu::pure]]
+	Uring::Queue *GetUringQueue() const noexcept {
+		return socket.GetUringQueue();
+	}
 #endif
 
 	auto &GetEventLoop() const noexcept {
