@@ -7,6 +7,7 @@
 #include "PutAction.hxx"
 
 #include <exception>
+#include <string_view>
 
 class StockItem;
 class StockGetHandler;
@@ -19,7 +20,10 @@ class EventLoop;
 class AbstractStock {
 public:
 	[[gnu::const]]
-	virtual const char *GetName() const noexcept = 0;
+	virtual std::string_view GetNameView() const noexcept = 0;
+
+	[[gnu::const]]
+	virtual const char *GetNameC() const noexcept = 0;
 
 	[[gnu::const]]
 	virtual EventLoop &GetEventLoop() const noexcept = 0;

@@ -5,10 +5,16 @@
 #include "Item.hxx"
 #include "Stock.hxx"
 
-const char *
-CreateStockItem::GetStockName() const noexcept
+std::string_view
+CreateStockItem::GetStockNameView() const noexcept
 {
-	return stock.GetName();
+	return stock.GetNameView();
+}
+
+const char *
+CreateStockItem::GetStockNameC() const noexcept
+{
+	return stock.GetNameC();
 }
 
 void
@@ -22,10 +28,16 @@ StockItem::~StockItem() noexcept
 {
 }
 
-const char *
-StockItem::GetStockName() const noexcept
+std::string_view
+StockItem::GetStockNameView() const noexcept
 {
-	return stock.GetName();
+	return stock.GetNameView();
+}
+
+const char *
+StockItem::GetStockNameC() const noexcept
+{
+	return stock.GetNameC();
 }
 
 PutAction

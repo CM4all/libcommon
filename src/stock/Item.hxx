@@ -9,6 +9,7 @@
 #include "util/IntrusiveList.hxx"
 
 #include <exception>
+#include <string_view>
 
 class AbstractStock;
 class StockGetHandler;
@@ -17,10 +18,16 @@ struct CreateStockItem {
 	AbstractStock &stock;
 
 	/**
-	 * Wrapper for Stock::GetName()
+	 * Wrapper for Stock::GetNameView()
 	 */
 	[[gnu::pure]]
-	const char *GetStockName() const noexcept;
+	std::string_view GetStockNameView() const noexcept;
+
+	/**
+	 * Wrapper for Stock::GetNameC()
+	 */
+	[[gnu::pure]]
+	const char *GetStockNameC() const noexcept;
 
 	/**
 	 * Announce that the creation of this item has failed.
@@ -72,10 +79,16 @@ public:
 	}
 
 	/**
-	 * Wrapper for Stock::GetName()
+	 * Wrapper for Stock::GetNameView()
 	 */
 	[[gnu::pure]]
-	const char *GetStockName() const noexcept;
+	std::string_view GetStockNameView() const noexcept;
+
+	/**
+	 * Wrapper for Stock::GetNameC()
+	 */
+	[[gnu::pure]]
+	const char *GetStockNameC() const noexcept;
 
 	/**
 	 * Return a busy item to the stock.  This is a wrapper for

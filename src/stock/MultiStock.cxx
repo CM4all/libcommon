@@ -163,10 +163,16 @@ MultiStock::OuterItem::GetLease(MultiStockClass &_inner_class,
 	return false;
 }
 
-const char *
-MultiStock::OuterItem::GetName() const noexcept
+std::string_view
+MultiStock::OuterItem::GetNameView() const noexcept
 {
-	return shared_item.GetStockName();
+	return shared_item.GetStockNameView();
+}
+
+const char *
+MultiStock::OuterItem::GetNameC() const noexcept
+{
+	return shared_item.GetStockNameC();
 }
 
 EventLoop &

@@ -149,7 +149,8 @@ class MultiStock {
 		}
 
 		/* virtual methods from class AbstractStock */
-		const char *GetName() const noexcept override;
+		std::string_view GetNameView() const noexcept override;
+		const char *GetNameC() const noexcept override;
 		EventLoop &GetEventLoop() const noexcept override;
 
 		PutAction Put(StockItem &item, PutAction action) noexcept override;
@@ -290,7 +291,11 @@ class MultiStock {
 		void OnStockItemError(std::exception_ptr error) noexcept override;
 
 		/* virtual methods from class AbstractStock */
-		const char *GetName() const noexcept override {
+		std::string_view GetNameView() const noexcept override {
+			return name;
+		}
+
+		const char *GetNameC() const noexcept override {
 			return name.c_str();
 		}
 

@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <string_view>
 
 class CancellablePointer;
 class BasicStock;
@@ -98,11 +99,11 @@ public:
 		return cls;
 	}
 
-	std::string_view GetNameView() const noexcept {
+	std::string_view GetNameView() const noexcept override {
 		return name;
 	}
 
-	const char *GetName() const noexcept override {
+	const char *GetNameC() const noexcept override {
 		return name.c_str();
 	}
 
