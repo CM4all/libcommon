@@ -249,7 +249,7 @@ Partition::Get() noexcept
 {
 	leases.emplace_back(*this);
 	auto &lease = leases.back();
-	instance.multi_stock.Get(key, ToNopPointer(this), 2,
+	instance.multi_stock.Get(StockKey{key}, ToNopPointer(this), 2,
 				 lease, lease.get_cancel_ptr);
 	return lease;
 }

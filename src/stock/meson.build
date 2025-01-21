@@ -1,5 +1,6 @@
 stock = static_library(
   'stock',
+  'Key.cxx',
   'Item.cxx',
   'AbstractStock.cxx',
   'BasicStock.cxx',

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Key.hxx"
 #include "Stock.hxx"
 #include "event/Chrono.hxx"
 #include "event/DeferEvent.hxx"
@@ -20,13 +21,15 @@ class StockMap {
 	struct Item final : IntrusiveHashSetHook<IntrusiveHookMode::NORMAL>, Stock {
 		StockMap &map;
 
+		const std::size_t hash;
+
 		DeferEvent defer_empty{GetEventLoop(), BIND_THIS_METHOD(OnDeferredEmpty)};
 
 		bool sticky = false;
 
 		template<typename... Args>
-		explicit Item(StockMap &_map, Args&&... args) noexcept
-			:Stock(std::forward<Args>(args)...), map(_map) {}
+		explicit Item(StockMap &_map, std::size_t _hash, Args&&... args) noexcept
+			:Stock(std::forward<Args>(args)...), map(_map), hash(_hash) {}
 
 	protected:
 		virtual void OnEmpty() noexcept override {
@@ -38,19 +41,21 @@ class StockMap {
 
 	public:
 		struct Hash {
-			[[gnu::pure]]
-			size_t operator()(std::string_view key) const noexcept;
+			constexpr size_t operator()(const StockKey &key) const noexcept {
+				return key.hash;
+			}
 		};
 
 		struct Equal {
-			[[gnu::pure]]
-			bool operator()(std::string_view a, std::string_view b) const noexcept;
+			constexpr bool operator()(const StockKey &a, const StockKey &b) const noexcept {
+				return a == b;
+			}
 		};
 
 		struct GetKeyFunction {
 			[[gnu::pure]]
-			std::string_view operator()(const Item &item) const noexcept {
-				return item.GetNameView();
+			StockKey operator()(const Item &item) const noexcept {
+				return StockKey{item.GetNameView(), item.hash};
 			}
 		};
 	};
@@ -126,7 +131,7 @@ public:
 	}
 
 	[[gnu::pure]]
-	Stock &GetStock(std::string_view uri, const void *request) noexcept;
+	Stock &GetStock(StockKey key, const void *request) noexcept;
 
 	/**
 	 * Set the "sticky" flag.  Sticky stocks will not be deleted
@@ -134,10 +139,10 @@ public:
 	 */
 	void SetSticky(Stock &stock, bool sticky) noexcept;
 
-	void Get(std::string_view uri, StockRequest &&request,
+	void Get(StockKey key, StockRequest &&request,
 		 StockGetHandler &handler,
 		 CancellablePointer &cancel_ptr) noexcept {
-		Stock &stock = GetStock(uri, request.get());
+		Stock &stock = GetStock(key, request.get());
 		stock.Get(std::move(request), handler, cancel_ptr);
 	}
 
@@ -148,8 +153,8 @@ public:
 	 *
 	 * Throws exception on error.
 	 */
-	StockItem *GetNow(std::string_view uri, StockRequest &&request) {
-		Stock &stock = GetStock(uri, request.get());
+	StockItem *GetNow(StockKey key, StockRequest &&request) {
+		Stock &stock = GetStock(key, request.get());
 		return stock.GetNow(std::move(request));
 	}
 

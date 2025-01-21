@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Key.hxx"
 #include "Request.hxx"
 #include "GetHandler.hxx"
 #include "AbstractStock.hxx"
@@ -179,6 +180,8 @@ class MultiStock {
 
 		OuterItemList items;
 
+		const std::size_t hash;
+
 		/**
 		 * The maximum number of items in this stock.  If any
 		 * more items are requested, they are put into the
@@ -212,7 +215,7 @@ class MultiStock {
 		IntrusiveListHook<IntrusiveHookMode::AUTO_UNLINK> chronological_siblings;
 
 		MapItem(EventLoop &event_loop, StockClass &_outer_class,
-			std::string_view _name,
+			StockKey key,
 			std::size_t _limit,
 			Event::Duration _clear_interval,
 			MultiStockClass &_inner_class) noexcept;
@@ -305,19 +308,21 @@ class MultiStock {
 
 	public:
 		struct Hash {
-			[[gnu::pure]]
-			std::size_t operator()(std::string_view key) const noexcept;
+			constexpr size_t operator()(const StockKey &key) const noexcept {
+				return key.hash;
+			}
 		};
 
 		struct Equal {
-			[[gnu::pure]]
-			bool operator()(std::string_view a, std::string_view b) const noexcept;
+			constexpr bool operator()(const StockKey &a, const StockKey &b) const noexcept {
+				return a == b;
+			}
 		};
 
 		struct GetKey {
 			[[gnu::pure]]
-			std::string_view operator()(const MapItem &item) const noexcept {
-				return item.name;
+			StockKey operator()(const MapItem &item) const noexcept {
+				return StockKey{item.name, item.hash};
 			}
 		};
 	};
@@ -401,12 +406,12 @@ public:
 		});
 	}
 
-	void Get(std::string_view uri, StockRequest request,
+	void Get(StockKey key, StockRequest request,
 		 std::size_t concurrency,
 		 StockGetHandler &handler,
 		 CancellablePointer &cancel_ptr) noexcept;
 
 private:
 	[[gnu::pure]]
-	MapItem &MakeMapItem(std::string_view uri, const void *request) noexcept;
+	MapItem &MakeMapItem(StockKey key, const void *request) noexcept;
 };

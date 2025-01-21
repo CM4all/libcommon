@@ -287,13 +287,13 @@ struct MultiStock::MapItem::Waiting final
 };
 
 MultiStock::MapItem::MapItem(EventLoop &_event_loop, StockClass &_outer_class,
-			     std::string_view _name,
+			     StockKey key,
 			     std::size_t _limit,
 			     Event::Duration _clear_interval,
 			     MultiStockClass &_inner_class) noexcept
 	:outer_class(_outer_class),
 	 inner_class(_inner_class),
-	 name(_name),
+	 name(key.value), hash(key.hash),
 	 limit(_limit),
 	 clear_interval(_clear_interval),
 	 retry_event(_event_loop, BIND_THIS_METHOD(RetryWaiting))
@@ -584,18 +584,6 @@ MultiStock::MapItem::OnLeaseReleased(OuterItem &item) noexcept
 		RemoveItem(item);
 }
 
-inline std::size_t
-MultiStock::MapItem::Hash::operator()(std::string_view key) const noexcept
-{
-	return djb_hash(AsBytes(key));
-}
-
-inline bool
-MultiStock::MapItem::Equal::operator()(std::string_view a, std::string_view b) const noexcept
-{
-	return a == b;
-}
-
 MultiStock::MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
 		       std::size_t _limit,
 		       MultiStockClass &_inner_class) noexcept
@@ -651,11 +639,11 @@ MultiStock::DiscardOldestIdle(std::size_t n_requested) noexcept
 }
 
 inline MultiStock::MapItem &
-MultiStock::MakeMapItem(std::string_view uri, const void *request) noexcept
+MultiStock::MakeMapItem(StockKey key, const void *request) noexcept
 {
-	auto [i, inserted] = map.insert_check(uri);
+	auto [i, inserted] = map.insert_check(key);
 	if (inserted) {
-		auto *item = new MapItem(GetEventLoop(), outer_class, uri,
+		auto *item = new MapItem(GetEventLoop(), outer_class, key,
 					 inner_class.GetLimit(request, limit),
 					 inner_class.GetClearInterval(request),
 					 inner_class);
@@ -673,12 +661,12 @@ MultiStock::MakeMapItem(std::string_view uri, const void *request) noexcept
 }
 
 void
-MultiStock::Get(std::string_view uri, StockRequest request,
+MultiStock::Get(StockKey key, StockRequest request,
 		std::size_t concurrency,
 		StockGetHandler &handler,
 		CancellablePointer &cancel_ptr) noexcept
 {
-	MakeMapItem(uri, request.get())
+	MakeMapItem(key, request.get())
 		.Get(std::move(request), concurrency,
 		     handler, cancel_ptr);
 }

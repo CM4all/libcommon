@@ -3,27 +3,13 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "MapStock.hxx"
-#include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
-#include "util/SpanCast.hxx"
 
 void
 StockMap::Item::OnDeferredEmpty() noexcept
 {
 	if (IsEmpty() && !sticky)
 		map.Erase(*this);
-}
-
-inline size_t
-StockMap::Item::Hash::operator()(std::string_view key) const noexcept
-{
-	return djb_hash(AsBytes(key));
-}
-
-inline bool
-StockMap::Item::Equal::operator()(std::string_view a, std::string_view b) const noexcept
-{
-	return a == b;
 }
 
 StockMap::StockMap(EventLoop &_event_loop, StockClass &_cls,
@@ -48,12 +34,12 @@ StockMap::Erase(Item &item) noexcept
 }
 
 Stock &
-StockMap::GetStock(std::string_view uri, const void *request) noexcept
+StockMap::GetStock(StockKey key, const void *request) noexcept
 {
-	auto [position, inserted] = map.insert_check(uri);
+	auto [position, inserted] = map.insert_check(key);
 	if (inserted) {
-		auto *item = new Item(*this, event_loop, cls,
-				      uri,
+		auto *item = new Item(*this, key.hash, event_loop, cls,
+				      key.value,
 				      GetLimit(request, limit),
 				      max_idle,
 				      GetClearInterval(request));
