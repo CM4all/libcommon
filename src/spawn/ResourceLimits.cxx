@@ -5,10 +5,9 @@
 #include "ResourceLimits.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "util/Base32.hxx"
-#include "util/djb_hash.hxx"
 #include "util/CharUtil.hxx"
+#include "util/IntHash.hxx"
 #include "util/Sanitizer.hxx"
-#include "util/SpanCast.hxx"
 
 #include <cassert>
 #include <charconv>
@@ -72,7 +71,7 @@ ResourceLimits::IsEmpty() const noexcept
 inline std::size_t
 ResourceLimits::GetHash() const noexcept
 {
-	return djb_hash(ReferenceAsBytes(*this));
+	return IntHashT(*this);
 }
 
 char *
