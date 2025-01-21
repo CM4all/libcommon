@@ -82,7 +82,7 @@ public:
 	 * the #MapStock class
 	 */
 	BasicStock(EventLoop &event_loop, StockClass &cls,
-		   const char *name, std::size_t max_idle,
+		   std::string_view name, std::size_t max_idle,
 		   Event::Duration _clear_interval) noexcept;
 
 	~BasicStock() noexcept;

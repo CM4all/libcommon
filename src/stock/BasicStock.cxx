@@ -159,7 +159,7 @@ BasicStock::ClearEventCallback() noexcept
  */
 
 BasicStock::BasicStock(EventLoop &event_loop, StockClass &_cls,
-		       const char *_name, std::size_t _max_idle,
+		       std::string_view _name, std::size_t _max_idle,
 		       Event::Duration _clear_interval) noexcept
 	:cls(_cls),
 	 name(_name),

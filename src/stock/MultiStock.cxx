@@ -287,7 +287,7 @@ struct MultiStock::MapItem::Waiting final
 };
 
 MultiStock::MapItem::MapItem(EventLoop &_event_loop, StockClass &_outer_class,
-			     const char *_name,
+			     std::string_view _name,
 			     std::size_t _limit,
 			     Event::Duration _clear_interval,
 			     MultiStockClass &_inner_class) noexcept
