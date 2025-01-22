@@ -9,6 +9,7 @@ util_sources = [
   'StringCompare.cxx',
   'StringParser.cxx',
   'StringStrip.cxx',
+  'StringWithHash.cxx',
   'UTF8.cxx',
 ]
 
