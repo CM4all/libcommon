@@ -22,6 +22,12 @@ std::size_t
 UriEscape(char *dest, std::span<const std::byte> src,
 	  char escape_char='%') noexcept;
 
+inline std::string_view
+UriEscapeView(char *dest, const auto &src, char escape_char='%') noexcept
+{
+	return {dest, UriEscape(dest, src, escape_char)};
+}
+
 AllocatedString
 UriEscape(std::string_view src, char escape_char='%') noexcept;
 
