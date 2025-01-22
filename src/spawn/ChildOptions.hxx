@@ -2,8 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef BENG_PROXY_CHILD_OPTIONS_HXX
-#define BENG_PROXY_CHILD_OPTIONS_HXX
+#pragma once
 
 #include "spawn/config.h"
 #include "translation/Features.hxx"
@@ -13,6 +12,7 @@
 #include "UidGid.hxx"
 #include "util/ShallowCopy.hxx"
 
+#include <cstddef>
 #include <span>
 #include <string_view>
 
@@ -153,6 +153,9 @@ struct ChildOptions {
 	 */
 	void Expand(AllocatorPtr alloc, const MatchData &match_data);
 
+	[[gnu::pure]]
+	std::size_t GetHash() const noexcept;
+
 	char *MakeId(char *p) const noexcept;
 
 	/**
@@ -180,5 +183,3 @@ struct ChildOptions {
 	 */
 	void CopyTo(PreparedChildProcess &dest, FdHolder &close_fds) const;
 };
-
-#endif

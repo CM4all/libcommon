@@ -11,6 +11,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
+#include "util/SpanCast.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
@@ -83,6 +84,20 @@ ChildOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 }
 
 #endif
+
+std::size_t
+ChildOptions::GetHash() const noexcept
+{
+	std::size_t hash = djb_hash(AsBytes(tag));
+
+	if (ns.mount.pivot_root != nullptr)
+		hash = djb_hash_string(ns.mount.pivot_root, hash);
+
+	if (ns.mount.home != nullptr)
+		hash = djb_hash_string(ns.mount.home, hash);
+
+	return hash;
+}
 
 char *
 ChildOptions::MakeId(char *p) const noexcept
