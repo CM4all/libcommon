@@ -28,3 +28,10 @@ struct StringWithHash {
 
 	constexpr bool operator==(const StringWithHash &) const noexcept = default;
 };
+
+template<>
+struct std::hash<StringWithHash> {
+	constexpr std::size_t operator()(const StringWithHash &s) const noexcept {
+		return s.hash;
+	}
+};

@@ -40,18 +40,6 @@ class StockMap {
 		void OnDeferredEmpty() noexcept;
 
 	public:
-		struct Hash {
-			constexpr size_t operator()(const StockKey &key) const noexcept {
-				return key.hash;
-			}
-		};
-
-		struct Equal {
-			constexpr bool operator()(const StockKey &a, const StockKey &b) const noexcept {
-				return a == b;
-			}
-		};
-
 		struct GetKeyFunction {
 			[[gnu::pure]]
 			StockKey operator()(const Item &item) const noexcept {
@@ -65,8 +53,8 @@ class StockMap {
 		IntrusiveHashSet<Item, N_BUCKETS,
 				 IntrusiveHashSetOperators<Item,
 							   Item::GetKeyFunction,
-							   Item::Hash,
-							   Item::Equal>>;
+							   std::hash<StockKey>,
+							   std::equal_to<StockKey>>>;
 
 	EventLoop &event_loop;
 

@@ -307,18 +307,6 @@ class MultiStock {
 				     std::exception_ptr ep) noexcept override;
 
 	public:
-		struct Hash {
-			constexpr size_t operator()(const StockKey &key) const noexcept {
-				return key.hash;
-			}
-		};
-
-		struct Equal {
-			constexpr bool operator()(const StockKey &a, const StockKey &b) const noexcept {
-				return a == b;
-			}
-		};
-
 		struct GetKey {
 			[[gnu::pure]]
 			StockKey operator()(const MapItem &item) const noexcept {
@@ -342,8 +330,8 @@ class MultiStock {
 	using Map =
 		IntrusiveHashSet<MapItem, N_BUCKETS,
 				 IntrusiveHashSetOperators<MapItem, MapItem::GetKey,
-							   MapItem::Hash,
-							   MapItem::Equal>>;
+							   std::hash<StockKey>,
+							   std::equal_to<StockKey>>>;
 
 	Map map;
 
