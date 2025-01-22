@@ -51,7 +51,7 @@ private:
 		return true;
 	}
 
-	bool OnBufferedEnd() {
+	bool OnBufferedEnd() override {
 		uring_manager.SetVolatile();
 		return true;
 	}
