@@ -26,6 +26,17 @@ struct StringWithHash {
 	explicit constexpr StringWithHash(std::string_view _value, std::size_t _hash) noexcept
 		:hash(_hash), value(_value) {}
 
+	/**
+	 * Construct a "nulled" instance, i.e. one where IsNull()
+	 * returns true.
+	 */
+	explicit constexpr StringWithHash(std::nullptr_t) noexcept
+		:value() {}
+
+	constexpr bool IsNull() const noexcept {
+		return value.data() == nullptr;
+	}
+
 	constexpr bool operator==(const StringWithHash &) const noexcept = default;
 };
 
