@@ -78,7 +78,7 @@ Open::OnUringCompletion(int res) noexcept
 	}
 
 	if (res >= 0)
-		handler.OnOpen(UniqueFileDescriptor{res});
+		handler.OnOpen(UniqueFileDescriptor{AdoptTag{}, res});
 	else
 		handler.OnOpenError(-res);
 }

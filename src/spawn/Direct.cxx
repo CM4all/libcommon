@@ -600,7 +600,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	error_pipe_w.Close();
 
-	UniqueFileDescriptor pidfd{_pidfd};
+	UniqueFileDescriptor pidfd{AdoptTag{}, _pidfd};
 
 	if (userns_map_pipe_w.IsDefined()) {
 		/* set up the child's uid/gid mapping and wake it

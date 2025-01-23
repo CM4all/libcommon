@@ -81,7 +81,7 @@ ReceiveMessage(SocketDescriptor s,
 			result.fds.reserve(result.fds.size() + n);
 
 			for (size_t i = 0; i < n; ++i)
-				result.fds.emplace_back(FileDescriptor(fds[i]));
+				result.fds.emplace_back(AdoptTag{}, FileDescriptor{fds[i]});
 		}
 
 		cmsg = CMSG_NXTHDR(&msg, cmsg);

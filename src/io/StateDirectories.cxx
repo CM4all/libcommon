@@ -160,7 +160,7 @@ StateDirectories::OpenFileAutoFollow(const char *relative_path,
 	for (const auto &i : directories) {
 		if (const auto fd = OpenReadOnlyNoFollow(i, relative_path);
 		    fd.IsDefined())
-			return UniqueFileDescriptor{fd};
+			return UniqueFileDescriptor{AdoptTag{}, fd};
 
 		const int e = errno;
 

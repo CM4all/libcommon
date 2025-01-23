@@ -56,8 +56,8 @@ RunSingle(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 	Was::SimpleServer s(event_loop,
 			    {
 				    UniqueSocketDescriptor{AdoptTag{}, 3},
-				    UniqueFileDescriptor(STDIN_FILENO),
-				    UniqueFileDescriptor(STDOUT_FILENO),
+				    UniqueFileDescriptor{AdoptTag{}, STDIN_FILENO},
+				    UniqueFileDescriptor{AdoptTag{}, STDOUT_FILENO},
 			    },
 			    connection_handler,
 			    request_handler);

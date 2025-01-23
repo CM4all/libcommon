@@ -99,7 +99,7 @@ OpenTree(FileDescriptor directory, const char *path, unsigned flags)
 	if (fd < 0)
 		throw MakeErrno("open_tree() failed");
 
-	return UniqueFileDescriptor{fd};
+	return UniqueFileDescriptor{AdoptTag{}, fd};
 }
 
 UniqueFileDescriptor
@@ -109,7 +109,7 @@ FSOpen(const char *fsname)
 	if (fs < 0)
 		throw MakeErrno("fsopen() failed");
 
-	return UniqueFileDescriptor{fs};
+	return UniqueFileDescriptor{AdoptTag{}, fs};
 }
 
 void
@@ -127,7 +127,7 @@ FSMount(FileDescriptor fs, unsigned flags)
 	if (mount < 0)
 		throw MakeErrno("fsmount() failed");
 
-	return UniqueFileDescriptor{mount};
+	return UniqueFileDescriptor{AdoptTag{}, mount};
 }
 
 void

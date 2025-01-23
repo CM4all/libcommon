@@ -84,7 +84,7 @@ OpenStat::OnUringCompletion(int res) noexcept
 	}
 
 	if (!fd.IsDefined()) {
-		fd = UniqueFileDescriptor(res);
+		fd = UniqueFileDescriptor(AdoptTag{}, res);
 
 		auto &s = queue.RequireSubmitEntry();
 

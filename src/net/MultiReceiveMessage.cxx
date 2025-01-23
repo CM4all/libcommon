@@ -98,7 +98,7 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 				for (unsigned ii = 0; ii < nn; ++ii) {
 					FileDescriptor fd(f[ii]);
 					if (remaining_fds > 0) {
-						*fds_p++ = UniqueFileDescriptor(fd);
+						*fds_p++ = UniqueFileDescriptor{AdoptTag{}, fd};
 						--remaining_fds;
 						d.fds = {d.fds.data(), d.fds.size() + 1};
 					} else

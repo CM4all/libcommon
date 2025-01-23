@@ -113,7 +113,7 @@ StartSystemdScopeProcess(const bool pid_namespace)
 		_exit(EXIT_SUCCESS);
 	}
 
-	const UniqueFileDescriptor pidfd{_pidfd};
+	const UniqueFileDescriptor pidfd{AdoptTag{}, _pidfd};
 
 	/* if we're in a non-root PID namespace, extract the real PID
 	   from /proc/self/fdinfo/PIDFD (this is still the old

@@ -22,8 +22,8 @@ CreatePipe(int flags)
 		throw MakeErrno("pipe2() failed");
 
 	return {
-		UniqueFileDescriptor{p[0]},
-		UniqueFileDescriptor{p[1]},
+		UniqueFileDescriptor{AdoptTag{}, p[0]},
+		UniqueFileDescriptor{AdoptTag{}, p[1]},
 	};
 }
 
@@ -43,8 +43,8 @@ _CreatePipe()
 		throw MakeErrno("pipe() failed");
 
 	return {
-		UniqueFileDescriptor{p[0]},
-		UniqueFileDescriptor{p[1]},
+		UniqueFileDescriptor{AdoptTag{}, p[0]},
+		UniqueFileDescriptor{AdoptTag{}, p[1]},
 	};
 }
 

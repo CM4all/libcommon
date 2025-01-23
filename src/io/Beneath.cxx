@@ -23,7 +23,7 @@ TryOpenReadOnlyBeneath(FileAt file) noexcept
 
 	int fd = openat2(file.directory.Get(), file.name,
 			 &ro_beneath, sizeof(ro_beneath));
-	return UniqueFileDescriptor{fd};
+	return UniqueFileDescriptor{AdoptTag{}, fd};
 }
 
 UniqueFileDescriptor
@@ -48,7 +48,7 @@ TryOpenDirectoryBeneath(FileAt file) noexcept
 
 	int fd = openat2(file.directory.Get(), file.name,
 			 &directory_beneath, sizeof(directory_beneath));
-	return UniqueFileDescriptor{fd};
+	return UniqueFileDescriptor{AdoptTag{}, fd};
 }
 
 UniqueFileDescriptor
@@ -73,7 +73,7 @@ TryOpenPathBeneath(FileAt file) noexcept
 
 	int fd = openat2(file.directory.Get(), file.name,
 			 &path_beneath, sizeof(path_beneath));
-	return UniqueFileDescriptor{fd};
+	return UniqueFileDescriptor{AdoptTag{}, fd};
 }
 
 UniqueFileDescriptor

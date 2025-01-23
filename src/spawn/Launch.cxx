@@ -324,7 +324,7 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 
 	error_pipe_w.Close();
 
-	UniqueFileDescriptor pidfd{_pidfd};
+	UniqueFileDescriptor pidfd{AdoptTag{}, _pidfd};
 
 	ReadErrorPipe(error_pipe_r);
 

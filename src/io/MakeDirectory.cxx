@@ -40,7 +40,7 @@ OpenDirectory(FileDescriptor directory, const char *name,
 	if (fd < 0)
 		throw FmtErrno("Failed to open {:?}", name);
 
-	return UniqueFileDescriptor{fd};
+	return UniqueFileDescriptor{AdoptTag{}, fd};
 }
 
 UniqueFileDescriptor

@@ -104,7 +104,7 @@ OpenDirectoryPathNoFollow(FileDescriptor directory, const char *path)
 	if (fd < 0)
 		throw FmtErrno("Failed to open {:?}", path);
 
-	return UniqueFileDescriptor{fd};
+	return UniqueFileDescriptor{AdoptTag{}, fd};
 }
 
 static UniqueFileDescriptor

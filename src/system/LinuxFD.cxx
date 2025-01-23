@@ -16,7 +16,7 @@ CreateEventFD(unsigned initval)
 	if (fd < 0)
 		throw MakeErrno("eventfd() failed");
 
-	return UniqueFileDescriptor(fd);
+	return UniqueFileDescriptor(AdoptTag{}, fd);
 }
 
 UniqueFileDescriptor
@@ -30,7 +30,7 @@ CreateSignalFD(const sigset_t &mask, bool nonblock)
 	if (fd < 0)
 		throw MakeErrno("signalfd() failed");
 
-	return UniqueFileDescriptor(fd);
+	return UniqueFileDescriptor(AdoptTag{}, fd);
 }
 
 UniqueFileDescriptor
@@ -42,5 +42,5 @@ CreateMemFD(const char *name, unsigned flags)
 	if (fd < 0)
 		throw MakeErrno("memfd_create() failed");
 
-	return UniqueFileDescriptor(fd);
+	return UniqueFileDescriptor(AdoptTag{}, fd);
 }
