@@ -10,7 +10,7 @@
 #include "CgroupOptions.hxx"
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
-#include "util/ShallowCopy.hxx"
+#include "util/TagStructs.hxx"
 
 #include <cstddef>
 #include <span>

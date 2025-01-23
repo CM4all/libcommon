@@ -5,7 +5,7 @@
 #pragma once
 
 #include "adata/AssignmentList.hxx"
-#include "util/ShallowCopy.hxx"
+#include "util/TagStructs.hxx"
 
 #include <string_view>
 

@@ -6,7 +6,7 @@
 
 #include "translation/Features.hxx"
 #include "util/IntrusiveForwardList.hxx"
-#include "util/ShallowCopy.hxx"
+#include "util/TagStructs.hxx"
 
 #include <iterator>
 #include <span>
