@@ -20,7 +20,10 @@ Server::Server(EventLoop &_event_loop, Handler &_handler)
 		   those sockets */
 		for (unsigned i = 0; i < unsigned(n); ++i) {
 			listeners.emplace_front(_event_loop, _handler);
-			listeners.front().Listen(UniqueSocketDescriptor(SD_LISTEN_FDS_START + i));
+			listeners.front().Listen(UniqueSocketDescriptor{
+				AdoptTag{},
+				static_cast<int>(SD_LISTEN_FDS_START + i),
+			});
 		}
 
 		/* ... instead of the default socket; we're done

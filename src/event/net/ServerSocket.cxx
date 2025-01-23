@@ -97,7 +97,7 @@ void
 ServerSocket::EventCallback(unsigned) noexcept
 {
 	StaticSocketAddress remote_address;
-	UniqueSocketDescriptor remote_fd(event.GetSocket().AcceptNonBlock(remote_address));
+	UniqueSocketDescriptor remote_fd{AdoptTag{}, GetSocket().AcceptNonBlock(remote_address)};
 	if (!remote_fd.IsDefined()) {
 		const auto e = GetSocketError();
 		if (!IsSocketErrorAcceptWouldBlock(e))

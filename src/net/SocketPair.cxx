@@ -12,8 +12,8 @@ _CreateSocketPair(int domain, int type, int protocol)
 		throw MakeSocketError("socketpair() failed");
 
 	return {
-		UniqueSocketDescriptor{sv[0]},
-		UniqueSocketDescriptor{sv[1]},
+		UniqueSocketDescriptor{AdoptTag{}, sv[0]},
+		UniqueSocketDescriptor{AdoptTag{}, sv[1]},
 	};
 }
 

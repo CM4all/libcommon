@@ -55,7 +55,7 @@ RunSingle(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 	RunConnectionHandler connection_handler(event_loop);
 	Was::SimpleServer s(event_loop,
 			    {
-				    UniqueSocketDescriptor{3},
+				    UniqueSocketDescriptor{AdoptTag{}, 3},
 				    UniqueFileDescriptor(STDIN_FILENO),
 				    UniqueFileDescriptor(STDOUT_FILENO),
 			    },
@@ -160,8 +160,12 @@ private:
 static void
 RunMulti(EventLoop &event_loop, SimpleRequestHandler &request_handler)
 {
-	MultiRunServer server{event_loop, UniqueSocketDescriptor{STDIN_FILENO},
-		request_handler};
+	MultiRunServer server{
+		event_loop,
+		UniqueSocketDescriptor{AdoptTag{}, STDIN_FILENO},
+		request_handler,
+	};
+
 	event_loop.Run();
 	server.CheckRethrowError();
 }
@@ -264,7 +268,7 @@ RunSystemd(EventLoop &event_loop, unsigned n,
 	std::forward_list<MultiListener> listeners;
 	for (unsigned i = 0; i < n; ++i)
 		listeners.emplace_front(event_loop,
-					UniqueSocketDescriptor(3 + i),
+					UniqueSocketDescriptor(AdoptTag{}, 3 + i),
 					request_handler);
 
 	sd_notify(0, "READY=1");
