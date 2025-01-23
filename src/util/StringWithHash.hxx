@@ -31,7 +31,7 @@ struct StringWithHash {
 	 * returns true.
 	 */
 	explicit constexpr StringWithHash(std::nullptr_t) noexcept
-		:value() {}
+		:hash(0), value() {}
 
 	constexpr bool IsNull() const noexcept {
 		return value.data() == nullptr;
