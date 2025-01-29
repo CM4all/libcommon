@@ -31,7 +31,7 @@ randombytes(lua_State *L)
 #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
 #endif
 
-	auto dest = std::make_unique<char[]>(size);
+	auto dest = std::make_unique_for_overwrite<char[]>(size);
 	randombytes_buf(dest.get(), size);
 
 	lua_pushlstring(L, dest.get(), size);

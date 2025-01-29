@@ -26,7 +26,7 @@ bin2hex(lua_State *L)
 
 	const std::size_t dest_length = src.size() * 2;
 	const std::size_t dest_capacity = dest_length + 1;
-	auto dest = std::make_unique<char[]>(dest_capacity);
+	auto dest = std::make_unique_for_overwrite<char[]>(dest_capacity);
 	sodium_bin2hex(dest.get(), dest_capacity,
 		       reinterpret_cast<const unsigned char *>(src.data()),
 		       src.size());
@@ -44,7 +44,7 @@ hex2bin(lua_State *L)
 	const auto src = CheckStringView(L, 1);
 
 	const std::size_t dest_capacity = src.size() / 2;
-	auto dest = std::make_unique<char[]>(dest_capacity);
+	auto dest = std::make_unique_for_overwrite<char[]>(dest_capacity);
 
 	size_t dest_length;
 	if (sodium_hex2bin(reinterpret_cast<unsigned char *>(dest.get()), dest_capacity,
