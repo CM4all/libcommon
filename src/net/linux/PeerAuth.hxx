@@ -3,12 +3,11 @@
 
 #pragma once
 
+#include "net/PeerCredentials.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <cassert>
 #include <string>
-
-#include <sys/socket.h> // for struct ucred
 
 class SocketDescriptor;
 
@@ -18,7 +17,7 @@ class SocketDescriptor;
 class SocketPeerAuth {
 	mutable std::string cgroup_path;
 
-	const struct ucred cred;
+	SocketPeerCredentials cred;
 
 	UniqueFileDescriptor pidfd;
 
@@ -26,25 +25,25 @@ public:
 	explicit SocketPeerAuth(SocketDescriptor s) noexcept;
 
 	bool HaveCred() const noexcept {
-		return cred.pid >= 0;
+		return cred.IsDefined();
 	}
 
 	pid_t GetPid() const noexcept {
 		assert(HaveCred());
 
-		return cred.pid;
+		return cred.GetPid();
 	}
 
 	uid_t GetUid() const noexcept {
 		assert(HaveCred());
 
-		return cred.uid;
+		return cred.GetUid();
 	}
 
 	gid_t GetGid() const noexcept{
 		assert(HaveCred());
 
-		return cred.gid;
+		return cred.GetGid();
 	}
 
 	std::string_view GetCgroupPath() const;

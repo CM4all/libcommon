@@ -45,7 +45,7 @@ SocketPeerAuth::GetCgroupPath() const
 {
 	if (cgroup_path.empty()) {
 		if (pidfd.IsDefined())
-			cgroup_path = ReadPidfdCgroup(pidfd, cred.pid);
+			cgroup_path = ReadPidfdCgroup(pidfd, cred.GetPid());
 		else if (HaveCred())
 			cgroup_path = ReadProcessCgroup(GetPid());
 		else
