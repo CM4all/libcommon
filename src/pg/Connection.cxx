@@ -74,7 +74,7 @@ Connection::SendQueryParams(bool result_binary, const char *query,
 std::string
 Connection::Escape(const std::string_view src) const noexcept
 {
-	auto buffer = std::make_unique<char[]>(src.size() * 2 + 1);
+	auto buffer = std::make_unique_for_overwrite<char[]>(src.size() * 2 + 1);
 
 	size_t dest_length = ::PQescapeStringConn(conn, buffer.get(),
 						  src.data(), src.size(),

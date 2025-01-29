@@ -272,9 +272,9 @@ public:
 		assert(query != nullptr);
 
 		const size_t n = CountDynamic(params...);
-		const auto values = std::make_unique<const char *[]>(n);
-		const auto lengths = std::make_unique<int[]>(n);
-		const auto formats = std::make_unique<int[]>(n);
+		const auto values = std::make_unique_for_overwrite<const char *[]>(n);
+		const auto lengths = std::make_unique_for_overwrite<int[]>(n);
+		const auto formats = std::make_unique_for_overwrite<int[]>(n);
 
 		return ExecuteDynamic2<Params...>(query, values.get(),
 						  lengths.get(), formats.get(), 0,
