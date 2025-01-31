@@ -9,6 +9,7 @@
 #include "system/EpollFD.hxx"
 #include "time/ClockCache.hxx"
 #include "util/IntrusiveList.hxx"
+#include "event/config.h"
 
 #ifndef NO_FINE_TIMER_EVENT
 #include "TimerList.hxx"
@@ -23,6 +24,12 @@
 
 #ifndef NDEBUG
 #include "util/BindMethod.hxx"
+#endif
+
+#ifdef HAVE_URING
+#include <memory>
+struct io_uring_params;
+namespace Uring { class Queue; class Manager; }
 #endif
 
 #include <cassert>
@@ -89,6 +96,10 @@ class EventLoop final
 	 * "ready_flags" field and need to be dispatched.
 	 */
 	SocketList ready_sockets;
+
+#ifdef HAVE_URING
+	std::unique_ptr<Uring::Manager> uring;
+#endif
 
 #ifndef NDEBUG
 	using PostCallback = BoundMethod<void() noexcept>;
@@ -202,6 +213,28 @@ public:
 		steady_clock_cache.flush();
 		system_clock_cache.flush();
 	}
+
+	void SetVolatile() noexcept;
+
+#ifdef HAVE_URING
+	/**
+	 * Try to enable io_uring support.  If this method succeeds,
+	 * GetUring() can be used to obtain a pointer to the queue
+	 * instance.
+	 *
+	 * Throws on error.
+	 */
+	void EnableUring(unsigned entries, unsigned flags);
+	void EnableUring(unsigned entries, struct io_uring_params &params);
+
+	/**
+	 * Returns a pointer to the io_uring queue instance or nullptr
+	 * if io_uring support is not available (or was not enabled
+	 * using EnableUring()).
+	 */
+	[[nodiscard]] [[gnu::const]]
+	Uring::Queue *GetUring() noexcept;
+#endif
 
 	/**
 	 * Stop execution of this #EventLoop at the next chance.

@@ -10,13 +10,13 @@ if pg_dep.found()
   )
 endif
 
-if event_uring_dep.found()
+if uring_dep.found()
   executable(
     'RunCoReadTextFile',
     'RunCoReadTextFile.cxx',
     include_directories: inc,
     dependencies: [
-      event_uring_dep, stock_dep,
+      event_dep, stock_dep,
     ],
   )
 endif

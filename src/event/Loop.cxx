@@ -11,6 +11,10 @@
 #include "InjectEvent.hxx"
 #endif
 
+#ifdef HAVE_URING
+#include "uring/Manager.hxx"
+#endif
+
 #include <array>
 
 EventLoop::EventLoop(
@@ -40,6 +44,41 @@ EventLoop::~EventLoop() noexcept
 	assert(sockets.empty());
 	assert(ready_sockets.empty());
 }
+
+void
+EventLoop::SetVolatile() noexcept
+{
+#ifdef HAVE_URING
+	if (uring)
+		uring->SetVolatile();
+#endif
+}
+
+#ifdef HAVE_URING
+
+void
+EventLoop::EnableUring(unsigned entries, unsigned flags)
+{
+	assert(!uring);
+
+	uring = std::make_unique<Uring::Manager>(*this, entries, flags);
+}
+
+void
+EventLoop::EnableUring(unsigned entries, struct io_uring_params &params)
+{
+	assert(!uring);
+
+	uring = std::make_unique<Uring::Manager>(*this, entries, params);
+}
+
+Uring::Queue *
+EventLoop::GetUring() noexcept
+{
+	return uring.get();
+}
+
+#endif
 
 bool
 EventLoop::AddFD(int fd, unsigned events, SocketEvent &event) noexcept
@@ -252,6 +291,17 @@ EventLoop::Run() noexcept
 	AtScopeExit(this) {
 		wake_event.Cancel();
 	};
+
+#ifdef HAVE_URING
+	AtScopeExit(this) {
+		/* make sure that the Uring::Manager gets destructed
+		   from within the EventThread, or else its
+		   destruction in another thread will cause assertion
+		   failures */
+		uring.reset();
+		uring_initialized = false;
+	};
+#endif
 #endif
 
 	FlushClockCaches();

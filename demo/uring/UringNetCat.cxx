@@ -7,7 +7,7 @@
 #include "net/Resolver.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "event/net/BufferedSocket.hxx"
-#include "event/uring/Manager.hxx"
+#include "io/uring/Queue.hxx"
 #include "event/Loop.hxx"
 #include "system/Error.hxx"
 #include "util/PrintException.hxx"
@@ -17,19 +17,21 @@
 #include <stdlib.h>
 
 class NetCat final : public BufferedSocketHandler {
-	Uring::Manager &uring_manager;
-
 	BufferedSocket socket;
 
 	std::exception_ptr error;
 
 public:
-	NetCat(EventLoop &event_loop, Uring::Manager &_uring_manager,
+	NetCat(EventLoop &event_loop,
 	       SocketDescriptor _socket)
-		:uring_manager(_uring_manager), socket(event_loop)
+		:socket(event_loop)
 	{
 		socket.Init(_socket, FdType::FD_TCP, std::chrono::minutes{1}, *this);
-		socket.EnableUring(uring_manager);
+		socket.EnableUring(*event_loop.GetUring());
+	}
+
+	auto &GetEventLoop() const noexcept {
+		return socket.GetEventLoop();
 	}
 
 	void Finish() {
@@ -52,7 +54,7 @@ private:
 	}
 
 	bool OnBufferedEnd() override {
-		uring_manager.SetVolatile();
+		GetEventLoop().SetVolatile();
 		return true;
 	}
 
@@ -61,7 +63,7 @@ private:
 	}
 
 	void OnBufferedError(std::exception_ptr e) noexcept override {
-		uring_manager.SetVolatile();
+		GetEventLoop().SetVolatile();
 		error = std::move(e);
 	}
 };
@@ -78,9 +80,9 @@ try {
 	const auto socket = CreateConnectSocket(Resolve(argv[1], 80, &hints).GetBest(), SOCK_STREAM);
 
 	EventLoop event_loop;
-	Uring::Manager uring_queue{event_loop, 64};
+	event_loop.EnableUring(1024, IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_COOP_TASKRUN);
 
-	NetCat net_cat{event_loop, uring_queue, socket};
+	NetCat net_cat{event_loop, socket};
 
 	event_loop.Run();
 

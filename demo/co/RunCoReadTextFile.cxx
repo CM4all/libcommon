@@ -5,7 +5,7 @@
 #include "co/InvokeTask.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
-#include "event/uring/Manager.hxx"
+#include "io/uring/Queue.hxx"
 #include "io/uring/CoTextFile.hxx"
 #include "io/uring/CoOperation.hxx"
 #include "util/PrintException.hxx"
@@ -23,27 +23,25 @@ struct Instance final {
 	EventLoop event_loop;
 	ShutdownListener shutdown_listener;
 
-	Uring::Manager uring;
-
 	Co::InvokeTask task;
 
 	std::exception_ptr error;
 
 	Instance()
-		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown)),
-		 uring(event_loop)
+		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown))
 	{
+		event_loop.EnableUring(1024, IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_COOP_TASKRUN);
 		shutdown_listener.Enable();
 	}
 
 	void OnShutdown() noexcept {
 		task = {};
-		uring.SetVolatile();
+		event_loop.SetVolatile();
 	}
 
 	void OnCompletion(std::exception_ptr _error) noexcept {
 		error = std::move(_error);
-		uring.SetVolatile();
+		event_loop.SetVolatile();
 		shutdown_listener.Disable();
 	}
 };
@@ -71,7 +69,7 @@ try {
 
 	Instance instance;
 
-	instance.task = Run(instance.uring, path);
+	instance.task = Run(*instance.event_loop.GetUring(), path);
 	instance.task.Start(BIND_METHOD(instance, &Instance::OnCompletion));
 
 	instance.event_loop.Run();

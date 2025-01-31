@@ -13,5 +13,5 @@ executable(
   'UringNetCat',
   'UringNetCat.cxx',
   include_directories: inc,
-  dependencies: [event_net_dep, event_uring_dep],
+  dependencies: [event_net_dep],
 )
