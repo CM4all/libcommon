@@ -99,7 +99,14 @@ class EventLoop final
 
 #ifdef HAVE_URING
 	std::unique_ptr<Uring::Manager> uring;
-#endif
+
+	/**
+	 * This class handles IORING_POLL_ADD_MULTI on the epoll file
+	 * descriptor and sets #epoll_ready.
+	 */
+	class UringPoll;
+	std::unique_ptr<UringPoll> uring_poll;
+#endif // HAVE_URING
 
 #ifndef NDEBUG
 	using PostCallback = BoundMethod<void() noexcept>;
@@ -128,6 +135,14 @@ class EventLoop final
 	 * necessary before going to sleep via PollGroup::ReadEvents().
 	 */
 	bool again;
+
+#ifdef HAVE_URING
+	/**
+	 * Set by #UringPoll to signal that we should invoke
+	 * epoll_wait().
+	 */
+	bool epoll_ready = false;
+#endif // HAVE_URING
 
 #ifdef HAVE_THREADED_EVENT_LOOP
 	bool quit_injected = false;

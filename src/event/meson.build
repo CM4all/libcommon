@@ -14,7 +14,6 @@ if get_variable('libcommon_enable_FineTimerEvent', true)
 endif
 
 if event_have_uring
-  event_sources += 'uring/Manager.cxx'
   event_internal_dependencies += uring_dep
 endif
 
