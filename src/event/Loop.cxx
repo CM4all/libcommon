@@ -289,8 +289,7 @@ void
 EventLoop::Run() noexcept
 {
 #ifdef HAVE_THREADED_EVENT_LOOP
-	if (thread.IsNull())
-		thread = ThreadId::GetCurrent();
+	assert(!thread.IsNull());
 #endif
 
 	assert(IsInside());
