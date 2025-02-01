@@ -44,7 +44,7 @@ class SocketEvent;
  * thread that runs it, except where explicitly documented as
  * thread-safe.
  *
- * @see SocketEvent, TimerEvent, DeferEvent
+ * @see SocketEvent, MultiSocketMonitor, TimerEvent, DeferEvent, InjectEvent
  */
 class EventLoop final
 {
