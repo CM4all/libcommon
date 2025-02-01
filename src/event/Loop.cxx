@@ -73,13 +73,19 @@ EventLoop::EnableUring(unsigned entries, struct io_uring_params &params)
 	uring = std::make_unique<Uring::Manager>(*this, entries, params);
 }
 
+void
+EventLoop::DisableUring() noexcept
+{
+	uring.reset();
+}
+
 Uring::Queue *
 EventLoop::GetUring() noexcept
 {
 	return uring.get();
 }
 
-#endif
+#endif // HAVE_URING
 
 bool
 EventLoop::AddFD(int fd, unsigned events, SocketEvent &event) noexcept
@@ -292,17 +298,6 @@ EventLoop::Run() noexcept
 	AtScopeExit(this) {
 		wake_event.Cancel();
 	};
-
-#ifdef HAVE_URING
-	AtScopeExit(this) {
-		/* make sure that the Uring::Manager gets destructed
-		   from within the EventThread, or else its
-		   destruction in another thread will cause assertion
-		   failures */
-		uring.reset();
-		uring_initialized = false;
-	};
-#endif
 #endif
 
 	FlushClockCaches();

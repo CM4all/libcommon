@@ -227,6 +227,8 @@ public:
 	void EnableUring(unsigned entries, unsigned flags);
 	void EnableUring(unsigned entries, struct io_uring_params &params);
 
+	void DisableUring() noexcept;
+
 	/**
 	 * Returns a pointer to the io_uring queue instance or nullptr
 	 * if io_uring support is not available (or was not enabled
