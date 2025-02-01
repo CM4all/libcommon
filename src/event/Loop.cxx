@@ -36,6 +36,13 @@ EventLoop::EventLoop(
 
 EventLoop::~EventLoop() noexcept
 {
+#if defined(HAVE_URING) && !defined(NDEBUG)
+	/* if Run() was never called (maybe because startup failed and
+	   an exception is pending), we need to destruct the
+	   Uring::Manager here or else the assertions below fail */
+	uring.reset();
+#endif
+
 	assert(defer.empty());
 	assert(idle.empty());
 	assert(next.empty());
