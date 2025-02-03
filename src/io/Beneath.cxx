@@ -62,7 +62,7 @@ OpenDirectoryBeneath(FileAt file)
 }
 
 static constexpr struct open_how path_beneath{
-	.flags = O_PATH|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
+	.flags = O_PATH|O_CLOEXEC,
 	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
 };
 
