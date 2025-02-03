@@ -3,13 +3,13 @@
 
 #include "Beneath.hxx"
 #include "FileAt.hxx"
+#include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
-#include "system/linux/openat2.h"
-#include "lib/fmt/SystemError.hxx"
 
 #include <cassert>
 
 #include <fcntl.h>
+#include <linux/openat2.h> // for struct open_how
 
 static constexpr struct open_how ro_beneath{
 	.flags = O_RDONLY|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
@@ -21,19 +21,15 @@ TryOpenReadOnlyBeneath(FileAt file) noexcept
 {
 	assert(file.directory.IsDefined());
 
-	int fd = openat2(file.directory.Get(), file.name,
-			 &ro_beneath, sizeof(ro_beneath));
-	return UniqueFileDescriptor{AdoptTag{}, fd};
+	return TryOpen(file, ro_beneath);
 }
 
 UniqueFileDescriptor
 OpenReadOnlyBeneath(FileAt file)
 {
-	auto fd = TryOpenReadOnlyBeneath(file);
-	if (!fd.IsDefined())
-		throw FmtErrno("Failed to open {:?}", file.name);
+	assert(file.directory.IsDefined());
 
-	return fd;
+	return Open(file, ro_beneath);
 }
 
 static constexpr struct open_how directory_beneath{
@@ -46,19 +42,15 @@ TryOpenDirectoryBeneath(FileAt file) noexcept
 {
 	assert(file.directory.IsDefined());
 
-	int fd = openat2(file.directory.Get(), file.name,
-			 &directory_beneath, sizeof(directory_beneath));
-	return UniqueFileDescriptor{AdoptTag{}, fd};
+	return TryOpen(file, directory_beneath);
 }
 
 UniqueFileDescriptor
 OpenDirectoryBeneath(FileAt file)
 {
-	auto fd = TryOpenDirectoryBeneath(file);
-	if (!fd.IsDefined())
-		throw FmtErrno("Failed to open {:?}", file.name);
+	assert(file.directory.IsDefined());
 
-	return fd;
+	return Open(file, directory_beneath);
 }
 
 static constexpr struct open_how path_beneath{
@@ -71,17 +63,13 @@ TryOpenPathBeneath(FileAt file) noexcept
 {
 	assert(file.directory.IsDefined());
 
-	int fd = openat2(file.directory.Get(), file.name,
-			 &path_beneath, sizeof(path_beneath));
-	return UniqueFileDescriptor{AdoptTag{}, fd};
+	return TryOpen(file, path_beneath);
 }
 
 UniqueFileDescriptor
 OpenPathBeneath(FileAt file)
 {
-	auto fd = TryOpenPathBeneath(file);
-	if (!fd.IsDefined())
-		throw FmtErrno("Failed to open {:?}", file.name);
+	assert(file.directory.IsDefined());
 
-	return fd;
+	return Open(file, path_beneath);
 }
