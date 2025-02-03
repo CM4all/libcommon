@@ -9,6 +9,17 @@
 #include <sys/types.h>
 
 class FileDescriptor;
+class UniqueFileDescriptor;
+
+/**
+ * Open the top-level temporary directory, i.e. $TMPDIR or /tmp.
+ *
+ * Throws on error.
+ *
+ * @param flags open() flags in addition to O_DIRECTORY
+ */
+UniqueFileDescriptor
+OpenTmpDir(int flags=0);
 
 /**
  * Create a new directory with a random unique name.

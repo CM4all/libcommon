@@ -3,13 +3,26 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Temp.hxx"
+#include "Open.hxx"
 #include "FileDescriptor.hxx"
+#include "UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
 #include "system/Urandom.hxx"
 #include "util/HexFormat.hxx"
 
 #include <stdio.h>
+#include <stdlib.h> // for getenv()
 #include <sys/stat.h>
+
+UniqueFileDescriptor
+OpenTmpDir(int flags)
+{
+	const char *path = getenv("TMPDIR");
+	if (path == nullptr)
+		path = "/tmp";
+
+	return OpenDirectory(path, flags);
+}
 
 static StringBuffer<16>
 RandomFilename() noexcept
