@@ -1314,6 +1314,13 @@ enum class TranslationCommand : uint16_t {
 	 * chroot() into this directory.
 	 */
 	CHROOT = 267,
+
+	/**
+	 * Make all directories created in tmpfs (#MOUNT_ROOT_TMPFS,
+	 * #MOUNT_EMPTY) readable.  By default, such directories are
+	 * only "executable", but not "readable".
+	 */
+	TMPFS_DIRS_READABLE = 268,
 };
 
 struct TranslationHeader {

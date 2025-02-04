@@ -4361,6 +4361,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::TMPFS_DIRS_READABLE:
+#if TRANSLATION_ENABLE_SPAWN
+		if (!payload.empty())
+			throw std::runtime_error("malformed TMPFS_DIRS_READABLE packet");
+
+		if (child_options == nullptr || !child_options->ns.mount.IsEnabled())
+			throw std::runtime_error("misplaced TMPFS_DIRS_READABLE packet");
+
+		child_options->ns.mount.dir_mode = 0755;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

@@ -730,6 +730,11 @@ public:
 			return *this;
 		}
 
+		auto TmpfsDirsReadable() noexcept {
+			response.Packet(TranslationCommand::TMPFS_DIRS_READABLE);
+			return *this;
+		}
+
 		auto MountProc() noexcept {
 			response.Packet(TranslationCommand::MOUNT_PROC);
 			return *this;
