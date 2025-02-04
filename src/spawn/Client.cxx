@@ -289,6 +289,11 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 		}
 	}
 
+	if (ns.mount.dir_mode != 0711) {
+		s.Write(SpawnExecCommand::DIR_MODE);
+		s.WriteT(ns.mount.dir_mode);
+	}
+
 	s.WriteOptionalString(SpawnExecCommand::HOSTNAME, ns.hostname);
 }
 

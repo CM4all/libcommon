@@ -9,6 +9,7 @@
 #include "util/TagStructs.hxx"
 
 #include <cstddef>
+#include <cstdint>
 #include <span>
 
 class AllocatorPtr;
@@ -76,6 +77,11 @@ struct MountNamespaceOptions {
 
 	IntrusiveForwardList<Mount> mounts;
 
+	/**
+	 * The mode for directories created in tmpfs.
+	 */
+	uint_least16_t dir_mode = 0711;
+
 	MountNamespaceOptions() = default;
 
 	constexpr MountNamespaceOptions(ShallowCopy shallow_copy,
@@ -93,7 +99,8 @@ struct MountNamespaceOptions {
 		 home(src.home),
 		 mount_tmp_tmpfs(src.mount_tmp_tmpfs),
 		 mount_listen_stream(src.mount_listen_stream),
-		 mounts(shallow_copy, src.mounts) {}
+		 mounts(shallow_copy, src.mounts),
+		 dir_mode(src.dir_mode) {}
 
 	MountNamespaceOptions(AllocatorPtr alloc,
 			      const MountNamespaceOptions &src) noexcept;

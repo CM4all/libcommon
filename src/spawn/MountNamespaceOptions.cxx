@@ -42,7 +42,8 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 	 home(alloc.CheckDup(src.home)),
 	 mount_tmp_tmpfs(alloc.CheckDup(src.mount_tmp_tmpfs)),
 	 mount_listen_stream(alloc.Dup(src.mount_listen_stream)),
-	 mounts(Mount::CloneAll(alloc, src.mounts))
+	 mounts(Mount::CloneAll(alloc, src.mounts)),
+	 dir_mode(src.dir_mode)
 {
 }
 
@@ -89,7 +90,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	const char *new_root = nullptr;
 
-	VfsBuilder vfs_builder{uid_gid.uid, uid_gid.gid, 0711};
+	VfsBuilder vfs_builder{uid_gid.uid, uid_gid.gid, dir_mode};
 
 	if (pivot_root != nullptr) {
 		/* first bind-mount the new root onto itself to "unlock" the

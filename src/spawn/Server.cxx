@@ -718,6 +718,10 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
+		case SpawnExecCommand::DIR_MODE:
+			payload.ReadT(p.ns.mount.dir_mode);
+			break;
+
 		case SpawnExecCommand::HOSTNAME:
 			p.ns.hostname = payload.ReadString();
 			break;
