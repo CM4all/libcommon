@@ -34,6 +34,10 @@ public:
 
 	~VfsBuilder() noexcept;
 
+	uint_least16_t GetDirMode() const noexcept {
+		return dir_mode;
+	}
+
 	void AddWritableRoot(const char *path);
 
 	/**

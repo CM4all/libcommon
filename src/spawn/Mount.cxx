@@ -203,7 +203,7 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	auto fs = FSOpen("tmpfs");
 	FSConfig(fs, FSCONFIG_SET_STRING, "size", "16M");
 	FSConfig(fs, FSCONFIG_SET_STRING, "nr_inodes", "256");
-	FSConfig(fs, FSCONFIG_SET_STRING, "mode", "711");
+	FSConfig(fs, FSCONFIG_SET_STRING, "mode", FmtBuffer<8>("{:o}", vfs_builder.GetDirMode()));
 
 	if (writable) {
 		FSConfig(fs, FSCONFIG_SET_STRING, "uid",
