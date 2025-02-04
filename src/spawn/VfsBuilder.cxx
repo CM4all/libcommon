@@ -33,8 +33,8 @@ struct VfsBuilder::Item {
 	}
 };
 
-VfsBuilder::VfsBuilder(uint_least32_t _uid, uint_least32_t _gid) noexcept
-	:uid(_uid), gid(_gid) {}
+VfsBuilder::VfsBuilder(uint_least32_t _uid, uint_least32_t _gid, uint_least16_t _dir_mode) noexcept
+	:dir_mode(_dir_mode), uid(_uid), gid(_gid) {}
 
 VfsBuilder::~VfsBuilder() noexcept
 {
@@ -84,7 +84,7 @@ VfsBuilder::FindWritable(std::string_view path) const noexcept
 }
 
 static void
-MakeDirs(FileDescriptor fd, std::string_view suffix)
+MakeDirs(FileDescriptor fd, std::string_view suffix, mode_t mode)
 {
 	UniqueFileDescriptor ufd;
 
@@ -99,7 +99,7 @@ MakeDirs(FileDescriptor fd, std::string_view suffix)
 
 		name2 = name;
 
-		if (mkdirat(fd.Get(), name2.c_str(), 0711) < 0) {
+		if (mkdirat(fd.Get(), name2.c_str(), mode) < 0) {
 			const int e = errno;
 			if (e == EEXIST)
 				continue;
@@ -125,7 +125,7 @@ VfsBuilder::Add(std::string_view path)
 		if (old_umask == -1)
 			old_umask = umask(0022);
 
-		MakeDirs(fw.item->fd, fw.suffix);
+		MakeDirs(fw.item->fd, fw.suffix, dir_mode);
 	}
 
 	items.emplace_back(path);
@@ -167,7 +167,7 @@ VfsBuilder::MakeOptionalDirectory(std::string_view path)
 	if (fw.item == nullptr)
 		return false;
 
-	MakeDirs(fw.item->fd, fw.suffix);
+	MakeDirs(fw.item->fd, fw.suffix, dir_mode);
 	return true;
 }
 

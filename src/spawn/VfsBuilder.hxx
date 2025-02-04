@@ -18,12 +18,20 @@ class VfsBuilder {
 
 	std::vector<Item> items;
 
+	const uint_least16_t dir_mode;
+
 	int old_umask = -1;
 
 public:
 	const uint_least32_t uid, gid;
 
-	VfsBuilder(uint_least32_t _uid, uint_least32_t _gid) noexcept;
+	/**
+	 * @param _dir_mode the "mode" parameter to mkdir() when
+	 * directories in tmpfs are created
+	 */
+	[[nodiscard]]
+	VfsBuilder(uint_least32_t _uid, uint_least32_t _gid, uint_least16_t _dir_mode) noexcept;
+
 	~VfsBuilder() noexcept;
 
 	void AddWritableRoot(const char *path);
