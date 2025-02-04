@@ -7,10 +7,11 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "event/net/BufferedSocket.hxx"
 #include "event/net/ConnectSocket.hxx"
-#include "io/uring/Queue.hxx"
 #include "event/Loop.hxx"
 #include "system/Error.hxx"
 #include "util/PrintException.hxx"
+
+#include <liburing.h>
 
 #include <cstdint>
 
