@@ -23,10 +23,10 @@ class NetCat final : public BufferedSocketHandler {
 
 public:
 	NetCat(EventLoop &event_loop,
-	       SocketDescriptor _socket)
+	       UniqueSocketDescriptor &&_socket)
 		:socket(event_loop)
 	{
-		socket.Init(_socket, FdType::FD_TCP, std::chrono::minutes{1}, *this);
+		socket.Init(_socket.Release(), FdType::FD_TCP, std::chrono::minutes{1}, *this);
 		socket.EnableUring(*event_loop.GetUring());
 	}
 
@@ -77,12 +77,12 @@ try {
 	static constexpr auto hints = MakeAddrInfo(AI_ADDRCONFIG, AF_UNSPEC,
 						   SOCK_STREAM);
 
-	const auto socket = CreateConnectSocket(Resolve(argv[1], 80, &hints).GetBest(), SOCK_STREAM);
+	auto socket = CreateConnectSocket(Resolve(argv[1], 80, &hints).GetBest(), SOCK_STREAM);
 
 	EventLoop event_loop;
 	event_loop.EnableUring(1024, IORING_SETUP_SINGLE_ISSUER|IORING_SETUP_COOP_TASKRUN);
 
-	NetCat net_cat{event_loop, socket};
+	NetCat net_cat{event_loop, std::move(socket)};
 
 	event_loop.Run();
 
