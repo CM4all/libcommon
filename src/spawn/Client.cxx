@@ -286,6 +286,11 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			s.WriteString(i.source);
 			s.WriteBool(i.optional);
 			break;
+
+		case Mount::Type::SYMLINK:
+			s.WriteString(SpawnExecCommand::SYMLINK, i.target);
+			s.WriteString(i.source);
+			break;
 		}
 	}
 

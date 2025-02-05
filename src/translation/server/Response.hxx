@@ -857,6 +857,15 @@ public:
 			return *this;
 		}
 
+		template<typename T, typename L>
+		auto Symlink(T &&target, L &&linkpath) noexcept {
+			response.StringPacket(TranslationCommand::SYMLINK,
+					      std::forward<T>(target),
+					      std::string_view{"", 1},
+					      std::forward<L>(linkpath));
+			return *this;
+		}
+
 		auto Optional() noexcept {
 			response.Optional();
 			return *this;

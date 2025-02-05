@@ -685,6 +685,22 @@ TranslateParser::HandleBindMount(std::string_view payload,
 }
 
 inline void
+TranslateParser::HandleSymlink(std::string_view payload)
+{
+	const auto [target, linkpath] = Split(payload, '\0');
+	if (!IsValidNonEmptyString(target) ||
+	    !IsValidAbsolutePath(linkpath))
+		throw std::runtime_error("malformed SYMLINK packet");
+
+	if (ns_options == nullptr)
+		throw std::runtime_error("misplaced SYMLINK packet");
+
+	auto *m = alloc.New<Mount>(target.data(), linkpath.data());
+	m->type = Mount::Type::SYMLINK;
+	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
+}
+
+inline void
 TranslateParser::HandleWriteFile(std::string_view payload)
 {
 	if (ns_options == nullptr)
@@ -4371,6 +4387,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("misplaced TMPFS_DIRS_READABLE packet");
 
 		child_options->ns.mount.dir_mode = 0755;
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::SYMLINK:
+#if TRANSLATION_ENABLE_SPAWN
+		previous_command = command;
+		HandleSymlink(string_payload);
 		return;
 #else
 		break;

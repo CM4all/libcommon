@@ -62,6 +62,13 @@ struct Mount : IntrusiveForwardListHook {
 		 * regular file).
 		 */
 		WRITE_FILE,
+
+		/**
+		 * Create a symlink.  #source is the symlink target,
+		 * #target is the link path.  Sorry for the confusing
+		 * nomenclature!
+		 */
+		SYMLINK,
 	} type = Type::BIND;
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -147,6 +154,7 @@ private:
 	void ApplyTmpfs(VfsBuilder &vfs_builder) const;
 	void ApplyNamedTmpfs(VfsBuilder &vfs_builder) const;
 	void ApplyWriteFile(VfsBuilder &vfs_builder) const;
+	void ApplySymlink(VfsBuilder &vfs_builder) const;
 
 public:
 	/**

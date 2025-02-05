@@ -718,6 +718,18 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
+		case SpawnExecCommand::SYMLINK:
+			{
+				const char *target = payload.ReadString();
+				const char *source = payload.ReadString();
+				mounts.emplace_front(source, target);
+				mounts.front().type = Mount::Type::SYMLINK;
+			}
+
+			mount_tail = p.ns.mount.mounts.insert_after(mount_tail,
+								    mounts.front());
+			break;
+
 		case SpawnExecCommand::DIR_MODE:
 			payload.ReadT(p.ns.mount.dir_mode);
 			break;

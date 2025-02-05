@@ -62,6 +62,7 @@ enum class SpawnExecCommand : uint8_t {
 	FD_BIND_MOUNT,
 	FD_BIND_MOUNT_FILE,
 	WRITE_FILE,
+	SYMLINK,
 	DIR_MODE,
 	HOSTNAME,
 	RLIMIT,

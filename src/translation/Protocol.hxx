@@ -1321,6 +1321,12 @@ enum class TranslationCommand : uint16_t {
 	 * only "executable", but not "readable".
 	 */
 	TMPFS_DIRS_READABLE = 268,
+
+	/**
+	 * Create a symlink.  Payload is target and linkpath separated
+	 * by a null byte.
+	 */
+	SYMLINK = 269,
 };
 
 struct TranslationHeader {

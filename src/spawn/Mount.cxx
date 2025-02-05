@@ -331,6 +331,19 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
 }
 
 inline void
+Mount::ApplySymlink(VfsBuilder &vfs_builder) const
+{
+	assert(type == Type::SYMLINK);
+	assert(source != nullptr);
+	assert(target != nullptr);
+
+	vfs_builder.Add(DirName(target));
+
+	if (symlink(source, target) < 0)
+		throw FmtErrno("Failed to create symlink {:?}", target);
+}
+
+inline void
 Mount::Apply(VfsBuilder &vfs_builder) const
 {
 	switch (type) {
@@ -352,6 +365,10 @@ Mount::Apply(VfsBuilder &vfs_builder) const
 
 	case Type::WRITE_FILE:
 		ApplyWriteFile(vfs_builder);
+		break;
+
+	case Type::SYMLINK:
+		ApplySymlink(vfs_builder);
 		break;
 	}
 }
@@ -394,6 +411,14 @@ Mount::MakeId(char *p) const noexcept
 		p = (char *)mempcpy(p, ";wf:", 4);
 		p = stpcpy(p, target);
 		*p++ = '=';
+		p = stpcpy(p, source);
+		*p++ = ';';
+		return p;
+
+	case Type::SYMLINK:
+		p = (char *)mempcpy(p, ";sy:", 4);
+		p = stpcpy(p, target);
+		*p++ = '>';
 		p = stpcpy(p, source);
 		*p++ = ';';
 		return p;

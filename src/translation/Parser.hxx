@@ -238,6 +238,8 @@ private:
 			     bool expand, bool writable, bool exec=false,
 			     bool file=false);
 
+	void HandleSymlink(std::string_view payload);
+
 	void HandleWriteFile(std::string_view payload);
 #endif // TRANSLATION_ENABLE_SPAWN
 
