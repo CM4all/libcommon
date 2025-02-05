@@ -5,6 +5,7 @@
 #include "Prepared.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/StringCompare.hxx"
+#include "AllocatorPtr.hxx"
 
 #include <fmt/core.h>
 
@@ -47,21 +48,22 @@ PreparedChildProcess::GetEnv(std::string_view name) const noexcept
 }
 
 const char *
-PreparedChildProcess::GetJailedHome() const noexcept
+PreparedChildProcess::ToContainerPath(AllocatorPtr alloc,
+				      const char *host_path) const noexcept
 {
-	const char *home = ns.mount.GetJailedHome();
-	if (home != nullptr && chroot != nullptr) {
-		const char *suffix = StringAfterPrefix(home, chroot);
+	const char *container_path = ns.mount.ToContainerPath(alloc, host_path);
+	if (container_path != nullptr && chroot != nullptr) {
+		const char *suffix = StringAfterPrefix(container_path, chroot);
 		if (suffix == nullptr)
 			return nullptr;
 
 		switch (*suffix) {
 		case '\0':
-			home = "/";
+			container_path = "/";
 			break;
 
 		case '/':
-			home = suffix;
+			container_path = suffix;
 			break;
 
 		default:
@@ -69,7 +71,7 @@ PreparedChildProcess::GetJailedHome() const noexcept
 		}
 	}
 
-	return home;
+	return container_path;
 }
 
 const char *

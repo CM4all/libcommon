@@ -282,29 +282,37 @@ MountNamespaceOptions::HasMountOn(const char *target) const noexcept
 	});
 }
 
-const Mount *
-MountNamespaceOptions::FindBindMountSource(const char *source) const noexcept
+std::pair<const Mount *, const char *>
+MountNamespaceOptions::FindBindMountInSource(const char *host_path) const noexcept
 {
-	assert(source != nullptr);
-	assert(*source == '/');
+	assert(host_path != nullptr);
+	assert(*host_path == '/');
 
-	for (const auto &i : mounts)
-		if (i.type == Mount::Type::BIND &&
-		    i.IsSourcePath(source))
-			return &i;
+	for (const auto &i : mounts) {
+		if (i.type == Mount::Type::BIND) {
+			const char *rest = i.IsInSourcePath(host_path);
+			if (rest != nullptr)
+				return {&i, rest};
+		}
+	}
 
-	return nullptr;
+	return {};
 }
 
 const char *
-MountNamespaceOptions::GetJailedHome() const noexcept
+MountNamespaceOptions::ToContainerPath(AllocatorPtr alloc,
+				       const char *host_path) const noexcept
 {
 	if (!IsRootMounted())
 		/* no translation needed */
-		return home;
+		return host_path;
 
-	if (const auto *m = FindMountHome())
-		return m->target;
+	const auto [mount, rest] = FindBindMountInSource(host_path);
+	if (mount == nullptr)
+		return nullptr;
 
-	return nullptr;
+	if (*rest == '\0')
+		return mount->target;
+
+	return alloc.Concat(mount->target, rest);
 }

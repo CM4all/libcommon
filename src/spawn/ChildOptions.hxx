@@ -171,9 +171,9 @@ struct ChildOptions {
 		return GetHome() != nullptr;
 	}
 
-	const char *GetJailedHome() const noexcept {
-		return ns.mount.GetJailedHome();
-	}
+	[[gnu::pure]]
+	const char *ToContainerPath(AllocatorPtr alloc,
+				    const char *host_path) const noexcept;
 
 	/**
 	 * Throws error.

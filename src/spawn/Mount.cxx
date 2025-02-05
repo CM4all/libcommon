@@ -14,6 +14,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringAPI.hxx"
+#include "util/StringCompare.hxx"
 #include "util/StringSplit.hxx"
 #include "AllocatorPtr.hxx"
 
@@ -63,6 +64,23 @@ Mount::IsSourcePath(const char *path) const noexcept
 	++path;
 
 	return StringIsEqual(source, path);
+}
+
+const char *
+Mount::IsInSourcePath(const char *path) const noexcept
+{
+	assert(path != nullptr);
+	assert(*path == '/');
+	assert(source != nullptr);
+
+	/* skip the leading slash which is also skipped in source */
+	++path;
+
+	const char *rest = StringAfterPrefix(path, source);
+	if (rest != nullptr && (*rest != '/' && *rest != '\0'))
+		rest = nullptr;
+
+	return rest;
 }
 
 #if TRANSLATION_ENABLE_EXPAND

@@ -128,6 +128,16 @@ struct Mount : IntrusiveForwardListHook {
 	[[gnu::pure]]
 	bool IsSourcePath(const char *path) const noexcept;
 
+	/**
+	 * Check if the source path is equal or "above" the specified
+	 * path.  If both paths are equal, returns an empty string.
+	 * If the specified path is below the source path, returns the
+	 * remaining string (starting with a slash).  Returns nullptr
+	 * on mismatch.
+	 */
+	[[gnu::pure]]
+	const char *IsInSourcePath(const char *path) const noexcept;
+
 #if TRANSLATION_ENABLE_EXPAND
 	bool IsExpandable() const noexcept {
 		return expand_source;

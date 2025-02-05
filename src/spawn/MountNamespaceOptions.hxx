@@ -143,13 +143,15 @@ struct MountNamespaceOptions {
 	[[gnu::pure]]
 	bool HasMountOn(const char *target) const noexcept;
 
+	/**
+	 * Translate a host path to a path inside this mount
+	 * namespace.  Returns nullptr if no matching bind mount was
+	 * found.  May return #host_path (i.e. the string must remain
+	 * valid as long as the return value is used).
+	 */
 	[[gnu::pure]]
-	bool HasMountHome() const noexcept {
-		return FindMountHome() != nullptr;
-	}
-
-	[[gnu::pure]]
-	const char *GetJailedHome() const noexcept;
+	const char *ToContainerPath(AllocatorPtr alloc,
+				    const char *host_path) const noexcept;
 
 private:
 	constexpr bool HasBindMount() const noexcept {
@@ -157,10 +159,5 @@ private:
 	}
 
 	[[gnu::pure]]
-	const Mount *FindBindMountSource(const char *source) const noexcept;
-
-	[[gnu::pure]]
-	const Mount *FindMountHome() const noexcept {
-		return FindBindMountSource(home);
-	}
+	std::pair<const Mount *, const char *> FindBindMountInSource(const char *source) const noexcept;
 };

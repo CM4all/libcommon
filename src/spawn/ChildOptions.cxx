@@ -177,6 +177,13 @@ ChildOptions::MakeId(char *p) const noexcept
 	return p;
 }
 
+const char *
+ChildOptions::ToContainerPath(AllocatorPtr alloc,
+			      const char *host_path) const noexcept
+{
+	return ns.mount.ToContainerPath(alloc, host_path);
+}
+
 UniqueFileDescriptor
 ChildOptions::OpenStderrPath() const
 {

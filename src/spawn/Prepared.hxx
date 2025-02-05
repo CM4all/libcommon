@@ -18,6 +18,7 @@
 #include <forward_list>
 
 struct CgroupOptions;
+class AllocatorPtr;
 class UniqueFileDescriptor;
 class UniqueSocketDescriptor;
 
@@ -221,7 +222,8 @@ struct PreparedChildProcess {
 	}
 
 	[[gnu::pure]]
-	const char *GetJailedHome() const noexcept;
+	const char *ToContainerPath(AllocatorPtr alloc,
+				    const char *host_path) const noexcept;
 
 	/**
 	 * Finish this object and return the executable path.
