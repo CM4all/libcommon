@@ -14,6 +14,9 @@ TEST(MountNamespaceOptions, GetJailedHome)
 
 	EXPECT_STREQ(options.GetJailedHome(), options.home);
 
+	options.mount_root_tmpfs = true;
+	EXPECT_EQ(options.GetJailedHome(), nullptr);
+
 	Mount mount_home{options.home + 1, "/home"};
 	options.mounts.push_front(mount_home);
 

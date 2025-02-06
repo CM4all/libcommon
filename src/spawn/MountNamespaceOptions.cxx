@@ -299,8 +299,12 @@ MountNamespaceOptions::FindBindMountSource(const char *source) const noexcept
 const char *
 MountNamespaceOptions::GetJailedHome() const noexcept
 {
+	if (!IsRootMounted())
+		/* no translation needed */
+		return home;
+
 	if (const auto *m = FindMountHome())
 		return m->target;
 
-	return home;
+	return nullptr;
 }
