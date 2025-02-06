@@ -139,9 +139,6 @@ struct MountNamespaceOptions {
 	}
 
 	[[gnu::pure]]
-	const char *GetMountHome() const noexcept;
-
-	[[gnu::pure]]
 	const char *GetJailedHome() const noexcept;
 
 private:

@@ -282,15 +282,6 @@ MountNamespaceOptions::FindBindMountSource(const char *source) const noexcept
 }
 
 const char *
-MountNamespaceOptions::GetMountHome() const noexcept
-{
-	if (const auto *m = FindMountHome())
-		return m->target;
-	else
-		return nullptr;
-}
-
-const char *
 MountNamespaceOptions::GetJailedHome() const noexcept
 {
 	if (const auto *m = FindMountHome())
