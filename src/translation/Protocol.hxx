@@ -1327,6 +1327,11 @@ enum class TranslationCommand : uint16_t {
 	 * by a null byte.
 	 */
 	SYMLINK = 269,
+
+	/**
+	 * Combination of #BIND_MOUNT_RW and #BIND_MOUNT_EXEC.
+	 */
+	BIND_MOUNT_RW_EXEC = 270,
 };
 
 struct TranslationHeader {

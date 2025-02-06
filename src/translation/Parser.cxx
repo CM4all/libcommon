@@ -3902,6 +3902,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		case TranslationCommand::EXPAND_BIND_MOUNT_EXEC:
 		case TranslationCommand::BIND_MOUNT_FILE:
 		case TranslationCommand::WRITE_FILE:
+		case TranslationCommand::BIND_MOUNT_RW_EXEC:
 #if TRANSLATION_ENABLE_SPAWN
 			if (ns_options != nullptr &&
 			    mount_list != ns_options->mount.mounts.before_begin()) {
@@ -4396,6 +4397,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_SPAWN
 		previous_command = command;
 		HandleSymlink(string_payload);
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::BIND_MOUNT_RW_EXEC:
+#if TRANSLATION_ENABLE_SPAWN
+		previous_command = command;
+		HandleBindMount(string_payload, false, true, true);
 		return;
 #else
 		break;
