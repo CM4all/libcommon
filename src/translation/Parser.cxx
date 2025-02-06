@@ -603,7 +603,7 @@ TranslateParser::HandleMountHome(std::string_view payload)
 	if (ns_options == nullptr || ns_options->mount.home == nullptr)
 		throw std::runtime_error("misplaced MOUNT_HOME packet");
 
-	if (ns_options->mount.HasMountHome())
+	if (ns_options->mount.HasMountOn(payload.data()))
 		throw std::runtime_error{"duplicate MOUNT_HOME packet"};
 
 	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
@@ -617,7 +617,7 @@ TranslateParser::HandleMountHome(std::string_view payload)
 
 	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
 
-	assert(ns_options->mount.HasMountHome());
+	assert(ns_options->mount.HasMountOn(payload.data()));
 }
 
 inline void

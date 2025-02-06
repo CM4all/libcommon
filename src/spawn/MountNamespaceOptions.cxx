@@ -15,10 +15,13 @@
 #include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
 #include "util/ScopeExit.hxx"
+#include "util/StringAPI.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
 #endif
+
+#include <algorithm>
 
 #include <assert.h>
 #include <unistd.h>
@@ -265,6 +268,18 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 	p = Mount::MakeIdAll(p, mounts);
 
 	return p;
+}
+
+bool
+MountNamespaceOptions::HasMountOn(const char *target) const noexcept
+{
+	assert(target != nullptr);
+	assert(*target == '/');
+
+	return std::any_of(mounts.begin(), mounts.end(), [target](const auto &i){
+		return i.type == Mount::Type::BIND &&
+		       StringIsEqual(i.target, target);
+	});
 }
 
 const Mount *

@@ -134,6 +134,9 @@ struct MountNamespaceOptions {
 	char *MakeId(char *p) const noexcept;
 
 	[[gnu::pure]]
+	bool HasMountOn(const char *target) const noexcept;
+
+	[[gnu::pure]]
 	bool HasMountHome() const noexcept {
 		return FindMountHome() != nullptr;
 	}
