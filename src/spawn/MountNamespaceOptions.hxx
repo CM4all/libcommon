@@ -105,10 +105,17 @@ struct MountNamespaceOptions {
 	MountNamespaceOptions(AllocatorPtr alloc,
 			      const MountNamespaceOptions &src) noexcept;
 
+	/**
+	 * Is something mounted on the filesystem root, i.e. is
+	 * pivot_root() going to be called?
+	 */
+	bool IsRootMounted() const noexcept {
+		return mount_root_tmpfs || pivot_root != nullptr;
+	}
+
 	bool IsEnabled() const noexcept {
-		return mount_root_tmpfs || mount_proc || mount_dev ||
+		return IsRootMounted() || mount_proc || mount_dev ||
 			mount_pts || bind_mount_pts ||
-			pivot_root != nullptr ||
 			mount_tmp_tmpfs != nullptr ||
 			mount_listen_stream.data() != nullptr ||
 			!mounts.empty();
