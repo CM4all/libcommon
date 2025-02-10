@@ -86,6 +86,10 @@ public:
 		return socket.GetEventLoop();
 	}
 
+	SocketDescriptor GetSocket() const noexcept {
+		return socket.GetSocket();
+	}
+
 	/**
 	 * Install a different handler.
 	 */
