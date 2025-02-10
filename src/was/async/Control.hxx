@@ -13,6 +13,8 @@
 #include <span>
 #include <string_view>
 
+class UniqueSocketDescriptor;
+
 namespace Was {
 
 class ControlHandler {
@@ -67,7 +69,7 @@ class Control final : BufferedSocketHandler {
 #endif
 
 public:
-	Control(EventLoop &event_loop, SocketDescriptor _fd,
+	Control(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
 		ControlHandler &_handler) noexcept;
 	~Control() noexcept;
 

@@ -4,6 +4,7 @@
 
 #include "Control.hxx"
 #include "net/SocketProtocolError.hxx"
+#include "net/UniqueSocketDescriptor.hxx"
 #include "system/Error.hxx"
 #include "util/SpanCast.hxx"
 #include "util/Unaligned.hxx"
@@ -152,11 +153,11 @@ Control::OnUringSendError(int error) noexcept
 
 #endif
 
-Control::Control(EventLoop &event_loop, SocketDescriptor _fd,
+Control::Control(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
 		 ControlHandler &_handler) noexcept
 	:socket(event_loop), handler(&_handler)
 {
-	socket.Init(_fd, FD_SOCKET, write_timeout, *this);
+	socket.Init(_fd.Release(), FD_SOCKET, write_timeout, *this);
 
 	if (!socket.HasUring())
 		socket.ScheduleRead();

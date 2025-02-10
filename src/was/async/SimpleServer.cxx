@@ -16,7 +16,7 @@ namespace Was {
 SimpleServer::SimpleServer(EventLoop &event_loop, WasSocket &&socket,
 			   SimpleServerHandler &_handler,
 			   SimpleRequestHandler &_request_handler) noexcept
-	:control(event_loop, socket.control.Release(), *this),
+	:control(event_loop, std::move(socket.control), *this),
 	 input(event_loop, std::move(socket.input), *this),
 	 output(event_loop, std::move(socket.output), *this),
 	 handler(_handler), request_handler(_request_handler)
