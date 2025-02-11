@@ -138,13 +138,6 @@ private:
 	std::byte *Start(enum was_command cmd, size_t payload_length) noexcept;
 	void Finish(size_t payload_length) noexcept;
 
-public:
-	/**
-	 * Release the socket held by this object.
-	 */
-	void ReleaseSocket() noexcept;
-
-private:
 	void InvokeDone() noexcept {
 		handler->OnWasControlDone();
 	}

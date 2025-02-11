@@ -171,21 +171,6 @@ Control::~Control() noexcept
 }
 
 void
-Control::ReleaseSocket() noexcept
-{
-	assert(socket.IsConnected());
-
-#ifdef HAVE_URING
-	CancelUringSend();
-#endif
-
-	output_buffer.FreeIfDefined();
-
-	socket.Abandon();
-	socket.Destroy();
-}
-
-void
 Control::InvokeError(const char *msg) noexcept
 {
 	InvokeError(std::make_exception_ptr(SocketProtocolError{msg}));
