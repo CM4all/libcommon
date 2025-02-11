@@ -106,10 +106,5 @@ ServerSocket::EventCallback(unsigned) noexcept
 		return;
 	}
 
-	if (remote_address.IsInet() && !remote_fd.SetNoDelay()) {
-		OnAcceptError(std::make_exception_ptr(MakeSocketError("setsockopt(TCP_NODELAY) failed")));
-		return;
-	}
-
 	OnAccept(std::move(remote_fd), remote_address);
 }
