@@ -6,6 +6,7 @@
 
 #include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
+#include "io/uring/config.h" // for HAVE_URING
 
 #include <exception>
 
@@ -16,6 +17,11 @@ class SocketAddress;
  */
 class ServerSocket {
 	SocketEvent event;
+
+#ifdef HAVE_URING
+	class UringAccept;
+	UringAccept *uring_accept = nullptr;
+#endif
 
 public:
 	explicit ServerSocket(EventLoop &event_loop) noexcept
