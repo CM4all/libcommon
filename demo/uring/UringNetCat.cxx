@@ -77,7 +77,7 @@ private:
 	}
 
 	bool OnBufferedClosed() noexcept override {
-		socket.Abandon();
+		socket.Close();
 		return true;
 	}
 
