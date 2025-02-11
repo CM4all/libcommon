@@ -9,6 +9,7 @@
 #include "net/TimeoutError.hxx"
 
 #ifdef HAVE_URING
+#include "io/uring/Close.hxx"
 #include "io/uring/Operation.hxx"
 #include "io/uring/Queue.hxx"
 #endif
@@ -931,6 +932,10 @@ BufferedSocket::Close() noexcept
 
 #ifdef HAVE_URING
 	if (uring_receive != nullptr) {
+		if (base.IsValid())
+			Uring::Close(&uring_receive->GetQueue(),
+				     base.ReleaseSocket().ToFileDescriptor());
+
 		uring_receive->Release();
 		uring_receive = nullptr;
 	}
