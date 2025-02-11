@@ -499,12 +499,6 @@ public:
 	}
 
 	/**
-	 * Returns the socket descriptor and calls Abandon().
-	 * Returns -1 if the input buffer is not empty.
-	 */
-	int AsFD() noexcept;
-
-	/**
 	 * Is the input buffer empty?
 	 */
 	[[gnu::pure]]

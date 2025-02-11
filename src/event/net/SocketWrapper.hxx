@@ -104,13 +104,6 @@ public:
 	 */
 	SocketDescriptor Abandon() noexcept;
 
-	/**
-	 * Returns the socket descriptor and calls socket_wrapper_abandon().
-	 */
-	int AsFD() noexcept {
-		return Abandon().Get();
-	}
-
 	bool IsValid() const noexcept {
 		return socket_event.IsDefined();
 	}

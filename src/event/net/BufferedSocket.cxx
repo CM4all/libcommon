@@ -233,17 +233,6 @@ BufferedSocket::ClosedByPeer() noexcept
 	return ClosedByPeerResult::OK;
 }
 
-int
-BufferedSocket::AsFD() noexcept
-{
-	if (!IsEmpty())
-		/* can switch to the raw socket descriptor only if the input
-		   buffer is empty */
-		return -1;
-
-	return base.AsFD();
-}
-
 std::size_t
 BufferedSocket::GetAvailable() const noexcept
 {
