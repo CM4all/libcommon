@@ -194,7 +194,7 @@ public:
 
 	/**
 	 * The peer has finished sending and has closed the socket.  The
-	 * method must close/abandon the socket.  There may still be data
+	 * method must close/release the socket.  There may still be data
 	 * in the input buffer, so don't give up on this object yet.
 	 *
 	 * At this time, it may be unknown how much data remains in
@@ -305,7 +305,7 @@ public:
  * - connected (after Init())
  *
  * - disconnected (after Close() or
- * Abandon()); in this state, the remaining data
+ * ReleaseSocket()); in this state, the remaining data
  * from the input buffer will be delivered
  *
  * - ended (when the handler method BufferedSocketHandler::end() is
@@ -417,11 +417,11 @@ public:
 	 * socket.  The caller is responsible for closing the socket (or
 	 * scheduling it for reuse).
 	 */
-	SocketDescriptor Abandon() noexcept;
+	SocketDescriptor ReleaseSocket() noexcept;
 
 	/**
 	 * Destroy the object.  Prior to that, the socket must be removed by
-	 * calling either Close() or Abandon().
+	 * calling either Close() or ReleaseSocket().
 	 */
 	void Destroy() noexcept;
 

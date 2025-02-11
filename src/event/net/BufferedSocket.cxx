@@ -942,7 +942,7 @@ BufferedSocket::Close() noexcept
 }
 
 SocketDescriptor
-BufferedSocket::Abandon() noexcept
+BufferedSocket::ReleaseSocket() noexcept
 {
 	assert(!ended);
 	assert(!destroyed);
@@ -956,7 +956,7 @@ BufferedSocket::Abandon() noexcept
 
 	defer_read.Cancel();
 	defer_write.Cancel();
-	return base.Abandon();
+	return base.ReleaseSocket();
 }
 
 

@@ -102,7 +102,7 @@ public:
 	 *
 	 * @return the socket that is now owned by the caller
 	 */
-	SocketDescriptor Abandon() noexcept;
+	SocketDescriptor ReleaseSocket() noexcept;
 
 	bool IsValid() const noexcept {
 		return socket_event.IsDefined();

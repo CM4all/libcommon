@@ -90,7 +90,7 @@ SocketWrapper::Close() noexcept
 }
 
 SocketDescriptor
-SocketWrapper::Abandon() noexcept
+SocketWrapper::ReleaseSocket() noexcept
 {
 	assert(IsValid());
 
