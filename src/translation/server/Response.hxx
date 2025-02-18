@@ -850,6 +850,15 @@ public:
 			return *this;
 		}
 
+		template<typename S, typename T>
+		auto BindMountFileExec(S &&source, T &&target) noexcept {
+			response.StringPacket(TranslationCommand::BIND_MOUNT_FILE_EXEC,
+					      std::forward<S>(source),
+					      std::string_view{"", 1},
+					      std::forward<T>(target));
+			return *this;
+		}
+
 		template<typename... Types>
 		auto MountListenStream(Types... mnt) noexcept {
 			response.StringPacket(TranslationCommand::MOUNT_LISTEN_STREAM,

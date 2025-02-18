@@ -196,7 +196,11 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 			throw FmtErrno("Failed to create {}", target);
 	}
 
-	constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
+	uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY, attr_clr = 0;
+	if (exec)
+		attr_clr |= MS_NOEXEC;
+	else
+		attr_set |= MS_NOEXEC;
 
 	if (source_fd.IsDefined())
 		MoveMount(source_fd, "",
@@ -206,7 +210,8 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 		BindMount(source, target);
 
 	MountSetAttr(FileDescriptor::Undefined(), target,
-		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, attr_set, 0);
+		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+		     attr_set, attr_clr);
 }
 
 inline void

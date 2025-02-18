@@ -264,6 +264,7 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			}
 
 			s.WriteString(i.target);
+			s.WriteBool(i.exec);
 			s.WriteBool(i.optional);
 			break;
 

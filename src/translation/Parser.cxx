@@ -4431,6 +4431,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::BIND_MOUNT_FILE_EXEC:
+#if TRANSLATION_ENABLE_SPAWN
+		previous_command = command;
+		HandleBindMount(string_payload, false, false, true, true);
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

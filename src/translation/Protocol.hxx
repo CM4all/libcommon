@@ -1092,8 +1092,8 @@ enum class TranslationCommand : uint16_t {
 	MOUNT_DEV = 233,
 
 	/**
-	 * Bind-mount a (read-only) file.  Payload is source and
-	 * target separated by a null byte.
+	 * Bind-mount a (read-only no-exec) file.  Payload is source
+	 * and target separated by a null byte.
 	 */
 	BIND_MOUNT_FILE = 234,
 
@@ -1332,6 +1332,11 @@ enum class TranslationCommand : uint16_t {
 	 * Combination of #BIND_MOUNT_RW and #BIND_MOUNT_EXEC.
 	 */
 	BIND_MOUNT_RW_EXEC = 270,
+
+	/**
+	 * Like #BIND_MOUNT_FILE, but don't make the mount "noexec".
+	 */
+	BIND_MOUNT_FILE_EXEC = 271,
 };
 
 struct TranslationHeader {

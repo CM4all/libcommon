@@ -670,6 +670,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				const char *target = payload.ReadString();
 				mounts.emplace_front(source, target);
 				mounts.front().type = Mount::Type::BIND_FILE;
+				mounts.front().exec = payload.ReadBool();
 				mounts.front().optional = payload.ReadBool();
 			}
 
@@ -698,6 +699,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				mounts.emplace_front(nullptr, target);
 				mounts.front().type = Mount::Type::BIND_FILE;
 				mounts.front().source_fd = fds.Borrow();
+				mounts.front().exec = payload.ReadBool();
 				mounts.front().optional = payload.ReadBool();
 			}
 
