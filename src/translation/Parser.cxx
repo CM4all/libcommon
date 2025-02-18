@@ -660,16 +660,37 @@ TranslateParser::HandleBindMount(std::string_view payload,
 				 bool expand, bool writable, bool exec,
 				 bool file)
 {
-	const auto [source, target] = Split(payload, '\0');
-	if (!IsValidAbsolutePath(source) ||
-	    !IsValidAbsolutePath(target))
+	auto [_source, target] = Split(payload, '\0');
+	if (!IsValidAbsolutePath(target))
 		throw std::runtime_error("malformed BIND_MOUNT packet");
+
+	const char *source;
+	if (SkipPrefix(_source, "container:"sv)) {
+		/* path on host (host's mount namespace) */
+
+		if (!IsValidAbsolutePath(_source))
+			throw std::runtime_error{"malformed BIND_MOUNT packet"};
+
+		/* keep the slash */
+		source = _source.data();
+	} else {
+		/* no prefix or prefix "host:": path on host (host's
+		   mount namespace) */
+		SkipPrefix(_source, "host:"sv);
+
+		if (!IsValidAbsolutePath(_source))
+			throw std::runtime_error{"malformed BIND_MOUNT packet"};
+
+		/* skip the slash to make it relative to the working
+		   directory (which is the host mount) */
+		source = _source.data() + 1;
+	}
 
 	if (ns_options == nullptr)
 		throw std::runtime_error("misplaced BIND_MOUNT packet");
 
-	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
-		source.data() + 1,
+	auto *m = alloc.New<Mount>(
+		source,
 		target.data(),
 		writable, exec);
 #if TRANSLATION_ENABLE_EXPAND
