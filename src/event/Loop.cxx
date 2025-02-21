@@ -77,6 +77,12 @@ private:
 		(void)res; // TODO
 
 		event_loop.epoll_ready = true;
+
+		if (!IsUringPending()) [[unlikely]]
+			/* for some reason, the kernel has stopped our
+			   poll operation (no IORING_CQE_F_MORE):
+			   restart the poll */
+			Start();
 	}
 };
 
