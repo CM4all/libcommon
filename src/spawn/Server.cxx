@@ -450,6 +450,8 @@ Read(SpawnPayload &payload, ResourceLimits &rlimits)
 static void
 Read(SpawnPayload &payload, UidGid &uid_gid)
 {
+	payload.ReadT(uid_gid.real_uid);
+	payload.ReadT(uid_gid.real_gid);
 	payload.ReadT(uid_gid.effective_uid);
 	payload.ReadT(uid_gid.effective_gid);
 

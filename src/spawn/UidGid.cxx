@@ -86,8 +86,12 @@ UidGid::Apply() const
 		   only for debugging anyway, so that's ok */
 		return;
 
-	if (effective_gid != UNSET_GID && setregid(effective_gid, effective_gid) < 0)
-		throw FmtErrno("setgid({}) failed", effective_gid);
+	if (effective_gid != UNSET_GID) {
+		const gid_t new_real_gid = real_gid != UNSET_GID ? real_gid : effective_gid;
+
+		if (setregid(new_real_gid, effective_gid) < 0)
+			throw FmtErrno("setregid({}, {}) failed", new_real_gid, effective_gid);
+	}
 
 	if (const auto n_groups = CountSupplementaryGroups(); n_groups > 0) {
 		if (setgroups(n_groups, supplementary_groups.data()) < 0)
@@ -97,6 +101,10 @@ UidGid::Apply() const
 			throw FmtErrno("setgroups({}) failed", effective_gid);
 	}
 
-	if (effective_uid != UNSET_UID && setreuid(effective_uid, effective_uid) < 0)
-		throw FmtErrno("setuid({}) failed", effective_uid);
+	if (effective_uid != UNSET_UID) {
+		const uid_t new_real_uid = real_uid != UNSET_UID ? real_uid : effective_uid;
+
+		if (setreuid(new_real_uid, effective_uid) < 0)
+			throw FmtErrno("setreuid({}, {}) failed", new_real_uid, effective_uid);
+	}
 }

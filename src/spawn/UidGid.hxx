@@ -16,6 +16,9 @@ struct UidGid {
 	static constexpr uid_t UNSET_UID = 0;
 	static constexpr gid_t UNSET_GID = 0;
 
+	uid_t real_uid{UNSET_UID};
+	gid_t real_gid{UNSET_GID};
+
 	uid_t effective_uid{UNSET_UID};
 	gid_t effective_gid{UNSET_GID};
 
@@ -41,11 +44,16 @@ struct UidGid {
 	constexpr bool IsEmpty() const noexcept {
 		return effective_uid == UNSET_UID &&
 			effective_gid == UNSET_GID &&
+			!HasReal() &&
 			!HasSupplementaryGroups();
 	}
 
 	constexpr bool IsComplete() const noexcept {
 		return effective_uid != UNSET_UID && effective_gid != UNSET_GID;
+	}
+
+	constexpr bool HasReal() const noexcept {
+		return real_uid != UNSET_UID || real_gid != UNSET_GID;
 	}
 
 	/**

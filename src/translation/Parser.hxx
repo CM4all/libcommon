@@ -257,6 +257,7 @@ private:
 
 #if TRANSLATION_ENABLE_SPAWN
 	void HandleUidGid(std::span<const std::byte> payload);
+	void HandleRealUidGid(std::span<const std::byte> payload);
 	void HandleMappedUidGid(std::span<const std::byte> payload);
 	void HandleUmask(std::span<const std::byte> payload);
 

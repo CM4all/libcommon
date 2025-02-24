@@ -79,13 +79,15 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
 	   user namespace */
 	std::set<unsigned> gids;
 	gids.emplace(uid_gid.effective_gid);
+	if (uid_gid.real_gid != UidGid::UNSET_GID)
+		gids.emplace(uid_gid.real_gid);
 	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
 		gids.emplace(uid_gid.supplementary_groups[i]);
 
 	SetupGidMap(pid, gids);
 	SetupUidMap(pid, uid_gid.effective_uid,
 		    mapped_uid > 0 ? mapped_uid : uid_gid.effective_uid,
-		    0,
+		    uid_gid.real_uid,
 		    false);
 }
 
@@ -118,7 +120,7 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 
 		SetupUidMap(0, uid_gid.effective_uid,
 			    mapped_uid > 0 ? mapped_uid : uid_gid.effective_uid,
-			    0,
+			    uid_gid.real_uid,
 			    false);
 	}
 

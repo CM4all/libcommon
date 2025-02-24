@@ -1135,6 +1135,18 @@ public:
 			return *this;
 		}
 
+		auto RealUid(const uint32_t &uid) noexcept {
+			response.PacketT(TranslationCommand::REAL_UID_GID, uid);
+			return *this;
+		}
+
+		auto RealUidGid(const uint32_t &uid, const uint32_t &gid) noexcept {
+			response.MultiPacket(TranslationCommand::REAL_UID_GID,
+					     std::span{&uid, 1},
+					     std::span{&gid, 1});
+			return *this;
+		}
+
 		auto MappedUid(const uint32_t &uid) noexcept {
 			response.PacketT(TranslationCommand::MAPPED_UID_GID, uid);
 			return *this;

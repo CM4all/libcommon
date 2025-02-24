@@ -40,6 +40,7 @@
 #include "util/StringSplit.hxx"
 #include "util/StringVerify.hxx"
 #include "util/StringListVerify.hxx"
+#include "util/Unaligned.hxx"
 
 #if TRANSLATION_ENABLE_HTTP
 #include "http/HeaderName.hxx"
@@ -1007,6 +1008,33 @@ TranslateParser::HandleMappedUidGid(std::span<const std::byte> payload)
 		throw std::runtime_error{"duplicate MAPPED_UID_GID packet"};
 
 	ns_options->mapped_uid = *value;
+}
+
+inline void
+TranslateParser::HandleRealUidGid(std::span<const std::byte> payload)
+{
+	if (child_options == nullptr || child_options->uid_gid.IsEmpty())
+		throw std::runtime_error{"misplaced REAL_UID_GID packet"};
+
+	if (child_options->uid_gid.HasReal())
+		throw std::runtime_error{"duplicate REAL_UID_GID packet"};
+
+	if (payload.size() < sizeof(child_options->uid_gid.real_uid))
+		throw std::runtime_error{"malformed REAL_UID_GID packet"};
+
+	LoadUnaligned(child_options->uid_gid.real_uid, payload.data());
+	payload = payload.subspan(sizeof(child_options->uid_gid.real_uid));
+
+	if (payload.size() >= sizeof(child_options->uid_gid.real_gid)) {
+		LoadUnaligned(child_options->uid_gid.real_gid, payload.data());
+		payload = payload.subspan(sizeof(child_options->uid_gid.real_gid));
+	}
+
+	if (!payload.empty())
+		throw std::runtime_error{"malformed REAL_UID_GID packet"};
+
+	if (!child_options->uid_gid.HasReal())
+		throw std::runtime_error{"malformed REAL_UID_GID packet"};
 }
 
 inline void
@@ -4437,6 +4465,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_SPAWN
 		previous_command = command;
 		HandleBindMount(string_payload, false, false, true, true);
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::REAL_UID_GID:
+#if TRANSLATION_ENABLE_SPAWN
+		HandleRealUidGid(payload);
 		return;
 #else
 		break;

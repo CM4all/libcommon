@@ -1337,6 +1337,12 @@ enum class TranslationCommand : uint16_t {
 	 * Like #BIND_MOUNT_FILE, but don't make the mount "noexec".
 	 */
 	BIND_MOUNT_FILE_EXEC = 271,
+
+	/**
+	 * Specify real uid and gid for the child process.  Payload is
+	 * one or two 32 bit integers.
+	 */
+	REAL_UID_GID = 272,
 };
 
 struct TranslationHeader {
