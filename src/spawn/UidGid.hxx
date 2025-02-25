@@ -13,6 +13,9 @@ struct UidGid {
 	uid_t uid;
 	gid_t gid;
 
+	/**
+	 * A zero-terminated list of supplementary groups.
+	 */
 	std::array<gid_t, 32> groups;
 
 	constexpr UidGid() noexcept:uid(0), gid(0) {
