@@ -21,11 +21,14 @@ DenySetGroups(unsigned pid);
  * for current process
  * @param uid the user id to be mapped inside the user namespace
  * @param mapped_uid the user id the #uid parameter is mapped to
+ * @param uid2 a second user id to be mapped (on itself); zero means
+ * none
  * @param root true to also map root
  */
 void
 SetupUidMap(unsigned pid, unsigned uid,
 	    unsigned mapped_uid,
+	    unsigned uid2,
 	    bool root);
 
 /**
