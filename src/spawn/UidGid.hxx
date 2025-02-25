@@ -15,7 +15,9 @@ struct UidGid {
 
 	std::array<gid_t, 32> groups;
 
-	constexpr UidGid() noexcept:uid(0), gid(0), groups{{0}} {}
+	constexpr UidGid() noexcept:uid(0), gid(0) {
+		groups.front() = 0;
+	}
 
 	/**
 	 * Look up a user name in the system user database (/etc/passwd)
