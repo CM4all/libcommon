@@ -320,12 +320,12 @@ try {
 #endif // HAVE_LIBSECCOMP
 
 	if (!early_uid_gid && !skip_uid_gid) {
-		if (p.ns.mapped_uid > 0 && p.ns.mapped_uid != p.uid_gid.uid) {
+		if (p.ns.mapped_uid > 0 && p.ns.mapped_uid != p.uid_gid.effective_uid) {
 			/* we need to use the mapped_uid because the
 			   original uid isn't valid from inside this
 			   user namespace */
 			auto mapped = p.uid_gid;
-			mapped.uid = p.ns.mapped_uid;
+			mapped.effective_uid = p.ns.mapped_uid;
 			mapped.Apply();
 		} else
 			p.uid_gid.Apply();

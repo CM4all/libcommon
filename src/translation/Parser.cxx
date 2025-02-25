@@ -981,8 +981,8 @@ TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 		throw std::runtime_error("malformed UID_GID packet");
 
 	const auto payload = FromBytesFloor<const int>(_payload);
-	uid_gid.uid = payload[0];
-	uid_gid.gid = payload[1];
+	uid_gid.effective_uid = payload[0];
+	uid_gid.effective_gid = payload[1];
 
 	size_t n_groups = payload.size() - 2;
 	std::copy(std::next(payload.begin(), 2), payload.end(),
@@ -994,7 +994,7 @@ TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 inline void
 TranslateParser::HandleMappedUidGid(std::span<const std::byte> payload)
 {
-	if (child_options == nullptr || child_options->uid_gid.uid == 0 ||
+	if (child_options == nullptr || child_options->uid_gid.effective_uid == 0 ||
 	    ns_options == nullptr || !ns_options->enable_user)
 		throw std::runtime_error{"misplaced MAPPED_UID_GID packet"};
 

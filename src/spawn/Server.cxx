@@ -450,8 +450,8 @@ Read(SpawnPayload &payload, ResourceLimits &rlimits)
 static void
 Read(SpawnPayload &payload, UidGid &uid_gid)
 {
-	payload.ReadT(uid_gid.uid);
-	payload.ReadT(uid_gid.gid);
+	payload.ReadT(uid_gid.effective_uid);
+	payload.ReadT(uid_gid.effective_gid);
 
 	const size_t n_groups = (std::size_t)payload.ReadByte();
 	if (n_groups > uid_gid.supplementary_groups.max_size())

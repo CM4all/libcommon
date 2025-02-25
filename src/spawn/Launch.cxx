@@ -190,9 +190,9 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 						   true,
 						   config.systemd_slice.empty() ? nullptr : config.systemd_slice.c_str());
 
-			Chown(cgroup_state, config.spawner_uid_gid.uid,
-			      config.cgroups_writable_by_gid > 0 ? config.cgroups_writable_by_gid : config.spawner_uid_gid.gid,
-			      config.spawner_uid_gid.gid);
+			Chown(cgroup_state, config.spawner_uid_gid.effective_uid,
+			      config.cgroups_writable_by_gid > 0 ? config.cgroups_writable_by_gid : config.spawner_uid_gid.effective_gid,
+			      config.spawner_uid_gid.effective_gid);
 
 			if (config.cgroups_writable_by_gid > 0)
 				/* if all cgroups shall be writable by

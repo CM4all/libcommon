@@ -93,7 +93,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	const char *new_root = nullptr;
 
-	VfsBuilder vfs_builder{uid_gid.uid, uid_gid.gid, dir_mode};
+	VfsBuilder vfs_builder{uid_gid.effective_uid, uid_gid.effective_gid, dir_mode};
 
 	if (pivot_root != nullptr) {
 		/* first bind-mount the new root onto itself to "unlock" the

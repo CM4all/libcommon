@@ -101,8 +101,8 @@ struct SpawnConfig {
 		if (allow_any_uid_gid)
 			return;
 
-		VerifyUid(uid_gid.uid);
-		VerifyGid(uid_gid.gid);
+		VerifyUid(uid_gid.effective_uid);
+		VerifyGid(uid_gid.effective_gid);
 		VerifyGroups(uid_gid.supplementary_groups.begin(),
 			     uid_gid.supplementary_groups.end());
 	}

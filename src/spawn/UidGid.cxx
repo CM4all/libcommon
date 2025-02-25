@@ -23,8 +23,8 @@ UidGid::Lookup(const char *username)
 			throw FmtErrno(e, "Failed to look up user {:?}", username);
 	}
 
-	uid = pw->pw_uid;
-	gid = pw->pw_gid;
+	effective_uid = pw->pw_uid;
+	effective_gid = pw->pw_gid;
 
 	int ngroups = supplementary_groups.size();
 	int n = getgrouplist(username, pw->pw_gid, supplementary_groups.data(), &ngroups);
@@ -35,22 +35,23 @@ UidGid::Lookup(const char *username)
 void
 UidGid::LoadEffective() noexcept
 {
-	uid = geteuid();
-	gid = getegid();
+	effective_uid = geteuid();
+	effective_gid = getegid();
 }
 
 char *
 UidGid::MakeId(char *p) const noexcept
 {
-	if (uid != 0)
-		p = fmt::format_to(p, ";uid{}", uid);
+	if (effective_uid != 0)
+		p = fmt::format_to(p, ";uid{}", effective_uid);
 
-	if (gid != 0)
-		p = fmt::format_to(p, ";gid{}", gid);
+	if (effective_gid != 0)
+		p = fmt::format_to(p, ";gid{}", effective_gid);
 
 	return p;
 }
 
+[[gnu::pure]]
 static bool
 IsUid(uid_t uid) noexcept
 {
@@ -59,6 +60,7 @@ IsUid(uid_t uid) noexcept
 		uid == ruid && uid == euid && uid == suid;
 }
 
+[[gnu::pure]]
 static bool
 IsGid(gid_t gid) noexcept
 {
@@ -70,7 +72,8 @@ IsGid(gid_t gid) noexcept
 bool
 UidGid::IsNop() const noexcept
 {
-	return (uid == 0 || IsUid(uid)) && (gid == 0 || IsGid(gid));
+	return (effective_uid == 0 || IsUid(effective_uid)) &&
+		(effective_gid == 0 || IsGid(effective_gid));
 }
 
 void
@@ -83,17 +86,17 @@ UidGid::Apply() const
 		   only for debugging anyway, so that's ok */
 		return;
 
-	if (gid != 0 && setregid(gid, gid) < 0)
-		throw FmtErrno("setgid({}) failed", gid);
+	if (effective_gid != 0 && setregid(effective_gid, effective_gid) < 0)
+		throw FmtErrno("setgid({}) failed", effective_gid);
 
 	if (const auto n_groups = CountSupplementaryGroups(); n_groups > 0) {
 		if (setgroups(n_groups, supplementary_groups.data()) < 0)
 			throw MakeErrno("setgroups() failed");
-	} else if (gid != 0) {
-		if (setgroups(0, &gid) < 0)
-			throw FmtErrno("setgroups({}) failed", gid);
+	} else if (effective_gid != 0) {
+		if (setgroups(0, &effective_gid) < 0)
+			throw FmtErrno("setgroups({}) failed", effective_gid);
 	}
 
-	if (uid != 0 && setreuid(uid, uid) < 0)
-		throw FmtErrno("setuid({}) failed", uid);
+	if (effective_uid != 0 && setreuid(effective_uid, effective_uid) < 0)
+		throw FmtErrno("setuid({}) failed", effective_uid);
 }

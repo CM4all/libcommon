@@ -51,9 +51,9 @@ try {
 	while (!args.empty() && *args.front() == '-') {
 		const char *arg = args.shift();
 		if (const char *uid = StringAfterPrefix(arg, "--uid=")) {
-			p.uid_gid.uid = atoi(uid);
+			p.uid_gid.effective_uid = atoi(uid);
 		} else if (const char *gid = StringAfterPrefix(arg, "--gid=")) {
-			p.uid_gid.gid = atoi(gid);
+			p.uid_gid.effective_gid = atoi(gid);
 		} else if (StringIsEqual(arg, "--userns")) {
 			p.ns.enable_user = true;
 		} else if (StringIsEqual(arg, "--pidns")) {

@@ -10,8 +10,8 @@
 #include <sys/types.h>
 
 struct UidGid {
-	uid_t uid{0};
-	gid_t gid{0};
+	uid_t effective_uid{0};
+	gid_t effective_gid{0};
 
 	/**
 	 * A zero-terminated list of supplementary groups.
@@ -33,11 +33,12 @@ struct UidGid {
 	void LoadEffective() noexcept;
 
 	constexpr bool IsEmpty() const noexcept {
-		return uid == 0 && gid == 0 && !HasSupplementaryGroups();
+		return effective_uid == 0 && effective_gid == 0 &&
+			!HasSupplementaryGroups();
 	}
 
 	constexpr bool IsComplete() const noexcept {
-		return uid != 0 && gid != 0;
+		return effective_uid != 0 && effective_gid != 0;
 	}
 
 	/**
