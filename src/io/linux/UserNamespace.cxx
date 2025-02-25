@@ -8,10 +8,9 @@
 #include "io/WriteFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
-#include <cassert>
+#include <fmt/core.h>
 
-#include <string.h>
-#include <stdio.h>
+#include <cassert>
 
 void
 DenySetGroups(unsigned pid)
@@ -33,25 +32,25 @@ SetupUidMap(unsigned pid, unsigned uid,
 	    unsigned mapped_uid,
 	    bool root)
 {
-	char data_buffer[256];
+	char data_buffer[256], *p = data_buffer;
 
-	size_t position = sprintf(data_buffer, "%u %u 1\n", mapped_uid, uid);
+	p = fmt::format_to(p, "{} {} 1\n", mapped_uid, uid);
 	if (root && uid != 0)
-		strcpy(data_buffer + position, "0 0 1\n");
+		p = stpcpy(p, "0 0 1\n");
 
-	WriteFileOrThrow(OpenProcPid(pid), "uid_map", data_buffer);
+	WriteFileOrThrow(OpenProcPid(pid), "uid_map", {data_buffer, p});
 }
 
 void
 SetupGidMap(unsigned pid, unsigned gid, bool root)
 {
-	char data_buffer[256];
+	char data_buffer[256], *p = data_buffer;
 
-	size_t position = sprintf(data_buffer, "%u %u 1\n", gid, gid);
+	p = fmt::format_to(p, "{} {} 1\n", gid, gid);
 	if (root && gid != 0)
-		strcpy(data_buffer + position, "0 0 1\n");
+		p = stpcpy(p, "0 0 1\n");
 
-	WriteFileOrThrow(OpenProcPid(pid), "gid_map", data_buffer);
+	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {data_buffer, p});
 }
 
 void
@@ -59,15 +58,14 @@ SetupGidMap(unsigned pid, const std::set<unsigned> &gids)
 {
 	assert(!gids.empty());
 
-	char data_buffer[1024];
+	char data_buffer[1024], *p = data_buffer;
 
-	size_t position = 0;
 	for (unsigned i : gids) {
-		if (position + 64 > sizeof(data_buffer))
+		if (p + 64 > data_buffer + sizeof(data_buffer))
 			break;
 
-		position += sprintf(data_buffer + position, "%u %u 1\n", i, i);
+		p = fmt::format_to(p, "{} {} 1\n", i, i);
 	}
 
-	WriteFileOrThrow(OpenProcPid(pid), "gid_map", data_buffer);
+	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {data_buffer, p});
 }
