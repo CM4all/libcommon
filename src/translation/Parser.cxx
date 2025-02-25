@@ -988,13 +988,14 @@ TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 	std::copy(std::next(payload.begin(), 2), payload.end(),
 		  uid_gid.supplementary_groups.begin());
 	if (n_groups < uid_gid.supplementary_groups.max_size())
-		uid_gid.supplementary_groups[n_groups] = 0;
+		uid_gid.supplementary_groups[n_groups] = UidGid::UNSET_GID;
 }
 
 inline void
 TranslateParser::HandleMappedUidGid(std::span<const std::byte> payload)
 {
-	if (child_options == nullptr || child_options->uid_gid.effective_uid == 0 ||
+	if (child_options == nullptr ||
+	    child_options->uid_gid.effective_uid == UidGid::UNSET_UID ||
 	    ns_options == nullptr || !ns_options->enable_user)
 		throw std::runtime_error{"misplaced MAPPED_UID_GID packet"};
 

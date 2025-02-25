@@ -10,16 +10,22 @@
 #include <sys/types.h>
 
 struct UidGid {
-	uid_t effective_uid{0};
-	gid_t effective_gid{0};
+	/**
+	 * Special values for "this uid/gid is not set".
+	 */
+	static constexpr uid_t UNSET_UID = 0;
+	static constexpr gid_t UNSET_GID = 0;
+
+	uid_t effective_uid{UNSET_UID};
+	gid_t effective_gid{UNSET_GID};
 
 	/**
-	 * A zero-terminated list of supplementary groups.
+	 * A list of supplementary groups terminated by #UNSET_GID.
 	 */
 	std::array<gid_t, 32> supplementary_groups;
 
 	constexpr UidGid() noexcept {
-		supplementary_groups.front() = 0;
+		supplementary_groups.front() = UNSET_GID;
 	}
 
 	/**
@@ -33,12 +39,13 @@ struct UidGid {
 	void LoadEffective() noexcept;
 
 	constexpr bool IsEmpty() const noexcept {
-		return effective_uid == 0 && effective_gid == 0 &&
+		return effective_uid == UNSET_UID &&
+			effective_gid == UNSET_GID &&
 			!HasSupplementaryGroups();
 	}
 
 	constexpr bool IsComplete() const noexcept {
-		return effective_uid != 0 && effective_gid != 0;
+		return effective_uid != UNSET_UID && effective_gid != UNSET_GID;
 	}
 
 	/**
@@ -52,12 +59,12 @@ struct UidGid {
 	bool IsNop() const noexcept;
 
 	bool HasSupplementaryGroups() const noexcept {
-		return supplementary_groups.front() != 0;
+		return supplementary_groups.front() != UNSET_GID;
 	}
 
 	size_t CountSupplementaryGroups() const noexcept {
 		return std::distance(supplementary_groups.begin(),
-				     std::find(supplementary_groups.begin(), supplementary_groups.end(), 0));
+				     std::find(supplementary_groups.begin(), supplementary_groups.end(), UNSET_GID));
 	}
 
 	char *MakeId(char *p) const noexcept;

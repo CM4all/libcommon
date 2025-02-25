@@ -29,7 +29,7 @@ UidGid::Lookup(const char *username)
 	int ngroups = supplementary_groups.size();
 	int n = getgrouplist(username, pw->pw_gid, supplementary_groups.data(), &ngroups);
 	if (n >= 0 && (size_t)n < supplementary_groups.size())
-		supplementary_groups[n] = 0;
+		supplementary_groups[n] = UNSET_GID;
 }
 
 void
@@ -42,10 +42,10 @@ UidGid::LoadEffective() noexcept
 char *
 UidGid::MakeId(char *p) const noexcept
 {
-	if (effective_uid != 0)
+	if (effective_uid != UNSET_UID)
 		p = fmt::format_to(p, ";uid{}", effective_uid);
 
-	if (effective_gid != 0)
+	if (effective_gid != UNSET_GID)
 		p = fmt::format_to(p, ";gid{}", effective_gid);
 
 	return p;
@@ -72,8 +72,8 @@ IsGid(gid_t gid) noexcept
 bool
 UidGid::IsNop() const noexcept
 {
-	return (effective_uid == 0 || IsUid(effective_uid)) &&
-		(effective_gid == 0 || IsGid(effective_gid));
+	return (effective_uid == UNSET_UID || IsUid(effective_uid)) &&
+		(effective_gid == UNSET_GID || IsGid(effective_gid));
 }
 
 void
@@ -86,17 +86,17 @@ UidGid::Apply() const
 		   only for debugging anyway, so that's ok */
 		return;
 
-	if (effective_gid != 0 && setregid(effective_gid, effective_gid) < 0)
+	if (effective_gid != UNSET_GID && setregid(effective_gid, effective_gid) < 0)
 		throw FmtErrno("setgid({}) failed", effective_gid);
 
 	if (const auto n_groups = CountSupplementaryGroups(); n_groups > 0) {
 		if (setgroups(n_groups, supplementary_groups.data()) < 0)
 			throw MakeErrno("setgroups() failed");
-	} else if (effective_gid != 0) {
+	} else if (effective_gid != UNSET_GID) {
 		if (setgroups(0, &effective_gid) < 0)
 			throw FmtErrno("setgroups({}) failed", effective_gid);
 	}
 
-	if (effective_uid != 0 && setreuid(effective_uid, effective_uid) < 0)
+	if (effective_uid != UNSET_UID && setreuid(effective_uid, effective_uid) < 0)
 		throw FmtErrno("setuid({}) failed", effective_uid);
 }

@@ -79,7 +79,7 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
 	   user namespace */
 	std::set<unsigned> gids;
 	gids.emplace(uid_gid.effective_gid);
-	for (unsigned i = 0; uid_gid.supplementary_groups[i] != 0; ++i)
+	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
 		gids.emplace(uid_gid.supplementary_groups[i]);
 
 	SetupGidMap(pid, gids);
@@ -111,7 +111,7 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 	if (enable_user) {
 		DenySetGroups(0);
 
-		if (uid_gid.effective_gid != 0)
+		if (uid_gid.effective_gid != UidGid::UNSET_GID)
 			SetupGidMap(0, uid_gid.effective_gid, false);
 		// TODO: map the current effective gid if no gid was given?
 

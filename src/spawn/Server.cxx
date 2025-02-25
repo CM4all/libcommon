@@ -461,7 +461,7 @@ Read(SpawnPayload &payload, UidGid &uid_gid)
 		payload.ReadT(uid_gid.supplementary_groups[i]);
 
 	if (n_groups < uid_gid.supplementary_groups.max_size())
-		uid_gid.supplementary_groups[n_groups] = 0;
+		uid_gid.supplementary_groups[n_groups] = UidGid::UNSET_GID;
 }
 
 inline void
