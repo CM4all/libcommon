@@ -781,9 +781,23 @@ public:
 			return *this;
 		}
 
+		struct Permissions {
+			bool write = false;
+			bool execute = false;
+		};
+
 		template<typename S, typename T>
-		auto BindMount(S &&source, T &&target) noexcept {
-			response.StringPacket(TranslationCommand::BIND_MOUNT,
+		auto BindMount(S &&source, T &&target, const Permissions& perms = {}) noexcept {
+			auto cmd = TranslationCommand::BIND_MOUNT;
+			if (perms.write && !perms.execute) {
+				cmd = TranslationCommand::BIND_MOUNT_RW;
+			} else if (!perms.write && perms.execute) {
+				cmd = TranslationCommand::BIND_MOUNT_EXEC;
+			} else if (perms.write && perms.execute) {
+				cmd = TranslationCommand::BIND_MOUNT_RW_EXEC;
+			}
+
+			response.StringPacket(cmd,
 					      std::forward<S>(source),
 					      std::string_view{"", 1},
 					      std::forward<T>(target));
