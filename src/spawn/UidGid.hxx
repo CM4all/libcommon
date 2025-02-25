@@ -10,15 +10,15 @@
 #include <sys/types.h>
 
 struct UidGid {
-	uid_t uid;
-	gid_t gid;
+	uid_t uid{0};
+	gid_t gid{0};
 
 	/**
 	 * A zero-terminated list of supplementary groups.
 	 */
 	std::array<gid_t, 32> supplementary_groups;
 
-	constexpr UidGid() noexcept:uid(0), gid(0) {
+	constexpr UidGid() noexcept {
 		supplementary_groups.front() = 0;
 	}
 
