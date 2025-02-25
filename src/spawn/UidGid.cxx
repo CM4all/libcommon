@@ -26,10 +26,10 @@ UidGid::Lookup(const char *username)
 	uid = pw->pw_uid;
 	gid = pw->pw_gid;
 
-	int ngroups = groups.size();
-	int n = getgrouplist(username, pw->pw_gid, groups.data(), &ngroups);
-	if (n >= 0 && (size_t)n < groups.size())
-		groups[n] = 0;
+	int ngroups = supplementary_groups.size();
+	int n = getgrouplist(username, pw->pw_gid, supplementary_groups.data(), &ngroups);
+	if (n >= 0 && (size_t)n < supplementary_groups.size())
+		supplementary_groups[n] = 0;
 }
 
 void
@@ -86,8 +86,8 @@ UidGid::Apply() const
 	if (gid != 0 && setregid(gid, gid) < 0)
 		throw FmtErrno("setgid({}) failed", gid);
 
-	if (const auto n_groups = CountGroups(); n_groups > 0) {
-		if (setgroups(n_groups, groups.data()) < 0)
+	if (const auto n_groups = CountSupplementaryGroups(); n_groups > 0) {
+		if (setgroups(n_groups, supplementary_groups.data()) < 0)
 			throw MakeErrno("setgroups() failed");
 	} else if (gid != 0) {
 		if (setgroups(0, &gid) < 0)

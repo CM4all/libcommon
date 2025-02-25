@@ -333,10 +333,10 @@ Serialize(SpawnSerializer &s, const UidGid &uid_gid)
 	s.WriteT(uid_gid.uid);
 	s.WriteT(uid_gid.gid);
 
-	const size_t n_groups = uid_gid.CountGroups();
+	const size_t n_groups = uid_gid.CountSupplementaryGroups();
 	s.WriteU8(n_groups);
 	for (size_t i = 0; i < n_groups; ++i)
-		s.WriteT(uid_gid.groups[i]);
+		s.WriteT(uid_gid.supplementary_groups[i]);
 }
 
 static void

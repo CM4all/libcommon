@@ -16,15 +16,15 @@ struct UidGid {
 	/**
 	 * A zero-terminated list of supplementary groups.
 	 */
-	std::array<gid_t, 32> groups;
+	std::array<gid_t, 32> supplementary_groups;
 
 	constexpr UidGid() noexcept:uid(0), gid(0) {
-		groups.front() = 0;
+		supplementary_groups.front() = 0;
 	}
 
 	/**
 	 * Look up a user name in the system user database (/etc/passwd)
-	 * and fill #uid, #gid and #groups.
+	 * and fill #uid, #gid and #supplementary_groups.
 	 *
 	 * Throws std::runtime_error on error.
 	 */
@@ -33,7 +33,7 @@ struct UidGid {
 	void LoadEffective() noexcept;
 
 	constexpr bool IsEmpty() const noexcept {
-		return uid == 0 && gid == 0 && !HasGroups();
+		return uid == 0 && gid == 0 && !HasSupplementaryGroups();
 	}
 
 	constexpr bool IsComplete() const noexcept {
@@ -50,13 +50,13 @@ struct UidGid {
 	[[gnu::pure]]
 	bool IsNop() const noexcept;
 
-	bool HasGroups() const noexcept {
-		return groups.front() != 0;
+	bool HasSupplementaryGroups() const noexcept {
+		return supplementary_groups.front() != 0;
 	}
 
-	size_t CountGroups() const noexcept {
-		return std::distance(groups.begin(),
-				     std::find(groups.begin(), groups.end(), 0));
+	size_t CountSupplementaryGroups() const noexcept {
+		return std::distance(supplementary_groups.begin(),
+				     std::find(supplementary_groups.begin(), supplementary_groups.end(), 0));
 	}
 
 	char *MakeId(char *p) const noexcept;

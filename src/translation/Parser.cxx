@@ -974,7 +974,7 @@ TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 	UidGid &uid_gid = child_options->uid_gid;
 
 	constexpr size_t min_size = sizeof(int) * 2;
-	const size_t max_size = min_size + sizeof(int) * uid_gid.groups.max_size();
+	const size_t max_size = min_size + sizeof(int) * uid_gid.supplementary_groups.max_size();
 
 	if (_payload.size() < min_size || _payload.size() > max_size ||
 	    _payload.size() % sizeof(int) != 0)
@@ -986,9 +986,9 @@ TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 
 	size_t n_groups = payload.size() - 2;
 	std::copy(std::next(payload.begin(), 2), payload.end(),
-		  uid_gid.groups.begin());
-	if (n_groups < uid_gid.groups.max_size())
-		uid_gid.groups[n_groups] = 0;
+		  uid_gid.supplementary_groups.begin());
+	if (n_groups < uid_gid.supplementary_groups.max_size())
+		uid_gid.supplementary_groups[n_groups] = 0;
 }
 
 inline void

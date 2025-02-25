@@ -79,8 +79,8 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
 	   user namespace */
 	std::set<unsigned> gids;
 	gids.emplace(uid_gid.gid);
-	for (unsigned i = 0; uid_gid.groups[i] != 0; ++i)
-		gids.emplace(uid_gid.groups[i]);
+	for (unsigned i = 0; uid_gid.supplementary_groups[i] != 0; ++i)
+		gids.emplace(uid_gid.supplementary_groups[i]);
 
 	SetupGidMap(pid, gids);
 	SetupUidMap(pid, uid_gid.uid,

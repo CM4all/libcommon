@@ -103,6 +103,7 @@ struct SpawnConfig {
 
 		VerifyUid(uid_gid.uid);
 		VerifyGid(uid_gid.gid);
-		VerifyGroups(uid_gid.groups.begin(), uid_gid.groups.end());
+		VerifyGroups(uid_gid.supplementary_groups.begin(),
+			     uid_gid.supplementary_groups.end());
 	}
 };
