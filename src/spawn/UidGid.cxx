@@ -86,8 +86,8 @@ UidGid::Apply() const
 	if (gid != 0 && setregid(gid, gid) < 0)
 		throw FmtErrno("setgid({}) failed", gid);
 
-	if (HasGroups()) {
-		if (setgroups(CountGroups(), groups.data()) < 0)
+	if (const auto n_groups = CountGroups(); n_groups > 0) {
+		if (setgroups(n_groups, groups.data()) < 0)
 			throw MakeErrno("setgroups() failed");
 	} else if (gid != 0) {
 		if (setgroups(0, &gid) < 0)
