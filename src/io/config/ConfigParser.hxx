@@ -82,6 +82,8 @@ public:
 	void ParseLine(FileLineParser &line) final;
 	void Finish() override;
 
+	void SetVariable(std::string name, std::string value);
+
 private:
 	void ExpandOne(std::string &dest,
 		       const char *&src, const char *end) const;
@@ -122,6 +124,21 @@ public:
 private:
 	void IncludePath(std::filesystem::path &&p);
 	void IncludeOptionalPath(std::filesystem::path &&p);
+};
+
+struct ShellIncludeParser : public ConfigParser {
+	// The child parser has to be a VariableConfigParser, because we want to share a map of variables
+	VariableConfigParser &child;
+
+public:
+	ShellIncludeParser(VariableConfigParser &_child) : child(_child) {}
+
+	bool PreParseLine(FileLineParser& line) override;
+	void ParseLine(FileLineParser &line) override;
+	void Finish() override;
+
+private:
+	void ParseShellInclude(const std::filesystem::path& path);
 };
 
 void

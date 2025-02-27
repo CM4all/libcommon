@@ -120,9 +120,7 @@ VariableConfigParser::ParseLine(FileLineParser &line)
 
 		line.ExpectEnd();
 
-		auto i = variables.emplace(name, value);
-		if (!i.second)
-			i.first->second = value;
+		SetVariable(name, value);
 	} else {
 		child.ParseLine(line);
 	}
@@ -133,6 +131,11 @@ VariableConfigParser::Finish()
 {
 	child.Finish();
 	ConfigParser::Finish();
+}
+
+void VariableConfigParser::SetVariable(std::string name, std::string value)
+{
+	variables.insert_or_assign(std::move(name), std::move(value));
 }
 
 void
@@ -348,6 +351,42 @@ IncludeConfigParser::IncludeOptionalPath(std::filesystem::path &&p)
 
 	ParseConfigFile(sub.path, buffered_reader, sub);
 	sub.Finish();
+}
+
+bool ShellIncludeParser::PreParseLine(FileLineParser& line)
+{
+	return child.PreParseLine(line);
+}
+
+void ShellIncludeParser::ParseLine(FileLineParser &line)
+{
+	/* TODO: Make VariableConfigParser expand in PreParseLine, so we can used expanded
+	   vars for shell include path? */
+	if (line.SkipWord("@shellinclude")) {
+		auto path = line.ExpectPath();
+		line.ExpectEnd();
+		ParseShellInclude(std::move(path));
+	} else {
+		child.ParseLine(line);
+	}
+}
+
+void ShellIncludeParser::Finish()
+{
+	child.Finish();
+}
+
+void ShellIncludeParser::ParseShellInclude(const std::filesystem::path& path)
+{
+	const auto fd = OpenReadOnly(path.c_str());
+	FdReader fd_reader{fd};
+	BufferedReader reader{fd_reader};
+	while (char *line = reader.ReadLine()) {
+		FileLineParser parser(path, line);
+		const auto name = parser.ExpectWordAndSymbol('=', "Expected variable name", "Expected '='");
+		const auto value = parser.ExpectValueAndEnd();
+		child.SetVariable(name, value);
+	}
 }
 
 void
