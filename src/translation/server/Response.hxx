@@ -21,6 +21,14 @@
 
 namespace Translation::Server {
 
+/* This class is at namespace scope, because clang has a bug that prevents us from moving
+   it into the Response or MountNamespaceContext class:
+   https://github.com/llvm/llvm-project/issues/36032 */
+struct BindMountPermissions {
+	bool write = false;
+	bool execute = false;
+};
+
 class Response {
 	std::byte *buffer = nullptr;
 	std::size_t capacity = 0, size = 0;
@@ -781,13 +789,8 @@ public:
 			return *this;
 		}
 
-		struct Permissions {
-			bool write = false;
-			bool execute = false;
-		};
-
 		template<typename S, typename T>
-		auto BindMount(S &&source, T &&target, const Permissions& perms = {}) noexcept {
+		auto BindMount(S &&source, T &&target, const BindMountPermissions& perms = {}) noexcept {
 			auto cmd = TranslationCommand::BIND_MOUNT;
 			if (perms.write && !perms.execute) {
 				cmd = TranslationCommand::BIND_MOUNT_RW;
