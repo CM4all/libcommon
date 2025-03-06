@@ -25,11 +25,7 @@ struct UidGid {
 	/**
 	 * A list of supplementary groups terminated by #UNSET_GID.
 	 */
-	std::array<gid_t, 32> supplementary_groups;
-
-	constexpr UidGid() noexcept {
-		supplementary_groups.front() = UNSET_GID;
-	}
+	std::array<gid_t, 32> supplementary_groups{UNSET_GID};
 
 	/**
 	 * Look up a user name in the system user database (/etc/passwd)
