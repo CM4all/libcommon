@@ -48,7 +48,7 @@ class StockMap {
 		};
 	};
 
-	static constexpr size_t N_BUCKETS = 251;
+	static constexpr size_t N_BUCKETS = 4096;
 	using Map =
 		IntrusiveHashSet<Item, N_BUCKETS,
 				 IntrusiveHashSetOperators<Item,
