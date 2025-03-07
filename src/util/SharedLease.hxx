@@ -100,4 +100,14 @@ public:
 	explicit constexpr operator bool() const noexcept {
 		return anchor != nullptr;
 	}
+
+	/**
+	 * Obtain a reference to the anchor (which must be valid).
+	 * This can be used to cast the reference to a derived type.
+	 */
+	constexpr SharedAnchor &GetAnchor() const noexcept {
+		assert(anchor != nullptr);
+
+		return *anchor;
+	}
 };
