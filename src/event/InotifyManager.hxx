@@ -21,6 +21,8 @@ class InotifyWatch {
 
 	int watch_descriptor = -1;
 
+	bool oneshot;
+
 public:
 	explicit InotifyWatch(InotifyManager &_manager) noexcept
 		:manager(_manager) {}

@@ -7,6 +7,8 @@
 
 #include <cassert>
 
+#include <sys/inotify.h>
+
 bool
 InotifyWatch::TryAddWatch(const char *pathname, uint32_t mask) noexcept
 {
@@ -16,6 +18,7 @@ InotifyWatch::TryAddWatch(const char *pathname, uint32_t mask) noexcept
 		/* ignore silently */
 		return true;
 
+	oneshot = (mask & IN_ONESHOT) != 0;
 	watch_descriptor = manager.event.TryAddWatch(pathname, mask);
 	const bool success = IsWatching();
 	if (success)
@@ -33,6 +36,7 @@ InotifyWatch::AddWatch(const char *pathname, uint32_t mask)
 		/* ignore silently */
 		return;
 
+	oneshot = (mask & IN_ONESHOT) != 0;
 	watch_descriptor = manager.event.AddWatch(pathname, mask);
 	assert(IsWatching());
 
@@ -82,6 +86,11 @@ InotifyManager::OnInotify(int wd, unsigned mask, const char *name)
 	if (i == watches.end()) [[unlikely]]
 		// should not happen
 		return;
+
+	if (i->oneshot) {
+		watches.erase(i);
+		i->watch_descriptor = -1;
+	}
 
 	i->OnInotify(mask, name);
 }
