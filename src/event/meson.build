@@ -27,6 +27,7 @@ event = static_library(
   'CleanupTimer.cxx',
   'DeferEvent.cxx',
   'InotifyEvent.cxx',
+  'InotifyManager.cxx',
   'SocketEvent.cxx',
   'SignalEvent.cxx',
   'PipeLineReader.cxx',
@@ -34,6 +35,7 @@ event = static_library(
   dependencies: [
     fmt_dep,
     event_internal_dependencies,
+    util_dep,
   ],
 )
 
