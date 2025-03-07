@@ -25,7 +25,7 @@ if get_variable('libcommon_enable_spawn_server', true)
 
   spawn_sources += [
     'Client.cxx',
-    'CgroupWatch.cxx',
+    'CgroupMemoryWatch.cxx',
     'Launch.cxx',
     'Server.cxx',
     'TmpfsManager.cxx',

@@ -5,7 +5,7 @@
 #include "spawn/Direct.hxx"
 #include "spawn/Prepared.hxx"
 #include "spawn/CgroupState.hxx"
-#include "spawn/CgroupWatch.hxx"
+#include "spawn/CgroupMemoryWatch.hxx"
 #include "event/Loop.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"

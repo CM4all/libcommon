@@ -2,7 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#include "CgroupWatch.hxx"
+#include "CgroupMemoryWatch.hxx"
 #include "CgroupState.hxx"
 #include "event/Loop.hxx"
 #include "io/Open.hxx"
