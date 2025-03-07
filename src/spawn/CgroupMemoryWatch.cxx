@@ -3,7 +3,6 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "CgroupMemoryWatch.hxx"
-#include "CgroupState.hxx"
 #include "event/Loop.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
