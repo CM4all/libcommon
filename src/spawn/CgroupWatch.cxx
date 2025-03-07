@@ -47,7 +47,7 @@ CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
 	 pressure(event_loop, BIND_THIS_METHOD(OnPressure)),
 	 callback(_callback)
 {
-	inotify.AddModifyWatch(ProcFdPath(OpenPath(group_fd, "memory.events.local")));
+	inotify.AddModifyWatch(ProcFdPath(OpenPath(group_fd, "memory.events")));
 
 	if (UniqueFileDescriptor pressure_fd;
 	    pressure_fd.Open(group_fd, "memory.pressure", O_WRONLY)) {
