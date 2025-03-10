@@ -642,6 +642,10 @@ public:
 		return base.IsWritePending() || defer_write.IsPending();
 	}
 
+	unsigned GetReadyFlags() const noexcept {
+		return base.GetReadyFlags();
+	}
+
 	/**
 	 * Defer a call to Read().
 	 */

@@ -156,6 +156,10 @@ public:
 		return socket_event.IsWritePending();
 	}
 
+	unsigned GetReadyFlags() const noexcept {
+		return socket_event.GetReadyFlags();
+	}
+
 	ssize_t ReadToBuffer(ForeignFifoBuffer<std::byte> &buffer) noexcept;
 
 	[[gnu::pure]]
