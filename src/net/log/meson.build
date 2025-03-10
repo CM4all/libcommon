@@ -15,7 +15,4 @@ net_log = static_library(
 
 net_log_dep = declare_dependency(
   link_with: net_log,
-  dependencies: [
-    http_dep,
-  ],
 )
