@@ -19,6 +19,46 @@
 
 #include <array>
 
+#if defined(HAVE_THREADED_EVENT_LOOP) && defined(USE_EVENTFD) && defined(HAVE_URING)
+
+#include <sys/eventfd.h>
+
+/**
+ * Read from the eventfd using io_uring and invoke
+ * EventLoop::OnWake().
+ */
+class EventLoop::UringWake final : Uring::Operation {
+	EventLoop &event_loop;
+
+	eventfd_t value;
+
+public:
+	explicit UringWake(EventLoop &_event_loop) noexcept
+		:event_loop(_event_loop) {}
+
+	void Start() {
+		assert(!IsUringPending());
+		assert(event_loop.GetUring());
+
+		auto &queue = *event_loop.GetUring();
+
+		auto &s = queue.RequireSubmitEntry();
+		io_uring_prep_read(&s, event_loop.wake_fd.GetSocket().Get(), &value, sizeof(value), 0);
+		queue.Push(s, *this);
+	}
+
+private:
+	void OnUringCompletion(int res) noexcept override {
+		if (res <= 0)
+			return;
+
+		Start();
+		event_loop.OnWake();
+	}
+};
+
+#endif // USE_EVENTFD && HAVE_URING
+
 EventLoop::EventLoop(
 #ifdef HAVE_THREADED_EVENT_LOOP
 		     ThreadId _thread
@@ -42,6 +82,9 @@ EventLoop::~EventLoop() noexcept
 	/* if Run() was never called (maybe because startup failed and
 	   an exception is pending), we need to destruct the
 	   Uring::Manager here or else the assertions below fail */
+#if defined(HAVE_THREADED_EVENT_LOOP) && defined(USE_EVENTFD)
+	uring_wake.reset();
+#endif
 	uring_poll.reset();
 	uring.reset();
 #endif
@@ -119,6 +162,9 @@ void
 EventLoop::DisableUring() noexcept
 {
 	uring.reset();
+#if defined(HAVE_THREADED_EVENT_LOOP) && defined(USE_EVENTFD)
+	uring_wake.reset();
+#endif
 	uring_poll.reset();
 }
 
@@ -405,7 +451,15 @@ EventLoop::Run() noexcept
 	assert(alive || quit_injected);
 	assert(busy);
 
-	wake_event.Schedule(SocketEvent::READ);
+#if defined(USE_EVENTFD) && defined(HAVE_URING)
+	if (uring) {
+		if (!uring_wake) {
+			uring_wake = std::make_unique<UringWake>(*this);
+			uring_wake->Start();
+		}
+	} else
+#endif
+		wake_event.Schedule(SocketEvent::READ);
 #endif
 
 #ifdef HAVE_THREADED_EVENT_LOOP
@@ -548,13 +602,9 @@ EventLoop::HandleInject() noexcept
 	}
 }
 
-void
-EventLoop::OnSocketReady([[maybe_unused]] unsigned flags) noexcept
+inline void
+EventLoop::OnWake() noexcept
 {
-	assert(IsInside());
-
-	wake_fd.Read();
-
 	if (quit_injected) {
 		Break();
 		return;
@@ -562,6 +612,16 @@ EventLoop::OnSocketReady([[maybe_unused]] unsigned flags) noexcept
 
 	const std::scoped_lock lock{mutex};
 	HandleInject();
+}
+
+void
+EventLoop::OnSocketReady([[maybe_unused]] unsigned flags) noexcept
+{
+	assert(IsInside());
+
+	wake_fd.Read();
+
+	OnWake();
 }
 
 #endif
