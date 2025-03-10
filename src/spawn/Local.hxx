@@ -25,7 +25,7 @@ public:
 		 registry(_registry) {}
 
 	/* virtual methods from class SpawnService */
-	std::unique_ptr<ChildProcessHandle> SpawnChildProcess(const char *name,
+	std::unique_ptr<ChildProcessHandle> SpawnChildProcess(std::string_view name,
 							      PreparedChildProcess &&params) override;
 	void Enqueue(EnqueueCallback callback, CancellablePointer &cancel_ptr) noexcept override;
 };

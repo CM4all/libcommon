@@ -445,7 +445,7 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 }
 
 std::unique_ptr<ChildProcessHandle>
-SpawnServerClient::SpawnChildProcess(const char *name,
+SpawnServerClient::SpawnChildProcess(std::string_view name,
 				     PreparedChildProcess &&p)
 try {
 	assert(!shutting_down);

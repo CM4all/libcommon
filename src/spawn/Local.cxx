@@ -32,7 +32,7 @@ public:
 	LocalChildProcess(EventLoop &event_loop,
 			  ChildProcessRegistry &_registry,
 			  UniqueFileDescriptor &&_pidfd,
-			  const char *_name) noexcept
+			  std::string_view _name) noexcept
 		:registry(_registry),
 		 pidfd(std::make_unique<PidfdEvent>(event_loop,
 						    std::move(_pidfd),
@@ -84,7 +84,7 @@ LocalChildProcess::Kill(int signo) noexcept
 }
 
 std::unique_ptr<ChildProcessHandle>
-LocalSpawnService::SpawnChildProcess(const char *name,
+LocalSpawnService::SpawnChildProcess(std::string_view name,
 				     PreparedChildProcess &&params)
 {
 	if (params.uid_gid.IsEmpty())

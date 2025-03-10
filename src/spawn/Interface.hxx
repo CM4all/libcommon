@@ -7,6 +7,7 @@
 #include "util/BindMethod.hxx"
 
 #include <memory>
+#include <string_view>
 
 struct PreparedChildProcess;
 class ChildProcessHandle;
@@ -26,7 +27,7 @@ public:
 	 * @return a process id
 	 */
 	[[nodiscard]]
-	virtual std::unique_ptr<ChildProcessHandle> SpawnChildProcess(const char *name,
+	virtual std::unique_ptr<ChildProcessHandle> SpawnChildProcess(std::string_view name,
 								      PreparedChildProcess &&params) = 0;
 
 	/**

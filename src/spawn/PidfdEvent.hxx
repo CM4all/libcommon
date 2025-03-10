@@ -23,7 +23,7 @@ class PidfdEvent final {
 public:
 	PidfdEvent(EventLoop &event_loop,
 		   UniqueFileDescriptor &&_pidfd,
-		   const char *_name,
+		   std::string_view _name,
 		   ExitListener &_listener) noexcept;
 
 	~PidfdEvent() noexcept;
