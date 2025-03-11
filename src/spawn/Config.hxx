@@ -101,6 +101,12 @@ struct SpawnConfig {
 		if (allow_any_uid_gid)
 			return;
 
+		if (uid_gid.real_uid != UidGid::UNSET_UID)
+			VerifyUid(uid_gid.real_uid);
+
+		if (uid_gid.real_gid != UidGid::UNSET_GID)
+			VerifyUid(uid_gid.real_gid);
+
 		VerifyUid(uid_gid.effective_uid);
 		VerifyGid(uid_gid.effective_gid);
 		VerifyGroups(uid_gid.supplementary_groups.begin(),
