@@ -65,8 +65,7 @@ struct CgroupOptions {
 
 	/**
 	 * Create a cgroup2 group.  Returns an undefined
-	 * #UniqueFileDescriptor if this instance is not enabled or
-	 * this is not a cgroup2-only host.
+	 * #UniqueFileDescriptor if this instance is not enabled.
 	 *
 	 * Throws on error.
 	 *
