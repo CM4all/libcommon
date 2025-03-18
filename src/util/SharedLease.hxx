@@ -28,11 +28,19 @@ public:
 	SharedAnchor(const SharedAnchor &) = delete;
 	SharedAnchor &operator=(const SharedAnchor &) = delete;
 
+	/**
+	 * Have all leases been released?  False if at least one
+	 * #SharedLease referencing this object remains.
+	 */
 	constexpr bool IsAbandoned() const noexcept {
 		return n_leases == 0;
 	}
 
 protected:
+	/**
+	 * The last lease was released.  This method is allowed to
+	 * destruct this object.
+	 */
 	virtual void OnAbandoned() noexcept = 0;
 
 private:
@@ -59,8 +67,15 @@ class SharedLease {
 	SharedAnchor *anchor = nullptr;
 
 public:
+	/**
+	 * Construct an empty lease (one that does not point to any
+	 * anchor).
+	 */
 	constexpr SharedLease() noexcept = default;
 
+	/**
+	 * Construct a least pointing to the specified #SharedAnchor.
+	 */
 	constexpr SharedLease(SharedAnchor &_anchor) noexcept
 		:anchor(&_anchor)
 	{
@@ -97,6 +112,9 @@ public:
 		return *this;
 	}
 
+	/**
+	 * Does this object own a least to a #SharedAnchor?
+	 */
 	explicit constexpr operator bool() const noexcept {
 		return anchor != nullptr;
 	}
