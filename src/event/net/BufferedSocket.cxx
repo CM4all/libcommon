@@ -490,12 +490,16 @@ BufferedSocket::FillBuffer() noexcept
 {
 	assert(IsConnected());
 
+	if (drained && base.IsReadPending())
+		return FillBufferResult::NOT_READY;
+
 	if (input.IsNull())
 		input.Allocate();
 
 	ssize_t nbytes = base.ReadToBuffer(input);
 	if (nbytes > 0) [[likely]] {
 		/* success: data was added to the buffer */
+		drained = !input.IsFull();
 		return FillBufferResult::RECEIVED;
 	}
 
@@ -522,6 +526,7 @@ BufferedSocket::FillBuffer() noexcept
 
 	if (nbytes == -1) {
 		if (const auto e = GetSocketError(); IsSocketErrorReceiveWouldBlock(e)) [[likely]] {
+			drained = true;
 			return FillBufferResult::NOT_READY;
 		} else {
 			handler->OnBufferedError(std::make_exception_ptr(MakeSocketError(e, "recv() failed")));
@@ -784,6 +789,8 @@ BufferedSocket::OnSocketRead() noexcept
 #ifndef NDEBUG
 	DestructObserver destructed{*this};
 #endif
+
+	drained = false;
 
 	switch (TryRead()) {
 	case BufferedReadResult::OK:

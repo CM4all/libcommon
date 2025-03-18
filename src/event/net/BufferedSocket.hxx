@@ -344,6 +344,15 @@ class BufferedSocket final : DebugDestructAnchor, LeakDetector, SocketHandler {
 	DefaultFifoBuffer input;
 
 	/**
+	 * True if the last read found that the kernel receive buffer
+	 * is drained (i.e. EAGAIN or partial read).  This is used to
+	 * decide whether to skip manual Read() calls and instead wait
+	 * for the kernel to notify us that more data is ready to be
+	 * read (EPOLLIN).
+	 */
+	bool drained = false;
+
+	/**
 	 * Attempt to do "direct" transfers?
 	 */
 	bool direct;
