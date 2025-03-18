@@ -520,11 +520,11 @@ EventLoop::Run() noexcept
 			if (!next.empty())
 				timeout = Event::Duration{0};
 
+			FlushClockCaches();
+
 			Wait(timeout);
 
 			idle.splice(std::next(idle.begin()), next);
-
-			FlushClockCaches();
 		}
 
 #ifdef HAVE_THREADED_EVENT_LOOP
