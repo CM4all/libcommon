@@ -160,6 +160,10 @@ public:
 		return socket_event.GetReadyFlags();
 	}
 
+	void ClearReadyFlags(unsigned flags) noexcept {
+		socket_event.ClearReadyFlags(flags);
+	}
+
 	ssize_t ReadToBuffer(ForeignFifoBuffer<std::byte> &buffer) noexcept;
 
 	[[gnu::pure]]
