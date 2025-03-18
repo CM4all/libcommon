@@ -84,6 +84,8 @@ struct TmpfsManager::Item final
 		expires = std::chrono::steady_clock::now() + std::chrono::hours{1};
 		manager.abandoned.push_back(*this);
 	}
+
+	// TDOO void OnBroken() noexcept override;
 };
 
 inline std::size_t

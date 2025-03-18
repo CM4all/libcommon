@@ -43,6 +43,16 @@ protected:
 	 */
 	virtual void OnAbandoned() noexcept = 0;
 
+	/**
+	 * An optional method for implementing
+	 * SharedLease::SetBroken().  It is only ever called if there
+	 * is at least one lease left, i.e. OnAbandoned() will be
+	 * called eventually after that.
+	 */
+	virtual void OnBroken() noexcept {
+		assert(!IsAbandoned());
+	}
+
 private:
 	constexpr void AddLease() noexcept {
 		++n_leases;
@@ -127,5 +137,21 @@ public:
 		assert(anchor != nullptr);
 
 		return *anchor;
+	}
+
+	/**
+	 * Mark the referenced #SharedAnchor as "broken".  Call this
+	 * when you see that the resource whose lifetime it is
+	 * managing aeppars defunct and should not be used again by
+	 * anybody else.
+	 *
+	 * This requires that the SharedAnchor::OnBroken() method is
+	 * implemented.  Calling it without a proper implementation
+	 * results in undefined behavior.
+	 */
+	void SetBroken() const noexcept {
+		assert(anchor != nullptr);
+
+		anchor->OnBroken();
 	}
 };
