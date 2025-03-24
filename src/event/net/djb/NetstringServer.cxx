@@ -5,9 +5,9 @@
 #include "NetstringServer.hxx"
 #include "net/SocketError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "util/Compiler.h"
 
 #include <stdexcept>
+#include <utility> // for std::unreachable()
 
 static constexpr auto busy_timeout = std::chrono::seconds(5);
 
@@ -43,8 +43,7 @@ try {
 		return true;
 	}
 
-	assert(false);
-	gcc_unreachable();
+	std::unreachable();
 } catch (...) {
 	OnError(std::current_exception());
 	return false;

@@ -5,10 +5,9 @@
 #include "AllocatedRequest.hxx"
 #include "../Protocol.hxx"
 #include "lib/fmt/RuntimeError.hxx"
-#include "util/Compiler.h"
 #include "util/SpanCast.hxx"
 
-#include <assert.h>
+#include <utility> // for std::unreachable()
 
 static std::string
 ToString(std::span<const std::byte> b) noexcept
@@ -31,8 +30,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		break;
 
 	case TranslationCommand::END:
-		assert(false);
-		gcc_unreachable();
+		std::unreachable();
 
 	case TranslationCommand::URI:
 		uri_buffer = ToString(payload);

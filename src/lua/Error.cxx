@@ -3,13 +3,13 @@
 
 #include "Error.hxx"
 #include "util/Exception.hxx"
-#include "util/Compiler.h"
 
 extern "C" {
 #include <lua.h>
 }
 
 #include <cassert>
+#include <utility> // for std::unreachable()
 
 namespace Lua {
 
@@ -37,7 +37,7 @@ Raise(lua_State *L, std::exception_ptr e)
 
 	/* this is unreachable because lua_error() never returns, but
 	   the C header doesn't declare it that way */
-	gcc_unreachable();
+	std::unreachable();
 }
 
 void

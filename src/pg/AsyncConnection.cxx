@@ -4,8 +4,9 @@
 
 #include "AsyncConnection.hxx"
 #include "Error.hxx"
-#include "util/Compiler.h"
 #include "util/Exception.hxx"
+
+#include <utility> // for std::unreachable()
 
 namespace Pg {
 
@@ -281,8 +282,7 @@ AsyncConnection::OnSocketEvent(unsigned) noexcept
 {
 	switch (state) {
 	case State::DISCONNECTED:
-		assert(false);
-		gcc_unreachable();
+		std::unreachable();
 
 	case State::CONNECTING:
 		socket_event.ReleaseSocket();

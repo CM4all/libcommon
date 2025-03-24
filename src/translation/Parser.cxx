@@ -34,7 +34,6 @@
 #endif
 #include "lib/fmt/RuntimeError.hxx"
 #include "util/CharUtil.hxx"
-#include "util/Compiler.h"
 #include "util/SpanCast.hxx"
 #include "util/StringCompare.hxx"
 #include "util/StringSplit.hxx"
@@ -47,6 +46,7 @@
 #endif
 
 #include <algorithm>
+#include <utility> // for std::unreachable()
 
 #include <assert.h>
 #include <string.h>
@@ -1221,7 +1221,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	switch (command) {
 	case TranslationCommand::BEGIN:
 	case TranslationCommand::END:
-		gcc_unreachable();
+		std::unreachable();
 
 	case TranslationCommand::PARAM:
 	case TranslationCommand::REMOTE_HOST:

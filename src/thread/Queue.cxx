@@ -4,7 +4,6 @@
 
 #include "Queue.hxx"
 #include "Job.hxx"
-#include "util/Compiler.h"
 
 #include <cassert>
 
@@ -149,6 +148,5 @@ ThreadQueue::Cancel(ThreadJob &job) noexcept
 		return false;
 	}
 
-	assert(false);
-	gcc_unreachable();
+	std::unreachable();
 }
