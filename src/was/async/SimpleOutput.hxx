@@ -8,6 +8,8 @@
 #include "event/DeferEvent.hxx"
 #include "util/DisposableBuffer.hxx"
 
+#include <exception> // for std::exception_ptr
+
 class UniqueFileDescriptor;
 
 namespace Was {

@@ -7,6 +7,7 @@
 #include "event/PipeEvent.hxx"
 #include "event/DeferEvent.hxx"
 
+#include <exception> // for std::exception_ptr
 #include <memory>
 
 class UniqueFileDescriptor;
