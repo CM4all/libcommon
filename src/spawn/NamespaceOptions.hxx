@@ -9,6 +9,8 @@
 
 #include <cstdint>
 
+#include <sys/types.h> // for uid_t
+
 class AllocatorPtr;
 struct UidGid;
 class MatchData;
