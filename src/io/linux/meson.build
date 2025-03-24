@@ -4,7 +4,6 @@ io_linux = static_library(
   'ProcPid.cxx',
   'ProcFdinfo.cxx',
   'ProcCgroup.cxx',
-  'MountInfo.cxx',
   'UserNamespace.cxx',
   include_directories: inc,
   dependencies: [
