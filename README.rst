@@ -22,7 +22,7 @@ You need:
 
 - a C++20 compiler (`GCC <https://gcc.gnu.org/>`__ or `clang
   <https://clang.llvm.org/>`__)
-- `Meson 1.0 <http://mesonbuild.com/>`__
+- `Meson 1.2 <http://mesonbuild.com/>`__
 - `libfmt <https://fmt.dev/>`__
 - `libsystemd <https://www.freedesktop.org/wiki/Software/systemd/>`__
 - `libdbus <https://www.freedesktop.org/wiki/Software/dbus/>`__
