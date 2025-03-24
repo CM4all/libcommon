@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <exception>
 #include <stdexcept>
 
 struct lua_State;
