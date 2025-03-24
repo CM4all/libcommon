@@ -15,6 +15,7 @@
 #include "util/ByteOrder.hxx"
 #include "util/SpanCast.hxx"
 
+#include <array>
 #include <cassert>
 #include <stdexcept>
 
