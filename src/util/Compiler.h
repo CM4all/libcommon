@@ -65,10 +65,4 @@
 #define gcc_restrict
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
-#define gcc_unreachable() __builtin_unreachable()
-#else
-#define gcc_unreachable()
-#endif
-
 #endif
