@@ -20,7 +20,7 @@ Building libcommon
 
 You need:
 
-- a C++20 compiler (`GCC <https://gcc.gnu.org/>`__ or `clang
+- a C++23 compiler (`GCC <https://gcc.gnu.org/>`__ or `clang
   <https://clang.llvm.org/>`__)
 - `Meson 1.2 <http://mesonbuild.com/>`__
 - `libfmt <https://fmt.dev/>`__
