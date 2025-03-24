@@ -6,6 +6,8 @@
 #include "SliceArea.hxx"
 #include "Checker.hxx"
 
+#include <cstdlib> // for free()
+
 void
 SliceAllocation::Free() noexcept
 {
