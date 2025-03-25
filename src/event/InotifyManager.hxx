@@ -34,6 +34,10 @@ public:
 	InotifyWatch(const InotifyWatch &) = delete;
 	InotifyWatch &operator=(const InotifyWatch &) = delete;
 
+	auto &GetManager() const noexcept {
+		return manager;
+	}
+
 	bool IsWatching() const noexcept {
 		return watch_descriptor >= 0;
 	}
