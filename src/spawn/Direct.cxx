@@ -219,12 +219,6 @@ try {
 		WakeUpPipe(std::move(userns_create_pipe_w));
 	}
 
-	/* call chroot() after creating a new user namespace because
-	   the Linux kernel doesn't allow unshare(CLONE_NEWUSER) if
-	   the calling process is chrooted */
-	if (p.chroot != nullptr && chroot(p.chroot) < 0)
-		throw FmtErrno("chroot({:?}) failed", p.chroot);
-
 	/* wait for the parent to set us up */
 	if (wait_pipe_r.IsDefined() && !WaitForPipe(wait_pipe_r))
 		_exit(EXIT_FAILURE);
@@ -330,6 +324,15 @@ try {
 		} else
 			p.uid_gid.Apply();
 	}
+
+	/* call chroot() after creating a new user namespace because
+	   the Linux kernel doesn't allow unshare(CLONE_NEWUSER) if
+	   the calling process is chrooted */
+	/* unlike pivot_root(), chroot() needs search permissions on
+	   the target directory, therefore we chroot() after switching
+	   to the final uid/gid */
+	if (p.chroot != nullptr && chroot(p.chroot) < 0)
+		throw FmtErrno("chroot({:?}) failed", p.chroot);
 
 	if (p.chdir != nullptr && chdir(p.chdir) < 0)
 		throw FmtErrno("chdir({:?}) failed", p.chdir);
