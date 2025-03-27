@@ -4477,6 +4477,18 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::RATE_LIMIT_SITE_TRAFFIC:
+#if TRANSLATION_ENABLE_HTTP
+		if (response.site == nullptr)
+			throw std::runtime_error{"misplaced RATE_LIMIT_SITE_TRAFFIC packet"};
+
+		HandleTokenBucketParams(response.rate_limit_site_traffic,
+					"RATE_LIMIT_SITE_TRAFFIC", payload);
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

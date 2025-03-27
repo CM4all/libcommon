@@ -259,6 +259,7 @@ TranslateResponse::Clear() noexcept
 
 #if TRANSLATION_ENABLE_HTTP
 	rate_limit_site_requests.Clear();
+	rate_limit_site_traffic.Clear();
 #endif
 }
 
@@ -527,6 +528,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 
 #if TRANSLATION_ENABLE_HTTP
 	rate_limit_site_requests = src.rate_limit_site_requests;
+	rate_limit_site_traffic = src.rate_limit_site_traffic;
 #endif
 }
 

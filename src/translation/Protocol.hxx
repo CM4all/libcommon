@@ -1343,6 +1343,13 @@ enum class TranslationCommand : uint16_t {
 	 * one or two 32 bit integers.
 	 */
 	REAL_UID_GID = 272,
+
+	/**
+	 * Configure a rate limit for the (HTTP) traffic of this site
+	 * (in bytes per second).  Payload is two 32-bit floats: rate
+	 * and burst.
+	 */
+	RATE_LIMIT_SITE_TRAFFIC = 273,
 };
 
 struct TranslationHeader {

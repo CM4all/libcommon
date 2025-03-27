@@ -325,6 +325,7 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_HTTP
 	TranslateTokenBucketParams rate_limit_site_requests;
+	TranslateTokenBucketParams rate_limit_site_traffic;
 #endif
 
 	/**
