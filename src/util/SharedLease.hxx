@@ -155,3 +155,40 @@ public:
 		anchor->OnBroken();
 	}
 };
+
+/**
+ * A wrapper for #SharedLease that supports casting the anchor into
+ * the specified type.
+ */
+template<typename T>
+class SharedLeasePtr {
+	SharedLease lease;
+
+public:
+	constexpr SharedLeasePtr() noexcept = default;
+
+	constexpr SharedLeasePtr(T &object) noexcept
+		:lease(static_cast<SharedAnchor &>(object))
+	{
+	}
+
+	constexpr SharedLeasePtr(SharedLeasePtr &&src) noexcept = default;
+	constexpr SharedLeasePtr(const SharedLeasePtr &src) noexcept = default;
+
+	~SharedLeasePtr() noexcept = default;
+
+	constexpr SharedLeasePtr &operator=(SharedLeasePtr &&src) noexcept = default;
+	SharedLeasePtr &operator=(const SharedLeasePtr &src) noexcept = default;
+
+	constexpr operator bool() const noexcept {
+		return static_cast<bool>(lease);
+	}
+
+	constexpr T &operator*() const noexcept {
+		return static_cast<T &>(lease.GetAnchor());
+	}
+
+	constexpr T *operator->() const noexcept {
+		return &static_cast<T &>(lease.GetAnchor());
+	}
+};
