@@ -27,11 +27,18 @@ public:
 	}
 
 	/**
+	 * Calculate how many tokens are available.
+	 */
+	constexpr double GetAvailable(double now, double rate, double burst) const noexcept {
+		return std::min((now - zero_time) * rate, burst);
+	}
+
+	/**
 	 * @return true if the given transmission is conforming, false
 	 * to discard it
 	 */
 	constexpr bool Check(double now, double rate, double burst, double size) noexcept {
-		double available = std::min((now - zero_time) * rate, burst) - size;
+		double available = GetAvailable(now, rate, burst) - size;
 		if (available < 0)
 			return false;
 
@@ -46,7 +53,7 @@ public:
 	 * update
 	 */
 	constexpr double Update(double now, double rate, double burst, double size) noexcept {
-		double available = std::min((now - zero_time) * rate, burst) - size;
+		double available = GetAvailable(now, rate, burst) - size;
 		zero_time = now - available / rate;
 		return available;
 	}
