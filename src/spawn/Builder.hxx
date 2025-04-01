@@ -2,8 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <mk@cm4all.com>
 
-#ifndef BENG_PROXY_SPAWN_BUILDER_HXX
-#define BENG_PROXY_SPAWN_BUILDER_HXX
+#pragma once
 
 #include "net/SocketDescriptor.hxx"
 #include "net/ScmRightsBuilder.hxx"
@@ -24,9 +23,11 @@
 #include <stdint.h>
 #include <string.h>
 
-class SpawnPayloadTooLargeError {};
+namespace Spawn {
 
-class SpawnSerializer {
+class PayloadTooLargeError {};
+
+class Serializer {
 	size_t size = 0;
 
 	std::array<std::byte, 65536> buffer;
@@ -34,17 +35,17 @@ class SpawnSerializer {
 	StaticVector<FileDescriptor, 8> fds;
 
 public:
-	explicit SpawnSerializer(SpawnRequestCommand cmd) {
+	explicit constexpr Serializer(RequestCommand cmd) noexcept {
 		buffer[size++] = static_cast<std::byte>(cmd);
 	}
 
-	explicit SpawnSerializer(SpawnResponseCommand cmd) {
+	explicit constexpr Serializer(ResponseCommand cmd) noexcept {
 		buffer[size++] = static_cast<std::byte>(cmd);
 	}
 
 	void WriteByte(std::byte value) {
 		if (size >= buffer.size())
-			throw SpawnPayloadTooLargeError();
+			throw PayloadTooLargeError();
 
 		buffer[size++] = value;
 	}
@@ -57,18 +58,18 @@ public:
 		WriteByte(static_cast<std::byte>(value));
 	}
 
-	void Write(SpawnExecCommand cmd) {
+	void Write(ExecCommand cmd) {
 		WriteByte(static_cast<std::byte>(cmd));
 	}
 
-	void WriteOptional(SpawnExecCommand cmd, bool value) {
+	void WriteOptional(ExecCommand cmd, bool value) {
 		if (value)
 			Write(cmd);
 	}
 
 	void Write(std::span<const std::byte> value) {
 		if (size + value.size() > buffer.size())
-			throw SpawnPayloadTooLargeError();
+			throw PayloadTooLargeError();
 
 		std::copy(value.begin(), value.end(),
 			  std::next(buffer.begin(), size));
@@ -98,27 +99,27 @@ public:
 		WriteU8(0);
 	}
 
-	void WriteString(SpawnExecCommand cmd, std::string_view value) {
+	void WriteString(ExecCommand cmd, std::string_view value) {
 		Write(cmd);
 		WriteString(value);
 	}
 
-	void WriteOptionalString(SpawnExecCommand cmd, const char *value) {
+	void WriteOptionalString(ExecCommand cmd, const char *value) {
 		if (value != nullptr)
 			WriteString(cmd, value);
 	}
 
-	void WriteFd(SpawnExecCommand cmd, FileDescriptor fd) {
+	void WriteFd(ExecCommand cmd, FileDescriptor fd) {
 		assert(fd.IsDefined());
 
 		if (fds.full())
-			throw SpawnPayloadTooLargeError();
+			throw PayloadTooLargeError();
 
 		Write(cmd);
 		fds.push_back(fd);
 	}
 
-	void CheckWriteFd(SpawnExecCommand cmd, FileDescriptor fd) {
+	void CheckWriteFd(ExecCommand cmd, FileDescriptor fd) {
 		if (fd.IsDefined())
 			WriteFd(cmd, fd);
 	}
@@ -153,9 +154,9 @@ Send(SocketDescriptor s, std::span<const std::byte> payload,
 
 template<size_t MAX_FDS>
 static void
-Send(SocketDescriptor socket, const SpawnSerializer &s)
+Send(SocketDescriptor socket, const Serializer &s)
 {
 	return Send<MAX_FDS>(socket, s.GetPayload(), s.GetFds());
 }
 
-#endif
+} // namespace Spawn

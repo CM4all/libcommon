@@ -8,6 +8,8 @@
 
 #include <cstdint>
 
+namespace Spawn {
+
 /*
  * This header contains definitions for the internal protocol between
  * #SpawnServerClient and #SpawnServerConnection.  It is not a stable
@@ -16,13 +18,13 @@
  * as root).
  */
 
-enum class SpawnRequestCommand : uint8_t {
+enum class RequestCommand : uint8_t {
 	CONNECT,
 	EXEC,
 	KILL,
 };
 
-enum class SpawnExecCommand : uint8_t {
+enum class ExecCommand : uint8_t {
 	EXEC_FUNCTION,
 	EXEC_PATH,
 	EXEC_FD,
@@ -89,7 +91,7 @@ enum class SpawnExecCommand : uint8_t {
 	HOOK_INFO,
 };
 
-enum class SpawnResponseCommand : uint8_t {
+enum class ResponseCommand : uint8_t {
 	/**
 	 * An EXEC request has completed.  This exists to allow the
 	 * #SpawnServerClient to count the number of pending requests,
@@ -100,6 +102,8 @@ enum class SpawnResponseCommand : uint8_t {
 	EXIT,
 };
 
-struct SpawnMemoryWarningPayload {
+struct MemoryWarningPayload {
 	uint64_t memory_usage, memory_max;
 };
+
+} // namespace Spawn

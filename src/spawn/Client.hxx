@@ -20,8 +20,10 @@
 #include <span>
 
 struct PreparedChildProcess;
-class SpawnPayload;
-class SpawnSerializer;
+namespace Spawn {
+class Payload;
+class Serializer;
+}
 class UniqueFileDescriptor;
 class UniqueSocketDescriptor;
 
@@ -148,11 +150,11 @@ private:
 
 	void Send(std::span<const std::byte> payload,
 		  std::span<const FileDescriptor> fds);
-	void Send(const SpawnSerializer &s);
+	void Send(const Spawn::Serializer &s);
 
-	void HandleExecCompleteMessage(SpawnPayload payload);
-	void HandleOneExit(SpawnPayload &payload);
-	void HandleExitMessage(SpawnPayload payload);
+	void HandleExecCompleteMessage(Spawn::Payload payload);
+	void HandleOneExit(Spawn::Payload &payload);
+	void HandleExitMessage(Spawn::Payload payload);
 	void HandleMessage(std::span<const std::byte> payload,
 			   std::span<UniqueFileDescriptor> fds);
 

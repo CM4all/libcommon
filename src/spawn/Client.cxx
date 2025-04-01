@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <sys/signal.h>
 
+using namespace Spawn;
+
 static constexpr size_t MAX_FDS = 8;
 
 class SpawnServerClient::SpawnQueueItem final
@@ -161,7 +163,7 @@ SpawnServerClient::Send(std::span<const std::byte> payload,
 }
 
 inline void
-SpawnServerClient::Send(const SpawnSerializer &s)
+SpawnServerClient::Send(const Serializer &s)
 {
 	::Send<MAX_FDS>(event.GetSocket(), s);
 }
@@ -173,7 +175,7 @@ SpawnServerClient::Connect()
 
 	auto [local_socket, remote_socket] = CreateSocketPairNonBlock(AF_LOCAL, SOCK_SEQPACKET);
 
-	static constexpr SpawnRequestCommand cmd = SpawnRequestCommand::CONNECT;
+	static constexpr RequestCommand cmd = RequestCommand::CONNECT;
 
 	const FileDescriptor remote_fd = remote_socket.ToFileDescriptor();
 
@@ -188,63 +190,63 @@ SpawnServerClient::Connect()
 }
 
 static void
-Serialize(SpawnSerializer &s, const CgroupOptions &c)
+Serialize(Serializer &s, const CgroupOptions &c)
 {
-	s.WriteOptionalString(SpawnExecCommand::CGROUP, c.name);
+	s.WriteOptionalString(ExecCommand::CGROUP, c.name);
 
 	for (const auto &i : c.xattr) {
-		s.Write(SpawnExecCommand::CGROUP_XATTR);
+		s.Write(ExecCommand::CGROUP_XATTR);
 		s.WriteString(i.name);
 		s.WriteString(i.value);
 	}
 
 	for (const auto &i : c.set) {
-		s.Write(SpawnExecCommand::CGROUP_SET);
+		s.Write(ExecCommand::CGROUP_SET);
 		s.WriteString(i.name);
 		s.WriteString(i.value);
 	}
 }
 
 static void
-Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
+Serialize(Serializer &s, const NamespaceOptions &ns)
 {
-	s.WriteOptional(SpawnExecCommand::USER_NS, ns.enable_user);
-	s.WriteOptional(SpawnExecCommand::PID_NS, ns.enable_pid);
-	s.WriteOptionalString(SpawnExecCommand::PID_NS_NAME, ns.pid_namespace);
-	s.WriteOptional(SpawnExecCommand::CGROUP_NS, ns.enable_cgroup);
-	s.WriteOptional(SpawnExecCommand::NETWORK_NS, ns.enable_network);
-	s.WriteOptionalString(SpawnExecCommand::NETWORK_NS_NAME,
+	s.WriteOptional(ExecCommand::USER_NS, ns.enable_user);
+	s.WriteOptional(ExecCommand::PID_NS, ns.enable_pid);
+	s.WriteOptionalString(ExecCommand::PID_NS_NAME, ns.pid_namespace);
+	s.WriteOptional(ExecCommand::CGROUP_NS, ns.enable_cgroup);
+	s.WriteOptional(ExecCommand::NETWORK_NS, ns.enable_network);
+	s.WriteOptionalString(ExecCommand::NETWORK_NS_NAME,
 			      ns.network_namespace);
-	s.WriteOptional(SpawnExecCommand::IPC_NS, ns.enable_ipc);
+	s.WriteOptional(ExecCommand::IPC_NS, ns.enable_ipc);
 
 	if (ns.mapped_uid > 0) {
-		s.Write(SpawnExecCommand::MAPPED_UID);
+		s.Write(ExecCommand::MAPPED_UID);
 		s.WriteT(ns.mapped_uid);
 	}
 
-	s.WriteOptional(SpawnExecCommand::MOUNT_PROC, ns.mount.mount_proc);
-	s.WriteOptional(SpawnExecCommand::MOUNT_DEV, ns.mount.mount_dev);
-	s.WriteOptional(SpawnExecCommand::MOUNT_PTS, ns.mount.mount_pts);
-	s.WriteOptional(SpawnExecCommand::BIND_MOUNT_PTS,
+	s.WriteOptional(ExecCommand::MOUNT_PROC, ns.mount.mount_proc);
+	s.WriteOptional(ExecCommand::MOUNT_DEV, ns.mount.mount_dev);
+	s.WriteOptional(ExecCommand::MOUNT_PTS, ns.mount.mount_pts);
+	s.WriteOptional(ExecCommand::BIND_MOUNT_PTS,
 			ns.mount.bind_mount_pts);
-	s.WriteOptional(SpawnExecCommand::WRITABLE_PROC,
+	s.WriteOptional(ExecCommand::WRITABLE_PROC,
 			ns.mount.writable_proc);
-	s.WriteOptionalString(SpawnExecCommand::PIVOT_ROOT,
+	s.WriteOptionalString(ExecCommand::PIVOT_ROOT,
 			      ns.mount.pivot_root);
-	s.WriteOptional(SpawnExecCommand::MOUNT_ROOT_TMPFS,
+	s.WriteOptional(ExecCommand::MOUNT_ROOT_TMPFS,
 			ns.mount.mount_root_tmpfs);
 
-	s.WriteOptionalString(SpawnExecCommand::MOUNT_TMP_TMPFS,
+	s.WriteOptionalString(ExecCommand::MOUNT_TMP_TMPFS,
 			      ns.mount.mount_tmp_tmpfs);
 
 	for (const auto &i : ns.mount.mounts) {
 		switch (i.type) {
 		case Mount::Type::BIND:
 			if (i.source_fd.IsDefined()) {
-				s.WriteFd(SpawnExecCommand::FD_BIND_MOUNT,
+				s.WriteFd(ExecCommand::FD_BIND_MOUNT,
 					  i.source_fd);
 			} else {
-				s.Write(SpawnExecCommand::BIND_MOUNT);
+				s.Write(ExecCommand::BIND_MOUNT);
 				s.WriteString(i.source);
 			}
 
@@ -256,10 +258,10 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 
 		case Mount::Type::BIND_FILE:
 			if (i.source_fd.IsDefined()) {
-				s.WriteFd(SpawnExecCommand::FD_BIND_MOUNT_FILE,
+				s.WriteFd(ExecCommand::FD_BIND_MOUNT_FILE,
 					  i.source_fd);
 			} else {
-				s.Write(SpawnExecCommand::BIND_MOUNT_FILE);
+				s.Write(ExecCommand::BIND_MOUNT_FILE);
 				s.WriteString(i.source);
 			}
 
@@ -269,47 +271,47 @@ Serialize(SpawnSerializer &s, const NamespaceOptions &ns)
 			break;
 
 		case Mount::Type::TMPFS:
-			s.WriteString(SpawnExecCommand::MOUNT_TMPFS,
+			s.WriteString(ExecCommand::MOUNT_TMPFS,
 				      i.target);
 			s.WriteBool(i.writable);
 			break;
 
 		case Mount::Type::NAMED_TMPFS:
-			s.Write(SpawnExecCommand::MOUNT_NAMED_TMPFS);
+			s.Write(ExecCommand::MOUNT_NAMED_TMPFS);
 			s.WriteString(i.source);
 			s.WriteString(i.target);
 			s.WriteBool(i.writable);
 			break;
 
 		case Mount::Type::WRITE_FILE:
-			s.WriteString(SpawnExecCommand::WRITE_FILE,
+			s.WriteString(ExecCommand::WRITE_FILE,
 				      i.target);
 			s.WriteString(i.source);
 			s.WriteBool(i.optional);
 			break;
 
 		case Mount::Type::SYMLINK:
-			s.WriteString(SpawnExecCommand::SYMLINK, i.target);
+			s.WriteString(ExecCommand::SYMLINK, i.target);
 			s.WriteString(i.source);
 			break;
 		}
 	}
 
 	if (ns.mount.dir_mode != 0711) {
-		s.Write(SpawnExecCommand::DIR_MODE);
+		s.Write(ExecCommand::DIR_MODE);
 		s.WriteT(ns.mount.dir_mode);
 	}
 
-	s.WriteOptionalString(SpawnExecCommand::HOSTNAME, ns.hostname);
+	s.WriteOptionalString(ExecCommand::HOSTNAME, ns.hostname);
 }
 
 static void
-Serialize(SpawnSerializer &s, unsigned i, const ResourceLimit &rlimit)
+Serialize(Serializer &s, unsigned i, const ResourceLimit &rlimit)
 {
 	if (rlimit.IsEmpty())
 		return;
 
-	s.Write(SpawnExecCommand::RLIMIT);
+	s.Write(ExecCommand::RLIMIT);
 	s.WriteU8(i);
 
 	const struct rlimit &data = rlimit;
@@ -317,19 +319,19 @@ Serialize(SpawnSerializer &s, unsigned i, const ResourceLimit &rlimit)
 }
 
 static void
-Serialize(SpawnSerializer &s, const ResourceLimits &rlimits)
+Serialize(Serializer &s, const ResourceLimits &rlimits)
 {
 	for (unsigned i = 0; i < RLIM_NLIMITS; ++i)
 		Serialize(s, i, rlimits.values[i]);
 }
 
 static void
-Serialize(SpawnSerializer &s, const UidGid &uid_gid)
+Serialize(Serializer &s, const UidGid &uid_gid)
 {
 	if (uid_gid.IsEmpty())
 		return;
 
-	s.Write(SpawnExecCommand::UID_GID);
+	s.Write(ExecCommand::UID_GID);
 	s.WriteT(uid_gid.real_uid);
 	s.WriteT(uid_gid.real_gid);
 	s.WriteT(uid_gid.effective_uid);
@@ -342,69 +344,69 @@ Serialize(SpawnSerializer &s, const UidGid &uid_gid)
 }
 
 static void
-Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
+Serialize(Serializer &s, const PreparedChildProcess &p)
 {
-	s.WriteOptionalString(SpawnExecCommand::HOOK_INFO, p.hook_info);
+	s.WriteOptionalString(ExecCommand::HOOK_INFO, p.hook_info);
 
 	if (p.exec_function != nullptr) {
-		s.Write(SpawnExecCommand::EXEC_FUNCTION);
+		s.Write(ExecCommand::EXEC_FUNCTION);
 		s.WriteT(p.exec_function);
 	}
 
 	if (p.exec_fd.IsDefined())
-		s.WriteFd(SpawnExecCommand::EXEC_FD, p.exec_fd);
+		s.WriteFd(ExecCommand::EXEC_FD, p.exec_fd);
 	else
-		s.WriteOptionalString(SpawnExecCommand::EXEC_PATH, p.exec_path);
+		s.WriteOptionalString(ExecCommand::EXEC_PATH, p.exec_path);
 
 	for (const char *i : p.args)
-		s.WriteString(SpawnExecCommand::ARG, i);
+		s.WriteString(ExecCommand::ARG, i);
 
 	for (const char *i : p.env)
-		s.WriteString(SpawnExecCommand::SETENV, i);
+		s.WriteString(ExecCommand::SETENV, i);
 
 	if (p.umask >= 0) {
 		uint16_t umask = p.umask;
-		s.Write(SpawnExecCommand::UMASK);
+		s.Write(ExecCommand::UMASK);
 		s.WriteT(umask);
 	}
 
-	s.CheckWriteFd(SpawnExecCommand::STDIN, p.stdin_fd);
+	s.CheckWriteFd(ExecCommand::STDIN, p.stdin_fd);
 
 	if (p.stdout_fd.IsDefined()) {
 		if (p.stdout_fd == p.stdin_fd)
-			s.Write(SpawnExecCommand::STDOUT_IS_STDIN);
+			s.Write(ExecCommand::STDOUT_IS_STDIN);
 		else
-			s.WriteFd(SpawnExecCommand::STDOUT, p.stdout_fd);
+			s.WriteFd(ExecCommand::STDOUT, p.stdout_fd);
 	}
 
 	if (p.stderr_fd.IsDefined()) {
 		if (p.stderr_fd == p.stdin_fd)
-			s.Write(SpawnExecCommand::STDERR_IS_STDIN);
+			s.Write(ExecCommand::STDERR_IS_STDIN);
 		else
-			s.WriteFd(SpawnExecCommand::STDERR, p.stderr_fd);
+			s.WriteFd(ExecCommand::STDERR, p.stderr_fd);
 	}
 
-	s.CheckWriteFd(SpawnExecCommand::CONTROL, p.control_fd);
+	s.CheckWriteFd(ExecCommand::CONTROL, p.control_fd);
 
-	s.CheckWriteFd(SpawnExecCommand::RETURN_STDERR,
+	s.CheckWriteFd(ExecCommand::RETURN_STDERR,
 		       p.return_stderr.ToFileDescriptor());
 
-	s.CheckWriteFd(SpawnExecCommand::RETURN_PIDFD,
+	s.CheckWriteFd(ExecCommand::RETURN_PIDFD,
 		       p.return_pidfd.ToFileDescriptor());
 
-	s.CheckWriteFd(SpawnExecCommand::RETURN_CGROUP,
+	s.CheckWriteFd(ExecCommand::RETURN_CGROUP,
 		       p.return_cgroup.ToFileDescriptor());
 
-	s.WriteOptionalString(SpawnExecCommand::STDERR_PATH, p.stderr_path);
+	s.WriteOptionalString(ExecCommand::STDERR_PATH, p.stderr_path);
 
 	if (p.priority != 0) {
-		s.Write(SpawnExecCommand::PRIORITY);
+		s.Write(ExecCommand::PRIORITY);
 		s.WriteInt(p.priority);
 	}
 
 	if (p.cgroup != nullptr) {
 		Serialize(s, *p.cgroup);
-		s.WriteOptionalString(SpawnExecCommand::CGROUP_SESSION,
+		s.WriteOptionalString(ExecCommand::CGROUP_SESSION,
 				      p.cgroup_session);
 	}
 
@@ -412,36 +414,36 @@ Serialize(SpawnSerializer &s, const PreparedChildProcess &p)
 	Serialize(s, p.rlimits);
 	Serialize(s, p.uid_gid);
 
-	s.WriteOptionalString(SpawnExecCommand::CHROOT, p.chroot);
-	s.WriteOptionalString(SpawnExecCommand::CHDIR, p.chdir);
+	s.WriteOptionalString(ExecCommand::CHROOT, p.chroot);
+	s.WriteOptionalString(ExecCommand::CHDIR, p.chdir);
 
 	if (p.sched_idle)
-		s.Write(SpawnExecCommand::SCHED_IDLE_);
+		s.Write(ExecCommand::SCHED_IDLE_);
 
 	if (p.ioprio_idle)
-		s.Write(SpawnExecCommand::IOPRIO_IDLE);
+		s.Write(ExecCommand::IOPRIO_IDLE);
 
 #ifdef HAVE_LIBSECCOMP
 	if (p.forbid_user_ns)
-		s.Write(SpawnExecCommand::FORBID_USER_NS);
+		s.Write(ExecCommand::FORBID_USER_NS);
 
 	if (p.forbid_multicast)
-		s.Write(SpawnExecCommand::FORBID_MULTICAST);
+		s.Write(ExecCommand::FORBID_MULTICAST);
 
 	if (p.forbid_bind)
-		s.Write(SpawnExecCommand::FORBID_BIND);
+		s.Write(ExecCommand::FORBID_BIND);
 #endif // HAVE_LIBSECCOMP
 
 #ifdef HAVE_LIBCAP
 	if (p.cap_sys_resource)
-		s.Write(SpawnExecCommand::CAP_SYS_RESOURCE);
+		s.Write(ExecCommand::CAP_SYS_RESOURCE);
 #endif // HAVE_LIBCAP
 
 	if (p.no_new_privs)
-		s.Write(SpawnExecCommand::NO_NEW_PRIVS);
+		s.Write(ExecCommand::NO_NEW_PRIVS);
 
 	if (p.tty)
-		s.Write(SpawnExecCommand::TTY);
+		s.Write(ExecCommand::TTY);
 }
 
 std::unique_ptr<ChildProcessHandle>
@@ -463,14 +465,14 @@ try {
 
 	const unsigned pid = MakePid();
 
-	SpawnSerializer s(SpawnRequestCommand::EXEC);
+	Serializer s{RequestCommand::EXEC};
 
 	try {
 		s.WriteUnsigned(pid);
 		s.WriteString(name);
 
 		Serialize(s, p);
-	} catch (SpawnPayloadTooLargeError) {
+	} catch (PayloadTooLargeError) {
 		throw std::runtime_error("Spawn payload is too large");
 	}
 
@@ -536,7 +538,7 @@ SpawnServerClient::Kill(ChildProcess &child, int signo) noexcept
 }
 
 inline void
-SpawnServerClient::HandleExecCompleteMessage(SpawnPayload payload)
+SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 {
 	assert(!payload.empty());
 
@@ -575,7 +577,7 @@ SpawnServerClient::HandleExecCompleteMessage(SpawnPayload payload)
 }
 
 inline void
-SpawnServerClient::HandleOneExit(SpawnPayload &payload)
+SpawnServerClient::HandleOneExit(Payload &payload)
 {
 	unsigned pid;
 	int status;
@@ -595,7 +597,7 @@ SpawnServerClient::HandleOneExit(SpawnPayload &payload)
 }
 
 inline void
-SpawnServerClient::HandleExitMessage(SpawnPayload payload)
+SpawnServerClient::HandleExitMessage(Payload payload)
 {
 	while (!payload.empty())
 		HandleOneExit(payload);
@@ -607,16 +609,16 @@ inline void
 SpawnServerClient::HandleMessage(std::span<const std::byte> payload,
 				 [[maybe_unused]] std::span<UniqueFileDescriptor> fds)
 {
-	const auto cmd = (SpawnResponseCommand)payload.front();
+	const auto cmd = static_cast<ResponseCommand>(payload.front());
 	payload = payload.subspan(1);
 
 	switch (cmd) {
-	case SpawnResponseCommand::EXEC_COMPLETE:
-		HandleExecCompleteMessage(SpawnPayload{payload});
+	case ResponseCommand::EXEC_COMPLETE:
+		HandleExecCompleteMessage(Payload{payload});
 		break;
 
-	case SpawnResponseCommand::EXIT:
-		HandleExitMessage(SpawnPayload(payload));
+	case ResponseCommand::EXIT:
+		HandleExitMessage(Payload(payload));
 		break;
 	}
 }
@@ -627,7 +629,7 @@ SpawnServerClient::FlushKillQueue()
 	if (kill_queue.empty())
 		return;
 
-	SpawnSerializer s{SpawnRequestCommand::KILL};
+	Serializer s{RequestCommand::KILL};
 
 	for (std::size_t n = 0; n < 256 && !kill_queue.empty(); ++n) {
 		const auto &i = kill_queue.front();

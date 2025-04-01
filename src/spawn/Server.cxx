@@ -50,6 +50,8 @@
 
 class SpawnServerProcess;
 
+using namespace Spawn;
+
 class SpawnFdList {
 	std::vector<UniqueFileDescriptor> v;
 	decltype(v)::iterator i;
@@ -73,7 +75,7 @@ public:
 
 	UniqueFileDescriptor Get() {
 		if (IsEmpty())
-			throw MalformedSpawnPayloadError();
+			throw MalformedPayloadError();
 
 		return std::move(*i++);
 	}
@@ -87,7 +89,7 @@ public:
 	 */
 	FileDescriptor Borrow() {
 		if (IsEmpty())
-			throw MalformedSpawnPayloadError();
+			throw MalformedPayloadError();
 
 		return *i++;
 	}
@@ -193,9 +195,9 @@ private:
 	void SpawnChild(unsigned id, const char *name,
 			PreparedChildProcess &&p);
 
-	void HandleExecMessage(SpawnPayload payload, SpawnFdList &&fds);
-	void HandleOneKill(SpawnPayload &payload);
-	void HandleKillMessage(SpawnPayload payload, SpawnFdList &&fds);
+	void HandleExecMessage(Payload payload, SpawnFdList &&fds);
+	void HandleOneKill(Payload &payload);
+	void HandleKillMessage(Payload payload, SpawnFdList &&fds);
 	void HandleMessage(std::span<const std::byte> payload, SpawnFdList &&fds);
 	void HandleMessage(ReceiveMessageResult &&result);
 
@@ -440,7 +442,7 @@ SpawnServerConnection::SpawnChild(unsigned id, const char *name,
 }
 
 static void
-Read(SpawnPayload &payload, ResourceLimits &rlimits)
+Read(Payload &payload, ResourceLimits &rlimits)
 {
 	unsigned i = (unsigned)payload.ReadByte();
 	struct rlimit &data = rlimits.values[i];
@@ -448,7 +450,7 @@ Read(SpawnPayload &payload, ResourceLimits &rlimits)
 }
 
 static void
-Read(SpawnPayload &payload, UidGid &uid_gid)
+Read(Payload &payload, UidGid &uid_gid)
 {
 	payload.ReadT(uid_gid.real_uid);
 	payload.ReadT(uid_gid.real_gid);
@@ -457,7 +459,7 @@ Read(SpawnPayload &payload, UidGid &uid_gid)
 
 	const size_t n_groups = (std::size_t)payload.ReadByte();
 	if (n_groups > uid_gid.supplementary_groups.max_size())
-		throw MalformedSpawnPayloadError();
+		throw MalformedPayloadError();
 
 	for (size_t i = 0; i < n_groups; ++i)
 		payload.ReadT(uid_gid.supplementary_groups[i]);
@@ -467,7 +469,7 @@ Read(SpawnPayload &payload, UidGid &uid_gid)
 }
 
 inline void
-SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
+SpawnServerConnection::HandleExecMessage(Payload payload,
 					 SpawnFdList &&fds)
 {
 	unsigned id;
@@ -484,35 +486,35 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 	std::forward_list<AssignmentList::Item> assignments;
 
 	while (!payload.empty()) {
-		const SpawnExecCommand cmd = (SpawnExecCommand)payload.ReadByte();
+		const ExecCommand cmd = static_cast<ExecCommand>(payload.ReadByte());
 		switch (cmd) {
-		case SpawnExecCommand::EXEC_FUNCTION:
+		case ExecCommand::EXEC_FUNCTION:
 			payload.ReadT(p.exec_function);
 			break;
 
-		case SpawnExecCommand::EXEC_PATH:
+		case ExecCommand::EXEC_PATH:
 			p.exec_path = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::EXEC_FD:
+		case ExecCommand::EXEC_FD:
 			p.exec_fd = fds.Borrow();
 			break;
 
-		case SpawnExecCommand::ARG:
+		case ExecCommand::ARG:
 			if (p.args.size() >= 16384)
-				throw MalformedSpawnPayloadError();
+				throw MalformedPayloadError();
 
 			p.Append(payload.ReadString());
 			break;
 
-		case SpawnExecCommand::SETENV:
+		case ExecCommand::SETENV:
 			if (p.env.size() >= 16384)
-				throw MalformedSpawnPayloadError();
+				throw MalformedPayloadError();
 
 			p.PutEnv(payload.ReadString());
 			break;
 
-		case SpawnExecCommand::UMASK:
+		case ExecCommand::UMASK:
 			{
 				uint16_t value;
 				payload.ReadT(value);
@@ -521,111 +523,111 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 
 			break;
 
-		case SpawnExecCommand::STDIN:
+		case ExecCommand::STDIN:
 			p.stdin_fd = fds.Borrow();
 			break;
 
-		case SpawnExecCommand::STDOUT:
+		case ExecCommand::STDOUT:
 			p.stdout_fd = fds.Borrow();
 			break;
 
-		case SpawnExecCommand::STDOUT_IS_STDIN:
+		case ExecCommand::STDOUT_IS_STDIN:
 			p.stdout_fd = p.stdin_fd;
 			break;
 
-		case SpawnExecCommand::STDERR:
+		case ExecCommand::STDERR:
 			p.stderr_fd = fds.Borrow();
 			break;
 
-		case SpawnExecCommand::STDERR_IS_STDIN:
+		case ExecCommand::STDERR_IS_STDIN:
 			p.stderr_fd = p.stdin_fd;
 			break;
 
-		case SpawnExecCommand::STDERR_PATH:
+		case ExecCommand::STDERR_PATH:
 			p.stderr_path = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::RETURN_STDERR:
+		case ExecCommand::RETURN_STDERR:
 			p.return_stderr = UniqueSocketDescriptor{fds.Get()};
 			break;
 
-		case SpawnExecCommand::RETURN_PIDFD:
+		case ExecCommand::RETURN_PIDFD:
 			p.return_pidfd = UniqueSocketDescriptor{fds.Get()};
 			break;
 
-		case SpawnExecCommand::RETURN_CGROUP:
+		case ExecCommand::RETURN_CGROUP:
 			p.return_cgroup = UniqueSocketDescriptor{fds.Get()};
 			break;
 
-		case SpawnExecCommand::CONTROL:
+		case ExecCommand::CONTROL:
 			p.control_fd = fds.Borrow();
 			break;
 
-		case SpawnExecCommand::TTY:
+		case ExecCommand::TTY:
 			p.tty = true;
 			break;
 
-		case SpawnExecCommand::USER_NS:
+		case ExecCommand::USER_NS:
 			p.ns.enable_user = true;
 			break;
 
-		case SpawnExecCommand::PID_NS:
+		case ExecCommand::PID_NS:
 			p.ns.enable_pid = true;
 			break;
 
-		case SpawnExecCommand::PID_NS_NAME:
+		case ExecCommand::PID_NS_NAME:
 			p.ns.pid_namespace = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::CGROUP_NS:
+		case ExecCommand::CGROUP_NS:
 			p.ns.enable_cgroup = true;
 			break;
 
-		case SpawnExecCommand::NETWORK_NS:
+		case ExecCommand::NETWORK_NS:
 			p.ns.enable_network = true;
 			break;
 
-		case SpawnExecCommand::NETWORK_NS_NAME:
+		case ExecCommand::NETWORK_NS_NAME:
 			p.ns.network_namespace = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::IPC_NS:
+		case ExecCommand::IPC_NS:
 			p.ns.enable_ipc = true;
 			break;
 
-		case SpawnExecCommand::MOUNT_PROC:
+		case ExecCommand::MOUNT_PROC:
 			p.ns.mount.mount_proc = true;
 			break;
 
-		case SpawnExecCommand::WRITABLE_PROC:
+		case ExecCommand::WRITABLE_PROC:
 			p.ns.mount.writable_proc = true;
 			break;
 
-		case SpawnExecCommand::MOUNT_DEV:
+		case ExecCommand::MOUNT_DEV:
 			p.ns.mount.mount_dev = true;
 			break;
 
-		case SpawnExecCommand::MOUNT_PTS:
+		case ExecCommand::MOUNT_PTS:
 			p.ns.mount.mount_pts = true;
 			break;
 
-		case SpawnExecCommand::BIND_MOUNT_PTS:
+		case ExecCommand::BIND_MOUNT_PTS:
 			p.ns.mount.bind_mount_pts = true;
 			break;
 
-		case SpawnExecCommand::PIVOT_ROOT:
+		case ExecCommand::PIVOT_ROOT:
 			p.ns.mount.pivot_root = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::MOUNT_ROOT_TMPFS:
+		case ExecCommand::MOUNT_ROOT_TMPFS:
 			p.ns.mount.mount_root_tmpfs = true;
 			break;
 
-		case SpawnExecCommand::MOUNT_TMP_TMPFS:
+		case ExecCommand::MOUNT_TMP_TMPFS:
 			p.ns.mount.mount_tmp_tmpfs = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::MOUNT_TMPFS:
+		case ExecCommand::MOUNT_TMPFS:
 			{
 				const char *target = payload.ReadString();
 				bool writable = payload.ReadBool();
@@ -637,7 +639,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
-		case SpawnExecCommand::MOUNT_NAMED_TMPFS:
+		case ExecCommand::MOUNT_NAMED_TMPFS:
 			{
 				const char *source = payload.ReadString();
 				const char *target = payload.ReadString();
@@ -651,7 +653,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
-		case SpawnExecCommand::BIND_MOUNT:
+		case ExecCommand::BIND_MOUNT:
 			{
 				const char *source = payload.ReadString();
 				const char *target = payload.ReadString();
@@ -666,7 +668,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
-		case SpawnExecCommand::BIND_MOUNT_FILE:
+		case ExecCommand::BIND_MOUNT_FILE:
 			{
 				const char *source = payload.ReadString();
 				const char *target = payload.ReadString();
@@ -680,7 +682,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
-		case SpawnExecCommand::FD_BIND_MOUNT:
+		case ExecCommand::FD_BIND_MOUNT:
 			{
 				const char *target = payload.ReadString();
 				bool writable = payload.ReadBool();
@@ -695,7 +697,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
-		case SpawnExecCommand::FD_BIND_MOUNT_FILE:
+		case ExecCommand::FD_BIND_MOUNT_FILE:
 			{
 				const char *target = payload.ReadString();
 				mounts.emplace_front(nullptr, target);
@@ -709,7 +711,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
-		case SpawnExecCommand::WRITE_FILE:
+		case ExecCommand::WRITE_FILE:
 			{
 				const char *path = payload.ReadString();
 				const char *contents = payload.ReadString();
@@ -722,7 +724,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
-		case SpawnExecCommand::SYMLINK:
+		case ExecCommand::SYMLINK:
 			{
 				const char *target = payload.ReadString();
 				const char *source = payload.ReadString();
@@ -734,74 +736,74 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 								    mounts.front());
 			break;
 
-		case SpawnExecCommand::DIR_MODE:
+		case ExecCommand::DIR_MODE:
 			payload.ReadT(p.ns.mount.dir_mode);
 			break;
 
-		case SpawnExecCommand::HOSTNAME:
+		case ExecCommand::HOSTNAME:
 			p.ns.hostname = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::RLIMIT:
+		case ExecCommand::RLIMIT:
 			Read(payload, p.rlimits);
 			break;
 
-		case SpawnExecCommand::UID_GID:
+		case ExecCommand::UID_GID:
 			Read(payload, p.uid_gid);
 			break;
 
-		case SpawnExecCommand::MAPPED_UID:
+		case ExecCommand::MAPPED_UID:
 			payload.ReadT(p.ns.mapped_uid);
 			break;
 
-		case SpawnExecCommand::SCHED_IDLE_:
+		case ExecCommand::SCHED_IDLE_:
 			p.sched_idle = true;
 			break;
 
-		case SpawnExecCommand::IOPRIO_IDLE:
+		case ExecCommand::IOPRIO_IDLE:
 			p.ioprio_idle = true;
 			break;
 
 #ifdef HAVE_LIBSECCOMP
-		case SpawnExecCommand::FORBID_USER_NS:
+		case ExecCommand::FORBID_USER_NS:
 			p.forbid_user_ns = true;
 			break;
 
-		case SpawnExecCommand::FORBID_MULTICAST:
+		case ExecCommand::FORBID_MULTICAST:
 			p.forbid_multicast = true;
 			break;
 
-		case SpawnExecCommand::FORBID_BIND:
+		case ExecCommand::FORBID_BIND:
 			p.forbid_bind = true;
 			break;
 #endif // HAVE_LIBSECCOMP
 
 #ifdef HAVE_LIBCAP
-		case SpawnExecCommand::CAP_SYS_RESOURCE:
+		case ExecCommand::CAP_SYS_RESOURCE:
 			p.cap_sys_resource = true;
 			break;
 #endif // HAVE_LIBCAP
 
-		case SpawnExecCommand::NO_NEW_PRIVS:
+		case ExecCommand::NO_NEW_PRIVS:
 			p.no_new_privs = true;
 			break;
 
-		case SpawnExecCommand::CGROUP:
+		case ExecCommand::CGROUP:
 			if (p.cgroup != nullptr)
-				throw MalformedSpawnPayloadError();
+				throw MalformedPayloadError();
 
 			cgroup.name = payload.ReadString();
 			p.cgroup = &cgroup;
 			break;
 
-		case SpawnExecCommand::CGROUP_SESSION:
+		case ExecCommand::CGROUP_SESSION:
 			if (p.cgroup == nullptr)
-				throw MalformedSpawnPayloadError();
+				throw MalformedPayloadError();
 
 			p.cgroup_session = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::CGROUP_SET:
+		case ExecCommand::CGROUP_SET:
 			if (p.cgroup != nullptr) {
 				const char *set_name = payload.ReadString();
 				const char *set_value = payload.ReadString();
@@ -814,11 +816,11 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				auto &set = assignments.front();
 				cgroup.set.Add(set);
 			} else
-				throw MalformedSpawnPayloadError();
+				throw MalformedPayloadError();
 
 			break;
 
-		case SpawnExecCommand::CGROUP_XATTR:
+		case ExecCommand::CGROUP_XATTR:
 			if (p.cgroup != nullptr) {
 				const char *_name = payload.ReadString();
 				const char *_value = payload.ReadString();
@@ -830,23 +832,23 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 				assignments.emplace_front(_name, _value);
 				cgroup.xattr.Add(assignments.front());
 			} else
-				throw MalformedSpawnPayloadError();
+				throw MalformedPayloadError();
 
 			break;
 
-		case SpawnExecCommand::PRIORITY:
+		case ExecCommand::PRIORITY:
 			payload.ReadInt(p.priority);
 			break;
 
-		case SpawnExecCommand::CHROOT:
+		case ExecCommand::CHROOT:
 			p.chroot = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::CHDIR:
+		case ExecCommand::CHDIR:
 			p.chdir = payload.ReadString();
 			break;
 
-		case SpawnExecCommand::HOOK_INFO:
+		case ExecCommand::HOOK_INFO:
 			p.hook_info = payload.ReadString();
 			break;
 		}
@@ -862,7 +864,7 @@ SpawnServerConnection::HandleExecMessage(SpawnPayload payload,
 }
 
 inline void
-SpawnServerConnection::HandleOneKill(SpawnPayload &payload)
+SpawnServerConnection::HandleOneKill(Payload &payload)
 {
 	unsigned id;
 	int signo;
@@ -881,11 +883,11 @@ SpawnServerConnection::HandleOneKill(SpawnPayload &payload)
 }
 
 inline void
-SpawnServerConnection::HandleKillMessage(SpawnPayload payload,
+SpawnServerConnection::HandleKillMessage(Payload payload,
 					 SpawnFdList &&fds)
 {
 	if (!fds.IsEmpty())
-		throw MalformedSpawnPayloadError();
+		throw MalformedPayloadError();
 
 	while (!payload.empty())
 		HandleOneKill(payload);
@@ -895,23 +897,23 @@ inline void
 SpawnServerConnection::HandleMessage(std::span<const std::byte> payload,
 				     SpawnFdList &&fds)
 {
-	const auto cmd = (SpawnRequestCommand)payload.front();
+	const auto cmd = static_cast<RequestCommand>(payload.front());
 	payload = payload.subspan(1);
 
 	switch (cmd) {
-	case SpawnRequestCommand::CONNECT:
+	case RequestCommand::CONNECT:
 		if (!payload.empty() || fds.size() != 1)
-			throw MalformedSpawnPayloadError();
+			throw MalformedPayloadError();
 
 		process.AddConnection(fds.GetSocket());
 		break;
 
-	case SpawnRequestCommand::EXEC:
-		HandleExecMessage(SpawnPayload(payload), std::move(fds));
+	case RequestCommand::EXEC:
+		HandleExecMessage(Payload{payload}, std::move(fds));
 		break;
 
-	case SpawnRequestCommand::KILL:
-		HandleKillMessage(SpawnPayload(payload), std::move(fds));
+	case RequestCommand::KILL:
+		HandleKillMessage(Payload{payload}, std::move(fds));
 		break;
 	}
 }
@@ -935,7 +937,7 @@ SpawnServerConnection::ReceiveAndHandle()
 
 	try {
 		HandleMessage(std::move(result));
-	} catch (MalformedSpawnPayloadError) {
+	} catch (MalformedPayloadError) {
 		logger(3, "Malformed spawn payload");
 	}
 }
@@ -946,7 +948,7 @@ SpawnServerConnection::FlushExecCompleteQueue()
 	if (exec_complete_queue.empty())
 		return;
 
-	SpawnSerializer s{SpawnResponseCommand::EXEC_COMPLETE};
+	Serializer s{ResponseCommand::EXEC_COMPLETE};
 
 	for (std::size_t n = 0; n < 64 && !exec_complete_queue.empty(); ++n) {
 		const auto &i = exec_complete_queue.front();
@@ -964,7 +966,7 @@ SpawnServerConnection::FlushExitQueue()
 	if (exit_queue.empty())
 		return;
 
-	SpawnSerializer s(SpawnResponseCommand::EXIT);
+	Serializer s(ResponseCommand::EXIT);
 
 	for (std::size_t n = 0; n < 64 && !exit_queue.empty(); ++n) {
 		const auto &i = exit_queue.front();
