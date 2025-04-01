@@ -30,7 +30,7 @@ class PayloadTooLargeError {};
 class Serializer {
 	size_t size = 0;
 
-	std::array<std::byte, 65536> buffer;
+	std::array<std::byte, MAX_DATAGRAM_SIZE> buffer;
 
 	StaticVector<FileDescriptor, 8> fds;
 

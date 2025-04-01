@@ -7,8 +7,11 @@
 #include "spawn/config.h"
 
 #include <cstdint>
+#include <cstddef>
 
 namespace Spawn {
+
+static constexpr std::size_t MAX_DATAGRAM_SIZE = 32768;
 
 /*
  * This header contains definitions for the internal protocol between

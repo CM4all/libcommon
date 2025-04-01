@@ -927,7 +927,7 @@ SpawnServerConnection::HandleMessage(ReceiveMessageResult &&result)
 inline void
 SpawnServerConnection::ReceiveAndHandle()
 {
-	ReceiveMessageBuffer<8192, CMSG_SPACE(sizeof(int) * 32)> rmb;
+	ReceiveMessageBuffer<MAX_DATAGRAM_SIZE, CMSG_SPACE(sizeof(int) * 32)> rmb;
 
 	auto result = ReceiveMessage(socket, rmb, MSG_DONTWAIT);
 	if (result.payload.empty()) {
