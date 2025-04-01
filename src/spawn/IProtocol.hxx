@@ -6,7 +6,7 @@
 
 #include "spawn/config.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 /*
  * This header contains definitions for the internal protocol between
