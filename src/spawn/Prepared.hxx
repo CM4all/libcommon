@@ -19,8 +19,6 @@
 
 struct CgroupOptions;
 class AllocatorPtr;
-class UniqueFileDescriptor;
-class UniqueSocketDescriptor;
 
 struct PreparedChildProcess {
 	/**
