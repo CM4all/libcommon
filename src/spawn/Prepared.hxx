@@ -8,7 +8,7 @@
 #include "NamespaceOptions.hxx"
 #include "UidGid.hxx"
 #include "spawn/config.h"
-#include "io/UniqueFileDescriptor.hxx"
+#include "io/FileDescriptor.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 
 #include <span>

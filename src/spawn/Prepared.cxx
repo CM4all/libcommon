@@ -3,7 +3,6 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Prepared.hxx"
-#include "io/UniqueFileDescriptor.hxx"
 #include "util/StringCompare.hxx"
 #include "AllocatorPtr.hxx"
 
