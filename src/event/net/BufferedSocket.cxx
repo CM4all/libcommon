@@ -14,6 +14,8 @@
 #include "io/uring/Queue.hxx"
 #endif
 
+#include <utility> // for std::unreachable()
+
 #include <sys/uio.h> // for struct iovec
 
 #ifdef HAVE_URING
@@ -156,9 +158,7 @@ BufferedSocketHandler::OnBufferedDirect([[maybe_unused]] SocketDescriptor fd,
 {
 	/* not reachable if nobody calls
            BufferedSocket::SetDirect(true) */
-#ifdef __GNUC__
-	__builtin_unreachable();
-#endif
+	std::unreachable();
 }
 
 bool
@@ -380,10 +380,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 
 	case BufferedResult::AGAIN:
 		/* unreachable, has been handled by InvokeData() */
-		assert(false);
-#ifdef __GNUC__
-		__builtin_unreachable();
-#endif
+		std::unreachable();
 
 	case BufferedResult::DESTROYED:
 		/* the BufferedSocket object has been destroyed by the
@@ -392,10 +389,7 @@ BufferedSocket::SubmitFromBuffer() noexcept
 		return BufferedReadResult::DESTROYED;
 	}
 
-	assert(false);
-#ifdef __GNUC__
-	__builtin_unreachable();
-#endif
+	std::unreachable();
 }
 
 /**
@@ -479,10 +473,7 @@ BufferedSocket::SubmitDirect() noexcept
 		return BufferedReadResult::DESTROYED;
 	}
 
-	assert(false);
-#ifdef __GNUC__
-	__builtin_unreachable();
-#endif
+	std::unreachable();
 }
 
 inline BufferedSocket::FillBufferResult
@@ -860,9 +851,7 @@ try {
 		case WRITE_BLOCKING:
 		case WRITE_SOURCE_EOF:
 			/* these enum values are not allowed here */
-#ifdef __GNUC__
-			__builtin_unreachable();
-#endif
+			std::unreachable();
 		}
 	}
 
