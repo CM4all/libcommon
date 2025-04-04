@@ -31,6 +31,13 @@ public:
 	}
 
 	/**
+	 * Is the bucket currently full?
+	 */
+	constexpr bool IsFull(const TokenBucketConfig config, double now) const noexcept {
+		return (now - zero_time) * config.rate >= config.burst;
+	}
+
+	/**
 	 * Calculate how many tokens are available.
 	 */
 	constexpr double GetAvailable(const TokenBucketConfig config, double now) const noexcept {
