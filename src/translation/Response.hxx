@@ -38,6 +38,7 @@
 
 enum class HttpStatus : uint_least16_t;
 enum class TranslationCommand : uint16_t;
+enum class Arch : uint_least8_t;
 struct TranslationLayoutItem;
 class AllocatorPtr;
 class UniqueRegex;
@@ -355,6 +356,8 @@ struct TranslateResponse {
 	 */
 	HeaderForwardSettings response_header_forward;
 #endif
+
+	Arch arch;
 
 #if TRANSLATION_ENABLE_CACHE
 	bool uncached;

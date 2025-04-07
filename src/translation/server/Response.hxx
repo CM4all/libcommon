@@ -519,6 +519,10 @@ public:
 		return Packet(TranslationCommand::POOL, name);
 	}
 
+	auto &Arch(std::string_view name) noexcept {
+		return Packet(TranslationCommand::ARCH, name);
+	}
+
 	template<typename P>
 	auto &InternalRedirect(P payload) noexcept {
 		return Packet(TranslationCommand::INTERNAL_REDIRECT, payload);

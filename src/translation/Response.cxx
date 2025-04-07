@@ -3,6 +3,7 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Response.hxx"
+#include "system/Arch.hxx"
 #if TRANSLATION_ENABLE_WIDGET
 #include "widget/View.hxx"
 #endif
@@ -97,6 +98,8 @@ TranslateResponse::Clear() noexcept
 	test_path = nullptr;
 
 	stats_tag = nullptr;
+
+	arch = Arch::NONE;
 
 #if TRANSLATION_ENABLE_CACHE
 	uncached = false;
@@ -348,6 +351,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	untrusted_raw_site_suffix =
 		alloc.CheckDup(src.untrusted_raw_site_suffix);
 #endif
+
+	arch = src.arch;
 
 #if TRANSLATION_ENABLE_CACHE
 	uncached = src.uncached;

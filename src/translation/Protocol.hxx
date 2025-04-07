@@ -1350,6 +1350,13 @@ enum class TranslationCommand : uint16_t {
 	 * and burst.
 	 */
 	RATE_LIMIT_SITE_TRAFFIC = 273,
+
+	/**
+	 * Select a CPU architecture.  For example, this can select a
+	 * subset of #POOL members.  Payload is a string understood by
+	 * ParseArch().
+	 */
+	ARCH = 274,
 };
 
 struct TranslationHeader {

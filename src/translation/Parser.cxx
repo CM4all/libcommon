@@ -33,6 +33,7 @@
 #include "http/Status.hxx"
 #endif
 #include "lib/fmt/RuntimeError.hxx"
+#include "system/Arch.hxx"
 #include "util/CharUtil.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringCompare.hxx"
@@ -4489,6 +4490,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::ARCH:
+		response.arch = ParseArch(string_payload);
+		if (response.arch == Arch::NONE)
+			throw std::runtime_error{"malformed ARCH packet"};
+
+		return;
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
