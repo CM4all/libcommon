@@ -22,6 +22,12 @@ public:
 			std::rethrow_exception(error);
 	}
 
+	const StringCurlResponse &GetResponse() const {
+		CheckRethrowError();
+
+		return std::move(response);
+	}
+
 	StringCurlResponse TakeResponse() && {
 		CheckRethrowError();
 
