@@ -7,13 +7,15 @@
 #include <string>
 
 class SocketAddress;
+typedef struct AvahiStringList AvahiStringList;
 
 namespace Avahi {
 
 class ServiceExplorerListener {
 public:
 	virtual void OnAvahiNewObject(const std::string &key,
-				      SocketAddress address) noexcept = 0;
+				      SocketAddress address,
+				      AvahiStringList *txt) noexcept = 0;
 	virtual void OnAvahiRemoveObject(const std::string &key) noexcept = 0;
 	virtual void OnAvahiAllForNow() noexcept {}
 };
