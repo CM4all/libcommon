@@ -22,5 +22,5 @@ StringCurlRequest(CurlEasy easy)
 	if (code != CURLE_OK)
 		throw Curl::MakeError(code, "CURL error");
 
-	return std::move(handler).GetResponse();
+	return std::move(handler).TakeResponse();
 }

@@ -22,7 +22,7 @@ public:
 			std::rethrow_exception(error);
 	}
 
-	StringCurlResponse GetResponse() && {
+	StringCurlResponse TakeResponse() && {
 		CheckRethrowError();
 
 		return std::move(response);
