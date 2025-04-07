@@ -7,6 +7,8 @@
 #include "Error.hxx"
 #include "ErrorHandler.hxx"
 #include "Client.hxx"
+#include "Resolver.hxx"
+#include "net/AllocatedSocketAddress.hxx"
 #include "net/IPv4Address.hxx"
 #include "net/IPv6Address.hxx"
 #include "util/Cast.hxx"
@@ -17,6 +19,57 @@
 #include <cassert>
 
 namespace Avahi {
+
+class ServiceExplorer::Object {
+	ServiceExplorer &explorer;
+
+	ServiceResolverPtr resolver;
+
+	AllocatedSocketAddress address;
+
+public:
+	explicit Object(ServiceExplorer &_explorer) noexcept
+		:explorer(_explorer) {}
+
+	Object(const Object &) = delete;
+	Object &operator=(const Object &) = delete;
+
+	const std::string &GetKey() const noexcept;
+
+	bool IsActive() const noexcept {
+		return !address.IsNull();
+	}
+
+	bool HasFailed() const noexcept {
+		return resolver == nullptr && !IsActive();
+	}
+
+	void Resolve(AvahiClient *client, AvahiIfIndex interface,
+		     AvahiProtocol protocol,
+		     const char *name,
+		     const char *type,
+		     const char *domain) noexcept;
+	void CancelResolve() noexcept;
+
+private:
+	void ServiceResolverCallback(AvahiIfIndex interface,
+				     AvahiResolverEvent event,
+				     const AvahiAddress *a,
+				     uint16_t port) noexcept;
+	static void ServiceResolverCallback(AvahiServiceResolver *r,
+					    AvahiIfIndex interface,
+					    AvahiProtocol protocol,
+					    AvahiResolverEvent event,
+					    const char *name,
+					    const char *type,
+					    const char *domain,
+					    const char *host_name,
+					    const AvahiAddress *a,
+					    uint16_t port,
+					    AvahiStringList *txt,
+					    AvahiLookupResultFlags flags,
+					    void *userdata) noexcept;
+};
 
 inline const std::string &
 ServiceExplorer::Object::GetKey() const noexcept

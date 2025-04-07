@@ -5,9 +5,7 @@
 #pragma once
 
 #include "Browser.hxx"
-#include "Resolver.hxx"
 #include "ConnectionListener.hxx"
-#include "net/AllocatedSocketAddress.hxx"
 
 #include <avahi-client/lookup.h>
 
@@ -38,56 +36,7 @@ class ServiceExplorer final : ConnectionListener {
 
 	ServiceBrowserPtr avahi_browser;
 
-	class Object {
-		ServiceExplorer &explorer;
-
-		ServiceResolverPtr resolver;
-
-		AllocatedSocketAddress address;
-
-	public:
-		explicit Object(ServiceExplorer &_explorer) noexcept
-			:explorer(_explorer) {}
-
-		Object(const Object &) = delete;
-		Object &operator=(const Object &) = delete;
-
-		const std::string &GetKey() const noexcept;
-
-		bool IsActive() const noexcept {
-			return !address.IsNull();
-		}
-
-		bool HasFailed() const noexcept {
-			return resolver == nullptr && !IsActive();
-		}
-
-		void Resolve(AvahiClient *client, AvahiIfIndex interface,
-			     AvahiProtocol protocol,
-			     const char *name,
-			     const char *type,
-			     const char *domain) noexcept;
-		void CancelResolve() noexcept;
-
-	private:
-		void ServiceResolverCallback(AvahiIfIndex interface,
-					     AvahiResolverEvent event,
-					     const AvahiAddress *a,
-					     uint16_t port) noexcept;
-		static void ServiceResolverCallback(AvahiServiceResolver *r,
-						    AvahiIfIndex interface,
-						    AvahiProtocol protocol,
-						    AvahiResolverEvent event,
-						    const char *name,
-						    const char *type,
-						    const char *domain,
-						    const char *host_name,
-						    const AvahiAddress *a,
-						    uint16_t port,
-						    AvahiStringList *txt,
-						    AvahiLookupResultFlags flags,
-						    void *userdata) noexcept;
-	};
+	class Object;
 
 	using Map = std::map<std::string, Object>;
 	Map objects;

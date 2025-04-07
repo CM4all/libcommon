@@ -10,6 +10,7 @@
 #include "lib/fmt/SocketAddressFormatter.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
+#include "net/SocketAddress.hxx"
 #include "util/PrintException.hxx"
 
 #include <fmt/core.h>
