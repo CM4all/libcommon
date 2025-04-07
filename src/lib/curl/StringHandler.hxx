@@ -6,7 +6,6 @@
 
 #include "Handler.hxx"
 #include "StringResponse.hxx"
-#include "util/SpanCast.hxx"
 
 /**
  * A #CurlResponseHandler implementation which stores the response
@@ -31,20 +30,8 @@ public:
 
 public:
 	/* virtual methods from class CurlResponseHandler */
-
-	void OnHeaders(HttpStatus status, Curl::Headers &&headers) override {
-		response.status = status;
-		response.headers = std::move(headers);
-	}
-
-	void OnData(std::span<const std::byte> data) override {
-		response.body.append(ToStringView(data));
-	}
-
-	void OnEnd() override {
-	}
-
-	void OnError(std::exception_ptr e) noexcept override {
-		error = std::move(e);
-	}
+	void OnHeaders(HttpStatus status, Curl::Headers &&headers) override;
+	void OnData(std::span<const std::byte> data) override;
+	void OnEnd() override;
+	void OnError(std::exception_ptr e) noexcept override;
 };

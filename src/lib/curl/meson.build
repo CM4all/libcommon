@@ -8,6 +8,7 @@ endif
 curl_sources = [
   'Version.cxx',
   'Init.cxx',
+  'StringHandler.cxx',
   'StringGlue.cxx',
 ]
 
