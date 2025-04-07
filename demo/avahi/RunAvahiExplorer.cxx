@@ -7,10 +7,12 @@
 #include "lib/avahi/ErrorHandler.hxx"
 #include "lib/avahi/Explorer.hxx"
 #include "lib/avahi/ExplorerListener.hxx"
+#include "lib/fmt/SocketAddressFormatter.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
-#include "net/FormatAddress.hxx"
 #include "util/PrintException.hxx"
+
+#include <fmt/core.h>
 
 class Instance final : Avahi::ServiceExplorerListener, Avahi::ErrorHandler {
 	EventLoop event_loop;
@@ -40,14 +42,11 @@ private:
 	/* virtual methods from class Avahi::ServiceExplorerListener */
 	void OnAvahiNewObject(const std::string &key,
 			      SocketAddress address) noexcept override {
-		char buffer[1024];
-
-		printf("new '%s' at %s\n", key.c_str(),
-		       ToString(std::span{buffer}, address, "?"));
+		fmt::print("new {:?} at {}\n", key, address);
 	}
 
 	void OnAvahiRemoveObject(const std::string &key) noexcept override {
-		printf("remove '%s'\n", key.c_str());
+		fmt::print("remove {:?}\n", key);
 	}
 
 	/* virtual methods from class Avahi::ErrorHandler */
@@ -61,7 +60,7 @@ int
 main(int argc, char **argv)
 try {
 	if (argc != 2) {
-		fprintf(stderr, "Usage: %s SERVICE\n", argv[0]);
+		fmt::print(stderr, "Usage: {} SERVICE\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
