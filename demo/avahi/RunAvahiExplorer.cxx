@@ -7,6 +7,7 @@
 #include "lib/avahi/ErrorHandler.hxx"
 #include "lib/avahi/Explorer.hxx"
 #include "lib/avahi/ExplorerListener.hxx"
+#include "lib/avahi/StringListCast.hxx"
 #include "lib/fmt/SocketAddressFormatter.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
@@ -46,7 +47,7 @@ private:
 			      AvahiStringList *txt) noexcept override {
 		fmt::print("new {:?} at {}\n", key, address);
 		for (; txt != nullptr; txt = txt->next)
-			fmt::print("  TXT {:?}\n", std::string_view{reinterpret_cast<const char *>(txt->text), txt->size});
+			fmt::print("  TXT {:?}\n", Avahi::ToStringView(*txt));
 	}
 
 	void OnAvahiRemoveObject(const std::string &key) noexcept override {
