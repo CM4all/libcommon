@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "StringList.hxx"
+#include "StringListPtr.hxx"
 #include "util/IntrusiveList.hxx"
 
 #include <avahi-common/address.h>
