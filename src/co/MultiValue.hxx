@@ -19,7 +19,7 @@ namespace Co {
  * This object must remain valid until all waiters have been resumed
  * (or canceled).
  *
- * This is similar to #MultiValue, but there is a return value and it
+ * This is similar to #MultiAwaitable, but there is a return value and it
  * cannot be reused.
  */
 template<typename T>
