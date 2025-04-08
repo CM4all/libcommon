@@ -10,6 +10,7 @@ test(
     'TestMultiAwaitable.cxx',
     'TestMultiResume.cxx',
     'TestMultiValue.cxx',
+    'TestMutex.cxx',
     include_directories: inc,
     dependencies: [
       gtest,
