@@ -38,6 +38,13 @@ public:
 	}
 
 	/**
+	 * When will the bucket be full?
+	 */
+	constexpr double GetFullTime(const TokenBucketConfig config) const noexcept {
+		return zero_time + config.burst / config.rate;
+	}
+
+	/**
 	 * Calculate how many tokens are available.
 	 */
 	constexpr double GetAvailable(const TokenBucketConfig config, double now) const noexcept {
