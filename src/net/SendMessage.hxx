@@ -16,10 +16,10 @@ class SocketDescriptor;
 class MessageHeader : public msghdr {
 public:
 	constexpr MessageHeader(std::span<const struct iovec> payload) noexcept
-		:msghdr{nullptr, 0,
-			const_cast<struct iovec *>(payload.data()),
-			payload.size(),
-			nullptr, 0, 0} {}
+		:msghdr{} {
+		msg_iov = const_cast<struct iovec *>(payload.data());
+		msg_iovlen = payload.size();
+	}
 
 	constexpr MessageHeader(std::span<struct iovec> payload) noexcept
 		:MessageHeader(std::span<const struct iovec>{payload}) {}
