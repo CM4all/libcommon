@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <linux/stat.h> // for STX_* (on Musl)
 
 static constexpr int
 RecursiveCopyOptionsToStatxMask(unsigned options) noexcept
