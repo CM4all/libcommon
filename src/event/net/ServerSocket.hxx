@@ -6,7 +6,7 @@
 
 #include "net/UniqueSocketDescriptor.hxx"
 #include "event/SocketEvent.hxx"
-#include "io/uring/config.h" // for HAVE_URING
+#include "event/config.h" // for HAVE_URING
 
 #include <exception>
 

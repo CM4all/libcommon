@@ -7,7 +7,7 @@
 #include "DefaultFifoBuffer.hxx"
 #include "SocketWrapper.hxx"
 #include "event/DeferEvent.hxx"
-#include "io/uring/config.h" // for HAVE_URING
+#include "event/config.h" // for HAVE_URING
 #include "util/DestructObserver.hxx"
 #include "util/LeakDetector.hxx"
 
