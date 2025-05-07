@@ -11,7 +11,7 @@
  * Cast a #statx_timestamp (returned from the Linux statx() system
  * call) to a std::chrono::system_clock::time_point.
  */
-constexpr std::chrono::system_clock::time_point
+inline std::chrono::system_clock::time_point
 ToSystemTimePoint(const struct statx_timestamp ts) noexcept
 {
 	return std::chrono::system_clock::from_time_t(ts.tv_sec)
