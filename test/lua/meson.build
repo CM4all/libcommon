@@ -4,6 +4,7 @@ endif
 
 test_lua_sources = [
   'TestClass.cxx',
+  'TestChrono.cxx',
   'TestCoRunner.cxx',
   'TestForEach.cxx',
 ]
