@@ -105,7 +105,7 @@ struct SpawnConfig {
 			VerifyUid(uid_gid.real_uid);
 
 		if (uid_gid.real_gid != UidGid::UNSET_GID)
-			VerifyUid(uid_gid.real_gid);
+			VerifyGid(uid_gid.real_gid);
 
 		VerifyUid(uid_gid.effective_uid);
 		VerifyGid(uid_gid.effective_gid);
