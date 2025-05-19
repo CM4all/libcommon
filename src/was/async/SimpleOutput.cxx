@@ -45,7 +45,7 @@ SimpleOutput::Activate(DisposableBuffer _buffer) noexcept
 void
 SimpleOutput::OnPipeReady(unsigned events) noexcept
 try {
-	if (events & (SocketEvent::HANGUP|SocketEvent::ERROR))
+	if (events & SocketEvent::CLOSED_MASK)
 		throw std::runtime_error("Hangup on WAS pipe");
 
 	TryWrite();

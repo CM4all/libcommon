@@ -189,7 +189,7 @@ ResolveHostnameRequest::OnResponse(std::string_view s)
 void
 ResolveHostnameRequest::OnSocketReady(unsigned events) noexcept
 try {
-	if (events & (socket.ERROR|socket.HANGUP))
+	if (events & socket.CLOSED_MASK)
 		throw SocketClosedPrematurelyError{};
 
 	char buffer[4096];
