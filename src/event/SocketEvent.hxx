@@ -175,6 +175,16 @@ public:
 		Schedule(IMPLICIT_FLAGS);
 	}
 
+	/**
+	 * Cancel READ but schedule READ_HANGUP.  This is useful to be
+	 * able to detect hangup while we're not interested in reading
+	 * further data from the socket; in that case, the Linux
+	 * kernel will not report HANGUP.
+	 */
+	void CancelReadAndScheduleReadHangup() noexcept {
+		Schedule((GetScheduledFlags() & ~READ) | READ_HANGUP);
+	}
+
 	bool IsReadPending() const noexcept {
 		return GetScheduledFlags() & READ;
 	}
