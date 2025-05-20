@@ -156,12 +156,6 @@ LEAP_IN_GREG(unsigned year) noexcept
 // ---------- implementation (public) --------------------------
 */
 
-/**
- * This is an implementation of the "slender"
- * algorithm described in the feb. 1993 paper
- * "efficient timestamp input and output" by
- * C. Dyreson and R. Snodgrass. (Chapter 4.3).
- */
 struct tm
 sysx_time_gmtime(time_t tm32) noexcept
 {
