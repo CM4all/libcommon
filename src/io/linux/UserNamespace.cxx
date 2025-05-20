@@ -30,14 +30,14 @@ WriteFileOrThrow(FileDescriptor directory, const char *path, std::string_view da
 void
 SetupUidMap(unsigned pid, unsigned uid,
 	    unsigned mapped_uid,
-	    unsigned uid2,
+	    unsigned uid2, unsigned mapped_uid2,
 	    bool root)
 {
 	char data_buffer[256], *p = data_buffer;
 
 	p = fmt::format_to(p, "{} {} 1\n", mapped_uid, uid);
 	if (uid2 != 0 && uid2 != uid)
-		p = fmt::format_to(p, "{} {} 1\n", uid2, uid2);
+		p = fmt::format_to(p, "{} {} 1\n", mapped_uid2, uid2);
 	if (root && uid != 0)
 		p = stpcpy(p, "0 0 1\n");
 

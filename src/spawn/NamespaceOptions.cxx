@@ -93,6 +93,7 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 	SetupUidMap(pid, uid_gid.effective_uid,
 		    mapped_uid > 0 ? mapped_uid : uid_gid.effective_uid,
 		    uid_gid.real_uid,
+		    uid_gid.real_uid,
 		    false);
 }
 

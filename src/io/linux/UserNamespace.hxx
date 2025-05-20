@@ -27,12 +27,13 @@ DenySetGroups(unsigned pid) noexcept;
  * @param mapped_uid the user id the #uid parameter is mapped to
  * @param uid2 a second user id to be mapped (on itself); zero means
  * none
+ * @param mapped_uid2 the user id the #uid2 parameter is mapped to
  * @param root true to also map root
  */
 void
 SetupUidMap(unsigned pid, unsigned uid,
 	    unsigned mapped_uid,
-	    unsigned uid2,
+	    unsigned uid2, unsigned mapped_uid2,
 	    bool root);
 
 /**
