@@ -94,7 +94,7 @@ http_date_format(std::chrono::system_clock::time_point t) noexcept
 	return buffer;
 }
 
-static int
+static constexpr int
 parse_2digit(const char *p) noexcept
 {
 	if (!IsDigitASCII(p[0]) || !IsDigitASCII(p[1]))
@@ -103,7 +103,7 @@ parse_2digit(const char *p) noexcept
 	return (p[0] - '0') * 10 + (p[1] - '0');
 }
 
-static int
+static constexpr int
 parse_4digit(const char *p) noexcept
 {
 	if (!IsDigitASCII(p[0]) || !IsDigitASCII(p[1]) ||
