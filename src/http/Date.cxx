@@ -13,6 +13,8 @@
 
 #include <string.h>
 
+using std::string_view_literals::operator""sv;
+
 static constexpr std::array<char, 4>
 operator ""_a4(const char *data, std::size_t size)
 {
@@ -63,19 +65,29 @@ month_name(int month) noexcept
 		      ? month : 12];
 }
 
+static constexpr char *
+Copy(char *dest, std::string_view src) noexcept
+{
+	return std::copy(src.begin(), src.end(), dest);
+}
+
+static constexpr char *
+Copy(char *dest, std::span<const char> src) noexcept
+{
+	return std::copy(src.begin(), src.end(), dest);
+}
+
 char *
 http_date_format_r(char *buffer,
 		   std::chrono::system_clock::time_point t) noexcept
 {
 	const struct tm tm = sysx_time_gmtime(std::chrono::system_clock::to_time_t(t));
 
-	*(uint32_t *)(void *)buffer = *(const uint32_t *)(const void *)wday_name(tm.tm_wday).data();
-	buffer += 4;
+	buffer = Copy(buffer, wday_name(tm.tm_wday));
 	*buffer++ = ' ';
 	buffer = format_2digit(buffer, tm.tm_mday);
 	*buffer++ = ' ';
-	*(uint32_t *)(void *)buffer = *(const uint32_t *)(const void *)month_name(tm.tm_mon).data();
-	buffer += 4;
+	buffer = Copy(buffer, month_name(tm.tm_mon));
 	buffer = format_4digit(buffer, tm.tm_year + 1900);
 	*buffer++ = ' ';
 	buffer = format_2digit(buffer, tm.tm_hour);
@@ -83,9 +95,7 @@ http_date_format_r(char *buffer,
 	buffer = format_2digit(buffer, tm.tm_min);
 	*buffer++ = ':';
 	buffer = format_2digit(buffer, tm.tm_sec);
-	*buffer++ = ' ';
-	*(uint32_t *)(void *)buffer = *(const uint32_t *)(const void *)"GMT";
-	buffer += 3;
+	buffer = Copy(buffer, " GMT"sv);
 
 	return buffer;
 }
