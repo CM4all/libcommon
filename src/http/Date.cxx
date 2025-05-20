@@ -7,45 +7,56 @@
 #include "util/CharUtil.hxx"
 #include "util/DecimalFormat.hxx"
 
+#include <array>
 #include <cstdint>
+#include <span>
 
 #include <string.h>
 
-static constexpr char wdays[8][5] = {
-	"Sun,",
-	"Mon,",
-	"Tue,",
-	"Wed,",
-	"Thu,",
-	"Fri,",
-	"Sat,",
-	"???,",
+static constexpr std::array<char, 4>
+operator ""_a4(const char *data, std::size_t size)
+{
+	if (size != 4)
+		throw "Bad size";
+
+	return {data[0], data[1], data[2], data[3]};
+}
+
+static constexpr std::array wdays = {
+	"Sun,"_a4,
+	"Mon,"_a4,
+	"Tue,"_a4,
+	"Wed,"_a4,
+	"Thu,"_a4,
+	"Fri,"_a4,
+	"Sat,"_a4,
+	"???,"_a4,
 };
 
-static constexpr char months[13][5] = {
-	"Jan ",
-	"Feb ",
-	"Mar ",
-	"Apr ",
-	"May ",
-	"Jun ",
-	"Jul ",
-	"Aug ",
-	"Sep ",
-	"Oct ",
-	"Nov ",
-	"Dec ",
-	"???,",
+static constexpr std::array months = {
+	"Jan "_a4,
+	"Feb "_a4,
+	"Mar "_a4,
+	"Apr "_a4,
+	"May "_a4,
+	"Jun "_a4,
+	"Jul "_a4,
+	"Aug "_a4,
+	"Sep "_a4,
+	"Oct "_a4,
+	"Nov "_a4,
+	"Dec "_a4,
+	"???,"_a4,
 };
 
-static const char *
+static constexpr std::span<const char, 4>
 wday_name(int wday) noexcept
 {
 	return wdays[wday >= 0 && wday < 7
 		     ? wday : 7];
 }
 
-static const char *
+static constexpr std::span<const char, 4>
 month_name(int month) noexcept
 {
 	return months[month >= 0 && month < 12
@@ -58,11 +69,11 @@ http_date_format_r(char *buffer,
 {
 	const struct tm tm = sysx_time_gmtime(std::chrono::system_clock::to_time_t(t));
 
-	*(uint32_t *)(void *)buffer = *(const uint32_t *)(const void *)wday_name(tm.tm_wday);
+	*(uint32_t *)(void *)buffer = *(const uint32_t *)(const void *)wday_name(tm.tm_wday).data();
 	buffer[4] = ' ';
 	format_2digit(buffer + 5, tm.tm_mday);
 	buffer[7] = ' ';
-	*(uint32_t *)(void *)(buffer + 8) = *(const uint32_t *)(const void *)month_name(tm.tm_mon);
+	*(uint32_t *)(void *)(buffer + 8) = *(const uint32_t *)(const void *)month_name(tm.tm_mon).data();
 	format_4digit(buffer + 12, tm.tm_year + 1900);
 	buffer[16] = ' ';
 	format_2digit(buffer + 17, tm.tm_hour);
@@ -114,7 +125,7 @@ parse_month_name(const char *p) noexcept
 	int i;
 
 	for (i = 0; i < 12; ++i)
-		if (*(const uint32_t *)(const void *)months[i] == *(const uint32_t *)(const void *)p)
+		if (*(const uint32_t *)(const void *)months[i].data() == *(const uint32_t *)(const void *)p)
 			return i;
 
 	return -1;
