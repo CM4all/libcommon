@@ -8,18 +8,20 @@
 #include <cstdint>
 #include <cstring>
 
-inline void
+constexpr char *
 format_2digit(char *dest, uint_least16_t number) noexcept
 {
-	dest[0] = (char)('0' + (number / 10));
-	dest[1] = (char)('0' + number % 10);
+	*dest++ = (char)('0' + (number / 10));
+	*dest++ = (char)('0' + number % 10);
+	return dest;
 }
 
-inline  void
+constexpr char *
 format_4digit(char *dest, uint_least32_t number) noexcept
 {
-	dest[0] = (char)('0' + number / 1000);
-	dest[1] = (char)('0' + (number / 100) % 10);
-	dest[2] = (char)('0' + (number / 10) % 10);
-	dest[3] = (char)('0' + number % 10);
+	*dest++ = (char)('0' + number / 1000);
+	*dest++ = (char)('0' + (number / 100) % 10);
+	*dest++ = (char)('0' + (number / 10) % 10);
+	*dest++ = (char)('0' + number % 10);
+	return dest;
 }
