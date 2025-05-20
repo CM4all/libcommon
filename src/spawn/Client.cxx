@@ -219,9 +219,9 @@ Serialize(Serializer &s, const NamespaceOptions &ns)
 			      ns.network_namespace);
 	s.WriteOptional(ExecCommand::IPC_NS, ns.enable_ipc);
 
-	if (ns.mapped_uid > 0) {
-		s.Write(ExecCommand::MAPPED_UID);
-		s.WriteT(ns.mapped_uid);
+	if (ns.mapped_effective_uid > 0) {
+		s.Write(ExecCommand::MAPPED_EFFECTIVE_UID);
+		s.WriteT(ns.mapped_effective_uid);
 	}
 
 	s.WriteOptional(ExecCommand::MOUNT_PROC, ns.mount.mount_proc);

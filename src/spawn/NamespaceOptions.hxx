@@ -42,10 +42,10 @@ struct NamespaceOptions {
 	bool enable_ipc = false;
 
 	/**
-	 * The uid visible to the spawned process.  If zero, then the
-	 * original uid is mapped.
+	 * The effective uid visible to the spawned process.  If zero,
+	 * then the original effective uid is mapped.
 	 */
-	uid_t mapped_uid = 0;
+	uid_t mapped_effective_uid = 0;
 
 	/**
 	 * The name of the PID namespace to reassociate with.  The
@@ -76,7 +76,7 @@ struct NamespaceOptions {
 		 enable_cgroup(src.enable_cgroup),
 		 enable_network(src.enable_network),
 		 enable_ipc(src.enable_ipc),
-		 mapped_uid(src.mapped_uid),
+		 mapped_effective_uid(src.mapped_effective_uid),
 		 pid_namespace(src.pid_namespace),
 		 network_namespace(src.network_namespace),
 		 hostname(src.hostname),

@@ -1005,10 +1005,10 @@ TranslateParser::HandleMappedUidGid(std::span<const std::byte> payload)
 	if (payload.size() != sizeof(*value) || *value <= 0)
 		throw std::runtime_error{"malformed MAPPED_UID_GID packet"};
 
-	if (ns_options->mapped_uid != 0)
+	if (ns_options->mapped_effective_uid != 0)
 		throw std::runtime_error{"duplicate MAPPED_UID_GID packet"};
 
-	ns_options->mapped_uid = *value;
+	ns_options->mapped_effective_uid = *value;
 }
 
 inline void
