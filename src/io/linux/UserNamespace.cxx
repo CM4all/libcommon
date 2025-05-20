@@ -13,7 +13,7 @@
 #include <cassert>
 
 void
-DenySetGroups(unsigned pid)
+DenySetGroups(unsigned pid) noexcept
 try {
 	TryWriteExistingFile(OpenProcPid(pid), "setgroups", "deny");
 } catch (...) {

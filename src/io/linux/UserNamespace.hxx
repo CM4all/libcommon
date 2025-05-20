@@ -10,9 +10,11 @@
  * Write "deny" to /proc/self/setgroups which is necessary for
  * unprivileged processes to set up a gid_map.  See Linux commits
  * 9cc4651 and 66d2f33 for details.
+ *
+ * Errors are ignored silently.
  */
 void
-DenySetGroups(unsigned pid);
+DenySetGroups(unsigned pid) noexcept;
 
 /**
  * Set up a uid mapping for a user namespace.
