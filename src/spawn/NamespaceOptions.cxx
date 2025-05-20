@@ -78,13 +78,18 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 	   to eliminate duplicates, and then map them all into the new
 	   user namespace */
 	std::set<unsigned> gids;
-	gids.emplace(uid_gid.effective_gid);
+
+	// TODO: map the current effective gid if no gid was given?
+	if (uid_gid.effective_gid != UidGid::UNSET_GID)
+		gids.emplace(uid_gid.effective_gid);
 	if (uid_gid.real_gid != UidGid::UNSET_GID)
 		gids.emplace(uid_gid.real_gid);
 	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
 		gids.emplace(uid_gid.supplementary_groups[i]);
 
-	SetupGidMap(pid, gids);
+	if (!gids.empty())
+		SetupGidMap(pid, gids);
+
 	SetupUidMap(pid, uid_gid.effective_uid,
 		    mapped_uid > 0 ? mapped_uid : uid_gid.effective_uid,
 		    uid_gid.real_uid,
@@ -114,14 +119,7 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 	if (enable_user) {
 		DenySetGroups(0);
 
-		if (uid_gid.effective_gid != UidGid::UNSET_GID)
-			SetupGidMap(0, uid_gid.effective_gid, false);
-		// TODO: map the current effective gid if no gid was given?
-
-		SetupUidMap(0, uid_gid.effective_uid,
-			    mapped_uid > 0 ? mapped_uid : uid_gid.effective_uid,
-			    uid_gid.real_uid,
-			    false);
+		SetupUidGidMap(uid_gid, 0);
 	}
 
 	if (network_namespace != nullptr)
