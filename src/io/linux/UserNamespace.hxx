@@ -19,6 +19,8 @@ DenySetGroups(unsigned pid) noexcept;
 /**
  * Set up a uid mapping for a user namespace.
  *
+ * Throws on error.
+ *
  * @param pid the process id whose user namespace shall be modified; 0
  * for current process
  * @param uid the user id to be mapped inside the user namespace
@@ -36,6 +38,8 @@ SetupUidMap(unsigned pid, unsigned uid,
 /**
  * Set up a gid mapping for a user namespace.
  *
+ * Throws on error.
+ *
  * @param pid the process id whose user namespace shall be modified; 0
  * for current process
  * @param gid the group id to be mapped inside the user namespace
@@ -46,6 +50,8 @@ SetupGidMap(unsigned pid, unsigned gid, bool root);
 
 /**
  * Set up a gid mapping for a user namespace.
+ *
+ * Throws on error.
  *
  * @param pid the process id whose user namespace shall be modified; 0
  * for current process
