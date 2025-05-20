@@ -72,7 +72,7 @@ NamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 }
 
 void
-NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, int pid) const
+NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 {
 	/* collect all gids (including supplementary groups) in a std::set
 	   to eliminate duplicates, and then map them all into the new

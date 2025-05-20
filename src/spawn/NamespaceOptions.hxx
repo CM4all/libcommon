@@ -108,7 +108,7 @@ struct NamespaceOptions {
 	uint_least64_t GetCloneFlags(uint_least64_t flags) const noexcept;
 
 	void SetupUidGidMap(const UidGid &uid_gid,
-			    int pid) const;
+			    unsigned pid) const;
 
 	/**
 	 * Apply #pid_namespace.  This will affect new child
