@@ -3,12 +3,8 @@
 
 #include "gmtime.hxx"
 
-#include <assert.h>
-#include <stdint.h>
-
-typedef uint8_t xuint8;
-typedef uint16_t xuint16;
-typedef uint32_t xuint32;
+#include <cassert>
+#include <cstdint>
 
 /*
 // ---------- macros -------------------------------------------
@@ -24,13 +20,13 @@ static constexpr unsigned SECONDS_PER_DAY = 24 * 60 * 60;
 // ---------- data ---------------------------------------------
 */
 
-static constexpr xuint32 leap_years[13] = {
+static constexpr uint_least32_t leap_years[13] = {
 	0x88888888, 0x88888888, 0x88888888, 0x88888880, 0x88888888,
 	0x88888888, 0x88888808, 0x88888888, 0x88888888, 0x88888088,
 	0x88888888, 0x88888888, 0x00008888
 };
 
-static constexpr xuint16 day_to_day[366] = {
+static constexpr uint_least16_t day_to_day[366] = {
 	0x0101, 0x0202, 0x0303, 0x0404, 0x0505, 0x0606, 0x0707, 0x0808,
 	0x0909, 0x0a0a, 0x0b0b, 0x0c0c, 0x0d0d, 0x0e0e, 0x0f0f, 0x1010,
 	0x1111, 0x1212, 0x1313, 0x1414, 0x1515, 0x1616, 0x1717, 0x1818,
@@ -79,7 +75,7 @@ static constexpr xuint16 day_to_day[366] = {
 	0x1a1b, 0x1b1c, 0x1c1d, 0x1d1e, 0x1e1f, 0x1f00
 };
 
-static constexpr xuint8 day_to_mon[366] = {
+static constexpr uint_least8_t day_to_mon[366] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -119,7 +115,7 @@ static constexpr xuint8 day_to_mon[366] = {
 	0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xb0
 };
 
-static constexpr xuint8 years_to_leap_days[401] = {
+static constexpr uint_least8_t years_to_leap_days[401] = {
 	0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
 	5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
 	10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13,
