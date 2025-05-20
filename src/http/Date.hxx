@@ -10,7 +10,11 @@
 
 #include <chrono>
 
-void
+/**
+ * @return the end pointer (not null-terminated)
+ */
+[[nodiscard]]
+char *
 http_date_format_r(char *buffer,
 		   std::chrono::system_clock::time_point t) noexcept;
 
