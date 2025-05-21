@@ -1357,6 +1357,15 @@ enum class TranslationCommand : uint16_t {
 	 * ParseArch().
 	 */
 	ARCH = 274,
+
+	/**
+	 * Like #MAPPED_UID_GID, but affects the ids specified in
+	 * #REAL_UID_GID.
+	 *
+	 * Currently, only the uid is implemented, therefore the
+	 * payload must be a 32-bit integer.
+	 */
+	MAPPED_REAL_UID_GID = 275,
 };
 
 struct TranslationHeader {

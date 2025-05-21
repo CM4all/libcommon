@@ -1162,6 +1162,11 @@ public:
 			return *this;
 		}
 
+		auto MappedRealUid(const uint32_t &uid) noexcept {
+			response.PacketT(TranslationCommand::MAPPED_REAL_UID_GID, uid);
+			return *this;
+		}
+
 		auto Umask(uint16_t mask) noexcept {
 			response.PacketT(TranslationCommand::UMASK, mask);
 			return *this;

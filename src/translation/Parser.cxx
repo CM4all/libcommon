@@ -1012,6 +1012,24 @@ TranslateParser::HandleMappedUidGid(std::span<const std::byte> payload)
 }
 
 inline void
+TranslateParser::HandleMappedRealUidGid(std::span<const std::byte> payload)
+{
+	if (child_options == nullptr ||
+	    child_options->uid_gid.real_uid == UidGid::UNSET_UID ||
+	    ns_options == nullptr || !ns_options->enable_user)
+		throw std::runtime_error{"misplaced MAPPED_REAL_UID_GID packet"};
+
+	const auto *value = (const uint32_t *)(const void *)payload.data();
+	if (payload.size() != sizeof(*value) || *value <= 0)
+		throw std::runtime_error{"malformed MAPPED_REAL_UID_GID packet"};
+
+	if (ns_options->mapped_real_uid != 0)
+		throw std::runtime_error{"duplicate MAPPED_REAL_UID_GID packet"};
+
+	ns_options->mapped_real_uid = *value;
+}
+
+inline void
 TranslateParser::HandleRealUidGid(std::span<const std::byte> payload)
 {
 	if (child_options == nullptr || child_options->uid_gid.IsEmpty())
@@ -4275,6 +4293,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::MAPPED_UID_GID:
 #if TRANSLATION_ENABLE_SPAWN
 		HandleMappedUidGid(payload);
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::MAPPED_REAL_UID_GID:
+#if TRANSLATION_ENABLE_SPAWN
+		HandleMappedRealUidGid(payload);
 		return;
 #else
 		break;
