@@ -314,15 +314,14 @@ try {
 #endif // HAVE_LIBSECCOMP
 
 	if (!early_uid_gid && !skip_uid_gid) {
-		if (p.ns.mapped_effective_uid > 0 && p.ns.mapped_effective_uid != p.uid_gid.effective_uid) {
-			/* we need to use the mapped_uid because the
-			   original uid isn't valid from inside this
-			   user namespace */
-			auto mapped = p.uid_gid;
-			mapped.effective_uid = p.ns.mapped_effective_uid;
-			mapped.Apply();
-		} else
-			p.uid_gid.Apply();
+		auto uid_gid = p.uid_gid;
+
+		/* we need to use the mapped UID because the original
+		   UID isn't valid from inside this user namespace */
+		if (p.ns.mapped_effective_uid > 0)
+			uid_gid.effective_uid = p.ns.mapped_effective_uid;
+
+		uid_gid.Apply();
 	}
 
 	/* call chroot() after creating a new user namespace because
