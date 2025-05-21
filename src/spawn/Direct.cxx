@@ -318,6 +318,8 @@ try {
 
 		/* we need to use the mapped UID because the original
 		   UID isn't valid from inside this user namespace */
+		if (p.ns.mapped_real_uid > 0)
+			uid_gid.real_uid = p.ns.mapped_real_uid;
 		if (p.ns.mapped_effective_uid > 0)
 			uid_gid.effective_uid = p.ns.mapped_effective_uid;
 

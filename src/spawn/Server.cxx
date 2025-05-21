@@ -752,6 +752,10 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			Read(payload, p.uid_gid);
 			break;
 
+		case ExecCommand::MAPPED_REAL_UID:
+			payload.ReadT(p.ns.mapped_real_uid);
+			break;
+
 		case ExecCommand::MAPPED_EFFECTIVE_UID:
 			payload.ReadT(p.ns.mapped_effective_uid);
 			break;

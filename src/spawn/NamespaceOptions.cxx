@@ -26,6 +26,7 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 	 enable_cgroup(src.enable_cgroup),
 	 enable_network(src.enable_network),
 	 enable_ipc(src.enable_ipc),
+	 mapped_real_uid(src.mapped_real_uid),
 	 mapped_effective_uid(src.mapped_effective_uid),
 	 pid_namespace(alloc.CheckDup(src.pid_namespace)),
 	 network_namespace(alloc.CheckDup(src.network_namespace)),
@@ -93,7 +94,7 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 	SetupUidMap(pid, uid_gid.effective_uid,
 		    mapped_effective_uid > 0 ? mapped_effective_uid : uid_gid.effective_uid,
 		    uid_gid.real_uid,
-		    uid_gid.real_uid,
+		    mapped_real_uid > 0 ? mapped_real_uid : uid_gid.real_uid,
 		    false);
 }
 
@@ -172,6 +173,9 @@ NamespaceOptions::MakeId(char *p) const noexcept
 
 	if (enable_ipc)
 		p = (char *)mempcpy(p, ";ins", 4);
+
+	if (mapped_real_uid > 0)
+		p = fmt::format_to(p, ";mru{}", mapped_real_uid);
 
 	if (mapped_effective_uid > 0)
 		p = fmt::format_to(p, ";meu{}", mapped_effective_uid);

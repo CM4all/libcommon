@@ -58,6 +58,8 @@ try {
 			p.uid_gid.real_uid = atoi(real_uid);
 		} else if (const char *real_gid = StringAfterPrefix(arg, "--real-gid=")) {
 			p.uid_gid.real_gid = atoi(real_gid);
+		} else if (const char *mapped_real_uid = StringAfterPrefix(arg, "--mapped-real-uid=")) {
+			p.ns.mapped_real_uid = atoi(mapped_real_uid);
 		} else if (const char *mapped_effective_uid = StringAfterPrefix(arg, "--mapped-effective-uid=")) {
 			p.ns.mapped_effective_uid = atoi(mapped_effective_uid);
 		} else if (StringIsEqual(arg, "--userns")) {
