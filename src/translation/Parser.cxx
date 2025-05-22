@@ -54,6 +54,8 @@
 
 using std::string_view_literals::operator""sv;
 
+#if TRANSLATION_ENABLE_SPAWN
+
 inline bool
 TranslateParser::HasArgs() const noexcept
 {
@@ -69,8 +71,6 @@ TranslateParser::HasArgs() const noexcept
 
 	return false;
 }
-
-#if TRANSLATION_ENABLE_SPAWN
 
 void
 TranslateParser::SetChildOptions(ChildOptions &_child_options)
@@ -2125,6 +2125,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		throw std::runtime_error{"deprecated DELEGATE packet"};
 
 	case TranslationCommand::APPEND:
+#if TRANSLATION_ENABLE_SPAWN
 		if (!IsValidNonEmptyString(string_payload))
 			throw std::runtime_error("malformed APPEND packet");
 
@@ -2133,6 +2134,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		args_builder.Add(alloc, string_payload.data(), false);
 		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::EXPAND_APPEND:
 #if TRANSLATION_ENABLE_EXPAND

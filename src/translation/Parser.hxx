@@ -111,6 +111,8 @@ class TranslateParser {
 
 	/** the tail of the current mount_list */
 	IntrusiveForwardList<Mount>::iterator mount_list;
+
+	ExpandableStringList::Builder env_builder, args_builder;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
@@ -131,8 +133,6 @@ class TranslateParser {
 
 	AddressListBuilder address_list_builder;
 #endif
-
-	ExpandableStringList::Builder env_builder, args_builder;
 
 #if TRANSLATION_ENABLE_RADDRESS
 	ExpandableStringList::Builder params_builder;
@@ -194,9 +194,9 @@ public:
 	}
 
 private:
+#if TRANSLATION_ENABLE_SPAWN
 	bool HasArgs() const noexcept;
 
-#if TRANSLATION_ENABLE_SPAWN
 	void SetChildOptions(ChildOptions &_child_options);
 #endif // TRANSLATION_ENABLE_SPAWN
 
