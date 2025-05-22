@@ -745,10 +745,10 @@ translate_client_uts_namespace(NamespaceOptions *ns,
 			       std::string_view payload)
 {
 	if (!IsValidNonEmptyString(payload))
-		throw std::runtime_error("malformed MOUNT_UTS_NAMESPACE packet");
+		throw std::runtime_error{"malformed UTS_NAMESPACE packet"};
 
 	if (ns == nullptr || ns->hostname != nullptr)
-		throw std::runtime_error("misplaced MOUNT_UTS_NAMESPACE packet");
+		throw std::runtime_error{"misplaced UTS_NAMESPACE packet"};
 
 	ns->hostname = payload.data();
 }
