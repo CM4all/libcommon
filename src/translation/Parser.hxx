@@ -232,7 +232,14 @@ private:
 
 	void HandleMountNamedTmpfs(std::string_view payload);
 
+	void HandlePivotRoot(std::string_view payload);
+	void HandleMountRootTmpfs(std::string_view payload);
+	void HandleHome(std::string_view payload);
+#if TRANSLATION_ENABLE_EXPAND
+	void HandleExpandHome(std::string_view payload);
+#endif
 	void HandleMountHome(std::string_view payload);
+	void HandleMountProc(std::string_view payload);
 
 	void HandleBindMount(std::string_view payload,
 			     bool expand, bool writable, bool exec=false,
@@ -241,6 +248,11 @@ private:
 	void HandleSymlink(std::string_view payload);
 
 	void HandleWriteFile(std::string_view payload);
+	void HandleUtsNamespace(std::string_view payload);
+
+	void HandleRlimits(std::string_view payload);
+	void HandleStderrPath(std::string_view payload, bool jailed);
+	void HandleExpandStderrPath(std::string_view payload);
 #endif // TRANSLATION_ENABLE_SPAWN
 
 #if TRANSLATION_ENABLE_WANT

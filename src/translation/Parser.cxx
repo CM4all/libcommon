@@ -502,44 +502,42 @@ translate_client_expand_pair(ExpandableStringList::Builder &builder,
 
 #if TRANSLATION_ENABLE_SPAWN
 
-static void
-translate_client_pivot_root(NamespaceOptions *ns, std::string_view payload)
+inline void
+TranslateParser::HandlePivotRoot(std::string_view payload)
 {
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed PIVOT_ROOT packet");
 
-	if (ns == nullptr || ns->mount.pivot_root != nullptr ||
-	    ns->mount.mount_root_tmpfs)
+	if (ns_options == nullptr || ns_options->mount.pivot_root != nullptr ||
+	    ns_options->mount.mount_root_tmpfs)
 		throw std::runtime_error("misplaced PIVOT_ROOT packet");
 
-	ns->mount.pivot_root = payload.data();
+	ns_options->mount.pivot_root = payload.data();
 }
 
-static void
-translate_client_mount_root_tmpfs(NamespaceOptions *ns,
-				  size_t payload_length)
+inline void
+TranslateParser::HandleMountRootTmpfs(std::string_view payload)
 {
-	if (payload_length > 0)
+	if (!payload.empty())
 		throw std::runtime_error("malformed MOUNT_ROOT_TMPFS packet");
 
-	if (ns == nullptr || ns->mount.pivot_root != nullptr ||
-	    ns->mount.mount_root_tmpfs)
+	if (ns_options == nullptr || ns_options->mount.pivot_root != nullptr ||
+	    ns_options->mount.mount_root_tmpfs)
 		throw std::runtime_error("misplaced MOUNT_ROOT_TMPFS packet");
 
-	ns->mount.mount_root_tmpfs = true;
+	ns_options->mount.mount_root_tmpfs = true;
 }
 
-static void
-translate_client_home(NamespaceOptions *ns,
-		      std::string_view payload)
+inline void
+TranslateParser::HandleHome(std::string_view payload)
 {
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed HOME packet");
 
 	bool ok = false;
 
-	if (ns != nullptr && ns->mount.home == nullptr) {
-		ns->mount.home = payload.data();
+	if (ns_options != nullptr && ns_options->mount.home == nullptr) {
+		ns_options->mount.home = payload.data();
 		ok = true;
 	}
 
@@ -549,36 +547,34 @@ translate_client_home(NamespaceOptions *ns,
 
 #if TRANSLATION_ENABLE_EXPAND
 
-static void
-translate_client_expand_home(NamespaceOptions *ns,
-			     std::string_view payload)
+inline void
+TranslateParser::HandleExpandHome(std::string_view payload)
 {
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed EXPAND_HOME packet");
 
-	if (ns == nullptr)
+	if (ns_options == nullptr)
 		throw std::runtime_error{"misplaced EXPAND_HOME packet"};
 
-	if (ns->mount.expand_home)
+	if (ns_options->mount.expand_home)
 		throw std::runtime_error{"duplicate EXPAND_HOME packet"};
 
-	ns->mount.expand_home = true;
-	ns->mount.home = payload.data();
+	ns_options->mount.expand_home = true;
+	ns_options->mount.home = payload.data();
 }
 
 #endif
 
-static void
-translate_client_mount_proc(NamespaceOptions *ns,
-			    size_t payload_length)
+inline void
+TranslateParser::HandleMountProc(std::string_view payload)
 {
-	if (payload_length > 0)
+	if (!payload.empty())
 		throw std::runtime_error("malformed MOUNT_PROC packet");
 
-	if (ns == nullptr || ns->mount.mount_proc)
+	if (ns_options == nullptr || ns_options->mount.mount_proc)
 		throw std::runtime_error("misplaced MOUNT_PROC packet");
 
-	ns->mount.mount_proc = true;
+	ns_options->mount.mount_proc = true;
 }
 
 static void
@@ -740,22 +736,20 @@ TranslateParser::HandleWriteFile(std::string_view payload)
 	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
 }
 
-static void
-translate_client_uts_namespace(NamespaceOptions *ns,
-			       std::string_view payload)
+inline void
+TranslateParser::HandleUtsNamespace(std::string_view payload)
 {
 	if (!IsValidNonEmptyString(payload))
 		throw std::runtime_error{"malformed UTS_NAMESPACE packet"};
 
-	if (ns == nullptr || ns->hostname != nullptr)
+	if (ns_options == nullptr || ns_options->hostname != nullptr)
 		throw std::runtime_error{"misplaced UTS_NAMESPACE packet"};
 
-	ns->hostname = payload.data();
+	ns_options->hostname = payload.data();
 }
 
-static void
-translate_client_rlimits(AllocatorPtr alloc, ChildOptions *child_options,
-			 std::string_view payload)
+inline void
+TranslateParser::HandleRlimits(std::string_view payload)
 {
 	if (child_options == nullptr)
 		throw std::runtime_error("misplaced RLIMITS packet");
@@ -929,12 +923,10 @@ translate_client_expires_relative_with_query(TranslateResponse &response,
 
 #if TRANSLATION_ENABLE_SPAWN
 
-static void
-translate_client_stderr_path(ChildOptions *child_options,
-			     const std::string_view path,
-			     bool jailed)
+inline void
+TranslateParser::HandleStderrPath(std::string_view payload, bool jailed)
 {
-	if (!IsValidAbsolutePath(path))
+	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed STDERR_PATH packet");
 
 	if (child_options == nullptr || child_options->stderr_null)
@@ -943,15 +935,14 @@ translate_client_stderr_path(ChildOptions *child_options,
 	if (child_options->stderr_path != nullptr)
 		throw std::runtime_error("duplicate STDERR_PATH packet");
 
-	child_options->stderr_path = path.data();
+	child_options->stderr_path = payload.data();
 	child_options->stderr_jailed = jailed;
 }
 
 #if TRANSLATION_ENABLE_EXPAND
 
-static void
-translate_client_expand_stderr_path(ChildOptions *child_options,
-				    std::string_view payload)
+inline void
+TranslateParser::HandleExpandStderrPath(std::string_view payload)
 {
 	if (!IsValidNonEmptyString(payload))
 		throw std::runtime_error("malformed EXPAND_STDERR_PATH packet");
@@ -1786,8 +1777,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::HOME:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_home(ns_options,
-				      string_payload);
+		HandleHome(string_payload);
 		return;
 #else
 		break;
@@ -2692,7 +2682,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::PIVOT_ROOT:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_pivot_root(ns_options, string_payload);
+		HandlePivotRoot(string_payload);
 		return;
 #else
 		break;
@@ -2700,7 +2690,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::MOUNT_PROC:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_mount_proc(ns_options, payload.size());
+		HandleMountProc(string_payload);
 		return;
 #else
 		break;
@@ -2733,7 +2723,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::UTS_NAMESPACE:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_uts_namespace(ns_options, string_payload);
+		HandleUtsNamespace(string_payload);
 		return;
 #else
 		break;
@@ -2741,7 +2731,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::RLIMITS:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_rlimits(alloc, child_options, string_payload);
+		HandleRlimits(string_payload);
 		return;
 #else
 		break;
@@ -2837,9 +2827,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::STDERR_PATH:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_stderr_path(child_options,
-					     string_payload,
-					     false);
+		HandleStderrPath(string_payload, false);
 		return;
 #else
 		break;
@@ -3184,17 +3172,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::EXPAND_HOME:
 #if TRANSLATION_ENABLE_EXPAND
-		translate_client_expand_home(ns_options,
-					     string_payload);
-		return;
+		return HandleExpandHome(string_payload);
 #else
 		break;
 #endif
 
 	case TranslationCommand::EXPAND_STDERR_PATH:
 #if TRANSLATION_ENABLE_EXPAND
-		translate_client_expand_stderr_path(child_options,
-						    string_payload);
+		HandleExpandStderrPath(string_payload);
 		return;
 #else
 		break;
@@ -3555,7 +3540,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::STDERR_PATH_JAILED:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_stderr_path(child_options, string_payload, true);
+		HandleStderrPath(string_payload, true);
 		return;
 #else
 		break;
@@ -3679,7 +3664,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::MOUNT_ROOT_TMPFS:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_mount_root_tmpfs(ns_options, payload.size());
+		HandleMountRootTmpfs(string_payload);
 		return;
 #else
 		break;
