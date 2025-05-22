@@ -76,9 +76,51 @@ inline void
 TranslateParser::SetChildOptions(ChildOptions &_child_options) noexcept
 {
 	child_options = &_child_options;
-	ns_options = &child_options->ns;
-	mount_list = ns_options->mount.mounts.before_begin();
+	mount_list = child_options->ns.mount.mounts.before_begin();
 	env_builder = child_options->env;
+}
+
+inline NamespaceOptions *
+TranslateParser::GetNamespaceOptions() noexcept
+{
+	return child_options != nullptr
+		? &child_options->ns
+		: nullptr;
+}
+
+ChildOptions &
+TranslateParser::MakeChildOptions(const char *error_message)
+{
+	if (child_options == nullptr)
+		throw std::runtime_error{error_message};
+
+	return *child_options;
+}
+
+inline ExpandableStringList::Builder &
+TranslateParser::MakeEnvBuilder(const char *error_message)
+{
+	MakeChildOptions(error_message);
+	return env_builder;
+}
+
+inline NamespaceOptions &
+TranslateParser::MakeNamespaceOptions(const char *error_message)
+{
+	return MakeChildOptions(error_message).ns;
+}
+
+inline MountNamespaceOptions &
+TranslateParser::MakeMountNamespaceOptions(const char *error_message)
+{
+	return MakeNamespaceOptions(error_message).mount;
+}
+
+void
+TranslateParser::AddMount(const char *error_message, Mount *mount)
+{
+	auto &options = MakeMountNamespaceOptions(error_message);
+	mount_list = options.mounts.insert_after(mount_list, *mount);
 }
 
 #endif // TRANSLATION_ENABLE_SPAWN
@@ -290,7 +332,6 @@ TranslateParser::AddView(const char *name)
 	widget_view_tail = response.views.insert_after(widget_view_tail, *new_view);
 	resource_address = &new_view->address;
 	child_options = nullptr;
-	ns_options = nullptr;
 	file_address = nullptr;
 	http_address = nullptr;
 	cgi_address = nullptr;
@@ -508,11 +549,13 @@ TranslateParser::HandlePivotRoot(std::string_view payload)
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed PIVOT_ROOT packet");
 
-	if (ns_options == nullptr || ns_options->mount.pivot_root != nullptr ||
-	    ns_options->mount.mount_root_tmpfs)
-		throw std::runtime_error("misplaced PIVOT_ROOT packet");
+	auto &options = MakeMountNamespaceOptions("misplaced PIVOT_ROOT packet");
 
-	ns_options->mount.pivot_root = payload.data();
+	if (options.pivot_root != nullptr ||
+	    options.mount_root_tmpfs)
+		throw std::runtime_error("duplicate PIVOT_ROOT packet");
+
+	options.pivot_root = payload.data();
 }
 
 inline void
@@ -521,11 +564,13 @@ TranslateParser::HandleMountRootTmpfs(std::string_view payload)
 	if (!payload.empty())
 		throw std::runtime_error("malformed MOUNT_ROOT_TMPFS packet");
 
-	if (ns_options == nullptr || ns_options->mount.pivot_root != nullptr ||
-	    ns_options->mount.mount_root_tmpfs)
-		throw std::runtime_error("misplaced MOUNT_ROOT_TMPFS packet");
+	auto &options = MakeMountNamespaceOptions("misplaced MOUNT_ROOT_TMPFS packet");
 
-	ns_options->mount.mount_root_tmpfs = true;
+	if (options.pivot_root != nullptr ||
+	    options.mount_root_tmpfs)
+		throw std::runtime_error("duplicate MOUNT_ROOT_TMPFS packet");
+
+	options.mount_root_tmpfs = true;
 }
 
 inline void
@@ -534,15 +579,12 @@ TranslateParser::HandleHome(std::string_view payload)
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed HOME packet");
 
-	bool ok = false;
+	auto &options = MakeMountNamespaceOptions("misplaced HOME packet");
 
-	if (ns_options != nullptr && ns_options->mount.home == nullptr) {
-		ns_options->mount.home = payload.data();
-		ok = true;
-	}
+	if (options.home != nullptr)
+		throw std::runtime_error("duplicate HOME packet");
 
-	if (!ok)
-		throw std::runtime_error("misplaced HOME packet");
+	options.home = payload.data();
 }
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -553,14 +595,12 @@ TranslateParser::HandleExpandHome(std::string_view payload)
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed EXPAND_HOME packet");
 
-	if (ns_options == nullptr)
-		throw std::runtime_error{"misplaced EXPAND_HOME packet"};
-
-	if (ns_options->mount.expand_home)
+	auto &options = MakeMountNamespaceOptions("misplaced EXPAND_HOME packet");
+	if (options.expand_home)
 		throw std::runtime_error{"duplicate EXPAND_HOME packet"};
 
-	ns_options->mount.expand_home = true;
-	ns_options->mount.home = payload.data();
+	options.expand_home = true;
+	options.home = payload.data();
 }
 
 #endif
@@ -571,10 +611,11 @@ TranslateParser::HandleMountProc(std::string_view payload)
 	if (!payload.empty())
 		throw std::runtime_error("malformed MOUNT_PROC packet");
 
-	if (ns_options == nullptr || ns_options->mount.mount_proc)
-		throw std::runtime_error("misplaced MOUNT_PROC packet");
+	auto &options = MakeMountNamespaceOptions("misplaced MOUNT_PROC packet");
+	if (options.mount_proc)
+		throw std::runtime_error("duplicate MOUNT_PROC packet");
 
-	ns_options->mount.mount_proc = true;
+	options.mount_proc = true;
 }
 
 inline void
@@ -583,10 +624,12 @@ TranslateParser::HandleMountTmpTmpfs(std::string_view payload)
 	if (!IsValidString(payload))
 		throw std::runtime_error("malformed MOUNT_TMP_TMPFS packet");
 
-	if (ns_options == nullptr || ns_options->mount.mount_tmp_tmpfs != nullptr)
-		throw std::runtime_error("misplaced MOUNT_TMP_TMPFS packet");
+	auto &options = MakeMountNamespaceOptions("misplaced MOUNT_TMP_TMPFS packet");
 
-	ns_options->mount.mount_tmp_tmpfs = payload.data() != nullptr
+	if (options.mount_tmp_tmpfs != nullptr)
+		throw std::runtime_error("duplicate MOUNT_TMP_TMPFS packet");
+
+	options.mount_tmp_tmpfs = payload.data() != nullptr
 		? payload.data()
 		: "";
 }
@@ -597,24 +640,25 @@ TranslateParser::HandleMountHome(std::string_view payload)
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed MOUNT_HOME packet");
 
-	if (ns_options == nullptr || ns_options->mount.home == nullptr)
+	auto &options = MakeMountNamespaceOptions("misplaced RLIMITS packet");
+	if (options.home == nullptr)
 		throw std::runtime_error("misplaced MOUNT_HOME packet");
 
-	if (ns_options->mount.HasMountOn(payload.data()))
+	if (options.HasMountOn(payload.data()))
 		throw std::runtime_error{"duplicate MOUNT_HOME packet"};
 
 	auto *m = alloc.New<Mount>(/* skip the slash to make it relative */
-		ns_options->mount.home + 1,
+		options.home + 1,
 		payload.data(),
 		true, true);
 
 #if TRANSLATION_ENABLE_EXPAND
-	m->expand_source = ns_options->mount.expand_home;
+	m->expand_source = options.expand_home;
 #endif
 
-	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
+	mount_list = options.mounts.insert_after(mount_list, *m);
 
-	assert(ns_options->mount.HasMountOn(payload.data()));
+	assert(options.HasMountOn(payload.data()));
 }
 
 inline void
@@ -626,11 +670,8 @@ TranslateParser::HandleMountTmpfs(std::string_view payload, bool writable)
 	    payload == "/tmp"sv)
 		throw std::runtime_error("malformed MOUNT_TMPFS packet");
 
-	if (ns_options == nullptr)
-		throw std::runtime_error("misplaced MOUNT_TMPFS packet");
-
-	auto *m = alloc.New<Mount>(Mount::Tmpfs{}, payload.data(), writable);
-	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
+	AddMount("misplaced MOUNT_TMPFS packet",
+		 alloc.New<Mount>(Mount::Tmpfs{}, payload.data(), writable));
 }
 
 inline void
@@ -641,15 +682,11 @@ TranslateParser::HandleMountNamedTmpfs(std::string_view payload)
 	    !IsValidAbsolutePath(target))
 		throw std::runtime_error("malformed MOUNT_NAMED_TMPFS packet");
 
-	if (ns_options == nullptr)
-		throw std::runtime_error("misplaced MOUNT_NAMED_TMPFS packet");
-
-	auto *m = alloc.New<Mount>(Mount::NamedTmpfs{},
-				   source.data(),
-				   target.data(),
-				   true);
-
-	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
+	AddMount("misplaced MOUNT_NAMED_TMPFS packet",
+		 alloc.New<Mount>(Mount::NamedTmpfs{},
+				  source.data(),
+				  target.data(),
+				  true));
 }
 
 inline void
@@ -683,9 +720,6 @@ TranslateParser::HandleBindMount(std::string_view payload,
 		source = _source.data() + 1;
 	}
 
-	if (ns_options == nullptr)
-		throw std::runtime_error("misplaced BIND_MOUNT packet");
-
 	auto *m = alloc.New<Mount>(
 		source,
 		target.data(),
@@ -699,7 +733,7 @@ TranslateParser::HandleBindMount(std::string_view payload,
 	if (file)
 		m->type = Mount::Type::BIND_FILE;
 
-	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
+	AddMount("misplaced BIND_MOUNT packet", m);
 }
 
 inline void
@@ -710,20 +744,14 @@ TranslateParser::HandleSymlink(std::string_view payload)
 	    !IsValidAbsolutePath(linkpath))
 		throw std::runtime_error("malformed SYMLINK packet");
 
-	if (ns_options == nullptr)
-		throw std::runtime_error("misplaced SYMLINK packet");
-
 	auto *m = alloc.New<Mount>(target.data(), linkpath.data());
 	m->type = Mount::Type::SYMLINK;
-	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
+	AddMount("misplaced SYMLINK packet", m);
 }
 
 inline void
 TranslateParser::HandleWriteFile(std::string_view payload)
 {
-	if (ns_options == nullptr)
-		throw std::runtime_error("misplaced WRITE_FILE packet");
-
 	const auto [path, contents] = Split(payload, '\0');
 	if (!IsValidAbsolutePath(path) || !IsValidString(contents))
 		throw std::runtime_error("malformed WRITE_FILE packet");
@@ -732,7 +760,7 @@ TranslateParser::HandleWriteFile(std::string_view payload)
 				   path.data(),
 				   contents.data());
 
-	mount_list = ns_options->mount.mounts.insert_after(mount_list, *m);
+	AddMount("misplaced WRITE_FILE packet", m);
 }
 
 inline void
@@ -741,22 +769,22 @@ TranslateParser::HandleUtsNamespace(std::string_view payload)
 	if (!IsValidNonEmptyString(payload))
 		throw std::runtime_error{"malformed UTS_NAMESPACE packet"};
 
-	if (ns_options == nullptr || ns_options->hostname != nullptr)
+	auto &options = MakeNamespaceOptions("misplaced UTS_NAMESPACE packet");
+	if (options.hostname != nullptr)
 		throw std::runtime_error{"misplaced UTS_NAMESPACE packet"};
 
-	ns_options->hostname = payload.data();
+	options.hostname = payload.data();
 }
 
 inline void
 TranslateParser::HandleRlimits(std::string_view payload)
 {
-	if (child_options == nullptr)
-		throw std::runtime_error("misplaced RLIMITS packet");
+	auto &options = MakeChildOptions("misplaced RLIMITS packet");
 
-	if (child_options->rlimits == nullptr)
-		child_options->rlimits = alloc.New<ResourceLimits>();
+	if (options.rlimits == nullptr)
+		options.rlimits = alloc.New<ResourceLimits>();
 
-	if (!child_options->rlimits->Parse(payload))
+	if (!options.rlimits->Parse(payload))
 		throw std::runtime_error("malformed RLIMITS packet");
 }
 
@@ -928,14 +956,16 @@ TranslateParser::HandleStderrPath(std::string_view payload, bool jailed)
 	if (!IsValidAbsolutePath(payload))
 		throw std::runtime_error("malformed STDERR_PATH packet");
 
-	if (child_options == nullptr || child_options->stderr_null)
+	auto &options = MakeChildOptions("misplaced STDERR_PATH packet");
+
+	if (options.stderr_null)
 		throw std::runtime_error("misplaced STDERR_PATH packet");
 
-	if (child_options->stderr_path != nullptr)
+	if (options.stderr_path != nullptr)
 		throw std::runtime_error("duplicate STDERR_PATH packet");
 
-	child_options->stderr_path = payload.data();
-	child_options->stderr_jailed = jailed;
+	options.stderr_path = payload.data();
+	options.stderr_jailed = jailed;
 }
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -946,13 +976,12 @@ TranslateParser::HandleExpandStderrPath(std::string_view payload)
 	if (!IsValidNonEmptyString(payload))
 		throw std::runtime_error("malformed EXPAND_STDERR_PATH packet");
 
-	if (child_options == nullptr)
-		throw std::runtime_error("misplaced EXPAND_STDERR_PATH packet");
+	auto &options = MakeChildOptions("misplaced EXPAND_STDERR_PATH packet");
 
-	if (child_options->expand_stderr_path != nullptr)
+	if (options.expand_stderr_path != nullptr)
 		throw std::runtime_error("duplicate EXPAND_STDERR_PATH packet");
 
-	child_options->expand_stderr_path = payload.data();
+	options.expand_stderr_path = payload.data();
 }
 
 #endif
@@ -960,10 +989,10 @@ TranslateParser::HandleExpandStderrPath(std::string_view payload)
 inline void
 TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 {
-	if (child_options == nullptr || !child_options->uid_gid.IsEmpty())
-		throw std::runtime_error("misplaced UID_GID packet");
+	auto &uid_gid = MakeChildOptions("misplaced RLIMITS packet").uid_gid;
 
-	UidGid &uid_gid = child_options->uid_gid;
+	if (!uid_gid.IsEmpty())
+		throw std::runtime_error("duplicate UID_GID packet");
 
 	constexpr size_t min_size = sizeof(int) * 2;
 	const size_t max_size = min_size + sizeof(int) * uid_gid.supplementary_groups.max_size();
@@ -986,63 +1015,67 @@ TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 inline void
 TranslateParser::HandleMappedUidGid(std::span<const std::byte> payload)
 {
-	if (child_options == nullptr ||
-	    child_options->uid_gid.effective_uid == UidGid::UNSET_UID ||
-	    ns_options == nullptr || !ns_options->enable_user)
+	auto &options = MakeChildOptions("misplaced MAPPED_UID_GID packet");
+
+	if (options.uid_gid.effective_uid == UidGid::UNSET_UID ||
+	    !options.ns.enable_user)
 		throw std::runtime_error{"misplaced MAPPED_UID_GID packet"};
 
 	const auto *value = (const uint32_t *)(const void *)payload.data();
 	if (payload.size() != sizeof(*value) || *value <= 0)
 		throw std::runtime_error{"malformed MAPPED_UID_GID packet"};
 
-	if (ns_options->mapped_effective_uid != 0)
+	if (options.ns.mapped_effective_uid != 0)
 		throw std::runtime_error{"duplicate MAPPED_UID_GID packet"};
 
-	ns_options->mapped_effective_uid = *value;
+	options.ns.mapped_effective_uid = *value;
 }
 
 inline void
 TranslateParser::HandleMappedRealUidGid(std::span<const std::byte> payload)
 {
-	if (child_options == nullptr ||
-	    child_options->uid_gid.real_uid == UidGid::UNSET_UID ||
-	    ns_options == nullptr || !ns_options->enable_user)
+	auto &options = MakeChildOptions("misplaced MAPPED_REAL_UID_GID packet");
+
+	if (options.uid_gid.real_uid == UidGid::UNSET_UID ||
+	    !options.ns.enable_user)
 		throw std::runtime_error{"misplaced MAPPED_REAL_UID_GID packet"};
 
 	const auto *value = (const uint32_t *)(const void *)payload.data();
 	if (payload.size() != sizeof(*value) || *value <= 0)
 		throw std::runtime_error{"malformed MAPPED_REAL_UID_GID packet"};
 
-	if (ns_options->mapped_real_uid != 0)
+	if (options.ns.mapped_real_uid != 0)
 		throw std::runtime_error{"duplicate MAPPED_REAL_UID_GID packet"};
 
-	ns_options->mapped_real_uid = *value;
+	options.ns.mapped_real_uid = *value;
 }
 
 inline void
 TranslateParser::HandleRealUidGid(std::span<const std::byte> payload)
 {
-	if (child_options == nullptr || child_options->uid_gid.IsEmpty())
+	auto &options = MakeChildOptions("misplaced REAL_UID packet");
+
+	if (options.uid_gid.IsEmpty())
 		throw std::runtime_error{"misplaced REAL_UID_GID packet"};
 
-	if (child_options->uid_gid.HasReal())
+	if (options.uid_gid.HasReal())
 		throw std::runtime_error{"duplicate REAL_UID_GID packet"};
 
-	if (payload.size() < sizeof(child_options->uid_gid.real_uid))
+	if (payload.size() < sizeof(options.uid_gid.real_uid))
 		throw std::runtime_error{"malformed REAL_UID_GID packet"};
 
-	LoadUnaligned(child_options->uid_gid.real_uid, payload.data());
-	payload = payload.subspan(sizeof(child_options->uid_gid.real_uid));
+	LoadUnaligned(options.uid_gid.real_uid, payload.data());
+	payload = payload.subspan(sizeof(options.uid_gid.real_uid));
 
-	if (payload.size() >= sizeof(child_options->uid_gid.real_gid)) {
-		LoadUnaligned(child_options->uid_gid.real_gid, payload.data());
-		payload = payload.subspan(sizeof(child_options->uid_gid.real_gid));
+	if (payload.size() >= sizeof(options.uid_gid.real_gid)) {
+		LoadUnaligned(options.uid_gid.real_gid, payload.data());
+		payload = payload.subspan(sizeof(options.uid_gid.real_gid));
 	}
 
 	if (!payload.empty())
 		throw std::runtime_error{"malformed REAL_UID_GID packet"};
 
-	if (!child_options->uid_gid.HasReal())
+	if (!options.uid_gid.HasReal())
 		throw std::runtime_error{"malformed REAL_UID_GID packet"};
 }
 
@@ -1051,10 +1084,9 @@ TranslateParser::HandleUmask(std::span<const std::byte> payload)
 {
 	typedef uint16_t value_type;
 
-	if (child_options == nullptr)
-		throw std::runtime_error("misplaced UMASK packet");
+	auto &options = MakeChildOptions("misplaced UMASK packet");
 
-	if (child_options->umask >= 0)
+	if (options.umask >= 0)
 		throw std::runtime_error("duplicate UMASK packet");
 
 	if (payload.size() != sizeof(value_type))
@@ -1064,7 +1096,7 @@ TranslateParser::HandleUmask(std::span<const std::byte> payload)
 	if (umask & ~0777)
 		throw std::runtime_error("malformed UMASK packet");
 
-	child_options->umask = umask;
+	options.umask = umask;
 }
 
 static constexpr bool
@@ -1138,43 +1170,40 @@ ParseCgroupSet(std::string_view payload)
 inline void
 TranslateParser::HandleCgroupSet(std::string_view payload)
 {
-	if (child_options == nullptr)
-		throw std::runtime_error("misplaced CGROUP_SET packet");
+	auto &options = MakeChildOptions("misplaced CGROUP_SET packet");
 
 	auto set = ParseCgroupSet(payload);
 	if (set.first.data() == nullptr)
 		throw std::runtime_error("malformed CGROUP_SET packet");
 
-	child_options->cgroup.Set(alloc, set.first, set.second);
+	options.cgroup.Set(alloc, set.first, set.second);
 }
 
 inline void
 TranslateParser::HandleCgroupXattr(std::string_view payload)
 {
-	if (child_options == nullptr)
-		throw std::runtime_error("misplaced CGROUP_XATTR packet");
+	auto &options = MakeChildOptions("misplaced CGROUP_XATTR packet");
 
 	auto xattr = ParseCgroupSet(payload);
 	if (xattr.first.data() == nullptr)
 		throw std::runtime_error("malformed CGROUP_XATTR packet");
 
-	child_options->cgroup.SetXattr(alloc, xattr.first, xattr.second);
+	options.cgroup.SetXattr(alloc, xattr.first, xattr.second);
 }
 
 inline void
 TranslateParser::HandleMountListenStream(std::span<const std::byte> payload)
 {
-	if (ns_options == nullptr)
-		throw std::runtime_error("misplaced MOUNT_LISTEN_STREAM packet");
+	auto &options = MakeMountNamespaceOptions("misplaced MOUNT_LISTEN_STREAM packet");
 
-	if (ns_options->mount.mount_listen_stream.data() != nullptr)
+	if (options.mount_listen_stream.data() != nullptr)
 		throw std::runtime_error("duplicate MOUNT_LISTEN_STREAM packet");
 
 	const auto [path, rest] = Split(ToStringView(payload), '\0');
 	if (!IsValidAbsolutePath(path))
 		throw std::runtime_error("malformed MOUNT_LISTEN_STREAM packet");
 
-	ns_options->mount.mount_listen_stream = payload;
+	options.mount_listen_stream = payload;
 }
 
 #endif // TRANSLATION_ENABLE_SPAWN
@@ -1484,7 +1513,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 		resource_address = AddFilter();
 		child_options = nullptr;
-		ns_options = nullptr;
 		file_address = nullptr;
 		cgi_address = nullptr;
 		lhttp_address = nullptr;
@@ -2154,13 +2182,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 #if TRANSLATION_ENABLE_SPAWN
-		if (child_options != nullptr) {
-			translate_client_pair(alloc, env_builder, "PAIR",
-					      string_payload);
-			return;
-		} else
+		MakeChildOptions("misplaced PAIR packet");
+		translate_client_pair(alloc, env_builder, "PAIR",
+				      string_payload);
+		return;
+#else
+		break;
 #endif // TRANSLATION_ENABLE_SPAWN
-			throw std::runtime_error("misplaced PAIR packet");
 
 	case TranslationCommand::EXPAND_PAIR:
 #if TRANSLATION_ENABLE_RADDRESS
@@ -2631,11 +2659,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed USER_NAMESPACE packet");
 
-		if (ns_options != nullptr) {
-			ns_options->enable_user = true;
-		} else
-			throw std::runtime_error("misplaced USER_NAMESPACE packet");
-
+		MakeNamespaceOptions("misplaced USER_NAMESPACE packet").enable_user = true;
 		return;
 #else
 		break;
@@ -2646,13 +2670,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed PID_NAMESPACE packet");
 
-		if (ns_options != nullptr) {
-			ns_options->enable_pid = true;
-		} else
-			throw std::runtime_error("misplaced PID_NAMESPACE packet");
-
-		if (ns_options->pid_namespace != nullptr)
+		if (auto &options = MakeNamespaceOptions("misplaced PID_NAMESPACE packet");
+		    options.pid_namespace != nullptr)
 			throw std::runtime_error("Can't combine PID_NAMESPACE with PID_NAMESPACE_NAME");
+		else
+			options.enable_pid = true;
 
 		return;
 #else
@@ -2664,16 +2686,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed NETWORK_NAMESPACE packet");
 
-		if (ns_options == nullptr)
-			throw std::runtime_error("misplaced NETWORK_NAMESPACE packet");
-
-		if (ns_options->enable_network)
+		if (auto &options = MakeNamespaceOptions("misplaced NETWORK_NAMESPACE packet");
+		    options.enable_network)
 			throw std::runtime_error("duplicate NETWORK_NAMESPACE packet");
-
-		if (ns_options->network_namespace != nullptr)
+		else if (options.network_namespace != nullptr)
 			throw std::runtime_error("Can't combine NETWORK_NAMESPACE with NETWORK_NAMESPACE_NAME");
-
-		ns_options->enable_network = true;
+		else
+			options.enable_network = true;
 		return;
 #else
 		break;
@@ -2851,12 +2870,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::SETENV:
 #if TRANSLATION_ENABLE_SPAWN
-		if (child_options != nullptr) {
-			translate_client_pair(alloc, env_builder,
-					      "SETENV",
-					      string_payload);
-		} else
-			throw std::runtime_error("misplaced SETENV packet");
+		translate_client_pair(alloc, MakeEnvBuilder("misplaced SETENV packet"),
+				      "SETENV",
+				      string_payload);
 		return;
 #else
 		break;
@@ -2867,12 +2883,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.regex == nullptr)
 			throw std::runtime_error("misplaced EXPAND_SETENV packet");
 
-		if (child_options != nullptr) {
-			translate_client_expand_pair(env_builder,
-						     "EXPAND_SETENV",
-						     string_payload);
-		} else
-			throw std::runtime_error("misplaced SETENV packet");
+		translate_client_expand_pair(MakeEnvBuilder("misplaced EXPAND_SETENV packet"),
+					     "EXPAND_SETENV",
+					     string_payload);
 		return;
 #else
 		break;
@@ -3155,11 +3168,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed IPC_NAMESPACE packet");
 
-		if (ns_options != nullptr) {
-			ns_options->enable_ipc = true;
-		} else
-			throw std::runtime_error("misplaced IPC_NAMESPACE packet");
-
+		MakeNamespaceOptions("misplaced IPC_NAMESPACE packet").enable_ipc = true;
 		return;
 #else
 		break;
@@ -3358,13 +3367,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::FORBID_USER_NS:
 #if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBSECCOMP)
-		if (child_options == nullptr || child_options->forbid_user_ns)
-			throw std::runtime_error("misplaced FORBID_USER_NS packet");
-
 		if (!payload.empty())
 			throw std::runtime_error("malformed FORBID_USER_NS packet");
 
-		child_options->forbid_user_ns = true;
+		if (auto &options = MakeChildOptions("misplaced FORBID_USER_NS packet");
+		    options.forbid_user_ns)
+			throw std::runtime_error("duplicate FORBID_USER_NS packet");
+		else
+			options.forbid_user_ns = true;
 		return;
 #else
 		break;
@@ -3372,13 +3382,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::NO_NEW_PRIVS:
 #if TRANSLATION_ENABLE_SPAWN
-		if (child_options == nullptr || child_options->no_new_privs)
-			throw std::runtime_error("misplaced NO_NEW_PRIVS packet");
-
 		if (!payload.empty())
 			throw std::runtime_error("malformed NO_NEW_PRIVS packet");
 
-		child_options->no_new_privs = true;
+		if (auto &options = MakeChildOptions("misplaced NO_NEW_PRIVS packet");
+		    options.no_new_privs)
+			throw std::runtime_error("duplicate NO_NEW_PRIVS packet");
+		else
+			options.no_new_privs = true;
 		return;
 #else
 		break;
@@ -3386,14 +3397,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::CGROUP:
 #if TRANSLATION_ENABLE_SPAWN
-		if (child_options == nullptr ||
-		    child_options->cgroup.name != nullptr)
-			throw std::runtime_error("misplaced CGROUP packet");
-
 		if (!valid_view_name(string_payload.data()))
 			throw std::runtime_error("malformed CGROUP packet");
 
-		child_options->cgroup.name = string_payload.data();
+		if (auto &options = MakeChildOptions("misplaced CGROUP packet");
+		    options.cgroup.name != nullptr)
+			throw std::runtime_error("duplicate CGROUP packet");
+		else
+			options.cgroup.name = string_payload.data();
 		return;
 #else
 		break;
@@ -3468,13 +3479,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed STDERR_NULL packet");
 
-		if (child_options == nullptr || child_options->stderr_path != nullptr)
-			throw std::runtime_error("misplaced STDERR_NULL packet");
-
-		if (child_options->stderr_null)
+		if (auto &options = MakeChildOptions("misplaced STDERR_NULL packet");
+		    options.stderr_null || options.stderr_path != nullptr)
 			throw std::runtime_error("duplicate STDERR_NULL packet");
-
-		child_options->stderr_null = true;
+		else
+			options.stderr_null = true;
 		return;
 #else
 		break;
@@ -3558,13 +3567,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed CGROUP_NAMESPACE packet");
 
-		if (ns_options != nullptr) {
-			if (ns_options->enable_cgroup)
-				throw std::runtime_error("duplicate CGROUP_NAMESPACE packet");
-
-			ns_options->enable_cgroup = true;
-		} else
-			throw std::runtime_error("misplaced CGROUP_NAMESPACE packet");
+		if (auto &options = MakeNamespaceOptions("misplaced CGROUP_NAMESPACE packet");
+		    options.enable_cgroup)
+			throw std::runtime_error("duplicate CGROUP_NAMESPACE packet");
+		else
+			options.enable_cgroup = true;
 
 		return;
 #else
@@ -3615,13 +3622,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::FORBID_MULTICAST:
 #if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBSECCOMP)
-		if (child_options == nullptr || child_options->forbid_multicast)
-			throw std::runtime_error("misplaced FORBID_MULTICAST packet");
-
 		if (!payload.empty())
 			throw std::runtime_error("malformed FORBID_MULTICAST packet");
 
-		child_options->forbid_multicast = true;
+		if (auto &options = MakeChildOptions("misplaced FORBID_MULTICAST packet");
+		    options.forbid_multicast)
+			throw std::runtime_error("duplicate FORBID_MULTICAST packet");
+		else
+			options.forbid_multicast = true;
 		return;
 #else
 		break;
@@ -3629,13 +3637,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::FORBID_BIND:
 #if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBSECCOMP)
-		if (child_options == nullptr || child_options->forbid_bind)
-			throw std::runtime_error("misplaced FORBID_BIND packet");
-
 		if (!payload.empty())
 			throw std::runtime_error("malformed FORBID_BIND packet");
 
-		child_options->forbid_bind = true;
+		if (auto &options = MakeChildOptions("misplaced FORBID_BIND packet");
+		    options.forbid_bind)
+			throw std::runtime_error("duplicate FORBID_BIND packet");
+		else
+			options.forbid_bind = true;
 		return;
 #else
 		break;
@@ -3646,16 +3655,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidName(string_payload))
 			throw std::runtime_error("malformed NETWORK_NAMESPACE_NAME packet");
 
-		if (ns_options == nullptr)
-			throw std::runtime_error("misplaced NETWORK_NAMESPACE_NAME packet");
-
-		if (ns_options->network_namespace != nullptr)
+		if (auto &options = MakeNamespaceOptions("misplaced NETWORK_NAMESPACE_NAME packet");
+		    options.network_namespace != nullptr)
 			throw std::runtime_error("duplicate NETWORK_NAMESPACE_NAME packet");
-
-		if (ns_options->enable_network)
+		else if (options.enable_network)
 			throw std::runtime_error("Can't combine NETWORK_NAMESPACE_NAME with NETWORK_NAMESPACE");
-
-		ns_options->network_namespace = string_payload.data();
+		else
+			options.network_namespace = string_payload.data();
 		return;
 #else
 		break;
@@ -3674,14 +3680,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidNonEmptyString(string_payload))
 			throw std::runtime_error("malformed CHILD_TAG packet");
 
-		if (child_options == nullptr)
-			throw std::runtime_error("misplaced CHILD_TAG packet");
-
-		if (child_options->tag.data() == nullptr)
-			child_options->tag = string_payload;
+		if (auto &options = MakeChildOptions("misplaced CHILD_TAG packet");
+		    options.tag.data() == nullptr)
+			options.tag = string_payload;
 		else
-			child_options->tag =
-				alloc.ConcatView(child_options->tag, '\0',
+			options.tag =
+				alloc.ConcatView(options.tag, '\0',
 						 string_payload);
 
 		return;
@@ -3727,16 +3731,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidName(string_payload))
 			throw std::runtime_error("malformed PID_NAMESPACE_NAME packet");
 
-		if (ns_options == nullptr)
-			throw std::runtime_error("misplaced PID_NAMESPACE_NAME packet");
-
-		if (ns_options->pid_namespace != nullptr)
+		if (auto &options = MakeNamespaceOptions("misplaced PID_NAMESPACE_NAME packet");
+		    options.pid_namespace != nullptr)
 			throw std::runtime_error("duplicate PID_NAMESPACE_NAME packet");
-
-		if (ns_options->enable_pid)
+		else if (options.enable_pid)
 			throw std::runtime_error("Can't combine PID_NAMESPACE_NAME with PID_NAMESPACE");
-
-		ns_options->pid_namespace = string_payload.data();
+		else
+			options.pid_namespace = string_payload.data();
 		return;
 #else
 		break;
@@ -3821,13 +3822,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed STDERR_POND packet");
 
-		if (child_options == nullptr)
-			throw std::runtime_error("misplaced STDERR_POND packet");
-
-		if (child_options->stderr_pond)
+		if (auto &options = MakeChildOptions("misplaced STDERR_POND packet");
+		    options.stderr_pond)
 			throw std::runtime_error("duplicate STDERR_POND packet");
-
-		child_options->stderr_pond = true;
+		else
+			options.stderr_pond = true;
 		return;
 #else
 		break;
@@ -3961,8 +3960,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		case TranslationCommand::WRITE_FILE:
 		case TranslationCommand::BIND_MOUNT_RW_EXEC:
 #if TRANSLATION_ENABLE_SPAWN
-			if (ns_options != nullptr &&
-			    mount_list != ns_options->mount.mounts.before_begin()) {
+			if (auto *options = GetNamespaceOptions();
+			    options != nullptr &&
+			    mount_list != options->mount.mounts.before_begin()) {
 				mount_list->optional = true;
 				return;
 			}
@@ -4028,15 +4028,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed MOUNT_DEV packet");
 
-		if (ns_options == nullptr ||
-		    (!ns_options->mount.mount_root_tmpfs &&
-		     ns_options->mount.pivot_root == nullptr))
+		if (auto &options = MakeMountNamespaceOptions("misplaced MOUNT_DEV packet");
+		    (!options.mount_root_tmpfs &&
+		     options.pivot_root == nullptr))
 			throw std::runtime_error("misplaced MOUNT_DEV packet");
-
-		if (ns_options->mount.mount_dev)
+		else if (options.mount_dev)
 			throw std::runtime_error("duplicate MOUNT_DEV packet");
-
-		ns_options->mount.mount_dev = true;
+		else
+			options.mount_dev = true;
 		return;
 #else
 		break;
@@ -4133,13 +4132,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::CHDIR:
 #if TRANSLATION_ENABLE_SPAWN
-		if (child_options == nullptr)
-			throw std::runtime_error("misplaced CHDIR packet");
-
 		if (!IsValidAbsolutePath(string_payload))
 			throw std::runtime_error("malformed CHDIR packet");
 
-		child_options->chdir = string_payload.data();
+		if (auto &options = MakeChildOptions("misplaced CHDIR packet");
+		    options.chdir != nullptr)
+			throw std::runtime_error("duplicate CHDIR packet");
+		else
+			options.chdir = string_payload.data();
 		return;
 #else
 		break;
@@ -4418,13 +4418,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::CAP_SYS_RESOURCE:
 #if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBCAP)
-		if (child_options == nullptr || child_options->cap_sys_resource)
-			throw std::runtime_error("misplaced CAP_SYS_RESOURCE packet");
-
 		if (!payload.empty())
 			throw std::runtime_error("malformed CAP_SYS_RESOURCE packet");
 
-		child_options->cap_sys_resource = true;
+		if (auto &options = MakeChildOptions("misplaced CAP_SYS_RESOURCE packet");
+		    options.cap_sys_resource)
+			throw std::runtime_error("duplicate CAP_SYS_RESOURCE packet");
+		else
+			options.cap_sys_resource = true;
 		return;
 #else
 		break;
@@ -4435,10 +4436,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidAbsolutePath(string_payload))
 			throw std::runtime_error("malformed CHROOT packet");
 
-		if (child_options == nullptr || child_options->chroot != nullptr)
+		if (auto &options = MakeChildOptions("misplaced CHROOT packet");
+		    options.chroot != nullptr)
 			throw std::runtime_error("misplaced CHROOT packet");
-
-		child_options->chroot = string_payload.data();
+		else
+			options.chroot = string_payload.data();
 		return;
 #else
 		break;
@@ -4449,10 +4451,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw std::runtime_error("malformed TMPFS_DIRS_READABLE packet");
 
-		if (child_options == nullptr || !child_options->ns.mount.IsEnabled())
+		if (auto &options = MakeMountNamespaceOptions("misplaced TMPFS_DIRS_READABLE packet");
+		    !options.IsEnabled())
 			throw std::runtime_error("misplaced TMPFS_DIRS_READABLE packet");
-
-		child_options->ns.mount.dir_mode = 0755;
+		else
+			options.dir_mode = 0755;
 		return;
 #else
 		break;
@@ -4560,8 +4563,7 @@ TranslateParser::HandlePacket(TranslationCommand command,
 		SetChildOptions(response.child_options);
 #elif TRANSLATION_ENABLE_SPAWN
 		child_options = nullptr;
-		ns_options = nullptr;
- #endif
+#endif
 #if TRANSLATION_ENABLE_RADDRESS
 		file_address = nullptr;
 		http_address = nullptr;

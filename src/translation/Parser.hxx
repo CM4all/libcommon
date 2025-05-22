@@ -35,6 +35,7 @@ struct HttpAddress;
 struct LhttpAddress;
 struct ChildOptions;
 struct NamespaceOptions;
+struct MountNamespaceOptions;
 struct Mount;
 struct AddressList;
 struct Transformation;
@@ -105,9 +106,6 @@ class TranslateParser {
 #if TRANSLATION_ENABLE_SPAWN
 	/** the current child process options being edited */
 	ChildOptions *child_options;
-
-	/** the current namespace options being edited */
-	NamespaceOptions *ns_options;
 
 	/** the tail of the current mount_list */
 	IntrusiveForwardList<Mount>::iterator mount_list;
@@ -198,6 +196,15 @@ private:
 	bool HasArgs() const noexcept;
 
 	void SetChildOptions(ChildOptions &_child_options) noexcept;
+
+	[[gnu::pure]]
+	NamespaceOptions *GetNamespaceOptions() noexcept;
+
+	ChildOptions &MakeChildOptions(const char *error_message);
+	ExpandableStringList::Builder &MakeEnvBuilder(const char *error_message);
+	NamespaceOptions &MakeNamespaceOptions(const char *error_message);
+	MountNamespaceOptions &MakeMountNamespaceOptions(const char *error_message);
+	void AddMount(const char *error_message, Mount *mount);
 #endif // TRANSLATION_ENABLE_SPAWN
 
 #if TRANSLATION_ENABLE_RADDRESS
