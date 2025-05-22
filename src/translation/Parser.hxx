@@ -33,6 +33,7 @@ struct FileAddress;
 struct CgiAddress;
 struct HttpAddress;
 struct LhttpAddress;
+struct ExecuteOptions;
 struct ChildOptions;
 struct NamespaceOptions;
 struct MountNamespaceOptions;
@@ -199,6 +200,10 @@ private:
 
 	[[gnu::pure]]
 	NamespaceOptions *GetNamespaceOptions() noexcept;
+
+#if TRANSLATION_ENABLE_EXECUTE
+	ExecuteOptions &MakeExecuteOptions() noexcept;
+#endif
 
 	ChildOptions &MakeChildOptions(const char *error_message);
 	ExpandableStringList::Builder &MakeEnvBuilder(const char *error_message);

@@ -20,10 +20,6 @@
 #include <memory>
 #include <vector>
 #endif
-#if TRANSLATION_ENABLE_EXECUTE
-#include "adata/ExpandableStringList.hxx"
-#include "spawn/ChildOptions.hxx"
-#endif
 
 #if TRANSLATION_ENABLE_SESSION
 #include "http/CookieSameSite.hxx"
@@ -43,6 +39,7 @@ struct TranslationLayoutItem;
 class AllocatorPtr;
 class UniqueRegex;
 class MatchData;
+struct ExecuteOptions;
 
 struct TranslateResponse {
 	/**
@@ -82,16 +79,7 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
-	const char *shell;
-
-	const char *execute;
-
-	/**
-	 * Command-line arguments for #execute.
-	 */
-	ExpandableStringList args;
-
-	ChildOptions child_options;
+	ExecuteOptions *execute_options;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS

@@ -3,6 +3,9 @@
 // author: Max Kellermann <mk@cm4all.com>
 
 #include "Response.hxx"
+#if TRANSLATION_ENABLE_EXECUTE
+#include "ExecuteOptions.hxx"
+#endif
 #include "system/Arch.hxx"
 #if TRANSLATION_ENABLE_WIDGET
 #include "widget/View.hxx"
@@ -46,9 +49,7 @@ TranslateResponse::Clear() noexcept
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
-	shell = nullptr;
-	execute = nullptr;
-	child_options = ChildOptions();
+	execute_options = nullptr;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
@@ -306,10 +307,9 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
-	shell = alloc.CheckDup(src.shell);
-	execute = alloc.CheckDup(src.execute);
-	args = ExpandableStringList(alloc, src.args);
-	child_options = ChildOptions(alloc, src.child_options);
+	execute_options = src.execute_options != nullptr
+		? alloc.New<ExecuteOptions>(alloc, *src.execute_options)
+		: nullptr;
 #endif
 
 #if TRANSLATION_ENABLE_HTTP
