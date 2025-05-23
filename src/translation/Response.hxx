@@ -25,6 +25,10 @@
 #include "http/CookieSameSite.hxx"
 #endif
 
+#if TRANSLATION_ENABLE_EXECUTE_SERVICE
+#include "adata/SimpleStringMap.hxx"
+#endif
+
 #include <algorithm> // for std::find()
 #include <chrono>
 #include <span>
@@ -40,6 +44,7 @@ class AllocatorPtr;
 class UniqueRegex;
 class MatchData;
 struct ExecuteOptions;
+struct ServiceExecuteOptions;
 
 struct TranslateResponse {
 	/**
@@ -80,6 +85,10 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_EXECUTE
 	ExecuteOptions *execute_options;
+
+#if TRANSLATION_ENABLE_EXECUTE_SERVICE
+	SimpleStringMap<ExecuteOptions> service_execute_options;
+#endif
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS

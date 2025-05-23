@@ -50,7 +50,10 @@ TranslateResponse::Clear() noexcept
 
 #if TRANSLATION_ENABLE_EXECUTE
 	execute_options = nullptr;
+#if TRANSLATION_ENABLE_EXECUTE_SERVICE
+	service_execute_options.clear();
 #endif
+#endif // TRANSLATION_ENABLE_EXECUTE
 
 #if TRANSLATION_ENABLE_RADDRESS
 	address.Clear();
@@ -310,6 +313,10 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 	execute_options = src.execute_options != nullptr
 		? alloc.New<ExecuteOptions>(alloc, *src.execute_options)
 		: nullptr;
+
+#if TRANSLATION_ENABLE_EXECUTE_SERVICE
+	service_execute_options = {alloc, src.service_execute_options};
+#endif
 #endif
 
 #if TRANSLATION_ENABLE_HTTP

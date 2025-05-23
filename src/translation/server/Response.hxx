@@ -238,6 +238,11 @@ public:
 	}
 
 	template<typename... Types>
+	auto &Service(Types... value) noexcept {
+		return StringPacket(TranslationCommand::SERVICE, value...);
+	}
+
+	template<typename... Types>
 	auto &Token(Types... value) noexcept {
 		return StringPacket(TranslationCommand::TOKEN, value...);
 	}

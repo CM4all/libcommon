@@ -59,6 +59,10 @@ public:
 		return list.empty();
 	}
 
+	constexpr void clear() noexcept {
+		list.clear();
+	}
+
 	[[gnu::pure]]
 	const T *Get(const char *key) const noexcept {
 		for (const auto &i : list)

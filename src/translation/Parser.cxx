@@ -1312,7 +1312,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::LOGIN:
 	case TranslationCommand::CRON:
 	case TranslationCommand::PASSWORD:
-	case TranslationCommand::SERVICE:
 	case TranslationCommand::ALT_HOST:
 	case TranslationCommand::CHAIN_HEADER:
 	case TranslationCommand::AUTH_TOKEN:
@@ -3307,6 +3306,21 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::REFENCE:
 		/* obsolete */
 		break;
+
+	case TranslationCommand::SERVICE:
+#if TRANSLATION_ENABLE_EXECUTE_SERVICE
+		if (!IsValidNonEmptyString(string_payload))
+			throw std::runtime_error{"malformed SERVICE packet"};
+
+		if (response.execute_options == nullptr)
+			throw std::runtime_error{"misplaced SERVICE packet"};
+
+		execute_options = &response.service_execute_options.Add(alloc, string_payload.data());
+		SetChildOptions(execute_options->child_options);
+		return;
+#else
+		break;
+#endif
 
 	case TranslationCommand::INVERSE_REGEX_UNESCAPE:
 #if TRANSLATION_ENABLE_EXPAND
