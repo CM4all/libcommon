@@ -72,8 +72,8 @@ TranslateParser::HasArgs() const noexcept
 	return false;
 }
 
-void
-TranslateParser::SetChildOptions(ChildOptions &_child_options)
+inline void
+TranslateParser::SetChildOptions(ChildOptions &_child_options) noexcept
 {
 	child_options = &_child_options;
 	ns_options = &child_options->ns;

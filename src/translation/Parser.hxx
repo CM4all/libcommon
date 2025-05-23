@@ -197,7 +197,7 @@ private:
 #if TRANSLATION_ENABLE_SPAWN
 	bool HasArgs() const noexcept;
 
-	void SetChildOptions(ChildOptions &_child_options);
+	void SetChildOptions(ChildOptions &_child_options) noexcept;
 #endif // TRANSLATION_ENABLE_SPAWN
 
 #if TRANSLATION_ENABLE_RADDRESS
