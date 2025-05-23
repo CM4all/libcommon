@@ -95,15 +95,6 @@ class TranslateParser {
 
 	TrivialArray<const char *, 16> probe_suffixes_builder;
 
-#if TRANSLATION_ENABLE_RADDRESS
-	const char *base_suffix = nullptr;
-
-	std::shared_ptr<std::vector<TranslationLayoutItem>> layout_items_builder;
-
-	/** the current resource address being edited */
-	ResourceAddress *resource_address;
-#endif
-
 #if TRANSLATION_ENABLE_SPAWN
 	/** the current child process options being edited */
 	ChildOptions *child_options;
@@ -115,6 +106,13 @@ class TranslateParser {
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
+	const char *base_suffix = nullptr;
+
+	std::shared_ptr<std::vector<TranslationLayoutItem>> layout_items_builder;
+
+	/** the current resource address being edited */
+	ResourceAddress *resource_address;
+
 	/** the current local file address being edited */
 	FileAddress *file_address;
 
