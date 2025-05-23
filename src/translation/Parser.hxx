@@ -240,6 +240,7 @@ private:
 #endif
 	void HandleMountHome(std::string_view payload);
 	void HandleMountProc(std::string_view payload);
+	void HandleMountTmpTmpfs(std::string_view payload);
 
 	void HandleBindMount(std::string_view payload,
 			     bool expand, bool writable, bool exec=false,

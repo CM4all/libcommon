@@ -577,17 +577,16 @@ TranslateParser::HandleMountProc(std::string_view payload)
 	ns_options->mount.mount_proc = true;
 }
 
-static void
-translate_client_mount_tmp_tmpfs(NamespaceOptions *ns,
-				 std::string_view payload)
+inline void
+TranslateParser::HandleMountTmpTmpfs(std::string_view payload)
 {
 	if (!IsValidString(payload))
 		throw std::runtime_error("malformed MOUNT_TMP_TMPFS packet");
 
-	if (ns == nullptr || ns->mount.mount_tmp_tmpfs != nullptr)
+	if (ns_options == nullptr || ns_options->mount.mount_tmp_tmpfs != nullptr)
 		throw std::runtime_error("misplaced MOUNT_TMP_TMPFS packet");
 
-	ns->mount.mount_tmp_tmpfs = payload.data() != nullptr
+	ns_options->mount.mount_tmp_tmpfs = payload.data() != nullptr
 		? payload.data()
 		: "";
 }
@@ -2715,7 +2714,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::MOUNT_TMP_TMPFS:
 #if TRANSLATION_ENABLE_SPAWN
-		translate_client_mount_tmp_tmpfs(ns_options, string_payload);
+		HandleMountTmpTmpfs(string_payload);
 		return;
 #else
 		break;
