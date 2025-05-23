@@ -129,9 +129,7 @@ class TranslateParser {
 	AddressList *address_list;
 
 	AddressListBuilder address_list_builder;
-#endif
 
-#if TRANSLATION_ENABLE_RADDRESS
 	ExpandableStringList::Builder params_builder;
 
 	/**
