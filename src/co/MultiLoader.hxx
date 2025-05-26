@@ -65,6 +65,32 @@ public:
 		}
 	}
 
+	/**
+	 * Artificially inject a value, marking this loader "ready".
+	 * All future get() calls will complete immediately and will
+	 * return this value; the specified loader function will be
+	 * ignored.  This is only allowed if get() has never been
+	 * called.
+	 */
+	template<typename... Args>
+	void InjectValue(Args&&... args) noexcept {
+		assert(std::holds_alternative<std::monostate>(value));
+		assert(!task.IsActive());
+
+		value.template emplace<T>(std::forward<Args>(args)...);
+	}
+
+	/**
+	 * Like InjectValue(), but store an error.  All future get()
+	 * calls will rethrow this exception.
+	 */
+	void InjectError(std::exception_ptr &&error) noexcept {
+		assert(std::holds_alternative<std::monostate>(value));
+		assert(!task.IsActive());
+
+		value.template emplace<std::exception_ptr>(std::move(error));
+	}
+
 private:
 	[[nodiscard]]
 	Co::EagerTask<void> Load(std::invocable<> auto f) try {
