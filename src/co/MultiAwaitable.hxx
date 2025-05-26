@@ -228,7 +228,7 @@ private:
 
 		co_await _task;
 
-		/* move the request list to the stack just in case one
+		/* move the task to the stack just in case one
 		   of the continuations deletes the MultiAwaitable */
 		auto this_task = std::move(task);
 
