@@ -97,18 +97,22 @@ TranslateParser::GetNamespaceOptions() noexcept
 inline const ExecuteOptions *
 TranslateParser::GetExecuteOptions() const noexcept
 {
-	return response.execute_options;
+	return execute_options;
 }
 
 inline ExecuteOptions &
-TranslateParser::MakeExecuteOptions() noexcept
+TranslateParser::MakeExecuteOptions(const char *error_message)
 {
+	if (execute_options != nullptr)
+		return *execute_options;
+
 	if (response.execute_options == nullptr) {
-		response.execute_options = alloc.New<ExecuteOptions>();
-		SetChildOptions(response.execute_options->child_options);
+		execute_options = response.execute_options = alloc.New<ExecuteOptions>();
+		SetChildOptions(execute_options->child_options);
+		return *execute_options;
 	}
 
-	return *response.execute_options;
+	throw std::runtime_error{error_message};
 }
 
 #endif
@@ -118,7 +122,7 @@ TranslateParser::MakeChildOptions(const char *error_message)
 {
 #if TRANSLATION_ENABLE_EXECUTE
 	if (child_options == nullptr && response.execute_options == nullptr)
-		return MakeExecuteOptions().child_options;
+		return MakeExecuteOptions(error_message).child_options;
 #endif
 
 	if (child_options == nullptr)
@@ -361,6 +365,9 @@ TranslateParser::AddView(const char *name)
 	view = new_view;
 	widget_view_tail = response.views.insert_after(widget_view_tail, *new_view);
 	resource_address = &new_view->address;
+#if TRANSLATION_ENABLE_EXECUTE
+	execute_options = nullptr;
+#endif
 	child_options = nullptr;
 	file_address = nullptr;
 	http_address = nullptr;
@@ -1542,6 +1549,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		FinishAddressList();
 
 		resource_address = AddFilter();
+#if TRANSLATION_ENABLE_EXECUTE
+		execute_options = nullptr;
+#endif
 		child_options = nullptr;
 		file_address = nullptr;
 		cgi_address = nullptr;
@@ -3524,7 +3534,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidAbsolutePath(string_payload))
 			throw std::runtime_error("malformed EXECUTE packet");
 
-		if (auto &options = MakeExecuteOptions();
+		if (auto &options = MakeExecuteOptions("misplaced EXECUTE pacxket");
 		    options.execute != nullptr)
 			throw std::runtime_error("duplicate EXECUTE packet");
 		else {
@@ -3564,7 +3574,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidAbsolutePath(string_payload))
 			throw std::runtime_error("malformed SHELL packet");
 
-		if (auto &options = MakeExecuteOptions();
+		if (auto &options = MakeExecuteOptions("misplaced SHELL packet");
 		    options.shell != nullptr)
 			throw std::runtime_error("duplicate SHELL packet");
 		else
@@ -4594,6 +4604,9 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #endif
 		probe_suffixes_builder.clear();
 #if TRANSLATION_ENABLE_SPAWN
+#if TRANSLATION_ENABLE_EXECUTE
+		execute_options = nullptr;
+#endif
 		child_options = nullptr;
 #endif
 #if TRANSLATION_ENABLE_RADDRESS

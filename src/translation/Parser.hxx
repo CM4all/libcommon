@@ -95,6 +95,10 @@ class TranslateParser {
 
 	TrivialArray<const char *, 16> probe_suffixes_builder;
 
+#if TRANSLATION_ENABLE_EXECUTE
+	ExecuteOptions *execute_options;
+#endif
+
 #if TRANSLATION_ENABLE_SPAWN
 	/** the current child process options being edited */
 	ChildOptions *child_options;
@@ -199,7 +203,7 @@ private:
 
 #if TRANSLATION_ENABLE_EXECUTE
 	const ExecuteOptions *GetExecuteOptions() const noexcept;
-	ExecuteOptions &MakeExecuteOptions() noexcept;
+	ExecuteOptions &MakeExecuteOptions(const char *error_message);
 #endif
 
 	ChildOptions &MakeChildOptions(const char *error_message);
