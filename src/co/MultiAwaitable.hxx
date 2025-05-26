@@ -221,6 +221,9 @@ private:
 	/**
 	 * A coroutine which executes the actual task and then resumes
 	 * all waiters.
+	 *
+	 * @param _task the task to be awaited; it is passed by value
+	 * so its lifetime is the coroutine stack
 	 */
 	[[nodiscard]]
 	MultiTask Wait(auto _task) noexcept {
