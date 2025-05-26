@@ -198,6 +198,7 @@ private:
 	NamespaceOptions *GetNamespaceOptions() noexcept;
 
 #if TRANSLATION_ENABLE_EXECUTE
+	const ExecuteOptions *GetExecuteOptions() const noexcept;
 	ExecuteOptions &MakeExecuteOptions() noexcept;
 #endif
 

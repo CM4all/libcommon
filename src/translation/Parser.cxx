@@ -68,7 +68,8 @@ TranslateParser::HasArgs() const noexcept
 #endif
 
 #if TRANSLATION_ENABLE_EXECUTE
-	if (response.execute_options != nullptr && response.execute_options->execute != nullptr)
+	if (const auto *options = GetExecuteOptions();
+	    options != nullptr && options->execute != nullptr)
 		return true;
 #endif
 
@@ -92,6 +93,12 @@ TranslateParser::GetNamespaceOptions() noexcept
 }
 
 #if TRANSLATION_ENABLE_EXECUTE
+
+inline const ExecuteOptions *
+TranslateParser::GetExecuteOptions() const noexcept
+{
+	return response.execute_options;
+}
 
 inline ExecuteOptions &
 TranslateParser::MakeExecuteOptions() noexcept
