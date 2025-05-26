@@ -15,7 +15,7 @@ namespace Co {
 
 /**
  * A class that helps with loading a value in a coroutine.  It
- * supports multiple waiters.
+ * supports multiple waiters.  To use it, call get().
  */
 template<typename T>
 class MultiLoader {
@@ -31,6 +31,14 @@ class MultiLoader {
 	std::variant<std::monostate, T, std::exception_ptr> value;
 
 public:
+	/**
+	 * Create a new task that can be used to await the value.
+	 *
+	 * @param f a function that loads the actual value; it will be
+	 * called at most once and its return value will be stored in
+	 * this #MultiLoader instance for all (current and future)
+	 * waiters
+	 */
 	[[nodiscard]]
 	Co::Task<const T &> get(std::invocable<> auto f) {
 		while (true) {
