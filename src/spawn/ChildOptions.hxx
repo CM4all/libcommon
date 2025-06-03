@@ -113,6 +113,7 @@ struct ChildOptions {
 	constexpr ChildOptions(ShallowCopy shallow_copy,
 			       const ChildOptions &src) noexcept
 		:tag(src.tag),
+		 chroot(src.chroot),
 		 chdir(src.chdir),
 		 stderr_path(src.stderr_path),
 		 expand_stderr_path(src.expand_stderr_path),
