@@ -574,7 +574,8 @@ public:
 		/* defer a read call which will check for "ended"; we
 		   can't do that here because this method is not
 		   allowed to fail */
-		DeferRead();
+		if (!IsConnected())
+			DeferRead();
 	}
 
 	/**
