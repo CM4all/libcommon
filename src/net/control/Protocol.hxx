@@ -156,6 +156,14 @@ enum class Command {
      * the current process.
      */
     RELOAD_STATE = 19,
+
+    /**
+     * Disconnect all database connections matching the payload.  This
+     * is usually received and handled by myproxy
+     * (https://github.com/CM4all/myproxy) processes and the payload
+     * is the account identifier.
+     */
+    DISCONNECT_DATABASE = 20,
 };
 
 struct Header {
