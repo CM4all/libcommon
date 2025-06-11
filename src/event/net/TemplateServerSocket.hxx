@@ -64,6 +64,15 @@ public:
 		connections.clear_and_dispose(DeleteDisposer{});
 	}
 
+	/**
+	 * Close all connections matching the predicate.
+	 *
+	 * @return the number of closed connections
+	 */
+	std::size_t CloseConnectionsIf(std::predicate<const C &> auto pred) noexcept {
+		return connections.remove_and_dispose_if(std::move(pred), DeleteDisposer{});
+	}
+
 protected:
 	void OnAccept(UniqueSocketDescriptor _fd,
 		      SocketAddress address) noexcept override {
