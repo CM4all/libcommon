@@ -40,9 +40,13 @@ ResolveBindSocket(const char *host_and_port, int default_port, int socktype)
 		return ParseBindSocket(host_and_port, default_port, socktype);
 	}
 
-	return ResolveBindSocket(host_and_port, default_port,
-				 MakeAddrInfo(AI_ADDRCONFIG|AI_PASSIVE,
-					      AF_UNSPEC, socktype));
+	const struct addrinfo hints{
+		.ai_flags = AI_ADDRCONFIG|AI_PASSIVE,
+		.ai_family = AF_UNSPEC,
+		.ai_socktype = socktype,
+	};
+
+	return ResolveBindSocket(host_and_port, default_port, hints);
 }
 
 UniqueSocketDescriptor

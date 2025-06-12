@@ -73,10 +73,14 @@ ResolveConnectSocket(const char *host_and_port, int default_port,
 		return ParseConnectSocket(host_and_port, default_port,
 					  socktype, timeout);
 
+	const struct addrinfo hints{
+		.ai_flags = AI_ADDRCONFIG,
+		.ai_family = AF_UNSPEC,
+		.ai_socktype = socktype,
+	};
+
 	return ResolveConnectSocket(host_and_port, default_port,
-				    MakeAddrInfo(AI_ADDRCONFIG,
-						 AF_UNSPEC, socktype),
-				    timeout);
+				    hints, timeout);
 }
 
 UniqueSocketDescriptor

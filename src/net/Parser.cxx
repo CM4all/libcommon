@@ -11,20 +11,6 @@
 
 #include <netdb.h>
 
-static constexpr struct addrinfo
-MakeActiveHints() noexcept
-{
-	return MakeAddrInfo(AI_NUMERICHOST,
-			    AF_UNSPEC, SOCK_STREAM);
-}
-
-static constexpr struct addrinfo
-MakePassiveHints() noexcept
-{
-	return MakeAddrInfo(AI_NUMERICHOST|AI_PASSIVE,
-			    AF_UNSPEC, SOCK_STREAM);
-}
-
 AllocatedSocketAddress
 ParseSocketAddress(const char *p, int default_port,
 		   const struct addrinfo &hints)
@@ -55,8 +41,17 @@ ParseSocketAddress(const char *p, int default_port,
 AllocatedSocketAddress
 ParseSocketAddress(const char *p, int default_port, bool passive)
 {
-	static constexpr struct addrinfo active_hints = MakeActiveHints();
-	static constexpr struct addrinfo passive_hints = MakePassiveHints();
+	static constexpr struct addrinfo active_hints{
+		.ai_flags = AI_NUMERICHOST,
+		.ai_family = AF_UNSPEC,
+		.ai_socktype = SOCK_STREAM,
+	};
+
+	static constexpr struct addrinfo passive_hints{
+		.ai_flags = AI_NUMERICHOST|AI_PASSIVE,
+		.ai_family = AF_UNSPEC,
+		.ai_socktype = SOCK_STREAM,
+	};
 
 	return ParseSocketAddress(p, default_port,
 				  passive ? passive_hints : active_hints);

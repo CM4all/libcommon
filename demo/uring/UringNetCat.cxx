@@ -104,8 +104,11 @@ try {
 	if (argc != 2)
 		throw "Usage: UringNetCat HOST:PORT";
 
-	static constexpr auto hints = MakeAddrInfo(AI_ADDRCONFIG, AF_UNSPEC,
-						   SOCK_STREAM);
+	static constexpr struct addrinfo hints{
+		.ai_flags = AI_ADDRCONFIG,
+		.ai_family = AF_UNSPEC,
+		.ai_socktype = SOCK_STREAM,
+	};
 
 	const auto addresses = Resolve(argv[1], 80, &hints);
 
