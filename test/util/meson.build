@@ -14,6 +14,7 @@ test(
     'TestFNVHash.cxx',
     'TestMimeType.cxx',
     'TestStaticCache.cxx',
+    'TestStringMultiSplit.cxx',
     'TestStringStrip.cxx',
     'TestTemplateString.cxx',
     'TestTokenBucket.cxx',
