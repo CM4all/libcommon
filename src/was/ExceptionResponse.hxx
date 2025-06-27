@@ -54,4 +54,9 @@ struct Conflict : Exception {
 		:body(_body) {}
 };
 
+/**
+ * Generate a "413 Payload Too Large" response.
+ */
+struct PayloadTooLarge : Exception {};
+
 } // namespace Was

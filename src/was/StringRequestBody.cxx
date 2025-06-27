@@ -28,7 +28,7 @@ RequestBodyToString(was_simple *w, std::string::size_type limit)
 
 		if (remaining > 0) {
 			if (uint64_t(remaining) > uint64_t(limit - s.length()))
-				throw RequestBodyTooLarge{};
+				throw PayloadTooLarge{};
 
 			s.reserve(s.length() + size_type(remaining));
 		}
@@ -43,7 +43,7 @@ RequestBodyToString(was_simple *w, std::string::size_type limit)
 
 		const size_type nbytes = r;
 		if (nbytes > limit - s.length())
-			throw RequestBodyTooLarge{};
+			throw PayloadTooLarge{};
 
 		s.append(buffer, nbytes);
 	}

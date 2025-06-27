@@ -37,6 +37,9 @@ WasLoop(F &&f) noexcept
 			Was::SendBadRequest(was, e.body);
 		} catch (const Was::Conflict &e) {
 			Was::SendConflict(was, e.body);
+		} catch (Was::PayloadTooLarge) {
+			Was::SendTextResponse(was, HTTP_STATUS_REQUEST_ENTITY_TOO_LARGE,
+					      "Payload Too Large");
 		}
 	}
 

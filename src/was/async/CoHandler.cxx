@@ -73,6 +73,11 @@ private:
 			response.status = HttpStatus::CONFLICT;
 			response.SetTextPlain(e.body);
 			result = server.SendResponse(std::move(response));
+		} catch (Was::PayloadTooLarge) {
+			SimpleResponse response;
+			response.status = HttpStatus::PAYLOAD_TOO_LARGE;
+			response.SetTextPlain("Payload Too Large");
+			result = server.SendResponse(std::move(response));
 		} catch (...) {
 			SimpleResponse response;
 			response.status = HttpStatus::INTERNAL_SERVER_ERROR;
