@@ -62,7 +62,7 @@ StringAfterPrefix(const char *haystack, std::string_view needle) noexcept
 		: nullptr;
 }
 
-[[gnu::pure]] [[gnu::nonnull]]
+[[gnu::pure]]
 static inline std::string_view
 StringAfterPrefix(std::string_view haystack, std::string_view needle) noexcept
 {
