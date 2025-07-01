@@ -164,6 +164,15 @@ enum class Command {
      * is the account identifier.
      */
     DISCONNECT_DATABASE = 20,
+
+    /**
+     * Disable io_uring (temporarily).  Optional payload is a
+     * big-endian 32 bit integer containing the number of seconds
+     * after which it will be re-enabled automatically.  As this
+     * overrides any previous #DISABLE_URING command, zero explicitly
+     * re-enables io_uring now.
+     */
+    DISABLE_URING = 21,
 };
 
 struct Header {
