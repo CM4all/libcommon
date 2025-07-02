@@ -90,6 +90,14 @@ public:
 		WriteAttribute(a);
 		WriteString(value);
 	}
+
+	void WriteOptionalString(Attribute a, std::string_view value) {
+		if (value.data() == nullptr)
+			return;
+
+		WriteAttribute(a);
+		WriteString(value);
+	}
 };
 
 }

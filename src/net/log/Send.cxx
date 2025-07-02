@@ -87,17 +87,17 @@ Send(SocketDescriptor s, const Datagram &d)
 		v.push_back(MakeIovecT(http_method));
 	}
 
-	if (d.http_uri != nullptr) {
+	if (d.http_uri.data() != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::HTTP_URI>());
 		PushString(v, d.http_uri);
 	}
 
-	if (d.http_referer != nullptr) {
+	if (d.http_referer.data() != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::HTTP_REFERER>());
 		PushString(v, d.http_referer);
 	}
 
-	if (d.user_agent != nullptr) {
+	if (d.user_agent.data() != nullptr) {
 		v.push_back(MakeIovecAttribute<Attribute::USER_AGENT>());
 		PushString(v, d.user_agent);
 	}

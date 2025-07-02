@@ -29,8 +29,8 @@ struct Datagram {
 
 	const char *forwarded_to = nullptr;
 
-	const char *http_uri = nullptr, *http_referer = nullptr;
-	const char *user_agent = nullptr;
+	std::string_view http_uri{}, http_referer{};
+	std::string_view user_agent{};
 
 	std::string_view message{};
 
@@ -95,7 +95,7 @@ struct Datagram {
 	}
 
 	constexpr bool GuessIsHttpAccess() const noexcept {
-		return http_uri != nullptr && HasHttpMethod() &&
+		return http_uri.data() != nullptr && HasHttpMethod() &&
 			/* the following matches cancelled HTTP
 			   requests (that have no HTTP status), but
 			   rejects HTTP error messages (via

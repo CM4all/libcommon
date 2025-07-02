@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <time.h>
 
+using std::string_view_literals::operator""sv;
+
 namespace Net::Log {
 
 static void
@@ -38,6 +40,16 @@ OptionalString(const char *p) noexcept
 {
 	if (p == nullptr)
 		return "-";
+
+	return p;
+}
+
+[[gnu::const]]
+static std::string_view
+OptionalString(std::string_view p) noexcept
+{
+	if (p.data() == nullptr)
+		return "-"sv;
 
 	return p;
 }
@@ -76,9 +88,9 @@ AppendQuoted(StringBuilder &b, std::string_view value)
 }
 
 static void
-AppendOptionalQuoted(StringBuilder &b, const char *value)
+AppendOptionalQuoted(StringBuilder &b, std::string_view value)
 {
-	if (value != nullptr)
+	if (value.data() != nullptr)
 		AppendQuoted(b, value);
 	else
 		b.Append('-');

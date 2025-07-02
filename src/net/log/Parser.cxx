@@ -80,7 +80,7 @@ private:
 static void
 FixUp(Datagram &d)
 {
-	if (d.type == Type::UNSPECIFIED && d.http_uri != nullptr)
+	if (d.type == Type::UNSPECIFIED && d.http_uri.data() != nullptr)
 		/* old clients don't send a type; attempt to guess the
 		   type */
 		d.type = d.message.data() == nullptr
@@ -128,15 +128,15 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::HTTP_URI:
-			datagram.http_uri = d.ReadString();
+			datagram.http_uri = d.ReadStringView();
 			break;
 
 		case Attribute::HTTP_REFERER:
-			datagram.http_referer = d.ReadString();
+			datagram.http_referer = d.ReadStringView();
 			break;
 
 		case Attribute::USER_AGENT:
-			datagram.user_agent = d.ReadString();
+			datagram.user_agent = d.ReadStringView();
 			break;
 
 		case Attribute::MESSAGE:
