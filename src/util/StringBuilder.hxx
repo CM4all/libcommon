@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "Compiler.h"
-
 #include <cstddef>
 #include <span>
 
@@ -82,13 +80,6 @@ public:
 	void Append(std::span<const T> src) {
 		Append(src.data(), src.size());
 	}
-
-#ifndef __clang__
-	/* clang thinks the "format argument not a string type"
-	   because it depends on a template argument */
-	gcc_printf(2, 3)
-#endif
-	void Format(const_pointer fmt, ...);
 };
 
 class StringBuilder : public BasicStringBuilder<char> {
