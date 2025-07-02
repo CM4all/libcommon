@@ -11,7 +11,7 @@
  * A variant of Split() that can do multiple splits.
  *
  * @param N the number of splits (constant expression)
- * @return a std::tuple with N+1 string_views
+ * @return a std::array with N+1 string_views
  */
 template<std::size_t N, typename T>
 constexpr auto
