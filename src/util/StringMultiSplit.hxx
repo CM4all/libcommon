@@ -5,30 +5,7 @@
 
 #include "StringSplit.hxx"
 
-#include <tuple>
-
-template<typename T>
-constexpr std::basic_string_view<T>
-_SplitInPlace(std::basic_string_view<T> &haystack, const T ch) noexcept
-{
-	const auto [a, b] = Split(haystack, ch);
-	haystack = b;
-	return a;
-}
-
-template<typename T, std::size_t... Is>
-constexpr auto
-_StringMultiSplit(std::basic_string_view<T> haystack, const T ch, std::index_sequence<Is...>) noexcept
-{
-	if constexpr (sizeof...(Is) == 0) {
-		// suppress -Wunused for a corner case
-		(void)ch;
-	}
-
-	return std::make_tuple((static_cast<void>(Is),
-				_SplitInPlace(haystack, ch))...,
-			       haystack);
-}
+#include <array>
 
 /**
  * A variant of Split() that can do multiple splits.
@@ -40,5 +17,15 @@ template<std::size_t N, typename T>
 constexpr auto
 StringMultiSplit(std::basic_string_view<T> haystack, const T ch) noexcept
 {
-	return _StringMultiSplit<T>(haystack, ch, std::make_index_sequence<N>{});
+	std::array<std::string_view, N + 1> result;
+
+	for (std::size_t i = 0; i < N; ++i) {
+		const auto [a, b] = Split(haystack, ch);
+		result[i] = a;
+		haystack = b;
+	}
+
+	result[N] = haystack;
+
+	return result;
 }
