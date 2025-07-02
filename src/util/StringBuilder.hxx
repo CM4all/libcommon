@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <span>
+#include <string_view>
 
 /**
  * Fills a string buffer incrementally by appending more data to the
@@ -74,12 +75,7 @@ public:
 		*p = SENTINEL;
 	}
 
-	void Append(const_pointer src);
-	void Append(const_pointer src, size_t length);
-
-	void Append(std::span<const T> src) {
-		Append(src.data(), src.size());
-	}
+	void Append(std::basic_string_view<T> src);
 };
 
 class StringBuilder : public BasicStringBuilder<char> {
