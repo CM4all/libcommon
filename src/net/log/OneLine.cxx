@@ -61,6 +61,12 @@ IsHarmlessChar(signed char ch) noexcept
 }
 
 static void
+AppendTruncationMarker(StringBuilder &b)
+{
+	b.Append("..."sv);
+}
+
+static void
 AppendEscape(StringBuilder &b, std::string_view value)
 {
 	if (b.GetRemainingSize() <= value.size() * 4)
@@ -80,18 +86,20 @@ AppendEscape(StringBuilder &b, std::string_view value)
 }
 
 static void
-AppendQuoted(StringBuilder &b, std::string_view value)
+AppendQuoted(StringBuilder &b, std::string_view value, bool truncated=false)
 {
 	b.Append('"');
 	AppendEscape(b, value);
+	if (truncated) [[unlikely]]
+		AppendTruncationMarker(b);
 	b.Append('"');
 }
 
 static void
-AppendOptionalQuoted(StringBuilder &b, std::string_view value)
+AppendOptionalQuoted(StringBuilder &b, std::string_view value, bool truncated=false)
 {
 	if (value.data() != nullptr)
-		AppendQuoted(b, value);
+		AppendQuoted(b, value, truncated);
 	else
 		b.Append('-');
 }
@@ -137,6 +145,8 @@ try {
 
 	if (options.show_host) {
 		AppendEscape(b, OptionalString(d.host));
+		if (d.truncated_host) [[unlikely]]
+			AppendTruncationMarker(b);
 		b.Append(' ');
 	}
 
@@ -171,6 +181,8 @@ try {
 	AppendFormat(b, " \"%s ", method);
 
 	AppendEscape(b, OptionalString(d.http_uri));
+	if (d.truncated_http_uri) [[unlikely]]
+		AppendTruncationMarker(b);
 
 	b.Append(" HTTP/1.1\" ");
 
@@ -197,12 +209,12 @@ try {
 
 	if (options.show_http_referer) {
 		b.Append(' ');
-		AppendOptionalQuoted(b, d.http_referer);
+		AppendOptionalQuoted(b, d.http_referer, d.truncated_http_referer);
 	}
 
 	if (options.show_user_agent) {
 		b.Append(' ');
-		AppendOptionalQuoted(b, d.user_agent);
+		AppendOptionalQuoted(b, d.user_agent, d.truncated_user_agent);
 	}
 
 	b.Append(' ');

@@ -53,6 +53,12 @@ struct Datagram {
 	bool valid_length = false, valid_traffic = false;
 	bool valid_duration = false;
 
+	bool truncated_host = false;
+	bool truncated_http_uri = false;
+	bool truncated_http_referer = false;
+	bool truncated_user_agent = false;
+	bool truncated_message = false;
+
 	constexpr bool HasTimestamp() const noexcept {
 		return timestamp != TimePoint();
 	}
@@ -107,6 +113,31 @@ struct Datagram {
 	constexpr bool IsHttpAccess() const noexcept {
 		return type == Type::HTTP_ACCESS ||
 			(type == Type::UNSPECIFIED && GuessIsHttpAccess());
+	}
+
+	constexpr void TruncateHttpUri(std::size_t max_length) noexcept {
+		Truncate(http_uri, truncated_http_uri, max_length);
+	}
+
+	constexpr void TruncateHttpReferer(std::size_t max_length) noexcept {
+		Truncate(http_referer, truncated_http_referer, max_length);
+	}
+
+	constexpr void TruncateUserAgent(std::size_t max_length) noexcept {
+		Truncate(user_agent, truncated_user_agent, max_length);
+	}
+
+	constexpr void TruncateMessage(std::size_t max_length) noexcept {
+		Truncate(message, truncated_message, max_length);
+	}
+
+private:
+	static constexpr void Truncate(std::string_view &value, bool &truncated_flag,
+				       std::size_t max_length) noexcept {
+		if (value.size() > max_length) {
+			value = value.substr(0, max_length);
+			truncated_flag = true;
+		}
 	}
 };
 

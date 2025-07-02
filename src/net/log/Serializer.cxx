@@ -102,6 +102,21 @@ public:
 
 }
 
+/**
+ * Write TRUNCATED attribute with the specified attribute as its
+ * payload.
+ *
+ * @param a the attribute that was truncated
+ */
+static void
+SerializeTruncated(BufferWriter &w, Attribute a, bool truncated)
+{
+	if (truncated) {
+		w.WriteAttribute(Attribute::TRUNCATED);
+		w.WriteAttribute(a);
+	}
+}
+
 std::size_t
 Serialize(std::span<std::byte> dest, const Datagram &d)
 {
@@ -166,6 +181,12 @@ Serialize(std::span<std::byte> dest, const Datagram &d)
 		w.WriteAttribute(Attribute::CONTENT_TYPE);
 		w.WriteT(d.content_type);
 	}
+
+	SerializeTruncated(w, Attribute::HOST, d.truncated_host);
+	SerializeTruncated(w, Attribute::HTTP_URI, d.truncated_http_uri);
+	SerializeTruncated(w, Attribute::HTTP_REFERER, d.truncated_http_referer);
+	SerializeTruncated(w, Attribute::USER_AGENT, d.truncated_user_agent);
+	SerializeTruncated(w, Attribute::MESSAGE, d.truncated_message);
 
 	Crc crc;
 	crc.Update(dest.first(w.size()).subspan(4));

@@ -160,6 +160,12 @@ enum class Attribute : uint8_t {
 	 * @see #ContentType
 	 */
 	CONTENT_TYPE = 19,
+
+	/**
+	 * Indicate that one field was truncated (or omitted
+	 * completely).  The payload is the affected attribute.
+	 */
+	TRUNCATED = 20,
 };
 
 /**

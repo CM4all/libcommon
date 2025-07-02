@@ -88,6 +88,39 @@ FixUp(Datagram &d)
 			: Type::HTTP_ERROR;
 }
 
+/**
+ * Apply one TRUNCATED command to the #Datagram, i.e. set the
+ * "truncated" flag for the specified attribute.
+ */
+static void
+ApplyTruncated(Datagram &d, Attribute attribute) noexcept
+{
+	switch (attribute) {
+	case Attribute::HOST:
+		d.truncated_host = true;
+		break;
+
+	case Attribute::HTTP_URI:
+		d.truncated_http_uri = true;
+		break;
+
+	case Attribute::HTTP_REFERER:
+		d.truncated_http_referer = true;
+		break;
+
+	case Attribute::USER_AGENT:
+		d.truncated_user_agent = true;
+		break;
+
+	case Attribute::MESSAGE:
+		d.truncated_message = true;
+		break;
+
+	default:
+		break;
+	}
+}
+
 static Datagram
 log_server_apply_attributes(Deserializer d)
 {
@@ -184,6 +217,10 @@ log_server_apply_attributes(Deserializer d)
 
 		case Attribute::CONTENT_TYPE:
 			datagram.content_type = static_cast<ContentType>(d.ReadByte());
+			continue;
+
+		case Attribute::TRUNCATED:
+			ApplyTruncated(datagram, static_cast<Attribute>(d.ReadByte()));
 			continue;
 		}
 
