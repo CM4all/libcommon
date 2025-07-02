@@ -140,7 +140,7 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::MESSAGE:
-			datagram.message = d.ReadString();
+			datagram.message = d.ReadStringView();
 			break;
 
 		case Attribute::HTTP_STATUS:
@@ -171,7 +171,7 @@ log_server_apply_attributes(Deserializer d)
 			break;
 
 		case Attribute::JSON:
-			datagram.json = d.ReadString();
+			datagram.json = d.ReadStringView();
 			break;
 
 		case Attribute::ANALYTICS_ID:
