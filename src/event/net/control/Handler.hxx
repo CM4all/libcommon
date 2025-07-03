@@ -15,12 +15,9 @@ class SocketAddress;
 
 namespace BengControl {
 
-class Server;
-
 class Handler {
 public:
-	virtual void OnControlPacket(Server &control_server,
-				     Command command,
+	virtual void OnControlPacket(Command command,
 				     std::span<const std::byte> payload,
 				     std::span<UniqueFileDescriptor> fds,
 				     SocketAddress address, int uid) = 0;

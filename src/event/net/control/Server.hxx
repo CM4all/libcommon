@@ -44,13 +44,6 @@ public:
 		socket.Disable();
 	}
 
-	/**
-	 * Throws std::runtime_error on error.
-	 */
-	void Reply(SocketAddress address,
-		   Command command,
-		   std::span<const std::byte> payload);
-
 private:
 	/* virtual methods from class UdpHandler */
 	bool OnUdpDatagram(std::span<const std::byte> payload,

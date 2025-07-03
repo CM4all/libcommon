@@ -8,9 +8,7 @@
 #include "net/control/Padding.hxx"
 #include "net/SocketConfig.hxx"
 #include "net/SocketAddress.hxx"
-#include "net/SendMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "io/Iovec.hxx"
 #include "util/ByteOrder.hxx"
 
 namespace BengControl {
@@ -28,8 +26,7 @@ Server::Server(EventLoop &event_loop, Handler &_handler,
 }
 
 static void
-control_server_decode(Server &control_server,
-		      const void *data, size_t length,
+control_server_decode(const void *data, size_t length,
 		      std::span<UniqueFileDescriptor> fds,
 		      SocketAddress address, int uid,
 		      Handler &handler)
@@ -68,7 +65,7 @@ control_server_decode(Server &control_server,
 
 		/* this command is ok, pass it to the callback */
 
-		handler.OnControlPacket(control_server, command,
+		handler.OnControlPacket(command,
 					{payload_length > 0 ? payload : nullptr, payload_length},
 					fds,
 					address, uid);
@@ -85,7 +82,7 @@ Server::OnUdpDatagram(std::span<const std::byte> payload,
 		      std::span<UniqueFileDescriptor> fds,
 		      SocketAddress address, int uid)
 try {
-	control_server_decode(*this, payload.data(), payload.size(),
+	control_server_decode(payload.data(), payload.size(),
 			      fds, address, uid, handler);
 	return true;
 } catch (...) {
@@ -97,23 +94,6 @@ void
 Server::OnUdpError(std::exception_ptr ep) noexcept
 {
 	handler.OnControlError(ep);
-}
-
-void
-Server::Reply(SocketAddress address,
-	      Command command,
-	      std::span<const std::byte> payload)
-{
-	const Header header{ToBE16(payload.size()), ToBE16(uint16_t(command))};
-
-	const struct iovec v[] = {
-		MakeIovecT(header),
-		MakeIovec(payload),
-	};
-
-	SendMessage(socket.GetSocket(),
-		    MessageHeader{v}.SetAddress(address),
-		    MSG_DONTWAIT|MSG_NOSIGNAL);
 }
 
 } // namespace BengControl
