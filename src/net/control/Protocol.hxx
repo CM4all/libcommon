@@ -173,6 +173,15 @@ enum class Command {
      * re-enables io_uring now.
      */
     DISABLE_URING = 21,
+
+    /**
+     * Reset data structures bound to the specified account that keep
+     * track of resource usage limits.  This shall be sent after
+     * resource limits have been changed and applies only to data
+     * structures that cannot automatically apply these because they
+     * do not have enough context (e.g. token buckets).
+     */
+    RESET_LIMITER = 22,
 };
 
 struct Header {
