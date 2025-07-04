@@ -7,10 +7,11 @@
 #include "spawn/CgroupState.hxx"
 #include "spawn/CgroupKill.hxx"
 #include "event/Loop.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
 #include "AllocatorPtr.hxx"
+
+#include <span>
 
 #include <stdio.h>
 
@@ -36,14 +37,18 @@ public:
 int
 main(int argc, char **argv)
 try {
-	ConstBuffer<const char *> args(argv + 1, argc - 1);
+	std::span<const char *const> args{argv + 1, static_cast<std::size_t>(argc - 1)};
 
-	if (args.size < 2)
+	if (args.size() < 2)
 		throw Usage{};
 
-	const char *scope = args.shift();
-	const char *name = args.shift();
-	const char *session = args.empty() ? nullptr : args.shift();
+	const char *scope = args.front();
+	args = args.subspan(1);
+	const char *name = args.front();
+	args = args.subspan(1);
+	const char *session = args.empty() ? nullptr : args.front();
+	if (!args.empty())
+		args = args.subspan(1);
 
 	if (!args.empty())
 		throw Usage{};

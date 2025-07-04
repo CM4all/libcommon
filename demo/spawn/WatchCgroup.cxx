@@ -7,12 +7,13 @@
 #include "spawn/CgroupState.hxx"
 #include "spawn/CgroupMemoryWatch.hxx"
 #include "event/Loop.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
 #include "AllocatorPtr.hxx"
 
 #include <fmt/core.h>
+
+#include <span>
 
 struct Usage {};
 
@@ -34,12 +35,13 @@ private:
 int
 main(int argc, char **argv)
 try {
-	ConstBuffer<const char *> args(argv + 1, argc - 1);
+	std::span<const char *const> args{argv + 1, static_cast<std::size_t>(argc - 1)};
 
-	if (args.size != 1)
+	if (args.size() != 1)
 		throw Usage{};
 
-	const char *scope = args.shift();
+	const char *scope = args.front();
+	args = args.subspan(1);
 
 	if (!args.empty())
 		throw Usage{};

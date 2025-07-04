@@ -9,13 +9,13 @@
 #include "spawn/Mount.hxx"
 #include "spawn/Systemd.hxx"
 #include "system/Error.hxx"
-#include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
 #include "util/StringSplit.hxx"
 #include "AllocatorPtr.hxx"
 
 #include <forward_list>
+#include <span>
 #include <string>
 
 #include <stdio.h>
@@ -31,7 +31,7 @@ struct Usage {};
 int
 main(int argc, char **argv)
 try {
-	ConstBuffer<const char *> args(argv + 1, argc - 1);
+	std::span<const char *const> args{argv + 1, static_cast<std::size_t>(argc - 1)};
 
 	const char *scope_name = nullptr;
 
@@ -49,7 +49,8 @@ try {
 	p.stderr_fd = FileDescriptor{STDERR_FILENO};
 
 	while (!args.empty() && *args.front() == '-') {
-		const char *arg = args.shift();
+		const char *arg = args.front();
+		args = args.subspan(1);
 		if (const char *uid = StringAfterPrefix(arg, "--uid=")) {
 			p.uid_gid.effective_uid = atoi(uid);
 		} else if (const char *gid = StringAfterPrefix(arg, "--gid=")) {
@@ -147,10 +148,13 @@ try {
 		p.args.emplace_back("bash");
 	} else {
 		p.exec_path = args.front();
-		p.args.emplace_back(args.shift());
+		p.args.emplace_back(args.front());
+		args = args.subspan(1);
 
-		while (!args.empty())
-			p.args.emplace_back(args.shift());
+		while (!args.empty()) {
+			p.args.emplace_back(args.front());
+			args = args.subspan(1);
+		}
 	}
 
 	const CgroupState cgroup_state = scope_name != nullptr
