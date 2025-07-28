@@ -63,9 +63,7 @@ inline void
 ServerSocket::UringAccept::Start()
 {
 	assert(!released);
-
-	if (IsUringPending())
-		return;
+	assert(!IsUringPending());
 
 	auto &s = queue.RequireSubmitEntry();
 
