@@ -98,6 +98,10 @@ ServerSocket::UringAccept::OnUringCompletion(int res) noexcept
 		remote_address.SetSize(remote_address_size);
 		parent.OnAccept(UniqueSocketDescriptor{AdoptTag{}, res}, remote_address);
 		Start();
+	} else if (IgnoreAcceptErrno(-res)) {
+		/* ignore this spurious error condition and start the
+		   next accept() operation */
+		Start();
 	} else {
 		parent.OnAcceptError(std::make_exception_ptr(MakeSocketError(-res, "Failed to accept connection")));
 	}
