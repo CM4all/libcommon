@@ -27,6 +27,7 @@ if get_variable('libcommon_enable_spawn_server', true)
     'Client.cxx',
     'CgroupMemoryWatch.cxx',
     'CgroupMultiWatch.cxx',
+    'CgroupPidsWatch.cxx',
     'Launch.cxx',
     'Server.cxx',
     'TmpfsManager.cxx',
