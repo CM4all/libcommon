@@ -19,6 +19,16 @@
 
 #include <cassert>
 
+/**
+ * Is this a spurious error condition that should be ignored?
+ */
+static constexpr bool
+IgnoreAcceptErrno(int e) noexcept
+{
+	return IsSocketErrorAcceptWouldBlock(e) ||
+		e == ECONNABORTED || e == EINTR;
+}
+
 #ifdef HAVE_URING
 
 class ServerSocket::UringAccept final : Uring::Operation {
@@ -196,7 +206,7 @@ ServerSocket::EventCallback(unsigned) noexcept
 	UniqueSocketDescriptor remote_fd{AdoptTag{}, GetSocket().AcceptNonBlock(remote_address)};
 	if (!remote_fd.IsDefined()) {
 		const auto e = GetSocketError();
-		if (!IsSocketErrorAcceptWouldBlock(e))
+		if (!IgnoreAcceptErrno(e))
 			OnAcceptError(std::make_exception_ptr(MakeSocketError(e, "Failed to accept connection")));
 
 		return;
