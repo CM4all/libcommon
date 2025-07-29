@@ -296,7 +296,8 @@ public:
 			timers.IsEmpty() &&
 #endif // NO_FINE_TIMER_EVENT
 			defer.empty() && idle.empty() && next.empty() &&
-			sockets.empty() && ready_sockets.empty();
+			sockets.empty() && ready_sockets.empty() &&
+			IsUringEmpty();
 	}
 
 	bool AddFD(int fd, unsigned events, SocketEvent &event) noexcept;
@@ -382,6 +383,27 @@ private:
 
 #ifdef HAVE_URING
 	void UringWait(Event::Duration timeout) noexcept;
+
+	/**
+	 * How many io_uring operations are currently scheduled by
+	 * this #EventLoop?  This number is necessary to check if
+	 * there are pending operations other than ours (for
+	 * IsUringEmpty()).
+	 */
+	[[gnu::pure]]
+	std::size_t CountOwnUringOperations() const noexcept;
+
+	/**
+	 * Are there pending io_uring operations that are waiting for
+	 * completion?  This excludes those that are owned by this
+	 * #EventLoop.
+	 */
+	[[gnu::pure]]
+	bool IsUringEmpty() const noexcept;
+#else
+	constexpr bool IsUringEmpty() const noexcept {
+		return true;
+	}
 #endif
 
 	/**
