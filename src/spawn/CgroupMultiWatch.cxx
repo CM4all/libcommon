@@ -135,8 +135,6 @@ CgroupMultiWatch::Item::Block() noexcept
 void
 CgroupMultiWatch::Item::MemoryEventsWatch::Open(FileDescriptor cgroup_fd) noexcept
 {
-	auto &item = ContainerCast(*this, &Item::memory_events_watch);
-
 	RemoveWatch();
 
 	last_oom_kill = 0;
@@ -147,8 +145,9 @@ CgroupMultiWatch::Item::MemoryEventsWatch::Open(FileDescriptor cgroup_fd) noexce
 
 	TryAddWatch(ProcFdPath(fd), IN_MODIFY);
 
-	if (Load())
-		item.Block();
+	/* load the initial oom_kill value, but do not block, because
+	   last_oom_kill was just zero-initialized */
+	Load();
 }
 
 bool
@@ -178,8 +177,6 @@ CgroupMultiWatch::Item::MemoryEventsWatch::OnInotify([[maybe_unused]] unsigned m
 void
 CgroupMultiWatch::Item::PidsEventsWatch::Open(FileDescriptor cgroup_fd) noexcept
 {
-	auto &item = ContainerCast(*this, &Item::pids_events_watch);
-
 	RemoveWatch();
 
 	last_max = 0;
@@ -190,8 +187,9 @@ CgroupMultiWatch::Item::PidsEventsWatch::Open(FileDescriptor cgroup_fd) noexcept
 
 	TryAddWatch(ProcFdPath(fd), IN_MODIFY);
 
-	if (Load())
-		item.Block();
+	/* load the initial pids.max value, but do not block, because
+	   last_max was just zero-initialized */
+	Load();
 }
 
 bool
