@@ -4,6 +4,14 @@ if not libavahi_client.found()
   subdir_done()
 endif
 
+avahi_sources = []
+avahi_dependencies = []
+
+if is_variable('io_config_dep')
+  avahi_sources += 'ExplorerConfig.cxx'
+  avahi_dependencies += io_config_dep
+endif
+
 avahi = static_library(
   'avahi',
   'Check.cxx',
@@ -13,11 +21,13 @@ avahi = static_library(
   'Publisher.cxx',
   'Service.cxx',
   'Explorer.cxx',
+  avahi_sources,
   include_directories: inc,
   dependencies: [
     libavahi_client,
     fmt_dep,
     time_dep,
+    avahi_dependencies,
   ],
 )
 
