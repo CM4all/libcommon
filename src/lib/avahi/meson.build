@@ -8,7 +8,10 @@ avahi_sources = []
 avahi_dependencies = []
 
 if is_variable('io_config_dep')
-  avahi_sources += 'ExplorerConfig.cxx'
+  avahi_sources += [
+    'ExplorerConfig.cxx',
+    'ServiceConfig.cxx',
+  ]
   avahi_dependencies += io_config_dep
 endif
 
