@@ -18,19 +18,19 @@ namespace Avahi {
 bool
 ServiceExplorerConfig::ParseLine(const char *word, FileLineParser &line)
 {
-	if (StringIsEqual(word, "service")) {
+	if (StringIsEqual(word, "zeroconf_service")) {
 		if (!service.empty())
 			throw LineParser::Error("Duplicate Zeroconf service");
 
 		service = MakeZeroconfServiceType(line.ExpectValueAndEnd(), "_tcp");
 		return true;
-	} else if (StringIsEqual(word, "domain")) {
+	} else if (StringIsEqual(word, "zeroconf_domain")) {
 		if (!domain.empty())
 			throw LineParser::Error("Duplicate Zeroconf domain");
 
 		domain = line.ExpectValueAndEnd();
 		return true;
-	} else if (StringIsEqual(word, "interface")) {
+	} else if (StringIsEqual(word, "zeroconf_interface")) {
 		if (service.empty())
 			throw LineParser::Error("Zeroconf interface without service");
 
@@ -39,7 +39,7 @@ ServiceExplorerConfig::ParseLine(const char *word, FileLineParser &line)
 
 		interface = line.ExpectValueAndEnd();
 		return true;
-	} else if (StringIsEqual(word, "protocol")) {
+	} else if (StringIsEqual(word, "zeroconf_protocol")) {
 		if (service.empty())
 			throw LineParser::Error("Zeroconf protocol without service");
 
