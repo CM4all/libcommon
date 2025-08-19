@@ -3,11 +3,16 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Service.hxx"
+#include "ServiceConfig.hxx"
+#include "Arch.hxx"
+#include "lib/fmt/ToBuffer.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/IPv6Address.hxx"
 #include "net/Interface.hxx"
 
 #include <net/if.h>
+
+using std::string_view_literals::operator""sv;
 
 namespace Avahi {
 
@@ -38,6 +43,28 @@ Service::Service(const char *_type, const char *_interface,
 			protocol = AVAHI_PROTO_INET6;
 		break;
 	}
+}
+
+Service::Service(const ServiceConfig &config, const char *interface2,
+		 SocketAddress bound_address, bool v6only) noexcept
+	:Service(config.service.c_str(),
+		 !config.interface.empty() ? config.interface.c_str() : interface2,
+		 bound_address, v6only)
+{
+	assert(config.IsEnabled());
+
+	if (config.protocol != AVAHI_PROTO_UNSPEC)
+		protocol = config.protocol;
+
+	AvahiStringList *t = nullptr;
+
+	t = Avahi::AddArchTxt(t);
+
+	if (config.weight >= 0)
+		t = avahi_string_list_add_pair(t, "weight",
+					       FmtBuffer<64>("{}"sv, config.weight));
+
+	txt.reset(t);
 }
 
 } // namespace Avahi

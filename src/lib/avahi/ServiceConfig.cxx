@@ -6,7 +6,6 @@
 #include "Service.hxx"
 #include "Arch.hxx"
 #include "Check.hxx"
-#include "lib/fmt/ToBuffer.hxx"
 #include "net/SocketAddress.hxx"
 #include "io/config/FileLineParser.hxx"
 #include "util/StringAPI.hxx"
@@ -14,8 +13,6 @@
 #include <cassert>
 
 #include <stdlib.h> // for strtod()
-
-using std::string_view_literals::operator""sv;
 
 namespace Avahi {
 
@@ -89,35 +86,6 @@ ServiceConfig::Check() const
 		if (!domain.empty())
 			throw LineParser::Error("Zeroconf service missing");
 	}
-}
-
-std::unique_ptr<Avahi::Service>
-ServiceConfig::Create(const char *interface2,
-		      SocketAddress local_address,
-		      bool v6only) const noexcept
-{
-	assert(IsEnabled());
-
-	auto s = std::make_unique<Service>(service.c_str(),
-					   !interface.empty()
-					   ? interface.c_str()
-					   : interface2,
-					   local_address,
-					   v6only);
-
-	if (protocol != AVAHI_PROTO_UNSPEC)
-		s->protocol = protocol;
-
-	AvahiStringList *txt = nullptr;
-
-	txt = Avahi::AddArchTxt(txt);
-
-	if (weight >= 0)
-		txt = avahi_string_list_add_pair(txt, "weight",
-						 FmtBuffer<64>("{}"sv, weight));
-
-	s->txt.reset(txt);
-	return s;
 }
 
 } // namespace Avahi

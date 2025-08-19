@@ -16,6 +16,8 @@ class SocketAddress;
 
 namespace Avahi {
 
+struct ServiceConfig;
+
 /**
  * A service that will be published by class #Publisher.
  */
@@ -48,6 +50,27 @@ struct Service : IntrusiveListHook<> {
 	 */
 	Service(const char *_type, const char *_interface,
 		SocketAddress address, bool v6only) noexcept;
+
+	/**
+	 * Create a #Service instance from a #ServiceConfig.
+	 *
+	 * @param config a ServiceConfig whose IsEnabled() must be
+	 * true
+	 *
+	 * @param interface2 the network interface the listener socket
+	 * was (explicitly) bound to (may be nullptr); this will be
+	 * used if there is no "zeroconf_interface" setting
+	 *
+	 * @param bound_address the address where the listener socket
+	 * is bound; this will be used to determine the port and
+	 * optionally the network interface and the protocol (if none
+	 * was given in the configuration)
+	 *
+	 * @param v6only true if the listener socket was bound using
+	 * the "v6only" option
+	 */
+	Service(const ServiceConfig &config, const char *interface2,
+		SocketAddress bound_address, bool v6only) noexcept;
 };
 
 } // namespace Avahi
