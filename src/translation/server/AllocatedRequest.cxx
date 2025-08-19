@@ -278,8 +278,8 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		mount_listen_stream = AsBytes(mount_listen_stream_buffer);
 		break;
 
-	case TranslationCommand::PROBE:
-		probe = true;
+	case TranslationCommand::PEEK:
+		peek = true;
 		break;
 
 	default:

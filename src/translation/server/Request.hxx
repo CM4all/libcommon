@@ -106,7 +106,7 @@ struct Request {
 
 	bool cron = false;
 
-	bool probe = false;
+	bool peek = false;
 };
 
 } // namespace Translation::Server

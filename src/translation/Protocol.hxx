@@ -1368,12 +1368,12 @@ enum class TranslationCommand : uint16_t {
 	MAPPED_REAL_UID_GID = 275,
 
 	/**
-	 * Mark this request as a "probe" request, which means the
+	 * Mark this request as a "peek" request, which means the
 	 * server shall generate the translation response, but shall
 	 * not account it (e.g. shall not mark a ticket as
 	 * "consumed").
 	 */
-	PROBE = 276,
+	PEEK = 276,
 };
 
 struct TranslationHeader {
