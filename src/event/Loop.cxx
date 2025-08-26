@@ -391,7 +391,7 @@ EventLoop::Poll(Event::Duration timeout) noexcept
 		ready_sockets.push_back(socket_event);
 	}
 
-	return ret > 0;
+	return std::cmp_equal(ret, received_events.size());
 }
 
 #ifdef HAVE_URING
@@ -451,6 +451,13 @@ EventLoop::UringWait(Event::Duration timeout) noexcept
 	if (epoll_ready) {
 		/* invoke epoll_wait() */
 		epoll_ready = Poll(Event::Duration{0});
+
+		/* if Poll() returns true, then the epoll_event was
+		   full and there may be more events in the kernel,
+		   but since #UringPoll is edge-triggered, it won't
+		   fire again, thus we keep #epoll_ready true to
+		   receive the remaining events in the next
+		   iteration */
 	}
 }
 
