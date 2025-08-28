@@ -11,6 +11,8 @@
 #include <string_view>
 #include <utility> // for std::forward
 
+class AllocatedString;
+
 /**
  * A #DisposablePointer wrapper which knows its size.  For convenience, it can
  * be casted implicitly to various classes such as std::string_view.
@@ -26,6 +28,12 @@ public:
 	template<typename D>
 	DisposableBuffer(D &&_data, std::size_t _size) noexcept
 		:data_(std::forward<D>(_data)), size_(_size) {}
+
+	/**
+	 * Construct a #DisposableBuffer by moving the allocation from
+	 * an #AllocatedString.
+	 */
+	DisposableBuffer(AllocatedString &&src) noexcept;
 
 	DisposableBuffer(DisposableBuffer &&) noexcept = default;
 	DisposableBuffer &operator=(DisposableBuffer &&) noexcept = default;
