@@ -377,10 +377,7 @@ private:
 	 * Call epoll_wait() and pass all returned events to
 	 * SocketEvent::SetReadyFlags().
 	 *
-	 * @return true if the epoll_wait() system call filled the
-	 * whole array, and thus there may be more events in the
-	 * kernel that did not fit; false if all pending events were
-	 * received from the kernel
+	 * @return true if one or more sockets have become ready
 	 */
 	bool Poll(Event::Duration timeout) noexcept;
 
