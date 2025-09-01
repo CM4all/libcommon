@@ -29,19 +29,8 @@ else
   libssl = disabler()
 endif
 
-crypto_sources = []
-
-if compiler.get_id() != 'gcc' or compiler.version().version_compare('>=10')
-  # std::span is implemented in GCC>=10
-  crypto_sources += [
-    'SHA1.cxx',
-    'SHA3.cxx',
-  ]
-endif
-
 crypto = static_library(
   'crypto',
-  crypto_sources,
   'AltName.cxx',
   'Buffer.cxx',
   'EvpParam.cxx',
@@ -54,6 +43,8 @@ crypto = static_library(
   'Key.cxx',
   'LoadFile.cxx',
   'Name.cxx',
+  'SHA1.cxx',
+  'SHA3.cxx',
   'Time.cxx',
   'TrivialExDataIndex.cxx',
   include_directories: inc,
