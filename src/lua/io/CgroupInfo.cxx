@@ -40,6 +40,7 @@ public:
 
 	int Close(lua_State *) {
 		auto_close = nullptr;
+		directory_fd.Close();
 		return 0;
 	}
 
