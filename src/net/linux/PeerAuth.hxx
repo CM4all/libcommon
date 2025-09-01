@@ -24,6 +24,14 @@ class SocketPeerAuth {
 public:
 	explicit SocketPeerAuth(SocketDescriptor s) noexcept;
 
+	/**
+	 * Close/free all resources held by this object.  This
+	 * invalidates the object.
+	 */
+	void Close() && noexcept {
+		pidfd.Close();
+	}
+
 	bool HaveCred() const noexcept {
 		return cred.IsDefined();
 	}
