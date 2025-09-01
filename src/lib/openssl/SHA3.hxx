@@ -5,14 +5,8 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <span>
 
 std::array<char, 64>
 EvpSHA3_256_Hex(std::span<const std::byte> input);
-
-template<typename T>
-std::array<char, 64>
-EvpSHA3_256_Hex(std::span<T> input)
-{
-	return EvpSHA3_256_Hex(std::as_bytes(input));
-}

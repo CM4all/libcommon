@@ -22,10 +22,3 @@ TEST(TestSHA3, ByteSpan)
 	EXPECT_EQ(std::string_view(hex.data(), hex.size()),
 		  "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a");
 }
-
-TEST(TestSHA3, IntSpan)
-{
-	const auto hex = EvpSHA3_256_Hex(std::span<int>{});
-	EXPECT_EQ(std::string_view(hex.data(), hex.size()),
-		  "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a");
-}
