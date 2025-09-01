@@ -143,6 +143,15 @@ struct ParamWrapper<const char *> {
 	}
 };
 
+/**
+ * Specialization that matches string literals.
+ */
+template<std::convertible_to<const char *> T>
+struct ParamWrapper<T> : ParamWrapper<const char *> {
+	constexpr ParamWrapper(const T &_value) noexcept
+		:ParamWrapper<const char *>(_value) {}
+};
+
 template<>
 struct ParamWrapper<bool> {
 	const char *value;
