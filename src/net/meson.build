@@ -27,6 +27,7 @@ net_sources = [
   'SendMessage.cxx',
   'EasyMessage.cxx',
   'Buffered.cxx',
+  'TempListener.cxx',
 ]
 
 net_dependencies = [
