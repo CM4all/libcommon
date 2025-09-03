@@ -23,6 +23,7 @@ io = static_library(
   'BufferedOutputStream.cxx',
   'BufferedReader.cxx',
   'Logger.cxx',
+  'RuntimeDirectory.cxx',
   'StringFile.cxx',
   'StateDirectories.cxx',
   'Temp.cxx',
