@@ -60,6 +60,14 @@ struct SpawnConfig {
 	gid_t cgroups_writable_by_gid = 0;
 
 	/**
+	 * Attempt to run the spawner in a new PID namespace?  This
+	 * means it cannot attach to externally managed PID namespaces
+	 * (e.g. from spawn-accessory via
+	 * NamespaceOptions::pid_namespace).
+	 */
+	bool pid_namespace = true;
+
+	/**
 	 * Is a systemd scope optional?  This option is only for
 	 * debugging/development if launched by an unprivileged user.
 	 */

@@ -281,15 +281,19 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	 */
 	auto [error_pipe_r, error_pipe_w] = CreatePipe();
 
-	bool pid_namespace = true;
+	bool has_mount_namespace = true;
+	bool pid_namespace = config.pid_namespace;
 
 	int _pidfd;
 
 	struct clone_args ca{
-		.flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_PIDFD,
+		.flags = CLONE_NEWNS | CLONE_PIDFD,
 		.pidfd = (uintptr_t)&_pidfd,
 		.exit_signal = SIGCHLD,
 	};
+
+	if (pid_namespace)
+		ca.flags |= CLONE_NEWPID;
 
 	/* try to run the spawner in a new PID namespace; to be able to
 	   mount a new /proc for this namespace, we need a mount namespace
@@ -297,8 +301,10 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 	int pid = clone3(&ca, sizeof(ca));
 	if (pid < 0) {
 		/* try again without CLONE_NEWPID */
-		fmt::print(stderr, "Failed to create spawner PID namespace ({}), trying without\n",
+		fmt::print(stderr, "Failed to create spawner namespace ({}), trying without\n",
 			   strerror(-pid));
+
+		has_mount_namespace = false;
 		pid_namespace = false;
 
 		ca.flags &= ~(CLONE_NEWPID | CLONE_NEWNS);
@@ -320,7 +326,7 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 
 		_exit(RunSpawnServer2(config, hook, std::move(socket),
 				      error_pipe_w,
-				      pid_namespace,
+				      has_mount_namespace,
 				      pid_namespace));
 	}
 
