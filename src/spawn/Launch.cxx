@@ -138,6 +138,7 @@ static int
 RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		UniqueSocketDescriptor socket,
 		FileDescriptor error_pipe_w,
+		const bool has_mount_namespace,
 		const bool pid_namespace) noexcept
 {
 #ifdef HAVE_LIBSYSTEMD
@@ -255,7 +256,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	error_pipe_w.Close();
 
 	try {
-		RunSpawnServer(config, cgroup_state, pid_namespace,
+		RunSpawnServer(config, cgroup_state, has_mount_namespace,
 			       hook, std::move(socket));
 		return EXIT_SUCCESS;
 	} catch (...) {
@@ -319,6 +320,7 @@ LaunchSpawnServer(const SpawnConfig &config, SpawnHook *hook,
 
 		_exit(RunSpawnServer2(config, hook, std::move(socket),
 				      error_pipe_w,
+				      pid_namespace,
 				      pid_namespace));
 	}
 
