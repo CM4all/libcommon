@@ -23,10 +23,30 @@ Connect();
 struct NamespacesRequest {
 	bool ipc = false;
 	bool pid = false;
+
+	/**
+	 * UID mapping for user namespace. If non-nullptr data(), a user
+	 * namespace will be created and this string will be written to
+	 * /proc/self/uid_map.
+	 */
+	std::string_view uid_map{};
+
+	/**
+	 * GID mapping for user namespace. If non-nullptr data(), a user
+	 * namespace will be created and this string will be written to
+	 * /proc/self/gid_map.
+	 */
+	std::string_view gid_map{};
 };
 
 struct NamespacesResponse {
 	UniqueFileDescriptor ipc, pid;
+
+	/**
+	 * User namespace file descriptor. Set when a user namespace
+	 * was created (when either uid_map or gid_map had non-nullptr data()).
+	 */
+	UniqueFileDescriptor user;
 };
 
 /**

@@ -50,6 +50,23 @@ SendNamespacesRequest(SocketDescriptor s, std::string_view name,
 		b.Append(pid_namespace_header);
 	}
 
+	RequestHeader user_namespace_header;
+	if (request.uid_map.data() != nullptr || request.gid_map.data() != nullptr) {
+		static constexpr std::byte zero{};
+		const std::size_t payload_size = request.uid_map.size() + sizeof(zero) + request.gid_map.size();
+
+		user_namespace_header = {
+			static_cast<uint16_t>(payload_size),
+			RequestCommand::USER_NAMESPACE,
+		};
+		b.Append(user_namespace_header);
+
+		b.AppendRaw(AsBytes(request.uid_map));
+		b.AppendRaw(ReferenceAsBytes(zero));
+		b.AppendRaw(AsBytes(request.gid_map));
+		b.Pad(payload_size);
+	}
+
 	SendMessage(s, b.Finish(), 0);
 }
 
@@ -99,6 +116,10 @@ ParseNamespaceHandles(const NamespacesRequest request,
 			response.pid = std::move(fds[i]);
 			break;
 
+		case CLONE_NEWUSER:
+			response.user = std::move(fds[i]);
+			break;
+
 		default:
 			throw std::runtime_error{"Unsupported namespace in NAMESPACE_HANDLES response"};
 		}
@@ -109,6 +130,10 @@ ParseNamespaceHandles(const NamespacesRequest request,
 
 	if (request.pid && !response.pid.IsDefined())
 		throw std::runtime_error{"PID namespace missing in NAMESPACE_HANDLES response"};
+
+	const bool user_requested = request.uid_map.data() != nullptr || request.gid_map.data() != nullptr;
+	if (user_requested && !response.user.IsDefined())
+		throw std::runtime_error{"User namespace missing in NAMESPACE_HANDLES response"};
 
 	return response;
 }

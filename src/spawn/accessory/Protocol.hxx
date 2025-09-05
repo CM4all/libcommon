@@ -67,6 +67,17 @@ enum class RequestCommand : uint16_t {
 	 * #ResponseCommand::ERROR.
 	 */
 	PID_NAMESPACE = 3,
+
+	/**
+	 * Create a new user namespace.  Optional payload: if non-empty,
+	 * consists of two strings separated by a null byte; the first
+	 * one is the uid_map to be written to /proc/self/uid_map; the
+	 * second one is the gid_map for /proc/self/gid_map.
+	 *
+	 * Response may be #ResponseCommand::NAMESPACE_HANDLES or
+	 * #ResponseCommand::ERROR.
+	 */
+	USER_NAMESPACE = 4,
 };
 
 struct RequestHeader {
