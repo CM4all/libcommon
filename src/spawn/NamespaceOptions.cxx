@@ -110,12 +110,12 @@ NamespaceOptions::ReassociateNetwork() const
 void
 NamespaceOptions::Apply(const UidGid &uid_gid) const
 {
-	/* set up UID/GID mapping in the old /proc */
-	if (enable_user && !user_namespace.IsDefined()) {
+	if (enable_user || user_namespace.IsDefined())
 		DenySetGroups(0);
 
+	/* set up UID/GID mapping in the old /proc */
+	if (enable_user)
 		SetupUidGidMap(uid_gid, 0);
-	}
 
 	if (network_namespace_name != nullptr)
 		ReassociateNetwork();
