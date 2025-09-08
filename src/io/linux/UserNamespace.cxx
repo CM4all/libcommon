@@ -24,17 +24,10 @@ try {
 }
 
 [[nodiscard]]
-static char *
+char *
 FormatIdMap(char *p, const IdMap::Item item) noexcept
 {
 	return fmt::format_to(p, "{} {} 1\n"sv, item.mapped_id, item.id);
-}
-
-[[nodiscard]]
-static char *
-FormatIdMap(char *p, unsigned id) noexcept
-{
-	return FormatIdMap(p, IdMap::Item{.id = id, .mapped_id = id});
 }
 
 [[nodiscard]]

@@ -34,6 +34,17 @@ struct IdMap {
 	bool root = false;
 };
 
+[[nodiscard]]
+char *
+FormatIdMap(char *p, const IdMap::Item item) noexcept;
+
+[[nodiscard]]
+static inline char *
+FormatIdMap(char *p, unsigned id) noexcept
+{
+	return FormatIdMap(p, IdMap::Item{.id = id, .mapped_id = id});
+}
+
 /**
  * Format the uid/gid map to a string buffer.  This prepares for
  * writing to `/proc/PID/[ug]id_map`.
