@@ -92,11 +92,18 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 	if (!gids.empty())
 		SetupGidMap(pid, gids);
 
-	SetupUidMap(pid, uid_gid.effective_uid,
-		    mapped_effective_uid > 0 ? mapped_effective_uid : uid_gid.effective_uid,
-		    uid_gid.real_uid,
-		    mapped_real_uid > 0 ? mapped_real_uid : uid_gid.real_uid,
-		    false);
+	const IdMap map{
+		.first = {
+			.id = uid_gid.effective_uid,
+			.mapped_id = mapped_effective_uid > 0 ? mapped_effective_uid : uid_gid.effective_uid,
+		},
+		.second = {
+			.id = uid_gid.real_uid,
+			.mapped_id = mapped_real_uid > 0 ? mapped_real_uid : uid_gid.real_uid,
+		},
+	};
+
+	SetupUidMap(pid, map);
 }
 
 void

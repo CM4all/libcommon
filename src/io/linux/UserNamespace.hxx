@@ -17,6 +17,24 @@ void
 DenySetGroups(unsigned pid) noexcept;
 
 /**
+ * Uid/gid mapping for Linux user namespaces.
+ */
+struct IdMap {
+	struct Item {
+		/** the id to be mapped inside the user namespace */
+		unsigned id;
+
+		/** the id the #id parameter is mapped to */
+		unsigned mapped_id;
+	};
+
+	Item first{}, second{};
+
+	/*** true to also map root */
+	bool root = false;
+};
+
+/**
  * Format the uid/gid map to a string buffer.  This prepares for
  * writing to `/proc/PID/[ug]id_map`.
  *
@@ -25,10 +43,7 @@ DenySetGroups(unsigned pid) noexcept;
  */
 [[nodiscard]]
 char *
-FormatIdMap(char *dest, unsigned id,
-	    unsigned mapped_id,
-	    unsigned id2, unsigned mapped_id2,
-	    bool root) noexcept;
+FormatIdMap(char *dest, const IdMap &map) noexcept;
 
 [[nodiscard]]
 char *
@@ -41,24 +56,12 @@ FormatIdMap(char *dest, const std::set<unsigned> &ids) noexcept;
  *
  * @param pid the process id whose user namespace shall be modified; 0
  * for current process
- * @param uid the user id to be mapped inside the user namespace
- * @param mapped_uid the user id the #uid parameter is mapped to
- * @param uid2 a second user id to be mapped (on itself); zero means
- * none
- * @param mapped_uid2 the user id the #uid2 parameter is mapped to
- * @param root true to also map root
  */
 void
-SetupUidMap(unsigned pid, unsigned uid,
-	    unsigned mapped_uid,
-	    unsigned uid2, unsigned mapped_uid2,
-	    bool root);
+SetupUidMap(unsigned pid, const IdMap &map);
 
-static inline void
-SetupUidMap(unsigned pid, unsigned uid)
-{
-	SetupUidMap(pid, uid, uid, 0, 0, false);
-}
+void
+SetupUidMap(unsigned pid, unsigned uid);
 
 /**
  * Set up a gid mapping for a user namespace.

@@ -25,16 +25,16 @@ try {
 
 [[nodiscard]]
 static char *
-FormatIdMap(char *p, unsigned id, unsigned mapped_id) noexcept
+FormatIdMap(char *p, const IdMap::Item item) noexcept
 {
-	return fmt::format_to(p, "{} {} 1\n"sv, mapped_id, id);
+	return fmt::format_to(p, "{} {} 1\n"sv, item.mapped_id, item.id);
 }
 
 [[nodiscard]]
 static char *
 FormatIdMap(char *p, unsigned id) noexcept
 {
-	return FormatIdMap(p, id, id);
+	return FormatIdMap(p, IdMap::Item{.id = id, .mapped_id = id});
 }
 
 [[nodiscard]]
@@ -46,15 +46,13 @@ FormatRootMap(char *p) noexcept
 }
 
 char *
-FormatIdMap(char *p, unsigned id,
-	    unsigned mapped_id,
-	    unsigned id2, unsigned mapped_id2,
-	    bool root) noexcept
+FormatIdMap(char *p, const IdMap &map) noexcept
 {
-	p = FormatIdMap(p, id, mapped_id);
-	if (id2 != 0 && id2 != id)
-		p = FormatIdMap(p, id2, mapped_id2);
-	if (root && id != 0)
+	p = FormatIdMap(p, map.first);
+	if (map.second.id != 0 && map.second.id != map.first.id)
+		p = FormatIdMap(p, map.second);
+
+	if (map.root && map.first.id != 0)
 		p = FormatRootMap(p);
 
 	return p;
@@ -77,13 +75,19 @@ WriteFileOrThrow(FileDescriptor directory, const char *path, std::string_view da
 }
 
 void
-SetupUidMap(unsigned pid, unsigned uid,
-	    unsigned mapped_uid,
-	    unsigned uid2, unsigned mapped_uid2,
-	    bool root)
+SetupUidMap(unsigned pid, const IdMap &map)
 {
 	char buffer[256];
-	char *end = FormatIdMap(buffer, uid, mapped_uid, uid2, mapped_uid2, root);
+	char *end = FormatIdMap(buffer, map);
+
+	WriteFileOrThrow(OpenProcPid(pid), "uid_map", {buffer, end});
+}
+
+void
+SetupUidMap(unsigned pid, unsigned uid)
+{
+	char buffer[256];
+	char *end = FormatIdMap(buffer, uid);
 
 	WriteFileOrThrow(OpenProcPid(pid), "uid_map", {buffer, end});
 }
