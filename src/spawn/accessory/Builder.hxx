@@ -31,12 +31,18 @@ public:
 		v.push_back(MakeIovec(s));
 	}
 
-	void AppendPadded(std::span<const std::byte> b) noexcept {
-		AppendRaw(b);
-
-		const size_t padding_size = (-b.size()) & 3;
+	/**
+	 * Append padding for a payload of the specified size.
+	 */
+	void Pad(std::size_t size) noexcept {
+		const std::size_t padding_size = (-size) & 3;
 		static constexpr std::byte padding[3]{};
 		AppendRaw(std::span{padding, padding_size});
+	}
+
+	void AppendPadded(std::span<const std::byte> b) noexcept {
+		AppendRaw(b);
+		Pad(b.size());
 	}
 
 	template<typename T>
