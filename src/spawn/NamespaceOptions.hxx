@@ -104,11 +104,33 @@ struct NamespaceOptions {
 #endif
 
 	/**
+	 * Clear all pid namespace options.
+	 */
+	void ClearPid() noexcept {
+		enable_pid = false;
+		pid_namespace = nullptr;
+	}
+
+	/**
+	 * Clear all cgroup namespace options.
+	 */
+	void ClearCgroup() noexcept {
+		enable_cgroup = false;
+	}
+
+	/**
 	 * Clear all network namespace options.
 	 */
 	void ClearNetwork() noexcept {
 		enable_network = false;
 		network_namespace = nullptr;
+	}
+
+	/**
+	 * Clear all IPC namespace options.
+	 */
+	void ClearIPC() noexcept {
+		enable_ipc = false;
 	}
 
 	[[gnu::pure]]
