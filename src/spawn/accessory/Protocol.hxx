@@ -8,10 +8,11 @@
 
 /*
 
-  Definitions for the Spawn daemon protocol
+  Definitions for the Spawn Accessory daemon protocol
   (https://github.com/CM4all/spawn).
 
-  The Spawn daemon listens on a local seqpacket socket for commands.
+  The Spawn Accessory daemon listens on a local seqpacket socket for
+  commands.
 
   Each datagram begins with the 32 bit "magic", followed by a CRC32 of
   all command packets, followed by one or more command packets.
