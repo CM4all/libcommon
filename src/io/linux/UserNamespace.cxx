@@ -12,12 +12,59 @@
 
 #include <cassert>
 
+using std::string_view_literals::operator""sv;
+
 void
 DenySetGroups(unsigned pid) noexcept
 try {
 	TryWriteExistingFile(OpenProcPid(pid), "setgroups", "deny");
 } catch (...) {
 	// silently ignore errors
+}
+
+[[nodiscard]]
+static char *
+FormatIdMap(char *p, unsigned id, unsigned mapped_id) noexcept
+{
+	return fmt::format_to(p, "{} {} 1\n"sv, mapped_id, id);
+}
+
+[[nodiscard]]
+static char *
+FormatIdMap(char *p, unsigned id) noexcept
+{
+	return FormatIdMap(p, id, id);
+}
+
+[[nodiscard]]
+static char *
+FormatRootMap(char *p) noexcept
+{
+	return stpcpy(p, "0 0 1\n");
+}
+
+char *
+FormatIdMap(char *p, unsigned id,
+	    unsigned mapped_id,
+	    unsigned id2, unsigned mapped_id2,
+	    bool root) noexcept
+{
+	p = FormatIdMap(p, id, mapped_id);
+	if (id2 != 0 && id2 != id)
+		p = FormatIdMap(p, id2, mapped_id2);
+	if (root && id != 0)
+		p = FormatRootMap(p);
+
+	return p;
+}
+
+char *
+FormatIdMap(char *p, const std::set<unsigned> &ids) noexcept
+{
+	for (unsigned id : ids)
+		p = FormatIdMap(p, id);
+
+	return p;
 }
 
 static void
@@ -33,25 +80,19 @@ SetupUidMap(unsigned pid, unsigned uid,
 	    unsigned uid2, unsigned mapped_uid2,
 	    bool root)
 {
-	char data_buffer[256], *p = data_buffer;
+	char buffer[256];
+	char *end = FormatIdMap(buffer, uid, mapped_uid, uid2, mapped_uid2, root);
 
-	p = fmt::format_to(p, "{} {} 1\n", mapped_uid, uid);
-	if (uid2 != 0 && uid2 != uid)
-		p = fmt::format_to(p, "{} {} 1\n", mapped_uid2, uid2);
-	if (root && uid != 0)
-		p = stpcpy(p, "0 0 1\n");
-
-	WriteFileOrThrow(OpenProcPid(pid), "uid_map", {data_buffer, p});
+	WriteFileOrThrow(OpenProcPid(pid), "uid_map", {buffer, end});
 }
 
 void
 SetupGidMap(unsigned pid, unsigned gid)
 {
-	char data_buffer[256], *p = data_buffer;
+	char buffer[256];
+	char *end = FormatIdMap(buffer, gid);
 
-	p = fmt::format_to(p, "{} {} 1\n", gid, gid);
-
-	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {data_buffer, p});
+	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {buffer, end});
 }
 
 void
@@ -59,14 +100,8 @@ SetupGidMap(unsigned pid, const std::set<unsigned> &gids)
 {
 	assert(!gids.empty());
 
-	char data_buffer[1024], *p = data_buffer;
+	char buffer[1024];
+	char *end = FormatIdMap(buffer, gids);
 
-	for (unsigned i : gids) {
-		if (p + 64 > data_buffer + sizeof(data_buffer))
-			break;
-
-		p = fmt::format_to(p, "{} {} 1\n", i, i);
-	}
-
-	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {data_buffer, p});
+	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {buffer, end});
 }

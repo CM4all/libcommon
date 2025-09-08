@@ -17,6 +17,24 @@ void
 DenySetGroups(unsigned pid) noexcept;
 
 /**
+ * Format the uid/gid map to a string buffer.  This prepares for
+ * writing to `/proc/PID/[ug]id_map`.
+ *
+ * @param dest the destination buffer
+ * @return the end of the destination buffer (not null-terminated)
+ */
+[[nodiscard]]
+char *
+FormatIdMap(char *dest, unsigned id,
+	    unsigned mapped_id,
+	    unsigned id2, unsigned mapped_id2,
+	    bool root) noexcept;
+
+[[nodiscard]]
+char *
+FormatIdMap(char *dest, const std::set<unsigned> &ids) noexcept;
+
+/**
  * Set up a uid mapping for a user namespace.
  *
  * Throws on error.
