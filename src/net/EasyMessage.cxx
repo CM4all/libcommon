@@ -56,7 +56,7 @@ EasySendError(SocketDescriptor s, std::exception_ptr error)
 UniqueFileDescriptor
 EasyReceiveMessageWithOneFD(SocketDescriptor s)
 {
-	ReceiveMessageBuffer<256, 4> buffer;
+	ReceiveMessageBuffer<256, CMSG_SPACE(sizeof(int))> buffer;
 	auto d = ReceiveMessage(s, buffer, 0);
 	if (d.payload.empty())
 		throw SocketClosedPrematurelyError{};
