@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "io/UniqueFileDescriptor.hxx"
+
 #include <string_view>
 
 class UniqueFileDescriptor;
@@ -18,14 +20,23 @@ namespace SpawnAccessory {
 UniqueSocketDescriptor
 Connect();
 
+struct NamespacesRequest {
+	bool pid = false;
+};
+
+struct NamespacesResponse {
+	UniqueFileDescriptor pid;
+};
+
 /**
- * Ask the Spawn daemon to create a new PID namespace.
+ * Ask the Spawn daemon to create namespaces.
  *
  * Throws on error.
  *
- * @return the namespace descriptor
+ * @return a struct containing namespace descriptors
  */
-UniqueFileDescriptor
-MakePidNamespace(SocketDescriptor s, std::string_view name);
+NamespacesResponse
+MakeNamespaces(SocketDescriptor s, std::string_view name,
+	       NamespacesRequest request);
 
 }

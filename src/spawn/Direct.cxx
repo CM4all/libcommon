@@ -448,9 +448,10 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		if (!old_pidns.OpenReadOnly("/proc/self/ns/pid"))
 			throw MakeErrno("Failed to open current PID namespace");
 
-		auto fd = SpawnAccessory::MakePidNamespace(SpawnAccessory::Connect(),
-							   params.ns.pid_namespace);
-		if (setns(fd.Get(), CLONE_NEWPID) < 0)
+		const auto ns = SpawnAccessory::MakeNamespaces(SpawnAccessory::Connect(),
+							       params.ns.pid_namespace,
+							       {.pid = true});
+		if (setns(ns.pid.Get(), CLONE_NEWPID) < 0)
 			throw MakeErrno("setns(CLONE_NEWPID) failed");
 	}
 

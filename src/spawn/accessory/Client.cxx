@@ -31,7 +31,8 @@ Connect()
 }
 
 static void
-SendPidNamespaceRequest(SocketDescriptor s, std::string_view name)
+SendNamespacesRequest(SocketDescriptor s, std::string_view name,
+		      const NamespacesRequest request)
 {
 	DatagramBuilder b;
 
@@ -39,8 +40,10 @@ SendPidNamespaceRequest(SocketDescriptor s, std::string_view name)
 	b.Append(name_header);
 	b.AppendPadded(AsBytes(name));
 
-	static constexpr RequestHeader pid_namespace_header{0, RequestCommand::PID_NAMESPACE};
-	b.Append(pid_namespace_header);
+	if (request.pid) {
+		static constexpr RequestHeader pid_namespace_header{0, RequestCommand::PID_NAMESPACE};
+		b.Append(pid_namespace_header);
+	}
 
 	SendMessage(s, b.Finish(), 0);
 }
@@ -67,10 +70,42 @@ ReceiveDatagram(SocketDescriptor s,
 	return {payload, std::move(response.fds)};
 }
 
-UniqueFileDescriptor
-MakePidNamespace(SocketDescriptor s, std::string_view name)
+static NamespacesResponse
+ParseNamespaceHandles(const NamespacesRequest request,
+		      const std::span<const std::byte> raw_payload,
+		      const std::span<UniqueFileDescriptor> fds)
 {
-	SendPidNamespaceRequest(s, name);
+	if (raw_payload.size() % sizeof(uint32_t) != 0)
+		throw std::runtime_error{"Odd NAMESPACE_HANDLES payload"};
+
+	const auto payload = FromBytesStrict<const uint32_t>(raw_payload);
+	if (payload.size() != fds.size())
+		throw std::runtime_error{"Wrong number of file descriptors in NAMESPACE_HANDLES response"};
+
+	NamespacesResponse response;
+
+	for (std::size_t i = 0; i < payload.size(); ++i) {
+		switch (payload[i]) {
+		case CLONE_NEWPID:
+			response.pid = std::move(fds[i]);
+			break;
+
+		default:
+			throw std::runtime_error{"Unsupported namespace in NAMESPACE_HANDLES response"};
+		}
+	}
+
+	if (request.pid && !response.pid.IsDefined())
+		throw std::runtime_error{"PID namespace missing in NAMESPACE_HANDLES response"};
+
+	return response;
+}
+
+NamespacesResponse
+MakeNamespaces(SocketDescriptor s, std::string_view name,
+	       NamespacesRequest request)
+{
+	SendNamespacesRequest(s, name, request);
 
 	ReceiveMessageBuffer<1024, 4> buffer;
 	auto d = ReceiveDatagram(s, buffer);
@@ -92,12 +127,7 @@ MakePidNamespace(SocketDescriptor s, std::string_view name)
 				      ToStringView(payload));
 
 	case ResponseCommand::NAMESPACE_HANDLES:
-		if (rh.size != sizeof(uint32_t) ||
-		    *(const uint32_t *)(const void *)payload.data() != CLONE_NEWPID ||
-		    fds.size() != 1)
-			throw std::runtime_error("Malformed NAMESPACE_HANDLES payload");
-
-		return std::move(fds.front());
+		return ParseNamespaceHandles(request, payload.first(rh.size), fds);
 	}
 
 	throw std::runtime_error("NAMESPACE_HANDLES expected");

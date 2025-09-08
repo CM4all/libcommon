@@ -10,19 +10,13 @@
 
 #include <sched.h>
 
-/**
- * Obtain a PID namespace from the Spawn daemon.
- */
-static UniqueFileDescriptor
-GetPidNS(std::string_view name)
-{
-	return SpawnAccessory::MakePidNamespace(SpawnAccessory::Connect(), name);
-}
-
 void
 ReassociatePidNamespace(std::string_view name)
 {
-	if (setns(GetPidNS(name).Get(), CLONE_NEWPID) < 0)
+	const auto response = SpawnAccessory::MakeNamespaces(SpawnAccessory::Connect(),
+							     name, {.pid = true});
+
+	if (setns(response.pid.Get(), CLONE_NEWPID) < 0)
 		throw FmtErrno("Failed to reassociate with PID namespace {:?}",
 			       name);
 }
