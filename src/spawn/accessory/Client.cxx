@@ -26,8 +26,8 @@ namespace SpawnAccessory {
 UniqueSocketDescriptor
 Connect()
 {
-	return CreateConnectSocket(LocalSocketAddress{"@cm4all-spawn"sv},
-				   SOCK_SEQPACKET);
+	static constexpr LocalSocketAddress address{"@cm4all-spawn"sv};
+	return CreateConnectSocket(address, SOCK_SEQPACKET);
 }
 
 static void
