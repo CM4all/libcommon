@@ -143,7 +143,6 @@ if get_variable('libcommon_enable_spawn_options', false)
     # but the functions are called from ChildOptions/NamespaceOptions
     # etc.
     'NetworkNamespace.cxx',
-    'PidNamespace.cxx',
     'ResourceLimits.cxx',
     'UidGid.cxx',
     'VfsBuilder.cxx',

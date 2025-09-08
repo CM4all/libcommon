@@ -3,7 +3,6 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "NamespaceOptions.hxx"
-#include "PidNamespace.hxx"
 #include "NetworkNamespace.hxx"
 #include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
@@ -96,14 +95,6 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 		    uid_gid.real_uid,
 		    mapped_real_uid > 0 ? mapped_real_uid : uid_gid.real_uid,
 		    false);
-}
-
-void
-NamespaceOptions::ReassociatePid() const
-{
-	assert(pid_namespace_name != nullptr);
-
-	ReassociatePidNamespace(pid_namespace_name);
 }
 
 void

@@ -140,12 +140,6 @@ struct NamespaceOptions {
 			    unsigned pid) const;
 
 	/**
-	 * Apply #pid_namespace_name.  This will affect new child
-	 * processes, but not this process.
-	 */
-	void ReassociatePid() const;
-
-	/**
 	 * Apply #network_namespace_name.
 	 */
 	void ReassociateNetwork() const;
