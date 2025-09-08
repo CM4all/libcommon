@@ -73,6 +73,42 @@ NamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 	return flags;
 }
 
+char *
+NamespaceOptions::FormatUidMap(char *p, const UidGid &uid_gid) const noexcept
+{
+	const IdMap map{
+		.first = {
+			.id = uid_gid.effective_uid,
+			.mapped_id = mapped_effective_uid > 0 ? mapped_effective_uid : uid_gid.effective_uid,
+		},
+		.second = {
+			.id = uid_gid.real_uid,
+			.mapped_id = mapped_real_uid > 0 ? mapped_real_uid : uid_gid.real_uid,
+		},
+	};
+
+	return FormatIdMap(p, map);
+}
+
+char *
+NamespaceOptions::FormatGidMap(char *p, const UidGid &uid_gid) const noexcept
+{
+	/* collect all gids (including supplementary groups) in a std::set
+	   to eliminate duplicates, and then map them all into the new
+	   user namespace */
+	std::set<unsigned> gids;
+
+	// TODO: map the current effective gid if no gid was given?
+	if (uid_gid.effective_gid != UidGid::UNSET_GID)
+		gids.emplace(uid_gid.effective_gid);
+	if (uid_gid.real_gid != UidGid::UNSET_GID)
+		gids.emplace(uid_gid.real_gid);
+	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
+		gids.emplace(uid_gid.supplementary_groups[i]);
+
+	return FormatIdMap(p, gids);
+}
+
 void
 NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 {
