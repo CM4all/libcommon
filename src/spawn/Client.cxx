@@ -212,11 +212,12 @@ Serialize(Serializer &s, const NamespaceOptions &ns)
 {
 	s.WriteOptional(ExecCommand::USER_NS, ns.enable_user);
 	s.WriteOptional(ExecCommand::PID_NS, ns.enable_pid);
-	s.WriteOptionalString(ExecCommand::PID_NS_NAME, ns.pid_namespace);
+	s.WriteOptionalString(ExecCommand::PID_NS_NAME,
+			      ns.pid_namespace_name);
 	s.WriteOptional(ExecCommand::CGROUP_NS, ns.enable_cgroup);
 	s.WriteOptional(ExecCommand::NETWORK_NS, ns.enable_network);
 	s.WriteOptionalString(ExecCommand::NETWORK_NS_NAME,
-			      ns.network_namespace);
+			      ns.network_namespace_name);
 	s.WriteOptional(ExecCommand::IPC_NS, ns.enable_ipc);
 
 	if (ns.mapped_real_uid > 0) {

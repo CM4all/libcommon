@@ -28,8 +28,8 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 	 enable_ipc(src.enable_ipc),
 	 mapped_real_uid(src.mapped_real_uid),
 	 mapped_effective_uid(src.mapped_effective_uid),
-	 pid_namespace(alloc.CheckDup(src.pid_namespace)),
-	 network_namespace(alloc.CheckDup(src.network_namespace)),
+	 pid_namespace_name(alloc.CheckDup(src.pid_namespace_name)),
+	 network_namespace_name(alloc.CheckDup(src.network_namespace_name)),
 	 hostname(alloc.CheckDup(src.hostname)),
 	 mount(alloc, src.mount)
 {
@@ -56,7 +56,7 @@ NamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 {
 	if (enable_user)
 		flags |= CLONE_NEWUSER;
-	if (enable_pid && pid_namespace == nullptr)
+	if (enable_pid && pid_namespace_name == nullptr)
 		flags |= CLONE_NEWPID;
 	if (enable_cgroup)
 		flags |= CLONE_NEWCGROUP;
@@ -101,17 +101,17 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 void
 NamespaceOptions::ReassociatePid() const
 {
-	assert(pid_namespace != nullptr);
+	assert(pid_namespace_name != nullptr);
 
-	ReassociatePidNamespace(pid_namespace);
+	ReassociatePidNamespace(pid_namespace_name);
 }
 
 void
 NamespaceOptions::ReassociateNetwork() const
 {
-	assert(network_namespace != nullptr);
+	assert(network_namespace_name != nullptr);
 
-	ReassociateNetworkNamespace(network_namespace);
+	ReassociateNetworkNamespace(network_namespace_name);
 }
 
 void
@@ -124,7 +124,7 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 		SetupUidGidMap(uid_gid, 0);
 	}
 
-	if (network_namespace != nullptr)
+	if (network_namespace_name != nullptr)
 		ReassociateNetwork();
 
 	mount.Apply(uid_gid);
@@ -137,7 +137,7 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 void
 NamespaceOptions::ApplyNetwork() const
 {
-	if (network_namespace != nullptr)
+	if (network_namespace_name != nullptr)
 		ReassociateNetwork();
 	else if (enable_network) {
 		if (unshare(CLONE_NEWNET) < 0)
@@ -154,9 +154,9 @@ NamespaceOptions::MakeId(char *p) const noexcept
 	if (enable_pid)
 		p = (char *)mempcpy(p, ";pns", 4);
 
-	if (pid_namespace != nullptr) {
+	if (pid_namespace_name != nullptr) {
 		p = (char *)mempcpy(p, ";pns=", 5);
-		p = (char *)stpcpy(p, pid_namespace);
+		p = (char *)stpcpy(p, pid_namespace_name);
 	}
 
 	if (enable_cgroup)
@@ -165,9 +165,9 @@ NamespaceOptions::MakeId(char *p) const noexcept
 	if (enable_network) {
 		p = (char *)mempcpy(p, ";nns", 4);
 
-		if (network_namespace != nullptr) {
+		if (network_namespace_name != nullptr) {
 			*p++ = '=';
-			p = stpcpy(p, network_namespace);
+			p = stpcpy(p, network_namespace_name);
 		}
 	}
 

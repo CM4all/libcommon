@@ -58,13 +58,13 @@ struct NamespaceOptions {
 	 * namespace is requested from the "Spawn" daemon (Package
 	 * cm4all-spawn).
 	 */
-	const char *pid_namespace = nullptr;
+	const char *pid_namespace_name = nullptr;
 
 	/**
 	 * The name of the network namespace (/run/netns/X) to reassociate
 	 * with.  Requires #enable_network.
 	 */
-	const char *network_namespace = nullptr;
+	const char *network_namespace_name = nullptr;
 
 	/**
 	 * The hostname of the new UTS namespace.
@@ -84,8 +84,8 @@ struct NamespaceOptions {
 		 enable_ipc(src.enable_ipc),
 		 mapped_real_uid(src.mapped_real_uid),
 		 mapped_effective_uid(src.mapped_effective_uid),
-		 pid_namespace(src.pid_namespace),
-		 network_namespace(src.network_namespace),
+		 pid_namespace_name(src.pid_namespace_name),
+		 network_namespace_name(src.network_namespace_name),
 		 hostname(src.hostname),
 		 mount(shallow_copy, src.mount)
 	{
@@ -108,7 +108,7 @@ struct NamespaceOptions {
 	 */
 	void ClearPid() noexcept {
 		enable_pid = false;
-		pid_namespace = nullptr;
+		pid_namespace_name = nullptr;
 	}
 
 	/**
@@ -123,7 +123,7 @@ struct NamespaceOptions {
 	 */
 	void ClearNetwork() noexcept {
 		enable_network = false;
-		network_namespace = nullptr;
+		network_namespace_name = nullptr;
 	}
 
 	/**
@@ -140,13 +140,13 @@ struct NamespaceOptions {
 			    unsigned pid) const;
 
 	/**
-	 * Apply #pid_namespace.  This will affect new child
+	 * Apply #pid_namespace_name.  This will affect new child
 	 * processes, but not this process.
 	 */
 	void ReassociatePid() const;
 
 	/**
-	 * Apply #network_namespace.
+	 * Apply #network_namespace_name.
 	 */
 	void ReassociateNetwork() const;
 

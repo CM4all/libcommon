@@ -68,11 +68,11 @@ try {
 		} else if (StringIsEqual(arg, "--pidns")) {
 			p.ns.enable_pid = true;
 		} else if (const char *pidns = StringAfterPrefix(arg, "--pidns=")) {
-			p.ns.pid_namespace = pidns;
+			p.ns.pid_namespace_name = pidns;
 		} else if (StringIsEqual(arg, "--netns")) {
 			p.ns.enable_network = true;
 		} else if (const char *netns = StringAfterPrefix(arg, "--netns=")) {
-			p.ns.network_namespace = netns;
+			p.ns.network_namespace_name = netns;
 		} else if (StringIsEqual(arg, "--root-tmpfs")) {
 			p.ns.mount.mount_root_tmpfs = true;
 		} else if (const char *pivot_root = StringAfterPrefix(arg, "--root=")) {

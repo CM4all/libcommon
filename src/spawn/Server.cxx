@@ -576,7 +576,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			break;
 
 		case ExecCommand::PID_NS_NAME:
-			p.ns.pid_namespace = payload.ReadString();
+			p.ns.pid_namespace_name = payload.ReadString();
 			break;
 
 		case ExecCommand::CGROUP_NS:
@@ -588,7 +588,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			break;
 
 		case ExecCommand::NETWORK_NS_NAME:
-			p.ns.network_namespace = payload.ReadString();
+			p.ns.network_namespace_name = payload.ReadString();
 			break;
 
 		case ExecCommand::IPC_NS:

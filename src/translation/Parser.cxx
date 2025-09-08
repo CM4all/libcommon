@@ -2711,7 +2711,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed PID_NAMESPACE packet");
 
 		if (auto &options = MakeNamespaceOptions("misplaced PID_NAMESPACE packet");
-		    options.pid_namespace != nullptr)
+		    options.pid_namespace_name != nullptr)
 			throw std::runtime_error("Can't combine PID_NAMESPACE with PID_NAMESPACE_NAME");
 		else
 			options.enable_pid = true;
@@ -2729,7 +2729,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (auto &options = MakeNamespaceOptions("misplaced NETWORK_NAMESPACE packet");
 		    options.enable_network)
 			throw std::runtime_error("duplicate NETWORK_NAMESPACE packet");
-		else if (options.network_namespace != nullptr)
+		else if (options.network_namespace_name != nullptr)
 			throw std::runtime_error("Can't combine NETWORK_NAMESPACE with NETWORK_NAMESPACE_NAME");
 		else
 			options.enable_network = true;
@@ -3715,12 +3715,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed NETWORK_NAMESPACE_NAME packet");
 
 		if (auto &options = MakeNamespaceOptions("misplaced NETWORK_NAMESPACE_NAME packet");
-		    options.network_namespace != nullptr)
+		    options.network_namespace_name != nullptr)
 			throw std::runtime_error("duplicate NETWORK_NAMESPACE_NAME packet");
 		else if (options.enable_network)
 			throw std::runtime_error("Can't combine NETWORK_NAMESPACE_NAME with NETWORK_NAMESPACE");
 		else
-			options.network_namespace = string_payload.data();
+			options.network_namespace_name = string_payload.data();
 		return;
 #else
 		break;
@@ -3791,12 +3791,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed PID_NAMESPACE_NAME packet");
 
 		if (auto &options = MakeNamespaceOptions("misplaced PID_NAMESPACE_NAME packet");
-		    options.pid_namespace != nullptr)
+		    options.pid_namespace_name != nullptr)
 			throw std::runtime_error("duplicate PID_NAMESPACE_NAME packet");
 		else if (options.enable_pid)
 			throw std::runtime_error("Can't combine PID_NAMESPACE_NAME with PID_NAMESPACE");
 		else
-			options.pid_namespace = string_payload.data();
+			options.pid_namespace_name = string_payload.data();
 		return;
 #else
 		break;
