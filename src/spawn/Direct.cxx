@@ -423,9 +423,6 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		  bool cgroups_group_writable,
 		  bool is_sys_admin)
 {
-	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
-	clone_flags = params.ns.GetCloneFlags(clone_flags);
-
 	const char *path = params.Finish();
 
 	/**
@@ -466,6 +463,9 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 		params.ns.ipc_namespace = ipc_namespace = std::move(ns.ipc);
 	}
+
+	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
+	clone_flags = params.ns.GetCloneFlags(clone_flags);
 
 	/**
 	 * A pipe used by the parent process to wait for the child to
