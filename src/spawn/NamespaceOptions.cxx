@@ -30,7 +30,9 @@ NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 	 pid_namespace_name(alloc.CheckDup(src.pid_namespace_name)),
 	 network_namespace_name(alloc.CheckDup(src.network_namespace_name)),
 	 hostname(alloc.CheckDup(src.hostname)),
-	 mount(alloc, src.mount)
+	 mount(alloc, src.mount),
+	 user_namespace(src.user_namespace),
+	 ipc_namespace(src.ipc_namespace)
 {
 }
 
@@ -109,7 +111,7 @@ void
 NamespaceOptions::Apply(const UidGid &uid_gid) const
 {
 	/* set up UID/GID mapping in the old /proc */
-	if (enable_user) {
+	if (enable_user && !user_namespace.IsDefined()) {
 		DenySetGroups(0);
 
 		SetupUidGidMap(uid_gid, 0);
@@ -117,6 +119,14 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	if (network_namespace_name != nullptr)
 		ReassociateNetwork();
+
+	if (ipc_namespace.IsDefined() &&
+	    setns(ipc_namespace.Get(), CLONE_NEWIPC) < 0)
+		throw MakeErrno("Failed to reassociate with IPC namespace");
+
+	if (user_namespace.IsDefined() &&
+	    setns(user_namespace.Get(), CLONE_NEWUSER) < 0)
+		throw MakeErrno("Failed to reassociate with user namespace");
 
 	mount.Apply(uid_gid);
 

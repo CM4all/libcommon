@@ -210,6 +210,9 @@ Serialize(Serializer &s, const CgroupOptions &c)
 static void
 Serialize(Serializer &s, const NamespaceOptions &ns)
 {
+	assert(!ns.user_namespace.IsDefined());
+	assert(!ns.ipc_namespace.IsDefined());
+
 	s.WriteOptional(ExecCommand::USER_NS, ns.enable_user);
 	s.WriteOptional(ExecCommand::PID_NS, ns.enable_pid);
 	s.WriteOptionalString(ExecCommand::PID_NS_NAME,

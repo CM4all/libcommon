@@ -6,6 +6,7 @@
 
 #include "MountNamespaceOptions.hxx"
 #include "translation/Features.hxx"
+#include "io/FileDescriptor.hxx"
 
 #include <cstdint>
 
@@ -73,6 +74,12 @@ struct NamespaceOptions {
 
 	MountNamespaceOptions mount;
 
+	/**
+	 * Namespace descriptors to reassociate with.
+	 */
+	FileDescriptor user_namespace = FileDescriptor::Undefined(),
+		ipc_namespace = FileDescriptor::Undefined();
+
 	NamespaceOptions() noexcept = default;
 
 	constexpr NamespaceOptions(ShallowCopy shallow_copy,
@@ -87,7 +94,9 @@ struct NamespaceOptions {
 		 pid_namespace_name(src.pid_namespace_name),
 		 network_namespace_name(src.network_namespace_name),
 		 hostname(src.hostname),
-		 mount(shallow_copy, src.mount)
+		 mount(shallow_copy, src.mount),
+		 user_namespace(src.user_namespace),
+		 ipc_namespace(src.ipc_namespace)
 	{
 	}
 
@@ -131,6 +140,7 @@ struct NamespaceOptions {
 	 */
 	void ClearIPC() noexcept {
 		enable_ipc = false;
+		ipc_namespace.SetUndefined();
 	}
 
 	[[gnu::pure]]
