@@ -119,7 +119,7 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 {
 	SendNamespacesRequest(s, name, request);
 
-	ReceiveMessageBuffer<1024, 4> buffer;
+	ReceiveMessageBuffer<1024, CMSG_SPACE(sizeof(int) * 4)> buffer;
 	auto d = ReceiveDatagram(s, buffer);
 	auto payload = d.first;
 	auto &fds = d.second;
