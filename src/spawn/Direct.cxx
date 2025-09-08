@@ -439,7 +439,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			setns(old_pidns.Get(), CLONE_NEWPID);
 	};
 
-	UniqueFileDescriptor ipc_namespace;
+	UniqueFileDescriptor ipc_namespace, user_namespace;
 
 	if (params.ns.pid_namespace_name != nullptr) {
 		/* first open a handle to our existing (old) namespaces
@@ -447,13 +447,24 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		if (!old_pidns.OpenReadOnly("/proc/self/ns/pid"))
 			throw MakeErrno("Failed to open current PID namespace");
 
-		const SpawnAccessory::NamespacesRequest request{
+		SpawnAccessory::NamespacesRequest request{
 			/* TODO add IPC_NAMESPACE_NAME to control this
 			   (experimental feature) */
 			.ipc = std::exchange(params.ns.enable_ipc, false),
 
 			.pid = true,
 		};
+
+		char uid_map_buffer[256], gid_map_buffer[256];
+		if (params.ns.enable_user) {
+			request.uid_map = {uid_map_buffer, params.ns.FormatUidMap(uid_map_buffer, params.uid_gid)};
+			request.gid_map = {gid_map_buffer, params.ns.FormatGidMap(gid_map_buffer, params.uid_gid)};
+
+			/* the user namespace will be applied from the
+			   "user_namespace" field; don't create
+			   another one */
+			params.ns.enable_user = false;
+		}
 
 		auto ns = SpawnAccessory::MakeNamespaces(SpawnAccessory::Connect(),
 							 params.ns.pid_namespace_name,
@@ -462,6 +473,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			throw MakeErrno("setns(CLONE_NEWPID) failed");
 
 		params.ns.ipc_namespace = ipc_namespace = std::move(ns.ipc);
+		params.ns.user_namespace = user_namespace = std::move(ns.user);
 	}
 
 	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
