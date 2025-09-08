@@ -40,6 +40,11 @@ SendNamespacesRequest(SocketDescriptor s, std::string_view name,
 	b.Append(name_header);
 	b.AppendPadded(AsBytes(name));
 
+	if (request.ipc) {
+		static constexpr RequestHeader ipc_namespace_header{0, RequestCommand::IPC_NAMESPACE};
+		b.Append(ipc_namespace_header);
+	}
+
 	if (request.pid) {
 		static constexpr RequestHeader pid_namespace_header{0, RequestCommand::PID_NAMESPACE};
 		b.Append(pid_namespace_header);
@@ -86,6 +91,10 @@ ParseNamespaceHandles(const NamespacesRequest request,
 
 	for (std::size_t i = 0; i < payload.size(); ++i) {
 		switch (payload[i]) {
+		case CLONE_NEWIPC:
+			response.ipc = std::move(fds[i]);
+			break;
+
 		case CLONE_NEWPID:
 			response.pid = std::move(fds[i]);
 			break;
@@ -94,6 +103,9 @@ ParseNamespaceHandles(const NamespacesRequest request,
 			throw std::runtime_error{"Unsupported namespace in NAMESPACE_HANDLES response"};
 		}
 	}
+
+	if (request.ipc && !response.ipc.IsDefined())
+		throw std::runtime_error{"IPC namespace missing in NAMESPACE_HANDLES response"};
 
 	if (request.pid && !response.pid.IsDefined())
 		throw std::runtime_error{"PID namespace missing in NAMESPACE_HANDLES response"};

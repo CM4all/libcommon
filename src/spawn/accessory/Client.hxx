@@ -21,11 +21,12 @@ UniqueSocketDescriptor
 Connect();
 
 struct NamespacesRequest {
+	bool ipc = false;
 	bool pid = false;
 };
 
 struct NamespacesResponse {
-	UniqueFileDescriptor pid;
+	UniqueFileDescriptor ipc, pid;
 };
 
 /**
