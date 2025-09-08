@@ -124,15 +124,18 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 	    setns(ipc_namespace.Get(), CLONE_NEWIPC) < 0)
 		throw MakeErrno("Failed to reassociate with IPC namespace");
 
-	if (user_namespace.IsDefined() &&
-	    setns(user_namespace.Get(), CLONE_NEWUSER) < 0)
-		throw MakeErrno("Failed to reassociate with user namespace");
-
 	mount.Apply(uid_gid);
 
 	if (hostname != nullptr &&
 	    sethostname(hostname, strlen(hostname)) < 0)
 		throw MakeErrno("sethostname() failed");
+
+	/* reassociate with the selected user namespace at the end
+	   after all privileged operations are done, because that will
+	   drop all capabilities */
+	if (user_namespace.IsDefined() &&
+	    setns(user_namespace.Get(), CLONE_NEWUSER) < 0)
+		throw MakeErrno("Failed to reassociate with user namespace");
 }
 
 void
