@@ -8,6 +8,7 @@
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
 #include "system/LinuxFD.hxx"
+#include "system/linux/clone3.h"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/PrintException.hxx"
 #include "util/Sanitizer.hxx"
@@ -190,12 +191,14 @@ SpawnInit(pid_t child_pid, bool remain)
 pid_t
 UnshareForkSpawnInit()
 {
-	if (unshare(CLONE_NEWPID) < 0)
-		throw MakeErrno("unshare(CLONE_NEWPID) failed");
+	static constexpr struct clone_args ca{
+		.flags = CLONE_CLEAR_SIGHAND|CLONE_NEWPID,
+		.exit_signal = SIGCHLD,
+	};
 
-	pid_t pid = fork();
+	const pid_t pid = clone3(&ca, sizeof(ca));
 	if (pid < 0)
-		throw MakeErrno("fork() failed");
+		throw MakeErrno("clone3() failed");
 
 	if (pid > 0)
 		return pid;
