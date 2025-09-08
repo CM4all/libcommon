@@ -10,6 +10,7 @@
 
 #include <fmt/core.h>
 
+#include <algorithm> // for std::copy()
 #include <cassert>
 
 using std::string_view_literals::operator""sv;
@@ -40,7 +41,8 @@ FormatIdMap(char *p, unsigned id) noexcept
 static char *
 FormatRootMap(char *p) noexcept
 {
-	return stpcpy(p, "0 0 1\n");
+	constexpr std::string_view root_map = "0 0 1\n"sv;
+	return std::copy(root_map.begin(), root_map.end(), p);
 }
 
 char *
