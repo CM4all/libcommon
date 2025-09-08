@@ -44,10 +44,9 @@ SetupUidMap(unsigned pid, unsigned uid,
  * @param pid the process id whose user namespace shall be modified; 0
  * for current process
  * @param gid the group id to be mapped inside the user namespace
- * @param root true to also map root
  */
 void
-SetupGidMap(unsigned pid, unsigned gid, bool root);
+SetupGidMap(unsigned pid, unsigned gid);
 
 /**
  * Set up a gid mapping for a user namespace.

@@ -45,13 +45,11 @@ SetupUidMap(unsigned pid, unsigned uid,
 }
 
 void
-SetupGidMap(unsigned pid, unsigned gid, bool root)
+SetupGidMap(unsigned pid, unsigned gid)
 {
 	char data_buffer[256], *p = data_buffer;
 
 	p = fmt::format_to(p, "{} {} 1\n", gid, gid);
-	if (root && gid != 0)
-		p = stpcpy(p, "0 0 1\n");
 
 	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {data_buffer, p});
 }
