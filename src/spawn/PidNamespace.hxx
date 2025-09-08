@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <string_view>
+
 /**
  * Reassociate the next child process with the given PID namespace.
  * The namespace handle is queried from the Spawn daemon (Package
@@ -12,4 +14,4 @@
  * Throws on error.
  */
 void
-ReassociatePidNamespace(const char *name);
+ReassociatePidNamespace(std::string_view name);

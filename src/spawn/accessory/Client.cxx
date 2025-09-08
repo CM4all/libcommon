@@ -68,7 +68,7 @@ ReceiveDatagram(SocketDescriptor s,
 }
 
 UniqueFileDescriptor
-MakePidNamespace(SocketDescriptor s, const char *name)
+MakePidNamespace(SocketDescriptor s, std::string_view name)
 {
 	SendPidNamespaceRequest(s, name);
 

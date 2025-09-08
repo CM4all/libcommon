@@ -14,16 +14,14 @@
  * Obtain a PID namespace from the Spawn daemon.
  */
 static UniqueFileDescriptor
-GetPidNS(const char *name)
+GetPidNS(std::string_view name)
 {
 	return SpawnAccessory::MakePidNamespace(SpawnAccessory::Connect(), name);
 }
 
 void
-ReassociatePidNamespace(const char *name)
+ReassociatePidNamespace(std::string_view name)
 {
-	assert(name != nullptr);
-
 	if (setns(GetPidNS(name).Get(), CLONE_NEWPID) < 0)
 		throw FmtErrno("Failed to reassociate with PID namespace {:?}",
 			       name);

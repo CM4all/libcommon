@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <string_view>
+
 class UniqueFileDescriptor;
 class SocketDescriptor;
 class UniqueSocketDescriptor;
@@ -24,6 +26,6 @@ Connect();
  * @return the namespace descriptor
  */
 UniqueFileDescriptor
-MakePidNamespace(SocketDescriptor s, const char *name);
+MakePidNamespace(SocketDescriptor s, std::string_view name);
 
 }
