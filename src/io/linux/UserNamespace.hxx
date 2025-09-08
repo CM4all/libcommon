@@ -36,6 +36,12 @@ SetupUidMap(unsigned pid, unsigned uid,
 	    unsigned uid2, unsigned mapped_uid2,
 	    bool root);
 
+static inline void
+SetupUidMap(unsigned pid, unsigned uid)
+{
+	SetupUidMap(pid, uid, uid, 0, 0, false);
+}
+
 /**
  * Set up a gid mapping for a user namespace.
  *
