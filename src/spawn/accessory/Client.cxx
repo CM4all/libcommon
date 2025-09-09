@@ -92,10 +92,10 @@ ReceiveDatagram(SocketDescriptor s,
 	return {payload, std::move(response.fds)};
 }
 
-static NamespacesResponse
-ParseNamespaceHandles(const NamespacesRequest request,
+static void
+ParseNamespaceHandles(NamespacesResponse &response,
 		      const std::span<const std::byte> raw_payload,
-		      const std::span<UniqueFileDescriptor> fds)
+		      std::span<UniqueFileDescriptor> &fds)
 {
 	if (raw_payload.size() % sizeof(uint32_t) != 0)
 		throw std::runtime_error{"Odd NAMESPACE_HANDLES payload"};
@@ -103,8 +103,6 @@ ParseNamespaceHandles(const NamespacesRequest request,
 	const auto payload = FromBytesStrict<const uint32_t>(raw_payload);
 	if (payload.size() != fds.size())
 		throw std::runtime_error{"Wrong number of file descriptors in NAMESPACE_HANDLES response"};
-
-	NamespacesResponse response;
 
 	for (std::size_t i = 0; i < payload.size(); ++i) {
 		switch (payload[i]) {
@@ -125,17 +123,7 @@ ParseNamespaceHandles(const NamespacesRequest request,
 		}
 	}
 
-	if (request.ipc && !response.ipc.IsDefined())
-		throw std::runtime_error{"IPC namespace missing in NAMESPACE_HANDLES response"};
-
-	if (request.pid && !response.pid.IsDefined())
-		throw std::runtime_error{"PID namespace missing in NAMESPACE_HANDLES response"};
-
-	const bool user_requested = request.uid_map.data() != nullptr || request.gid_map.data() != nullptr;
-	if (user_requested && !response.user.IsDefined())
-		throw std::runtime_error{"User namespace missing in NAMESPACE_HANDLES response"};
-
-	return response;
+	fds = fds.subspan(payload.size());
 }
 
 NamespacesResponse
@@ -149,25 +137,47 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 	auto payload = d.first;
 	std::span<UniqueFileDescriptor> fds = d.second;
 
-	const auto &rh = *(const ResponseHeader *)(const void *)payload.data();
-	if (payload.size() < sizeof(rh))
-		throw std::runtime_error("Response datagram too small");
+	NamespacesResponse response;
 
-	payload = payload.subspan(sizeof(rh));
+	while (!payload.empty()) {
+		const auto &rh = *(const ResponseHeader *)(const void *)payload.data();
+		if (payload.size() < sizeof(rh))
+			throw std::runtime_error("Response datagram too small");
 
-	if (payload.size() < rh.size)
-		throw std::runtime_error("Response datagram too small");
+		payload = payload.subspan(sizeof(rh));
 
-	switch (rh.command) {
-	case ResponseCommand::ERROR:
-		throw FmtRuntimeError("Spawn server error: {}",
-				      ToStringView(payload));
+		if (payload.size() < rh.size)
+			throw std::runtime_error("Response datagram too small");
 
-	case ResponseCommand::NAMESPACE_HANDLES:
-		return ParseNamespaceHandles(request, payload.first(rh.size), fds);
+		const size_t padded_size = (rh.size + 3) & (~3u);
+
+		switch (rh.command) {
+		case ResponseCommand::ERROR:
+			throw FmtRuntimeError("Spawn server error: {}",
+					      ToStringView(payload));
+
+		case ResponseCommand::NAMESPACE_HANDLES:
+			ParseNamespaceHandles(response, payload.first(rh.size), fds);
+			break;
+		}
+
+		payload = payload.subspan(padded_size);
 	}
 
-	throw std::runtime_error("NAMESPACE_HANDLES expected");
+	if (!fds.empty())
+		throw std::runtime_error{"Too many file descriptors"};
+
+	if (request.ipc && !response.ipc.IsDefined())
+		throw std::runtime_error{"IPC namespace missing in response"};
+
+	if (request.pid && !response.pid.IsDefined())
+		throw std::runtime_error{"PID namespace missing in response"};
+
+	const bool user_requested = request.uid_map.data() != nullptr || request.gid_map.data() != nullptr;
+	if (user_requested && !response.user.IsDefined())
+		throw std::runtime_error{"User namespace missing in response"};
+
+	return response;
 }
 
 }
