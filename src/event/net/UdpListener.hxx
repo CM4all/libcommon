@@ -22,7 +22,7 @@ class UdpListener {
 	UdpHandler &handler;
 
 public:
-	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
+	UdpListener(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
 		    UdpHandler &_handler) noexcept;
 	~UdpListener() noexcept;
 

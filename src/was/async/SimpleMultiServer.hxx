@@ -35,7 +35,7 @@ class SimpleMultiServer final
 
 public:
 	SimpleMultiServer(EventLoop &event_loop,
-			  UniqueSocketDescriptor _socket,
+			  UniqueSocketDescriptor &&_socket,
 			  SimpleMultiServerHandler &_handler) noexcept;
 
 	auto &GetEventLoop() const noexcept {

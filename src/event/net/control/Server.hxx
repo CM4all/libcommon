@@ -26,7 +26,7 @@ class Server final : UdpHandler {
 	UdpListener socket;
 
 public:
-	Server(EventLoop &event_loop, UniqueSocketDescriptor s,
+	Server(EventLoop &event_loop, UniqueSocketDescriptor &&s,
 	       Handler &_handler) noexcept;
 
 	Server(EventLoop &event_loop, Handler &_handler,

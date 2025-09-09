@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <unistd.h>
 
-UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor _fd,
+UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
 			 UdpHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(EventCallback), _fd.Release()),
 	 handler(_handler)

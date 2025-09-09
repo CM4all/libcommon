@@ -14,7 +14,7 @@
 namespace Was {
 
 SimpleMultiServer::SimpleMultiServer(EventLoop &event_loop,
-				     UniqueSocketDescriptor _socket,
+				     UniqueSocketDescriptor &&_socket,
 				     SimpleMultiServerHandler &_handler) noexcept
 	:socket(event_loop, std::move(_socket), *this),
 	 handler(_handler)

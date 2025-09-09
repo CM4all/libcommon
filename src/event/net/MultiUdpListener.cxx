@@ -10,7 +10,7 @@
 #include <assert.h>
 
 MultiUdpListener::MultiUdpListener(EventLoop &event_loop,
-				   UniqueSocketDescriptor _socket,
+				   UniqueSocketDescriptor &&_socket,
 				   MultiReceiveMessage &&_multi,
 				   UdpHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(EventCallback), _socket.Release()),

@@ -25,7 +25,7 @@ class MultiUdpListener {
 	UdpHandler &handler;
 
 public:
-	MultiUdpListener(EventLoop &event_loop, UniqueSocketDescriptor _socket,
+	MultiUdpListener(EventLoop &event_loop, UniqueSocketDescriptor &&_socket,
 			 MultiReceiveMessage &&_multi,
 			 UdpHandler &_handler) noexcept;
 	~MultiUdpListener() noexcept;

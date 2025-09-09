@@ -13,7 +13,7 @@
 
 namespace BengControl {
 
-Server::Server(EventLoop &event_loop, UniqueSocketDescriptor s,
+Server::Server(EventLoop &event_loop, UniqueSocketDescriptor &&s,
 	       Handler &_handler) noexcept
 	:handler(_handler), socket(event_loop, std::move(s), *this)
 {
