@@ -49,7 +49,7 @@ private:
 	bool OnUdpDatagram(std::span<const std::byte> payload,
 			   std::span<UniqueFileDescriptor> fds,
 			   SocketAddress address, int uid) override;
-	void OnUdpError(std::exception_ptr ep) noexcept override;
+	void OnUdpError(std::exception_ptr &&error) noexcept override;
 };
 
 } // namespace BengControl

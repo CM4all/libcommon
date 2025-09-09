@@ -22,7 +22,7 @@ public:
 				     std::span<UniqueFileDescriptor> fds,
 				     SocketAddress address, int uid) = 0;
 
-	virtual void OnControlError(std::exception_ptr ep) noexcept = 0;
+	virtual void OnControlError(std::exception_ptr &&error) noexcept = 0;
 };
 
 } // namespace BengControl

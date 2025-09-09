@@ -47,5 +47,5 @@ public:
 	 * After returning, it is assumed that the #UdpListener has
 	 * been destroyed.
 	 */
-	virtual void OnUdpError(std::exception_ptr ep) noexcept = 0;
+	virtual void OnUdpError(std::exception_ptr &&error) noexcept = 0;
 };

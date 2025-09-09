@@ -91,9 +91,9 @@ try {
 }
 
 void
-Server::OnUdpError(std::exception_ptr ep) noexcept
+Server::OnUdpError(std::exception_ptr &&error) noexcept
 {
-	handler.OnControlError(ep);
+	handler.OnControlError(std::move(error));
 }
 
 } // namespace BengControl

@@ -53,7 +53,7 @@ private:
 		return false;
 	}
 
-	void OnUdpError(std::exception_ptr e) noexcept override {
+	void OnUdpError(std::exception_ptr &&e) noexcept override {
 		handler.OnMultiWasError(*this, std::move(e));
 	}
 };
