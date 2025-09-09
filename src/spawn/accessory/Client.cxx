@@ -147,7 +147,7 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 	ReceiveMessageBuffer<1024, CMSG_SPACE(sizeof(int) * 4)> buffer;
 	auto d = ReceiveDatagram(s, buffer);
 	auto payload = d.first;
-	auto &fds = d.second;
+	std::span<UniqueFileDescriptor> fds = d.second;
 
 	const auto &rh = *(const ResponseHeader *)(const void *)payload.data();
 	if (payload.size() < sizeof(rh))
