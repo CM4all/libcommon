@@ -15,7 +15,6 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Pipe.hxx"
 #include "io/ScopeUmask.hxx"
-#include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
 #include "io/linux/UserNamespace.hxx"
 #include "system/linux/clone3.h"
@@ -417,7 +416,7 @@ ReadErrorPipeTimeout(FileDescriptor error_pipe_r)
 	ReadErrorPipe(error_pipe_r);
 }
 
-std::pair<UniqueFileDescriptor, pid_t>
+SpawnChildProcessResult
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
@@ -689,5 +688,8 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	/* TODO don't return the "classic" pid_t as soon as all
 	   callers have been fully migrated to pidfd */
-	return {std::move(pidfd), pid};
+	return {
+		.pidfd = std::move(pidfd),
+		.pid = static_cast<pid_t>(pid),
+	};
 }

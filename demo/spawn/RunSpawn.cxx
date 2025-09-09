@@ -160,13 +160,13 @@ try {
 				     true, nullptr)
 		: CgroupState();
 
-	const auto pid = SpawnChildProcess(std::move(p), cgroup_state,
-					   false,
-					   geteuid() == 0).first;
+	const auto result = SpawnChildProcess(std::move(p), cgroup_state,
+					      false,
+					      geteuid() == 0);
 
 	siginfo_t info;
 
-	if (waitid((idtype_t)P_PIDFD, pid.Get(),
+	if (waitid((idtype_t)P_PIDFD, result.pidfd.Get(),
 		   &info, WEXITED) < 0)
 		throw MakeErrno("waitid() failed");
 

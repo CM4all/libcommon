@@ -429,15 +429,15 @@ SpawnServerConnection::SpawnChild(unsigned id, const char *name,
                 PrepareNamedTmpfs(*tmpfs_manager,
                                   p.ns.mount, leases, fds);
 
-	auto pid = SpawnChildProcess(std::move(p),
-				     process.GetCgroupState(),
-				     config.cgroups_writable_by_gid > 0,
-				     process.IsSysAdmin()).first;
+	auto result = SpawnChildProcess(std::move(p),
+					process.GetCgroupState(),
+					config.cgroups_writable_by_gid > 0,
+					process.IsSysAdmin());
 
 	auto *child = new SpawnServerChild(GetEventLoop(), *this,
 					   std::move(leases),
 					   id,
-					   std::move(pid), name);
+					   std::move(result.pidfd), name);
 	children.insert(*child);
 }
 

@@ -90,11 +90,11 @@ LocalSpawnService::SpawnChildProcess(std::string_view name,
 	if (params.uid_gid.IsEmpty())
 		params.uid_gid = config.default_uid_gid;
 
-	auto pidfd = ::SpawnChildProcess(std::move(params), CgroupState(),
-					 false,
-					 false /* TODO? */).first;
+	auto result = ::SpawnChildProcess(std::move(params), CgroupState(),
+					  false,
+					  false /* TODO? */);
 	return std::make_unique<LocalChildProcess>(event_loop, registry,
-						   std::move(pidfd),
+						   std::move(result.pidfd),
 						   name);
 }
 

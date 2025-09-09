@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "io/UniqueFileDescriptor.hxx"
+
 #include <utility>
 
 #include <sys/types.h>
@@ -12,6 +14,16 @@ struct PreparedChildProcess;
 struct CgroupState;
 class UniqueFileDescriptor;
 
+struct SpawnChildProcessResult {
+	UniqueFileDescriptor pidfd;
+
+	/**
+	 * A classic PID (for legacy callers which cannot work with
+	 * pidfds).
+	 */
+	pid_t pid;
+};
+
 /**
  * Throws exception on error.
  *
@@ -19,12 +31,9 @@ class UniqueFileDescriptor;
  * function be writable by the owner gid?
  *
  * @param is_sys_admin are we CAP_SYS_ADMIN?
- *
- * @return a pidfd and a classic pid (the latter for legacy callers
- * which cannot work with pidfds)
  */
 [[nodiscard]]
-std::pair<UniqueFileDescriptor, pid_t>
+SpawnChildProcessResult
 SpawnChildProcess(PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
