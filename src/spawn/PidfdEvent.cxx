@@ -14,10 +14,6 @@
 #include <sys/resource.h> // for struct rusage
 #include <sys/wait.h>
 
-#if defined(__GLIBC__) && __GLIBC__+0 == 2 && __GLIBC_MINOR__+0 < 36
-#include <linux/wait.h> // for P_PIDFD on glibc < 2.36
-#endif
-
 using std::string_view_literals::operator""sv;
 
 /**
