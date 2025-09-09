@@ -37,6 +37,11 @@ struct NamespacesRequest {
 	 * /proc/self/gid_map.
 	 */
 	std::string_view gid_map{};
+
+	/**
+	 * Request a lease pipe.
+	 */
+	bool lease_pipe = false;
 };
 
 struct NamespacesResponse {
@@ -47,6 +52,12 @@ struct NamespacesResponse {
 	 * was created (when either uid_map or gid_map had non-nullptr data()).
 	 */
 	UniqueFileDescriptor user;
+
+	/**
+	 * Lease pipe file descriptor. Set when a lease pipe
+	 * was requested.
+	 */
+	UniqueFileDescriptor lease_pipe;
 };
 
 /**

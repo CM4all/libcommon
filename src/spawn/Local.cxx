@@ -14,6 +14,7 @@
 #include "CgroupState.hxx"
 #include "event/PipeEvent.hxx"
 #include "io/Logger.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 
 #include <memory>
 #include <utility>
@@ -26,18 +27,22 @@ class LocalChildProcess final : public ChildProcessHandle, ExitListener {
 
 	std::unique_ptr<PidfdEvent> pidfd;
 
+	const UniqueFileDescriptor accessory_lease_pipe;
+
 	ExitListener *exit_listener = nullptr;
 
 public:
 	LocalChildProcess(EventLoop &event_loop,
 			  ChildProcessRegistry &_registry,
 			  UniqueFileDescriptor &&_pidfd,
+			  UniqueFileDescriptor &&_accessory_lease_pipe,
 			  std::string_view _name) noexcept
 		:registry(_registry),
 		 pidfd(std::make_unique<PidfdEvent>(event_loop,
 						    std::move(_pidfd),
 						    _name,
-						    (ExitListener &)*this))
+						    (ExitListener &)*this)),
+		 accessory_lease_pipe(std::move(_accessory_lease_pipe))
 	{
 	}
 
@@ -95,6 +100,7 @@ LocalSpawnService::SpawnChildProcess(std::string_view name,
 					  false /* TODO? */);
 	return std::make_unique<LocalChildProcess>(event_loop, registry,
 						   std::move(result.pidfd),
+						   std::move(result.accessory_lease_pipe),
 						   name);
 }
 

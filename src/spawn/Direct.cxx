@@ -439,6 +439,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	};
 
 	UniqueFileDescriptor ipc_namespace, user_namespace;
+	UniqueFileDescriptor accessory_lease_pipe;
 
 	if (params.ns.pid_namespace_name != nullptr) {
 		/* first open a handle to our existing (old) namespaces
@@ -452,6 +453,8 @@ SpawnChildProcess(PreparedChildProcess &&params,
 			.ipc = std::exchange(params.ns.enable_ipc, false),
 
 			.pid = true,
+
+			.lease_pipe = true,
 		};
 
 		char uid_map_buffer[256], gid_map_buffer[256];
@@ -473,6 +476,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 		params.ns.ipc_namespace = ipc_namespace = std::move(ns.ipc);
 		params.ns.user_namespace = user_namespace = std::move(ns.user);
+		accessory_lease_pipe = std::move(ns.lease_pipe);
 	}
 
 	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
@@ -691,5 +695,6 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	return {
 		.pidfd = std::move(pidfd),
 		.pid = static_cast<pid_t>(pid),
+		.accessory_lease_pipe = std::move(accessory_lease_pipe),
 	};
 }

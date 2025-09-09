@@ -67,6 +67,11 @@ SendNamespacesRequest(SocketDescriptor s, std::string_view name,
 		b.Pad(payload_size);
 	}
 
+	if (request.lease_pipe) {
+		static constexpr RequestHeader lease_pipe_header{0, RequestCommand::LEASE_PIPE};
+		b.Append(lease_pipe_header);
+	}
+
 	SendMessage(s, b.Finish(), 0);
 }
 
@@ -101,8 +106,8 @@ ParseNamespaceHandles(NamespacesResponse &response,
 		throw std::runtime_error{"Odd NAMESPACE_HANDLES payload"};
 
 	const auto payload = FromBytesStrict<const uint32_t>(raw_payload);
-	if (payload.size() != fds.size())
-		throw std::runtime_error{"Wrong number of file descriptors in NAMESPACE_HANDLES response"};
+	if (fds.size() < payload.size())
+		throw std::runtime_error{"Not enough file descriptors in NAMESPACE_HANDLES response"};
 
 	for (std::size_t i = 0; i < payload.size(); ++i) {
 		switch (payload[i]) {
@@ -124,6 +129,21 @@ ParseNamespaceHandles(NamespacesResponse &response,
 	}
 
 	fds = fds.subspan(payload.size());
+}
+
+static void
+ParseLeasePipe(NamespacesResponse &response,
+	       const std::span<const std::byte> raw_payload,
+	       std::span<UniqueFileDescriptor> &fds)
+{
+	if (!raw_payload.empty())
+		throw std::runtime_error{"Bad LEASE_PIPE payload"};
+
+	if (fds.empty())
+		throw std::runtime_error{"LEASE_PIPE without file descriptor"};
+
+	response.lease_pipe = std::move(fds.front());
+	fds = fds.subspan(1);
 }
 
 NamespacesResponse
@@ -159,6 +179,13 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 		case ResponseCommand::NAMESPACE_HANDLES:
 			ParseNamespaceHandles(response, payload.first(rh.size), fds);
 			break;
+
+		case ResponseCommand::LEASE_PIPE:
+			if (!request.lease_pipe)
+				throw std::runtime_error("Unexpected LEASE_PIPE response");
+
+			ParseLeasePipe(response, payload.first(rh.size), fds);
+			break;
 		}
 
 		payload = payload.subspan(padded_size);
@@ -176,6 +203,9 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 	const bool user_requested = request.uid_map.data() != nullptr || request.gid_map.data() != nullptr;
 	if (user_requested && !response.user.IsDefined())
 		throw std::runtime_error{"User namespace missing in response"};
+
+	if (request.lease_pipe && !response.lease_pipe.IsDefined())
+		throw std::runtime_error{"LEASE_PIPE missing in response"};
 
 	return response;
 }

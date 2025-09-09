@@ -108,11 +108,14 @@ class SpawnServerChild final : public ExitListener,
 
 	std::unique_ptr<PidfdEvent> pidfd;
 
+	const UniqueFileDescriptor accessory_lease_pipe;
+
 public:
 	explicit SpawnServerChild(EventLoop &event_loop,
 				  SpawnServerConnection &_connection,
 				  std::forward_list<SharedLease> &&_leases,
-				  unsigned _id, UniqueFileDescriptor _pidfd,
+				  unsigned _id, UniqueFileDescriptor &&_pidfd,
+				  UniqueFileDescriptor &&_accessory_lease_pipe,
 				  const char *_name) noexcept
 		:connection(_connection),
 		 leases(std::move(_leases)),
@@ -120,7 +123,8 @@ public:
 		 pidfd(std::make_unique<PidfdEvent>(event_loop,
 						    std::move(_pidfd),
 						    _name,
-						    (ExitListener &)*this)) {}
+						    (ExitListener &)*this)),
+		 accessory_lease_pipe(std::move(_accessory_lease_pipe)) {}
 
 	SpawnServerChild(const SpawnServerChild &) = delete;
 	SpawnServerChild &operator=(const SpawnServerChild &) = delete;
@@ -437,7 +441,9 @@ SpawnServerConnection::SpawnChild(unsigned id, const char *name,
 	auto *child = new SpawnServerChild(GetEventLoop(), *this,
 					   std::move(leases),
 					   id,
-					   std::move(result.pidfd), name);
+					   std::move(result.pidfd),
+					   std::move(result.accessory_lease_pipe),
+					   name);
 	children.insert(*child);
 }
 

@@ -22,6 +22,12 @@ struct SpawnChildProcessResult {
 	 * pidfds).
 	 */
 	pid_t pid;
+
+	/**
+	 * A pipe the holds a lease for resources received from the
+	 * spawn-accessory daemon (e.g. namespace handles).
+	 */
+	UniqueFileDescriptor accessory_lease_pipe;
 };
 
 /**

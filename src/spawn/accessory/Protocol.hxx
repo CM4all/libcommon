@@ -78,6 +78,18 @@ enum class RequestCommand : uint16_t {
 	 * #ResponseCommand::ERROR.
 	 */
 	USER_NAMESPACE = 4,
+
+	/**
+	 * Create a lease pipe.  The namespaces created with this
+	 * datagram will be kept alive at least until the client
+	 * closes the pipe returned by this command.
+	 *
+	 * No payload.
+	 *
+	 * Response may be #ResponseCommand::LEASE_PIPE or
+	 * #ResponseCommand::ERROR.
+	 */
+	LEASE_PIPE = 5,
 };
 
 struct RequestHeader {
@@ -101,6 +113,14 @@ enum class ResponseCommand : uint16_t {
 	 * namespace file handles are being transmitted as ancillary data.
 	 */
 	NAMESPACE_HANDLES = 1,
+
+	/**
+	 * Successful response to #RequestCommand::LEASE_PIPE.
+	 *
+	 * No payload. The write side of the lease pipe is transmitted
+	 * as ancillary data.
+	 */
+	LEASE_PIPE = 2,
 };
 
 struct ResponseHeader {
