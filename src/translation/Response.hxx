@@ -278,9 +278,9 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_CACHE
 	/**
-	 * From #TranslationCommand::CACHE_TAG.
+	 * From #TranslationCommand::CACHE_TAG for the #address field.
 	 */
-	const char *cache_tag;
+	const char *address_cache_tag;
 
 	std::span<const TranslationCommand> vary;
 	std::span<const TranslationCommand> invalidate;

@@ -3826,10 +3826,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!response.address.IsDefined())
 			throw std::runtime_error("misplaced CACHE_TAG packet");
 
-		if (response.cache_tag != nullptr)
+		if (response.address_cache_tag != nullptr)
 			throw std::runtime_error("duplicate CACHE_TAG packet");
 
-		response.cache_tag = string_payload.data();
+		response.address_cache_tag = string_payload.data();
 		return;
 #else
 		break;
@@ -4132,7 +4132,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("misplaced AUTO_FLUSH_CACHE packet");
 #endif
 
-		if (response.cache_tag == nullptr)
+		if (response.address_cache_tag == nullptr)
 			throw std::runtime_error("AUTO_FLUSH_CACHE without CACHE_TAG");
 
 		if (response.auto_flush_cache)

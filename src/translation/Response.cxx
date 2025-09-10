@@ -243,7 +243,7 @@ TranslateResponse::Clear() noexcept
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
-	cache_tag = nullptr;
+	address_cache_tag = nullptr;
 	vary = {};
 	invalidate = {};
 #endif
@@ -515,7 +515,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
-	cache_tag = alloc.CheckDup(src.cache_tag);
+	address_cache_tag = alloc.CheckDup(src.address_cache_tag);
 	vary = alloc.Dup(src.vary);
 	invalidate = alloc.Dup(src.invalidate);
 #endif
