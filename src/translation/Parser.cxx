@@ -3823,13 +3823,15 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		}
 #endif // TRANSLATION_ENABLE_TRANSFORMATION
 
-		if (!response.address.IsDefined())
-			throw std::runtime_error("misplaced CACHE_TAG packet");
+		if (response.address.IsDefined()) {
+			if (response.address_cache_tag != nullptr)
+				throw std::runtime_error("duplicate CACHE_TAG packet");
 
-		if (response.address_cache_tag != nullptr)
-			throw std::runtime_error("duplicate CACHE_TAG packet");
+			response.address_cache_tag = string_payload.data();
+			return;
+		}
 
-		response.address_cache_tag = string_payload.data();
+		response.cache_tags.Add(alloc, string_payload.data());
 		return;
 #else
 		break;

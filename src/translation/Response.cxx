@@ -243,6 +243,7 @@ TranslateResponse::Clear() noexcept
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
+	cache_tags.Init();
 	address_cache_tag = nullptr;
 	vary = {};
 	invalidate = {};
@@ -290,8 +291,8 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 {
 	protocol_version = src.protocol_version;
 
-	/* we don't copy the "max_age" attribute, because it's only used
-	   by the tcache itself */
+	/* we don't copy the "max_age" and "cache_tag" attributes,
+	   because they're only used by the tcache itself */
 
 	expires_relative = src.expires_relative;
 	expires_relative_with_query = src.expires_relative_with_query;
@@ -554,6 +555,9 @@ TranslateResponse::FullCopyFrom(AllocatorPtr alloc, const TranslateResponse &src
 #endif
 #if TRANSLATION_ENABLE_SESSION
 	user = alloc.CheckDup(src.user);
+#endif
+#if TRANSLATION_ENABLE_CACHE
+	cache_tags.CopyFrom(alloc, src.cache_tags);
 #endif
 }
 

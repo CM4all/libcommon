@@ -15,6 +15,9 @@
 #include "widget/VList.hxx"
 #include "util/StringSet.hxx"
 #endif
+#if TRANSLATION_ENABLE_CACHE
+#include "util/StringSet.hxx"
+#endif
 #if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
 #include <memory>
@@ -277,6 +280,11 @@ struct TranslateResponse {
 #endif
 
 #if TRANSLATION_ENABLE_CACHE
+	/**
+	 * From #TranslationCommand::CACHE_TAG for the whole response.
+	 */
+	StringSet cache_tags;
+
 	/**
 	 * From #TranslationCommand::CACHE_TAG for the #address field.
 	 */
