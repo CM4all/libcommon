@@ -4575,6 +4575,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error{"malformed ARCH packet"};
 
 		return;
+
+	case TranslationCommand::ALLOW_PTRACE:
+#if TRANSLATION_ENABLE_SPAWN && defined(HAVE_LIBSECCOMP)
+		if (!payload.empty())
+			throw std::runtime_error("malformed ALLOW_PTRACE packet");
+		if (auto &options = MakeChildOptions("misplaced ALLOW_PTRACE packet");
+		    options.allow_ptrace)
+			throw std::runtime_error("duplicate ALLOW_PTRACE packet");
+		else
+			options.allow_ptrace = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

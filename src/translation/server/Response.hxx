@@ -1192,6 +1192,11 @@ public:
 			return *this;
 		}
 
+		auto AllowPtrace() noexcept {
+			response.Packet(TranslationCommand::ALLOW_PTRACE);
+			return *this;
+		}
+
 		auto CapSysResource() noexcept {
 			response.Packet(TranslationCommand::CAP_SYS_RESOURCE);
 			return *this;

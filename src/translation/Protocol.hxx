@@ -1374,6 +1374,12 @@ enum class TranslationCommand : uint16_t {
 	 * "consumed").
 	 */
 	PEEK = 276,
+
+	/**
+	 * Allow the child process to use the ptrace() and similar
+	 * system calls which are disallowed by default.
+	 */
+	ALLOW_PTRACE = 277,
 };
 
 struct TranslationHeader {
