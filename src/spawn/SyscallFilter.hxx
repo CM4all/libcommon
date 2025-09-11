@@ -35,7 +35,8 @@ void
 ForbidBind(Seccomp::Filter &sf);
 
 /**
- * Add rules which kill the process upon attempting to use ptrace().
+ * Add rules which kill the process upon attempting to use ptrace()
+ * and related process_vm syscalls.
  */
 void
 ForbidPtrace(Seccomp::Filter &sf);

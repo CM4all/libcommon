@@ -77,9 +77,6 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(nfsservctl),
 	SCMP_SYS(perf_event_open),
 	SCMP_SYS(personality),
-	SCMP_SYS(process_vm_readv),
-	SCMP_SYS(process_vm_writev),
-
 
 	SCMP_SYS(query_module),
 	SCMP_SYS(reboot),
@@ -265,4 +262,6 @@ void
 ForbidPtrace(Seccomp::Filter &sf)
 {
 	sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(ptrace));
+	sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(process_vm_readv));
+	sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(process_vm_writev));
 }
