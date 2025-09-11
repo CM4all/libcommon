@@ -433,6 +433,9 @@ Serialize(Serializer &s, const PreparedChildProcess &p)
 		s.Write(ExecCommand::IOPRIO_IDLE);
 
 #ifdef HAVE_LIBSECCOMP
+	if (p.allow_ptrace)
+		s.Write(ExecCommand::ALLOW_PTRACE);
+
 	if (p.forbid_user_ns)
 		s.Write(ExecCommand::FORBID_USER_NS);
 

@@ -775,6 +775,10 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			break;
 
 #ifdef HAVE_LIBSECCOMP
+		case ExecCommand::ALLOW_PTRACE:
+			p.allow_ptrace = true;
+			break;
+
 		case ExecCommand::FORBID_USER_NS:
 			p.forbid_user_ns = true;
 			break;
