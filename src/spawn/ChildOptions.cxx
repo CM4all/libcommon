@@ -42,6 +42,7 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 	 stderr_jailed(src.stderr_jailed),
 	 stderr_pond(src.stderr_pond),
 #ifdef HAVE_LIBSECCOMP
+	 allow_ptrace(src.allow_ptrace),
 	 forbid_user_ns(src.forbid_user_ns),
 	 forbid_multicast(src.forbid_multicast),
 	 forbid_bind(src.forbid_bind),
@@ -142,6 +143,12 @@ ChildOptions::MakeId(char *p) const noexcept
 	}
 
 #ifdef HAVE_LIBSECCOMP
+	if (allow_ptrace) {
+		*p++ = ';';
+		*p++ = 'a';
+		*p++ = 'p';
+	}
+
 	if (forbid_user_ns) {
 		*p++ = ';';
 		*p++ = 'f';
@@ -227,6 +234,7 @@ ChildOptions::CopyTo(PreparedChildProcess &dest, FdHolder &close_fds) const
 		dest.rlimits = *rlimits;
 	dest.uid_gid = uid_gid;
 #ifdef HAVE_LIBSECCOMP
+	dest.allow_ptrace = allow_ptrace;
 	dest.forbid_user_ns = forbid_user_ns;
 	dest.forbid_multicast = forbid_multicast;
 	dest.forbid_bind = forbid_bind;

@@ -80,9 +80,6 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(process_vm_readv),
 	SCMP_SYS(process_vm_writev),
 
-	/* ptrace() is dangerous because it allows breaking out of
-	   namespaces */
-	SCMP_SYS(ptrace),
 
 	SCMP_SYS(query_module),
 	SCMP_SYS(reboot),
@@ -262,4 +259,10 @@ ForbidBind(Seccomp::Filter &sf)
 {
 	sf.AddRule(SCMP_ACT_ERRNO(EACCES), SCMP_SYS(bind));
 	sf.AddRule(SCMP_ACT_ERRNO(EACCES), SCMP_SYS(listen));
+}
+
+void
+ForbidPtrace(Seccomp::Filter &sf)
+{
+	sf.AddRule(SCMP_ACT_KILL, SCMP_SYS(ptrace));
 }

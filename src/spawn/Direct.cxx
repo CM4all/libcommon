@@ -291,6 +291,9 @@ try {
 
 		BuildSyscallFilter(sf);
 
+		if (!p.allow_ptrace)
+			ForbidPtrace(sf);
+
 		if (p.forbid_user_ns)
 			ForbidUserNamespace(sf);
 

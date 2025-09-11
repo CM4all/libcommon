@@ -137,6 +137,8 @@ struct PreparedChildProcess {
 	bool ioprio_idle = false;
 
 #ifdef HAVE_LIBSECCOMP
+	bool allow_ptrace = false;
+
 	bool forbid_user_ns = false;
 
 	bool forbid_multicast = false;
@@ -183,7 +185,7 @@ struct PreparedChildProcess {
 	 * then failures to set up the filter are fatal.
 	 */
 	bool HasSyscallFilter() const noexcept {
-		return forbid_user_ns || forbid_multicast || forbid_bind;
+		return allow_ptrace || forbid_user_ns || forbid_multicast || forbid_bind;
 	}
 #endif // HAVE_LIBSECCOMP
 

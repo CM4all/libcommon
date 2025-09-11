@@ -33,3 +33,9 @@ ForbidMulticast(Seccomp::Filter &sf);
  */
 void
 ForbidBind(Seccomp::Filter &sf);
+
+/**
+ * Add rules which kill the process upon attempting to use ptrace().
+ */
+void
+ForbidPtrace(Seccomp::Filter &sf);

@@ -91,6 +91,8 @@ struct ChildOptions {
 	bool stderr_pond = false;
 
 #ifdef HAVE_LIBSECCOMP
+	bool allow_ptrace = false;
+
 	bool forbid_user_ns = false;
 
 	bool forbid_multicast = false;
@@ -127,6 +129,7 @@ struct ChildOptions {
 		 stderr_jailed(src.stderr_jailed),
 		 stderr_pond(src.stderr_pond),
 #ifdef HAVE_LIBSECCOMP
+		 allow_ptrace(src.allow_ptrace),
 		 forbid_user_ns(src.forbid_user_ns),
 		 forbid_multicast(src.forbid_multicast),
 		 forbid_bind(src.forbid_bind),
