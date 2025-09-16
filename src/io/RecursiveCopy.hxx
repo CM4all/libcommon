@@ -30,6 +30,7 @@ enum RecursiveCopyOptions : unsigned {
 };
 
 class FileDescriptor;
+struct FileAt;
 
 /**
  * Copies a file or directory recursively.
@@ -44,6 +45,5 @@ class FileDescriptor;
  * @param options one or more of #RecursiveCopyOptions
  */
 void
-RecursiveCopy(FileDescriptor src_parent, const char *src_filename,
-	      FileDescriptor dst_parent, const char *dst_filename,
+RecursiveCopy(FileAt src_file, FileAt dst_file,
 	      unsigned options=0);

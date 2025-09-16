@@ -4,6 +4,7 @@
 
 #include "RecursiveDelete.hxx"
 #include "DirectoryReader.hxx"
+#include "FileAt.hxx"
 #include "FileName.hxx"
 #include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
@@ -19,15 +20,15 @@ ClearDirectory(UniqueFileDescriptor &&fd)
 
 	while (const char *child = r.Read())
 		if (!IsSpecialFilename(child))
-			RecursiveDelete(r.GetFileDescriptor(), child);
+			RecursiveDelete({r.GetFileDescriptor(), child});
 }
 
 static void
-RecursiveDeleteDirectory(FileDescriptor parent, const char *filename)
+RecursiveDeleteDirectory(FileAt file)
 {
-	ClearDirectory(OpenDirectory(parent, filename, O_NOFOLLOW));
+	ClearDirectory(OpenDirectory(file, O_NOFOLLOW));
 
-	if (unlinkat(parent.Get(), filename, AT_REMOVEDIR) == 0)
+	if (unlinkat(file.directory.Get(), file.name, AT_REMOVEDIR) == 0)
 		return;
 
 	switch (const int e = errno; e) {
@@ -36,20 +37,20 @@ RecursiveDeleteDirectory(FileDescriptor parent, const char *filename)
 		return;
 
 	default:
-		throw FmtErrno(e, "Failed to delete {}", filename);
+		throw FmtErrno(e, "Failed to delete {}", file.name);
 	}
 }
 
 void
-RecursiveDelete(FileDescriptor parent, const char *filename)
+RecursiveDelete(FileAt file)
 {
-	if (unlinkat(parent.Get(), filename, 0) == 0)
+	if (unlinkat(file.directory.Get(), file.name, 0) == 0)
 		return;
 
 	switch (const int e = errno; e) {
 	case EISDIR:
 		/* switch to directory mode */
-		RecursiveDeleteDirectory(parent, filename);
+		RecursiveDeleteDirectory(file);
 		return;
 
 	case ENOENT:
@@ -57,6 +58,6 @@ RecursiveDelete(FileDescriptor parent, const char *filename)
 		return;
 
 	default:
-		throw FmtErrno(e, "Failed to delete {}", filename);
+		throw FmtErrno(e, "Failed to delete {}", file.name);
 	}
 }

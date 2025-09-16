@@ -5,6 +5,7 @@
 #include "CgroupState.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
+#include "io/FileAt.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
@@ -31,7 +32,7 @@ CgroupState::~CgroupState() noexcept = default;
 static void
 WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 {
-	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
+	if (TryWriteExistingFile({fd, path}, data) == WriteFileResult::ERROR)
 		throw FmtErrno("write({:?}) failed", path);
 }
 
@@ -57,7 +58,7 @@ CgroupState::EnableAllControllers(unsigned pid) const
 	/* create a leaf cgroup and move this process into it, or else
 	   we can't enable other controllers */
 
-	const auto leaf_group = MakeDirectory(group_fd, "_", {.mode=0770});
+	const auto leaf_group = MakeDirectory({group_fd, "_"}, {.mode=0770});
 	WriteFile(leaf_group, "cgroup.procs", fmt::format_int{pid}.c_str());
 
 	/* now enable all other controllers in subtree_control */
@@ -98,7 +99,7 @@ CgroupState::FromGroupPath(std::string &&group_path)
 
 	auto sys_fs_cgroup = OpenPath("/sys/fs/cgroup");
 
-	state.group_fd = OpenPath(sys_fs_cgroup, group_path.c_str() + 1);
+	state.group_fd = OpenPath({sys_fs_cgroup, group_path.c_str() + 1});
 	state.cgroup_kill = HasCgroupKill(state.group_fd);
 
 	state.group_path = std::move(group_path);

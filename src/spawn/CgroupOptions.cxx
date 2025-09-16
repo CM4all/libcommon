@@ -6,6 +6,7 @@
 #include "CgroupState.hxx"
 #include "AllocatorPtr.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "io/FileAt.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -44,7 +45,7 @@ CgroupOptions::Set(AllocatorPtr alloc,
 static void
 WriteFile(FileDescriptor fd, const char *path, std::string_view data)
 {
-	if (TryWriteExistingFile(fd, path, data) == WriteFileResult::ERROR)
+	if (TryWriteExistingFile({fd, path}, data) == WriteFileResult::ERROR)
 		throw FmtErrno("write({:?}) failed", path);
 }
 
@@ -68,12 +69,12 @@ CgroupOptions::Create2(const CgroupState &state, const char *session) const
 	if (!state.IsEnabled())
 		throw std::runtime_error("Control groups are disabled");
 
-	auto fd = MakeDirectory(state.group_fd, name);
+	auto fd = MakeDirectory({state.group_fd, name});
 
 	if (!xattr.empty()) {
 		/* reopen the directory because fsetxattr() refuses to
 		   work with an O_PATH fildescriptor */
-		auto d = OpenDirectory(fd, ".");
+		auto d = OpenDirectory({fd, "."});
 
 		for (const auto &i : xattr)
 			if (fsetxattr(d.Get(), i.name,
@@ -86,7 +87,7 @@ CgroupOptions::Create2(const CgroupState &state, const char *session) const
 		WriteCgroupFile(fd, s.name, s.value);
 
 	if (session != nullptr)
-		return MakeDirectory(fd, session);
+		return MakeDirectory({fd, session});
 	else
 		return fd;
 }

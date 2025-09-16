@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "CgroupPidsWatch.hxx"
+#include "io/FileAt.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -28,11 +29,11 @@ ReadUint64(FileDescriptor fd)
 CgroupPidsWatch::CgroupPidsWatch(EventLoop &event_loop,
 				 FileDescriptor group_fd,
 				 BoundMethod<void(uint_least64_t value) noexcept> _callback)
-	:current_fd(OpenReadOnly(group_fd, "pids.current")),
+	:current_fd(OpenReadOnly({group_fd, "pids.current"})),
 	 inotify(event_loop, *this),
 	 callback(_callback)
 {
-	inotify.AddModifyWatch(ProcFdPath(OpenPath(group_fd, "pids.events")));
+	inotify.AddModifyWatch(ProcFdPath(OpenPath({group_fd, "pids.events"})));
 }
 
 CgroupPidsWatch::~CgroupPidsWatch() noexcept = default;

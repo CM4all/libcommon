@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "MakeDirectory.hxx"
+#include "FileAt.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "system/linux/openat2.h"
@@ -44,21 +45,21 @@ OpenDirectory(FileDescriptor directory, const char *name,
 }
 
 UniqueFileDescriptor
-MakeDirectory(FileDescriptor parent_fd, const char *name,
+MakeDirectory(FileAt file,
 	      const MakeDirectoryOptions options)
 {
-	if (mkdirat(parent_fd.Get(), name, options.mode) < 0) {
+	if (mkdirat(file.directory.Get(), file.name, options.mode) < 0) {
 		switch (const int e = FilterErrno(errno, options)) {
 		case 0:
 			break;
 
 		default:
 			throw FmtErrno(e, "Failed to create directory {:?}",
-				       name);
+				       file.name);
 		}
 	}
 
-	return OpenDirectory(parent_fd, name, options);
+	return OpenDirectory(file.directory, file.name, options);
 }
 
 static char *
@@ -113,22 +114,21 @@ RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 	auto middle_options = options;
 	middle_options.exclusive = false;
 
-	return MakeDirectory(RecursiveMakeNestedDirectory(parent_fd, path, slash - path,
-							  middle_options),
-			     name,
-			     options);
+	auto parent_dir = RecursiveMakeNestedDirectory(parent_fd, path, slash - path,
+						       middle_options);
+	return MakeDirectory({parent_dir, name}, options);
 }
 
 UniqueFileDescriptor
-MakeNestedDirectory(FileDescriptor parent_fd, const char *path,
+MakeNestedDirectory(FileAt file,
 		    const MakeDirectoryOptions options)
 {
-	size_t path_length = strlen(path);
+	size_t path_length = strlen(file.name);
 	char copy[PATH_MAX];
 	if (path_length >= sizeof(copy))
 		throw MakeErrno(ENAMETOOLONG, "Path too long");
 
-	memcpy(copy, path, path_length + 1);
-	return RecursiveMakeNestedDirectory(parent_fd, copy, path_length,
+	memcpy(copy, file.name, path_length + 1);
+	return RecursiveMakeNestedDirectory(file.directory, copy, path_length,
 					    options);
 }

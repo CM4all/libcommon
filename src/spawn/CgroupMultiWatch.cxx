@@ -6,6 +6,7 @@
 #include "CgroupWatchPtr.hxx"
 #include "event/CoarseTimerEvent.hxx"
 #include "event/Loop.hxx"
+#include "io/FileAt.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/linux/CgroupEvents.hxx"
 #include "io/linux/ProcPath.hxx"
@@ -140,7 +141,7 @@ CgroupMultiWatch::Item::MemoryEventsWatch::Open(FileDescriptor cgroup_fd) noexce
 	last_oom_kill = 0;
 
 	fd.Close();
-	if (!fd.OpenReadOnly(cgroup_fd, "memory.events"))
+	if (!fd.OpenReadOnly({cgroup_fd, "memory.events"}))
 		return;
 
 	TryAddWatch(ProcFdPath(fd), IN_MODIFY);
@@ -182,7 +183,7 @@ CgroupMultiWatch::Item::PidsEventsWatch::Open(FileDescriptor cgroup_fd) noexcept
 	last_max = 0;
 
 	fd.Close();
-	if (!fd.OpenReadOnly(cgroup_fd, "pids.events"))
+	if (!fd.OpenReadOnly({cgroup_fd, "pids.events"}))
 		return;
 
 	TryAddWatch(ProcFdPath(fd), IN_MODIFY);

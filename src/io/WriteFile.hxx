@@ -6,6 +6,7 @@
 #include <string_view>
 
 class FileDescriptor;
+struct FileAt;
 
 enum class WriteFileResult {
 	/**
@@ -41,7 +42,7 @@ TryWriteExistingFile(const char *path, std::string_view value) noexcept;
  * useful to write "special" files like the ones in /proc.
  */
 WriteFileResult
-TryWriteExistingFile(FileDescriptor directory, const char *path,
+TryWriteExistingFile(FileAt file,
 		     std::string_view value) noexcept;
 
 #endif

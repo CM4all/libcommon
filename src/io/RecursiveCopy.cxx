@@ -4,6 +4,7 @@
 
 #include "RecursiveCopy.hxx"
 #include "CopyRegularFile.hxx"
+#include "FileAt.hxx"
 #include "FileName.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "MakeDirectory.hxx"
@@ -85,8 +86,7 @@ Preserve(const RecursiveCopyContext &ctx, const struct statx &stx,
 
 static void
 RecursiveCopy(RecursiveCopyContext &ctx,
-	      FileDescriptor src_parent, const char *src_filename,
-	      FileDescriptor dst_parent, const char *dst_filename);
+	      FileAt src_file, FileAt dst_file);
 
 /**
  * Create a regular file.  If one already exists, it is deleted.
@@ -97,7 +97,7 @@ CreateRegularFile(FileDescriptor parent, const char *filename, bool overwrite)
 	UniqueFileDescriptor dst;
 
 	/* optimistic create with O_EXCL */
-	if (dst.Open(parent, filename, O_CREAT|O_EXCL|O_WRONLY|O_NOFOLLOW))
+	if (dst.Open({parent, filename}, O_CREAT|O_EXCL|O_WRONLY|O_NOFOLLOW))
 		return dst;
 
 	if (const int e = errno; e != EEXIST)
@@ -113,7 +113,7 @@ CreateRegularFile(FileDescriptor parent, const char *filename, bool overwrite)
 			throw FmtErrno(e, "Failed to delete {:?}", filename);
 
 	/* ... and try again */
-	if (!dst.Open(parent, filename, O_CREAT|O_EXCL|O_WRONLY|O_NOFOLLOW))
+	if (!dst.Open({parent, filename}, O_CREAT|O_EXCL|O_WRONLY|O_NOFOLLOW))
 		throw FmtErrno("Failed to create {:?}", filename);
 
 	return dst;
@@ -144,8 +144,8 @@ RecursiveCopyDirectory(RecursiveCopyContext &ctx,
 	while (auto *name = src.Read())
 		if (!IsSpecialFilename(name))
 			RecursiveCopy(ctx,
-				      src.GetFileDescriptor(), name,
-				      dst, name);
+				      {src.GetFileDescriptor(), name},
+				      {dst, name});
 }
 
 /**
@@ -161,7 +161,7 @@ RecursiveCopyDirectory(RecursiveCopyContext &ctx,
 		RecursiveCopyDirectory(ctx, std::move(src), dst_parent);
 		Preserve(ctx, stx, dst_parent, "?");
 	} else {
-		auto dst = MakeDirectory(dst_parent, dst_filename);
+		auto dst = MakeDirectory({dst_parent, dst_filename});
 		RecursiveCopyDirectory(ctx, std::move(src), dst);
 		Preserve(ctx, stx, dst, dst_filename);
 	}
@@ -233,26 +233,25 @@ CopySymlink(FileDescriptor src_parent, const char *src_filename,
 
 static void
 RecursiveCopy(RecursiveCopyContext &ctx,
-	      FileDescriptor src_parent, const char *src_filename,
-	      FileDescriptor dst_parent, const char *dst_filename)
+	      FileAt src_file, FileAt dst_file)
 {
 	UniqueFileDescriptor src;
 
 	/* optimistic open() - this works for regular files and
 	   directories */
-	if (!src.Open(src_parent, src_filename, O_RDONLY|O_NOFOLLOW)) {
+	if (!src.Open(src_file, O_RDONLY|O_NOFOLLOW)) {
 		switch (int e = errno) {
 		case ELOOP:
 			/* due to O_NOFOLLOW, symlinks fail with
 			   ELOOP, so copy the symlink */
-			CopySymlink(src_parent, src_filename,
-				    dst_parent, dst_filename,
+			CopySymlink(src_file.directory, src_file.name,
+				    dst_file.directory, dst_file.name,
 				    ctx.overwrite);
 			return;
 
 		default:
 			throw FmtErrno(e, "Failed to open {:?}",
-				       src_filename);
+				       src_file.name);
 		}
 	}
 
@@ -260,7 +259,7 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 	if (statx(src.Get(), "",
 		  AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_STATX_SYNC_AS_STAT,
 		  ctx.statx_mask, &stx) < 0)
-		throw FmtErrno("Failed to stat {:?}", src_filename);
+		throw FmtErrno("Failed to stat {:?}", src_file.name);
 
 	if (ctx.one_filesystem) {
 		if (ctx.mnt_id == 0)
@@ -273,16 +272,13 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 			return;
 	}
 
-	RecursiveCopy(ctx, std::move(src), stx, dst_parent, dst_filename);
+	RecursiveCopy(ctx, std::move(src), stx, dst_file.directory, dst_file.name);
 }
 
 void
-RecursiveCopy(FileDescriptor src_parent, const char *src_filename,
-	      FileDescriptor dst_parent, const char *dst_filename,
+RecursiveCopy(FileAt src_file, FileAt dst_file,
 	      unsigned options)
 {
 	RecursiveCopyContext ctx{options};
-	RecursiveCopy(ctx,
-		      src_parent, src_filename,
-		      dst_parent, dst_filename);
+	RecursiveCopy(ctx, src_file, dst_file);
 }

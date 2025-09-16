@@ -5,6 +5,7 @@
 #include "UserNamespace.hxx"
 #include "ProcPid.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "io/FileAt.hxx"
 #include "io/WriteFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
@@ -18,7 +19,7 @@ using std::string_view_literals::operator""sv;
 void
 DenySetGroups(unsigned pid) noexcept
 try {
-	TryWriteExistingFile(OpenProcPid(pid), "setgroups", "deny");
+	TryWriteExistingFile({OpenProcPid(pid), "setgroups"}, "deny");
 } catch (...) {
 	// silently ignore errors
 }
@@ -63,7 +64,7 @@ FormatIdMap(char *p, const std::set<unsigned> &ids) noexcept
 static void
 WriteFileOrThrow(FileDescriptor directory, const char *path, std::string_view data)
 {
-	if (TryWriteExistingFile(directory, path, data) == WriteFileResult::ERROR)
+	if (TryWriteExistingFile({directory, path}, data) == WriteFileResult::ERROR)
 		throw FmtErrno("write({:?}) failed", path);
 }
 

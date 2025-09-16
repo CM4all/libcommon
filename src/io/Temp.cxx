@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Temp.hxx"
+#include "FileAt.hxx"
 #include "Open.hxx"
 #include "FileDescriptor.hxx"
 #include "UniqueFileDescriptor.hxx"
@@ -55,13 +56,12 @@ MakeTempDirectory(FileDescriptor parent_fd, mode_t mode)
 }
 
 StringBuffer<16>
-MoveToTemp(FileDescriptor old_parent_fd, const char *old_name,
-	   FileDescriptor new_parent_fd)
+MoveToTemp(FileAt old_file, FileDescriptor new_parent_fd)
 {
 	while (true) {
 		auto name = RandomFilename();
 
-		if (renameat2(old_parent_fd.Get(), old_name,
+		if (renameat2(old_file.directory.Get(), old_file.name,
 			      new_parent_fd.Get(), name,
 			      RENAME_NOREPLACE) == 0)
 			return name;
@@ -71,7 +71,7 @@ MoveToTemp(FileDescriptor old_parent_fd, const char *old_name,
 		if (e == EINVAL) {
 			/* RENAME_NOREPLACE not supported by the
 			   filesystem */
-			if (renameat(old_parent_fd.Get(), old_name,
+			if (renameat(old_file.directory.Get(), old_file.name,
 				     new_parent_fd.Get(), name) == 0)
 				return name;
 

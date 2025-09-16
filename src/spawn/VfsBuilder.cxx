@@ -5,6 +5,7 @@
 #include "VfsBuilder.hxx"
 #include "lib/fmt/RuntimeError.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "io/FileAt.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/Mount.hxx"
@@ -95,7 +96,7 @@ MakeDirs(FileDescriptor fd, std::string_view suffix, mode_t mode)
 			continue;
 
 		if (!name2.empty())
-			fd = ufd = OpenPath(fd, name2.c_str(), O_DIRECTORY);
+			fd = ufd = OpenPath({fd, name2.c_str()}, O_DIRECTORY);
 
 		name2 = name;
 

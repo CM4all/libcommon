@@ -5,6 +5,7 @@
 #pragma once
 
 class FileDescriptor;
+struct FileAt;
 
 /**
  * Delete a file or directory recursively.
@@ -12,4 +13,4 @@ class FileDescriptor;
  * Throws on error.
  */
 void
-RecursiveDelete(FileDescriptor parent, const char *filename);
+RecursiveDelete(FileAt file);

@@ -2,6 +2,7 @@
 // author: Max Kellermann <max.kellermann@gmail.com>
 
 #include "WriteFile.hxx"
+#include "FileAt.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "util/SpanCast.hxx"
 
@@ -38,19 +39,19 @@ TryWriteExistingFile(const char *path, std::string_view value) noexcept
 }
 
 static WriteFileResult
-TryWriteExistingFile(FileDescriptor directory, const char *path,
+TryWriteExistingFile(FileAt file,
 		     std::span<const std::byte> value) noexcept
 {
 	UniqueFileDescriptor fd;
-	if (!fd.Open(directory, path, O_WRONLY))
+	if (!fd.Open(file, O_WRONLY))
 		return WriteFileResult::ERROR;
 
 	return TryWrite(fd, value);
 }
 
 WriteFileResult
-TryWriteExistingFile(FileDescriptor directory, const char *path,
+TryWriteExistingFile(FileAt file,
 		     std::string_view value) noexcept
 {
-	return TryWriteExistingFile(directory, path, AsBytes(value));
+	return TryWriteExistingFile(file, AsBytes(value));
 }

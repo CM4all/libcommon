@@ -26,6 +26,7 @@
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "net/SocketError.hxx"
+#include "io/FileAt.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/DeleteDisposer.hxx"
@@ -232,7 +233,7 @@ static UniqueFileDescriptor
 MakeTmpfsMountRoot()
 {
 	// TODO hard-coded path
-	return MakeDirectory(FileDescriptor::Undefined(), "/tmp/tmpfs",
+	return MakeDirectory({FileDescriptor::Undefined(), "/tmp/tmpfs"},
 			     {.mode = 0100});
 }
 

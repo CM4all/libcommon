@@ -9,6 +9,8 @@
 #include <span>
 #include <string>
 
+struct FileAt;
+
 /**
  * Create a new file or replace an existing file.  This class attempts
  * to make this atomic: if an error occurs, it attempts to restore the
@@ -31,8 +33,7 @@ public:
 	 */
 	explicit FileWriter(const char *_path, mode_t mode=0666);
 
-	FileWriter(FileDescriptor _directory_fd, const char *_path,
-		   mode_t mode=0666);
+	explicit FileWriter(FileAt file, mode_t mode=0666);
 
 	~FileWriter() noexcept {
 		if (fd.IsDefined())

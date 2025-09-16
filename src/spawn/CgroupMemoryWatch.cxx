@@ -4,6 +4,7 @@
 
 #include "CgroupMemoryWatch.hxx"
 #include "event/Loop.hxx"
+#include "io/FileAt.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -23,7 +24,7 @@ using std::string_view_literals::operator""sv;
 static UniqueFileDescriptor
 OpenMemoryUsage(FileDescriptor group_fd)
 {
-	return OpenReadOnly(group_fd, "memory.current");
+	return OpenReadOnly({group_fd, "memory.current"});
 }
 
 static uint_least64_t
@@ -46,10 +47,10 @@ CgroupMemoryWatch::CgroupMemoryWatch(EventLoop &event_loop,
 	 pressure(event_loop, BIND_THIS_METHOD(OnPressure)),
 	 callback(_callback)
 {
-	inotify.AddModifyWatch(ProcFdPath(OpenPath(group_fd, "memory.events")));
+	inotify.AddModifyWatch(ProcFdPath(OpenPath({group_fd, "memory.events"})));
 
 	if (UniqueFileDescriptor pressure_fd;
-	    pressure_fd.Open(group_fd, "memory.pressure", O_WRONLY)) {
+	    pressure_fd.Open({group_fd, "memory.pressure"}, O_WRONLY)) {
 		/* subscribe to a notification every 2 seconds if the
 		   "some" memory pressure goes above 10% */
 		constexpr auto w = "some 200000 2000000"sv;

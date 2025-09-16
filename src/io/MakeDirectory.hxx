@@ -9,6 +9,7 @@
 
 class FileDescriptor;
 class UniqueFileDescriptor;
+struct FileAt;
 
 struct MakeDirectoryOptions {
 	mode_t mode = 0777;
@@ -32,7 +33,7 @@ struct MakeDirectoryOptions {
  * @return an O_PATH file handle to the directory
  */
 UniqueFileDescriptor
-MakeDirectory(FileDescriptor parent_fd, const char *name,
+MakeDirectory(FileAt file,
 	      MakeDirectoryOptions options=MakeDirectoryOptions{});
 
 /**
@@ -42,7 +43,7 @@ MakeDirectory(FileDescriptor parent_fd, const char *name,
  * slash; however, it must not contain "." and ".." segments
  */
 UniqueFileDescriptor
-MakeNestedDirectory(FileDescriptor parent_fd, const char *path,
+MakeNestedDirectory(FileAt file,
 		    MakeDirectoryOptions options=MakeDirectoryOptions{});
 
 #endif

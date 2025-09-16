@@ -10,6 +10,7 @@
 
 class FileDescriptor;
 class UniqueFileDescriptor;
+struct FileAt;
 
 /**
  * Open the top-level temporary directory, i.e. $TMPDIR or /tmp.
@@ -41,5 +42,4 @@ MakeTempDirectory(FileDescriptor parent_fd, mode_t mode=0777);
  * directory
  */
 StringBuffer<16>
-MoveToTemp(FileDescriptor old_parent_fd, const char *old_name,
-	   FileDescriptor new_parent_fd);
+MoveToTemp(FileAt old_file, FileDescriptor new_parent_fd);

@@ -21,7 +21,7 @@
 inline decltype(auto)
 WithReadOnly(FileAt file_at, std::invocable<FileDescriptor> auto f)
 {
-	const auto fd = OpenReadOnly(file_at.directory, file_at.name);
+	const auto fd = OpenReadOnly(file_at);
 	return f(FileDescriptor{fd});
 }
 

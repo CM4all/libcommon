@@ -5,6 +5,7 @@
 #include "CgroupKill.hxx"
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
+#include "io/FileAt.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
@@ -26,7 +27,7 @@ OpenUnifiedCgroup(const CgroupState &state, const char *name)
 {
 	assert(state.IsEnabled());
 
-	return OpenPath(state.group_fd, name);
+	return OpenPath({state.group_fd, name});
 }
 
 static UniqueFileDescriptor
@@ -34,7 +35,7 @@ OpenUnifiedCgroup(const CgroupState &state, const char *name,
 		  const char *session)
 {
 	return session != nullptr
-		? OpenPath(OpenUnifiedCgroup(state, name), session)
+		? OpenPath({OpenUnifiedCgroup(state, name), session})
 		: OpenUnifiedCgroup(state, name);
 }
 
@@ -54,7 +55,7 @@ OpenCgroupKill(const CgroupState &state, FileDescriptor cgroup_fd)
 	UniqueFileDescriptor fd;
 
 	if (state.cgroup_kill)
-		(void)fd.Open(cgroup_fd, "cgroup.kill", O_WRONLY);
+		(void)fd.Open({cgroup_fd, "cgroup.kill"}, O_WRONLY);
 
 	return fd;
 }
@@ -66,15 +67,15 @@ CgroupKill::CgroupKill(EventLoop &event_loop,
 		       CgroupKillHandler &_handler)
 	:handler(_handler),
 	 inotify_event(event_loop, *this),
-	 cgroup_events_fd(OpenReadOnly(cgroup_fd, "cgroup.events")),
-	 cgroup_procs_fd(OpenReadOnly(cgroup_fd, "cgroup.procs")),
+	 cgroup_events_fd(OpenReadOnly({cgroup_fd, "cgroup.events"})),
+	 cgroup_procs_fd(OpenReadOnly({cgroup_fd, "cgroup.procs"})),
 	 cgroup_kill_fd(OpenCgroupKill(state, cgroup_fd)),
 	 send_term_event(event_loop, BIND_THIS_METHOD(OnSendTerm)),
 	 send_kill_event(event_loop, BIND_THIS_METHOD(OnSendKill)),
 	 timeout_event(event_loop, BIND_THIS_METHOD(OnTimeout))
 {
 	// TODO: initialize inotify only if cgroup is populated currently
-	inotify_event.AddModifyWatch(ProcFdPath(OpenPath(cgroup_fd, "cgroup.events")));
+	inotify_event.AddModifyWatch(ProcFdPath(OpenPath({cgroup_fd, "cgroup.events"})));
 
 	send_term_event.Schedule();
 }

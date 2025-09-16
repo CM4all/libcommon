@@ -2,6 +2,7 @@
 // author: Max Kellermann <max.kellermann@gmail.com>
 
 #include "FileWriter.hxx"
+#include "FileAt.hxx"
 #include "io/linux/ProcPath.hxx"
 #include "lib/fmt/RuntimeError.hxx"
 #include "lib/fmt/SystemError.hxx"
@@ -53,7 +54,7 @@ MakeTempFileInDirectory(FileDescriptor directory_fd, mode_t mode)
 	while (true) {
 		auto path = "tmp." + std::to_string(r);
 		UniqueFileDescriptor fd;
-		if (fd.Open(directory_fd, path.c_str(),
+		if (fd.Open({directory_fd, path.c_str()},
 			    O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,
 			    mode))
 			return {std::move(path), std::move(fd)};
@@ -65,19 +66,18 @@ MakeTempFileInDirectory(FileDescriptor directory_fd, mode_t mode)
 	}
 }
 
-FileWriter::FileWriter(FileDescriptor _directory_fd, const char *_path,
-		       mode_t mode)
-	:path(_path), directory_fd(_directory_fd)
+FileWriter::FileWriter(FileAt file, mode_t mode)
+	:path(file.name), directory_fd(file.directory)
 {
 	if (directory_fd != FileDescriptor(AT_FDCWD)) {
-		if (fd.Open(directory_fd, ".", O_TMPFILE|O_WRONLY, mode))
+		if (fd.Open({directory_fd, "."}, O_TMPFILE|O_WRONLY, mode))
 			return;
 
 		auto tmp = MakeTempFileInDirectory(directory_fd, mode);
 		tmp_path = std::move(tmp.first);
 		fd = std::move(tmp.second);
 	} else {
-		const auto directory = GetDirectory(_path);
+		const auto directory = GetDirectory(file.name);
 
 		if (fd.Open(directory.c_str(), O_TMPFILE|O_WRONLY, mode))
 			return;
@@ -89,7 +89,7 @@ FileWriter::FileWriter(FileDescriptor _directory_fd, const char *_path,
 }
 
 FileWriter::FileWriter(const char *_path, mode_t mode)
-	:FileWriter(FileDescriptor(AT_FDCWD), _path, mode) {}
+	:FileWriter({FileDescriptor(AT_FDCWD), _path}, mode) {}
 
 void
 FileWriter::Allocate(off_t size) noexcept
