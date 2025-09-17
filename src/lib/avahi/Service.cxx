@@ -46,7 +46,8 @@ Service::Service(const char *_type, const char *_interface,
 }
 
 Service::Service(const ServiceConfig &config, const char *interface2,
-		 SocketAddress bound_address, bool v6only) noexcept
+		 SocketAddress bound_address, bool v6only,
+		 bool arch) noexcept
 	:Service(config.service.c_str(),
 		 !config.interface.empty() ? config.interface.c_str() : interface2,
 		 bound_address, v6only)
@@ -58,7 +59,8 @@ Service::Service(const ServiceConfig &config, const char *interface2,
 
 	AvahiStringList *t = nullptr;
 
-	t = Avahi::AddArchTxt(t);
+	if (arch)
+		t = Avahi::AddArchTxt(t);
 
 	if (config.weight >= 0)
 		t = avahi_string_list_add_pair(t, "weight",

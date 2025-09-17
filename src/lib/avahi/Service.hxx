@@ -68,9 +68,12 @@ struct Service : IntrusiveListHook<> {
 	 *
 	 * @param v6only true if the listener socket was bound using
 	 * the "v6only" option
+	 *
+	 * @param arch add an "arch" TXT record?
 	 */
 	Service(const ServiceConfig &config, const char *interface2,
-		SocketAddress bound_address, bool v6only) noexcept;
+		SocketAddress bound_address, bool v6only,
+		bool arch=true) noexcept;
 };
 
 } // namespace Avahi
