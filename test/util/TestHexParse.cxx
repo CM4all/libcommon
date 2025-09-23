@@ -196,9 +196,10 @@ TEST(ParseLowerHexFixed, Span)
 
 TEST(ParseLowerHexFixed, StringView)
 {
-	uint8_t value8;
-	uint16_t value16;
-	uint32_t value32;
+	// initialize with bogus value to suppress -Wmaybe-uninitialized
+	uint8_t value8{};
+	uint16_t value16{};
+	uint32_t value32{};
 
 	EXPECT_TRUE(ParseLowerHexFixed(std::string_view("ab"), value8));
 	EXPECT_EQ(value8, 0xab);
