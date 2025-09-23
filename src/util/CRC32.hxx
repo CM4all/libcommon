@@ -19,17 +19,20 @@ private:
 	value_type state = 0xffffffff;
 
 public:
+	[[gnu::hot]]
 	constexpr const auto &Update(std::span<const std::byte> b) noexcept {
 		for (auto i : b)
 			state = Update(state, static_cast<uint8_t>(i));
 		return *this;
 	}
 
+	[[nodiscard]]
 	constexpr value_type Finish() const noexcept {
 		return ~state;
 	}
 
 private:
+	[[nodiscard]] [[gnu::hot]]
 	static constexpr value_type Update(value_type crc,
 					   uint8_t octet) noexcept {
 		for (unsigned i = 0; i < 8; i++) {
@@ -45,6 +48,7 @@ private:
 	}
 };
 
+[[nodiscard]] [[gnu::hot]]
 constexpr auto
 CRC32(std::span<const std::byte> src) noexcept
 {
