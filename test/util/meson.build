@@ -5,6 +5,7 @@ test(
     'TestCRC32.cxx',
     'TestException.cxx',
     'TestHashRing.cxx',
+    'TestHexParse.cxx',
     'TestIntrusiveForwardList.cxx',
     'TestIntrusiveHashSet.cxx',
     'TestIntrusiveHashArrayTrie.cxx',
