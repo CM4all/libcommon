@@ -42,7 +42,7 @@ ParseLowerHexDigit(char ch) noexcept
  * @return the end of the parsed string on success, nullptr on error
  */
 template<std::unsigned_integral T>
-const char *
+constexpr const char *
 ParseLowerHexFixed(const char *input, T &output) noexcept
 {
 	T value{};
@@ -59,7 +59,7 @@ ParseLowerHexFixed(const char *input, T &output) noexcept
 	return input;
 }
 
-inline const char *
+constexpr const char *
 ParseLowerHexFixed(const char *input, std::byte &_output) noexcept
 {
 	auto &output = (uint8_t &)_output;
@@ -73,7 +73,7 @@ ParseLowerHexFixed(const char *input, std::byte &_output) noexcept
  * @return the end of the parsed string on success, nullptr on error
  */
 template<typename T, std::size_t size>
-const char *
+constexpr const char *
 ParseLowerHexFixed(const char *input, std::array<T, size> &output) noexcept
 {
 	for (auto &i : output) {
@@ -86,7 +86,7 @@ ParseLowerHexFixed(const char *input, std::array<T, size> &output) noexcept
 }
 
 template<typename T>
-bool
+constexpr bool
 ParseLowerHexFixed(std::string_view input, T &output) noexcept
 {
 	return input.size() == sizeof(output) * 2 &&
