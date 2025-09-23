@@ -9,6 +9,7 @@
 #include <array>
 #include <concepts>
 #include <cstdint>
+#include <span>
 #include <string_view>
 
 constexpr int
@@ -68,13 +69,13 @@ ParseLowerHexFixed(const char *input, std::byte &_output) noexcept
 
 /**
  * Parse the hex digits of a fixed-length string to the given integer
- * array.
+ * span.
  *
  * @return the end of the parsed string on success, nullptr on error
  */
 template<typename T, std::size_t size>
 constexpr const char *
-ParseLowerHexFixed(const char *input, std::array<T, size> &output) noexcept
+ParseLowerHexFixed(const char *input, std::span<T, size> output) noexcept
 {
 	for (auto &i : output) {
 		input = ParseLowerHexFixed(input, i);
@@ -83,6 +84,19 @@ ParseLowerHexFixed(const char *input, std::array<T, size> &output) noexcept
 	}
 
 	return input;
+}
+
+/**
+ * Parse the hex digits of a fixed-length string to the given integer
+ * array.
+ *
+ * @return the end of the parsed string on success, nullptr on error
+ */
+template<typename T, std::size_t size>
+constexpr const char *
+ParseLowerHexFixed(const char *input, std::array<T, size> &output) noexcept
+{
+	return ParseLowerHexFixed(input, std::span{output});
 }
 
 template<typename T>

@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cstdint>
+#include <span>
 
 TEST(ParseHexDigit, Valid)
 {
@@ -147,6 +148,31 @@ TEST(ParseLowerHexFixed, Byte)
 TEST(ParseLowerHexFixed, Array)
 {
 	std::array<uint8_t, 3> value;
+
+	EXPECT_NE(ParseLowerHexFixed("00ffaa", value), nullptr);
+	EXPECT_EQ(value[0], 0x00);
+	EXPECT_EQ(value[1], 0xff);
+	EXPECT_EQ(value[2], 0xaa);
+
+	EXPECT_NE(ParseLowerHexFixed("123456", value), nullptr);
+	EXPECT_EQ(value[0], 0x12);
+	EXPECT_EQ(value[1], 0x34);
+	EXPECT_EQ(value[2], 0x56);
+
+	EXPECT_EQ(ParseLowerHexFixed("12345", value), nullptr);
+	EXPECT_EQ(ParseLowerHexFixed("12345G", value), nullptr);
+
+	const char *too_long = "2345678";
+	EXPECT_EQ(ParseLowerHexFixed(too_long, value), too_long + 6);
+	EXPECT_EQ(value[0], 0x23);
+	EXPECT_EQ(value[1], 0x45);
+	EXPECT_EQ(value[2], 0x67);
+}
+
+TEST(ParseLowerHexFixed, Span)
+{
+	std::array<uint8_t, 3> array;
+	std::span<uint8_t, 3> value{array};
 
 	EXPECT_NE(ParseLowerHexFixed("00ffaa", value), nullptr);
 	EXPECT_EQ(value[0], 0x00);
