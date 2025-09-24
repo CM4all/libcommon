@@ -32,6 +32,23 @@
 
 static sigset_t init_signal_mask;
 
+static void
+SetInitProcessName(const char *name) noexcept
+{
+	if (name != nullptr) {
+		char buffer[16];
+		size_t length = strlen(name);
+
+		const char *prefix = length > 10
+			? "i" : "init";
+
+		snprintf(buffer, sizeof(buffer), "%s-%s",
+			 prefix, name);
+		SetProcessName(buffer);
+	} else
+		SetProcessName("init");
+}
+
 pid_t
 SpawnInitFork(const char *name)
 {
@@ -50,18 +67,7 @@ SpawnInitFork(const char *name)
 	if (pid == 0) {
 		sigprocmask(SIG_UNBLOCK, &init_signal_mask, nullptr);
 	} else {
-		if (name != nullptr) {
-			char buffer[16];
-			size_t length = strlen(name);
-
-			const char *prefix = length > 10
-				? "i" : "init";
-
-			snprintf(buffer, sizeof(buffer), "%s-%s",
-				 prefix, name);
-			SetProcessName(buffer);
-		} else
-			SetProcessName("init");
+		SetInitProcessName(name);
 
 		sys_close_range(3, UINT_MAX, 0);
 	}
