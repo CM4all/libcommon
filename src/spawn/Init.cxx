@@ -195,7 +195,7 @@ SpawnInit(pid_t child_pid, bool remain)
 }
 
 pid_t
-UnshareForkSpawnInit()
+UnshareForkSpawnInit(const char *name)
 {
 	static constexpr struct clone_args ca{
 		.flags = CLONE_CLEAR_SIGHAND|CLONE_NEWPID,
@@ -217,7 +217,7 @@ UnshareForkSpawnInit()
 
 	sigprocmask(SIG_BLOCK, &init_signal_mask, nullptr);
 
-	SetProcessName("init");
+	SetInitProcessName(name);
 
 	sys_close_range(3, UINT_MAX, 0);
 

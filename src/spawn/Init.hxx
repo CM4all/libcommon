@@ -40,8 +40,9 @@ SpawnInit(pid_t child_pid, bool remain);
  *
  * Throws on error.
  *
+ * @param name a name for this init process; it appears on the its name
  * @return pid the pid of the new init process (as seen by the
  * caller's PID namespace)
  */
 pid_t
-UnshareForkSpawnInit();
+UnshareForkSpawnInit(const char *name);
