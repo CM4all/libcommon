@@ -94,17 +94,17 @@ public:
 		if (empty())
 			return sizeof(*list);
 
-		const auto first = &*list->begin();
-		const auto last = &*list->last();
+		const auto &first = list->front();
+		auto &last = list->back();
 
-		const auto after_last = reinterpret_cast<const std::byte *>(AfterLast(&*last));
+		const auto after_last = reinterpret_cast<const std::byte *>(AfterLast(&last));
 
-		if (first <= last)
-			return after_last - reinterpret_cast<const std::byte *>(first);
+		if (&first <= &last)
+			return after_last - reinterpret_cast<const std::byte *>(&first);
 
 		const auto buffer_end = reinterpret_cast<const std::byte *>(EndOfBuffer());
 		return (after_last - reinterpret_cast<const std::byte *>(list))
-			+ (buffer_end - reinterpret_cast<const std::byte *>(first));
+			+ (buffer_end - reinterpret_cast<const std::byte *>(&first));
 	}
 
 	void clear() noexcept {
@@ -276,17 +276,17 @@ private:
 		if (empty())
 			return FirstSlot();
 
-		auto first = list->begin();
-		auto last = list->last();
-		void *after_last = AfterLast(&*last);
+		auto *first = &list->front();
+		auto &last = list->back();
+		void *after_last = AfterLast(&last);
 		void *const end_of_buffer = EndOfBuffer();
 		assert(after_last <= end_of_buffer);
 
-		while (&*first > &*last) {
+		while (first > &last) {
 			/* wraparound - free space is somewhere in the
 			   middle */
 
-			if (BytesDelta(after_last, &*first) >= item_size)
+			if (BytesDelta(after_last, first) >= item_size)
 				/* there's enough room between last
 				   and first item */
 				return after_last;
@@ -297,7 +297,7 @@ private:
 			if (empty())
 				return FirstSlot();
 
-			first = list->begin();
+			first = &list->front();
 		}
 
 		/* no wraparound (anymore) */
