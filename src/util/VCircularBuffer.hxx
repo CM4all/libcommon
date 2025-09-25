@@ -97,13 +97,14 @@ public:
 		const auto first = &*list->begin();
 		const auto last = &*list->last();
 
-		const auto after_last = (const std::byte *)AfterLast(&*last);
+		const auto after_last = reinterpret_cast<const std::byte *>(AfterLast(&*last));
 
 		if (first <= last)
-			return after_last - (const std::byte *)first;
+			return after_last - reinterpret_cast<const std::byte *>(first);
 
-		const auto buffer_end = (const std::byte *)EndOfBuffer();
-		return (after_last - (const std::byte *)list) + (buffer_end - (const std::byte *)first);
+		const auto buffer_end = reinterpret_cast<const std::byte *>(EndOfBuffer());
+		return (after_last - reinterpret_cast<const std::byte *>(list))
+			+ (buffer_end - reinterpret_cast<const std::byte *>(first));
 	}
 
 	void clear() noexcept {
@@ -207,7 +208,7 @@ private:
 	}
 
 	static constexpr void *Align(void *p, size_t align) noexcept {
-		return Align((std::byte *)p, align);
+		return Align(reinterpret_cast<std::byte *>(p), align);
 	}
 
 	static constexpr void *Align(void *p) noexcept {
