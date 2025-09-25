@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Cast.hxx"
-#include "IntrusiveForwardList.hxx"
+#include "IntrusiveList.hxx"
 #include "MemberIteratorAdapter.hxx"
 
 #include <cassert>
@@ -30,7 +30,7 @@ public:
 
 private:
 	struct Item {
-		IntrusiveForwardListHook list_hook;
+		IntrusiveListHook<> list_hook;
 
 		T value;
 
@@ -53,10 +53,10 @@ private:
 		};
 	};
 
-	using List = IntrusiveForwardList<
+	using List = IntrusiveList<
 		Item,
-		IntrusiveForwardListMemberHookTraits<&Item::list_hook>,
-		IntrusiveForwardListOptions{.constant_time_size = true, .cache_last = true}>;
+		IntrusiveListMemberHookTraits<&Item::list_hook>,
+		IntrusiveListOptions{.constant_time_size = true}>;
 
 	List *const list;
 	const size_t buffer_size;
