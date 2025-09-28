@@ -23,7 +23,7 @@ SocketWrapper::SocketEventCallback(unsigned events) noexcept
 		events &= socket_event.GetScheduledFlags();
 	}
 
-	if (events & SocketEvent::HANGUP) {
+	if (events & SocketEvent::ANY_HANGUP) {
 		if (!handler.OnSocketHangup())
 			return;
 
