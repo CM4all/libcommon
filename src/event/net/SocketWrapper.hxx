@@ -122,6 +122,12 @@ public:
 		socket_event.ScheduleRead();
 	}
 
+	void ScheduleReadAndAnyHangup() noexcept {
+		assert(IsValid());
+
+		socket_event.Schedule(SocketEvent::READ|SocketEvent::ANY_HANGUP);
+	}
+
 	void UnscheduleRead() noexcept {
 		socket_event.CancelRead();
 	}

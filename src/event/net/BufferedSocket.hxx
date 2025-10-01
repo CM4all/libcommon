@@ -681,6 +681,15 @@ public:
 
 	void ScheduleRead() noexcept;
 
+	void ScheduleReadAndAnyHangup() noexcept {
+		assert(!ended);
+		assert(!destroyed);
+		assert(!HasUring());
+		assert(!in_data_handler);
+
+		base.ScheduleReadAndAnyHangup();
+	}
+
 	void UnscheduleRead() noexcept {
 		base.UnscheduleRead();
 		defer_read.Cancel();
