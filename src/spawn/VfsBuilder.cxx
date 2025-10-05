@@ -49,7 +49,7 @@ VfsBuilder::AddWritableRoot(const char *path)
 	assert(items.empty());
 
 	items.emplace_back(std::string_view{});
-	items.back().fd = OpenPath(path, O_DIRECTORY);
+	items.back().fd = OpenDirectoryPath({FileDescriptor::Undefined(), path});
 }
 
 struct VfsBuilder::FindWritableResult {
@@ -96,7 +96,7 @@ MakeDirs(FileDescriptor fd, std::string_view suffix, mode_t mode)
 			continue;
 
 		if (!name2.empty())
-			fd = ufd = OpenPath({fd, name2.c_str()}, O_DIRECTORY);
+			fd = ufd = OpenDirectoryPath({fd, name2.c_str()});
 
 		name2 = name;
 
@@ -140,7 +140,7 @@ VfsBuilder::MakeWritable()
 	auto &item = items.back();
 	assert(!item.fd.IsDefined());
 
-	item.fd = OpenPath(item.path.c_str(), O_DIRECTORY);
+	item.fd = OpenDirectoryPath({FileDescriptor::Undefined(), item.path.c_str()});
 }
 
 void

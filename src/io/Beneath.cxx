@@ -73,3 +73,24 @@ OpenPathBeneath(FileAt file)
 
 	return Open(file, path_beneath);
 }
+
+static constexpr struct open_how directory_path_beneath{
+	.flags = O_DIRECTORY|O_PATH|O_CLOEXEC,
+	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
+};
+
+UniqueFileDescriptor
+TryOpenDirectoryPathBeneath(FileAt file) noexcept
+{
+	assert(file.directory.IsDefined());
+
+	return TryOpen(file, directory_path_beneath);
+}
+
+UniqueFileDescriptor
+OpenDirectoryPathBeneath(FileAt file)
+{
+	assert(file.directory.IsDefined());
+
+	return Open(file, directory_path_beneath);
+}
