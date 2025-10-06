@@ -57,6 +57,8 @@ public:
 		Cancel();
 	}
 
+	EventLoop &GetEventLoop() const noexcept;
+
 	bool IsScheduled() const noexcept {
 		return shared_connection_query_siblings.is_linked();
 	}
@@ -124,6 +126,12 @@ private:
 	void OnNotify(const char *name) override;
 	void OnError(std::exception_ptr e) noexcept override;
 };
+
+inline EventLoop &
+SharedConnectionQuery::GetEventLoop() const noexcept
+{
+	return shared_connection.GetEventLoop();
+}
 
 inline void
 SharedConnectionQuery::Cancel() noexcept
