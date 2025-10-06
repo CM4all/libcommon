@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 
 #include <cassert>
+#include <memory>
 
 struct Completion {
 	std::exception_ptr error;
@@ -250,4 +251,42 @@ TEST(InvokeTask, PauseEager)
 	ASSERT_FALSE(c.error);
 	ASSERT_EQ(invoke_i, 2);
 	ASSERT_EQ(task_i, 2);
+}
+
+struct SelfDeletingCompletion {
+	std::exception_ptr error;
+	bool done = false;
+	std::unique_ptr<Co::InvokeTask> invoke;
+
+	void Callback(std::exception_ptr _error) noexcept {
+		assert(!done);
+		assert(!error);
+
+		error = std::move(_error);
+		done = true;
+
+		invoke.reset();
+	}
+
+	void Start(std::unique_ptr<Co::InvokeTask> _invoke) noexcept {
+		invoke = std::move(_invoke);
+		assert(*invoke);
+		invoke->Start(BIND_THIS_METHOD(Callback));
+	}
+};
+
+TEST(InvokeTask, DeleteInCallback)
+{
+	int i = 0;
+
+	auto invoke = std::make_unique<Co::InvokeTask>(IncInvokeTask(i));
+	ASSERT_TRUE(*invoke);
+	ASSERT_EQ(i, 0);
+
+	SelfDeletingCompletion c;
+	c.Start(std::move(invoke));
+
+	ASSERT_TRUE(c.done);
+	ASSERT_FALSE(c.error);
+	ASSERT_EQ(i, 1);
 }
