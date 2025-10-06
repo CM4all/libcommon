@@ -250,8 +250,7 @@ public:
 
 	template<typename K>
 	Task Get(K &&key) {
-		auto *cached = GetIfCached(key);
-		if (cached != nullptr)
+		if (auto *cached = GetIfCached(key))
 			return Task(*cached);
 
 		for (auto &i : requests)
