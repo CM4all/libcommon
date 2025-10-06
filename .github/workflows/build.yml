@@ -28,6 +28,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
+            postgresql postgresql-client \
             meson \
             ccache \
             libfmt-dev \
@@ -74,5 +75,12 @@ jobs:
       - name: Build
         run: ninja -C output -v
 
+      - name: Set up PostgreSQL (for unit tests)
+        run: |
+          sudo systemctl start postgresql.service
+          pg_isready
+          sudo -u postgres createuser -w $USER
+          sudo -u postgres createdb -O $USER test
+
       - name: Unit Tests
-        run: meson test -C output --print-errorlogs
+        run: PG_CONNINFO=dbname=test meson test -C output --print-errorlogs
