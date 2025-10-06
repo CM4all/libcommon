@@ -28,7 +28,7 @@ template<typename Factory, typename Key, typename Data,
 	 std::size_t table_size,
 	 typename Hash=std::hash<Key>,
 	 typename Equal=std::equal_to<Key>>
-class Cache : Factory {
+class Cache {
 	template<typename F, typename=void>
 	struct IsCacheable {
 		constexpr bool operator()(const F &, const Data &) noexcept {
@@ -42,6 +42,9 @@ class Cache : Factory {
 			return factory.IsCacheable(data);
 		}
 	};
+
+	[[no_unique_address]]
+	Factory factory;
 
 	using Cache_ = StaticCache<Key, Data, max_size, table_size, Hash, Equal>;
 	Cache_ cache;
@@ -232,7 +235,7 @@ public:
 
 	template<typename... P>
 	explicit Cache(P&&... _params) noexcept
-		:Factory(std::forward<P>(_params)...) {}
+		:factory(std::forward<P>(_params)...) {}
 
 	decltype(auto) hash_function() const noexcept {
 		return cache.hash_function();
@@ -260,7 +263,7 @@ public:
 		auto *request = new Request(*this, std::forward<K>(key));
 		requests.push_back(*request);
 		Task task(*request);
-		request->Start(*this);
+		request->Start(factory);
 		return task;
 	}
 
