@@ -102,6 +102,17 @@ SharedConnection::OnIdle()
 {
 	assert(connection.IsDefined());
 	assert(connection.IsIdle());
+
+	if (submitted) {
+		assert(!queries.empty());
+		submitted = false;
+		queries.pop_front();
+	}
+
+	if (!queries.empty()) {
+		defer_submit_next.Cancel();
+		SubmitNext();
+	}
 }
 
 void
