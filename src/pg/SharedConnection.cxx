@@ -44,7 +44,7 @@ SharedConnection::CancelQuery(SharedConnectionQuery &query) noexcept
 
 		/* submit the next query (outside of this caller
 		   chain, using the DeferEvent) */
-		if (!queries.empty())
+		if (!queries.empty() && connection.IsIdle())
 			defer_submit_next.Schedule();
 	}
 }
