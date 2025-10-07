@@ -21,7 +21,7 @@ CalcSHA1(std::span<const std::byte> src)
 }
 
 SHA1Digest
-CalcSHA1(X509_NAME &src)
+CalcSHA1(const X509_NAME &src)
 {
 	const SslBuffer buffer(src);
 	return CalcSHA1(buffer.get());

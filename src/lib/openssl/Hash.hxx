@@ -24,6 +24,6 @@ CalcSHA1(std::span<const std::byte> src);
 
 [[gnu::pure]]
 SHA1Digest
-CalcSHA1(X509_NAME &src);
+CalcSHA1(const X509_NAME &src);
 
 #endif
