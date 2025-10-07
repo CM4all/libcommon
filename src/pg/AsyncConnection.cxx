@@ -113,6 +113,8 @@ try {
 			} catch (...) {
 				std::throw_with_nested(std::runtime_error("Failed to set schema"));
 			}
+
+			delayed_reconnect = false;
 		}
 
 		state = State::READY;
@@ -162,6 +164,8 @@ AsyncConnection::PollResult()
 		auto result = ReceiveResult();
 		const bool had_result = result.IsDefined();
 		if (result_handler != nullptr) {
+			delayed_reconnect = false;
+
 			if (result.IsDefined())
 				result_handler->OnResult(std::move(result));
 			else {
@@ -273,8 +277,16 @@ AsyncConnection::ScheduleReconnect() noexcept
 {
 	assert(state == State::DISCONNECTED);
 
-	/* attempt to reconnect every 10 seconds */
-	reconnect_timer.Schedule(std::chrono::seconds(10));
+	/* the first reconnect is immediately, but if we reconnect
+	   repeatedly (without successful queries in between), delay
+	   each reconnect attempt by 10 seconds */
+	Event::Duration t{};
+	if (delayed_reconnect)
+		t = std::chrono::seconds{10};
+	else
+		delayed_reconnect = true;
+
+	reconnect_timer.Schedule(t);
 }
 
 inline void

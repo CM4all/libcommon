@@ -152,11 +152,19 @@ class AsyncConnection : public Connection {
 	/**
 	 * A timer which reconnects during State::DISCONNECTED.
 	 */
-	CoarseTimerEvent reconnect_timer;
+	CoarseTimerEvent reconnect_timer ;
 
 	AsyncResultHandler *result_handler = nullptr;
 
 	bool auto_reconnect = true;
+
+	/**
+	 * This is true if auto-reconnect shall be delayed for some
+	 * time.  This is enabled automatically if reconnecting twice
+	 * in a row, in order to reduce pressure.  It will be disabled
+	 * each time the connection has done a successful query.
+	 */
+	bool delayed_reconnect = false;
 
 	bool cancelling = false;
 
