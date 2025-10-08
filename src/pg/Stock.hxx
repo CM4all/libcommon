@@ -25,12 +25,7 @@ class Stock final : StockClass {
 public:
 	Stock(EventLoop &event_loop,
 	      const char *_conninfo, const char *_schema,
-	      unsigned limit, unsigned max_idle) noexcept
-		:stock(event_loop, *this, "Pg::AsyncConnection",
-		       limit, max_idle, std::chrono::minutes(5)),
-		 conninfo(_conninfo), schema(_schema)
-	{
-	}
+	      unsigned limit, unsigned max_idle) noexcept;
 
 	operator ::Stock &() noexcept {
 		return stock;

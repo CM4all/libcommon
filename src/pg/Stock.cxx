@@ -125,6 +125,15 @@ private:
 	}
 };
 
+Stock::Stock(EventLoop &event_loop,
+	     const char *_conninfo, const char *_schema,
+	     unsigned limit, unsigned max_idle) noexcept
+	:stock(event_loop, *this, "Pg::AsyncConnection",
+	       limit, max_idle, std::chrono::minutes(5)),
+	 conninfo(_conninfo), schema(_schema)
+{
+}
+
 void
 Stock::Create(CreateStockItem c, StockRequest,
 	      StockGetHandler &handler, CancellablePointer &cancel_ptr)
