@@ -642,18 +642,7 @@ MultiStock::AddStats(StockStats &data) const noexcept
 std::size_t
 MultiStock::DiscardUnused() noexcept
 {
-	std::size_t n = 0;
-
-	map.remove_and_dispose_if([&n](auto &i){
-		/* TODO this const_cast is an ugly kludge because the
-		   predicate gets only a const reference */
-		auto &j = const_cast<MapItem &>(i);
-		n += j.DiscardUnused();
-
-		return i.IsEmpty();
-	}, DeleteDisposer{});
-
-	return n;
+	return DiscardOldestIdle(SIZE_MAX);
 }
 
 std::size_t
