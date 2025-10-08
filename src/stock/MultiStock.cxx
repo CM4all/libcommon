@@ -298,14 +298,18 @@ struct MultiStock::MapItem::Waiting final
 	StockGetHandler &handler;
 	CancellablePointer &caller_cancel_ptr;
 
+	const bool is_create;
+
 	Waiting(MapItem &_parent, StockRequest &&_request,
 		Event::TimePoint _start_time,
+		bool _is_create,
 		StockGetHandler &_handler,
 		CancellablePointer &_cancel_ptr) noexcept
 		:parent(_parent), request(std::move(_request)),
 		 start_time(_start_time),
 		 handler(_handler),
-		 caller_cancel_ptr(_cancel_ptr)
+		 caller_cancel_ptr(_cancel_ptr),
+		 is_create(_is_create)
 	{
 		caller_cancel_ptr = *this;
 	}
@@ -403,6 +407,7 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 
 	auto *w = new Waiting(*this, std::move(request),
 			      GetEventLoop().SteadyNow(),
+			      create,
 			      get_handler, cancel_ptr);
 	waiting.push_back(*w);
 
@@ -427,6 +432,8 @@ MultiStock::MapItem::RemoveItem(OuterItem &item) noexcept
 inline void
 MultiStock::MapItem::WaitingEnded(Waiting &w) noexcept
 {
+	assert(!w.is_create);
+
 	const auto wait_duration = GetEventLoop().SteadyNow() - w.start_time;
 	counters.total_wait_duration += wait_duration;
 }
@@ -434,9 +441,11 @@ MultiStock::MapItem::WaitingEnded(Waiting &w) noexcept
 inline void
 MultiStock::MapItem::RemoveWaiting(Waiting &w) noexcept
 {
-	++counters.canceled_waits;
+	if (!w.is_create) {
+		++counters.canceled_waits;
+		WaitingEnded(w);
+	}
 
-	WaitingEnded(w);
 	waiting.erase_and_dispose(waiting.iterator_to(w), DeleteDisposer{});
 
 	if (!waiting.empty())
@@ -501,8 +510,11 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		DeleteEmptyItems(&item);
 
 	if (item.GetLease(inner_class, get_handler)) {
-		++counters.successful_waits;
-		WaitingEnded(w);
+		if (!w.is_create) {
+			++counters.successful_waits;
+			WaitingEnded(w);
+		}
+
 		delete &w;
 	} else {
 		/* currently, no lease is available (probably because
@@ -566,8 +578,11 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 	retry_event.Cancel();
 
 	waiting.clear_and_dispose([this, &error](auto *w){
-		++counters.failed_waits;
-		WaitingEnded(*w);
+		if (!w->is_create) {
+			++counters.failed_waits;
+			WaitingEnded(*w);
+		}
+
 		w->handler.OnStockItemError(error);
 		delete w;
 	});
