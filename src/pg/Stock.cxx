@@ -5,6 +5,7 @@
 #include "Stock.hxx"
 #include "AsyncConnection.hxx"
 #include "stock/Item.hxx"
+#include "stock/Options.hxx"
 #include "util/Cancellable.hxx"
 
 #include <cassert>
@@ -127,9 +128,8 @@ private:
 
 Stock::Stock(EventLoop &event_loop,
 	     const char *_conninfo, const char *_schema,
-	     unsigned limit, unsigned max_idle) noexcept
-	:stock(event_loop, *this, "Pg::AsyncConnection",
-	       limit, max_idle, std::chrono::minutes(5)),
+	     StockOptions options) noexcept
+	:stock(event_loop, *this, "Pg::AsyncConnection", options),
 	 conninfo(_conninfo), schema(_schema)
 {
 }

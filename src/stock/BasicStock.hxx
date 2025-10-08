@@ -18,6 +18,7 @@
 #include <string>
 #include <string_view>
 
+struct BasicStockOptions;
 class CancellablePointer;
 class BasicStock;
 class StockClass;
@@ -83,8 +84,7 @@ public:
 	 * the #MapStock class
 	 */
 	BasicStock(EventLoop &event_loop, StockClass &cls,
-		   std::string_view name, std::size_t max_idle,
-		   Event::Duration _clear_interval) noexcept;
+		   std::string_view name, BasicStockOptions options) noexcept;
 
 	~BasicStock() noexcept;
 

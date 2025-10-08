@@ -2,6 +2,7 @@
 #include "net/FormatAddress.hxx"
 #include "pg/Stock.hxx"
 #include "pg/CoStockQuery.hxx"
+#include "stock/Options.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
 #include "util/PrintException.hxx"
@@ -22,7 +23,7 @@ struct Instance final {
 
 	Instance(const char *conninfo, const char *schema)
 		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown)),
-		 db(event_loop, conninfo, schema, 4, 1)
+		 db(event_loop, conninfo, schema, {.limit = 4, .max_idle = 1, .clear_interval = std::chrono::minutes{5}})
 	{
 		shutdown_listener.Enable();
 	}

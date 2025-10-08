@@ -5,6 +5,7 @@
 #include "Stock.hxx"
 #include "Class.hxx"
 #include "GetHandler.hxx"
+#include "Options.hxx"
 #include "util/Cancellable.hxx"
 
 #include <cassert>
@@ -137,12 +138,9 @@ Stock::ScheduleRetryWaiting() noexcept
  */
 
 Stock::Stock(EventLoop &event_loop, StockClass &_cls,
-	     std::string_view _name, std::size_t _limit, std::size_t _max_idle,
-	     Event::Duration _clear_interval) noexcept
-	:BasicStock(event_loop, _cls, _name,
-		    _max_idle,
-		    _clear_interval),
-	 limit(_limit),
+	     std::string_view _name, StockOptions options) noexcept
+	:BasicStock(event_loop, _cls, _name, options),
+	 limit(options.limit),
 	 retry_event(event_loop, BIND_THIS_METHOD(RetryWaiting))
 {
 }

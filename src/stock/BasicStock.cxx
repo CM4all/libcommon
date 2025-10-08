@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "BasicStock.hxx"
+#include "Options.hxx"
 #include "Class.hxx"
 #include "GetHandler.hxx"
 #include "util/Cancellable.hxx"
@@ -159,12 +160,11 @@ BasicStock::ClearEventCallback() noexcept
  */
 
 BasicStock::BasicStock(EventLoop &event_loop, StockClass &_cls,
-		       std::string_view _name, std::size_t _max_idle,
-		       Event::Duration _clear_interval) noexcept
+		       std::string_view _name, BasicStockOptions options) noexcept
 	:cls(_cls),
 	 name(_name),
-	 max_idle(_max_idle),
-	 clear_interval(_clear_interval),
+	 max_idle(options.max_idle),
+	 clear_interval(options.clear_interval),
 	 cleanup_event(event_loop, BIND_THIS_METHOD(CleanupEventCallback)),
 	 clear_event(event_loop, BIND_THIS_METHOD(ClearEventCallback))
 {

@@ -25,7 +25,7 @@ class Stock final : StockClass {
 public:
 	Stock(EventLoop &event_loop,
 	      const char *_conninfo, const char *_schema,
-	      unsigned limit, unsigned max_idle) noexcept;
+	      StockOptions options) noexcept;
 
 	operator ::Stock &() noexcept {
 		return stock;

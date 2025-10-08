@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Key.hxx"
+#include "Options.hxx"
 #include "Stock.hxx"
 #include "event/Chrono.hxx"
 #include "event/DeferEvent.hxx"
@@ -61,23 +62,15 @@ class StockMap {
 	StockClass &cls;
 
 	/**
-	 * The maximum number of items in each stock.
+	 * Options for each stock.
 	 */
-	const std::size_t limit;
-
-	/**
-	 * The maximum number of permanent idle items in each stock.
-	 */
-	const std::size_t max_idle;
-
-	const Event::Duration clear_interval;
+	const StockOptions options;
 
 	Map map;
 
 public:
 	StockMap(EventLoop &_event_loop, StockClass &_cls,
-		 std::size_t _limit, std::size_t _max_idle,
-		 Event::Duration _clear_interval) noexcept;
+		 StockOptions _options) noexcept;
 
 	~StockMap() noexcept;
 
@@ -162,6 +155,6 @@ protected:
 	 * per-#Stock clear_interval.
 	 */
 	virtual Event::Duration GetClearInterval([[maybe_unused]] const void *request) const noexcept {
-		return clear_interval;
+		return options.clear_interval;
 	}
 };

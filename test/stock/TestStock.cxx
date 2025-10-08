@@ -6,6 +6,7 @@
 #include "stock/Class.hxx"
 #include "stock/GetHandler.hxx"
 #include "stock/Item.hxx"
+#include "stock/Options.hxx"
 #include "event/Loop.hxx"
 #include "util/Cancellable.hxx"
 #include "util/PrintException.hxx"
@@ -124,8 +125,13 @@ TEST(Stock, Basic)
 
 	Instance instance;
 	MyStockClass cls;
-	Stock stock(instance.event_loop, cls, "test", 3, 8,
-		    Event::Duration::zero());
+	Stock stock{
+		instance.event_loop, cls, "test",
+		{
+			.limit = 3,
+			.max_idle = 8,
+		},
+	};
 
 	MyStockGetHandler handler;
 
@@ -335,8 +341,13 @@ TEST(Stock, Blocking)
 		}
 	} cls;
 
-	Stock stock(instance.event_loop, cls, "test", 1, 8,
-		    Event::Duration::zero());
+	Stock stock{
+		instance.event_loop, cls, "test",
+		{
+			.limit = 1,
+			.max_idle = 8,
+		},
+	};
 
 	MyStockGetHandler handler;
 	CancellablePointer cancel_ptr;
@@ -435,8 +446,13 @@ TEST(Stock, ContinueOnCancel)
 		}
 	} cls;
 
-	Stock stock(instance.event_loop, cls, "test", 1, 8,
-		    Event::Duration::zero());
+	Stock stock{
+		instance.event_loop, cls, "test",
+		{
+			.limit = 1,
+			.max_idle = 8,
+		},
+	};
 
 	MyStockGetHandler handler, handler2;
 	CancellablePointer cancel_ptr, cancel_ptr2;

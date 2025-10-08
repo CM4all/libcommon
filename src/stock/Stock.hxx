@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 
+struct StockOptions;
 class CancellablePointer;
 class Stock;
 class StockClass;
@@ -51,8 +52,7 @@ public:
 	 * the #MapStock class
 	 */
 	Stock(EventLoop &event_loop, StockClass &cls,
-	      std::string_view name, std::size_t limit, std::size_t max_idle,
-	      Event::Duration _clear_interval) noexcept;
+	      std::string_view name, StockOptions options) noexcept;
 
 	~Stock() noexcept;
 

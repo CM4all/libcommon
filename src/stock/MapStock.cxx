@@ -13,11 +13,9 @@ StockMap::Item::OnDeferredEmpty() noexcept
 }
 
 StockMap::StockMap(EventLoop &_event_loop, StockClass &_cls,
-		   std::size_t _limit, std::size_t _max_idle,
-		   Event::Duration _clear_interval) noexcept
+		   StockOptions _options) noexcept
 	:event_loop(_event_loop), cls(_cls),
-	 limit(_limit), max_idle(_max_idle),
-	 clear_interval(_clear_interval)
+	 options(_options)
 {
 }
 
@@ -38,11 +36,15 @@ StockMap::GetStock(StockKey key, const void *request) noexcept
 {
 	auto [position, inserted] = map.insert_check(key);
 	if (inserted) {
+		const StockOptions item_options{
+			.limit = GetLimit(request, options.limit),
+			.max_idle = options.max_idle,
+			.clear_interval = GetClearInterval(request),
+		};
+
 		auto *item = new Item(*this, key.hash, event_loop, cls,
 				      key.value,
-				      GetLimit(request, limit),
-				      max_idle,
-				      GetClearInterval(request));
+				      item_options);
 		map.insert_commit(position, *item);
 		return *item;
 	} else
