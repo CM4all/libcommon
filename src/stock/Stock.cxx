@@ -65,8 +65,8 @@ Stock::Waiting::Destroy() noexcept
 inline void
 Stock::WaitingEnded(Waiting &w) noexcept
 {
-	const auto wait = GetEventLoop().SteadyNow() - w.start_time;
-	counters.total_wait += wait;
+	const auto wait_duration = GetEventLoop().SteadyNow() - w.start_time;
+	counters.total_wait_duration += wait_duration;
 }
 
 inline void
