@@ -9,6 +9,7 @@
 #include "GetHandler.hxx"
 #include "AbstractStock.hxx"
 #include "Item.hxx"
+#include "Options.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
 #include "util/Cancellable.hxx"
@@ -323,10 +324,7 @@ class MultiStock {
 
 	StockClass &outer_class;
 
-	/**
-	 * The maximum number of items in each stock.
-	 */
-	const std::size_t limit;
+	const StockOptions options;
 
 	MultiStockClass &inner_class;
 
@@ -350,7 +348,7 @@ class MultiStock {
 
 public:
 	MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
-		   std::size_t _limit,
+		   StockOptions _options,
 		   MultiStockClass &_inner_class) noexcept;
 	~MultiStock() noexcept;
 

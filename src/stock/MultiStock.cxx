@@ -598,10 +598,10 @@ MultiStock::MapItem::OnLeaseReleased(OuterItem &item) noexcept
 }
 
 MultiStock::MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
-		       std::size_t _limit,
+		       StockOptions _options,
 		       MultiStockClass &_inner_class) noexcept
 	:event_loop(_event_loop), outer_class(_outer_cls),
-	 limit(_limit),
+	 options(_options),
 	 inner_class(_inner_class)
 {
 }
@@ -657,7 +657,7 @@ MultiStock::MakeMapItem(StockKey key, const void *request) noexcept
 	auto [i, inserted] = map.insert_check(key);
 	if (inserted) {
 		auto *item = new MapItem(GetEventLoop(), outer_class, key,
-					 inner_class.GetOptions(request, {.limit = limit, .clear_interval = std::chrono::minutes{10}}),
+					 inner_class.GetOptions(request, options),
 					 inner_class);
 		map.insert_commit(i, *item);
 		chronological_list.push_back(*item);

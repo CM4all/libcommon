@@ -111,7 +111,8 @@ struct Instance {
 	MultiStock multi_stock;
 
 	explicit Instance(unsigned limit=1) noexcept
-		:multi_stock(event_loop, stock_class, limit,
+		:multi_stock(event_loop, stock_class,
+			     {.limit = limit, .clear_interval = std::chrono::minutes{10}},
 			     stock_class) {}
 
 	void RunSome() noexcept {
