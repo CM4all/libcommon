@@ -265,6 +265,8 @@ BasicStock::GetCreate(StockRequest request,
 		      StockGetHandler &get_handler,
 		      CancellablePointer &cancel_ptr) noexcept
 {
+	++counters.total_creates;
+
 	auto *c = new Create(*this,
 			     cls.ShouldContinueOnCancel(request.get()),
 			     get_handler, cancel_ptr);
@@ -281,6 +283,8 @@ void
 BasicStock::ItemCreateSuccess(StockGetHandler &_handler,
 			      StockItem &item) noexcept
 {
+	++counters.successful_creates;
+
 	auto &c = static_cast<Create &>(_handler);
 	auto *get_handler = c.handler;
 
@@ -297,6 +301,8 @@ void
 BasicStock::ItemCreateError(StockGetHandler &_handler,
 			    std::exception_ptr ep) noexcept
 {
+	++counters.failed_creates;
+
 	auto &c = static_cast<Create &>(_handler);
 	auto *get_handler = c.handler;
 
@@ -314,6 +320,8 @@ inline void
 BasicStock::CreateCanceled(Create &c) noexcept
 {
 	assert(c.cancel_ptr);
+
+	++counters.canceled_creates;
 
 	if (c.continue_on_cancel) {
 		// TOOD connect to waiting item?

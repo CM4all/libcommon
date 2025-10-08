@@ -104,9 +104,13 @@ MultiStock::OuterItem::CreateLease(MultiStockClass &_inner_class,
 try {
 	assert(CanCreateLease());
 
+	++counters.total_creates;
+
 	auto *lease = _inner_class.Create({*this}, shared_item);
+	++counters.successful_creates;
 	lease->InvokeCreateSuccess(handler);
 } catch (...) {
+	++counters.failed_creates;
 	ItemCreateError(handler, std::current_exception());
 }
 
@@ -363,6 +367,8 @@ MultiStock::MapItem::Create(StockRequest request) noexcept
 {
 	assert(!get_cancel_ptr);
 
+	++counters.total_creates;
+
 	try {
 		outer_class.Create({*this}, std::move(request),
 				   *this, get_cancel_ptr);
@@ -442,8 +448,10 @@ MultiStock::MapItem::RemoveWaiting(Waiting &w) noexcept
 
 	if (items.empty())
 		parent.Erase(*this);
-	else if (get_cancel_ptr)
+	else if (get_cancel_ptr) {
+		++counters.canceled_creates;
 		get_cancel_ptr.Cancel();
+	}
 }
 
 inline void
@@ -613,6 +621,8 @@ void
 MultiStock::MapItem::ItemCreateSuccess(StockGetHandler &get_handler,
 				       StockItem &item) noexcept
 {
+	++counters.successful_creates;
+
 	get_handler.OnStockItemReady(item);
 }
 
@@ -620,6 +630,8 @@ void
 MultiStock::MapItem::ItemCreateError(StockGetHandler &get_handler,
 				     std::exception_ptr ep) noexcept
 {
+	++counters.failed_creates;
+
 	get_handler.OnStockItemError(ep);
 }
 

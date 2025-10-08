@@ -10,11 +10,21 @@
 
 struct StockCounters {
 	/**
+	 * Number of items that were attempted to be created, were
+	 * canceled, were successful and failed.
+	 */
+	std::size_t total_creates, canceled_creates, successful_creates, failed_creates;
+
+	/**
 	 * Total wait time.
 	 */
 	Event::Duration total_wait;
 
 	constexpr auto &operator+=(const StockCounters &other) noexcept {
+		total_creates += other.total_creates;
+		canceled_creates += other.canceled_creates;
+		successful_creates += other.successful_creates;
+		failed_creates += other.failed_creates;
 		total_wait += other.total_wait;
 		return *this;
 	}
