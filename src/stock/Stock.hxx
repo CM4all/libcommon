@@ -102,6 +102,8 @@ public:
 private:
 	void OnCreateCanceled() noexcept override;
 
+	void CancelWaiting(Waiting &w) noexcept;
+
 	[[gnu::pure]]
 	WaitingList::iterator PickWaiting() noexcept;
 

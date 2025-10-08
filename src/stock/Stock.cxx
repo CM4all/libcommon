@@ -56,12 +56,17 @@ Stock::Waiting::Destroy() noexcept
  *
  */
 
+inline void
+Stock::CancelWaiting(Waiting &w) noexcept
+{
+	waiting.erase(waiting.iterator_to(w));
+	w.Destroy();
+}
+
 void
 Stock::Waiting::Cancel() noexcept
 {
-	auto &list = stock.waiting;
-	const auto i = list.iterator_to(*this);
-	list.erase_and_dispose(i, [](Stock::Waiting *w){ w->Destroy(); });
+	stock.CancelWaiting(*this);
 }
 
 inline Stock::WaitingList::iterator
