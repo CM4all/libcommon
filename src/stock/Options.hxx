@@ -25,6 +25,12 @@ struct StockOptions {
 	std::size_t max_idle;
 	Event::Duration clear_interval;
 
+	/**
+	 * If the wait time goes above this threshold, then further
+	 * waiters fail.
+	 */
+	Event::Duration max_wait;
+
 	constexpr operator BasicStockOptions() const noexcept {
 		return {
 			.max_idle = max_idle,

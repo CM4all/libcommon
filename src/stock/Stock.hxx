@@ -32,6 +32,8 @@ class Stock : public BasicStock {
 	 */
 	const std::size_t limit;
 
+	const Event::Duration max_wait;
+
 	/**
 	 * This event is used to move the "retry waiting" code out of the
 	 * current stack, to invoke the handler method in a safe
@@ -47,6 +49,8 @@ class Stock : public BasicStock {
 	WaitingList waiting;
 
 	uint_least64_t last_fairness_hash = 0;
+
+	Event::TimePoint reject_wait_until;
 
 public:
 	/**

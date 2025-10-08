@@ -4,6 +4,7 @@
 
 #include "Stock.hxx"
 #include "Class.hxx"
+#include "Error.hxx"
 #include "GetHandler.hxx"
 #include "Options.hxx"
 #include "event/Loop.hxx"
@@ -65,14 +66,19 @@ Stock::Waiting::Destroy() noexcept
 inline void
 Stock::WaitingEnded(Waiting &w) noexcept
 {
-	const auto wait_duration = GetEventLoop().SteadyNow() - w.start_time;
+	const auto now = GetEventLoop().SteadyNow();
+	const auto wait_duration = now - w.start_time;
 	counters.total_wait_duration += wait_duration;
+
+	if (max_wait > Event::Duration{} && wait_duration > max_wait)
+		reject_wait_until = now + std::chrono::seconds{1};
 }
 
 inline void
 Stock::CancelWaiting(Waiting &w) noexcept
 {
 	++counters.canceled_waits;
+
 	waiting.erase(waiting.iterator_to(w));
 	WaitingEnded(w);
 	w.Destroy();
@@ -170,6 +176,7 @@ Stock::Stock(EventLoop &event_loop, StockClass &_cls,
 	     std::string_view _name, StockOptions options) noexcept
 	:BasicStock(event_loop, _cls, _name, options),
 	 limit(options.limit),
+	 max_wait(options.max_wait),
 	 retry_event(event_loop, BIND_THIS_METHOD(RetryWaiting))
 {
 }
@@ -188,10 +195,18 @@ Stock::Get(StockRequest request,
 		return;
 
 	if (IsFull()) {
+		const auto now = GetEventLoop().SteadyNow();
+
+		if (now < reject_wait_until) {
+			++counters.rejects;
+			get_handler.OnStockItemError(std::make_exception_ptr(StockOverloadedError{"Overloaded"}));
+			return;
+		}
+
 		/* item limit reached: wait for an item to return */
 		++counters.total_waits;
 		auto w = new Waiting(*this, std::move(request),
-				     GetEventLoop().SteadyNow(),
+				     now,
 				     get_handler, cancel_ptr);
 		waiting.push_back(*w);
 		return;

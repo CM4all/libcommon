@@ -204,6 +204,8 @@ class MultiStock {
 
 		const Event::Duration clear_interval;
 
+		const Event::Duration max_wait;
+
 		struct Waiting;
 		using WaitingList = IntrusiveList<Waiting,
 			IntrusiveListBaseHookTraits<Waiting>,
@@ -223,6 +225,8 @@ class MultiStock {
 		std::size_t get_concurrency;
 
 		StockCounters counters{};
+
+		Event::TimePoint reject_wait_until;
 
 	public:
 		/**

@@ -4,6 +4,7 @@
 
 #include "MultiStock.hxx"
 #include "Class.hxx"
+#include "Error.hxx"
 #include "GetHandler.hxx"
 #include "Item.hxx"
 #include "Options.hxx"
@@ -331,6 +332,7 @@ MultiStock::MapItem::MapItem(MultiStock &_parent,
 	 name(key.value), hash(key.hash),
 	 limit(options.limit),
 	 clear_interval(options.clear_interval),
+	 max_wait(options.max_wait),
 	 retry_event(_event_loop, BIND_THIS_METHOD(RetryWaiting))
 {
 }
@@ -403,10 +405,17 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 
 	get_concurrency = concurrency;
 
+	const auto now = GetEventLoop().SteadyNow();
 	const bool create = waiting.empty() && !IsFull() && !get_cancel_ptr;
 
+	if (!create && now < reject_wait_until) {
+		++counters.rejects;
+		get_handler.OnStockItemError(std::make_exception_ptr(StockOverloadedError{"Overloaded"}));
+		return;
+	}
+
 	auto *w = new Waiting(*this, std::move(request),
-			      GetEventLoop().SteadyNow(),
+			      now,
 			      create,
 			      get_handler, cancel_ptr);
 	waiting.push_back(*w);
@@ -434,8 +443,12 @@ MultiStock::MapItem::WaitingEnded(Waiting &w) noexcept
 {
 	assert(!w.is_create);
 
-	const auto wait_duration = GetEventLoop().SteadyNow() - w.start_time;
+	const auto now = GetEventLoop().SteadyNow();
+	const auto wait_duration = now - w.start_time;
 	counters.total_wait_duration += wait_duration;
+
+	if (max_wait > Event::Duration{} && wait_duration > max_wait)
+		reject_wait_until = now + std::chrono::seconds{1};
 }
 
 inline void
