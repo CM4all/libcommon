@@ -197,7 +197,9 @@ class MultiStock {
 		const Event::Duration clear_interval;
 
 		struct Waiting;
-		using WaitingList = IntrusiveList<Waiting>;
+		using WaitingList = IntrusiveList<Waiting,
+			IntrusiveListBaseHookTraits<Waiting>,
+			IntrusiveListOptions{.constant_time_size = true}>;
 
 		WaitingList waiting;
 

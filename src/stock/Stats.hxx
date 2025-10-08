@@ -8,4 +8,9 @@
 
 struct StockStats {
 	std::size_t busy, idle;
+
+	/**
+	 * Number of callers waiting for an item.
+	 */
+	std::size_t waiting;
 };

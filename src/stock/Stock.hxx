@@ -39,7 +39,9 @@ class Stock : public BasicStock {
 	DeferEvent retry_event;
 
 	struct Waiting;
-	using WaitingList = IntrusiveList<Waiting>;
+	using WaitingList = IntrusiveList<Waiting,
+		IntrusiveListBaseHookTraits<Waiting>,
+		IntrusiveListOptions{.constant_time_size = true}>;
 
 	WaitingList waiting;
 
@@ -67,6 +69,11 @@ public:
 	[[gnu::pure]]
 	bool IsFull() const noexcept {
 		return limit > 0 && GetActiveCount() >= limit;
+	}
+
+	void AddStats(StockStats &data) const noexcept {
+		BasicStock::AddStats(data);
+		data.waiting += waiting.size();
 	}
 
 	void Get(StockRequest request,

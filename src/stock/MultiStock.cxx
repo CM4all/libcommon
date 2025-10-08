@@ -367,6 +367,8 @@ MultiStock::MapItem::AddStats(StockStats &data) const noexcept
 {
 	for (const auto &i : items)
 		i.AddStats(data);
+
+	data.waiting += waiting.size();
 }
 
 inline void
