@@ -22,14 +22,14 @@ class CancellablePointer;
 class StockClass;
 struct CreateStockItem;
 class StockItem;
+struct StockOptions;
 struct StockStats;
 
 class MultiStockClass {
 public:
-	virtual std::size_t GetLimit(const void *request,
-				     std::size_t _limit) const noexcept = 0;
-
-	virtual Event::Duration GetClearInterval(const void *info) const noexcept = 0;
+	[[gnu::pure]]
+	virtual StockOptions GetOptions(const void *request,
+					StockOptions o) const noexcept;
 
 	virtual StockItem *Create(CreateStockItem c,
 				  StockItem &shared_item) = 0;
@@ -217,8 +217,7 @@ class MultiStock {
 
 		MapItem(EventLoop &event_loop, StockClass &_outer_class,
 			StockKey key,
-			std::size_t _limit,
-			Event::Duration _clear_interval,
+			StockOptions options,
 			MultiStockClass &_inner_class) noexcept;
 		~MapItem() noexcept;
 

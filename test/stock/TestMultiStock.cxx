@@ -4,6 +4,7 @@
 
 #include "stock/MultiStock.hxx"
 #include "stock/Class.hxx"
+#include "stock/Options.hxx"
 #include "event/Loop.hxx"
 
 #include <gtest/gtest.h>
@@ -96,15 +97,6 @@ public:
 		    CancellablePointer &cancel_ptr) override;
 
 	/* virtual methods from class MultiStockClass */
-	std::size_t GetLimit(const void *,
-			     std::size_t _limit) const noexcept override {
-		return _limit;
-	}
-
-	Event::Duration GetClearInterval(const void *) const noexcept override {
-		return std::chrono::hours{1};
-	}
-
 	StockItem *Create(CreateStockItem c, StockItem &outer_item) override {
 		return new MyInnerStockItem(c, outer_item);
 	}

@@ -6,11 +6,19 @@
 #include "Class.hxx"
 #include "GetHandler.hxx"
 #include "Item.hxx"
+#include "Options.hxx"
 #include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/SpanCast.hxx"
 
 #include <cassert>
+
+StockOptions
+MultiStockClass::GetOptions([[maybe_unused]] const void *request,
+			    StockOptions o) const noexcept
+{
+	return o;
+}
 
 MultiStock::OuterItem::OuterItem(MapItem &_parent, StockItem &_item,
 				 std::size_t _limit,
@@ -294,14 +302,13 @@ struct MultiStock::MapItem::Waiting final
 
 MultiStock::MapItem::MapItem(EventLoop &_event_loop, StockClass &_outer_class,
 			     StockKey key,
-			     std::size_t _limit,
-			     Event::Duration _clear_interval,
+			     StockOptions options,
 			     MultiStockClass &_inner_class) noexcept
 	:outer_class(_outer_class),
 	 inner_class(_inner_class),
 	 name(key.value), hash(key.hash),
-	 limit(_limit),
-	 clear_interval(_clear_interval),
+	 limit(options.limit),
+	 clear_interval(options.clear_interval),
 	 retry_event(_event_loop, BIND_THIS_METHOD(RetryWaiting))
 {
 }
@@ -650,8 +657,7 @@ MultiStock::MakeMapItem(StockKey key, const void *request) noexcept
 	auto [i, inserted] = map.insert_check(key);
 	if (inserted) {
 		auto *item = new MapItem(GetEventLoop(), outer_class, key,
-					 inner_class.GetLimit(request, limit),
-					 inner_class.GetClearInterval(request),
+					 inner_class.GetOptions(request, {.limit = limit, .clear_interval = std::chrono::minutes{10}}),
 					 inner_class);
 		map.insert_commit(i, *item);
 		chronological_list.push_back(*item);
