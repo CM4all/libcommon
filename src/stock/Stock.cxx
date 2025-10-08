@@ -72,6 +72,7 @@ Stock::WaitingEnded(Waiting &w) noexcept
 inline void
 Stock::CancelWaiting(Waiting &w) noexcept
 {
+	++counters.canceled_waits;
 	waiting.erase(waiting.iterator_to(w));
 	WaitingEnded(w);
 	w.Destroy();
@@ -128,6 +129,7 @@ Stock::RetryWaiting() noexcept
 			break;
 		}
 
+		++counters.successful_waits;
 		WaitingEnded(w);
 		w.Destroy();
 	}
@@ -138,6 +140,12 @@ Stock::RetryWaiting() noexcept
 	     GetActiveCount() < limit && i > 0 && !waiting.empty();
 	     --i) {
 		auto &w = waiting.pop_front();
+
+		/* this isn't really a "success" yet (we don't know if
+		   creating the item will succeed), but close enough
+		   for this statistic */
+		++counters.successful_waits;
+
 		WaitingEnded(w);
 		GetCreate(std::move(w.request),
 			  w.handler,
@@ -181,6 +189,7 @@ Stock::Get(StockRequest request,
 
 	if (IsFull()) {
 		/* item limit reached: wait for an item to return */
+		++counters.total_waits;
 		auto w = new Waiting(*this, std::move(request),
 				     GetEventLoop().SteadyNow(),
 				     get_handler, cancel_ptr);

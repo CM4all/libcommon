@@ -15,6 +15,8 @@ struct StockCounters {
 	 */
 	std::size_t total_creates, canceled_creates, successful_creates, failed_creates;
 
+	std::size_t total_waits, canceled_waits, successful_waits, failed_waits;
+
 	/**
 	 * Total wait time.
 	 */
@@ -25,6 +27,10 @@ struct StockCounters {
 		canceled_creates += other.canceled_creates;
 		successful_creates += other.successful_creates;
 		failed_creates += other.failed_creates;
+		total_waits += other.total_waits;
+		canceled_waits += other.canceled_waits;
+		successful_waits += other.successful_waits;
+		failed_waits += other.failed_waits;
 		total_wait_duration += other.total_wait_duration;
 		return *this;
 	}

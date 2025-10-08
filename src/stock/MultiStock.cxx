@@ -408,6 +408,8 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 
 	if (waiting_empty && !IsFull() && !get_cancel_ptr)
 		Create(std::move(w->request));
+	else
+		++counters.total_waits;
 }
 
 inline void
@@ -432,6 +434,8 @@ MultiStock::MapItem::WaitingEnded(Waiting &w) noexcept
 inline void
 MultiStock::MapItem::RemoveWaiting(Waiting &w) noexcept
 {
+	++stats.canceled_waits;
+
 	WaitingEnded(w);
 	waiting.erase_and_dispose(waiting.iterator_to(w), DeleteDisposer{});
 
@@ -497,6 +501,7 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		DeleteEmptyItems(&item);
 
 	if (item.GetLease(inner_class, get_handler)) {
+		++stats.successful_waits;
 		WaitingEnded(w);
 		delete &w;
 	} else {
@@ -561,6 +566,7 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 	retry_event.Cancel();
 
 	waiting.clear_and_dispose([this, &error](auto *w){
+		++stats.failed_waits;
 		WaitingEnded(*w);
 		w->handler.OnStockItemError(error);
 		delete w;
