@@ -8,16 +8,18 @@
 
 #include <cstddef>
 
-struct StockStats {
+struct StockCounters {
+	/**
+	 * Total wait time.
+	 */
+	Event::Duration total_wait;
+};
+
+struct StockStats : StockCounters {
 	std::size_t busy, idle;
 
 	/**
 	 * Number of callers waiting for an item.
 	 */
 	std::size_t waiting;
-
-	/**
-	 * Total wait time.
-	 */
-	Event::Duration total_wait;
 };
