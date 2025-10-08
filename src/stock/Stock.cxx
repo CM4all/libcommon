@@ -66,7 +66,7 @@ inline void
 Stock::WaitingEnded(Waiting &w) noexcept
 {
 	const auto wait = GetEventLoop().SteadyNow() - w.start_time;
-	total_wait += wait;
+	counters.total_wait += wait;
 }
 
 inline void

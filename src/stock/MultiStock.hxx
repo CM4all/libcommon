@@ -10,6 +10,7 @@
 #include "AbstractStock.hxx"
 #include "Item.hxx"
 #include "Options.hxx"
+#include "Stats.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
 #include "util/Cancellable.hxx"
@@ -215,7 +216,7 @@ class MultiStock {
 
 		std::size_t get_concurrency;
 
-		Event::Duration total_wait{};
+		StockCounters counters;
 
 	public:
 		/**
@@ -248,8 +249,8 @@ class MultiStock {
 			return limit > 0 && GetActiveCount() >= limit;
 		}
 
-		Event::Duration GetTotalWait() const noexcept {
-			return total_wait;
+		const StockCounters &GetCounters() const noexcept {
+			return counters;
 		}
 
 		void AddStats(StockStats &data) const noexcept;
@@ -368,13 +369,10 @@ class MultiStock {
 		      IntrusiveListMemberHookTraits<&MapItem::chronological_siblings>> chronological_list;
 
 	/**
-	 * Tracks the total wait time of #MapItem instances that were
+	 * Tracks the counters of #MapItem instances that have been
 	 * removed.
-	 *
-	 * TODO currently, empty items are never removed, but we
-	 * should do that
 	 */
-	Event::Duration total_wait{};
+	StockCounters counters;
 
 public:
 	MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,

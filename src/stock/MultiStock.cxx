@@ -7,7 +7,6 @@
 #include "GetHandler.hxx"
 #include "Item.hxx"
 #include "Options.hxx"
-#include "Stats.hxx"
 #include "event/Loop.hxx"
 #include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
@@ -375,7 +374,7 @@ MultiStock::MapItem::AddStats(StockStats &data) const noexcept
 		i.AddStats(data);
 
 	data.waiting += waiting.size();
-	data.total_wait += total_wait;
+	data += counters;
 }
 
 inline void
@@ -414,7 +413,7 @@ inline void
 MultiStock::MapItem::WaitingEnded(Waiting &w) noexcept
 {
 	const auto wait = GetEventLoop().SteadyNow() - w.start_time;
-	total_wait += wait;
+	counters.total_wait += wait;
 }
 
 inline void
@@ -656,13 +655,13 @@ MultiStock::AddStats(StockStats &data) const noexcept
 		i.AddStats(data);
 	});
 
-	data.total_wait += total_wait;
+	data += counters;
 }
 
 void
 MultiStock::Erase(MapItem &item) noexcept
 {
-	total_wait += item.GetTotalWait();
+	counters += item.GetCounters();
 	map.erase_and_dispose(map.iterator_to(item), DeleteDisposer{});
 }
 

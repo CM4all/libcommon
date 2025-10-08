@@ -6,7 +6,7 @@
 
 #include "BasicStock.hxx"
 #include "Request.hxx"
-#include "event/Chrono.hxx"
+#include "Stats.hxx"
 #include "event/DeferEvent.hxx"
 #include "util/IntrusiveList.hxx"
 
@@ -48,7 +48,7 @@ class Stock : public BasicStock {
 
 	uint_least64_t last_fairness_hash = 0;
 
-	Event::Duration total_wait{};
+	StockCounters counters{};
 
 public:
 	/**
@@ -74,14 +74,14 @@ public:
 		return limit > 0 && GetActiveCount() >= limit;
 	}
 
-	Event::Duration GetTotalWait() const noexcept {
-		return total_wait;
+	const StockCounters &GetCounters() const noexcept {
+		return counters;
 	}
 
 	void AddStats(StockStats &data) const noexcept {
 		BasicStock::AddStats(data);
 		data.waiting += waiting.size();
-		data.total_wait += total_wait;
+		data += counters;
 	}
 
 	void Get(StockRequest request,

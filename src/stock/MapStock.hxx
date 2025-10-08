@@ -6,8 +6,8 @@
 
 #include "Key.hxx"
 #include "Options.hxx"
+#include "Stats.hxx"
 #include "Stock.hxx"
-#include "event/Chrono.hxx"
 #include "event/DeferEvent.hxx"
 #include "util/IntrusiveHashSet.hxx"
 
@@ -69,10 +69,10 @@ class StockMap {
 	Map map;
 
 	/**
-	 * Tracks the total wait time of #Item instances that were
+	 * Tracks the counters of #Item instances that have been
 	 * removed.
 	 */
-	Event::Duration total_wait{};
+	StockCounters counters;
 
 public:
 	StockMap(EventLoop &_event_loop, StockClass &_cls,

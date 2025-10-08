@@ -13,6 +13,11 @@ struct StockCounters {
 	 * Total wait time.
 	 */
 	Event::Duration total_wait;
+
+	constexpr auto &operator+=(const StockCounters &other) noexcept {
+		total_wait += other.total_wait;
+		return *this;
+	}
 };
 
 struct StockStats : StockCounters {
