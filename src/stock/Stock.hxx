@@ -48,8 +48,6 @@ class Stock : public BasicStock {
 
 	uint_least64_t last_fairness_hash = 0;
 
-	StockCounters counters{};
-
 public:
 	/**
 	 * @param name may be something like a hostname:port pair for HTTP
@@ -74,14 +72,9 @@ public:
 		return limit > 0 && GetActiveCount() >= limit;
 	}
 
-	const StockCounters &GetCounters() const noexcept {
-		return counters;
-	}
-
 	void AddStats(StockStats &data) const noexcept {
 		BasicStock::AddStats(data);
 		data.waiting += waiting.size();
-		data += counters;
 	}
 
 	void Get(StockRequest request,

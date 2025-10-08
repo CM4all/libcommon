@@ -75,6 +75,8 @@ private:
 		IntrusiveListOptions{.constant_time_size = true}> create;
 
 protected:
+	StockCounters counters{};
+
 	bool may_clear = false;
 
 public:
@@ -116,12 +118,17 @@ public:
 		return idle.empty() && busy.empty() && create.empty();
 	}
 
+	const StockCounters &GetCounters() const noexcept {
+		return counters;
+	}
+
 	/**
 	 * Obtain statistics.
 	 */
 	void AddStats(StockStats &data) const noexcept {
 		data.busy += busy.size();
 		data.idle += idle.size();
+		data += counters;
 	}
 
 	/**
