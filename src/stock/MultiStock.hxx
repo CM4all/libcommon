@@ -109,6 +109,8 @@ class MultiStock {
 		bool CanUse() const noexcept;
 		bool ShouldDelete() const noexcept;
 
+		void AddStats(StockStats &data) const noexcept;
+
 		void DiscardUnused() noexcept;
 
 		void Fade() noexcept;
@@ -240,6 +242,8 @@ class MultiStock {
 			return limit > 0 && GetActiveCount() >= limit;
 		}
 
+		void AddStats(StockStats &data) const noexcept;
+
 		void Get(StockRequest request, std::size_t concurrency,
 			 StockGetHandler &handler,
 			 CancellablePointer &cancel_ptr) noexcept;
@@ -358,6 +362,11 @@ public:
 	auto &GetEventLoop() const noexcept {
 		return event_loop;
 	}
+
+	/**
+	 * Obtain statistics.
+	 */
+	void AddStats(StockStats &data) const noexcept;
 
 	/**
 	 * Discard all items which are idle and havn't been used in a

@@ -7,6 +7,7 @@
 #include "GetHandler.hxx"
 #include "Item.hxx"
 #include "Options.hxx"
+#include "Stats.hxx"
 #include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/SpanCast.hxx"
@@ -70,6 +71,13 @@ MultiStock::OuterItem::OnCleanupTimer() noexcept
 	/* repeat until we need this OuterItem again or until there
 	   are no more idle items */
 	ScheduleCleanupTimer();
+}
+
+inline void
+MultiStock::OuterItem::AddStats(StockStats &data) const noexcept
+{
+	data.busy += busy.size();
+	data.idle += idle.size();
 }
 
 void
@@ -355,6 +363,13 @@ MultiStock::MapItem::Create(StockRequest request) noexcept
 }
 
 inline void
+MultiStock::MapItem::AddStats(StockStats &data) const noexcept
+{
+	for (const auto &i : items)
+		i.AddStats(data);
+}
+
+inline void
 MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 			 StockGetHandler &get_handler,
 			 CancellablePointer &cancel_ptr) noexcept
@@ -612,6 +627,14 @@ MultiStock::~MultiStock() noexcept
 
 	/* by now, all leases must be freed */
 	assert(map.empty());
+}
+
+void
+MultiStock::AddStats(StockStats &data) const noexcept
+{
+	map.for_each([&data](auto &i){
+		i.AddStats(data);
+	});
 }
 
 std::size_t
