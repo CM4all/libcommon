@@ -73,6 +73,8 @@ class MultiStock {
 
 		ItemList idle, busy;
 
+		StockCounters counters{};
+
 	public:
 		OuterItem(MapItem &_parent, StockItem &_item,
 			  std::size_t _limit,
@@ -109,6 +111,10 @@ class MultiStock {
 
 		bool CanUse() const noexcept;
 		bool ShouldDelete() const noexcept;
+
+		const StockCounters &GetCounters() const noexcept {
+			return counters;
+		}
 
 		void AddStats(StockStats &data) const noexcept;
 
@@ -216,7 +222,7 @@ class MultiStock {
 
 		std::size_t get_concurrency;
 
-		StockCounters counters;
+		StockCounters counters{};
 
 	public:
 		/**

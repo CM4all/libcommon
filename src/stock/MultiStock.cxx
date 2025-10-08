@@ -78,6 +78,7 @@ MultiStock::OuterItem::AddStats(StockStats &data) const noexcept
 {
 	data.busy += busy.size();
 	data.idle += idle.size();
+	data += counters;
 }
 
 void
@@ -346,7 +347,10 @@ MultiStock::MapItem::FindUsable() noexcept
 			/* as a kludge, this method disposes items
 			   that have been marked "fading" somewhere
 			   else without us noticing it */
-			i = items.erase_and_dispose(i, DeleteDisposer{});
+			i = items.erase_and_dispose(i, [this](auto *j){
+				counters += j->GetCounters();
+				delete j;
+			});
 		else
 			++i;
 	}
@@ -403,7 +407,10 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 inline void
 MultiStock::MapItem::RemoveItem(OuterItem &item) noexcept
 {
-	items.erase_and_dispose(items.iterator_to(item), DeleteDisposer{});
+	items.erase_and_dispose(items.iterator_to(item), [this](auto *j){
+		counters += j->GetCounters();
+		delete j;
+	});
 
 	if (items.empty() && !ScheduleRetryWaiting())
 		parent.Erase(*this);
