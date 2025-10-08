@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "event/Chrono.hxx"
+
 #include <cstddef>
 
 struct StockStats {
@@ -13,4 +15,9 @@ struct StockStats {
 	 * Number of callers waiting for an item.
 	 */
 	std::size_t waiting;
+
+	/**
+	 * Total wait time.
+	 */
+	Event::Duration total_wait;
 };

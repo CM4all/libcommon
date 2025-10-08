@@ -27,6 +27,7 @@ StockMap::~StockMap() noexcept
 void
 StockMap::Erase(Item &item) noexcept
 {
+	total_wait += item.GetTotalWait();
 	auto i = map.iterator_to(item);
 	map.erase_and_dispose(i, DeleteDisposer());
 }
@@ -37,6 +38,8 @@ StockMap::AddStats(StockStats &data) const noexcept
 	map.for_each([&data](auto &i){
 		i.AddStats(data);
 	});
+
+	data.total_wait += total_wait;
 }
 
 Stock &

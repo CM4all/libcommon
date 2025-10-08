@@ -215,6 +215,8 @@ class MultiStock {
 
 		std::size_t get_concurrency;
 
+		Event::Duration total_wait{};
+
 	public:
 		/**
 		 * For MultiStock::chronological_list.
@@ -244,6 +246,10 @@ class MultiStock {
 		[[gnu::pure]]
 		bool IsFull() const noexcept {
 			return limit > 0 && GetActiveCount() >= limit;
+		}
+
+		Event::Duration GetTotalWait() const noexcept {
+			return total_wait;
 		}
 
 		void AddStats(StockStats &data) const noexcept;
@@ -283,6 +289,13 @@ class MultiStock {
 		 * Delete all empty items.
 		 */
 		void DeleteEmptyItems(const OuterItem *except=nullptr) noexcept;
+
+		/**
+		 * A #Waiting instance has ended (maybe successful,
+		 * failed or canceled).  This methods does the
+		 * bookkeeping.
+		 */
+		void WaitingEnded(Waiting &w) noexcept;
 
 		void FinishWaiting(OuterItem &item) noexcept;
 
@@ -353,6 +366,15 @@ class MultiStock {
 	 */
 	IntrusiveList<MapItem,
 		      IntrusiveListMemberHookTraits<&MapItem::chronological_siblings>> chronological_list;
+
+	/**
+	 * Tracks the total wait time of #MapItem instances that were
+	 * removed.
+	 *
+	 * TODO currently, empty items are never removed, but we
+	 * should do that
+	 */
+	Event::Duration total_wait{};
 
 public:
 	MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,

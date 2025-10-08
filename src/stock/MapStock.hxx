@@ -68,6 +68,12 @@ class StockMap {
 
 	Map map;
 
+	/**
+	 * Tracks the total wait time of #Item instances that were
+	 * removed.
+	 */
+	Event::Duration total_wait{};
+
 public:
 	StockMap(EventLoop &_event_loop, StockClass &_cls,
 		 StockOptions _options) noexcept;

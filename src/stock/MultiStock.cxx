@@ -8,6 +8,7 @@
 #include "Item.hxx"
 #include "Options.hxx"
 #include "Stats.hxx"
+#include "event/Loop.hxx"
 #include "util/djb_hash.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/SpanCast.hxx"
@@ -289,13 +290,16 @@ struct MultiStock::MapItem::Waiting final
 {
 	MapItem &parent;
 	StockRequest request;
+	const Event::TimePoint start_time;
 	StockGetHandler &handler;
 	CancellablePointer &caller_cancel_ptr;
 
 	Waiting(MapItem &_parent, StockRequest &&_request,
+		Event::TimePoint _start_time,
 		StockGetHandler &_handler,
 		CancellablePointer &_cancel_ptr) noexcept
 		:parent(_parent), request(std::move(_request)),
+		 start_time(_start_time),
 		 handler(_handler),
 		 caller_cancel_ptr(_cancel_ptr)
 	{
@@ -371,6 +375,7 @@ MultiStock::MapItem::AddStats(StockStats &data) const noexcept
 		i.AddStats(data);
 
 	data.waiting += waiting.size();
+	data.total_wait += total_wait;
 }
 
 inline void
@@ -388,6 +393,7 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 	const bool waiting_empty = waiting.empty();
 
 	auto *w = new Waiting(*this, std::move(request),
+			      GetEventLoop().SteadyNow(),
 			      get_handler, cancel_ptr);
 	waiting.push_back(*w);
 
@@ -405,8 +411,16 @@ MultiStock::MapItem::RemoveItem(OuterItem &item) noexcept
 }
 
 inline void
+MultiStock::MapItem::WaitingEnded(Waiting &w) noexcept
+{
+	const auto wait = GetEventLoop().SteadyNow() - w.start_time;
+	total_wait += wait;
+}
+
+inline void
 MultiStock::MapItem::RemoveWaiting(Waiting &w) noexcept
 {
+	WaitingEnded(w);
 	waiting.erase_and_dispose(waiting.iterator_to(w), DeleteDisposer{});
 
 	if (!waiting.empty())
@@ -468,9 +482,10 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		   really needed */
 		DeleteEmptyItems(&item);
 
-	if (item.GetLease(inner_class, get_handler))
+	if (item.GetLease(inner_class, get_handler)) {
+		WaitingEnded(w);
 		delete &w;
-	else {
+	} else {
 		/* currently, no lease is available (probably because
 		   we're waiting for "unclean" idle items); wait some
 		   more (for ItemUncleanFlagCleared() to be called) */
@@ -531,7 +546,8 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 
 	retry_event.Cancel();
 
-	waiting.clear_and_dispose([&error](auto *w){
+	waiting.clear_and_dispose([this, &error](auto *w){
+		WaitingEnded(*w);
 		w->handler.OnStockItemError(error);
 		delete w;
 	});
@@ -639,11 +655,14 @@ MultiStock::AddStats(StockStats &data) const noexcept
 	map.for_each([&data](auto &i){
 		i.AddStats(data);
 	});
+
+	data.total_wait += total_wait;
 }
 
 void
 MultiStock::Erase(MapItem &item) noexcept
 {
+	total_wait += item.GetTotalWait();
 	map.erase_and_dispose(map.iterator_to(item), DeleteDisposer{});
 }
 

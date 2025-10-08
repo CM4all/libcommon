@@ -6,6 +6,7 @@
 #include "Class.hxx"
 #include "GetHandler.hxx"
 #include "Options.hxx"
+#include "event/Loop.hxx"
 #include "util/Cancellable.hxx"
 
 #include <cassert>
@@ -19,11 +20,14 @@ struct Stock::Waiting final
 
 	const uint_least64_t fairness_hash;
 
+	const Event::TimePoint start_time;
+
 	StockGetHandler &handler;
 
 	CancellablePointer &cancel_ptr;
 
 	Waiting(Stock &_stock, StockRequest &&_request,
+		Event::TimePoint _start_time,
 		StockGetHandler &_handler,
 		CancellablePointer &_cancel_ptr) noexcept;
 
@@ -35,10 +39,12 @@ struct Stock::Waiting final
 
 inline
 Stock::Waiting::Waiting(Stock &_stock, StockRequest &&_request,
+			Event::TimePoint _start_time,
 			StockGetHandler &_handler,
 			CancellablePointer &_cancel_ptr) noexcept
 	:stock(_stock), request(std::move(_request)),
 	 fairness_hash(_stock.cls.GetFairnessHash(request.get())),
+	 start_time(_start_time),
 	 handler(_handler),
 	 cancel_ptr(_cancel_ptr)
 {
@@ -57,9 +63,17 @@ Stock::Waiting::Destroy() noexcept
  */
 
 inline void
+Stock::WaitingEnded(Waiting &w) noexcept
+{
+	const auto wait = GetEventLoop().SteadyNow() - w.start_time;
+	total_wait += wait;
+}
+
+inline void
 Stock::CancelWaiting(Waiting &w) noexcept
 {
 	waiting.erase(waiting.iterator_to(w));
+	WaitingEnded(w);
 	w.Destroy();
 }
 
@@ -114,6 +128,7 @@ Stock::RetryWaiting() noexcept
 			break;
 		}
 
+		WaitingEnded(w);
 		w.Destroy();
 	}
 
@@ -123,6 +138,7 @@ Stock::RetryWaiting() noexcept
 	     GetActiveCount() < limit && i > 0 && !waiting.empty();
 	     --i) {
 		auto &w = waiting.pop_front();
+		WaitingEnded(w);
 		GetCreate(std::move(w.request),
 			  w.handler,
 			  w.cancel_ptr);
@@ -166,6 +182,7 @@ Stock::Get(StockRequest request,
 	if (IsFull()) {
 		/* item limit reached: wait for an item to return */
 		auto w = new Waiting(*this, std::move(request),
+				     GetEventLoop().SteadyNow(),
 				     get_handler, cancel_ptr);
 		waiting.push_back(*w);
 		return;
@@ -235,6 +252,7 @@ Stock::OnCreateCanceled() noexcept
 
 		if (GetCanceled(w.handler, w.cancel_ptr)) {
 			waiting.pop_front();
+			WaitingEnded(w);
 			w.Destroy();
 			return;
 		}

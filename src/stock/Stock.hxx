@@ -6,6 +6,7 @@
 
 #include "BasicStock.hxx"
 #include "Request.hxx"
+#include "event/Chrono.hxx"
 #include "event/DeferEvent.hxx"
 #include "util/IntrusiveList.hxx"
 
@@ -47,6 +48,8 @@ class Stock : public BasicStock {
 
 	uint_least64_t last_fairness_hash = 0;
 
+	Event::Duration total_wait{};
+
 public:
 	/**
 	 * @param name may be something like a hostname:port pair for HTTP
@@ -71,9 +74,14 @@ public:
 		return limit > 0 && GetActiveCount() >= limit;
 	}
 
+	Event::Duration GetTotalWait() const noexcept {
+		return total_wait;
+	}
+
 	void AddStats(StockStats &data) const noexcept {
 		BasicStock::AddStats(data);
 		data.waiting += waiting.size();
+		data.total_wait += total_wait;
 	}
 
 	void Get(StockRequest request,
@@ -109,6 +117,12 @@ public:
 private:
 	void OnCreateCanceled() noexcept override;
 
+	/**
+	 * A #Waiting instance has ended (maybe successful,
+	 * failed or canceled).  This methods does the
+	 * bookkeeping.
+	 */
+	void WaitingEnded(Waiting &w) noexcept;
 	void CancelWaiting(Waiting &w) noexcept;
 
 	[[gnu::pure]]
