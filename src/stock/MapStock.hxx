@@ -141,20 +141,12 @@ public:
 
 protected:
 	/**
-	 * Derived classes can override this method to choose a
-	 * per-#Stock limit.
+	 * Derived classes can override this method to choose
+	 * different per-#Stock options.
 	 */
 	[[gnu::pure]]
-	virtual std::size_t GetLimit([[maybe_unused]] const void *request,
-				     std::size_t _limit) const noexcept {
-		return _limit;
-	}
-
-	/**
-	 * Derived classes can override this method to choose a
-	 * per-#Stock clear_interval.
-	 */
-	virtual Event::Duration GetClearInterval([[maybe_unused]] const void *request) const noexcept {
-		return options.clear_interval;
+	virtual StockOptions GetOptions([[maybe_unused]] const void *request,
+					StockOptions o) const noexcept {
+		return o;
 	}
 };

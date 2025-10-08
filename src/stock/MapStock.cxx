@@ -36,15 +36,9 @@ StockMap::GetStock(StockKey key, const void *request) noexcept
 {
 	auto [position, inserted] = map.insert_check(key);
 	if (inserted) {
-		const StockOptions item_options{
-			.limit = GetLimit(request, options.limit),
-			.max_idle = options.max_idle,
-			.clear_interval = GetClearInterval(request),
-		};
-
 		auto *item = new Item(*this, key.hash, event_loop, cls,
 				      key.value,
-				      item_options);
+				      GetOptions(request, options));
 		map.insert_commit(position, *item);
 		return *item;
 	} else
