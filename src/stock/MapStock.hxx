@@ -82,8 +82,6 @@ public:
 		return cls;
 	}
 
-	void Erase(Item &item) noexcept;
-
 	/**
 	 * @see Stock::FadeAll()
 	 */
@@ -145,4 +143,7 @@ protected:
 					StockOptions o) const noexcept {
 		return o;
 	}
+
+private:
+	void Erase(Item &item) noexcept;
 };
