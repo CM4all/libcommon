@@ -105,11 +105,7 @@ public:
 	/**
 	 * Obtain statistics.
 	 */
-	void AddStats(StockStats &data) const noexcept {
-		map.for_each([&data](auto &i){
-			i.AddStats(data);
-		});
-	}
+	void AddStats(StockStats &data) const noexcept;
 
 	[[gnu::pure]]
 	Stock &GetStock(StockKey key, const void *request) noexcept;

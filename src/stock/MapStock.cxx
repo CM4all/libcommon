@@ -31,6 +31,14 @@ StockMap::Erase(Item &item) noexcept
 	map.erase_and_dispose(i, DeleteDisposer());
 }
 
+void
+StockMap::AddStats(StockStats &data) const noexcept
+{
+	map.for_each([&data](auto &i){
+		i.AddStats(data);
+	});
+}
+
 Stock &
 StockMap::GetStock(StockKey key, const void *request) noexcept
 {
