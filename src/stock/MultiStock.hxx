@@ -168,10 +168,11 @@ class MultiStock {
 	};
 
 	class MapItem final
-		: public IntrusiveHashSetHook<IntrusiveHookMode::AUTO_UNLINK>,
+		: public IntrusiveHashSetHook<>,
 		  AbstractStock,
 		  StockGetHandler
 	{
+		MultiStock &parent;
 		StockClass &outer_class;
 		MultiStockClass &inner_class;
 
@@ -220,7 +221,8 @@ class MultiStock {
 		 */
 		IntrusiveListHook<IntrusiveHookMode::AUTO_UNLINK> chronological_siblings;
 
-		MapItem(EventLoop &event_loop, StockClass &_outer_class,
+		MapItem(MultiStock &_parent,
+			EventLoop &event_loop, StockClass &_outer_class,
 			StockKey key,
 			StockOptions options,
 			MultiStockClass &_inner_class) noexcept;
@@ -415,4 +417,6 @@ public:
 private:
 	[[gnu::pure]]
 	MapItem &MakeMapItem(StockKey key, const void *request) noexcept;
+
+	void Erase(MapItem &item) noexcept;
 };

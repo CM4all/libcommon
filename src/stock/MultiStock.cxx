@@ -308,11 +308,13 @@ struct MultiStock::MapItem::Waiting final
 	}
 };
 
-MultiStock::MapItem::MapItem(EventLoop &_event_loop, StockClass &_outer_class,
+MultiStock::MapItem::MapItem(MultiStock &_parent,
+			     EventLoop &_event_loop, StockClass &_outer_class,
 			     StockKey key,
 			     StockOptions options,
 			     MultiStockClass &_inner_class) noexcept
-	:outer_class(_outer_class),
+	:parent(_parent),
+	 outer_class(_outer_class),
 	 inner_class(_inner_class),
 	 name(key.value), hash(key.hash),
 	 limit(options.limit),
@@ -399,7 +401,7 @@ MultiStock::MapItem::RemoveItem(OuterItem &item) noexcept
 	items.erase_and_dispose(items.iterator_to(item), DeleteDisposer{});
 
 	if (items.empty() && !ScheduleRetryWaiting())
-		delete this;
+		parent.Erase(*this);
 }
 
 inline void
@@ -419,7 +421,7 @@ MultiStock::MapItem::RemoveWaiting(Waiting &w) noexcept
 	}
 
 	if (items.empty())
-		delete this;
+		parent.Erase(*this);
 	else if (get_cancel_ptr)
 		get_cancel_ptr.Cancel();
 }
@@ -535,7 +537,7 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 	});
 
 	if (items.empty())
-		delete this;
+		parent.Erase(*this);
 }
 
 inline MultiStock::OuterItem &
@@ -639,6 +641,12 @@ MultiStock::AddStats(StockStats &data) const noexcept
 	});
 }
 
+void
+MultiStock::Erase(MapItem &item) noexcept
+{
+	map.erase_and_dispose(map.iterator_to(item), DeleteDisposer{});
+}
+
 std::size_t
 MultiStock::DiscardUnused() noexcept
 {
@@ -654,7 +662,9 @@ MultiStock::DiscardOldestIdle(std::size_t n_requested) noexcept
 		n_removed += i->DiscardUnused();
 
 		if (i->IsEmpty())
-			i = chronological_list.erase_and_dispose(i, DeleteDisposer{});
+			i = chronological_list.erase_and_dispose(i, [this](auto *j){
+				Erase(*j);
+			});
 		else
 			++i;
 
@@ -670,7 +680,8 @@ MultiStock::MakeMapItem(StockKey key, const void *request) noexcept
 {
 	auto [i, inserted] = map.insert_check(key);
 	if (inserted) {
-		auto *item = new MapItem(GetEventLoop(), outer_class, key,
+		auto *item = new MapItem(*this,
+					 GetEventLoop(), outer_class, key,
 					 inner_class.GetOptions(request, options),
 					 inner_class);
 		map.insert_commit(i, *item);
