@@ -175,6 +175,22 @@ enum class Command {
      * do not have enough context (e.g. token buckets).
      */
     RESET_LIMITER = 22,
+
+    /**
+     * Reject clients from the specified address.  Payload is a
+     * big-endian 32 bit integer containing the number of seconds
+     * after which the effect will expire, followed by a string
+     * describing the client address.  If an entry for this address
+     * already exists, this packet will only update the expiration
+     * time.  An expiry of 0 means remove the entry immediately.
+     */
+    REJECT_CLIENT = 23,
+
+    /**
+     * Like #REJECT_CLIENT, but slow down the client instead of
+     * rejecting it.
+     */
+    TARPIT_CLIENT = 24,
 };
 
 struct Header {
