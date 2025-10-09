@@ -38,8 +38,8 @@ class Cache {
 
 	template<typename F>
 	struct IsCacheable<F, std::void_t<decltype(std::declval<F>().IsCacheable(std::declval<Data>()))>> {
-		constexpr bool operator()(const F &factory, const Data &data) noexcept {
-			return factory.IsCacheable(data);
+		constexpr bool operator()(const F &factory_, const Data &data) noexcept {
+			return factory_.IsCacheable(data);
 		}
 	};
 
@@ -191,15 +191,15 @@ class Cache {
 			});
 		}
 
-		Co::InvokeTask Run(Factory &factory) {
+		Co::InvokeTask Run(Factory &factory_) {
 			assert(task);
 
 			const Key &c_key = key;
-			auto value = co_await factory(c_key);
+			auto value = co_await factory_(c_key);
 			for (auto &i : handlers)
 				i.data.emplace(value);
 
-			if (store && !IsCacheable<Factory>{}(factory, value))
+			if (store && !IsCacheable<Factory>{}(factory_, value))
 				store = false;
 
 			if (store)
@@ -207,11 +207,11 @@ class Cache {
 						std::move(value));
 		}
 
-		void Start(Factory &factory) noexcept {
+		void Start(Factory &factory_) noexcept {
 			assert(!task);
 			assert(!handlers.empty());
 
-			task = Run(factory);
+			task = Run(factory_);
 			task.Start(BIND_THIS_METHOD(OnCompletion));
 		}
 
