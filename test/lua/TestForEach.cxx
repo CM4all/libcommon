@@ -67,7 +67,7 @@ TEST(ForEach, Throw)
 	RawSet(L, RelativeStackIndex{-1}, 42, "foo");
 
 	try {
-		ForEach(L, RelativeStackIndex{-1}, [](auto, auto){
+		ForEach(L, RelativeStackIndex{-1}, [] [[noreturn]] (auto, auto) {
 			throw 42;
 		});
 

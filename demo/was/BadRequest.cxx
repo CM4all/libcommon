@@ -9,6 +9,7 @@
 #include "util/PrintException.hxx"
 #include "DefaultFifoBuffer.hxx"
 
+[[noreturn]]
 static Co::Task<Was::SimpleResponse>
 MyHandler(Was::SimpleRequest)
 {
