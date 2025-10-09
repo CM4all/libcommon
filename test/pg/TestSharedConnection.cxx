@@ -110,7 +110,6 @@ TEST(SharedConnection, One)
 	const char *conninfo = getenv("PG_CONNINFO");
 	if (conninfo == nullptr) {
 		GTEST_SKIP();
-		return;
 	}
 
 	const char *schema = getenv("PG_SCHEMA");
@@ -152,7 +151,6 @@ TEST(SharedConnection, Serial)
 	const char *conninfo = getenv("PG_CONNINFO");
 	if (conninfo == nullptr) {
 		GTEST_SKIP();
-		return;
 	}
 
 	const char *schema = getenv("PG_SCHEMA");
@@ -188,7 +186,6 @@ TEST(SharedConnection, Multi)
 	const char *conninfo = getenv("PG_CONNINFO");
 	if (conninfo == nullptr) {
 		GTEST_SKIP();
-		return;
 	}
 
 	const char *schema = getenv("PG_SCHEMA");
@@ -230,7 +227,6 @@ TEST(SharedConnection, Cancel)
 	const char *conninfo = getenv("PG_CONNINFO");
 	if (conninfo == nullptr) {
 		GTEST_SKIP();
-		return;
 	}
 
 	const char *schema = getenv("PG_SCHEMA");
@@ -267,7 +263,6 @@ TEST(SharedConnection, DeferCancel)
 	const char *conninfo = getenv("PG_CONNINFO");
 	if (conninfo == nullptr) {
 		GTEST_SKIP();
-		return;
 	}
 
 	const char *schema = getenv("PG_SCHEMA");
@@ -304,7 +299,6 @@ TEST(SharedConnection, CancelSleep)
 	const char *conninfo = getenv("PG_CONNINFO");
 	if (conninfo == nullptr) {
 		GTEST_SKIP();
-		return;
 	}
 
 	const char *schema = getenv("PG_SCHEMA");
@@ -345,7 +339,6 @@ TEST(SharedConnection, Disconnect)
 	const char *conninfo = getenv("PG_CONNINFO");
 	if (conninfo == nullptr) {
 		GTEST_SKIP();
-		return;
 	}
 
 	const char *schema = getenv("PG_SCHEMA");
