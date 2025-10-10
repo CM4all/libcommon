@@ -20,6 +20,7 @@ test(
     'TestTemplateString.cxx',
     'TestTokenBucket.cxx',
     'TestUnaligned.cxx',
+    'TestUnalignedBigEndian.cxx',
     'TestVCircularBuffer.cxx',
     include_directories: inc,
     dependencies: [gtest, util_dep],
