@@ -137,7 +137,7 @@ private:
 };
 
 static constexpr char lua_pg_connection_class[] = "pg.Connection";
-using PgConnectionClass = Lua::Class<PgConnection, lua_pg_connection_class>;
+using PgConnectionClass = Class<PgConnection, lua_pg_connection_class>;
 
 static constexpr struct luaL_Reg lua_pg_connection_methods[] = {
 	{"execute", PgConnectionClass::WrapMethod<&PgConnection::Execute>()},
@@ -235,7 +235,7 @@ private:
 };
 
 static constexpr char lua_pg_request_class[] = "pg.Request";
-using PgRequestClass = Lua::Class<PgRequest, lua_pg_request_class>;
+using PgRequestClass = Class<PgRequest, lua_pg_request_class>;
 
 inline int
 PgConnection::Execute(lua_State *L)

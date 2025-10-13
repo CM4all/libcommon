@@ -41,7 +41,7 @@ private:
 };
 
 static constexpr char lua_timer_class[] = "Timer";
-using TimerClass = Lua::Class<Timer, lua_timer_class>;
+using TimerClass = Class<Timer, lua_timer_class>;
 
 static int
 Sleep(lua_State *L)
@@ -78,7 +78,7 @@ InitTimer(lua_State *L, EventLoop &event_loop) noexcept
 	lua_pop(L, 1);
 
 	SetGlobal(L, "sleep",
-		  Lua::MakeCClosure(Sleep, Lua::LightUserData(&event_loop)));
+		  MakeCClosure(Sleep, LightUserData{&event_loop}));
 }
 
 } // namespace Lua

@@ -13,7 +13,7 @@ namespace Lua {
 
 static constexpr char socket_address_class[] = "SocketAddress";
 using LuaSocketAddress =
-	Lua::Class<AllocatedSocketAddress, socket_address_class>;
+	Class<AllocatedSocketAddress, socket_address_class>;
 
 static int
 LuaSocketAddressToString(lua_State *L)
@@ -27,7 +27,7 @@ LuaSocketAddressToString(lua_State *L)
 	if (!ToString(std::span{buffer}, a))
 		return 0;
 
-	Lua::Push(L, buffer);
+	Push(L, buffer);
 	return 1;
 }
 

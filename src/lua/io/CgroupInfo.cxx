@@ -23,14 +23,14 @@ extern "C" {
 namespace Lua {
 
 class CgroupInfo {
-	Lua::AutoCloseList *auto_close;
+	AutoCloseList *auto_close;
 
 	const std::string path;
 
 	UniqueFileDescriptor directory_fd;
 
 public:
-	CgroupInfo(lua_State *L, Lua::AutoCloseList &_auto_close,
+	CgroupInfo(lua_State *L, AutoCloseList &_auto_close,
 		   std::string_view _path,
 		   UniqueFileDescriptor &&_directory_fd={});
 
@@ -51,16 +51,16 @@ private:
 };
 
 static constexpr char lua_cgroup_info_class[] = "cgroup_info";
-typedef Lua::Class<CgroupInfo, lua_cgroup_info_class> LuaCgroupInfo;
+typedef Class<CgroupInfo, lua_cgroup_info_class> LuaCgroupInfo;
 
-CgroupInfo::CgroupInfo(lua_State *L, Lua::AutoCloseList &_auto_close,
+CgroupInfo::CgroupInfo(lua_State *L, AutoCloseList &_auto_close,
 		       std::string_view _path,
 		       UniqueFileDescriptor &&_directory_fd)
 	:auto_close(&_auto_close),
 	 path(_path),
 	 directory_fd(std::move(_directory_fd))
 {
-	auto_close->Add(L, Lua::RelativeStackIndex{-1});
+	auto_close->Add(L, RelativeStackIndex{-1});
 
 	lua_newtable(L);
 	lua_setfenv(L, -2);
@@ -89,24 +89,24 @@ CgroupInfo::Index(lua_State *L)
 		return luaL_error(L, "Stale object");
 
 	// look it up in the fenv (our cache)
-	if (Lua::GetFenvCache(L, 1, name_idx))
+	if (GetFenvCache(L, 1, name_idx))
 		return 1;
 
 	if (StringIsEqual(name, "path")) {
-		Lua::Push(L, path);
+		Push(L, path);
 		return 1;
 	} else if (StringIsEqual(name, "xattr")) {
 		try {
-			Lua::NewXattrTable(L, OpenDirectory());
+			NewXattrTable(L, OpenDirectory());
 		} catch (...) {
-			Lua::RaiseCurrent(L);
+			RaiseCurrent(L);
 		}
 
 		// auto-close the file descriptor when the connection is closed
-		auto_close->Add(L, Lua::RelativeStackIndex{-1});
+		auto_close->Add(L, RelativeStackIndex{-1});
 
 		// copy a reference to the fenv (our cache)
-		Lua::SetFenvCache(L, 1, name_idx, Lua::RelativeStackIndex{-1});
+		SetFenvCache(L, 1, name_idx, RelativeStackIndex{-1});
 
 		return 1;
 	} else if (StringIsEqual(name, "parent")) {
@@ -118,7 +118,7 @@ CgroupInfo::Index(lua_State *L)
 			      std::string_view{path}.substr(0, slash));
 
 		// copy a reference to the fenv (our cache)
-		Lua::SetFenvCache(L, 1, name_idx, Lua::RelativeStackIndex{-1});
+		SetFenvCache(L, 1, name_idx, RelativeStackIndex{-1});
 
 		return 1;
 	} else
@@ -137,14 +137,14 @@ RegisterCgroupInfo(lua_State *L)
 }
 
 void
-NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
+NewCgroupInfo(lua_State *L, AutoCloseList &auto_close,
 	      std::string_view path) noexcept
 {
 	LuaCgroupInfo::New(L, L, auto_close, path);
 }
 
 void
-NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
+NewCgroupInfo(lua_State *L, AutoCloseList &auto_close,
 	      std::string_view path, UniqueFileDescriptor directory_fd) noexcept
 {
 	LuaCgroupInfo::New(L, L, auto_close, path, std::move(directory_fd));

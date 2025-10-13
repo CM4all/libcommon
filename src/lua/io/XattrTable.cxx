@@ -24,7 +24,7 @@ public:
 };
 
 static constexpr char lua_xattr_table_class[] = "io.XattrTable";
-using XattrTableClass = Lua::Class<XattrTable, lua_xattr_table_class>;
+using XattrTableClass = Class<XattrTable, lua_xattr_table_class>;
 
 inline int
 XattrTable::Close(lua_State *L)

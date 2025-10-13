@@ -14,7 +14,7 @@ namespace Lua {
  * actually create the thread.
  */
 class Thread {
-	Lua::Value thread;
+	Value thread;
 
 public:
 	explicit Thread(lua_State *L) noexcept

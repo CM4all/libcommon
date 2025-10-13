@@ -17,7 +17,7 @@ void
 RegisterCgroupInfo(lua_State *L);
 
 void
-NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
+NewCgroupInfo(lua_State *L, AutoCloseList &auto_close,
 	      std::string_view path) noexcept;
 
 /**
@@ -25,7 +25,7 @@ NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
  * cgroup directory
  */
 void
-NewCgroupInfo(lua_State *L, Lua::AutoCloseList &auto_close,
+NewCgroupInfo(lua_State *L, AutoCloseList &auto_close,
 	      std::string_view path, UniqueFileDescriptor directory_fd) noexcept;
 
 } // namespace Lua

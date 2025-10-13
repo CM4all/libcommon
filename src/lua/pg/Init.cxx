@@ -38,8 +38,7 @@ InitPg(lua_State *L, EventLoop &event_loop)
 
 	lua_newtable(L);
 	SetTable(L, RelativeStackIndex{-1}, "new",
-		 Lua::MakeCClosure(NewPg,
-				   Lua::LightUserData(&event_loop)));
+		 MakeCClosure(NewPg, LightUserData{&event_loop}));
 	SetTable(L, RelativeStackIndex{-1}, "encode_array", EncodeArray);
 	SetTable(L, RelativeStackIndex{-1}, "decode_array", DecodeArray);
 	lua_setglobal(L, "pg");

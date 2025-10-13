@@ -9,6 +9,6 @@
 
 namespace Lua {
 
-typedef std::shared_ptr<Lua::Value> ValuePtr;
+typedef std::shared_ptr<Value> ValuePtr;
 
 }

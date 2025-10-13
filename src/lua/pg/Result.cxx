@@ -27,7 +27,7 @@ public:
 };
 
 static constexpr char lua_pg_result_class[] = "pg.Result";
-using PgResultClass = Lua::Class<PgResult, lua_pg_result_class>;
+using PgResultClass = Class<PgResult, lua_pg_result_class>;
 
 static constexpr struct luaL_Reg lua_pg_result_methods [] = {
 	{"fetch", PgResultClass::WrapMethod<&PgResult::Fetch>()},

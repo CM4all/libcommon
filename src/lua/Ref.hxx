@@ -39,7 +39,7 @@ public:
 	Ref(lua_State *_L, V &&value)
 		:L(_L)
 	{
-		Lua::Push(_L, std::forward<V>(value));
+		Push(_L, std::forward<V>(value));
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	}
 
