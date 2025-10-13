@@ -86,6 +86,8 @@ struct Instance final {
 	EventLoop event_loop;
 	ShutdownListener shutdown_listener{event_loop, BIND_THIS_METHOD(OnShutdown)};
 
+	const Lua::State state{luaL_newstate()};
+
 	IntrusiveList<Thread> threads;
 	std::forward_list<std::exception_ptr> errors;
 
@@ -131,8 +133,7 @@ try {
 	Instance instance;
 	auto &event_loop = instance.event_loop;
 
-	const Lua::State state{luaL_newstate()};
-	lua_State *const L = state.get();
+	lua_State *const L = instance.state.get();
 
 	luaL_openlibs(L);
 
