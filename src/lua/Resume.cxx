@@ -10,7 +10,11 @@
 
 namespace Lua {
 
-static constexpr auto resume_listener_key = "ResumeListener";
+/**
+ * A global variable used to build a unique LightUserData for storing
+ * the #ResumeListener table.
+ */
+static int resume_listener_id;
 
 void
 SetResumeListener(lua_State *L, ResumeListener &listener) noexcept
@@ -18,18 +22,16 @@ SetResumeListener(lua_State *L, ResumeListener &listener) noexcept
 	const ScopeCheckStack check_stack(L);
 
 	/* look up registry[key] */
-	lua_getfield(L, LUA_REGISTRYINDEX, resume_listener_key);
+	GetTable(L, LUA_REGISTRYINDEX, LightUserData{&resume_listener_id});
 	if (lua_isnil(L, -1)) {
 		/* pop nil */
 		lua_pop(L, 1);
 
 		/* create a new table */
 		lua_newtable(L);
-		/* leave a copy on the stack (because lua_setfield()
-		   pops it) */
-		Push(L, RelativeStackIndex{-1});
 		/* registry[key] = newtable */
-		lua_setfield(L, LUA_REGISTRYINDEX, resume_listener_key);
+		SetTable(L, LUA_REGISTRYINDEX, LightUserData{&resume_listener_id},
+			 RelativeStackIndex{-1});
 	}
 
 	/* registry[key][L] = &listener */
@@ -46,7 +48,7 @@ UnsetResumeListener(lua_State *L) noexcept
 	const ScopeCheckStack check_stack(L);
 
 	/* look up registry[key] */
-	lua_getfield(L, LUA_REGISTRYINDEX, resume_listener_key);
+	GetTable(L, LUA_REGISTRYINDEX, LightUserData{&resume_listener_id});
 	if (lua_isnil(L, -1)) {
 		/* pop nil */
 		lua_pop(L, 1);
