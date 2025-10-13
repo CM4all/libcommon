@@ -4,6 +4,7 @@
 
 #include "Resume.hxx"
 #include "Error.hxx"
+#include "LightUserData.hxx"
 #include "Util.hxx"
 
 #include <cassert>

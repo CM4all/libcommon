@@ -5,6 +5,7 @@
 #include "Resolver.hxx"
 #include "SocketAddress.hxx"
 #include "lua/Error.hxx"
+#include "lua/LightUserData.hxx"
 #include "lua/Util.hxx"
 #include "lua/PushCClosure.hxx"
 #include "net/AddressInfo.hxx"

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "LightUserData.hxx"
 #include "Util.hxx"
 
 extern "C" {

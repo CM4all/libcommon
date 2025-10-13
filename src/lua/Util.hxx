@@ -15,13 +15,6 @@ extern "C" {
 
 namespace Lua {
 
-struct LightUserData {
-	void *value;
-
-	explicit constexpr LightUserData(void *_value) noexcept
-		:value(_value) {}
-};
-
 static inline void
 Push(lua_State *L, std::nullptr_t) noexcept
 {
@@ -82,13 +75,6 @@ static inline void
 Push(lua_State *L, lua_CFunction value) noexcept
 {
 	lua_pushcfunction(L, value);
-}
-
-[[gnu::nonnull]]
-static inline void
-Push(lua_State *L, LightUserData value) noexcept
-{
-	lua_pushlightuserdata(L, value.value);
 }
 
 template<typename V>

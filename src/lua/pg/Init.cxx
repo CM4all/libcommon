@@ -6,6 +6,7 @@
 #include "Array.hxx"
 #include "Connection.hxx"
 #include "Result.hxx"
+#include "lua/LightUserData.hxx"
 #include "lua/Util.hxx"
 #include "lua/PushCClosure.hxx"
 
