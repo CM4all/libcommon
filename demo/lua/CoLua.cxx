@@ -125,10 +125,8 @@ Thread::OnLuaError(lua_State *, std::exception_ptr e) noexcept
 
 int main(int argc, char **argv)
 try {
-	if (argc != 2)
-		throw "Usage: CoLua FILE.lua";
-
-	const char *path = argv[1];
+	if (argc < 2)
+		throw "Usage: CoLua FILE.lua [FILE2.lua...]";
 
 	Instance instance;
 	auto &event_loop = instance.event_loop;
@@ -142,7 +140,8 @@ try {
 	InitPg(L, event_loop);
 	InitSodium(L);
 
-	instance.threads.push_back(*new Thread(instance, L, event_loop, path));
+	for (int i = 1; i < argc; ++i)
+		instance.threads.push_back(*new Thread(instance, L, event_loop, argv[i]));
 
 	event_loop.Run();
 
