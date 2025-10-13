@@ -26,6 +26,7 @@ class ScopeCheckStack {
 	int expected_top;
 
 public:
+	[[nodiscard]]
 	explicit ScopeCheckStack(lua_State *_L, int offset = 0) noexcept
 		:L(_L), expected_top(lua_gettop(L) + offset) {}
 
