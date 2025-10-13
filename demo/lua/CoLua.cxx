@@ -6,6 +6,7 @@
 #include "lua/Util.hxx"
 #include "lua/Error.hxx"
 #include "lua/Resume.hxx"
+#include "lua/State.hxx"
 #include "lua/event/Init.hxx"
 #include "lua/pg/Init.hxx"
 #include "lua/sodium/Init.hxx"
@@ -15,7 +16,6 @@
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveList.hxx"
 #include "util/PrintException.hxx"
-#include "util/ScopeExit.hxx"
 
 extern "C" {
 #include <lauxlib.h>
@@ -131,8 +131,8 @@ try {
 	Instance instance;
 	auto &event_loop = instance.event_loop;
 
-	const auto L = luaL_newstate();
-	AtScopeExit(L) { lua_close(L); };
+	const Lua::State state{luaL_newstate()};
+	lua_State *const L = state.get();
 
 	luaL_openlibs(L);
 
