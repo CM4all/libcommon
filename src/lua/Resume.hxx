@@ -22,6 +22,14 @@ public:
 };
 
 /**
+ * Global initialization of this Lua state for using this library.  It
+ * installs a coroutine.resume() wrapper which tracks coroutine
+ * completions that are invoked by Lua code.
+ */
+void
+InitResume(lua_State *L) noexcept;
+
+/**
  * Installs a #ResumeListener in the given Lua thread.
  */
 void

@@ -72,6 +72,7 @@ TEST(LuaCoroutine, Resume)
 	const Lua::State main{luaL_newstate()};
 	lua_State *const L = main.get();
 	luaL_openlibs(L);
+	Lua::InitResume(L);
 
 	/* the first coroutine yields twice, i.e. must be resumed
 	   twice */
@@ -126,6 +127,7 @@ TEST(LuaCoroutine, ResumeError)
 	const Lua::State main{luaL_newstate()};
 	lua_State *const L = main.get();
 	luaL_openlibs(L);
+	Lua::InitResume(L);
 
 	/* the coroutine yields and then throws a Lua error */
 	MyThread t1{L};

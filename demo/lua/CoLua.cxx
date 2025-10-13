@@ -137,6 +137,7 @@ try {
 
 	luaL_openlibs(L);
 
+	InitResume(L);
 	InitEvent(L, event_loop);
 	InitPg(L, event_loop);
 	InitSodium(L);
