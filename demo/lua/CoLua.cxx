@@ -53,7 +53,7 @@ public:
 
 		/* pop the lua_newthread() (a reference to it is held
 		   by SetResumeListener()) */
-		lua_pop(L, 1);
+		lua_pop(_L, 1);
 
 		start_event.Schedule();
 	}
