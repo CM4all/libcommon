@@ -158,24 +158,6 @@ SetTable(lua_State *L, AnyStackIndex auto table_idx,
 
 template<typename V>
 static inline void
-SetRegistry(lua_State *L, const char *name, V &&value) noexcept
-{
-	SetField(L, LUA_REGISTRYINDEX, name, std::forward<V>(value));
-}
-
-static inline void *
-GetRegistryLightUserData(lua_State *L, const char *name) noexcept
-{
-	const ScopeCheckStack check_stack(L);
-
-	lua_getfield(L, LUA_REGISTRYINDEX, name);
-	void *value = lua_touserdata(L, -1);
-	lua_pop(L, 1);
-	return value;
-}
-
-template<typename V>
-static inline void
 SetField(lua_State *L, const char *package,
 	 const char *name, V &&value) noexcept
 {
