@@ -12,6 +12,8 @@
 #include "event/Loop.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/ShutdownListener.hxx"
+#include "util/DeleteDisposer.hxx"
+#include "util/IntrusiveList.hxx"
 #include "util/PrintException.hxx"
 #include "util/ScopeExit.hxx"
 
@@ -20,38 +22,30 @@ extern "C" {
 #include <lualib.h>
 }
 
+#include <forward_list>
+
 #include <stdio.h>
 #include <stdlib.h>
 
 using namespace Lua;
 
-struct Instance final {
-	EventLoop event_loop;
-	ShutdownListener shutdown_listener{event_loop, BIND_THIS_METHOD(OnShutdown)};
+struct Instance;
 
-	Instance() noexcept
-	{
-		shutdown_listener.Enable();
-	}
+class Thread final : ResumeListener, public IntrusiveListHook<> {
+	Instance &instance;
 
-	void OnShutdown() noexcept {
-		event_loop.Break();
-	}
-};
-
-class Thread final : ResumeListener {
 	lua_State *const L;
 
 	DeferEvent start_event;
 
 	const char *const path;
 
-	std::exception_ptr error;
-
 public:
-	Thread(lua_State *_L, EventLoop &event_loop,
+	Thread(Instance &_instance,
+	       lua_State *_L, EventLoop &event_loop,
 	       const char *_path) noexcept
-		:L(lua_newthread(_L)),
+		:instance(_instance),
+		 L(lua_newthread(_L)),
 		 start_event(event_loop, BIND_THIS_METHOD(Start)),
 		 path(_path)
 	{
@@ -72,11 +66,6 @@ public:
 		return start_event.GetEventLoop();
 	}
 
-	void CheckRethrow() const {
-		if (error)
-			std::rethrow_exception(error);
-	}
-
 private:
 	void Start() noexcept {
 		try {
@@ -89,15 +78,50 @@ private:
 		}
 	}
 
-	void OnLuaFinished(lua_State *) noexcept override {
-		GetEventLoop().Break();
+	void OnLuaFinished(lua_State *) noexcept override;
+	void OnLuaError(lua_State *, std::exception_ptr e) noexcept override;
+};
+
+struct Instance final {
+	EventLoop event_loop;
+	ShutdownListener shutdown_listener{event_loop, BIND_THIS_METHOD(OnShutdown)};
+
+	IntrusiveList<Thread> threads;
+	std::forward_list<std::exception_ptr> errors;
+
+	Instance() noexcept
+	{
+		shutdown_listener.Enable();
 	}
 
-	void OnLuaError(lua_State *, std::exception_ptr e) noexcept override {
-		error = std::move(e);
-		GetEventLoop().Break();
+	~Instance() noexcept {
+		threads.clear_and_dispose(DeleteDisposer{});
+	}
+
+	void OnShutdown() noexcept {
+		event_loop.Break();
+	}
+
+	void OnThreadFinished(Thread &thread) noexcept {
+		threads.erase_and_dispose(threads.iterator_to(thread),
+					  DeleteDisposer{});
+		if (threads.empty())
+			event_loop.Break();
 	}
 };
+
+void
+Thread::OnLuaFinished(lua_State *) noexcept
+{
+	instance.OnThreadFinished(*this);
+}
+
+void
+Thread::OnLuaError(lua_State *, std::exception_ptr e) noexcept
+{
+	instance.errors.emplace_front(std::move(e));
+	instance.OnThreadFinished(*this);
+}
 
 int main(int argc, char **argv)
 try {
@@ -118,11 +142,15 @@ try {
 	InitPg(L, event_loop);
 	InitSodium(L);
 
-	Thread thread(L, event_loop, path);
+	instance.threads.push_back(*new Thread(instance, L, event_loop, path));
 
 	event_loop.Run();
 
-	thread.CheckRethrow();
+	if (!instance.errors.empty()) {
+		for (auto &i : instance.errors)
+			PrintException(std::move(i));
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 } catch (...) {
