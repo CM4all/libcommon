@@ -6,6 +6,7 @@
 #include "Error.hxx"
 #include "LightUserData.hxx"
 #include "PushCClosure.hxx"
+#include "RegistryTable.hxx"
 #include "Util.hxx"
 
 #include <cassert>
@@ -110,17 +111,7 @@ SetResumeListener(lua_State *L, ResumeListener &listener) noexcept
 	const ScopeCheckStack check_stack(L);
 
 	/* look up registry[key] */
-	GetTable(L, LUA_REGISTRYINDEX, LightUserData{&resume_listener_id});
-	if (lua_isnil(L, -1)) {
-		/* pop nil */
-		lua_pop(L, 1);
-
-		/* create a new table */
-		lua_newtable(L);
-		/* registry[key] = newtable */
-		SetTable(L, LUA_REGISTRYINDEX, LightUserData{&resume_listener_id},
-			 RelativeStackIndex{-1});
-	}
+	MakeRegistryTable(L, LightUserData{&resume_listener_id});
 
 	/* registry[key][L] = &listener */
 	SetTable(L, RelativeStackIndex{-1},

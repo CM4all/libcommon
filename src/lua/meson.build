@@ -24,6 +24,7 @@ lua = static_library(
   'CoRunner.cxx',
   'Error.cxx',
   'ReloadRunner.cxx',
+  'RegistryTable.cxx',
   'Resume.cxx',
   'RunFile.cxx',
   'State.cxx',
