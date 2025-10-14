@@ -10,7 +10,18 @@ extern "C" {
 #include <lua.h>
 }
 
+#include <cassert>
+
 namespace Lua {
+
+int
+YieldOperation(lua_State *L) noexcept
+{
+	assert(lua_gettop(L) >= 1);
+	assert(lua_isuserdata(L, -1));
+
+	return lua_yield(L, 1);
+}
 
 static bool
 CancelOperation(lua_State *L, int idx)

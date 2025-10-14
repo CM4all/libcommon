@@ -5,6 +5,7 @@
 #include "Init.hxx"
 #include "Timer.hxx"
 #include "lua/Class.hxx"
+#include "lua/CoOperation.hxx"
 #include "lua/LightUserData.hxx"
 #include "lua/PushCClosure.hxx"
 #include "lua/Resume.hxx"
@@ -60,7 +61,7 @@ Sleep(lua_State *L)
 
 	TimerClass::New(L, L, event_loop,
 			std::chrono::duration_cast<Event::Duration>(duration));
-	return lua_yield(L, 1);
+	return YieldOperation(L);
 }
 
 void

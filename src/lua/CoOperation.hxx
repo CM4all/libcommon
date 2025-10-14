@@ -9,6 +9,13 @@ struct lua_State;
 namespace Lua {
 
 /**
+ * Wrapper for lua_yield().  A cancellable userdata object (with
+ * method "__close") is expected to be the only item on the Lua stack.
+ */
+int
+YieldOperation(lua_State *L) noexcept;
+
+/**
  * If the state is suspended (#LUA_YIELD), attempt to close the
  * blocking operation by invoking its `__close` metamethod.
  *

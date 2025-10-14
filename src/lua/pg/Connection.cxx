@@ -11,6 +11,7 @@
 #include "lua/Error.hxx"
 #include "lua/Resume.hxx"
 #include "lua/Value.hxx"
+#include "lua/CoOperation.hxx"
 #include "lua/CoRunner.hxx"
 #include "pg/SharedConnection.hxx"
 #include "util/AllocatedArray.hxx"
@@ -257,7 +258,7 @@ PgConnection::Execute(lua_State *L)
 	auto *request = PgRequestClass::New(L, L, connection,
 					    sql, params);
 	connection.ScheduleQuery(*request);
-	return lua_yield(L, 1);
+	return YieldOperation(L);
 }
 
 inline int
