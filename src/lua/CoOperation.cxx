@@ -2,7 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#include "CoCancel.hxx"
+#include "CoOperation.hxx"
 #include "Assert.hxx"
 #include "Close.hxx"
 
@@ -13,13 +13,13 @@ extern "C" {
 namespace Lua {
 
 static bool
-CoCancel(lua_State *L, int idx)
+CancelOperation(lua_State *L, int idx)
 {
 	return Close(L, idx);
 }
 
 bool
-CoCancel(lua_State *L)
+CancelOperation(lua_State *L)
 {
 	const ScopeCheckStack check_main_stack{L};
 
@@ -32,7 +32,7 @@ CoCancel(lua_State *L)
 		/* not a "userdata" object on the stack */
 		return false;
 
-	return CoCancel(L, 1);
+	return CancelOperation(L, 1);
 }
 
 } // namespace Lua

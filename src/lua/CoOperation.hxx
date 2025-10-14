@@ -18,6 +18,6 @@ namespace Lua {
  * @return true if `__close` has been called
  */
 bool
-CoCancel(lua_State *L);
+CancelOperation(lua_State *L);
 
 } // namespace Lua

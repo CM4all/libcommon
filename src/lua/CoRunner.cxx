@@ -3,7 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "CoRunner.hxx"
-#include "CoCancel.hxx"
+#include "CoOperation.hxx"
 #include "Resume.hxx"
 
 namespace Lua {
@@ -31,7 +31,7 @@ CoRunner::Cancel()
 
 	thread.Dispose(main_L, [](auto *L){
 		if (UnsetResumeListener(L) != nullptr)
-			CoCancel(L);
+			CancelOperation(L);
 	});
 }
 

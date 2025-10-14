@@ -3,7 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "CoAwaitable.hxx"
-#include "CoCancel.hxx"
+#include "CoOperation.hxx"
 #include "Thread.hxx"
 
 namespace Lua {
@@ -27,7 +27,7 @@ CoAwaitable::~CoAwaitable() noexcept
 
 	thread.Dispose(main_L, [](auto *L){
 		if (UnsetResumeListener(L) != nullptr)
-			CoCancel(L);
+			CancelOperation(L);
 	});
 }
 
