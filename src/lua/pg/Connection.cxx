@@ -192,6 +192,8 @@ public:
 	}
 
 	void ResumeError(std::exception_ptr _error) noexcept {
+		ConsumeOperation(L);
+
 		/* return [nil, error_message] for assert() */
 		Push(L, nullptr);
 		Push(L, _error);
@@ -200,6 +202,8 @@ public:
 
 private:
 	void OnDeferredResume() noexcept {
+		ConsumeOperation(L);
+
 		if (!result.IsDefined()) {
 			if (error)
 				ResumeError(std::move(error));
@@ -379,11 +383,12 @@ PgRequest::SendQuery(Pg::AsyncConnection &c)
 {
 	const ScopeCheckStack check_stack(L);
 
+	PushOperation(L);
 	/* stack[-2] = fenv.sql; stack[-1] = fenv.params */
 	lua_getfenv(L, -1);
 	lua_getfield(L, -1, "sql");
 	lua_getfield(L, -2, "params");
-	AtScopeExit(_L=L) { lua_pop(_L, 3); };
+	AtScopeExit(_L=L) { lua_pop(_L, 4); };
 
 	if (!lua_isnil(L, -1)) {
 		const std::size_t n = lua_objlen(L, -1);

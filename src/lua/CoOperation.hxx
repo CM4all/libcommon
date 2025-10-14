@@ -16,6 +16,21 @@ int
 YieldOperation(lua_State *L) noexcept;
 
 /**
+ * Push the pending operation to the Lua stack.
+ */
+void
+PushOperation(lua_State *L);
+
+/**
+ * Push the pending operation to the Lua stack and unregister it from
+ * the Lua thread.  Call this when the operation that was started with
+ * YieldOperation completes, before resuming the yielded Lua
+ * coroutine/thread.
+ */
+void
+ConsumeOperation(lua_State *L);
+
+/**
  * If the state is suspended (#LUA_YIELD), attempt to close the
  * blocking operation by invoking its `__close` metamethod.
  *

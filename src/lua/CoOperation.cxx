@@ -23,6 +23,34 @@ YieldOperation(lua_State *L) noexcept
 	return lua_yield(L, 1);
 }
 
+void
+PushOperation(lua_State *L)
+{
+	assert(lua_status(L) == LUA_YIELD);
+
+	/* the current implementation assumes the operation object is
+	   already on the stack */
+	assert(lua_gettop(L) == 1);
+	assert(lua_isuserdata(L, 1));
+
+	// TODO implement
+	lua_pushvalue(L, -1);
+}
+
+void
+ConsumeOperation(lua_State *L)
+{
+	assert(lua_status(L) == LUA_YIELD);
+
+	/* the current implementation assumes the operation object is
+	   already on the stack */
+	assert(lua_gettop(L) == 1);
+	assert(lua_isuserdata(L, 1));
+
+	// TODO implement
+	(void)L;
+}
+
 static bool
 CancelOperation(lua_State *L, AnyStackIndex auto idx)
 {

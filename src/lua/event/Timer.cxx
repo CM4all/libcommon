@@ -38,6 +38,7 @@ public:
 
 private:
 	void OnTimer() noexcept {
+		ConsumeOperation(L);
 		Resume(L, 0);
 	}
 };
