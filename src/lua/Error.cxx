@@ -13,10 +13,15 @@ extern "C" {
 
 namespace Lua {
 
+Error::Error(lua_State *L, int idx) noexcept
+	:Error(lua_tostring(L, idx))
+{
+}
+
 Error
 PopError(lua_State *L)
 {
-	Error e(lua_tostring(L, -1));
+	Error e{L};
 	lua_pop(L, 1);
 	return e;
 }

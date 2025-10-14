@@ -17,6 +17,13 @@ namespace Lua {
 class Error : public std::runtime_error {
 public:
 	using std::runtime_error::runtime_error;
+
+	/**
+	 * Load a Lua error from the stack, defaulting to the top-most
+	 * stack position (because that is where the current error is
+	 * usually located after lua_pcall())'
+	 */
+	explicit Error(lua_State *L, int idx=-1) noexcept;
 };
 
 /**
