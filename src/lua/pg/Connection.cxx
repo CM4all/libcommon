@@ -179,6 +179,11 @@ public:
 		lua_setfenv(L, -2);
 	}
 
+	void Cancel() noexcept {
+		defer_resume.Cancel();
+		Pg::SharedConnectionQuery::Cancel();
+	}
+
 	void SendQuery(Pg::AsyncConnection &c);
 
 	void DeferResumeError(std::exception_ptr _error) noexcept {
