@@ -19,9 +19,17 @@ extern "C" {
 
 namespace Lua {
 
+template<typename T>
+concept HasGCMethod = requires(T &obj, lua_State *L) {
+	{ obj.GC(L) };
+};
+
 /**
  * Helper to wrap a C++ class in a Lua metatable.  This allows
  * instantiating C++ objects managed by Lua.
+ *
+ * The Lua GC will automatically invoke the method GC(lua_State*) if
+ * it exists and will invoke the destructor.
  */
 template<typename T, const char *name>
 struct Class {
@@ -40,7 +48,8 @@ struct Class {
 
 		/* let Lua's garbage collector call the destructor
 		   (but only if there is one) */
-		if constexpr (!std::is_trivially_destructible_v<T>)
+		if constexpr (!std::is_trivially_destructible_v<T> ||
+			      HasGCMethod<T>)
 			SetField(L, RelativeStackIndex{-1}, "__gc", l_gc);
 	}
 
@@ -146,6 +155,10 @@ private:
 		const ScopeCheckStack check_stack(L);
 
 		T *p = static_cast<T *>(lua_touserdata(L, 1));
+
+		if constexpr (HasGCMethod<T>)
+			p->GC(L);
+
 		/* call the destructor when this instance is
 		   garbage-collected */
 		std::destroy_at(p);

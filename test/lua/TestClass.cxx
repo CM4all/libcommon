@@ -95,6 +95,55 @@ TEST(Class, Dtor)
 	EXPECT_EQ(n, 1);
 }
 
+// see if the GC method gets called
+TEST(Class, GC)
+{
+	const State main{luaL_newstate()};
+	const auto L = main.get();
+	const ScopeCheckStack check_stack{L};
+
+	unsigned gc_calls = 0;
+	unsigned dtor_calls = 0;
+
+	struct T {
+		unsigned &gc_calls_;
+		unsigned &dtor_calls_;
+
+		explicit constexpr T(unsigned &_gc_calls, unsigned &_dtor_calls) noexcept
+			:gc_calls_(_gc_calls), dtor_calls_(_dtor_calls) {}
+
+		void GC(lua_State *) noexcept {
+			++gc_calls_;
+		}
+
+		~T() noexcept {
+			++dtor_calls_;
+		}
+
+		T(const T &) = delete;
+		T &operator=(const T &) = delete;
+	};
+
+	static constexpr char name[] = "T";
+	using C = Class<T, name>;
+
+	C::Register(L);
+	lua_pop(L, 1);
+
+	C::New(L, gc_calls, dtor_calls);
+	EXPECT_EQ(gc_calls, 0);
+	EXPECT_EQ(dtor_calls, 0);
+	lua_pop(L, 1);
+
+	EXPECT_EQ(gc_calls, 0);
+	EXPECT_EQ(dtor_calls, 0);
+
+	/* the GC calls both the GC method and the destructor */
+	lua_gc(L, LUA_GCCOLLECT, 0);
+	EXPECT_EQ(gc_calls, 1);
+	EXPECT_EQ(dtor_calls, 1);
+}
+
 // constructor throws C++ exception
 TEST(Class, Throw)
 {
