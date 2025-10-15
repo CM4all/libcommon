@@ -24,7 +24,7 @@ YieldOperation(lua_State *L) noexcept
 }
 
 static bool
-CancelOperation(lua_State *L, int idx)
+CancelOperation(lua_State *L, AnyStackIndex auto idx)
 {
 	return Close(L, idx);
 }
