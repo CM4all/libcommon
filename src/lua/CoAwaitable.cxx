@@ -44,7 +44,7 @@ CoAwaitable::OnLuaFinished(lua_State *) noexcept
 }
 
 void
-CoAwaitable::OnLuaError(lua_State *, std::exception_ptr e) noexcept
+CoAwaitable::OnLuaError(lua_State *, std::exception_ptr &&e) noexcept
 {
 	assert(!ready);
 	assert(!error);

@@ -28,7 +28,7 @@ struct MyResumeListener final : Lua::ResumeListener {
 		done = true;
 	}
 
-	void OnLuaError(lua_State *, std::exception_ptr e) noexcept override {
+	void OnLuaError(lua_State *, std::exception_ptr &&e) noexcept override {
 		assert(!done);
 		assert(!error);
 

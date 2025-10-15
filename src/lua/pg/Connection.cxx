@@ -74,7 +74,7 @@ class PgConnection final : Pg::SharedConnectionHandler {
 		/* virtual methods from class ResumeListener */
 		void OnLuaFinished(lua_State *L) noexcept override;
 		void OnLuaError(lua_State *L,
-				std::exception_ptr e) noexcept override;
+				std::exception_ptr &&e) noexcept override;
 	};
 
 	using NotifyRegistrationMap =
@@ -344,7 +344,7 @@ PgConnection::NotifyRegistration::OnLuaFinished([[maybe_unused]] lua_State *L) n
 
 void
 PgConnection::NotifyRegistration::OnLuaError([[maybe_unused]] lua_State *L,
-					     std::exception_ptr e) noexcept
+					     std::exception_ptr &&e) noexcept
 {
 	assert(busy);
 	busy = false;

@@ -18,7 +18,7 @@ class ResumeListener {
 public:
 	virtual void OnLuaFinished(lua_State *L) noexcept = 0;
 	virtual void OnLuaError(lua_State *L,
-				std::exception_ptr e) noexcept = 0;
+				std::exception_ptr &&error) noexcept = 0;
 };
 
 /**

@@ -53,7 +53,7 @@ ReloadRunner::OnLuaFinished(lua_State *) noexcept
 }
 
 void
-ReloadRunner::OnLuaError(lua_State *, std::exception_ptr e) noexcept
+ReloadRunner::OnLuaError(lua_State *, std::exception_ptr &&e) noexcept
 {
 	PrintException(e);
 

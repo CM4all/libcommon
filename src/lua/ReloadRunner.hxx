@@ -31,7 +31,7 @@ public:
 private:
 	/* virtual methods from ResumeListener */
 	void OnLuaFinished(lua_State *L) noexcept override;
-	void OnLuaError(lua_State *L, std::exception_ptr e) noexcept override;
+	void OnLuaError(lua_State *L, std::exception_ptr &&e) noexcept override;
 };
 
 } // namespace Lua

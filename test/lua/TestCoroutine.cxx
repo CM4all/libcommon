@@ -49,7 +49,7 @@ struct MyThread final : Lua::ResumeListener {
 		finished = true;
 	}
 
-	void OnLuaError(lua_State *, std::exception_ptr e) noexcept override {
+	void OnLuaError(lua_State *, std::exception_ptr &&e) noexcept override {
 		finished = true;
 		error = std::move(e);
 	}

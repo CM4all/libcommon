@@ -79,7 +79,7 @@ private:
 	}
 
 	void OnLuaFinished(lua_State *) noexcept override;
-	void OnLuaError(lua_State *, std::exception_ptr e) noexcept override;
+	void OnLuaError(lua_State *, std::exception_ptr &&e) noexcept override;
 };
 
 struct Instance final {
@@ -119,7 +119,7 @@ Thread::OnLuaFinished(lua_State *) noexcept
 }
 
 void
-Thread::OnLuaError(lua_State *, std::exception_ptr e) noexcept
+Thread::OnLuaError(lua_State *, std::exception_ptr &&e) noexcept
 {
 	instance.errors.emplace_front(std::move(e));
 	instance.OnThreadFinished(*this);
