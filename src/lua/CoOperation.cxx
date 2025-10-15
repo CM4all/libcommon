@@ -32,7 +32,7 @@ CancelOperation(lua_State *L, int idx)
 bool
 CancelOperation(lua_State *L)
 {
-	const ScopeCheckStack check_main_stack{L};
+	const ScopeCheckStack check_stack{L};
 
 	if (lua_status(L) != LUA_YIELD)
 		/* not suspended by a blocking operation via
