@@ -6,8 +6,8 @@
 
 #include "AsyncConnection.hxx"
 #include "event/DeferEvent.hxx"
-#include "co/Compat.hxx"
 
+#include <coroutine>
 #include <cstdint>
 
 namespace Pg {

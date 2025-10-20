@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "Compat.hxx"
 #include "util/IntrusiveList.hxx"
 
 #include <cassert>
+#include <coroutine>
 
 namespace Co {
 

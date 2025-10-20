@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "co/Compat.hxx"
 #include "co/AwaitableHelper.hxx"
 #include "event/FineTimerEvent.hxx"
 
