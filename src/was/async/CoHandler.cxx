@@ -44,7 +44,7 @@ public:
 	}
 
 private:
-	void OnCompletion(std::exception_ptr) noexcept {
+	void OnCompletion(std::exception_ptr &&) noexcept {
 		assert(!complete);
 
 		if (starting)

@@ -15,7 +15,7 @@ struct Completion {
 	std::exception_ptr error;
 	bool done = false;
 
-	void Callback(std::exception_ptr _error) noexcept {
+	void Callback(std::exception_ptr &&_error) noexcept {
 		assert(!done);
 		assert(!error);
 
@@ -258,7 +258,7 @@ struct SelfDeletingCompletion {
 	bool done = false;
 	std::unique_ptr<Co::InvokeTask> invoke;
 
-	void Callback(std::exception_ptr _error) noexcept {
+	void Callback(std::exception_ptr &&_error) noexcept {
 		assert(!done);
 		assert(!error);
 

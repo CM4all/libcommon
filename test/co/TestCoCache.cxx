@@ -95,7 +95,7 @@ struct Work {
 		task.Start(BIND_THIS_METHOD(OnCompletion));
 	}
 
-	void OnCompletion(std::exception_ptr _error) noexcept {
+	void OnCompletion(std::exception_ptr &&_error) noexcept {
 		assert(value >= 0 || _error);
 
 		error = std::move(_error);

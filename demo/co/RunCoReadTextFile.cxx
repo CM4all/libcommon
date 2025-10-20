@@ -39,7 +39,7 @@ struct Instance final {
 		event_loop.SetVolatile();
 	}
 
-	void OnCompletion(std::exception_ptr _error) noexcept {
+	void OnCompletion(std::exception_ptr &&_error) noexcept {
 		error = std::move(_error);
 		event_loop.SetVolatile();
 		shutdown_listener.Disable();

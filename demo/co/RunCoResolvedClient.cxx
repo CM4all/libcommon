@@ -29,7 +29,7 @@ struct Instance final {
 		task = {};
 	}
 
-	void OnCompletion(std::exception_ptr _error) noexcept {
+	void OnCompletion(std::exception_ptr &&_error) noexcept {
 		error = std::move(_error);
 		shutdown_listener.Disable();
 	}

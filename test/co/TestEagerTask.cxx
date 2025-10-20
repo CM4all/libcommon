@@ -39,7 +39,7 @@ TEST(Task, EagerTask)
 	std::exception_ptr error;
 
 	auto task = RunEagerTask(42, value);
-	task.Start({&error, [](void *error_p, std::exception_ptr _error) noexcept {
+	task.Start({&error, [](void *error_p, std::exception_ptr &&_error) noexcept {
 		auto &error_r = *(std::exception_ptr *)error_p;
 		error_r = std::move(_error);
 	}});
@@ -68,7 +68,7 @@ TEST(Task, Reference)
 	std::exception_ptr error;
 
 	auto task = RunReferenceTask(result);
-	task.Start({&error, [](void *error_p, std::exception_ptr _error) noexcept {
+	task.Start({&error, [](void *error_p, std::exception_ptr &&_error) noexcept {
 		auto &error_r = *(std::exception_ptr *)error_p;
 		error_r = std::move(_error);
 	}});

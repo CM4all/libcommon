@@ -33,7 +33,7 @@ struct Instance final {
 		db.Shutdown();
 	}
 
-	void OnCompletion(std::exception_ptr _error) noexcept {
+	void OnCompletion(std::exception_ptr &&_error) noexcept {
 		error = std::move(_error);
 		db.Shutdown();
 		shutdown_listener.Disable();

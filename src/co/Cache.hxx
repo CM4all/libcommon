@@ -63,7 +63,7 @@ class Cache {
 		explicit Handler(const Data &_data) noexcept
 			:data(_data) {}
 
-		explicit Handler(std::exception_ptr _error) noexcept
+		explicit Handler(std::exception_ptr &&_error) noexcept
 			:error(std::move(_error)) {}
 
 		explicit Handler(Request &_request) noexcept
@@ -116,7 +116,7 @@ class Cache {
 		explicit Task(const Data &data) noexcept
 			:handler(new Handler(data)) {}
 
-		explicit Task(std::exception_ptr _error) noexcept
+		explicit Task(std::exception_ptr &&_error) noexcept
 			:handler(new Handler(std::move(_error))) {}
 
 		explicit Task(Request &request) noexcept
@@ -215,7 +215,7 @@ class Cache {
 			task.Start(BIND_THIS_METHOD(OnCompletion));
 		}
 
-		void OnCompletion(std::exception_ptr error) noexcept {
+		void OnCompletion(std::exception_ptr &&error) noexcept {
 			assert(!task);
 
 			if (error)
