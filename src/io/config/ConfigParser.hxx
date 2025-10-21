@@ -69,7 +69,7 @@ public:
 class VariableConfigParser final : public ConfigParser {
 	ConfigParser &child;
 
-	std::map<std::string, std::string> variables;
+	std::map<std::string, std::string, std::less<>> variables;
 
 	mutable std::string buffer;
 
