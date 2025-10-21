@@ -38,7 +38,7 @@ class ServiceExplorer final : ConnectionListener {
 
 	class Object;
 
-	using Map = std::map<std::string, Object>;
+	using Map = std::map<std::string, Object, std::less<>>;
 	Map objects;
 
 	std::size_t n_resolvers = 0;
