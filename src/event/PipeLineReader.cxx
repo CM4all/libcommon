@@ -11,6 +11,7 @@ void
 PipeLineReader::TryRead(bool flush) noexcept
 {
 	assert(!buffer.IsFull());
+	assert(event.IsDefined());
 
 	auto w = buffer.Write();
 	assert(!w.empty());
