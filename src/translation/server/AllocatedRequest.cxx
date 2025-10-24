@@ -282,6 +282,12 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		peek = true;
 		break;
 
+	case TranslationCommand::APPEND:
+		strings.emplace_front(ToStringView(payload));
+		append_buffer.push_back(strings.front().c_str());
+		append = append_buffer;
+		break;
+
 	default:
 		throw FmtRuntimeError("unknown translation packet: {}",
 				      unsigned(cmd));

@@ -7,7 +7,9 @@
 #include "Request.hxx"
 #include "util/AllocatedArray.hxx"
 
+#include <forward_list>
 #include <string>
+#include <vector>
 
 #include <stdint.h>
 
@@ -16,6 +18,10 @@ enum class TranslationCommand : uint16_t;
 namespace Translation::Server {
 
 class AllocatedRequest : public Request {
+	std::forward_list<std::string> strings;
+
+	std::vector<const char *> append_buffer;
+
 	std::string uri_buffer, host_buffer;
 	std::string session_buffer;
 	std::string realm_session_buffer;

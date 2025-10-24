@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <span>
+#include <string_view>
 
 enum class TranslationCommand : uint16_t;
 
@@ -17,6 +18,8 @@ struct Request {
 	unsigned protocol_version = 0;
 
 	HttpStatus status = HttpStatus{};
+
+	std::span<const char *const> append{};
 
 	const char *uri = nullptr;
 
