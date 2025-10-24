@@ -51,6 +51,10 @@ public:
 		return event.GetEventLoop();
 	}
 
+	bool IsDefined() const noexcept {
+		return event.IsDefined();
+	}
+
 	/**
 	 * Attempt to read again, and pass all data to the callback.  If
 	 * the last line isn't finalized with a newline character, it is
