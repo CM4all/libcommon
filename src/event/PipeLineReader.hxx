@@ -33,12 +33,6 @@ class PipeLineReader {
 	StaticFifoBuffer<char, 8192> buffer;
 
 public:
-	/**
-	 * @param callback this function will be invoked for every
-	 * received line, and again with a nullptr parameter at the
-	 * end of the pipe; it returns false if the #PipeLineReader
-	 * has been destroyed inside the callback
-	 */
 	PipeLineReader(EventLoop &event_loop,
 		       UniqueFileDescriptor fd,
 		       PipeLineReaderHandler &_handler) noexcept
