@@ -656,6 +656,10 @@ public:
 		return base.GetReadyFlags();
 	}
 
+	void ClearReadyFlags(unsigned flags) noexcept {
+		base.ClearReadyFlags(flags);
+	}
+
 	/**
 	 * Defer a call to Read().
 	 */

@@ -987,7 +987,7 @@ BufferedSocket::Read() noexcept
 	   request), the pending EPOLLIN has been handled already in
 	   this EventLoop iteration; clear this flag for now and skip
 	   the pending read */
-	base.ClearReadyFlags(SocketEvent::READ);
+	ClearReadyFlags(SocketEvent::READ);
 	defer_read.Cancel();
 
 	return TryRead();
