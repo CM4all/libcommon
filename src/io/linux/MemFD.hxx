@@ -3,12 +3,7 @@
 
 #pragma once
 
-#include <signal.h>
-
 class UniqueFileDescriptor;
 
 UniqueFileDescriptor
-CreateEventFD(unsigned initval=0);
-
-UniqueFileDescriptor
-CreateSignalFD(const sigset_t &mask, bool nonblock=true);
+CreateMemFD(const char *name, unsigned flags=0);

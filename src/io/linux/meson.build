@@ -1,6 +1,7 @@
 io_linux = static_library(
   'io_linux',
   'CgroupEvents.cxx',
+  'MemFD.cxx',
   'ProcPid.cxx',
   'ProcFdinfo.cxx',
   'ProcCgroup.cxx',

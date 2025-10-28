@@ -7,7 +7,6 @@
 
 #include <sys/eventfd.h>
 #include <sys/signalfd.h>
-#include <sys/mman.h> //for memfd_create()
 
 UniqueFileDescriptor
 CreateEventFD(unsigned initval)
@@ -29,18 +28,6 @@ CreateSignalFD(const sigset_t &mask, bool nonblock)
 	int fd = ::signalfd(-1, &mask, flags);
 	if (fd < 0)
 		throw MakeErrno("signalfd() failed");
-
-	return UniqueFileDescriptor(AdoptTag{}, fd);
-}
-
-UniqueFileDescriptor
-CreateMemFD(const char *name, unsigned flags)
-{
-	flags |= MFD_CLOEXEC;
-
-	int fd = memfd_create(name, flags);
-	if (fd < 0)
-		throw MakeErrno("memfd_create() failed");
 
 	return UniqueFileDescriptor(AdoptTag{}, fd);
 }
