@@ -34,6 +34,7 @@ pg = static_library(
   'pg',
   'Serial.cxx',
   'Array.cxx',
+  'Hex.cxx',
   'Interval.cxx',
   'Connection.cxx',
   'Result.cxx',

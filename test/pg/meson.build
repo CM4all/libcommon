@@ -8,6 +8,7 @@ test(
     'TestPg',
     'TestDecodeArray.cxx',
     'TestEncodeArray.cxx',
+    'TestDecodeHex.cxx',
     'TestParamWrapper.cxx',
     'TestInterval.cxx',
     'TestTimestamp.cxx',
