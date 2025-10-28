@@ -282,6 +282,48 @@ public:
 	}
 
 	/**
+	 * Prepare a statement.
+	 *
+	 * Throws #Error on error.
+	 */
+	Result Prepare(const char *stmt_name, const char *query,
+		       size_t n_params = 0, const Oid *param_types = nullptr) {
+		assert(IsDefined());
+		assert(stmt_name != nullptr);
+		assert(query != nullptr);
+
+		return CheckResult(::PQprepare(conn, stmt_name, query, n_params, param_types));
+	}
+
+	template<ParamArray A>
+	Result ExecutePrepared(bool result_binary, const char *stmt_name,
+			       const A &params) {
+		assert(IsDefined());
+		assert(stmt_name != nullptr);
+
+		return CheckResult(::PQexecPrepared(conn, stmt_name, params.size(),
+						    params.GetValues(),
+						    params.GetLengths(),
+						    params.GetFormats(),
+						    result_binary));
+	}
+
+	template<typename... Params>
+	Result ExecutePrepared(bool result_binary,
+			       const char *stmt_name, const Params&... _params) {
+		assert(IsDefined());
+		assert(stmt_name != nullptr);
+
+		const AutoParamArray<Params...> params(_params...);
+		return ExecutePrepared(result_binary, stmt_name, params);
+	}
+
+	template<typename... Params>
+	Result ExecutePrepared(const char *stmt_name, const Params&... params) {
+		return ExecutePrepared(false, stmt_name, params...);
+	}
+
+	/**
 	 * Wrapper for "SET ROLE ...".
 	 *
 	 * Throws #Error on error.
