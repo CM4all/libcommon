@@ -7,6 +7,21 @@
 
 #include <cerrno>
 
+PipeLineReader::PipeLineReader(EventLoop &event_loop,
+			       UniqueFileDescriptor &&fd,
+			       PipeLineReaderHandler &_handler) noexcept
+	:event(event_loop, BIND_THIS_METHOD(OnPipeReadable),
+	       fd.Release()),
+	 handler(_handler)
+{
+	event.ScheduleRead();
+}
+
+PipeLineReader::~PipeLineReader() noexcept
+{
+	event.Close();
+}
+
 void
 PipeLineReader::TryRead(bool flush) noexcept
 {
@@ -36,4 +51,10 @@ PipeLineReader::TryRead(bool flush) noexcept
 		if (!handler.OnPipeLine(r))
 			return;
 	}
+}
+
+inline void
+PipeLineReader::OnPipeReadable(unsigned) noexcept
+{
+	TryRead(false);
 }

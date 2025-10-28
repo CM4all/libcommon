@@ -34,18 +34,10 @@ class PipeLineReader {
 
 public:
 	PipeLineReader(EventLoop &event_loop,
-		       UniqueFileDescriptor fd,
-		       PipeLineReaderHandler &_handler) noexcept
-		:event(event_loop, BIND_THIS_METHOD(OnPipeReadable),
-		       fd.Release()),
-		 handler(_handler)
-	{
-		event.ScheduleRead();
-	}
+		       UniqueFileDescriptor &&fd,
+		       PipeLineReaderHandler &_handler) noexcept;
 
-	~PipeLineReader() noexcept {
-		event.Close();
-	}
+	~PipeLineReader() noexcept;
 
 	EventLoop &GetEventLoop() const noexcept {
 		return event.GetEventLoop();
@@ -69,7 +61,5 @@ public:
 private:
 	void TryRead(bool flush) noexcept;
 
-	void OnPipeReadable(unsigned) noexcept {
-		TryRead(false);
-	}
+	void OnPipeReadable(unsigned) noexcept;
 };
