@@ -26,5 +26,5 @@ TEST(PgTest, DecodeHex)
 	EXPECT_EQ(ToStringView(Pg::DecodeHex("\\x00"sv)), "\x00"sv);
 	EXPECT_EQ(ToStringView(Pg::DecodeHex("\\x0a"sv)), "\x0a"sv);
 	EXPECT_EQ(ToStringView(Pg::DecodeHex("\\x41"sv)), "A"sv);
-	EXPECT_EQ(ToStringView(Pg::DecodeHex("\\x410042"sv)), "A\x00B"sv);
+	EXPECT_EQ(ToStringView(Pg::DecodeHex("\\x410042"sv)), "A\0B"sv);
 }
