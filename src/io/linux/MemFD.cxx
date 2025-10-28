@@ -18,3 +18,14 @@ CreateMemFD(const char *name, unsigned flags)
 
 	return UniqueFileDescriptor(AdoptTag{}, fd);
 }
+
+UniqueFileDescriptor
+CreateMemFD(const char *name, std::span<const std::byte> contents)
+{
+	auto fd = CreateMemFD(name);
+	if (const auto nbytes = fd.WriteAt(0, contents); nbytes < 0)
+		throw MakeErrno("Failed to write to memfd");
+	else if (static_cast<std::size_t>(nbytes) < contents.size())
+		throw std::runtime_error{"Short write on memfd"};
+	return fd;
+}
