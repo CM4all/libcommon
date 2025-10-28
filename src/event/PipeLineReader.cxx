@@ -32,10 +32,10 @@ PipeLineReader::TryRead(bool flush) noexcept
 	assert(!w.empty());
 
 	auto nbytes = event.GetFileDescriptor().Read(std::as_writable_bytes(w));
-	if (nbytes < 0 && errno == EAGAIN)
-		return;
+	if (nbytes <= 0) [[unlikely]] {
+		if (nbytes < 0 && errno == EAGAIN)
+			return;
 
-	if (nbytes <= 0) {
 		event.Close();
 		handler.OnPipeEnd();
 		return;
