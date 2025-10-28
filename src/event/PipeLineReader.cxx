@@ -37,8 +37,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 			return;
 
 		event.Close();
-		handler.OnPipeEnd();
-		return;
+		flush = true;
 	}
 
 	buffer.Append(nbytes);
@@ -51,6 +50,9 @@ PipeLineReader::TryRead(bool flush) noexcept
 		if (!handler.OnPipeLine(r))
 			return;
 	}
+
+	if (!event.IsDefined())
+		handler.OnPipeEnd();
 }
 
 inline void
