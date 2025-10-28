@@ -23,7 +23,7 @@ PipeLineReader::~PipeLineReader() noexcept
 }
 
 void
-PipeLineReader::TryRead(bool flush) noexcept
+PipeLineReader::TryRead(bool flush, bool hangup) noexcept
 {
 	assert(!buffer.IsFull());
 	assert(event.IsDefined());
@@ -36,6 +36,14 @@ PipeLineReader::TryRead(bool flush) noexcept
 		if (nbytes < 0 && errno == EAGAIN)
 			return;
 
+		event.Close();
+		flush = true;
+	}
+
+	if (hangup && static_cast<std::size_t>(nbytes) < w.size()) {
+		/* the peer has closed the write end of the pipe and
+		   we had a short read: there won't ever be any more
+		   data, so let's stop here */
 		event.Close();
 		flush = true;
 	}
@@ -56,7 +64,7 @@ PipeLineReader::TryRead(bool flush) noexcept
 }
 
 inline void
-PipeLineReader::OnPipeReadable(unsigned) noexcept
+PipeLineReader::OnPipeReadable(unsigned events) noexcept
 {
-	TryRead(false);
+	TryRead(false, (events & event.DEAD_MASK) != 0);
 }

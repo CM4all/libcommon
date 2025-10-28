@@ -55,11 +55,11 @@ public:
 	 * ensure that everything in the pipe is handled.
 	 */
 	void Flush() noexcept {
-		TryRead(true);
+		TryRead(true, false);
 	}
 
 private:
-	void TryRead(bool flush) noexcept;
+	void TryRead(bool flush, bool hangup) noexcept;
 
 	void OnPipeReadable(unsigned) noexcept;
 };
