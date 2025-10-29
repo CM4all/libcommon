@@ -8,6 +8,8 @@
 
 #include "Hex.hxx"
 #include "util/AllocatedArray.hxx"
+#include "util/AllocatedString.hxx"
+#include "util/HexFormat.hxx"
 #include "util/HexParse.hxx"
 #include "util/StringCompare.hxx"
 
@@ -36,6 +38,20 @@ DecodeHex(std::string_view src)
 		if (p == nullptr)
 			throw std::invalid_argument{"Malformed hex digit"};
 	}
+
+	return result;
+}
+
+AllocatedString
+EncodeHex(std::span<const std::byte> src) noexcept
+{
+	AllocatedString result = AllocatedString::Donate(new char[2 + src.size() * 2 + 1]);
+
+	char *p = result.data();
+	*p++ = '\\';
+	*p++ = 'x';
+	p = HexFormat(p, src);
+	*p = 0;
 
 	return result;
 }

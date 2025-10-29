@@ -4,6 +4,7 @@
 
 #include "pg/Hex.hxx"
 #include "util/AllocatedArray.hxx"
+#include "util/AllocatedString.hxx"
 #include "util/SpanCast.hxx"
 
 #include <gtest/gtest.h>
@@ -27,4 +28,13 @@ TEST(PgTest, DecodeHex)
 	EXPECT_EQ(ToStringView(Pg::DecodeHex("\\x0a"sv)), "\x0a"sv);
 	EXPECT_EQ(ToStringView(Pg::DecodeHex("\\x41"sv)), "A"sv);
 	EXPECT_EQ(ToStringView(Pg::DecodeHex("\\x410042"sv)), "A\0B"sv);
+}
+
+TEST(PgTest, EncodeHex)
+{
+	EXPECT_STREQ(Pg::EncodeHex(AsBytes(""sv)).c_str(), "\\x");
+	EXPECT_STREQ(Pg::EncodeHex(AsBytes("\x00"sv)).c_str(), "\\x00");
+	EXPECT_STREQ(Pg::EncodeHex(AsBytes("\x0a"sv)).c_str(), "\\x0a");
+	EXPECT_STREQ(Pg::EncodeHex(AsBytes("A"sv)).c_str(), "\\x41");
+	EXPECT_STREQ(Pg::EncodeHex(AsBytes("A\0B"sv)).c_str(), "\\x410042");
 }

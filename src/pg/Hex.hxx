@@ -13,6 +13,7 @@
 #include <string_view>
 
 template<typename T> class AllocatedArray;
+class AllocatedString;
 
 namespace Pg {
 
@@ -24,5 +25,9 @@ namespace Pg {
  */
 AllocatedArray<std::byte>
 DecodeHex(std::string_view src);
+
+[[gnu::pure]]
+AllocatedString
+EncodeHex(std::span<const std::byte> src) noexcept;
 
 } /* namespace Pg */
