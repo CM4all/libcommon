@@ -7,6 +7,7 @@ util_sources = [
   'PrintException.cxx',
   'StringBuilder.cxx',
   'StringCompare.cxx',
+  'StringList.cxx',
   'StringParser.cxx',
   'StringStrip.cxx',
   'StringWithHash.cxx',
