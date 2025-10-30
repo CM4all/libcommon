@@ -191,6 +191,13 @@ enum class Command {
      * rejecting it.
      */
     TARPIT_CLIENT = 24,
+
+    /**
+     * Cancel an asynchronous job (usually Workshop).  Payload is the
+     * Workshop partition name and the job id (as string), separated
+     * by a null byte.
+     */
+    CANCEL_JOB = 25,
 };
 
 struct Header {
