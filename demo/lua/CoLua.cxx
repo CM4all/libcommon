@@ -11,6 +11,8 @@
 #include "lua/event/Init.hxx"
 #include "lua/pg/Init.hxx"
 #include "lua/sodium/Init.hxx"
+#include "lua/net/SocketAddress.hxx"
+#include "lua/net/ControlClient.hxx"
 #include "event/Loop.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/ShutdownListener.hxx"
