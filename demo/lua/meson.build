@@ -23,6 +23,7 @@ if lua_pg_dep.found()
     dependencies: [
       lua_dep,
       lua_event_dep,
+      lua_json_dep,
       lua_pg_dep,
       lua_sodium_dep,
       event_dep,
