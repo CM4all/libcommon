@@ -55,11 +55,11 @@ constexpr std::size_t
 IntHashT(const T &src, std::size_t hash=INT_HASH_INIT) noexcept
 {
 	if constexpr (sizeof(T) % 8 == 0)
-	return _IntHashT<T, uint64_t>(src, hash);
+		return _IntHashT<T, uint64_t>(src, hash);
 	else if constexpr (sizeof(T) % 4 == 0)
-	return _IntHashT<T, uint32_t>(src, hash);
+		return _IntHashT<T, uint32_t>(src, hash);
 	else if constexpr (sizeof(T) % 2 == 0)
-	return _IntHashT<T, uint16_t>(src, hash);
+		return _IntHashT<T, uint16_t>(src, hash);
 	else
-	return _IntHashT<T, uint8_t>(src, hash);
+		return _IntHashT<T, uint8_t>(src, hash);
 }
