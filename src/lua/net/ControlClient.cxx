@@ -9,6 +9,7 @@
 #include "net/control/Protocol.hxx"
 #include "net/ConnectSocket.hxx"
 #include "net/SocketAddress.hxx"
+#include "lua/CheckArg.hxx"
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
 #include "lua/StringView.hxx"
@@ -16,6 +17,10 @@
 extern "C" {
 #include <lauxlib.h>
 }
+
+#include <fmt/core.h>
+
+using std::string_view_literals::operator""sv;
 
 namespace Lua {
 
@@ -62,9 +67,7 @@ private:
 		return AddSimple(L, BengControl::Command::TARPIT_CLIENT);
 	}
 
-	int CancelJob(lua_State *L) {
-		return AddSimple(L, BengControl::Command::CANCEL_JOB);
-	}
+	int CancelJob(lua_State *L);
 };
 
 int
@@ -76,6 +79,25 @@ ControlBuilder::AddSimple(lua_State *L, BengControl::Command command)
 
 	for (int i = 2; i <= top; ++i)
 		Add(command, ToStringView(L, i));
+
+	// return self
+	lua_settop(L, 1);
+	return 1;
+}
+
+inline int
+ControlBuilder::CancelJob(lua_State *L)
+{
+	const int top = lua_gettop(L);
+	if (top < 3)
+		return luaL_error(L, "Not enough parameters");
+	if (top > 3)
+		return luaL_error(L, "Too many parameters");
+
+	const std::string_view partition_name = CheckStringView(L, 2);
+	const std::string_view job_id = CheckStringView(L, 3);
+
+	Add(BengControl::Command::CANCEL_JOB, fmt::format("{}\0{}"sv, partition_name, job_id));
 
 	// return self
 	lua_settop(L, 1);
