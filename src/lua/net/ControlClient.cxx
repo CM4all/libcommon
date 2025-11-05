@@ -157,7 +157,10 @@ try {
 	client.Send(ControlBuilderClass::Cast(L, 2));
 	return 0;
 } catch (...) {
-	RaiseCurrent(L);
+	// return [nil, error_message] for assert()
+	Push(L, nullptr);
+	Push(L, std::current_exception());
+	return 2;
 }
 
 static constexpr char lua_control_client_class[] = "control_client";
@@ -186,7 +189,10 @@ try {
 		return 1;
 	}
 } catch (...) {
-	RaiseCurrent(L);
+	// return [nil, error_message] for assert()
+	Push(L, nullptr);
+	Push(L, std::current_exception());
+	return 2;
 }
 
 void
