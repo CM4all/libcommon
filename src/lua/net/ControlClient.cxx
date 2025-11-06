@@ -155,7 +155,10 @@ try {
 		return luaL_error(L, "Too many parameters");
 
 	client.Send(ControlBuilderClass::Cast(L, 2));
-	return 0;
+
+	// return true on success
+	Push(L, true);
+	return 1;
 } catch (...) {
 	// return [nil, error_message] for assert()
 	Push(L, nullptr);
