@@ -144,6 +144,8 @@ try {
 	InitEvent(L, event_loop);
 	InitPg(L, event_loop);
 	InitSodium(L);
+	InitSocketAddress(L);
+	InitControlClient(L);
 	InitToJson(L);
 
 	for (int i = 1; i < argc; ++i)
