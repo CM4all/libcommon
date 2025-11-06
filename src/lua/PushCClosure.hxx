@@ -22,7 +22,7 @@ struct CClosure {
 };
 
 template<typename... T>
-CClosure<T...>
+constexpr CClosure<T...>
 MakeCClosure(lua_CFunction fn, T&&... values)
 {
 	return {fn, std::make_tuple(std::forward<T>(values)...)};
