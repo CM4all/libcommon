@@ -8,6 +8,7 @@ endif
 
 lua_net = static_library(
   'lua_net',
+  'Socket.cxx',
   'SocketAddress.cxx',
   'Resolver.cxx',
   lua_net_sources,

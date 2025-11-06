@@ -11,6 +11,7 @@
 #include "lua/event/Init.hxx"
 #include "lua/pg/Init.hxx"
 #include "lua/sodium/Init.hxx"
+#include "lua/net/Socket.hxx"
 #include "lua/net/SocketAddress.hxx"
 #include "lua/net/ControlClient.hxx"
 #include "event/Loop.hxx"
@@ -145,6 +146,7 @@ try {
 	InitPg(L, event_loop);
 	InitSodium(L);
 	InitSocketAddress(L);
+	InitSocket(L);
 	InitControlClient(L);
 	InitToJson(L);
 
