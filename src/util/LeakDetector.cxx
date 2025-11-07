@@ -37,6 +37,11 @@ LeakDetector::LeakDetector() noexcept
 	state = State::REGISTERED;
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
+/* do not optimize the "state" update away - it's legally dead code,
+   but we want it anyway */
+[[gnu::optimize("O0")]]
+#endif
 LeakDetector::~LeakDetector() noexcept
 {
 	assert(state == State::REGISTERED);
