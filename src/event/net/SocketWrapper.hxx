@@ -116,6 +116,12 @@ public:
 		return fd_type;
 	}
 
+	void ScheduleAnyHangup() noexcept {
+		assert(IsValid());
+
+		socket_event.ScheduleAnyHangup();
+	}
+
 	void ScheduleRead() noexcept {
 		assert(IsValid());
 

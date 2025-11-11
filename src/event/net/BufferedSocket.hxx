@@ -683,6 +683,13 @@ public:
 		defer_read.Schedule();
 	}
 
+	void ScheduleAnyHangup() noexcept {
+		assert(!ended);
+		assert(!destroyed);
+
+		base.ScheduleAnyHangup();
+	}
+
 	void ScheduleRead() noexcept;
 
 	void ScheduleReadAndAnyHangup() noexcept {
