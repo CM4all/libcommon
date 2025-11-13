@@ -503,6 +503,10 @@ public:
 		return base.GetType();
 	}
 
+	bool GetDirect() const noexcept {
+		return direct;
+	}
+
 	void SetDirect(bool _direct) noexcept {
 		direct = _direct;
 	}
