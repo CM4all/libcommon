@@ -150,3 +150,15 @@ ThreadQueue::Cancel(ThreadJob &job) noexcept
 
 	std::unreachable();
 }
+
+void
+ThreadQueue::FlushSynchronously() noexcept
+{
+	std::unique_lock lock{mutex};
+
+	while (!waiting.empty() || !busy.empty()) {
+		lock.unlock();
+		notify.WaitSynchronously();
+		lock.lock();
+	}
+}

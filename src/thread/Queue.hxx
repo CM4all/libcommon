@@ -85,6 +85,14 @@ public:
 	 */
 	bool Cancel(ThreadJob &job) noexcept;
 
+	/**
+	 * Wait for the queue to run empty (but do not invoke any
+	 * completion callbacks).  This method is only meant as a
+	 * workaround for unit tests and should not be used in regular
+	 * code.
+	 */
+	void FlushSynchronously() noexcept;
+
 private:
 	bool IsEmpty() const noexcept {
 		return waiting.empty() && busy.empty() && done.empty();
