@@ -88,39 +88,48 @@ public:
 	/**
 	 * Like MoveFrom(), but allow the destination to be nulled.  This
 	 * is useful when #src can be freed, but this object cannot.
+	 *
+	 * @return the number of bytes moved
 	 */
-	void MoveFromAllowNull(SliceFifoBuffer &src) noexcept {
-		if (empty() && (!src.empty() || !IsNull()))
+	size_type MoveFromAllowNull(SliceFifoBuffer &src) noexcept {
+		if (empty() && (!src.empty() || !IsNull())) {
 			/* optimized special case: swap buffer pointers instead of
 			   copying data */
 			swap(src);
-		else
-			ForeignFifoBuffer<std::byte>::MoveFrom(src);
+			return GetAvailable();
+		} else
+			return ForeignFifoBuffer<std::byte>::MoveFrom(src);
 	}
 
 	/**
 	 * Like MoveFrom(), but allow the source to be nulled.  This is
 	 * useful when this object can be freed, but #src cannot.
+	 *
+	 * @return the number of bytes moved
 	 */
-	void MoveFromAllowSrcNull(SliceFifoBuffer &src) noexcept {
-		if (empty() && (!src.empty() || IsNull()))
+	size_type MoveFromAllowSrcNull(SliceFifoBuffer &src) noexcept {
+		if (empty() && (!src.empty() || IsNull())) {
 			/* optimized special case: swap buffer pointers instead of
 			   copying data */
 			swap(src);
-		else
-			ForeignFifoBuffer<std::byte>::MoveFrom(src);
+			return GetAvailable();
+		} else
+			return ForeignFifoBuffer<std::byte>::MoveFrom(src);
 	}
 
 	/**
 	 * Like MoveFrom(), but allow both to be nulled.
+	 *
+	 * @return the number of bytes moved
 	 */
-	void MoveFromAllowBothNull(SliceFifoBuffer &src) noexcept {
-		if (empty())
+	size_type MoveFromAllowBothNull(SliceFifoBuffer &src) noexcept {
+		if (empty()) {
 			/* optimized special case: swap buffer pointers instead of
 			   copying data */
 			swap(src);
-		else
-			ForeignFifoBuffer<std::byte>::MoveFrom(src);
+			return GetAvailable();
+		} else
+			return ForeignFifoBuffer<std::byte>::MoveFrom(src);
 	}
 
 	/**
