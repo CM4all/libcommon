@@ -38,6 +38,16 @@ public:
 
 	void Signal() noexcept;
 
+	/**
+	 * Wait for Signal() to be called synchronously, but do not
+	 * consume the event.  This method is only meant as a
+	 * workaround for unit tests and should not be used in regular
+	 * code.
+	 */
+	void WaitSynchronously() noexcept {
+		(void)event.GetFileDescriptor().WaitReadable(-1);
+	}
+
 private:
 	void EventFdCallback(unsigned events) noexcept;
 };
