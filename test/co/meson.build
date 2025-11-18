@@ -11,6 +11,7 @@ test(
     'TestMultiResume.cxx',
     'TestMultiValue.cxx',
     'TestMutex.cxx',
+    'TestOptionalTask.cxx',
     include_directories: inc,
     dependencies: [
       gtest,
