@@ -3060,7 +3060,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::APPEND_AUTH:
 #if TRANSLATION_ENABLE_SESSION
-		if (!response.HasAuth() ||
+		if (!response.HasAnyAuth() ||
 		    response.append_auth.data() != nullptr ||
 		    response.expand_append_auth != nullptr)
 			throw std::runtime_error("misplaced APPEND_AUTH packet");
@@ -3074,7 +3074,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::EXPAND_APPEND_AUTH:
 #if TRANSLATION_ENABLE_SESSION
 		if (response.regex == nullptr ||
-		    !response.HasAuth() ||
+		    !response.HasAnyAuth() ||
 		    response.append_auth.data() != nullptr ||
 		    response.expand_append_auth != nullptr)
 			throw std::runtime_error("misplaced EXPAND_APPEND_AUTH packet");

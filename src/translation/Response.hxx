@@ -524,6 +524,12 @@ struct TranslateResponse {
 			auth_file != nullptr;
 	}
 
+	[[nodiscard]] [[gnu::pure]]
+	constexpr bool HasAnyAuth() const noexcept {
+		return HasAuth() || http_auth.data() != nullptr ||
+			token_auth.data() != nullptr;
+	}
+
 	[[nodiscard]]
 	constexpr bool HasUntrusted() const noexcept {
 		return untrusted != nullptr || untrusted_prefix != nullptr ||
