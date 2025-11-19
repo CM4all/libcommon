@@ -117,7 +117,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 
 	case TranslationCommand::HTTP_AUTH:
 		http_auth_buffer = ToString(payload);
-		http_auth = AsBytes(http_auth_buffer.data());
+		http_auth = AsBytes(http_auth_buffer);
 		break;
 
 	case TranslationCommand::TOKEN_AUTH:
@@ -251,7 +251,7 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 
 	case TranslationCommand::LAYOUT:
 		layout_buffer = ToString(payload);
-		layout = AsBytes(layout_buffer.data());
+		layout = AsBytes(layout_buffer);
 		break;
 
 	case TranslationCommand::BASE:
