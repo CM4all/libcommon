@@ -11,7 +11,7 @@
 
 TEST(TestBase64, Empty)
 {
-	const auto b64 = FixedBase64<0, sodium_base64_VARIANT_ORIGINAL>("");
+	const auto b64 = FixedBase64<0, sodium_base64_VARIANT_ORIGINAL>(reinterpret_cast<const std::byte *>(""));
 	EXPECT_STREQ(b64, "");
 }
 
@@ -19,13 +19,13 @@ static constexpr char leviathan[] = "Man is distinguished, not only by his reaso
 
 TEST(TestBase64, FixedLeviathan)
 {
-	const auto b64 = FixedBase64<sizeof(leviathan) - 1, sodium_base64_VARIANT_ORIGINAL>(leviathan);
+	const auto b64 = FixedBase64<sizeof(leviathan) - 1, sodium_base64_VARIANT_ORIGINAL>(reinterpret_cast<const std::byte *>(leviathan));
 	EXPECT_STREQ(b64, "TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBieSB0aGlzIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBpcyBhIGx1c3Qgb2YgdGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGVsaWdodCBpbiB0aGUgY29udGludWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb24gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRoZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=");
 }
 
 TEST(TestBase64, FixedLeviathanNoPadding)
 {
-	const auto b64 = FixedBase64<sizeof(leviathan) - 1, sodium_base64_VARIANT_ORIGINAL_NO_PADDING>(leviathan);
+	const auto b64 = FixedBase64<sizeof(leviathan) - 1, sodium_base64_VARIANT_ORIGINAL_NO_PADDING>(reinterpret_cast<const std::byte *>(leviathan));
 	EXPECT_STREQ(b64, "TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBieSB0aGlzIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBpcyBhIGx1c3Qgb2YgdGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGVsaWdodCBpbiB0aGUgY29udGludWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb24gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRoZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4");
 }
 
