@@ -68,6 +68,11 @@ private:
 			response.status = HttpStatus::BAD_REQUEST;
 			response.SetTextPlain(e.body);
 			result = server.SendResponse(std::move(response));
+		} catch (const Was::Forbidden &e) {
+			SimpleResponse response;
+			response.status = HttpStatus::FORBIDDEN;
+			response.SetTextPlain(e.body);
+			result = server.SendResponse(std::move(response));
 		} catch (const Was::Conflict &e) {
 			SimpleResponse response;
 			response.status = HttpStatus::CONFLICT;

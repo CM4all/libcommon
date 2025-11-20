@@ -46,6 +46,14 @@ struct BadRequest : Exception {
 		:body(_body) {}
 };
 
+struct Forbidden : Exception {
+	std::string_view body = "Forbidden\n";
+
+	Forbidden() noexcept = default;
+	constexpr Forbidden(std::string_view _body) noexcept
+		:body(_body) {}
+};
+
 struct Conflict : Exception {
 	std::string_view body = "Conflict\n";
 
