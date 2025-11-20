@@ -4,9 +4,8 @@
 
 #pragma once
 
+#include "Base64.hxx"
 #include "util/StringBuffer.hxx"
-
-#include <sodium/utils.h>
 
 #include <cstddef>
 
@@ -16,8 +15,8 @@ auto
 FixedBase64(const std::byte *src) noexcept
 {
 	StringBuffer<sodium_base64_ENCODED_LEN(src_size, variant)> dest;
-	sodium_bin2base64(dest.data(), dest.capacity(),
-			  reinterpret_cast<const unsigned char *>(src), src_size,
+	sodium_bin2base64(std::span{dest.data(), dest.capacity()},
+			  {src, src_size},
 			  variant);
 	return dest;
 }

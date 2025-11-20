@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "jwt/EdDSA.hxx"
+#include "lib/sodium/Base64.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 #include "util/HexFormat.hxx"
@@ -10,8 +11,6 @@
 #include "util/StringBuffer.hxx"
 
 #include <gtest/gtest.h>
-
-#include <sodium/utils.h>
 
 #include <stdexcept>
 
@@ -23,8 +22,7 @@ ParseBase64Key(const std::string_view base64)
 	CryptoSignPublicKey key;
 
 	size_t length;
-	if (sodium_base642bin((unsigned char *)key.data(), key.size(),
-			      base64.data(), base64.size(),
+	if (sodium_base642bin(key, base64,
 			      nullptr, &length,
 			      nullptr, sodium_base64_VARIANT_URLSAFE_NO_PADDING) != 0)
 		throw std::runtime_error("sodium_base642bin() failed");
@@ -42,16 +40,14 @@ ParseBase64Key(const std::string_view d_base64,
 	CryptoSignSecretKey key;
 
 	size_t d_length;
-	if (sodium_base642bin((unsigned char *)key.data(), key.size(),
-			      d_base64.data(), d_base64.size(),
+	if (sodium_base642bin(key, d_base64,
 			      nullptr, &d_length,
 			      nullptr, sodium_base64_VARIANT_URLSAFE_NO_PADDING) != 0)
 		throw std::runtime_error("sodium_base642bin() failed");
 
 	size_t x_length;
-	if (sodium_base642bin((unsigned char *)key.data() + d_length,
-			      key.size() - d_length,
-			      x_base64.data(), x_base64.size(),
+	if (sodium_base642bin(std::span{key}.subspan(d_length),
+			      x_base64,
 			      nullptr, &x_length,
 			      nullptr, sodium_base64_VARIANT_URLSAFE_NO_PADDING) != 0)
 		throw std::runtime_error("sodium_base642bin() failed");

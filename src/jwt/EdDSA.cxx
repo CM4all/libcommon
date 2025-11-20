@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "EdDSA.hxx"
+#include "lib/sodium/Base64.hxx"
 #include "lib/sodium/Base64Alloc.hxx"
 #include "lib/sodium/Sign.hxx"
 #include "util/AllocatedArray.hxx"
@@ -53,9 +54,7 @@ VerifyEdDSA(const CryptoSignPublicKeyView key,
 		return false;
 
 	size_t signature_size;
-	if (sodium_base642bin((unsigned char *)signature.data(),
-			      signature.size(),
-			      signature_b64.data(), signature_b64.size(),
+	if (sodium_base642bin(signature, signature_b64,
 			      nullptr, &signature_size,
 			      nullptr,
 			      sodium_base64_VARIANT_URLSAFE_NO_PADDING) != 0)
