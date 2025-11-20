@@ -9,10 +9,10 @@
 
 // 32 = crypto_sign_PUBLICKEYBYTES
 using CryptoSignPublicKey = std::array<std::byte, 32>;
-using CryptoSignPublicKeyBuffer = std::span<std::byte, 32>;
+using CryptoSignPublicKeyPtr = std::span<std::byte, 32>;
 using CryptoSignPublicKeyView = std::span<const std::byte, 32>;
 
 // 64 = crypto_sign_SECRETKEYBYTES
 using CryptoSignSecretKey = std::array<std::byte, 64>;
-using CryptoSignSecretKeyBuffer = std::span<std::byte, 64>;
+using CryptoSignSecretKeyPtr = std::span<std::byte, 64>;
 using CryptoSignSecretKeyView = std::span<const std::byte, 64>;

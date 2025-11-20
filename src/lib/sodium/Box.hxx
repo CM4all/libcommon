@@ -9,8 +9,8 @@
 #include <sodium/crypto_box.h>
 
 static inline void
-crypto_box_keypair(CryptoBoxPublicKeyBuffer pk,
-		   CryptoBoxSecretKeyBuffer sk) noexcept
+crypto_box_keypair(CryptoBoxPublicKeyPtr pk,
+		   CryptoBoxSecretKeyPtr sk) noexcept
 {
 	crypto_box_keypair(reinterpret_cast<unsigned char *>(pk.data()),
 			   reinterpret_cast<unsigned char *>(sk.data()));
