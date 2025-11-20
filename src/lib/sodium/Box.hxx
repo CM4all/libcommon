@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "BoxKey.hxx"
+#include "BoxTypes.hxx"
 
 #include <sodium/crypto_box.h>
 

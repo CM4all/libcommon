@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "lib/sodium/SignKey.hxx"
+#include "lib/sodium/SignTypes.hxx"
 
 #include <string_view>
 
