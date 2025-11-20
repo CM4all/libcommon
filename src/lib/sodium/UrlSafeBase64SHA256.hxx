@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Base64.hxx"
+#include "Base64Fixed.hxx"
 #include "SHA256.hxx"
 
 [[gnu::pure]]

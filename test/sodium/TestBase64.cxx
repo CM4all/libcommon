@@ -2,8 +2,8 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#include "lib/sodium/Base64.hxx"
 #include "lib/sodium/Base64Alloc.hxx"
+#include "lib/sodium/Base64Fixed.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 
