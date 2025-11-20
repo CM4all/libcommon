@@ -28,7 +28,7 @@ MakeOptionalTask(int i)
 }
 
 static Co::InvokeTask
-InvokeTask(auto &result, auto &&task)
+InvokeTask(auto &result, auto task)
 {
 	result = co_await task;
 }
