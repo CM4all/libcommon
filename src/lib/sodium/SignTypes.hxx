@@ -16,3 +16,8 @@ using CryptoSignPublicKeyView = std::span<const std::byte, 32>;
 using CryptoSignSecretKey = std::array<std::byte, 64>;
 using CryptoSignSecretKeyPtr = std::span<std::byte, 64>;
 using CryptoSignSecretKeyView = std::span<const std::byte, 64>;
+
+// 64 = crypto_sign_BYTES
+using CryptoSignature = std::array<std::byte, 64>;
+using CryptoSignaturePtr = std::span<std::byte, 64>;
+using CryptoSignatureView = std::span<const std::byte, 64>;

@@ -14,12 +14,10 @@
 
 namespace JWT {
 
-using Ed25519Signature = std::array<std::byte, crypto_sign_BYTES>;
-
 static AllocatedString
 SignEdDSA(const CryptoSignSecretKeyView key, std::span<const std::byte> input) noexcept
 {
-	Ed25519Signature signature;
+	CryptoSignature signature;
 	crypto_sign_detached((unsigned char *)signature.data(), nullptr,
 			     (const unsigned char *)input.data(), input.size(),
 			     (const unsigned char *)key.data());
@@ -48,7 +46,7 @@ VerifyEdDSA(const CryptoSignPublicKeyView key,
 	    std::string_view header_dot_payload_b64,
 	    std::string_view signature_b64) noexcept
 {
-	Ed25519Signature signature;
+	CryptoSignature signature;
 
 	/* subtracting 1 because the function includes space for the
 	   null terminator */
