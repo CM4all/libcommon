@@ -16,13 +16,13 @@ public:
 	explicit GenericHashState(size_t outlen,
 				  std::span<const std::byte> key={}) noexcept {
 		crypto_generichash_init(&state,
-					(const unsigned char *)key.data(),
+					reinterpret_cast<const unsigned char *>(key.data()),
 					key.size(), outlen);
 	}
 
 	void Update(std::span<const std::byte> p) noexcept {
 		crypto_generichash_update(&state,
-					  (const unsigned char *)p.data(),
+					  reinterpret_cast<const unsigned char *>(p.data()),
 					  p.size());
 	}
 
@@ -42,7 +42,8 @@ public:
 	}
 
 	void Final(std::span<std::byte> out) noexcept {
-		crypto_generichash_final(&state, (unsigned char *)out.data(),
+		crypto_generichash_final(&state,
+					 reinterpret_cast<unsigned char *>(out.data()),
 					 out.size());
 	}
 

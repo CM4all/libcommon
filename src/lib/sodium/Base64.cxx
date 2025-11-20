@@ -12,7 +12,7 @@ SodiumBase64(std::span<const std::byte> src, int variant) noexcept
 	size_t size = sodium_base64_ENCODED_LEN(src.size(), variant);
 	auto buffer = new char[size];
 	sodium_bin2base64(buffer, size,
-			  (const unsigned char *)src.data(), src.size(),
+			  reinterpret_cast<const unsigned char *>(src.data()), src.size(),
 			  variant);
 	return AllocatedString::Donate(buffer);
 }
@@ -45,7 +45,7 @@ SodiumDecodeBase64(std::string_view src, const char *ignore,
 	AllocatedArray<std::byte> buffer(src.size());
 
 	size_t decoded_size;
-	if (sodium_base642bin((unsigned char *)buffer.data(),
+	if (sodium_base642bin(reinterpret_cast<unsigned char *>(buffer.data()),
 			      buffer.capacity(),
 			      src.data(), src.size(),
 			      ignore, &decoded_size,

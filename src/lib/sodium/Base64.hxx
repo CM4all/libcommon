@@ -21,7 +21,7 @@ FixedBase64(const void *src) noexcept
 {
 	StringBuffer<sodium_base64_ENCODED_LEN(src_size, variant)> dest;
 	sodium_bin2base64(dest.data(), dest.capacity(),
-			  (const unsigned char *)src, src_size,
+			  reinterpret_cast<const unsigned char *>(src), src_size,
 			  variant);
 	return dest;
 }
