@@ -19,9 +19,10 @@ TEST(TestBase64, Empty)
 
 TEST(TestBase64, StrictDecodeBase64)
 {
-	EXPECT_TRUE(StrictDecodeBase64({}, ""sv, sodium_base64_VARIANT_ORIGINAL));
-
 	std::array<std::byte, 3> buffer;
+
+	EXPECT_TRUE(StrictDecodeBase64(std::span{buffer}.first(0), ""sv, sodium_base64_VARIANT_ORIGINAL));
+
 	EXPECT_TRUE(StrictDecodeBase64(buffer, "Zm9v"sv, sodium_base64_VARIANT_ORIGINAL));
 	EXPECT_FALSE(StrictDecodeBase64(buffer, "Zm9v="sv, sodium_base64_VARIANT_ORIGINAL));
 	EXPECT_FALSE(StrictDecodeBase64(buffer, "Zm9vX"sv, sodium_base64_VARIANT_ORIGINAL));
