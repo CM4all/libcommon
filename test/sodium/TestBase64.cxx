@@ -9,10 +9,24 @@
 
 #include <gtest/gtest.h>
 
+using std::string_view_literals::operator""sv;
+
 TEST(TestBase64, Empty)
 {
 	const auto b64 = FixedBase64<0, sodium_base64_VARIANT_ORIGINAL>(reinterpret_cast<const std::byte *>(""));
 	EXPECT_STREQ(b64, "");
+}
+
+TEST(TestBase64, StrictDecodeBase64)
+{
+	EXPECT_TRUE(StrictDecodeBase64({}, ""sv, sodium_base64_VARIANT_ORIGINAL));
+
+	std::array<std::byte, 3> buffer;
+	EXPECT_TRUE(StrictDecodeBase64(buffer, "Zm9v"sv, sodium_base64_VARIANT_ORIGINAL));
+	EXPECT_FALSE(StrictDecodeBase64(buffer, "Zm9v="sv, sodium_base64_VARIANT_ORIGINAL));
+	EXPECT_FALSE(StrictDecodeBase64(buffer, "Zm9vX"sv, sodium_base64_VARIANT_ORIGINAL));
+	EXPECT_FALSE(StrictDecodeBase64(buffer, "Zm9vbw=="sv, sodium_base64_VARIANT_ORIGINAL));
+	EXPECT_FALSE(StrictDecodeBase64(buffer, "Zm8="sv, sodium_base64_VARIANT_ORIGINAL));
 }
 
 static constexpr char leviathan[] = "Man is distinguished, not only by his reason, but by this singular passion from other animals, which is a lust of the mind, that by a perseverance of delight in the continued and indefatigable generation of knowledge, exceeds the short vehemence of any carnal pleasure.";
