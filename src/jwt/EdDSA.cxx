@@ -3,7 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "EdDSA.hxx"
-#include "lib/sodium/Base64.hxx"
+#include "lib/sodium/Base64Alloc.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 #include "util/StringSplit.hxx"

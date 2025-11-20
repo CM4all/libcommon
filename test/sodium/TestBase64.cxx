@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "lib/sodium/Base64.hxx"
+#include "lib/sodium/Base64Alloc.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 

@@ -2,7 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#include "Base64.hxx"
+#include "Base64Alloc.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 

@@ -7,7 +7,7 @@ endif
 
 sodium = static_library(
   'sodium',
-  'Base64.cxx',
+  'Base64Alloc.cxx',
   include_directories: inc,
   dependencies: [
     libsodium,

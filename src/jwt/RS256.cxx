@@ -3,7 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "RS256.hxx"
-#include "lib/sodium/Base64.hxx"
+#include "lib/sodium/Base64Alloc.hxx"
 #include "lib/sodium/SHA256.hxx"
 #include "lib/openssl/Error.hxx"
 #include "lib/openssl/UniqueEVP.hxx"

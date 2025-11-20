@@ -3,7 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "OsslJWK.hxx"
-#include "lib/sodium/Base64.hxx"
+#include "lib/sodium/Base64Alloc.hxx"
 #include "lib/openssl/Buffer.hxx"
 #include "lib/openssl/EvpParam.hxx"
 #include "util/AllocatedString.hxx"
