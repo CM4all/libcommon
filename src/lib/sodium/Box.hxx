@@ -8,6 +8,9 @@
 
 #include <sodium/crypto_box.h>
 
+static_assert(sizeof(CryptoBoxPublicKey) == crypto_box_PUBLICKEYBYTES);
+static_assert(sizeof(CryptoBoxSecretKey) == crypto_box_SECRETKEYBYTES);
+
 static inline void
 crypto_box_keypair(CryptoBoxPublicKeyPtr pk,
 		   CryptoBoxSecretKeyPtr sk) noexcept
