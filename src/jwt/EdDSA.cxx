@@ -4,11 +4,11 @@
 
 #include "EdDSA.hxx"
 #include "lib/sodium/Base64Alloc.hxx"
+#include "lib/sodium/Sign.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
+#include "util/SpanCast.hxx"
 #include "util/StringSplit.hxx"
-
-#include <sodium/crypto_sign.h>
 
 #include <string>
 
@@ -17,12 +17,7 @@ namespace JWT {
 static AllocatedString
 SignEdDSA(const CryptoSignSecretKeyView key, std::span<const std::byte> input) noexcept
 {
-	CryptoSignature signature;
-	crypto_sign_detached((unsigned char *)signature.data(), nullptr,
-			     (const unsigned char *)input.data(), input.size(),
-			     (const unsigned char *)key.data());
-
-	return UrlSafeBase64(signature);
+	return UrlSafeBase64(crypto_sign_detached(input, key));
 }
 
 AllocatedString
@@ -69,11 +64,7 @@ VerifyEdDSA(const CryptoSignPublicKeyView key,
 	if (signature_size != signature.size())
 		return false;
 
-	return crypto_sign_verify_detached((const unsigned char *)signature.data(),
-					   (const unsigned char *)header_dot_payload_b64.data(),
-					   header_dot_payload_b64.size(),
-					   (const unsigned char *)key.data()) == 0;
-
+	return crypto_sign_verify_detached(signature, AsBytes(header_dot_payload_b64), key) == 0;
 }
 
 bool
