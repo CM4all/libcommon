@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <span>
 
-template<int variant, std::size_t src_size>
+template<int variant=sodium_base64_VARIANT_ORIGINAL, std::size_t src_size>
 requires(src_size != std::dynamic_extent)
 [[gnu::pure]]
 auto
@@ -24,7 +24,7 @@ FixedBase64(std::span<const std::byte, src_size> src) noexcept
 }
 
 /* convenience overload for non-const spans */
-template<int variant, std::size_t src_size>
+template<int variant=sodium_base64_VARIANT_ORIGINAL, std::size_t src_size>
 requires(src_size != std::dynamic_extent)
 [[gnu::pure]]
 auto
