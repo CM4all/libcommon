@@ -22,3 +22,13 @@ FixedBase64(std::span<const std::byte, src_size> src) noexcept
 			  variant);
 	return dest;
 }
+
+/* convenience overload for non-const spans */
+template<int variant, std::size_t src_size>
+requires(src_size != std::dynamic_extent)
+[[gnu::pure]]
+auto
+FixedBase64(std::span<std::byte, src_size> src) noexcept
+{
+	return FixedBase64<variant>(std::as_bytes(src));
+}
