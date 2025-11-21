@@ -8,15 +8,17 @@
 #include "util/StringBuffer.hxx"
 
 #include <cstddef>
+#include <span>
 
-template<std::size_t src_size, int variant>
+template<int variant, std::size_t src_size>
+requires(src_size != std::dynamic_extent)
 [[gnu::pure]]
 auto
-FixedBase64(const std::byte *src) noexcept
+FixedBase64(std::span<const std::byte, src_size> src) noexcept
 {
 	StringBuffer<sodium_base64_ENCODED_LEN(src_size, variant)> dest;
 	sodium_bin2base64(std::span{dest.data(), dest.capacity()},
-			  {src, src_size},
+			  src,
 			  variant);
 	return dest;
 }
