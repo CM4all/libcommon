@@ -7,8 +7,19 @@
 #include "CharUtil.hxx" // for IsLowerHexDigit()
 #include "StringVerify.hxx" // for CheckChars()
 
+/**
+ * The (binary) size of a UUID.
+ */
 static constexpr std::size_t UUID_SIZE = 16;
+
+/**
+ * The number of hex digits in a UUID.
+ */
 static constexpr std::size_t UUID_HEX_DIGITS = UUID_SIZE * 2;
+
+/**
+ * The length of a UUID string according to RFC 9562 section 4.
+ */
 static constexpr std::size_t UUID_STRING_LENGTH = UUID_HEX_DIGITS + 4;
 
 /**
