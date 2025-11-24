@@ -17,7 +17,7 @@ TEST(TestSHA1, Empty)
 	Nettle::SHA1Ctx ctx;
 	const auto digest = ctx.Digest();
 	const auto hash = HexFormat(std::span{digest});
-	EXPECT_EQ(ToStringView(hash), "da39a3ee5e6b4b0d3255bfef95601890afd80709"sv);
+	EXPECT_EQ(hash, "da39a3ee5e6b4b0d3255bfef95601890afd80709"sv);
 }
 
 TEST(TestSHA1, FoxDog)
@@ -26,5 +26,5 @@ TEST(TestSHA1, FoxDog)
 	ctx.Update(AsBytes("The quick brown fox jumps over the lazy dog"sv));
 	const auto digest = ctx.Digest();
 	const auto hash = HexFormat(std::span{digest});
-	EXPECT_EQ(ToStringView(hash), "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12"sv);
+	EXPECT_EQ(hash, "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12"sv);
 }

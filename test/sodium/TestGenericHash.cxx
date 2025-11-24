@@ -4,7 +4,6 @@
 
 #include "lib/sodium/GenericHash.hxx"
 #include "util/HexFormat.hxx"
-#include "util/SpanCast.hxx"
 
 #include <gtest/gtest.h>
 
@@ -20,7 +19,7 @@ TGH(std::string_view expected)
 	GenericHashState state(size);
 	const auto hash = state.GetFinalT<std::array<std::byte, size>>();
 	const auto hex = HexFormat(std::span{hash});
-	EXPECT_EQ(ToStringView(hex), expected);
+	EXPECT_EQ(hex, expected);
 }
 
 TEST(TestGenericHash, Empty384)

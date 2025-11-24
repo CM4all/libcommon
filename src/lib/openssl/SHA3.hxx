@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include <array>
+#include "util/FixedString.hxx"
+
 #include <cstddef>
 #include <span>
 
-std::array<char, 64>
+FixedString<64>
 EvpSHA3_256_Hex(std::span<const std::byte> input);

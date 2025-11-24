@@ -17,6 +17,5 @@ TEST(TestEvpDigest, SHA1)
 
 	const auto digest = ctx.Final();
 	const auto hex = HexFormat(std::span{digest});
-	EXPECT_EQ(std::string_view(hex.data(), hex.size()),
-		  "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12"sv);
+	EXPECT_EQ(hex, "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12"sv);
 }

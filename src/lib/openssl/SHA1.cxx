@@ -6,7 +6,7 @@
 #include "EvpDigest.hxx"
 #include "util/HexFormat.hxx"
 
-std::array<char, 40>
+FixedString<40>
 EvpSHA1_Hex(std::span<const std::byte> input)
 {
     const auto digest = EvpDigest<20>(input, EVP_sha1());
