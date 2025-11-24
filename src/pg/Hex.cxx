@@ -2,10 +2,6 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-/*
- * Small utilities for PostgreSQL clients.
- */
-
 #include "Hex.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"

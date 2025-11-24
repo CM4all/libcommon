@@ -2,10 +2,6 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-/*
- * Small utilities for PostgreSQL clients.
- */
-
 #pragma once
 
 #include <cstddef>
