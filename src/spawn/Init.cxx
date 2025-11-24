@@ -4,6 +4,7 @@
 
 #include "Init.hxx"
 #include "spawn/config.h"
+#include "lib/fmt/ToBuffer.hxx"
 #include "system/linux/CloseRange.hxx"
 #include "system/Error.hxx"
 #include "system/ProcessName.hxx"
@@ -25,10 +26,10 @@
 #include <sys/signalfd.h>
 #include <unistd.h>
 #include <sched.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <limits.h> // for UINT_MAX
+
+using std::string_view_literals::operator""sv;
 
 static sigset_t init_signal_mask;
 
@@ -36,15 +37,11 @@ static void
 SetInitProcessName(const char *name) noexcept
 {
 	if (name != nullptr) {
-		char buffer[16];
-		size_t length = strlen(name);
-
-		const char *prefix = length > 10
+		const std::string_view name_sv{name};
+		const char *prefix = name_sv.size() > 10
 			? "i" : "init";
 
-		snprintf(buffer, sizeof(buffer), "%s-%s",
-			 prefix, name);
-		SetProcessName(buffer);
+		SetProcessName(FmtBuffer<16>("{}-{}"sv, prefix, name_sv));
 	} else
 		SetProcessName("init");
 }
