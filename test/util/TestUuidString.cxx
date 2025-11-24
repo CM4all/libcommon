@@ -8,14 +8,14 @@
 
 using std::string_view_literals::operator""sv;
 
-TEST(UuidString, IsUuidString)
+TEST(UuidString, IsLowerUuidString)
 {
-	EXPECT_FALSE(IsUuidString(""sv));
-	EXPECT_FALSE(IsUuidString("foo"sv));
+	EXPECT_FALSE(IsLowerUuidString(""sv));
+	EXPECT_FALSE(IsLowerUuidString("foo"sv));
 
-	EXPECT_TRUE(IsUuidString("f81d4fae-7dec-11d0-a765-00a0c91e6bf6"sv));
+	EXPECT_TRUE(IsLowerUuidString("f81d4fae-7dec-11d0-a765-00a0c91e6bf6"sv));
 
-	EXPECT_FALSE(IsUuidString("f81d4fae-7dec-11d0-a765-00a0c91e6bf6 "sv));
-	EXPECT_FALSE(IsUuidString("f81d4fae-7dec-11d0-a765-00a0c91e6bg6"sv));
-	EXPECT_FALSE(IsUuidString("f81d4fae 7dec-11d0-a765-00a0c91e6bf6"sv));
+	EXPECT_FALSE(IsLowerUuidString("f81d4fae-7dec-11d0-a765-00a0c91e6bf6 "sv));
+	EXPECT_FALSE(IsLowerUuidString("f81d4fae-7dec-11d0-a765-00a0c91e6bg6"sv));
+	EXPECT_FALSE(IsLowerUuidString("f81d4fae 7dec-11d0-a765-00a0c91e6bf6"sv));
 }

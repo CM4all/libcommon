@@ -11,8 +11,13 @@ static constexpr std::size_t UUID_SIZE = 16;
 static constexpr std::size_t UUID_HEX_DIGITS = UUID_SIZE * 2;
 static constexpr std::size_t UUID_STRING_LENGTH = UUID_HEX_DIGITS + 4;
 
+/**
+ * Is this a well-formed UUID? (Only lower-case hex digits accepted)
+ *
+ * @see RFC 9562
+ */
 static constexpr bool
-IsUuidString(std::string_view s) noexcept
+IsLowerUuidString(std::string_view s) noexcept
 {
 	return s.size() == UUID_STRING_LENGTH &&
 		CheckChars(s.substr(0, 8), IsLowerHexDigit) &&
