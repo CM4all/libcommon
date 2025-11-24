@@ -6,8 +6,9 @@
 #include "Socket.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "util/SpanCast.hxx"
-#include "util/StringFormat.hxx"
 #include "util/StringSplit.hxx"
+
+#include <fmt/format.h>
 
 #include <array>
 
@@ -375,7 +376,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 	if (response.body && http_method_is_empty(request.method)) {
 		if (request.method == HttpMethod::HEAD)
 			response.headers.emplace("content-length",
-						 StringFormat<64>("%zu", response.body.size()).c_str());
+						 fmt::format_int{response.body.size()}.c_str());
 
 		response.body = {};
 	}

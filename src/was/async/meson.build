@@ -62,6 +62,7 @@ was_server_async = static_library(
   'MultiClient.cxx',
   include_directories: inc,
   dependencies: [
+    fmt_dep,
     http_dep,
     was_async_dep,
     libwas_protocol,
