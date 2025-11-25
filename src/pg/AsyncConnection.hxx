@@ -181,8 +181,16 @@ public:
 		return socket_event.GetEventLoop();
 	}
 
+	bool IsDefaultSchema() const noexcept {
+		return config.IsDefaultSchema();
+	}
+
 	const std::string &GetSchemaName() const noexcept {
 		return config.schema;
+	}
+
+	const char *GetEffectiveSchemaName() const noexcept {
+		return config.GetEffectiveSchemaName();
 	}
 
 	bool IsReady() const noexcept {
