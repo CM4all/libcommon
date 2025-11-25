@@ -118,7 +118,11 @@ TEST(SharedConnection, One)
 
 	EventLoop event_loop;
 	Handler handler;
-	Pg::SharedConnection connection{event_loop, conninfo, schema, handler};
+	Pg::SharedConnection connection{
+		event_loop,
+		{.connect = conninfo, .schema = schema},
+		handler,
+	};
 
 	std::array queries{Query{connection}};
 	queries.back().quit = true;
@@ -159,7 +163,11 @@ TEST(SharedConnection, Serial)
 
 	EventLoop event_loop;
 	Handler handler;
-	Pg::SharedConnection connection{event_loop, conninfo, schema, handler};
+	Pg::SharedConnection connection{
+		event_loop,
+		{.connect = conninfo, .schema = schema},
+		handler,
+	};
 
 	for (unsigned i = 0; i < 4; ++i) {
 		Query query{connection};
@@ -194,7 +202,11 @@ TEST(SharedConnection, Multi)
 
 	EventLoop event_loop;
 	Handler handler;
-	Pg::SharedConnection connection{event_loop, conninfo, schema, handler};
+	Pg::SharedConnection connection{
+		event_loop,
+		{.connect = conninfo, .schema = schema},
+		handler,
+	};
 
 	std::array queries{Query{connection}, Query{connection}, Query{connection}, Query{connection}};
 	queries.back().quit = true;
@@ -235,7 +247,11 @@ TEST(SharedConnection, Cancel)
 
 	EventLoop event_loop;
 	Handler handler;
-	Pg::SharedConnection connection{event_loop, conninfo, schema, handler};
+	Pg::SharedConnection connection{
+		event_loop,
+		{.connect = conninfo, .schema = schema},
+		handler,
+	};
 
 	std::array queries{Query{connection}, Query{connection}, Query{connection}, Query{connection}};
 	queries[1].cancel = true;
@@ -271,7 +287,11 @@ TEST(SharedConnection, DeferCancel)
 
 	EventLoop event_loop;
 	Handler handler;
-	Pg::SharedConnection connection{event_loop, conninfo, schema, handler};
+	Pg::SharedConnection connection{
+		event_loop,
+		{.connect = conninfo, .schema = schema},
+		handler,
+	};
 
 	std::array queries{Query{connection}, Query{connection}, Query{connection}, Query{connection}};
 	queries[1].defer_cancel = true;
@@ -307,7 +327,11 @@ TEST(SharedConnection, CancelSleep)
 
 	EventLoop event_loop;
 	Handler handler;
-	Pg::SharedConnection connection{event_loop, conninfo, schema, handler};
+	Pg::SharedConnection connection{
+		event_loop,
+		{.connect = conninfo, .schema = schema},
+		handler,
+	};
 
 	std::array queries{Query{connection}, Query{connection}, Query{connection}};
 
@@ -347,7 +371,11 @@ TEST(SharedConnection, Disconnect)
 
 	EventLoop event_loop;
 	Handler handler;
-	Pg::SharedConnection connection{event_loop, conninfo, schema, handler};
+	Pg::SharedConnection connection{
+		event_loop,
+		{.connect = conninfo, .schema = schema},
+		handler,
+	};
 
 	std::array queries{Query{connection}, Query{connection}};
 	queries[1].disconnect = true;

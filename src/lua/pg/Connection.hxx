@@ -7,6 +7,8 @@
 struct lua_State;
 class EventLoop;
 
+namespace Pg { struct Config; }
+
 namespace Lua {
 
 void
@@ -14,6 +16,6 @@ InitPgConnection(lua_State *L) noexcept;
 
 void
 NewPgConnection(struct lua_State *L, EventLoop &event_loop,
-		const char *conninfo, const char *schema) noexcept;
+		Pg::Config &&config) noexcept;
 
 } // namespace Lua

@@ -470,9 +470,9 @@ InitPgConnection(lua_State *L) noexcept
 
 void
 NewPgConnection(struct lua_State *L, EventLoop &event_loop,
-		const char *conninfo, const char *schema) noexcept
+		Pg::Config &&config) noexcept
 {
-	PgConnectionClass::New(L, event_loop, conninfo, schema);
+	PgConnectionClass::New(L, event_loop, std::move(config));
 }
 
 } // namespace Lua

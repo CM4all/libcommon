@@ -11,9 +11,9 @@
 namespace Pg {
 
 AsyncConnection::AsyncConnection(EventLoop &event_loop,
-				 const char *_conninfo, const char *_schema,
+				 Config &&_config,
 				 AsyncConnectionHandler &_handler) noexcept
-	:conninfo(_conninfo), schema(_schema),
+	:config(std::move(_config)),
 	 handler(_handler),
 	 socket_event(event_loop, BIND_THIS_METHOD(OnSocketEvent)),
 	 reconnect_timer(event_loop, BIND_THIS_METHOD(OnReconnectTimer))
@@ -106,10 +106,10 @@ try {
 		break;
 
 	case PGRES_POLLING_OK:
-		if (!schema.empty() &&
+		if (!config.schema.empty() &&
 		    (state == State::CONNECTING || state == State::RECONNECTING)) {
 			try {
-				SetSchema(schema.c_str());
+				SetSchema(config.schema.c_str());
 			} catch (...) {
 				std::throw_with_nested(std::runtime_error("Failed to set schema"));
 			}
@@ -230,7 +230,7 @@ AsyncConnection::Connect() noexcept
 	state = State::CONNECTING;
 
 	try {
-		StartConnect(conninfo.c_str());
+		StartConnect(config.connect.c_str());
 	} catch (...) {
 		Connection::Disconnect();
 		Error(std::current_exception());

@@ -26,10 +26,10 @@ class Stock::Item final : public StockItem, Cancellable, AsyncConnectionHandler 
 public:
 	Item(CreateStockItem c, StockGetHandler &_handler,
 	     EventLoop &event_loop,
-	     const char *conninfo, const char *schema) noexcept
+	     Config &&_config) noexcept
 		:StockItem(c),
 		 handler(_handler),
-		 connection(event_loop, conninfo, schema, *this),
+		 connection(event_loop, std::move(_config), *this),
 		 defer_initialized(event_loop,
 				   BIND_THIS_METHOD(OnDeferredInitialized))
 	{
@@ -127,10 +127,10 @@ private:
 };
 
 Stock::Stock(EventLoop &event_loop,
-	     const char *_conninfo, const char *_schema,
+	     Config &&_config,
 	     StockOptions options) noexcept
 	:stock(event_loop, *this, "Pg::AsyncConnection", options),
-	 conninfo(_conninfo), schema(_schema)
+	 config(std::move(_config))
 {
 }
 
@@ -138,8 +138,7 @@ void
 Stock::Create(CreateStockItem c, StockRequest,
 	      StockGetHandler &handler, CancellablePointer &cancel_ptr)
 {
-	auto *item = new Item(c, handler, stock.GetEventLoop(),
-			      conninfo.c_str(), schema.c_str());
+	auto *item = new Item(c, handler, stock.GetEventLoop(), Config{config});
 	item->Connect(cancel_ptr);
 }
 

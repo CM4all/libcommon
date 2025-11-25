@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Connection.hxx"
+#include "Config.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
 
@@ -100,8 +101,7 @@ public:
  * handler.
  */
 class AsyncConnection : public Connection {
-	const std::string conninfo;
-	const std::string schema;
+	const Config config;
 
 	AsyncConnectionHandler &handler;
 
@@ -174,7 +174,7 @@ public:
 	 * Call Connect() to do that.
 	 */
 	AsyncConnection(EventLoop &event_loop,
-			const char *conninfo, const char *schema,
+			Config &&_config,
 			AsyncConnectionHandler &handler) noexcept;
 
 	auto &GetEventLoop() const noexcept {
@@ -182,7 +182,7 @@ public:
 	}
 
 	const std::string &GetSchemaName() const noexcept {
-		return schema;
+		return config.schema;
 	}
 
 	bool IsReady() const noexcept {

@@ -9,6 +9,7 @@
 #include "lua/LightUserData.hxx"
 #include "lua/Util.hxx"
 #include "lua/PushCClosure.hxx"
+#include "pg/Config.hxx"
 
 extern "C" {
 #include <lauxlib.h>
@@ -27,7 +28,7 @@ NewPg(lua_State *L)
 	const char *conninfo = luaL_checkstring(L, 2);
 	const char *schema = luaL_optstring(L, 3, "");
 
-	NewPgConnection(L, event_loop, conninfo, schema);
+	NewPgConnection(L, event_loop, {.connect = conninfo, .schema = schema});
 	return 1;
 }
 

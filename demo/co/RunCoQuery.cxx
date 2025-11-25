@@ -21,9 +21,9 @@ struct Instance final {
 
 	std::exception_ptr error;
 
-	Instance(const char *conninfo, const char *schema)
+	explicit Instance(Pg::Config &&pg_config)
 		:shutdown_listener(event_loop, BIND_THIS_METHOD(OnShutdown)),
-		 db(event_loop, conninfo, schema, {.limit = 4, .max_idle = 1, .clear_interval = std::chrono::minutes{5}})
+		 db(event_loop, std::move(pg_config), {.limit = 4, .max_idle = 1, .clear_interval = std::chrono::minutes{5}})
 	{
 		shutdown_listener.Enable();
 	}
@@ -73,7 +73,9 @@ try {
 	const char *const conninfo = argv[1];
 	const char *const sql = argv[2];
 
-	Instance instance(conninfo, "");
+	Instance instance{
+		{.connect = conninfo},
+	};
 
 	instance.task = Run(instance.db, sql);
 	instance.task.Start(BIND_METHOD(instance, &Instance::OnCompletion));

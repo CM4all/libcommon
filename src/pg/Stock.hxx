@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Config.hxx"
 #include "stock/Class.hxx"
 #include "stock/Stock.hxx"
 
@@ -20,11 +21,11 @@ class Stock final : StockClass {
 
 	::Stock stock;
 
-	const std::string conninfo, schema;
+	const Config config;
 
 public:
 	Stock(EventLoop &event_loop,
-	      const char *_conninfo, const char *_schema,
+	      Config &&_config,
 	      StockOptions options) noexcept;
 
 	operator ::Stock &() noexcept {

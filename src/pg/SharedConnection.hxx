@@ -97,9 +97,9 @@ class SharedConnection : public AsyncConnectionHandler {
 
 public:
 	SharedConnection(EventLoop &event_loop,
-			 const char *conninfo, const char *schema,
+			 Config &&_config,
 			 SharedConnectionHandler &_handler) noexcept
-		:connection(event_loop, conninfo, schema, *this),
+		:connection(event_loop, std::move(_config), *this),
 		 defer_submit_next(event_loop, BIND_THIS_METHOD(SubmitNext)),
 		 handler(_handler)
 	{
