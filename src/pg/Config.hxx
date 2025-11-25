@@ -23,6 +23,21 @@ struct Config {
 	 * used.
 	 */
 	std::string schema;
+
+	bool IsDefaultSchema() const noexcept {
+		using std::string_view_literals::operator""sv;
+		return schema.empty() || schema == "public"sv;
+	}
+
+	/**
+	 * Returns the name of the PostgreSQL schema that is
+	 * effectively being used.  If no schema was passed to the
+	 * constructor, this method returns the PostgreSQL default
+	 * schema name "public".
+	 */
+	const char *GetEffectiveSchemaName() const noexcept {
+		return schema.empty() ? "public" : schema.c_str();
+	}
 };
 
 } /* namespace Pg */
