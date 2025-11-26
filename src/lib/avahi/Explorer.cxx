@@ -8,9 +8,7 @@
 #include "ErrorHandler.hxx"
 #include "Client.hxx"
 #include "Resolver.hxx"
-#include "net/AllocatedSocketAddress.hxx"
-#include "net/IPv4Address.hxx"
-#include "net/IPv6Address.hxx"
+#include "net/InetAddress.hxx"
 #include "util/Cast.hxx"
 
 #include <avahi-common/error.h>
@@ -25,11 +23,14 @@ class ServiceExplorer::Object {
 
 	ServiceResolverPtr resolver;
 
-	AllocatedSocketAddress address;
+	InetAddress address;
 
 public:
 	explicit Object(ServiceExplorer &_explorer) noexcept
-		:explorer(_explorer) {}
+		:explorer(_explorer)
+	{
+		address.Clear();
+	}
 
 	Object(const Object &) = delete;
 	Object &operator=(const Object &) = delete;
@@ -37,7 +38,7 @@ public:
 	const std::string &GetKey() const noexcept;
 
 	bool IsActive() const noexcept {
-		return !address.IsNull();
+		return address.IsDefined();
 	}
 
 	bool HasFailed() const noexcept {
@@ -135,18 +136,20 @@ Import(AvahiIfIndex interface, const AvahiIPv6Address &src,
 	return {address, port, static_cast<uint32_t>(interface)};
 }
 
-static AllocatedSocketAddress
+static constexpr InetAddress
 Import(AvahiIfIndex interface, const AvahiAddress &src, uint_least16_t port) noexcept
 {
 	switch (src.proto) {
 	case AVAHI_PROTO_INET:
-		return AllocatedSocketAddress{Import(src.data.ipv4, port)};
+		return Import(src.data.ipv4, port);
 
 	case AVAHI_PROTO_INET6:
-		return AllocatedSocketAddress{Import(interface, src.data.ipv6, port)};
+		return Import(interface, src.data.ipv6, port);
 	}
 
-	return AllocatedSocketAddress();
+	InetAddress result;
+	result.Clear();
+	return result;
 }
 
 inline void

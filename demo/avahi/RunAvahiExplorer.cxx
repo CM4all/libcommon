@@ -11,6 +11,7 @@
 #include "lib/fmt/SocketAddressFormatter.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
+#include "net/InetAddress.hxx"
 #include "net/SocketAddress.hxx"
 #include "util/PrintException.hxx"
 
@@ -43,7 +44,7 @@ private:
 
 	/* virtual methods from class Avahi::ServiceExplorerListener */
 	void OnAvahiNewObject(const std::string &key,
-			      SocketAddress address,
+			      const InetAddress &address,
 			      AvahiStringList *txt) noexcept override {
 		fmt::print("new {:?} at {}\n", key, address);
 		for (; txt != nullptr; txt = txt->next)

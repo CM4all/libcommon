@@ -6,7 +6,7 @@
 
 #include <string>
 
-class SocketAddress;
+union InetAddress;
 typedef struct AvahiStringList AvahiStringList;
 
 namespace Avahi {
@@ -14,7 +14,7 @@ namespace Avahi {
 class ServiceExplorerListener {
 public:
 	virtual void OnAvahiNewObject(const std::string &key,
-				      SocketAddress address,
+				      const InetAddress &address,
 				      AvahiStringList *txt) noexcept = 0;
 	virtual void OnAvahiRemoveObject(const std::string &key) noexcept = 0;
 	virtual void OnAvahiAllForNow() noexcept {}
