@@ -120,14 +120,14 @@ ServiceExplorer::Object::CancelResolve() noexcept
 }
 
 static AllocatedSocketAddress
-Import(const AvahiIPv4Address &src, unsigned port) noexcept
+Import(const AvahiIPv4Address &src, uint_least16_t port) noexcept
 {
 	return AllocatedSocketAddress(IPv4Address({src.address}, port));
 }
 
 static AllocatedSocketAddress
 Import(AvahiIfIndex interface, const AvahiIPv6Address &src,
-       unsigned port) noexcept
+       uint_least16_t port) noexcept
 {
 	struct in6_addr address;
 	static_assert(sizeof(src.address) == sizeof(address), "Wrong size");
@@ -136,7 +136,7 @@ Import(AvahiIfIndex interface, const AvahiIPv6Address &src,
 }
 
 static AllocatedSocketAddress
-Import(AvahiIfIndex interface, const AvahiAddress &src, unsigned port) noexcept
+Import(AvahiIfIndex interface, const AvahiAddress &src, uint_least16_t port) noexcept
 {
 	switch (src.proto) {
 	case AVAHI_PROTO_INET:
