@@ -6,11 +6,11 @@
 #include "Buffer.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "util/DisposableBuffer.hxx"
 
 #include <cassert>
 #include <cerrno>
-#include <stdexcept>
 
 namespace Was {
 
@@ -46,7 +46,7 @@ void
 SimpleOutput::OnPipeReady(unsigned events) noexcept
 try {
 	if (events & SocketEvent::DEAD_MASK)
-		throw std::runtime_error("Hangup on WAS pipe");
+		throw SocketClosedPrematurelyError("Hangup on WAS pipe");
 
 	TryWrite();
 } catch (...) {
