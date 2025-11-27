@@ -20,6 +20,7 @@ endif
 was_async = static_library(
   'was_async',
   'Control.cxx',
+  'Output.cxx',
   'SimpleInput.cxx',
   'SimpleOutput.cxx',
   'MultiClient.cxx',

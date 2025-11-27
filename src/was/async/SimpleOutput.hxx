@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "event/PipeEvent.hxx"
-#include "event/DeferEvent.hxx"
+#include "Output.hxx"
 #include "util/DisposableBuffer.hxx"
 
 #include <exception> // for std::exception_ptr
@@ -19,15 +18,12 @@ public:
 	virtual void OnWasOutputError(std::exception_ptr error) noexcept = 0;
 };
 
-class SimpleOutput final {
-	PipeEvent event;
-	DeferEvent defer_write;
+class SimpleOutput final : OutputHandler, OutputProducer {
+	Output output;
 
 	SimpleOutputHandler &handler;
 
 	DisposableBuffer buffer;
-
-	std::size_t position;
 
 public:
 	SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
@@ -35,12 +31,11 @@ public:
 	~SimpleOutput() noexcept;
 
 	auto &GetEventLoop() const noexcept {
-		return event.GetEventLoop();
+		return output.GetEventLoop();
 	}
 
 	void Close() noexcept {
-		event.Close();
-		defer_write.Cancel();
+		output.Close();
 	}
 
 	bool IsActive() const noexcept {
@@ -55,7 +50,7 @@ public:
 	 * body.
 	 */
 	void ResetPosition() noexcept {
-		position = 0;
+		output.ResetPosition();
 	}
 
 	/**
@@ -66,19 +61,15 @@ public:
 	 */
 	std::size_t Stop() noexcept {
 		buffer = {};
-		event.ScheduleImplicit();
-		defer_write.Cancel();
-		return position;
+		return output.Stop();
 	}
 
 private:
-	FileDescriptor GetPipe() const noexcept {
-		return event.GetFileDescriptor();
-	}
+	// virtual methods from class OutputHandler
+	void OnWasOutputError(std::exception_ptr &&error) noexcept override;
 
-	void TryWrite();
-	void OnDeferredWrite() noexcept;
-	void OnPipeReady(unsigned events) noexcept;
+	// virtual methods from class OutputProducer
+	std::size_t OnWasOutputReady(FileDescriptor pipe) override;
 };
 
 } // namespace Was

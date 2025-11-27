@@ -3,11 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "SimpleOutput.hxx"
-#include "Buffer.hxx"
-#include "io/UniqueFileDescriptor.hxx"
 #include "system/Error.hxx"
-#include "net/SocketProtocolError.hxx"
-#include "util/DisposableBuffer.hxx"
 
 #include <cassert>
 #include <cerrno>
@@ -15,18 +11,13 @@
 namespace Was {
 
 SimpleOutput::SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
-			 SimpleOutputHandler &_handler) noexcept
-	:event(event_loop, BIND_THIS_METHOD(OnPipeReady), pipe.Release()),
-	 defer_write(event_loop, BIND_THIS_METHOD(OnDeferredWrite)),
+			   SimpleOutputHandler &_handler) noexcept
+	:output(event_loop, std::move(pipe), *this),
 	 handler(_handler)
 {
-	event.ScheduleImplicit();
 }
 
-SimpleOutput::~SimpleOutput() noexcept
-{
-	event.Close();
-}
+SimpleOutput::~SimpleOutput() noexcept = default;
 
 void
 SimpleOutput::Activate(DisposableBuffer _buffer) noexcept
@@ -37,45 +28,33 @@ SimpleOutput::Activate(DisposableBuffer _buffer) noexcept
 		return;
 
 	buffer = std::move(_buffer);
-	position = 0;
-
-	defer_write.Schedule();
+	output.Activate(*this);
+	output.DeferWrite();
 }
 
 void
-SimpleOutput::OnPipeReady(unsigned events) noexcept
-try {
-	if (events & SocketEvent::DEAD_MASK)
-		throw SocketClosedPrematurelyError("Hangup on WAS pipe");
-
-	TryWrite();
-} catch (...) {
-	handler.OnWasOutputError(std::current_exception());
+SimpleOutput::OnWasOutputError(std::exception_ptr &&error) noexcept
+{
+	handler.OnWasOutputError(std::move(error));
 }
 
-inline void
-SimpleOutput::OnDeferredWrite() noexcept
-try {
-	TryWrite();
-} catch (...) {
-	handler.OnWasOutputError(std::current_exception());
-}
-
-inline void
-SimpleOutput::TryWrite()
+std::size_t
+SimpleOutput::OnWasOutputReady(FileDescriptor pipe)
 {
 	assert(buffer);
+
+	std::size_t position = output.GetPosition();
 	assert(position < buffer.size());
 
 	std::span<const std::byte> r = buffer;
 	r = r.subspan(position);
 	assert(!r.empty());
 
-	auto nbytes = GetPipe().Write(r);
+	auto nbytes = pipe.Write(r);
 	if (nbytes <= 0) {
 		if (nbytes == 0 || errno == EAGAIN) {
-			event.ScheduleWrite();
-			return;
+			output.ScheduleWrite();
+			return 0;
 		} else
 			throw MakeErrno("Write error on WAS pipe");
 	}
@@ -84,10 +63,11 @@ SimpleOutput::TryWrite()
 
 	if (position == buffer.size()) {
 		/* done */
-		buffer = {};
-		event.ScheduleImplicit();
+		output.Stop();
 	} else
-		event.ScheduleWrite();
+		output.ScheduleWrite();
+
+	return nbytes;
 }
 
 } // namespace Was
