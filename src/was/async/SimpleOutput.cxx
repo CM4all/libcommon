@@ -14,7 +14,7 @@
 
 namespace Was {
 
-SimpleOutput::SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor pipe,
+SimpleOutput::SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
 			 SimpleOutputHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(OnPipeReady), pipe.Release()),
 	 defer_write(event_loop, BIND_THIS_METHOD(OnDeferredWrite)),

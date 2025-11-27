@@ -30,7 +30,7 @@ class SimpleOutput final {
 	std::size_t position;
 
 public:
-	SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor pipe,
+	SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
 		     SimpleOutputHandler &_handler) noexcept;
 	~SimpleOutput() noexcept;
 
