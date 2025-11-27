@@ -63,7 +63,7 @@ SimpleOutput::OnWasOutputReady(FileDescriptor pipe)
 
 	if (position == buffer.size()) {
 		/* done */
-		output.Stop();
+		output.Deactivate();
 	} else
 		output.ScheduleWrite();
 
