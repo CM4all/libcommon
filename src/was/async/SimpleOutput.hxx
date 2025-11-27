@@ -66,7 +66,7 @@ public:
 	 */
 	std::size_t Stop() noexcept {
 		buffer = {};
-		event.Cancel();
+		event.ScheduleImplicit();
 		defer_write.Cancel();
 		return position;
 	}
