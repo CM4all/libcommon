@@ -255,7 +255,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return control.SendUint64(WAS_COMMAND_PREMATURE, 0);
 
 		return control.SendUint64(WAS_COMMAND_PREMATURE,
-					  output.Stop());
+					  simple_output.Stop());
 
 	case WAS_COMMAND_PREMATURE:
 		{
@@ -330,6 +330,12 @@ SimpleServer::OnWasControlError(std::exception_ptr error) noexcept
 }
 
 void
+SimpleServer::OnWasOutputError(std::exception_ptr &&error) noexcept
+{
+	AbortError(std::move(error));
+}
+
+void
 SimpleServer::OnWasInput(DisposableBuffer body) noexcept
 {
 	assert(request.state == Request::State::BODY);
@@ -351,9 +357,9 @@ SimpleServer::OnWasInputError(std::exception_ptr error) noexcept
 }
 
 void
-SimpleServer::OnWasOutputError(std::exception_ptr error) noexcept
+SimpleServer::OnWasOutputEnd() noexcept
 {
-	AbortError(error);
+	output.Deactivate();
 }
 
 bool
@@ -390,7 +396,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 		    !control.SendUint64(WAS_COMMAND_LENGTH, response.body.size()))
 			return false;
 
-		output.Activate(std::move(response.body));
+		simple_output.Activate(std::move(response.body));
 	} else {
 		if (!control.Send(WAS_COMMAND_NO_DATA))
 			return false;

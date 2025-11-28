@@ -15,43 +15,21 @@ namespace Was {
 
 class SimpleOutputHandler {
 public:
-	virtual void OnWasOutputError(std::exception_ptr error) noexcept = 0;
+	virtual void OnWasOutputEnd() noexcept = 0;
 };
 
-class SimpleOutput final : OutputHandler, OutputProducer {
-	Output output;
+class SimpleOutput final : OutputProducer {
+	Output &output;
 
 	SimpleOutputHandler &handler;
 
 	DisposableBuffer buffer;
 
 public:
-	SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
-		     SimpleOutputHandler &_handler) noexcept;
+	SimpleOutput(Output &_output, SimpleOutputHandler &_handler) noexcept;
 	~SimpleOutput() noexcept;
 
-	auto &GetEventLoop() const noexcept {
-		return output.GetEventLoop();
-	}
-
-	void Close() noexcept {
-		output.Close();
-	}
-
-	bool IsActive() const noexcept {
-		return buffer;
-	}
-
 	void Activate(DisposableBuffer _buffer) noexcept;
-
-	/**
-	 * Set the "position" field to zero to allow calling Stop()
-	 * without Activate(), in cases where there is no request
-	 * body.
-	 */
-	void ResetPosition() noexcept {
-		output.ResetPosition();
-	}
 
 	/**
 	 * Handle a STOP command.  Returns the number of bytes already
@@ -65,9 +43,6 @@ public:
 	}
 
 private:
-	// virtual methods from class OutputHandler
-	void OnWasOutputError(std::exception_ptr &&error) noexcept override;
-
 	// virtual methods from class OutputProducer
 	void OnWasOutputReady() override;
 };

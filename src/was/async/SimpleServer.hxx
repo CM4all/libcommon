@@ -6,6 +6,7 @@
 
 #include "SimpleHandler.hxx"
 #include "Control.hxx"
+#include "Output.hxx"
 #include "SimpleInput.hxx"
 #include "SimpleOutput.hxx"
 #include "http/Method.hxx"
@@ -28,11 +29,13 @@ public:
  * A "simple" WAS server connection.
  */
 class SimpleServer final
-	: ControlHandler, SimpleInputHandler, SimpleOutputHandler
+	: ControlHandler, OutputHandler,
+	  SimpleInputHandler, SimpleOutputHandler
 {
 	Control control;
 	SimpleInput input;
-	SimpleOutput output;
+	Output output;
+	SimpleOutput simple_output{output, *this};
 
 	SimpleServerHandler &handler;
 	SimpleRequestHandler &request_handler;
@@ -116,13 +119,16 @@ private:
 	void OnWasControlHangup() noexcept override;
 	void OnWasControlError(std::exception_ptr ep) noexcept override;
 
+	/* virtual methods from class Was::OutputHandler */
+	void OnWasOutputError(std::exception_ptr &&error) noexcept override;
+
 	/* virtual methods from class Was::SimpleInputHandler */
 	void OnWasInput(DisposableBuffer input) noexcept override;
 	void OnWasInputHangup() noexcept override;
 	void OnWasInputError(std::exception_ptr error) noexcept override;
 
 	/* virtual methods from class Was::SimpleOutputHandler */
-	void OnWasOutputError(std::exception_ptr error) noexcept override;
+	void OnWasOutputEnd() noexcept override;
 };
 
 } // namespace Was

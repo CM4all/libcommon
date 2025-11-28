@@ -6,6 +6,7 @@
 
 #include "SimpleHandler.hxx"
 #include "Control.hxx"
+#include "Output.hxx"
 #include "SimpleInput.hxx"
 #include "SimpleOutput.hxx"
 #include "util/Cancellable.hxx"
@@ -35,11 +36,14 @@ public:
  * A "simple" WAS client connection.
  */
 class SimpleClient final
-	: ControlHandler, SimpleInputHandler, SimpleOutputHandler, Cancellable
+	: ControlHandler, OutputHandler,
+	  SimpleInputHandler, SimpleOutputHandler,
+	  Cancellable
 {
 	Control control;
 	SimpleInput input;
-	SimpleOutput output;
+	Output output;
+	SimpleOutput simple_output{output, *this};
 
 	SimpleClientHandler &handler;
 
@@ -95,13 +99,16 @@ private:
 	void OnWasControlHangup() noexcept override;
 	void OnWasControlError(std::exception_ptr ep) noexcept override;
 
+	/* virtual methods from class Was::OutputHandler */
+	void OnWasOutputError(std::exception_ptr &&error) noexcept override;
+
 	/* virtual methods from class Was::SimpleInputHandler */
 	void OnWasInput(DisposableBuffer input) noexcept override;
 	void OnWasInputHangup() noexcept override;
 	void OnWasInputError(std::exception_ptr error) noexcept override;
 
 	/* virtual methods from class Was::SimpleOutputHandler */
-	void OnWasOutputError(std::exception_ptr error) noexcept override;
+	void OnWasOutputEnd() noexcept override;
 
 	/* virtual methods from class Cancellable */
 	void Cancel() noexcept override;

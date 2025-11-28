@@ -76,7 +76,7 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 		return false;
 
 	if (request.body)
-		output.Activate(std::move(request.body));
+		simple_output.Activate(std::move(request.body));
 
 	return true;
 }
@@ -205,7 +205,7 @@ SimpleClient::OnWasControlPacket(enum was_command cmd,
 
 	case WAS_COMMAND_STOP:
 		return control.SendUint64(WAS_COMMAND_PREMATURE,
-					  output.Stop());
+					  simple_output.Stop());
 
 	case WAS_COMMAND_PREMATURE:
 		if (state != State::BODY && !stopping) {
@@ -275,6 +275,12 @@ SimpleClient::OnWasControlError(std::exception_ptr error) noexcept
 }
 
 void
+SimpleClient::OnWasOutputError(std::exception_ptr &&error) noexcept
+{
+	AbortError(std::move(error));
+}
+
+void
 SimpleClient::OnWasInput(DisposableBuffer body) noexcept
 {
 	assert(state == State::BODY);
@@ -297,9 +303,9 @@ SimpleClient::OnWasInputError(std::exception_ptr error) noexcept
 }
 
 void
-SimpleClient::OnWasOutputError(std::exception_ptr error) noexcept
+SimpleClient::OnWasOutputEnd() noexcept
 {
-	AbortError(error);
+	output.Deactivate();
 }
 
 void
@@ -309,7 +315,7 @@ SimpleClient::Cancel() noexcept
 
 	if (output.IsActive()) {
 		if (!control.SendUint64(WAS_COMMAND_PREMATURE,
-					output.Stop()))
+					simple_output.Stop()))
 			return;
 	}
 

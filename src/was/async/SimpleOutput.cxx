@@ -10,9 +10,9 @@
 
 namespace Was {
 
-SimpleOutput::SimpleOutput(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
+SimpleOutput::SimpleOutput(Output &_output,
 			   SimpleOutputHandler &_handler) noexcept
-	:output(event_loop, std::move(pipe), *this),
+	:output(_output),
 	 handler(_handler)
 {
 }
@@ -29,13 +29,6 @@ SimpleOutput::Activate(DisposableBuffer _buffer) noexcept
 
 	buffer = std::move(_buffer);
 	output.Activate(*this);
-	output.DeferWrite();
-}
-
-void
-SimpleOutput::OnWasOutputError(std::exception_ptr &&error) noexcept
-{
-	handler.OnWasOutputError(std::move(error));
 }
 
 void
@@ -64,7 +57,7 @@ SimpleOutput::OnWasOutputReady()
 	if (output.GetPosition() == buffer.size()) {
 		/* done */
 		buffer = {};
-		output.Deactivate();
+		handler.OnWasOutputEnd();
 	} else
 		output.ScheduleWrite();
 }
