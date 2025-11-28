@@ -32,6 +32,8 @@ Output::Activate(OutputProducer &_producer) noexcept
 	position = 0;
 
 	defer_write.Schedule();
+
+	producer->OnWasOutputBegin(*this);
 }
 
 void

@@ -11,16 +11,20 @@
 
 namespace Was {
 
-SimpleOutput::SimpleOutput(Output &_output,
-			   DisposableBuffer &&_buffer,
+SimpleOutput::SimpleOutput(DisposableBuffer &&_buffer,
 			   SimpleOutputHandler &_handler) noexcept
-	:output(_output),
-	 handler(_handler),
+	:handler(_handler),
 	 buffer(std::move(_buffer))
 {
 }
 
 SimpleOutput::~SimpleOutput() noexcept = default;
+
+void
+SimpleOutput::OnWasOutputBegin(Output &_output) noexcept
+{
+	output = &_output;
+}
 
 void
 SimpleOutput::OnWasOutputReady()
@@ -30,29 +34,29 @@ SimpleOutput::OnWasOutputReady()
 		return;
 	}
 
-	const std::size_t position = output.GetPosition();
+	const std::size_t position = output->GetPosition();
 	assert(position < buffer.size());
 
 	std::span<const std::byte> r = buffer;
 	r = r.subspan(position);
 	assert(!r.empty());
 
-	auto nbytes = output.GetPipe().Write(r);
+	auto nbytes = output->GetPipe().Write(r);
 	if (nbytes <= 0) {
 		if (nbytes == 0 || errno == EAGAIN) {
-			output.ScheduleWrite();
+			output->ScheduleWrite();
 			return;
 		} else
 			throw MakeErrno("Write error on WAS pipe");
 	}
 
-	output.AddPosition(nbytes);
+	output->AddPosition(nbytes);
 
-	if (output.GetPosition() == buffer.size()) {
+	if (output->GetPosition() == buffer.size()) {
 		/* done */
 		handler.OnWasOutputEnd();
 	} else
-		output.ScheduleWrite();
+		output->ScheduleWrite();
 }
 
 } // namespace Was

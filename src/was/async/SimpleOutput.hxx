@@ -21,19 +21,20 @@ public:
 };
 
 class SimpleOutput final : public OutputProducer {
-	Output &output;
+	Output *output;
 
 	SimpleOutputHandler &handler;
 
 	const DisposableBuffer buffer;
 
 public:
-	SimpleOutput(Output &_output, DisposableBuffer &&_buffer,
+	SimpleOutput(DisposableBuffer &&_buffer,
 		     SimpleOutputHandler &_handler) noexcept;
 	~SimpleOutput() noexcept;
 
 private:
 	// virtual methods from class OutputProducer
+	void OnWasOutputBegin(Output &_output) noexcept override;
 	void OnWasOutputReady() override;
 };
 

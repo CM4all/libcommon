@@ -77,7 +77,7 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 
 	if (request.body) {
 		SimpleOutputHandler &simple_output_handler = *this;
-		simple_output.emplace(output, std::move(request.body),
+		simple_output.emplace(std::move(request.body),
 				      simple_output_handler);
 		output.Activate(*simple_output);
 	}

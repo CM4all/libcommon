@@ -399,7 +399,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 			return false;
 
 		SimpleOutputHandler &simple_output_handler = *this;
-		simple_output.emplace(output, std::move(response.body),
+		simple_output.emplace(std::move(response.body),
 				      simple_output_handler);
 		output.Activate(*simple_output);
 	} else {
