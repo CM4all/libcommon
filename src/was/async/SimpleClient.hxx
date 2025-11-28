@@ -12,7 +12,6 @@
 #include "util/Cancellable.hxx"
 
 #include <exception>
-#include <optional>
 
 struct WasSocket;
 
@@ -44,8 +43,6 @@ class SimpleClient final
 	Control control;
 	SimpleInput input;
 	Output output;
-
-	std::optional<SimpleOutput> simple_output;
 
 	SimpleClientHandler &handler;
 

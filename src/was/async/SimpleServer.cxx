@@ -254,7 +254,6 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			   produce a response */
 			return control.SendUint64(WAS_COMMAND_PREMATURE, 0);
 
-		simple_output.reset();
 		return control.SendUint64(WAS_COMMAND_PREMATURE,
 					  output.Stop());
 
@@ -361,7 +360,6 @@ void
 SimpleServer::OnWasOutputEnd() noexcept
 {
 	output.Deactivate();
-	simple_output.reset();
 }
 
 bool
@@ -399,9 +397,8 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 			return false;
 
 		SimpleOutputHandler &simple_output_handler = *this;
-		simple_output.emplace(std::move(response.body),
-				      simple_output_handler);
-		output.Activate(*simple_output);
+		output.Activate(std::make_unique<SimpleOutput>(std::move(response.body),
+							       simple_output_handler));
 	} else {
 		if (!control.Send(WAS_COMMAND_NO_DATA))
 			return false;

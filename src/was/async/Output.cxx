@@ -24,11 +24,11 @@ Output::~Output() noexcept
 }
 
 void
-Output::Activate(OutputProducer &_producer) noexcept
+Output::Activate(std::unique_ptr<OutputProducer> &&_producer) noexcept
 {
 	assert(producer == nullptr);
 
-	producer = &_producer;
+	producer = std::move(_producer);
 	position = 0;
 
 	defer_write.Schedule();
@@ -41,7 +41,7 @@ Output::Deactivate() noexcept
 {
 	assert(producer != nullptr);
 
-	producer = nullptr;
+	producer.reset();
 	CancelWrite();
 }
 

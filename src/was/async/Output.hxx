@@ -8,6 +8,7 @@
 #include "event/DeferEvent.hxx"
 
 #include <cassert>
+#include <memory>
 #include <exception> // for std::exception_ptr
 
 class UniqueFileDescriptor;
@@ -30,7 +31,7 @@ class Output final {
 
 	OutputHandler *handler;
 
-	OutputProducer *producer = nullptr;
+	std::unique_ptr<OutputProducer> producer;
 
 	std::size_t position;
 
@@ -59,7 +60,7 @@ public:
 		return producer != nullptr;
 	}
 
-	void Activate(OutputProducer &_producer) noexcept;
+	void Activate(std::unique_ptr<OutputProducer> &&_producer) noexcept;
 	void Deactivate() noexcept;
 
 	/**

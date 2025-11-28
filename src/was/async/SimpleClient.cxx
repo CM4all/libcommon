@@ -77,9 +77,8 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 
 	if (request.body) {
 		SimpleOutputHandler &simple_output_handler = *this;
-		simple_output.emplace(std::move(request.body),
-				      simple_output_handler);
-		output.Activate(*simple_output);
+		output.Activate(std::make_unique<SimpleOutput>(std::move(request.body),
+							       simple_output_handler));
 	}
 
 	return true;
@@ -208,7 +207,6 @@ SimpleClient::OnWasControlPacket(enum was_command cmd,
 		break;
 
 	case WAS_COMMAND_STOP:
-		simple_output.reset();
 		return control.SendUint64(WAS_COMMAND_PREMATURE,
 					  output.Stop());
 
@@ -311,7 +309,6 @@ void
 SimpleClient::OnWasOutputEnd() noexcept
 {
 	output.Deactivate();
-	simple_output.reset();
 }
 
 void
@@ -320,7 +317,6 @@ SimpleClient::Cancel() noexcept
 	assert(state != State::IDLE);
 
 	if (output.IsActive()) {
-		simple_output.reset();
 		if (!control.SendUint64(WAS_COMMAND_PREMATURE,
 					output.Stop()))
 			return;

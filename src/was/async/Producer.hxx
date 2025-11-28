@@ -14,6 +14,8 @@ class Output;
  */
 class OutputProducer {
 public:
+	virtual ~OutputProducer() noexcept = default;
+
 	/**
 	 * This object has been registered in an #Output instance and
 	 * the first write has been deferred.  This makes the #Output

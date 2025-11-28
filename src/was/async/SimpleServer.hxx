@@ -75,8 +75,6 @@ class SimpleServer final
 		} state = State::NONE;
 	} request;
 
-	std::optional<SimpleOutput> simple_output;
-
 public:
 	SimpleServer(EventLoop &event_loop, WasSocket &&socket,
 		     SimpleServerHandler &_handler,
