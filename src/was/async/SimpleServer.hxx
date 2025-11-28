@@ -35,7 +35,6 @@ class SimpleServer final
 	Control control;
 	SimpleInput input;
 	Output output;
-	SimpleOutput simple_output{output, *this};
 
 	SimpleServerHandler &handler;
 	SimpleRequestHandler &request_handler;
@@ -75,6 +74,8 @@ class SimpleServer final
 			SUBMITTED,
 		} state = State::NONE;
 	} request;
+
+	std::optional<SimpleOutput> simple_output;
 
 public:
 	SimpleServer(EventLoop &event_loop, WasSocket &&socket,

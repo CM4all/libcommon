@@ -11,30 +11,23 @@
 namespace Was {
 
 SimpleOutput::SimpleOutput(Output &_output,
+			   DisposableBuffer &&_buffer,
 			   SimpleOutputHandler &_handler) noexcept
 	:output(_output),
-	 handler(_handler)
+	 handler(_handler),
+	 buffer(std::move(_buffer))
 {
 }
 
 SimpleOutput::~SimpleOutput() noexcept = default;
 
 void
-SimpleOutput::Activate(DisposableBuffer _buffer) noexcept
-{
-	assert(!buffer);
-
-	if (_buffer.empty())
-		return;
-
-	buffer = std::move(_buffer);
-	output.Activate(*this);
-}
-
-void
 SimpleOutput::OnWasOutputReady()
 {
-	assert(buffer);
+	if (buffer.empty()) {
+		handler.OnWasOutputEnd();
+		return;
+	}
 
 	const std::size_t position = output.GetPosition();
 	assert(position < buffer.size());
@@ -56,7 +49,6 @@ SimpleOutput::OnWasOutputReady()
 
 	if (output.GetPosition() == buffer.size()) {
 		/* done */
-		buffer = {};
 		handler.OnWasOutputEnd();
 	} else
 		output.ScheduleWrite();
