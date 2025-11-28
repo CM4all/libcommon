@@ -30,7 +30,7 @@ class Output final {
 	PipeEvent event;
 	DeferEvent defer_write;
 
-	OutputHandler &handler;
+	OutputHandler *handler;
 
 	OutputProducer *producer = nullptr;
 
@@ -48,6 +48,13 @@ public:
 	void Close() noexcept {
 		event.Close();
 		defer_write.Cancel();
+	}
+
+	/**
+	 * Install a different handler.
+	 */
+	void SetHandler(OutputHandler &_handler) noexcept {
+		handler = &_handler;
 	}
 
 	bool IsActive() const noexcept {

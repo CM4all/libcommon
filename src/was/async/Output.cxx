@@ -14,7 +14,7 @@ Output::Output(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
 	       OutputHandler &_handler) noexcept
 	:event(event_loop, BIND_THIS_METHOD(OnPipeReady), pipe.Release()),
 	 defer_write(event_loop, BIND_THIS_METHOD(OnDeferredWrite)),
-	 handler(_handler)
+	 handler(&_handler)
 {
 	event.ScheduleImplicit();
 }
@@ -64,7 +64,7 @@ try {
 
 	TryWrite();
 } catch (...) {
-	handler.OnWasOutputError(std::current_exception());
+	handler->OnWasOutputError(std::current_exception());
 }
 
 inline void
@@ -72,7 +72,7 @@ Output::OnDeferredWrite() noexcept
 try {
 	TryWrite();
 } catch (...) {
-	handler.OnWasOutputError(std::current_exception());
+	handler->OnWasOutputError(std::current_exception());
 }
 
 } // namespace Was
