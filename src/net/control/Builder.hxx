@@ -67,7 +67,7 @@ private:
 
 	void AppendPadded(std::span<const std::byte> s) noexcept {
 		Append(s);
-		data.append(PaddingSize(s.size()), '\0');
+		AppendPadding(s.size());
 	}
 
 	void AppendT(const auto &s) noexcept {
@@ -81,6 +81,13 @@ private:
 		};
 
 		AppendT(header);
+	}
+
+	/**
+	 * Append padding for a payload with the specified size.
+	 */
+	void AppendPadding(std::size_t length) noexcept {
+		data.append(PaddingSize(length), '\0');
 	}
 };
 
