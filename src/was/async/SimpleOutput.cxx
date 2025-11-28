@@ -63,6 +63,7 @@ SimpleOutput::OnWasOutputReady()
 
 	if (output.GetPosition() == buffer.size()) {
 		/* done */
+		buffer = {};
 		output.Deactivate();
 	} else
 		output.ScheduleWrite();
