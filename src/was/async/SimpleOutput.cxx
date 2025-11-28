@@ -39,7 +39,7 @@ SimpleOutput::OnWasOutputError(std::exception_ptr &&error) noexcept
 }
 
 void
-SimpleOutput::OnWasOutputReady(FileDescriptor pipe)
+SimpleOutput::OnWasOutputReady()
 {
 	assert(buffer);
 
@@ -50,7 +50,7 @@ SimpleOutput::OnWasOutputReady(FileDescriptor pipe)
 	r = r.subspan(position);
 	assert(!r.empty());
 
-	auto nbytes = pipe.Write(r);
+	auto nbytes = output.GetPipe().Write(r);
 	if (nbytes <= 0) {
 		if (nbytes == 0 || errno == EAGAIN) {
 			output.ScheduleWrite();

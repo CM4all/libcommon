@@ -47,7 +47,7 @@ Output::TryWrite()
 {
 	assert(producer);
 
-	producer->OnWasOutputReady(GetPipe());
+	producer->OnWasOutputReady();
 }
 
 void

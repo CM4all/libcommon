@@ -69,7 +69,7 @@ private:
 	void OnWasOutputError(std::exception_ptr &&error) noexcept override;
 
 	// virtual methods from class OutputProducer
-	void OnWasOutputReady(FileDescriptor pipe) override;
+	void OnWasOutputReady() override;
 };
 
 } // namespace Was

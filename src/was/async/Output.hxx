@@ -21,7 +21,7 @@ public:
 
 class OutputProducer {
 public:
-	virtual void OnWasOutputReady(FileDescriptor pipe) = 0;
+	virtual void OnWasOutputReady() = 0;
 };
 
 /**
@@ -64,6 +64,14 @@ public:
 
 	void Activate(OutputProducer &_producer) noexcept;
 	void Deactivate() noexcept;
+
+	/**
+	 * Provides access to the underlying pipe.  The producer may
+	 * write to it; after a successful write, call AddPosition().
+	 */
+	FileDescriptor GetPipe() noexcept {
+		return event.GetFileDescriptor();
+	}
 
 	std::size_t GetPosition() const noexcept {
 		return position;
@@ -113,10 +121,6 @@ public:
 	}
 
 private:
-	FileDescriptor GetPipe() const noexcept {
-		return event.GetFileDescriptor();
-	}
-
 	void TryWrite();
 	void OnDeferredWrite() noexcept;
 	void OnPipeReady(unsigned events) noexcept;
