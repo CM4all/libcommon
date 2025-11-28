@@ -73,6 +73,17 @@ public:
 		return event.GetFileDescriptor();
 	}
 
+	/**
+	 * If an OutputProducer::OnWasOutputReady() call is pending
+	 * because the pipe was determined to be ready for writing,
+	 * cancel that call for this #EventLoop iteration.  The
+	 * producer may call this after a successful write to avoid
+	 * writing twice per #EventLoop iteration.
+	 */
+	void ClearReadyFlag() noexcept {
+		event.ClearReadyFlags(PipeEvent::WRITE);
+	}
+
 	std::size_t GetPosition() const noexcept {
 		return position;
 	}
