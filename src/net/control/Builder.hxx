@@ -39,7 +39,7 @@ public:
 
 	void Add(Command cmd,
 		 std::span<const std::byte> payload) noexcept {
-		AppendT(Header{ToBE16(payload.size()), ToBE16(uint16_t(cmd))});
+		AppendHeader(cmd, payload.size());
 		AppendPadded(payload);
 	}
 
@@ -72,6 +72,15 @@ private:
 
 	void AppendT(const auto &s) noexcept {
 		Append(ReferenceAsBytes(s));
+	}
+
+	void AppendHeader(Command cmd, std::size_t length) noexcept {
+		const Header header{
+			.length = ToBE16(static_cast<uint16_t>(length)),
+			.command = ToBE16(static_cast<uint16_t>(cmd)),
+		};
+
+		AppendT(header);
 	}
 };
 
