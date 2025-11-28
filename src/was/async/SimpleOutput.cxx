@@ -38,12 +38,12 @@ SimpleOutput::OnWasOutputError(std::exception_ptr &&error) noexcept
 	handler.OnWasOutputError(std::move(error));
 }
 
-std::size_t
+void
 SimpleOutput::OnWasOutputReady(FileDescriptor pipe)
 {
 	assert(buffer);
 
-	std::size_t position = output.GetPosition();
+	const std::size_t position = output.GetPosition();
 	assert(position < buffer.size());
 
 	std::span<const std::byte> r = buffer;
@@ -54,20 +54,18 @@ SimpleOutput::OnWasOutputReady(FileDescriptor pipe)
 	if (nbytes <= 0) {
 		if (nbytes == 0 || errno == EAGAIN) {
 			output.ScheduleWrite();
-			return 0;
+			return;
 		} else
 			throw MakeErrno("Write error on WAS pipe");
 	}
 
-	position += nbytes;
+	output.AddPosition(nbytes);
 
-	if (position == buffer.size()) {
+	if (output.GetPosition() == buffer.size()) {
 		/* done */
 		output.Deactivate();
 	} else
 		output.ScheduleWrite();
-
-	return nbytes;
 }
 
 } // namespace Was

@@ -6,8 +6,6 @@
 #include "net/SocketProtocolError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
-#include <cassert>
-
 namespace Was {
 
 Output::Output(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
@@ -49,11 +47,7 @@ Output::TryWrite()
 {
 	assert(producer);
 
-	const std::size_t nbytes = producer->OnWasOutputReady(GetPipe());
-
-	/* if nbytes==0, this object might be deleted already */
-	if (nbytes > 0)
-		position += nbytes;
+	producer->OnWasOutputReady(GetPipe());
 }
 
 void

@@ -7,6 +7,7 @@
 #include "event/PipeEvent.hxx"
 #include "event/DeferEvent.hxx"
 
+#include <cassert>
 #include <exception> // for std::exception_ptr
 
 class UniqueFileDescriptor;
@@ -20,7 +21,7 @@ public:
 
 class OutputProducer {
 public:
-	virtual std::size_t OnWasOutputReady(FileDescriptor pipe) = 0;
+	virtual void OnWasOutputReady(FileDescriptor pipe) = 0;
 };
 
 /**
@@ -66,6 +67,12 @@ public:
 
 	std::size_t GetPosition() const noexcept {
 		return position;
+	}
+
+	void AddPosition(std::size_t nbytes) noexcept {
+		assert(IsActive());
+
+		position += nbytes;
 	}
 
 	/**
