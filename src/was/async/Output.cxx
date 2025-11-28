@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Output.hxx"
+#include "Producer.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 

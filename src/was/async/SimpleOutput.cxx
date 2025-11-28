@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "SimpleOutput.hxx"
+#include "Output.hxx"
 #include "system/Error.hxx"
 
 #include <cassert>

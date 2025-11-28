@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Output.hxx"
+#include "Producer.hxx"
 #include "util/DisposableBuffer.hxx"
 
 #include <exception> // for std::exception_ptr
@@ -12,6 +12,8 @@
 class UniqueFileDescriptor;
 
 namespace Was {
+
+class Output;
 
 class SimpleOutputHandler {
 public:

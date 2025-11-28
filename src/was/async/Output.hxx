@@ -14,14 +14,11 @@ class UniqueFileDescriptor;
 
 namespace Was {
 
+class OutputProducer;
+
 class OutputHandler {
 public:
 	virtual void OnWasOutputError(std::exception_ptr &&error) noexcept = 0;
-};
-
-class OutputProducer {
-public:
-	virtual void OnWasOutputReady() = 0;
 };
 
 /**
