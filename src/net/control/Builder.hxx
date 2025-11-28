@@ -9,6 +9,7 @@
 #include "util/ByteOrder.hxx"
 #include "util/SpanCast.hxx"
 
+#include <initializer_list>
 #include <span>
 #include <string>
 
@@ -41,6 +42,19 @@ public:
 		 std::span<const std::byte> payload) noexcept {
 		AppendHeader(cmd, payload.size());
 		AppendPadded(payload);
+	}
+
+	void Add(Command cmd,
+		 std::initializer_list<std::span<const std::byte>> payload) noexcept {
+		std::size_t total_size = 0;
+		for (const auto i : payload)
+			total_size += i.size();
+
+		AppendHeader(cmd, total_size);
+		for (const auto i : payload)
+			Append(i);
+
+		AppendPadding(total_size);
 	}
 
 	void Add(Command cmd,
