@@ -6,6 +6,7 @@
 #include "lib/nlohmann_json/ToDisposableBuffer.hxx"
 #include "was/ExceptionResponse.hxx"
 #include "was/async/SimpleResponse.hxx"
+#include "was/async/SimpleOutput.hxx"
 
 #include <nlohmann/json.hpp>
 
@@ -17,7 +18,7 @@ void
 WriteJson(SimpleResponse &response, const nlohmann::json &j) noexcept
 {
 	response.headers.emplace("content-type"sv, "application/json"sv);
-	response.body = Json::ToDisposableBuffer(j);
+	response.body = std::make_unique<SimpleOutput>(Json::ToDisposableBuffer(j));
 }
 
 SimpleResponse

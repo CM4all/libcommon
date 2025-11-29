@@ -4,13 +4,10 @@
 
 #include "SimpleServer.hxx"
 #include "SimpleResponse.hxx"
-#include "SimpleOutput.hxx"
 #include "Socket.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringSplit.hxx"
-
-#include <fmt/format.h>
 
 #include <array>
 
@@ -388,9 +385,11 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 		return false;
 
 	if (response.body && http_method_is_empty(request.method)) {
+		/* TODO
 		if (request.method == HttpMethod::HEAD)
 			response.headers.emplace("content-length",
 						 fmt::format_int{response.body.size()}.c_str());
+		*/
 
 		response.body = {};
 	}
@@ -403,7 +402,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 		if (!control.Send(WAS_COMMAND_DATA))
 			return false;
 
-		if (output.Activate(std::make_unique<SimpleOutput>(std::move(response.body))))
+		if (output.Activate(std::move(response.body)))
 			return false;
 	} else {
 		if (!control.Send(WAS_COMMAND_NO_DATA))

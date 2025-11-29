@@ -245,7 +245,7 @@ bool
 SimpleClient::OnWasControlDrained() noexcept
 {
 	if (state == State::BODY) {
-		response.body = input.CheckComplete();
+		response.body = std::make_unique<SimpleOutput>(input.CheckComplete());
 		if (response.body) {
 			state = State::IDLE;
 			response_handler->OnWasResponse(std::move(response));
@@ -300,7 +300,7 @@ SimpleClient::OnWasInput(DisposableBuffer body) noexcept
 {
 	assert(state == State::BODY);
 
-	response.body = std::move(body);
+	response.body = std::make_unique<SimpleOutput>(std::move(body));
 	state = State::IDLE;
 	response_handler->OnWasResponse(std::move(response));
 }

@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "was/async/CoRun.hxx"
+#include "was/async/SimpleOutput.hxx"
 #include "was/async/SimpleResponse.hxx"
 #include "event/Loop.hxx"
 #include "util/PrintException.hxx"
@@ -14,7 +15,7 @@ MyHandler(Was::SimpleRequest request)
 	co_return Was::SimpleResponse{
 		HttpStatus::OK,
 		std::move(request.headers),
-		std::move(request.body),
+		request.body ? std::make_unique<Was::SimpleOutput>(std::move(request.body)) : nullptr,
 	};
 }
 

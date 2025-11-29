@@ -4,25 +4,25 @@
 
 #pragma once
 
+#include "Producer.hxx"
 #include "http/Status.hxx"
-#include "util/DisposableBuffer.hxx"
 
 #include <map>
+#include <memory>
 #include <string>
 
 class CancellablePointer;
 
 namespace Was {
 
+class OutputProducer;
+
 struct SimpleResponse {
 	HttpStatus status = HttpStatus::OK;
 	std::multimap<std::string, std::string, std::less<>> headers;
-	DisposableBuffer body;
+	std::unique_ptr<OutputProducer> body;
 
-	void SetTextPlain(std::string_view _body) noexcept {
-		body = {ToNopPointer(_body.data()), _body.size()};
-		headers.emplace("content-type", "text/plain");
-	}
+	void SetTextPlain(std::string_view _body) noexcept;
 
 	static SimpleResponse MethodNotAllowed(std::string allow) noexcept {
 		return {
@@ -30,7 +30,6 @@ struct SimpleResponse {
 			std::multimap<std::string, std::string, std::less<>>{
 				{"allow", std::move(allow)},
 			},
-			nullptr,
 		};
 	}
 };

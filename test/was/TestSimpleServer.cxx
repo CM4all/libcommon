@@ -5,6 +5,7 @@
 #include "was/async/SimpleHandler.hxx"
 #include "was/async/SimpleServer.hxx"
 #include "was/async/SimpleClient.hxx"
+#include "was/async/SimpleOutput.hxx"
 #include "was/async/Socket.hxx"
 #include "event/Loop.hxx"
 #include "event/FineTimerEvent.hxx"
@@ -154,7 +155,7 @@ MyRequestHandler::OnRequest(Was::SimpleServer &server, Was::SimpleRequest &&requ
 	case Mode::MIRROR:
 		return server.SendResponse({
 			.headers = std::move(request.headers),
-			.body = std::move(request.body),
+			.body = request.body ? std::make_unique<Was::SimpleOutput>(std::move(request.body)) : nullptr,
 		});
 
 	case Mode::DEFER:
