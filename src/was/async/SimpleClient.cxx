@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "SimpleClient.hxx"
+#include "SimpleHandler.hxx"
 #include "SimpleOutput.hxx"
 #include "Socket.hxx"
 #include "net/SocketProtocolError.hxx"

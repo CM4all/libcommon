@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "was/async/SimpleRun.hxx"
+#include "was/async/SimpleResponse.hxx"
 #include "was/async/SimpleServer.hxx"
 #include "event/Loop.hxx"
 #include "util/PrintException.hxx"

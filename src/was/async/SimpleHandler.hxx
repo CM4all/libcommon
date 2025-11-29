@@ -5,7 +5,6 @@
 #pragma once
 
 #include "http/Method.hxx"
-#include "http/Status.hxx"
 #include "util/DisposableBuffer.hxx"
 
 #include <map>
@@ -14,6 +13,9 @@
 class CancellablePointer;
 
 namespace Was {
+
+struct SimpleResponse;
+class SimpleServer;
 
 struct SimpleRequest {
 	std::string remote_host;
@@ -31,29 +33,6 @@ struct SimpleRequest {
 	[[gnu::pure]]
 	bool IsContentType(const std::string_view expected) const noexcept;
 };
-
-struct SimpleResponse {
-	HttpStatus status = HttpStatus::OK;
-	std::multimap<std::string, std::string, std::less<>> headers;
-	DisposableBuffer body;
-
-	void SetTextPlain(std::string_view _body) noexcept {
-		body = {ToNopPointer(_body.data()), _body.size()};
-		headers.emplace("content-type", "text/plain");
-	}
-
-	static SimpleResponse MethodNotAllowed(std::string allow) noexcept {
-		return {
-			HttpStatus::METHOD_NOT_ALLOWED,
-			std::multimap<std::string, std::string, std::less<>>{
-				{"allow", std::move(allow)},
-			},
-			nullptr,
-		};
-	}
-};
-
-class SimpleServer;
 
 class SimpleRequestHandler {
 public:

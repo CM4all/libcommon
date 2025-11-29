@@ -5,6 +5,7 @@
 #include "CoRun.hxx"
 #include "CoHandler.hxx"
 #include "SimpleRun.hxx"
+#include "SimpleResponse.hxx"
 
 #include <functional>
 

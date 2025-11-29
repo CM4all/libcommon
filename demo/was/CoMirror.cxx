@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "was/async/CoRun.hxx"
+#include "was/async/SimpleResponse.hxx"
 #include "event/Loop.hxx"
 #include "util/PrintException.hxx"
 #include "DefaultFifoBuffer.hxx"

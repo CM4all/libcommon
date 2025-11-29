@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "SimpleHandler.hxx"
+#include "SimpleResponse.hxx"
 #include "Control.hxx"
 #include "Output.hxx"
 #include "SimpleInput.hxx"
@@ -15,6 +15,8 @@
 struct WasSocket;
 
 namespace Was {
+
+struct SimpleRequest;
 
 class SimpleClientHandler {
 public:

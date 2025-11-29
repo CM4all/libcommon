@@ -5,7 +5,7 @@
 #include "Write.hxx"
 #include "lib/nlohmann_json/ToDisposableBuffer.hxx"
 #include "was/ExceptionResponse.hxx"
-#include "was/async/SimpleHandler.hxx"
+#include "was/async/SimpleResponse.hxx"
 
 #include <nlohmann/json.hpp>
 

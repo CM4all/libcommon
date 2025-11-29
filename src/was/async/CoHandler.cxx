@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "CoHandler.hxx"
+#include "SimpleResponse.hxx"
 #include "SimpleServer.hxx"
 #include "was/ExceptionResponse.hxx"
 #include "co/InvokeTask.hxx"

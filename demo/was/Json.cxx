@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "was/async/CoRun.hxx"
+#include "was/async/SimpleResponse.hxx"
 #include "was/async/nlohmann_json/Read.hxx"
 #include "was/async/nlohmann_json/Write.hxx"
 #include "lib/nlohmann_json/ToDisposableBuffer.hxx"
