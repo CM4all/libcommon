@@ -8,7 +8,6 @@
 #include "Control.hxx"
 #include "Output.hxx"
 #include "SimpleInput.hxx"
-#include "SimpleOutput.hxx"
 #include "util/Cancellable.hxx"
 
 #include <exception>
@@ -37,7 +36,7 @@ public:
  */
 class SimpleClient final
 	: ControlHandler, OutputHandler,
-	  SimpleInputHandler, SimpleOutputHandler,
+	  SimpleInputHandler,
 	  Cancellable
 {
 	Control control;
@@ -99,15 +98,13 @@ private:
 	void OnWasControlError(std::exception_ptr ep) noexcept override;
 
 	/* virtual methods from class Was::OutputHandler */
+	void OnWasOutputEnd() noexcept override;
 	void OnWasOutputError(std::exception_ptr &&error) noexcept override;
 
 	/* virtual methods from class Was::SimpleInputHandler */
 	void OnWasInput(DisposableBuffer input) noexcept override;
 	void OnWasInputHangup() noexcept override;
 	void OnWasInputError(std::exception_ptr error) noexcept override;
-
-	/* virtual methods from class Was::SimpleOutputHandler */
-	void OnWasOutputEnd() noexcept override;
 
 	/* virtual methods from class Cancellable */
 	void Cancel() noexcept override;

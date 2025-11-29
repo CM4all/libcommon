@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "SimpleClient.hxx"
+#include "SimpleOutput.hxx"
 #include "Socket.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "util/SpanCast.hxx"
@@ -76,9 +77,7 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 		return false;
 
 	if (request.body) {
-		SimpleOutputHandler &simple_output_handler = *this;
-		output.Activate(std::make_unique<SimpleOutput>(std::move(request.body),
-							       simple_output_handler));
+		output.Activate(std::make_unique<SimpleOutput>(std::move(request.body)));
 	}
 
 	return true;
@@ -278,6 +277,12 @@ SimpleClient::OnWasControlError(std::exception_ptr error) noexcept
 }
 
 void
+SimpleClient::OnWasOutputEnd() noexcept
+{
+	output.Deactivate();
+}
+
+void
 SimpleClient::OnWasOutputError(std::exception_ptr &&error) noexcept
 {
 	AbortError(std::move(error));
@@ -303,12 +308,6 @@ void
 SimpleClient::OnWasInputError(std::exception_ptr error) noexcept
 {
 	AbortError(error);
-}
-
-void
-SimpleClient::OnWasOutputEnd() noexcept
-{
-	output.Deactivate();
 }
 
 void

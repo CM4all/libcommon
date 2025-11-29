@@ -19,6 +19,7 @@ class OutputProducer;
 
 class OutputHandler {
 public:
+	virtual void OnWasOutputEnd() noexcept = 0;
 	virtual void OnWasOutputError(std::exception_ptr &&error) noexcept = 0;
 };
 
@@ -127,6 +128,14 @@ public:
 	void CancelWrite() noexcept {
 		event.ScheduleImplicit();
 		defer_write.Cancel();
+	}
+
+	/**
+	 * Called by the #OutputProducer once the stream is finished.
+	 * After returning, the #OutputProducer has been deleted.
+	 */
+	void End() noexcept {
+		handler->OnWasOutputEnd();
 	}
 
 private:

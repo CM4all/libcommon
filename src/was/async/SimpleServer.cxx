@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "SimpleServer.hxx"
+#include "SimpleOutput.hxx"
 #include "Socket.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "util/SpanCast.hxx"
@@ -330,6 +331,12 @@ SimpleServer::OnWasControlError(std::exception_ptr error) noexcept
 }
 
 void
+SimpleServer::OnWasOutputEnd() noexcept
+{
+	output.Deactivate();
+}
+
+void
 SimpleServer::OnWasOutputError(std::exception_ptr &&error) noexcept
 {
 	AbortError(std::move(error));
@@ -354,12 +361,6 @@ void
 SimpleServer::OnWasInputError(std::exception_ptr error) noexcept
 {
 	AbortError(error);
-}
-
-void
-SimpleServer::OnWasOutputEnd() noexcept
-{
-	output.Deactivate();
 }
 
 bool
@@ -396,9 +397,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 		    !control.SendUint64(WAS_COMMAND_LENGTH, response.body.size()))
 			return false;
 
-		SimpleOutputHandler &simple_output_handler = *this;
-		output.Activate(std::make_unique<SimpleOutput>(std::move(response.body),
-							       simple_output_handler));
+		output.Activate(std::make_unique<SimpleOutput>(std::move(response.body)));
 	} else {
 		if (!control.Send(WAS_COMMAND_NO_DATA))
 			return false;

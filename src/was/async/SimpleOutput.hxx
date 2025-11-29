@@ -7,30 +7,21 @@
 #include "Producer.hxx"
 #include "util/DisposableBuffer.hxx"
 
-#include <exception> // for std::exception_ptr
-
-class UniqueFileDescriptor;
-
 namespace Was {
 
 class Output;
 
-class SimpleOutputHandler {
-public:
-	virtual void OnWasOutputEnd() noexcept = 0;
-};
-
 class SimpleOutput final : public OutputProducer {
 	Output *output;
-
-	SimpleOutputHandler &handler;
 
 	const DisposableBuffer buffer;
 
 public:
-	SimpleOutput(DisposableBuffer &&_buffer,
-		     SimpleOutputHandler &_handler) noexcept;
-	~SimpleOutput() noexcept;
+	[[nodiscard]]
+	explicit SimpleOutput(DisposableBuffer &&_buffer) noexcept
+		:buffer(std::move(_buffer)) {}
+
+	~SimpleOutput() noexcept = default;
 
 private:
 	// virtual methods from class OutputProducer
