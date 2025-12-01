@@ -34,7 +34,7 @@ class Output final {
 
 	std::unique_ptr<OutputProducer> producer;
 
-	std::size_t position;
+	uint_least64_t position;
 
 public:
 	Output(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
@@ -83,11 +83,11 @@ public:
 		event.ClearReadyFlags(PipeEvent::WRITE);
 	}
 
-	std::size_t GetPosition() const noexcept {
+	uint_least64_t GetPosition() const noexcept {
 		return position;
 	}
 
-	void AddPosition(std::size_t nbytes) noexcept {
+	void AddPosition(uint_least64_t nbytes) noexcept {
 		assert(IsActive());
 
 		position += nbytes;
@@ -108,7 +108,7 @@ public:
 	 * has completed (because the `position` field does not get
 	 * cleared).
 	 */
-	std::size_t Stop() noexcept {
+	uint_least64_t Stop() noexcept {
 		Deactivate();
 		return position;
 	}

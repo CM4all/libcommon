@@ -25,7 +25,7 @@ SimpleOutput::OnWasOutputReady()
 		return;
 	}
 
-	const std::size_t position = output->GetPosition();
+	const uint_least64_t position = output->GetPosition();
 	assert(position < buffer.size());
 
 	std::span<const std::byte> r = buffer;
