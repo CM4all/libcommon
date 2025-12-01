@@ -100,6 +100,7 @@ private:
 	void OnWasControlError(std::exception_ptr ep) noexcept override;
 
 	/* virtual methods from class Was::OutputHandler */
+	bool OnWasOutputLength(uint_least64_t length) noexcept override;
 	void OnWasOutputEnd() noexcept override;
 	void OnWasOutputError(std::exception_ptr &&error) noexcept override;
 

@@ -11,10 +11,11 @@
 
 namespace Was {
 
-void
+bool
 SimpleOutput::OnWasOutputBegin(Output &_output) noexcept
 {
 	output = &_output;
+	return output->SetLength(buffer.size());
 }
 
 void

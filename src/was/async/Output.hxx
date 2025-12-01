@@ -11,6 +11,10 @@
 #include <memory>
 #include <exception> // for std::exception_ptr
 
+#ifndef NDEBUG
+#include <optional>
+#endif
+
 class UniqueFileDescriptor;
 
 namespace Was {
@@ -19,6 +23,7 @@ class OutputProducer;
 
 class OutputHandler {
 public:
+	virtual bool OnWasOutputLength(uint_least64_t length) noexcept = 0;
 	virtual void OnWasOutputEnd() noexcept = 0;
 	virtual void OnWasOutputError(std::exception_ptr &&error) noexcept = 0;
 };
@@ -35,6 +40,10 @@ class Output final {
 	std::unique_ptr<OutputProducer> producer;
 
 	uint_least64_t position;
+
+#ifndef NDEBUG
+	std::optional<uint_least64_t> length;
+#endif
 
 public:
 	Output(EventLoop &event_loop, UniqueFileDescriptor &&pipe,
@@ -61,7 +70,12 @@ public:
 		return producer != nullptr;
 	}
 
-	void Activate(std::unique_ptr<OutputProducer> &&_producer) noexcept;
+	/**
+	 * @return false if this object has been destroyed
+	 */
+	[[nodiscard]]
+	bool Activate(std::unique_ptr<OutputProducer> &&_producer) noexcept;
+
 	void Deactivate() noexcept;
 
 	/**
@@ -131,10 +145,30 @@ public:
 	}
 
 	/**
+	 * Called by the #OutputProducer once the stream length is
+	 * known.  Must be called after OnWasOutputBegin() is called
+	 * (or from inside that method) but before End() is called.
+	 *
+	 * @return false if the #OutputProducer has been destroyed
+	 */
+	[[nodiscard]]
+	bool SetLength(uint_least64_t _length) noexcept {
+#ifndef NDEBUG
+		assert(!length);
+		length = _length;
+#endif
+
+		return handler->OnWasOutputLength(_length);
+	}
+
+	/**
 	 * Called by the #OutputProducer once the stream is finished.
 	 * After returning, the #OutputProducer has been deleted.
 	 */
 	void End() noexcept {
+		assert(length);
+		assert(position == *length);
+
 		handler->OnWasOutputEnd();
 	}
 

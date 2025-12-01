@@ -331,6 +331,12 @@ SimpleServer::OnWasControlError(std::exception_ptr error) noexcept
 	AbortError(error);
 }
 
+bool
+SimpleServer::OnWasOutputLength(uint_least64_t length) noexcept
+{
+	return control.SendUint64(WAS_COMMAND_LENGTH, length);
+}
+
 void
 SimpleServer::OnWasOutputEnd() noexcept
 {
@@ -394,11 +400,11 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 			return false;
 
 	if (response.body) {
-		if (!control.Send(WAS_COMMAND_DATA) ||
-		    !control.SendUint64(WAS_COMMAND_LENGTH, response.body.size()))
+		if (!control.Send(WAS_COMMAND_DATA))
 			return false;
 
-		output.Activate(std::make_unique<SimpleOutput>(std::move(response.body)));
+		if (output.Activate(std::make_unique<SimpleOutput>(std::move(response.body))))
+			return false;
 	} else {
 		if (!control.Send(WAS_COMMAND_NO_DATA))
 			return false;

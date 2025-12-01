@@ -23,7 +23,7 @@ Output::~Output() noexcept
 	event.Close();
 }
 
-void
+bool
 Output::Activate(std::unique_ptr<OutputProducer> &&_producer) noexcept
 {
 	assert(producer == nullptr);
@@ -33,13 +33,17 @@ Output::Activate(std::unique_ptr<OutputProducer> &&_producer) noexcept
 
 	defer_write.Schedule();
 
-	producer->OnWasOutputBegin(*this);
+	return producer->OnWasOutputBegin(*this);
 }
 
 void
 Output::Deactivate() noexcept
 {
 	assert(producer != nullptr);
+
+#ifndef NDEBUG
+	length.reset();
+#endif
 
 	producer.reset();
 	CancelWrite();

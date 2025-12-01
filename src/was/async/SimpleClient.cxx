@@ -58,8 +58,7 @@ SendRequest(Control &control, const SimpleRequest &request) noexcept
 		control.SendString(WAS_COMMAND_REMOTE_HOST, request.remote_host)) &&
 	       control.Send(request.body
 			    ? WAS_COMMAND_DATA
-			    : WAS_COMMAND_NO_DATA) &&
-	       (!request.body || control.SendUint64(WAS_COMMAND_LENGTH, request.body.size()));
+			    : WAS_COMMAND_NO_DATA);
 }
 
 bool
@@ -78,7 +77,8 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 		return false;
 
 	if (request.body) {
-		output.Activate(std::make_unique<SimpleOutput>(std::move(request.body)));
+		if (!output.Activate(std::make_unique<SimpleOutput>(std::move(request.body))))
+			return false;
 	}
 
 	return true;
@@ -275,6 +275,12 @@ SimpleClient::OnWasControlError(std::exception_ptr error) noexcept
 	assert(control.IsDefined());
 
 	AbortError(error);
+}
+
+bool
+SimpleClient::OnWasOutputLength(uint_least64_t length) noexcept
+{
+	return control.SendUint64(WAS_COMMAND_LENGTH, length);
 }
 
 void

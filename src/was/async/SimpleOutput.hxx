@@ -25,7 +25,7 @@ public:
 
 private:
 	// virtual methods from class OutputProducer
-	void OnWasOutputBegin(Output &_output) noexcept override;
+	bool OnWasOutputBegin(Output &_output) noexcept override;
 	void OnWasOutputReady() override;
 };
 
