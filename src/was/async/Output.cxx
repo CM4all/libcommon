@@ -4,6 +4,7 @@
 
 #include "Output.hxx"
 #include "Producer.hxx"
+#include "system/Error.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
@@ -47,6 +48,30 @@ Output::Deactivate() noexcept
 
 	producer.reset();
 	CancelWrite();
+}
+
+std::size_t
+Output::Write(std::span<const std::byte> src)
+{
+	const auto result = GetPipe().Write(src);
+	if (result <= 0) {
+		if (result == 0)
+			return 0;
+
+		const int e = errno;
+		if (e == EAGAIN) {
+			ScheduleWrite();
+			return 0;
+		} else
+			throw MakeErrno(e, "Write error on WAS pipe");
+	}
+
+	const std::size_t nbytes = static_cast<std::size_t>(result);
+	if (nbytes < src.size())
+		ScheduleWrite();
+
+	AddPosition(nbytes);
+	return nbytes;
 }
 
 inline void

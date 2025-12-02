@@ -8,8 +8,9 @@
 #include "event/DeferEvent.hxx"
 
 #include <cassert>
-#include <memory>
 #include <exception> // for std::exception_ptr
+#include <memory>
+#include <span>
 
 #ifndef NDEBUG
 #include <optional>
@@ -85,6 +86,17 @@ public:
 	FileDescriptor GetPipe() noexcept {
 		return event.GetFileDescriptor();
 	}
+
+	/**
+	 * Write data to the pipe, with some bookkeeping:
+	 *
+	 * - throws on error
+	 * - schedules writing on EAGAIN or on short write
+	 * - calls AddPosition() on success
+	 *
+	 * @return the number of bytes written
+	 */
+	std::size_t Write(std::span<const std::byte> src);
 
 	/**
 	 * If an OutputProducer::OnWasOutputReady() call is pending

@@ -4,10 +4,8 @@
 
 #include "SimpleOutput.hxx"
 #include "Output.hxx"
-#include "system/Error.hxx"
 
 #include <cassert>
-#include <cerrno>
 
 namespace Was {
 
@@ -33,22 +31,11 @@ SimpleOutput::OnWasOutputReady()
 	r = r.subspan(position);
 	assert(!r.empty());
 
-	auto nbytes = output->GetPipe().Write(r);
-	if (nbytes <= 0) {
-		if (nbytes == 0 || errno == EAGAIN) {
-			output->ScheduleWrite();
-			return;
-		} else
-			throw MakeErrno("Write error on WAS pipe");
-	}
+	const std::size_t nbytes = output->Write(r);
 
-	output->AddPosition(nbytes);
-
-	if (output->GetPosition() == buffer.size()) {
+	if (nbytes == r.size())
 		/* done */
 		output->End();
-	} else
-		output->ScheduleWrite();
 }
 
 } // namespace Was
