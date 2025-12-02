@@ -24,6 +24,7 @@ was_async = static_library(
   'SimpleInput.cxx',
   'SimpleOutput.cxx',
   'SimpleResponse.cxx',
+  'SpanOutputProducer.cxx',
   'StringOutputProducer.cxx',
   'MultiClient.cxx',
   'Socket.cxx',
