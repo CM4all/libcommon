@@ -3,10 +3,9 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Write.hxx"
-#include "lib/nlohmann_json/ToDisposableBuffer.hxx"
 #include "was/ExceptionResponse.hxx"
 #include "was/async/SimpleResponse.hxx"
-#include "was/async/SimpleOutput.hxx"
+#include "was/async/StringOutputProducer.hxx"
 
 #include <nlohmann/json.hpp>
 
@@ -18,7 +17,7 @@ void
 WriteJson(SimpleResponse &response, const nlohmann::json &j) noexcept
 {
 	response.headers.emplace("content-type"sv, "application/json"sv);
-	response.body = std::make_unique<SimpleOutput>(Json::ToDisposableBuffer(j));
+	response.body = std::make_unique<StringOutputProducer>(j.dump());
 }
 
 SimpleResponse
