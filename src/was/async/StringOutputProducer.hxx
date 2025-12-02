@@ -18,7 +18,7 @@ class Output;
 class StringOutputProducer final : public OutputProducer {
 	Output *output;
 
-	std::string buffer;
+	const std::string buffer;
 
 public:
 	[[nodiscard]]
