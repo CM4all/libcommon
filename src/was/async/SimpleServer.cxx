@@ -402,7 +402,7 @@ SimpleServer::SendResponse(SimpleResponse &&response) noexcept
 		if (!control.Send(WAS_COMMAND_DATA))
 			return false;
 
-		if (output.Activate(std::move(response.body)))
+		if (!output.Activate(std::move(response.body)))
 			return false;
 	} else {
 		if (!control.Send(WAS_COMMAND_NO_DATA))
