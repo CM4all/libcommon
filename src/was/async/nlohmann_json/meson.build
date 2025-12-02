@@ -2,6 +2,7 @@ was_async_nlohmann_json = static_library(
   'was_json',
   'Read.cxx',
   'Write.cxx',
+  'JsonLinesOutputProducer.cxx',
   include_directories: inc,
   dependencies: [
     was_async_dep,
