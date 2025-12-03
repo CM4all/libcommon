@@ -32,13 +32,15 @@ JsonLinesOutputProducer::Push(const nlohmann::json &j) noexcept
 	lines.emplace_back(j.dump());
 	size += lines.back().value.size();
 
-	output->DeferWrite();
+	if (output != nullptr)
+		output->DeferWrite();
 	return true;
 }
 
 bool
 JsonLinesOutputProducer::OnWasOutputBegin(Output &_output) noexcept
 {
+	assert(output == nullptr);
 	output = &_output;
 	return true;
 }

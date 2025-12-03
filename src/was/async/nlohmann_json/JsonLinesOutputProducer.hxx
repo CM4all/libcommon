@@ -20,7 +20,7 @@ class Output;
  * stream of JSON lines.  New lines are added with Push().
  */
 class JsonLinesOutputProducer : public OutputProducer {
-	Output *output;
+	Output *output = nullptr;
 
 	struct Line;
 	std::list<Line> lines;
