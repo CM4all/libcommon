@@ -21,7 +21,7 @@ public:
 	explicit SimpleOutput(DisposableBuffer &&_buffer) noexcept
 		:buffer(std::move(_buffer)) {}
 
-	~SimpleOutput() noexcept = default;
+	~SimpleOutput() noexcept override = default;
 
 private:
 	// virtual methods from class OutputProducer
