@@ -8,6 +8,8 @@
 #include "Crc.hxx"
 #include "util/PackedBigEndian.hxx"
 
+#include <cassert>
+
 #include <sys/socket.h>
 #include <string.h>
 
@@ -79,6 +81,10 @@ public:
 	}
 
 	void WriteString(std::string_view value) {
+		/* strings must not contain null bytes because that's
+		   the terminator */
+		assert(value.find('\0') == value.npos);
+
 		void *dest = WriteN(value.size() + 1);
 		*(char *)mempcpy(dest, value.data(), value.size()) = 0;
 	}
