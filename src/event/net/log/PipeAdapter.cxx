@@ -7,6 +7,14 @@
 #include "net/log/Sink.hxx"
 #include "time/Cast.hxx"
 
+#include <algorithm>
+
+static constexpr bool
+HasNullByte(std::span<const char> s) noexcept
+{
+	return std::find(s.begin(), s.end(), '\0') != s.end();
+}
+
 namespace Net::Log {
 
 bool
@@ -20,7 +28,12 @@ PipeAdapter::OnPipeLine(std::span<char> line) noexcept
 			return true;
 	}
 
-	// TODO: erase/quote "dangerous" characters?
+	if (HasNullByte(line))
+		/* discard line with a null byte - the logging
+		   protocol requires null-terminated strings, and if a
+		   line contains a null byte, it's likely to be
+		   garbage anyway */
+		return true;
 
 	datagram.SetTimestamp(GetEventLoop().SystemNow());
 
