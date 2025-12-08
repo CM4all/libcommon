@@ -45,7 +45,8 @@ private:
 	/* virtual methods from class Avahi::ServiceExplorerListener */
 	void OnAvahiNewObject(const std::string &key,
 			      const InetAddress &address,
-			      AvahiStringList *txt) noexcept override {
+			      AvahiStringList *txt,
+			      [[maybe_unused]] Flags flags) noexcept override {
 		fmt::print("new {:?} at {}\n", key, address);
 		for (; txt != nullptr; txt = txt->next)
 			fmt::print("  TXT {:?}\n", Avahi::ToStringView(*txt));

@@ -25,9 +25,15 @@ class ServiceExplorer::Object {
 
 	InetAddress address;
 
+	const ServiceExplorerListener::Flags flags;
+
 public:
-	explicit Object(ServiceExplorer &_explorer) noexcept
-		:explorer(_explorer)
+	explicit Object(ServiceExplorer &_explorer, AvahiLookupResultFlags _flags) noexcept
+		:explorer(_explorer),
+		 flags{
+			 .is_local = (_flags & AVAHI_LOOKUP_RESULT_LOCAL) != 0,
+			 .is_our_own = (_flags & AVAHI_LOOKUP_RESULT_OUR_OWN) != 0,
+		 }
 	{
 		address.Clear();
 	}
@@ -162,7 +168,7 @@ ServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 	switch (event) {
 	case AVAHI_RESOLVER_FOUND:
 		address = Import(interface, *a, port);
-		explorer.listener.OnAvahiNewObject(GetKey(), address, txt);
+		explorer.listener.OnAvahiNewObject(GetKey(), address, txt, flags);
 		break;
 
 	case AVAHI_RESOLVER_FAILURE:
@@ -244,14 +250,14 @@ ServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 					const char *name,
 					const char *type,
 					const char *domain,
-					[[maybe_unused]] AvahiLookupResultFlags flags) noexcept
+					AvahiLookupResultFlags flags) noexcept
 {
 	if (event == AVAHI_BROWSER_NEW) {
 		auto i = objects.emplace(std::piecewise_construct,
 					 std::forward_as_tuple(MakeKey(interface,
 								       protocol, name,
 								       type, domain)),
-					 std::forward_as_tuple(*this));
+					 std::forward_as_tuple(*this, flags));
 		if (i.second || i.first->second.HasFailed())
 			i.first->second.Resolve(avahi_service_browser_get_client(b),
 						interface, protocol,
