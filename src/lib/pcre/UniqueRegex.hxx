@@ -6,6 +6,7 @@
 
 #include "RegexPointer.hxx"
 
+#include <string_view>
 #include <utility>
 
 namespace Pcre {
@@ -41,6 +42,10 @@ public:
 		Compile(pattern, options);
 	}
 
+	UniqueRegex(std::string_view pattern, Pcre::CompileOptions options) {
+		Compile(pattern, options);
+	}
+
 	UniqueRegex(UniqueRegex &&src) noexcept:RegexPointer(src) {
 		src.re = nullptr;
 	}
@@ -60,8 +65,13 @@ public:
 	 * Throws Pcre::Error on error.
 	 */
 	void Compile(const char *pattern, int options);
+	void Compile(std::string_view pattern, int options);
 
 	void Compile(const char *pattern, Pcre::CompileOptions options={}) {
+		Compile(pattern, (int)options);
+	}
+
+	void Compile(std::string_view pattern, Pcre::CompileOptions options={}) {
 		Compile(pattern, (int)options);
 	}
 };
