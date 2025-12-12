@@ -2046,7 +2046,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.layout.data() != nullptr) {
 			assert(layout_items_builder);
 
-			layout_items_builder->emplace_back(TranslationLayoutItem::Base{},
+			layout_items_builder->emplace_back(TranslationLayoutItem::Type::BASE,
 							   string_payload);
 			return;
 		}
@@ -2108,7 +2108,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (response.layout.data() != nullptr) {
 			assert(layout_items_builder);
 
-			layout_items_builder->emplace_back(TranslationLayoutItem::Regex{},
+			layout_items_builder->emplace_back(TranslationLayoutItem::Type::REGEX,
 							   string_payload);
 			return;
 		}
