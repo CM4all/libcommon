@@ -33,8 +33,14 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		std::unreachable();
 
 	case TranslationCommand::URI:
-		uri_buffer = ToString(payload);
-		uri = uri_buffer.c_str();
+		if (layout.data() != nullptr) {
+			layout_uri_buffer = ToString(payload);
+			layout_uri = layout_uri_buffer.c_str();
+		} else {
+			uri_buffer = ToString(payload);
+			uri = uri_buffer.c_str();
+		}
+
 		break;
 
 	case TranslationCommand::HOST:

@@ -51,7 +51,7 @@ struct Request {
 	 * The matching BASE/REGEX response packet for the given
 	 * LAYOUT.
 	 */
-	const char *base = nullptr, *regex = nullptr;
+	const char *layout_uri = nullptr, *base = nullptr, *regex = nullptr;
 
 	std::span<const std::byte> error_document{};
 

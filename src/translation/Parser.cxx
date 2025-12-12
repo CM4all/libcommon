@@ -1706,6 +1706,16 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::URI:
 #if TRANSLATION_ENABLE_HTTP
+#if TRANSLATION_ENABLE_RADDRESS
+		if (response.layout.data() != nullptr) {
+			assert(layout_items_builder);
+
+			layout_items_builder->emplace_back(TranslationLayoutItem::Type::EXACT,
+							   string_payload);
+			return;
+		}
+#endif
+
 		if (!IsValidAbsoluteUriPath(string_payload))
 			throw std::runtime_error("malformed URI packet");
 
