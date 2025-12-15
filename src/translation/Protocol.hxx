@@ -1380,6 +1380,13 @@ enum class TranslationCommand : uint16_t {
 	 * system calls which are disallowed by default.
 	 */
 	ALLOW_PTRACE = 277,
+
+	/**
+	 * All OPTIONS request for the current #LAYOUT item (#URI,
+	 * #BASE, #REGEX) return a response allowing all origins,
+	 * methods and headers.
+	 */
+	ACCESS_CONTROL_ALLOW_ALL = 278,
 };
 
 struct TranslationHeader {

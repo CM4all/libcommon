@@ -267,6 +267,10 @@ public:
 		return StringPacket(TranslationCommand::LAYOUT, value...);
 	}
 
+	auto &AccessControlAllowAll() noexcept {
+		return Packet(TranslationCommand::ACCESS_CONTROL_ALLOW_ALL);
+	}
+
 	template<typename... Types>
 	auto &Base(Types... value) noexcept {
 		return StringPacket(TranslationCommand::BASE, value...);

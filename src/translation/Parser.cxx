@@ -4599,6 +4599,26 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::ACCESS_CONTROL_ALLOW_ALL:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (!payload.empty())
+			throw std::runtime_error{"malformed ACCESS_CONTROL_ALLOW_ALL packet"};
+
+		if (response.layout.data() != nullptr && !layout_items_builder->empty()) {
+			auto &item = layout_items_builder->back();
+
+			if (item.access_control_allow_all)
+				throw std::runtime_error{"duplicate ACCESS_CONTROL_ALLOW_ALL packet"};
+
+			item.access_control_allow_all = true;
+			return;
+		}
+
+		throw std::runtime_error{"misplaced ACCESS_CONTROL_ALLOW_ALL packet"};
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
