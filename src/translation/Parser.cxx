@@ -3842,10 +3842,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		}
 
 		response.cache_tags.Add(alloc, string_payload.data());
-		return;
 #else
-		break;
+		// ignore
 #endif // TRANSLATION_ENABLE_CACHE
+		return;
 
 	case TranslationCommand::HTTP2:
 #if TRANSLATION_ENABLE_HTTP
