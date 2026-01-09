@@ -12,6 +12,7 @@ test(
     'TestMultiValue.cxx',
     'TestMutex.cxx',
     'TestOptionalTask.cxx',
+    'TestTimeout.cxx',
     include_directories: inc,
     dependencies: [
       gtest,
