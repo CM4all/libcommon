@@ -10,6 +10,7 @@
 #include <cassert>
 #include <coroutine>
 #include <optional>
+#include <utility>
 
 namespace Co {
 
@@ -84,6 +85,15 @@ public:
 	Timeout(EventLoop &event_loop, Event::Duration timeout,
 		InnerTask &&_inner_task) noexcept
 		:inner_task(std::move(_inner_task)),
+		 timer(event_loop, BIND_THIS_METHOD(OnTimeout))
+	{
+		timer.SetDue(timeout);
+	}
+
+	template<typename... Args>
+	Timeout(EventLoop &event_loop, Event::Duration timeout,
+		std::in_place_t, Args&&... args) noexcept
+		:inner_task(std::in_place, std::forward<Args>(args)...),
 		 timer(event_loop, BIND_THIS_METHOD(OnTimeout))
 	{
 		timer.SetDue(timeout);
