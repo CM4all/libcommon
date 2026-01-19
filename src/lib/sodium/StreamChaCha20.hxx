@@ -12,7 +12,7 @@
 #include <span>
 
 static_assert(sizeof(ChaCha20Key) == crypto_stream_chacha20_KEYBYTES);
-static_assert(sizeof(ChaCha20NonceView) == crypto_stream_chacha20_NONCEBYTES);
+static_assert(sizeof(ChaCha20Nonce) == crypto_stream_chacha20_NONCEBYTES);
 
 static void
 crypto_stream_chacha20_xor(std::byte *c, std::span<const std::byte> m,
