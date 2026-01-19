@@ -4,13 +4,18 @@
 
 #pragma once
 
+#include "SecretBoxTypes.hxx"
+
 #include <sodium/crypto_secretbox.h>
+
+static_assert(sizeof(CryptoSecretBoxKey) == crypto_secretbox_KEYBYTES);
+static_assert(sizeof(CryptoSecretBoxNonce) == crypto_secretbox_NONCEBYTES);
 
 static inline void
 crypto_secretbox_easy(std::byte *ciphertext,
 		      std::span<const std::byte> message,
-		      std::span<const std::byte, crypto_secretbox_NONCEBYTES> nonce,
-		      std::span<const std::byte, crypto_secretbox_KEYBYTES> key) noexcept
+		      CryptoSecretBoxNonceView nonce,
+		      CryptoSecretBoxKeyView key) noexcept
 {
 	crypto_secretbox_easy(reinterpret_cast<unsigned char *>(ciphertext),
 			      reinterpret_cast<const unsigned char *>(message.data()),
@@ -22,8 +27,8 @@ crypto_secretbox_easy(std::byte *ciphertext,
 static inline bool
 crypto_secretbox_open_easy(std::byte *message,
 			   std::span<const std::byte> ciphertext,
-			   std::span<const std::byte, crypto_secretbox_NONCEBYTES> nonce,
-			   std::span<const std::byte, crypto_secretbox_KEYBYTES> key) noexcept
+			   CryptoSecretBoxNonceView nonce,
+			   CryptoSecretBoxKeyView key) noexcept
 {
 	return crypto_secretbox_open_easy(reinterpret_cast<unsigned char *>(message),
 					  reinterpret_cast<const unsigned char *>(ciphertext.data()),
