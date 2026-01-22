@@ -4,6 +4,7 @@ translation = static_library(
   'Parser.cxx',
   'Response.cxx',
   'ExecuteOptions.cxx',
+  'String.cxx',
   include_directories: inc,
   dependencies: [
     # using get_variable() because this library can be built without
