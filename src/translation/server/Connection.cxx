@@ -45,8 +45,7 @@ Connection::TryRead() noexcept
 	auto r = input.Write();
 	assert(!r.empty());
 
-	ssize_t nbytes = recv(event.GetSocket().Get(), r.data(), r.size(),
-			      MSG_DONTWAIT);
+	ssize_t nbytes = event.GetSocket().ReadNoWait(r);
 	if (nbytes > 0) [[likely]] {
 		input.Append(nbytes);
 		return OnReceived();
@@ -141,7 +140,7 @@ Connection::TryWrite() noexcept
 {
 	assert(state == State::RESPONSE);
 
-	ssize_t nbytes = event.GetSocket().Send(output, MSG_DONTWAIT);
+	ssize_t nbytes = event.GetSocket().WriteNoWait(output);
 	if (nbytes < 0) {
 		if (errno == EAGAIN) [[likely]] {
 			event.ScheduleWrite();
