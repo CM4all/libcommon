@@ -13,12 +13,13 @@ namespace Json {
 
 [[gnu::pure]]
 inline std::string_view
-GetStringRobust(const nlohmann::json &j, std::string_view key) noexcept
+GetStringRobust(const nlohmann::json &j, std::string_view key,
+		std::string_view fallback={}) noexcept
 {
 	if (const auto i = j.find(key); i != j.end() && i->is_string())
 		return i->get<std::string_view>();
 	else
-		return {};
+		return fallback;
 }
 
 } // namespace Json
