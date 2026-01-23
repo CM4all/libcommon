@@ -6,11 +6,11 @@
 #include "Handler.hxx"
 #include "Response.hxx"
 #include "translation/Protocol.hxx"
+#include "net/SocketError.hxx"
 #include "io/Logger.hxx"
 
 #include <sys/socket.h>
 #include <unistd.h>
-#include <errno.h>
 #include <string.h>
 
 namespace Translation::Server {
@@ -52,10 +52,12 @@ Connection::TryRead() noexcept
 	}
 
 	if (nbytes < 0) {
-		if (errno == EAGAIN)
+		const auto e = GetSocketError();
+		if (IsSocketErrorReceiveWouldBlock(e))
 			return true;
 
-		LogConcat(2, "ts", "Failed to read from client: ", strerror(errno));
+		LogConcat(2, "ts", "Failed to read from client: ",
+			  (const char *)SocketErrorMessage{e});
 	}
 
 	Destroy();
@@ -142,12 +144,14 @@ Connection::TryWrite() noexcept
 
 	ssize_t nbytes = event.GetSocket().WriteNoWait(output);
 	if (nbytes < 0) {
-		if (errno == EAGAIN) [[likely]] {
+		const auto e = GetSocketError();
+		if (IsSocketErrorSendWouldBlock(e)) [[likely]] {
 			event.ScheduleWrite();
 			return true;
 		}
 
-		LogConcat(2, "ts", "Failed to write to client: ", strerror(errno));
+		LogConcat(2, "ts", "Failed to write to client: ",
+			  (const char *)SocketErrorMessage{e});
 		Destroy();
 		return false;
 	}
