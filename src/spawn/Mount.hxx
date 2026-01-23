@@ -46,7 +46,7 @@ struct Mount : IntrusiveForwardListHook {
 		TMPFS,
 
 		/**
-		 * Mount the tmpfs with the gviven name (#source) on
+		 * Mount the tmpfs with the given name (#source) on
 		 * #target.  If a tmpfs with that name does not exist,
 		 * an empty one is created and will remain for some
 		 * time even after the last child process using it
