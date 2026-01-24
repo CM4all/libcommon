@@ -4159,14 +4159,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::PARALLELISM:
 #if TRANSLATION_ENABLE_RADDRESS
 		if (payload.size() != 2)
-			throw std::runtime_error("malformed CONCURRENCY packet");
+			throw std::runtime_error("malformed PARALLELISM packet");
 
 		if (lhttp_address != nullptr)
 			lhttp_address->parallelism = *(const uint16_t *)(const void *)payload.data();
 		else if (cgi_address != nullptr)
 			cgi_address->parallelism = *(const uint16_t *)(const void *)payload.data();
 		else
-			throw std::runtime_error("misplaced CONCURRENCY packet");
+			throw std::runtime_error("misplaced PARALLELISM packet");
 		return;
 #else
 		break;
