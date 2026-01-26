@@ -7,6 +7,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
+#include "util/TransparentHash.hxx"
 
 #include <string_view>
 #include <utility> // for std::pair
@@ -21,18 +22,13 @@ class SharedLease;
 class TmpfsManager {
 	struct Item;
 
-	struct ItemHash {
-		[[gnu::pure]]
-		std::size_t operator()(std::string_view name) const noexcept;
-	};
-
 	struct ItemGetKey {
 		[[gnu::pure]]
 		std::string_view operator()(const Item &item) const noexcept;
 	};
 
 	IntrusiveHashSet<Item, 1024,
-			 IntrusiveHashSetOperators<Item, ItemGetKey, ItemHash,
+			 IntrusiveHashSetOperators<Item, ItemGetKey, TransparentHash,
 						   std::equal_to<std::string_view>>> items;
 	IntrusiveList<Item> abandoned;
 

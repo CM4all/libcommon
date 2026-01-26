@@ -6,9 +6,7 @@
 #include "TmpfsCreate.hxx"
 #include "system/Error.hxx"
 #include "system/Mount.hxx"
-#include "util/djb_hash.hxx"
 #include "util/SharedLease.hxx"
-#include "util/SpanCast.hxx"
 
 #include <cassert>
 #include <chrono>
@@ -87,12 +85,6 @@ struct TmpfsManager::Item final
 
 	// TDOO void OnBroken() noexcept override;
 };
-
-inline std::size_t
-TmpfsManager::ItemHash::operator()(std::string_view name) const noexcept
-{
-	return djb_hash(AsBytes(name));
-}
 
 inline std::string_view
 TmpfsManager::ItemGetKey::operator()(const Item &item) const noexcept

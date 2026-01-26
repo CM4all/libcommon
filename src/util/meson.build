@@ -11,6 +11,7 @@ util_sources = [
   'StringParser.cxx',
   'StringStrip.cxx',
   'StringWithHash.cxx',
+  'TransparentHash.cxx',
   'UTF8.cxx',
 ]
 
