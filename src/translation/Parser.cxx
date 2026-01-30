@@ -3841,6 +3841,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			return;
 		}
 
+		if (response.cache_tags.Contains(string_payload.data()))
+			throw std::runtime_error{"duplicate CACHE_TAG packet"};
+
 		response.cache_tags.Add(alloc, string_payload.data());
 #else
 		// ignore
