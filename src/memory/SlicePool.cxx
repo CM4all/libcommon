@@ -229,12 +229,27 @@ SlicePool::SlicePool(std::size_t _slice_size, unsigned _slices_per_area,
 		pages_per_area = _slices_per_area * pages_per_slice;
 	}
 
-	slices_per_area = (pages_per_area / pages_per_slice) * slices_per_page;
+	/* determine the maximum possible number of slices per area
+	   just in case the area size gets rounded up to
+	   HUGE_PAGE_SIZE */
+	const unsigned max_pages_per_area = pages_per_area + HUGE_PAGE_SIZE / PAGE_SIZE;
+	const unsigned max_slices_per_area = (max_pages_per_area / pages_per_slice) * slices_per_page;
 
-	const std::size_t header_size = SliceArea::GetHeaderSize(slices_per_area);
+	/* assume this worst-case number in the header size
+	   calculation */
+	const std::size_t header_size = SliceArea::GetHeaderSize(max_slices_per_area);
 	header_pages = DivideRoundUp(header_size, PAGE_SIZE);
 
-	area_size = PAGE_SIZE * (header_pages + pages_per_area);
+	/* round up the total area size to the HUGE_PAGE_SIZE */
+	const unsigned total_pages_per_area =
+		RoundUpToPowerOfTwo(header_pages + pages_per_area,
+				    static_cast<unsigned>(HUGE_PAGE_SIZE / PAGE_SIZE));
+	pages_per_area = total_pages_per_area - header_pages;
+	area_size = total_pages_per_area * PAGE_SIZE;
+
+	assert(area_size % HUGE_PAGE_SIZE == 0);
+
+	slices_per_area = (pages_per_area / pages_per_slice) * slices_per_page;
 }
 
 SlicePool::~SlicePool() noexcept
