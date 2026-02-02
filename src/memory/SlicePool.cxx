@@ -298,16 +298,21 @@ SlicePool::FindNonFullArea() noexcept
 }
 
 inline SliceArea &
+SlicePool::CreateArea() noexcept
+{
+	auto *area = SliceArea::New(*this);
+	area->ForkCow(fork_cow);
+	empty_areas.push_front(*area);
+	return *area;
+}
+
+inline SliceArea &
 SlicePool::MakeNonFullArea() noexcept
 {
-	SliceArea *area = FindNonFullArea();
-	if (area == nullptr) {
-		area = SliceArea::New(*this);
-		area->ForkCow(fork_cow);
-		empty_areas.push_front(*area);
-	}
+	if (SliceArea *area = FindNonFullArea())
+		return *area;
 
-	return *area;
+	return CreateArea();
 }
 
 inline void *

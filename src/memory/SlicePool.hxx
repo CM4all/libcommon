@@ -90,5 +90,6 @@ private:
 	[[gnu::pure]]
 	SliceArea *FindNonFullArea() noexcept;
 
+	SliceArea &CreateArea() noexcept;
 	SliceArea &MakeNonFullArea() noexcept;
 };
