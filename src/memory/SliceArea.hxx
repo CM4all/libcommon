@@ -55,6 +55,8 @@ public:
 	}
 
 	void ForkCow(bool inherit) noexcept;
+	void Populate() noexcept;
+	void CollapseHugePages() noexcept;
 
 	bool IsEmpty() const noexcept {
 		return allocated_count == 0;

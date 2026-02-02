@@ -273,11 +273,33 @@ SlicePool::ForkCow(bool inherit) noexcept
 		area.ForkCow(fork_cow);
 }
 
+inline void
+SliceArea::Populate() noexcept
+{
+	PagesPopulateWrite(this, pool.area_size);
+}
+
+inline void
+SliceArea::CollapseHugePages() noexcept
+{
+	::CollapseHugePages(this, pool.area_size);
+}
+
+void
+SlicePool::Populate() noexcept
+{
+	populate = true;
+
+	if (areas.empty() && empty_areas.empty() && full_areas.empty())
+		CreateArea().CollapseHugePages();
+}
+
 void
 SlicePool::Compress() noexcept
 {
-	for (auto &area : areas)
-		area.Compress();
+	if (!populate)
+		for (auto &area : areas)
+			area.Compress();
 
 	empty_areas.clear_and_dispose(SliceArea::Disposer());
 
@@ -302,6 +324,8 @@ SlicePool::CreateArea() noexcept
 {
 	auto *area = SliceArea::New(*this);
 	area->ForkCow(fork_cow);
+	if (populate)
+		area->Populate();
 	empty_areas.push_front(*area);
 	return *area;
 }

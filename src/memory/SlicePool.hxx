@@ -61,6 +61,8 @@ class SlicePool {
 
 	bool fork_cow = true;
 
+	bool populate = false;
+
 public:
 	SlicePool(std::size_t _slice_size, unsigned _slices_per_area,
 		  const char *_vma_name) noexcept;
@@ -75,6 +77,13 @@ public:
 	 * This is enabled by default.
 	 */
 	void ForkCow(bool inherit) noexcept;
+
+	/**
+	 * Always been at least one area completely populated (using
+	 * MADV_POPULATE_WRITE).  This reduces waits for Linux kernel
+	 * VM compaction/migration.
+	 */
+	void Populate() noexcept;
 
 	void AddStats(AllocatorStats &stats, const AreaList &list) const noexcept;
 
