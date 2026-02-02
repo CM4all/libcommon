@@ -56,6 +56,22 @@ EnableHugePages(void *p, std::size_t size) noexcept
 }
 
 /**
+ * Attempt to collapse all regular pages into transparent huge pages.
+ *
+ * @param size a multiple of #HUGE_PAGE_SIZE
+ */
+static inline void
+CollapseHugePages(void *p, std::size_t size) noexcept
+{
+#ifdef MADV_COLLAPSE
+	madvise(p, size, MADV_COLLAPSE);
+#else
+	(void)p;
+	(void)size;
+#endif
+}
+
+/**
  * Controls whether forked processes inherit the specified pages.
  */
 static inline void
@@ -96,6 +112,21 @@ DiscardPages(void *p, std::size_t size) noexcept
 {
 #ifdef __linux__
 	madvise(p, size, MADV_DONTNEED);
+#else
+	(void)p;
+	(void)size;
+#endif
+}
+
+/**
+ * Populate (prefault) page tables writable, faulting in all pages in
+ * the range just as if manually writing to each each page.
+ */
+static inline void
+PagesPopulateWrite(void *p, std::size_t size) noexcept
+{
+#ifdef MADV_POPULATE_WRITE
+	madvise(p, size, MADV_POPULATE_WRITE);
 #else
 	(void)p;
 	(void)size;
