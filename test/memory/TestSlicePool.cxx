@@ -48,7 +48,11 @@ TEST(SliceTest, Small)
 	for (unsigned i = 0; i < per_area; ++i) {
 		auto &allocation = allocations[i];
 		allocation = pool.Alloc();
-		ASSERT_EQ(allocation.area, area0);
+
+		if (!HaveMemoryChecker()) {
+			ASSERT_EQ(allocation.area, area0);
+		}
+
 		ASSERT_NE(allocation.data, nullptr);
 		ASSERT_TRUE(i <= 0 || allocation.data != allocations[0].data);
 		ASSERT_TRUE(i <= 1 || allocation.data != allocations[1].data);
