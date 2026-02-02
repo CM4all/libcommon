@@ -73,6 +73,15 @@ public:
 	}
 
 	/**
+	 * Returns the effective number of slices per area.  This may
+	 * be larger than the value passed to the constructor due to
+	 * page-alignment rounding.
+	 */
+	unsigned GetSlicesPerArea() const noexcept {
+		return slices_per_area;
+	}
+
+	/**
 	 * Controls whether forked child processes inherit the allocator.
 	 * This is enabled by default.
 	 */

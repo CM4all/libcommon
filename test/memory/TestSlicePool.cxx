@@ -4,6 +4,7 @@
 
 #include "memory/Checker.hxx"
 #include "memory/SlicePool.hxx"
+#include "util/AllocatedArray.hxx"
 #include "util/Sanitizer.hxx"
 
 #include <gtest/gtest.h>
@@ -32,9 +33,9 @@ Check(const void *_p, size_t length, unsigned seed)
 TEST(SliceTest, Small)
 {
 	const size_t slice_size = 13;
-	const unsigned per_area = 600;
+	const unsigned per_area_init = 600;
 
-	SlicePool pool{slice_size, per_area, "slice"};
+	SlicePool pool{slice_size, per_area_init, "slice"};
 
 	auto allocation0 = pool.Alloc();
 	auto *area0 = allocation0.area;
@@ -43,7 +44,8 @@ TEST(SliceTest, Small)
 	}
 	allocation0.Free();
 
-	SliceAllocation allocations[per_area];
+	const unsigned per_area = pool.GetSlicesPerArea();
+	AllocatedArray<SliceAllocation> allocations{per_area};
 
 	for (unsigned i = 0; i < per_area; ++i) {
 		auto &allocation = allocations[i];
@@ -61,7 +63,7 @@ TEST(SliceTest, Small)
 		Fill(allocation.data, slice_size, i);
 	}
 
-	SliceAllocation more[per_area];
+	AllocatedArray<SliceAllocation> more{per_area};
 
 	for (unsigned i = 0; i < per_area; ++i) {
 		more[i] = pool.Alloc();
@@ -87,9 +89,9 @@ TEST(SliceTest, Small)
 TEST(SliceTest, Medium)
 {
 	const size_t slice_size = 3000;
-	const unsigned per_area = 10;
+	const unsigned per_area_init = 10;
 
-	SlicePool pool{slice_size, per_area, "slice"};
+	SlicePool pool{slice_size, per_area_init, "slice"};
 
 	auto allocation0 = pool.Alloc();
 	auto *area0 = allocation0.area;
@@ -98,7 +100,8 @@ TEST(SliceTest, Medium)
 	}
 	allocation0.Free();
 
-	SliceAllocation allocations[per_area];
+	const unsigned per_area = pool.GetSlicesPerArea();
+	AllocatedArray<SliceAllocation> allocations{per_area};
 
 	for (unsigned i = 0; i < per_area; ++i) {
 		auto &allocation = allocations[i];
@@ -117,7 +120,7 @@ TEST(SliceTest, Medium)
 		Fill(allocation.data, slice_size, i);
 	}
 
-	SliceAllocation more[per_area];
+	AllocatedArray<SliceAllocation> more{per_area};
 
 	for (unsigned i = 0; i < per_area; ++i) {
 		more[i] = pool.Alloc();
@@ -139,9 +142,9 @@ TEST(SliceTest, Medium)
 TEST(SliceTest, Large)
 {
 	const size_t slice_size = 8192;
-	const unsigned per_area = 13;
+	const unsigned per_area_init = 13;
 
-	SlicePool pool{slice_size, per_area, "slice"};
+	SlicePool pool{slice_size, per_area_init, "slice"};
 
 	auto allocation0 = pool.Alloc();
 	auto *area0 = allocation0.area;
@@ -150,7 +153,8 @@ TEST(SliceTest, Large)
 	}
 	allocation0.Free();
 
-	SliceAllocation allocations[per_area];
+	const unsigned per_area = pool.GetSlicesPerArea();
+	AllocatedArray<SliceAllocation> allocations{per_area};
 
 	for (unsigned i = 0; i < per_area; ++i) {
 		auto &allocation = allocations[i];
@@ -169,7 +173,7 @@ TEST(SliceTest, Large)
 		Fill(allocation.data, slice_size, i);
 	}
 
-	SliceAllocation more[per_area];
+	AllocatedArray<SliceAllocation> more{per_area};
 
 	for (unsigned i = 0; i < per_area; ++i) {
 		more[i] = pool.Alloc();
