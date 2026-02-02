@@ -9,6 +9,7 @@
 #include "system/PageAllocator.hxx"
 #include "system/HugePage.hxx"
 #include "system/VmaName.hxx"
+#include "util/DivideRoundUp.hxx"
 #include "util/Poison.h"
 
 #include <cstdint>
@@ -21,12 +22,6 @@ static constexpr std::size_t
 align_size(std::size_t size) noexcept
 {
 	return RoundUpToPowerOfTwo(size, (std::size_t)0x20);
-}
-
-static constexpr unsigned
-divide_round_up(unsigned a, unsigned b) noexcept
-{
-	return (a + b - 1) / b;
 }
 
 /*
@@ -174,7 +169,7 @@ SliceArea::PunchSliceRange(unsigned start,
 {
 	assert(start <= end);
 
-	unsigned start_page = divide_round_up(start, pool.slices_per_page)
+	unsigned start_page = DivideRoundUp(start, pool.slices_per_page)
 		* pool.pages_per_slice;
 	unsigned end_page = (start / pool.slices_per_page )
 		* pool.pages_per_slice;
@@ -223,8 +218,8 @@ SlicePool::SlicePool(std::size_t _slice_size, unsigned _slices_per_area,
 		slices_per_page = PAGE_SIZE / slice_size;
 		pages_per_slice = 1;
 
-		pages_per_area = divide_round_up(_slices_per_area,
-						 slices_per_page);
+		pages_per_area = DivideRoundUp(_slices_per_area,
+					       slices_per_page);
 	} else {
 		slice_size = AlignToPageSize(_slice_size);
 
@@ -237,7 +232,7 @@ SlicePool::SlicePool(std::size_t _slice_size, unsigned _slices_per_area,
 	slices_per_area = (pages_per_area / pages_per_slice) * slices_per_page;
 
 	const std::size_t header_size = SliceArea::GetHeaderSize(slices_per_area);
-	header_pages = divide_round_up(header_size, PAGE_SIZE);
+	header_pages = DivideRoundUp(header_size, PAGE_SIZE);
 
 	area_size = PAGE_SIZE * (header_pages + pages_per_area);
 }
