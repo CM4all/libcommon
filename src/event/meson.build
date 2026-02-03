@@ -1,5 +1,8 @@
 event_config = configuration_data()
 event_have_uring = is_variable('liburing') and uring_dep.found()
+event_config.set('USE_EVENTFD', true)
+event_config.set('USE_SIGNALFD', true)
+event_config.set('USE_EPOLL', true)
 event_config.set('HAVE_URING', event_have_uring)
 configure_file(output: 'config.h', configuration: event_config)
 
