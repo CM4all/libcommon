@@ -500,6 +500,10 @@ EventLoop::Run() noexcept
 
 	quit = false;
 
+#ifdef ENABLE_EVENT_LOOP_STATS
+	Event::TimePoint busy_since = SteadyNow();
+#endif
+
 	do {
 		again = false;
 
@@ -550,7 +554,26 @@ EventLoop::Run() noexcept
 
 			FlushClockCaches();
 
+#ifdef ENABLE_EVENT_LOOP_STATS
+			Event::TimePoint idle_since;
+			if (timeout.count() > 0) {
+				const auto now = SteadyNow();
+				stats.busy_duration += now - busy_since;
+				idle_since = now;
+			}
+#endif
+
 			Wait(timeout);
+
+#ifdef ENABLE_EVENT_LOOP_STATS
+			if (timeout.count() > 0) {
+				FlushClockCaches();
+				const auto now = SteadyNow();
+				stats.idle_duration += now - idle_since;
+				++stats.iterations;
+				busy_since = now;
+			}
+#endif
 
 			idle.splice(std::next(idle.begin()), next);
 		}

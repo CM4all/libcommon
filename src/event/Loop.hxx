@@ -11,6 +11,10 @@
 #include "util/IntrusiveList.hxx"
 #include "event/config.h"
 
+#ifdef ENABLE_EVENT_LOOP_STATS
+#include "Stats.hxx"
+#endif
+
 #ifndef NO_FINE_TIMER_EVENT
 #include "TimerList.hxx"
 #endif // NO_FINE_TIMER_EVENT
@@ -113,6 +117,10 @@ class EventLoop final
 	PostCallback post_callback = nullptr;
 #endif
 
+#ifdef ENABLE_EVENT_LOOP_STATS
+	EventLoopStats stats;
+#endif
+
 #ifdef HAVE_THREADED_EVENT_LOOP
 #if defined(USE_EVENTFD) && defined(HAVE_URING)
 	class UringWake;
@@ -185,6 +193,12 @@ public:
 
 	EventLoop(const EventLoop &other) = delete;
 	EventLoop &operator=(const EventLoop &other) = delete;
+
+#ifdef ENABLE_EVENT_LOOP_STATS
+	const auto &GetStats() const noexcept {
+		return stats;
+	}
+#endif
 
 #ifndef NDEBUG
 	/**

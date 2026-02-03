@@ -4,6 +4,7 @@ event_config.set('USE_EVENTFD', true)
 event_config.set('USE_SIGNALFD', true)
 event_config.set('USE_EPOLL', true)
 event_config.set('HAVE_URING', event_have_uring)
+event_config.set('ENABLE_EVENT_LOOP_STATS', get_variable('libcommon_enable_EventLoopStats', false))
 event_config.set('NO_FINE_TIMER_EVENT', not get_variable('libcommon_enable_FineTimerEvent', true))
 configure_file(output: 'config.h', configuration: event_config)
 

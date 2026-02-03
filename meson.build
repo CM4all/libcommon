@@ -100,6 +100,8 @@ endif
 
 inc = include_directories('src', 'src/pluggable', '.')
 
+libcommon_enable_EventLoopStats = true
+
 libcommon_require_avahi = get_option('avahi')
 libcommon_require_cap = get_option('cap')
 libcommon_require_curl = get_option('curl')
