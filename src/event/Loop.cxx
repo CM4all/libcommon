@@ -566,7 +566,7 @@ EventLoop::Run() noexcept
 			Wait(timeout);
 
 #ifdef ENABLE_EVENT_LOOP_STATS
-			if (timeout.count() > 0) {
+			if (timeout.count() != 0) {
 				FlushClockCaches();
 				const auto now = SteadyNow();
 				stats.idle_duration += now - idle_since;
