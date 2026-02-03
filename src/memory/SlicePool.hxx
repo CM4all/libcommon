@@ -88,7 +88,7 @@ public:
 	void ForkCow(bool inherit) noexcept;
 
 	/**
-	 * Always been at least one area completely populated (using
+	 * Always keep at least one area completely populated (using
 	 * MADV_POPULATE_WRITE).  This reduces waits for Linux kernel
 	 * VM compaction/migration.
 	 */
