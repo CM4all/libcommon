@@ -13,7 +13,8 @@
 #include "util/StringBuffer.hxx"
 #include "util/StringBuilder.hxx"
 
-#include <stdio.h>
+#include <fmt/core.h>
+
 #include <time.h>
 
 using std::string_view_literals::operator""sv;
@@ -72,17 +73,16 @@ AppendEscape(StringBuilder &b, std::string_view value)
 	if (b.GetRemainingSize() <= value.size() * 4)
 		throw StringBuilder::Overflow();
 
-	char *p = b.GetTail();
-	size_t n = 0;
+	char *const p0 = b.GetTail(), *p = p0;
 
 	for (char ch : value) {
 		if (IsHarmlessChar(ch))
-			p[n++] = ch;
+			*p++ = ch;
 		else
-			n += sprintf(p + n, "\\x%02X", (unsigned char)ch);
+			p = fmt::format_to(p, "\\x{:02X}"sv, static_cast<unsigned char>(ch));
 	}
 
-	b.Extend(n);
+	b.Extend(std::distance(p0, p));
 }
 
 static void
@@ -112,15 +112,22 @@ AppendAnonymize(StringBuilder &b, const char *value)
 	b.Append(result.second);
 }
 
-template<typename... Args>
-static inline void
-AppendFormat(StringBuilder &b, const char *fmt, Args&&... args)
+static constexpr void
+VAppendFmt(StringBuilder &b,
+	   fmt::string_view format_str, fmt::format_args args) noexcept
 {
-	size_t size = b.GetRemainingSize();
-	size_t n = snprintf(b.GetTail(), size, fmt, args...);
-	if (n >= size - 1)
-		throw StringBuilder::Overflow();
-	b.Extend(n);
+	const auto w = b.Write();
+	auto [p, _] = fmt::vformat_to_n(w.data(), w.size(),
+					format_str, args);
+	b.Extend(std::distance(w.data(), p));
+}
+
+template<typename S, typename... Args>
+static constexpr void
+AppendFmt(StringBuilder &b,
+	  const S &format_str, Args&&... args) noexcept
+{
+	VAppendFmt(b, format_str, fmt::make_format_args(args...));
 }
 
 static char *
@@ -178,7 +185,7 @@ try {
 		? http_method_to_string(d.http_method)
 		: "?";
 
-	AppendFormat(b, " \"%s ", method);
+	AppendFmt(b, " \"{} "sv, method);
 
 	AppendEscape(b, OptionalString(d.http_uri));
 	if (d.truncated_http_uri) [[unlikely]]
@@ -187,14 +194,14 @@ try {
 	b.Append(" HTTP/1.1\" ");
 
 	if (d.HasHttpStatus())
-		AppendFormat(b, "%u", d.http_status);
+		AppendFmt(b, "{}"sv, std::to_underlying(d.http_status));
 	else
 		b.Append('-');
 
 	b.Append(' ');
 
 	if (d.valid_length)
-		AppendFormat(b, "%llu", (unsigned long long)d.length);
+		AppendFmt(b, "{}"sv, d.length);
 	else
 		b.Append('-');
 
@@ -219,7 +226,7 @@ try {
 
 	b.Append(' ');
 	if (d.valid_duration)
-		AppendFormat(b, "%llu", (unsigned long long)d.duration.count());
+		AppendFmt(b, "{}", d.duration.count());
 	else
 		b.Append('-');
 

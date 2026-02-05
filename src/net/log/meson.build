@@ -22,6 +22,7 @@ net_log = static_library(
   'Serializer.cxx',
   include_directories: inc,
   dependencies: [
+    fmt_dep,
     net_log_types_dep,
     http_dep,
     net_dep,
