@@ -311,7 +311,20 @@ SlicePool::Compress() noexcept
 		for (auto &area : areas)
 			area.Compress();
 
-	empty_areas.clear_and_dispose(SliceArea::Disposer());
+	if (!empty_areas.empty()) {
+		SliceArea *tmp = nullptr;
+		if (populate && areas.empty() && full_areas.empty())
+			/* with "populate" enabled, keep one area;
+			   remove it from the list and re-add it
+			   later */
+			tmp = &empty_areas.pop_front();
+
+		empty_areas.clear_and_dispose(SliceArea::Disposer());
+
+		if (tmp != nullptr)
+			/* ... re-add the area */
+			empty_areas.push_front(*tmp);
+	}
 
 	/* compressing full_areas would have no effect */
 }
