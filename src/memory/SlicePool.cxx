@@ -46,14 +46,14 @@ SliceArea::SliceArea(SlicePool &_pool) noexcept
 SliceArea *
 SliceArea::New(SlicePool &pool) noexcept
 {
-	void *p = AllocatePages(pool.area_size);
+	std::byte *p = AllocatePages(pool.area_size);
 
 	if (pool.vma_name != nullptr)
 		SetVmaName(p, pool.area_size, pool.vma_name);
 
 	if (std::size_t huge_size = AlignHugePageDown(pool.area_size);
 	    huge_size > 0)
-		EnableHugePages(p, huge_size);
+		EnableHugePages({p, huge_size});
 
 	return ::new(p) SliceArea(pool);
 }
@@ -89,7 +89,7 @@ SliceArea::Delete() noexcept
 
 	const std::size_t free_size = pool.area_size;
 	this->~SliceArea();
-	FreePages(this, free_size);
+	FreePages({reinterpret_cast<std::byte *>(this), free_size});
 }
 
 inline std::byte *
@@ -177,10 +177,7 @@ SliceArea::PunchSliceRange(unsigned start,
 	if (start_page >= end_page)
 		return;
 
-	std::byte *start_pointer = GetPage(start_page);
-	std::byte *end_pointer = GetPage(end_page);
-
-	DiscardPages(start_pointer, end_pointer - start_pointer);
+	DiscardPages({GetPage(start_page), GetPage(end_page)});
 }
 
 void
@@ -263,7 +260,8 @@ SlicePool::~SlicePool() noexcept
 void
 SliceArea::ForkCow(bool inherit) noexcept
 {
-	EnablePageFork(this, pool.area_size, inherit);
+	EnablePageFork({reinterpret_cast<std::byte *>(this), pool.area_size},
+		       inherit);
 }
 
 void
@@ -286,13 +284,13 @@ SlicePool::ForkCow(bool inherit) noexcept
 inline void
 SliceArea::Populate() noexcept
 {
-	PagesPopulateWrite(this, pool.area_size);
+	PagesPopulateWrite({reinterpret_cast<std::byte *>(this), pool.area_size});
 }
 
 inline void
 SliceArea::CollapseHugePages() noexcept
 {
-	::CollapseHugePages(this, pool.area_size);
+	::CollapseHugePages({reinterpret_cast<std::byte *>(this), pool.area_size});
 }
 
 void

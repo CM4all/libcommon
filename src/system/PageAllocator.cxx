@@ -6,7 +6,7 @@
 
 #include <new>
 
-void *
+std::byte *
 AllocatePages(std::size_t size)
 {
 	void *p = mmap(NULL, size, PROT_READ|PROT_WRITE,
@@ -14,5 +14,5 @@ AllocatePages(std::size_t size)
 	if (p == MAP_FAILED)
 		throw std::bad_alloc{};
 
-	return p;
+	return reinterpret_cast<std::byte *>(p);
 }

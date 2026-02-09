@@ -77,17 +77,16 @@ public:
 	}
 
 private:
-	void *At(size_t offset) {
-		return OffsetPointer(buffer.get(), offset);
+	std::byte *At(std::size_t offset) noexcept {
+		return buffer.get().data() + offset;
 	}
 
-	void *GetPayload(size_t i) noexcept {
+	std::byte *GetPayload(size_t i) noexcept {
 		return At(i * max_payload_size);
 	}
 
 	void *GetCmsg(size_t i) noexcept {
-		return OffsetPointer(GetPayload(allocated_datagrams),
-				     i * max_cmsg_size);
+		return GetPayload(allocated_datagrams) + i * max_cmsg_size;
 	}
 
 	struct mmsghdr *GetMmsg() noexcept {

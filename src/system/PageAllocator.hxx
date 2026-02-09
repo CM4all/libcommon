@@ -7,6 +7,7 @@
 #include "util/RoundPowerOfTwo.hxx"
 
 #include <cstddef>
+#include <span>
 
 #include <sys/mman.h>
 
@@ -29,13 +30,13 @@ AlignToPageSize(std::size_t size) noexcept
  * @param size the size of the allocation; must be a multiple of
  * #PAGE_SIZE
  */
-void *
+std::byte *
 AllocatePages(std::size_t size);
 
 static inline void
-FreePages(void *p, std::size_t size) noexcept
+FreePages(std::span<std::byte> p) noexcept
 {
-	munmap(p, size);
+	munmap(p.data(), p.size());
 }
 
 /**
@@ -45,13 +46,12 @@ FreePages(void *p, std::size_t size) noexcept
  * @param size a multiple of #HUGE_PAGE_SIZE
  */
 static inline void
-EnableHugePages(void *p, std::size_t size) noexcept
+EnableHugePages(std::span<std::byte> p) noexcept
 {
 #ifdef MADV_HUGEPAGE
-	madvise(p, size, MADV_HUGEPAGE);
+	madvise(p.data(), p.size(), MADV_HUGEPAGE);
 #else
 	(void)p;
-	(void)size;
 #endif
 }
 
@@ -61,13 +61,12 @@ EnableHugePages(void *p, std::size_t size) noexcept
  * @param size a multiple of #HUGE_PAGE_SIZE
  */
 static inline void
-CollapseHugePages(void *p, std::size_t size) noexcept
+CollapseHugePages(std::span<std::byte> p) noexcept
 {
 #ifdef MADV_COLLAPSE
-	madvise(p, size, MADV_COLLAPSE);
+	madvise(p.data(), p.size(), MADV_COLLAPSE);
 #else
 	(void)p;
-	(void)size;
 #endif
 }
 
@@ -75,13 +74,12 @@ CollapseHugePages(void *p, std::size_t size) noexcept
  * Controls whether forked processes inherit the specified pages.
  */
 static inline void
-EnablePageFork(void *p, std::size_t size, bool inherit) noexcept
+EnablePageFork(std::span<std::byte> p, bool inherit) noexcept
 {
 #ifdef __linux__
-	madvise(p, size, inherit ? MADV_DOFORK : MADV_DONTFORK);
+	madvise(p.data(), p.size(), inherit ? MADV_DOFORK : MADV_DONTFORK);
 #else
 	(void)p;
-	(void)size;
 	(void)inherit;
 #endif
 }
@@ -91,13 +89,12 @@ EnablePageFork(void *p, std::size_t size, bool inherit) noexcept
  * dump.
  */
 static inline void
-EnablePageDump(void *p, std::size_t size, bool dump) noexcept
+EnablePageDump(std::span<std::byte> p, bool dump) noexcept
 {
 #ifdef __linux__
-	madvise(p, size, dump ? MADV_DODUMP : MADV_DONTDUMP);
+	madvise(p.data(), p.size(), dump ? MADV_DODUMP : MADV_DONTDUMP);
 #else
 	(void)p;
-	(void)size;
 	(void)dump;
 #endif
 }
@@ -108,13 +105,12 @@ EnablePageDump(void *p, std::size_t size, bool dump) noexcept
  * automatically on the next write access.
  */
 static inline void
-DiscardPages(void *p, std::size_t size) noexcept
+DiscardPages(std::span<std::byte> p) noexcept
 {
 #ifdef __linux__
-	madvise(p, size, MADV_DONTNEED);
+	madvise(p.data(), p.size(), MADV_DONTNEED);
 #else
 	(void)p;
-	(void)size;
 #endif
 }
 
@@ -123,12 +119,11 @@ DiscardPages(void *p, std::size_t size) noexcept
  * the range just as if manually writing to each each page.
  */
 static inline void
-PagesPopulateWrite(void *p, std::size_t size) noexcept
+PagesPopulateWrite(std::span<std::byte> p) noexcept
 {
 #ifdef MADV_POPULATE_WRITE
-	madvise(p, size, MADV_POPULATE_WRITE);
+	madvise(p.data(), p.size(), MADV_POPULATE_WRITE);
 #else
 	(void)p;
-	(void)size;
 #endif
 }

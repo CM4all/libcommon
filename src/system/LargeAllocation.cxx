@@ -11,13 +11,13 @@
 #include <unistd.h>
 
 LargeAllocation::LargeAllocation(size_t _size)
-	:the_size(AlignToPageSize(_size))
 {
-	data = AllocatePages(the_size);
+	_size = AlignToPageSize(_size);
+	ptr = {AllocatePages(_size), _size};
 }
 
 void
-LargeAllocation::Free(void *p, size_t size) noexcept
+LargeAllocation::Free(std::span<std::byte> p) noexcept
 {
-	FreePages(p, size);
+	FreePages(p);
 }

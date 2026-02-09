@@ -2,18 +2,17 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#ifndef LARGE_ALLOCATION_HXX
-#define LARGE_ALLOCATION_HXX
+#pragma once
 
 #include <cstddef>
+#include <span>
 #include <utility>
 
 /**
  * Allocates anonymous memory using mmap().
  */
 class LargeAllocation {
-	void *data = nullptr;
-	std::size_t the_size;
+	std::span<std::byte> ptr;
 
 public:
 	LargeAllocation() = default;
@@ -24,41 +23,38 @@ public:
 	explicit LargeAllocation(std::size_t _size);
 
 	LargeAllocation(LargeAllocation &&src) noexcept
-		:data(std::exchange(src.data, nullptr)), the_size(src.the_size) {}
+		:ptr(std::exchange(src.ptr, std::span<std::byte>{})) {}
 
 	~LargeAllocation() noexcept {
-		if (data != nullptr)
-			Free(data, the_size);
+		if (ptr.data() != nullptr)
+			Free(ptr);
 	}
 
 	LargeAllocation &operator=(LargeAllocation &&src) noexcept {
 		using std::swap;
-		swap(data, src.data);
-		swap(the_size, src.the_size);
+		swap(ptr, src.ptr);
 		return *this;
 	}
 
 	operator bool() const noexcept {
-		return data != nullptr;
+		return ptr.data() != nullptr;
 	}
 
 	void reset() noexcept {
-		if (data != nullptr) {
-			Free(data, the_size);
-			data = nullptr;
+		if (ptr.data() != nullptr) {
+			Free(ptr);
+			ptr = {};
 		}
 	}
 
-	void *get() const noexcept {
-		return data;
+	operator std::span<std::byte>() const noexcept {
+		return ptr;
 	}
 
-	std::size_t size() const noexcept {
-		return the_size;
+	std::span<std::byte> get() const noexcept {
+		return ptr;
 	}
 
 private:
-	static void Free(void *p, std::size_t size) noexcept;
+	static void Free(std::span<std::byte> p) noexcept;
 };
-
-#endif
