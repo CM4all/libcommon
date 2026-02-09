@@ -7,6 +7,7 @@
 #include "Checker.hxx"
 #include "AllocatorStats.hxx"
 #include "system/PageAllocator.hxx"
+#include "system/PageSize.hxx"
 #include "system/HugePage.hxx"
 #include "system/VmaName.hxx"
 #include "util/DivideRoundUp.hxx"

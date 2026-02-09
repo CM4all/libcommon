@@ -4,6 +4,7 @@
 
 #include "LargeAllocation.hxx"
 #include "PageAllocator.hxx"
+#include "PageSize.hxx"
 
 #include <new>
 
