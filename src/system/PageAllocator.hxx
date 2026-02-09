@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "util/RoundPowerOfTwo.hxx"
-
 #include <cstddef>
 #include <span>
 
