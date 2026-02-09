@@ -92,15 +92,15 @@ SliceArea::Delete() noexcept
 	FreePages(this, free_size);
 }
 
-inline void *
+inline std::byte *
 SliceArea::GetPage(unsigned page) noexcept
 {
 	assert(page <= pool.pages_per_area);
 
-	return (uint8_t *)this + (pool.header_pages + page) * PAGE_SIZE;
+	return reinterpret_cast<std::byte *>(this) + (pool.header_pages + page) * PAGE_SIZE;
 }
 
-inline void *
+inline std::byte *
 SliceArea::GetSlice(unsigned slice) noexcept
 {
 	assert(slice < pool.slices_per_area);
@@ -109,17 +109,17 @@ SliceArea::GetSlice(unsigned slice) noexcept
 	unsigned page = (slice / pool.slices_per_page) * pool.pages_per_slice;
 	slice %= pool.slices_per_page;
 
-	return (uint8_t *)GetPage(page) + slice * pool.slice_size;
+	return GetPage(page) + slice * pool.slice_size;
 }
 
 inline unsigned
 SliceArea::IndexOf(const void *_p) noexcept
 {
-	const uint8_t *p = (const uint8_t *)_p;
-	assert(p >= (uint8_t *)GetPage(0));
-	assert(p < (uint8_t *)GetPage(pool.pages_per_area));
+	const std::byte *p = reinterpret_cast<const std::byte *>(_p);
+	assert(p >= GetPage(0));
+	assert(p < GetPage(pool.pages_per_area));
 
-	std::size_t offset = p - (const uint8_t *)this;
+	std::size_t offset = p - reinterpret_cast<const std::byte *>(this);
 	const unsigned page = offset / PAGE_SIZE - pool.header_pages;
 	offset %= PAGE_SIZE;
 	assert(offset % pool.slice_size == 0);
@@ -177,8 +177,8 @@ SliceArea::PunchSliceRange(unsigned start,
 	if (start_page >= end_page)
 		return;
 
-	uint8_t *start_pointer = (uint8_t *)GetPage(start_page);
-	uint8_t *end_pointer = (uint8_t *)GetPage(end_page);
+	std::byte *start_pointer = GetPage(start_page);
+	std::byte *end_pointer = GetPage(end_page);
 
 	DiscardPages(start_pointer, end_pointer - start_pointer);
 }
@@ -374,7 +374,7 @@ SliceArea::Alloc() noexcept
 	free_head = slot->next;
 	slot->next = Slot::ALLOCATED;
 
-	auto *p = GetSlice(i);
+	std::byte *p = GetSlice(i);
 	PoisonUndefined(p, pool.slice_size);
 	return p;
 }

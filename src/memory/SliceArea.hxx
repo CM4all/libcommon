@@ -69,10 +69,10 @@ public:
 	}
 
 	[[gnu::pure]]
-	void *GetPage(unsigned page) noexcept;
+	std::byte *GetPage(unsigned page) noexcept;
 
 	[[gnu::pure]]
-	void *GetSlice(unsigned slice) noexcept;
+	std::byte *GetSlice(unsigned slice) noexcept;
 
 	/**
 	 * Calculates the allocation slot index from an allocated pointer.
