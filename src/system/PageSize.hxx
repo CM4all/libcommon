@@ -8,8 +8,6 @@
 
 #include <cstddef>
 
-#include <sys/mman.h>
-
 static constexpr std::size_t PAGE_SIZE = 4096;
 
 /**
