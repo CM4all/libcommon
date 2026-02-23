@@ -198,6 +198,14 @@ enum class Command {
      * by a null byte.
      */
     CANCEL_JOB = 25,
+
+    /**
+     * Expire (invalidate) all cache items (and other resources
+     * referenced by them, such as child processes) within an
+     * arbitrary amount of time chosen by the recipient.  Payload is a
+     * CACHE_TAG.
+     */
+    EXPIRE_TCACHE_TAG = 26,
 };
 
 struct Header {
