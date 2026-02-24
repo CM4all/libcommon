@@ -46,11 +46,18 @@ public:
 	}
 
 	/**
+	 * Returns a span pointing to the raw (untyped) allocation.
+	 */
+	std::span<std::byte> raw() const noexcept {
+		return allocation.get();
+	}
+
+	/**
 	 * Returns the allocated size, i.e. the size passed to the
 	 * constructor.
 	 */
 	size_t size() const noexcept {
-		return allocation.get().size();
+		return raw().size();
 	}
 
 	void reset() noexcept {
@@ -61,7 +68,7 @@ public:
 	}
 
 	T *get() const noexcept {
-		return reinterpret_cast<T *>(allocation.get().data());
+		return reinterpret_cast<T *>(raw().data());
 	}
 
 	T *operator->() const noexcept {
