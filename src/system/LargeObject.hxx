@@ -29,7 +29,7 @@ public:
 	template<typename... Args>
 	explicit LargeObject(size_t _size, Args&&... args)
 		:allocation(_size) {
-		new(allocation.get()) T(std::forward<Args>(args)...);
+		new(allocation.get().data()) T(std::forward<Args>(args)...);
 	}
 
 	LargeObject(LargeObject &&src) = default;
@@ -50,7 +50,7 @@ public:
 	 * constructor.
 	 */
 	size_t size() const noexcept {
-		return allocation.size();
+		return allocation.get().size();
 	}
 
 	void reset() noexcept {
@@ -61,7 +61,7 @@ public:
 	}
 
 	T *get() const noexcept {
-		return static_cast<T *>(allocation.get());
+		return reinterpret_cast<T *>(allocation.get().data());
 	}
 
 	T *operator->() const noexcept {
