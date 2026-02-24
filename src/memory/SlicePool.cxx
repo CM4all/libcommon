@@ -50,7 +50,7 @@ SliceArea::New(SlicePool &pool) noexcept
 	std::byte *p = AllocatePages(pool.area_size);
 
 	if (pool.vma_name != nullptr)
-		SetVmaName(p, pool.area_size, pool.vma_name);
+		SetVmaName({p, pool.area_size}, pool.vma_name);
 
 	if (std::size_t huge_size = AlignHugePageDown(pool.area_size);
 	    huge_size > 0)
