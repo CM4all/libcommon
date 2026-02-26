@@ -208,47 +208,24 @@ Serialize(Serializer &s, const CgroupOptions &c)
 }
 
 static void
-Serialize(Serializer &s, const NamespaceOptions &ns)
+Serialize(Serializer &s, const MountNamespaceOptions &ns)
 {
-	assert(!ns.user_namespace.IsDefined());
-	assert(!ns.ipc_namespace.IsDefined());
-
-	s.WriteOptional(ExecCommand::USER_NS, ns.enable_user);
-	s.WriteOptional(ExecCommand::PID_NS, ns.enable_pid);
-	s.WriteOptionalString(ExecCommand::PID_NS_NAME,
-			      ns.pid_namespace_name);
-	s.WriteOptional(ExecCommand::CGROUP_NS, ns.enable_cgroup);
-	s.WriteOptional(ExecCommand::NETWORK_NS, ns.enable_network);
-	s.WriteOptionalString(ExecCommand::NETWORK_NS_NAME,
-			      ns.network_namespace_name);
-	s.WriteOptional(ExecCommand::IPC_NS, ns.enable_ipc);
-
-	if (ns.mapped_real_uid > 0) {
-		s.Write(ExecCommand::MAPPED_REAL_UID);
-		s.WriteT(ns.mapped_real_uid);
-	}
-
-	if (ns.mapped_effective_uid > 0) {
-		s.Write(ExecCommand::MAPPED_EFFECTIVE_UID);
-		s.WriteT(ns.mapped_effective_uid);
-	}
-
-	s.WriteOptional(ExecCommand::MOUNT_PROC, ns.mount.mount_proc);
-	s.WriteOptional(ExecCommand::MOUNT_DEV, ns.mount.mount_dev);
-	s.WriteOptional(ExecCommand::MOUNT_PTS, ns.mount.mount_pts);
+	s.WriteOptional(ExecCommand::MOUNT_PROC, ns.mount_proc);
+	s.WriteOptional(ExecCommand::MOUNT_DEV, ns.mount_dev);
+	s.WriteOptional(ExecCommand::MOUNT_PTS, ns.mount_pts);
 	s.WriteOptional(ExecCommand::BIND_MOUNT_PTS,
-			ns.mount.bind_mount_pts);
+			ns.bind_mount_pts);
 	s.WriteOptional(ExecCommand::WRITABLE_PROC,
-			ns.mount.writable_proc);
+			ns.writable_proc);
 	s.WriteOptionalString(ExecCommand::PIVOT_ROOT,
-			      ns.mount.pivot_root);
+			      ns.pivot_root);
 	s.WriteOptional(ExecCommand::MOUNT_ROOT_TMPFS,
-			ns.mount.mount_root_tmpfs);
+			ns.mount_root_tmpfs);
 
 	s.WriteOptionalString(ExecCommand::MOUNT_TMP_TMPFS,
-			      ns.mount.mount_tmp_tmpfs);
+			      ns.mount_tmp_tmpfs);
 
-	for (const auto &i : ns.mount.mounts) {
+	for (const auto &i : ns.mounts) {
 		switch (i.type) {
 		case Mount::Type::BIND:
 			if (i.source_fd.IsDefined()) {
@@ -306,10 +283,39 @@ Serialize(Serializer &s, const NamespaceOptions &ns)
 		}
 	}
 
-	if (ns.mount.dir_mode != 0711) {
+	if (ns.dir_mode != 0711) {
 		s.Write(ExecCommand::DIR_MODE);
-		s.WriteT(ns.mount.dir_mode);
+		s.WriteT(ns.dir_mode);
 	}
+}
+
+static void
+Serialize(Serializer &s, const NamespaceOptions &ns)
+{
+	assert(!ns.user_namespace.IsDefined());
+	assert(!ns.ipc_namespace.IsDefined());
+
+	s.WriteOptional(ExecCommand::USER_NS, ns.enable_user);
+	s.WriteOptional(ExecCommand::PID_NS, ns.enable_pid);
+	s.WriteOptionalString(ExecCommand::PID_NS_NAME,
+			      ns.pid_namespace_name);
+	s.WriteOptional(ExecCommand::CGROUP_NS, ns.enable_cgroup);
+	s.WriteOptional(ExecCommand::NETWORK_NS, ns.enable_network);
+	s.WriteOptionalString(ExecCommand::NETWORK_NS_NAME,
+			      ns.network_namespace_name);
+	s.WriteOptional(ExecCommand::IPC_NS, ns.enable_ipc);
+
+	if (ns.mapped_real_uid > 0) {
+		s.Write(ExecCommand::MAPPED_REAL_UID);
+		s.WriteT(ns.mapped_real_uid);
+	}
+
+	if (ns.mapped_effective_uid > 0) {
+		s.Write(ExecCommand::MAPPED_EFFECTIVE_UID);
+		s.WriteT(ns.mapped_effective_uid);
+	}
+
+	Serialize(s, ns.mount);
 
 	s.WriteOptionalString(ExecCommand::HOSTNAME, ns.hostname);
 }
