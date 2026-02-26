@@ -5,6 +5,7 @@
 #pragma once
 
 #include "MountNamespaceOptions.hxx"
+#include "PidNamespaceOptions.hxx"
 #include "translation/Features.hxx"
 #include "io/FileDescriptor.hxx"
 
@@ -21,11 +22,6 @@ struct NamespaceOptions {
 	 * Start the child process in a new user namespace?
 	 */
 	bool enable_user = false;
-
-	/**
-	 * Start the child process in a new PID namespace?
-	 */
-	bool enable_pid = false;
 
 	/**
 	 * Start the child process in a new Cgroup namespace?
@@ -55,13 +51,6 @@ struct NamespaceOptions {
 	uid_t mapped_effective_uid = 0;
 
 	/**
-	 * The name of the PID namespace to reassociate with.  The
-	 * namespace is requested from the "Spawn" daemon (Package
-	 * cm4all-spawn).
-	 */
-	const char *pid_namespace_name = nullptr;
-
-	/**
 	 * The name of the network namespace (/run/netns/X) to reassociate
 	 * with.  Requires #enable_network.
 	 */
@@ -71,6 +60,8 @@ struct NamespaceOptions {
 	 * The hostname of the new UTS namespace.
 	 */
 	const char *hostname = nullptr;
+
+	PidNamespaceOptions pid;
 
 	MountNamespaceOptions mount;
 
@@ -85,15 +76,14 @@ struct NamespaceOptions {
 	constexpr NamespaceOptions(ShallowCopy shallow_copy,
 				   const NamespaceOptions &src) noexcept
 		:enable_user(src.enable_user),
-		 enable_pid(src.enable_pid),
 		 enable_cgroup(src.enable_cgroup),
 		 enable_network(src.enable_network),
 		 enable_ipc(src.enable_ipc),
 		 mapped_real_uid(src.mapped_real_uid),
 		 mapped_effective_uid(src.mapped_effective_uid),
-		 pid_namespace_name(src.pid_namespace_name),
 		 network_namespace_name(src.network_namespace_name),
 		 hostname(src.hostname),
+		 pid(shallow_copy, src.pid),
 		 mount(shallow_copy, src.mount),
 		 user_namespace(src.user_namespace),
 		 ipc_namespace(src.ipc_namespace)
@@ -116,8 +106,7 @@ struct NamespaceOptions {
 	 * Clear all pid namespace options.
 	 */
 	void ClearPid() noexcept {
-		enable_pid = false;
-		pid_namespace_name = nullptr;
+		pid = {};
 	}
 
 	/**

@@ -2721,10 +2721,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed PID_NAMESPACE packet");
 
 		if (auto &options = MakeNamespaceOptions("misplaced PID_NAMESPACE packet");
-		    options.pid_namespace_name != nullptr)
+		    options.pid.name != nullptr)
 			throw std::runtime_error("Can't combine PID_NAMESPACE with PID_NAMESPACE_NAME");
 		else
-			options.enable_pid = true;
+			options.pid.enable = true;
 
 		return;
 #else
@@ -3801,12 +3801,12 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed PID_NAMESPACE_NAME packet");
 
 		if (auto &options = MakeNamespaceOptions("misplaced PID_NAMESPACE_NAME packet");
-		    options.pid_namespace_name != nullptr)
+		    options.pid.name != nullptr)
 			throw std::runtime_error("duplicate PID_NAMESPACE_NAME packet");
-		else if (options.enable_pid)
+		else if (options.pid.enable)
 			throw std::runtime_error("Can't combine PID_NAMESPACE_NAME with PID_NAMESPACE");
 		else
-			options.pid_namespace_name = string_payload.data();
+			options.pid.name = string_payload.data();
 		return;
 #else
 		break;

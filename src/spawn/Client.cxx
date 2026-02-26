@@ -208,6 +208,13 @@ Serialize(Serializer &s, const CgroupOptions &c)
 }
 
 static void
+Serialize(Serializer &s, const PidNamespaceOptions &ns)
+{
+	s.WriteOptional(ExecCommand::PID_NS, ns.enable);
+	s.WriteOptionalString(ExecCommand::PID_NS_NAME, ns.name);
+}
+
+static void
 Serialize(Serializer &s, const MountNamespaceOptions &ns)
 {
 	s.WriteOptional(ExecCommand::MOUNT_PROC, ns.mount_proc);
@@ -296,9 +303,6 @@ Serialize(Serializer &s, const NamespaceOptions &ns)
 	assert(!ns.ipc_namespace.IsDefined());
 
 	s.WriteOptional(ExecCommand::USER_NS, ns.enable_user);
-	s.WriteOptional(ExecCommand::PID_NS, ns.enable_pid);
-	s.WriteOptionalString(ExecCommand::PID_NS_NAME,
-			      ns.pid_namespace_name);
 	s.WriteOptional(ExecCommand::CGROUP_NS, ns.enable_cgroup);
 	s.WriteOptional(ExecCommand::NETWORK_NS, ns.enable_network);
 	s.WriteOptionalString(ExecCommand::NETWORK_NS_NAME,
@@ -315,6 +319,7 @@ Serialize(Serializer &s, const NamespaceOptions &ns)
 		s.WriteT(ns.mapped_effective_uid);
 	}
 
+	Serialize(s, ns.pid);
 	Serialize(s, ns.mount);
 
 	s.WriteOptionalString(ExecCommand::HOSTNAME, ns.hostname);

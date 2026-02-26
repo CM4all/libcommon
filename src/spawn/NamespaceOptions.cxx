@@ -21,15 +21,14 @@
 NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 				   const NamespaceOptions &src) noexcept
 	:enable_user(src.enable_user),
-	 enable_pid(src.enable_pid),
 	 enable_cgroup(src.enable_cgroup),
 	 enable_network(src.enable_network),
 	 enable_ipc(src.enable_ipc),
 	 mapped_real_uid(src.mapped_real_uid),
 	 mapped_effective_uid(src.mapped_effective_uid),
-	 pid_namespace_name(alloc.CheckDup(src.pid_namespace_name)),
 	 network_namespace_name(alloc.CheckDup(src.network_namespace_name)),
 	 hostname(alloc.CheckDup(src.hostname)),
+	 pid(alloc, src.pid),
 	 mount(alloc, src.mount),
 	 user_namespace(src.user_namespace),
 	 ipc_namespace(src.ipc_namespace)
@@ -55,10 +54,10 @@ NamespaceOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 uint_least64_t
 NamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 {
+	flags = pid.GetCloneFlags(flags);
+
 	if (enable_user)
 		flags |= CLONE_NEWUSER;
-	if (enable_pid && pid_namespace_name == nullptr)
-		flags |= CLONE_NEWPID;
 	if (enable_cgroup)
 		flags |= CLONE_NEWCGROUP;
 	if (enable_network)
@@ -110,7 +109,7 @@ NamespaceOptions::FormatGidMap(char *p, const UidGid &uid_gid) const noexcept
 }
 
 void
-NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
+NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned _pid) const
 {
 	/* collect all gids (including supplementary groups) in a std::set
 	   to eliminate duplicates, and then map them all into the new
@@ -126,7 +125,7 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 		gids.emplace(uid_gid.supplementary_groups[i]);
 
 	if (!gids.empty())
-		SetupGidMap(pid, gids);
+		SetupGidMap(_pid, gids);
 
 	const IdMap map{
 		.first = {
@@ -139,7 +138,7 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned pid) const
 		},
 	};
 
-	SetupUidMap(pid, map);
+	SetupUidMap(_pid, map);
 }
 
 void
@@ -198,14 +197,6 @@ NamespaceOptions::MakeId(char *p) const noexcept
 	if (enable_user)
 		p = (char *)mempcpy(p, ";uns", 4);
 
-	if (enable_pid)
-		p = (char *)mempcpy(p, ";pns", 4);
-
-	if (pid_namespace_name != nullptr) {
-		p = (char *)mempcpy(p, ";pns=", 5);
-		p = (char *)stpcpy(p, pid_namespace_name);
-	}
-
 	if (enable_cgroup)
 		p = (char *)mempcpy(p, ";cns", 4);
 
@@ -227,6 +218,7 @@ NamespaceOptions::MakeId(char *p) const noexcept
 	if (mapped_effective_uid > 0)
 		p = fmt::format_to(p, ";meu{}", mapped_effective_uid);
 
+	p = pid.MakeId(p);
 	p = mount.MakeId(p);
 
 	if (hostname != nullptr) {

@@ -136,6 +136,7 @@ if get_variable('libcommon_enable_spawn_options', false)
     'Mount.cxx',
     'MountNamespaceOptions.cxx',
     'NamespaceOptions.cxx',
+    'PidNamespaceOptions.cxx',
     'Prepared.cxx',
     'TmpfsCreate.cxx',
 

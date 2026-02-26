@@ -579,11 +579,11 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			break;
 
 		case ExecCommand::PID_NS:
-			p.ns.enable_pid = true;
+			p.ns.pid.enable = true;
 			break;
 
 		case ExecCommand::PID_NS_NAME:
-			p.ns.pid_namespace_name = payload.ReadString();
+			p.ns.pid.name = payload.ReadString();
 			break;
 
 		case ExecCommand::CGROUP_NS:

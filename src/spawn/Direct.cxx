@@ -237,7 +237,7 @@ try {
 	if (p.tty)
 		DisconnectTty();
 
-	if (p.ns.enable_pid && p.ns.pid_namespace_name == nullptr) {
+	if (p.ns.pid.enable && p.ns.pid.name == nullptr) {
 		setsid();
 
 		const auto pid = SpawnInitFork(name);
@@ -444,7 +444,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	UniqueFileDescriptor ipc_namespace, user_namespace;
 	UniqueFileDescriptor accessory_lease_pipe;
 
-	if (params.ns.pid_namespace_name != nullptr) {
+	if (params.ns.pid.name != nullptr) {
 		/* first open a handle to our existing (old) namespaces
 		   to be able to restore them later (see above) */
 		if (!old_pidns.OpenReadOnly("/proc/self/ns/pid"))
@@ -472,7 +472,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		}
 
 		auto ns = SpawnAccessory::MakeNamespaces(SpawnAccessory::Connect(),
-							 params.ns.pid_namespace_name,
+							 params.ns.pid.name,
 							 request);
 		if (setns(ns.pid.Get(), CLONE_NEWPID) < 0)
 			throw MakeErrno("setns(CLONE_NEWPID) failed");
