@@ -82,6 +82,11 @@ struct MountNamespaceOptions {
 	 */
 	uint_least16_t dir_mode = 0711;
 
+	/**
+	 * Shall /tmp be mounted without MS_NOEXEC?
+	 */
+	bool mount_tmp_tmpfs_exec = false;
+
 	MountNamespaceOptions() = default;
 
 	constexpr MountNamespaceOptions(ShallowCopy shallow_copy,
@@ -100,7 +105,8 @@ struct MountNamespaceOptions {
 		 mount_tmp_tmpfs(src.mount_tmp_tmpfs),
 		 mount_listen_stream(src.mount_listen_stream),
 		 mounts(shallow_copy, src.mounts),
-		 dir_mode(src.dir_mode) {}
+		 dir_mode(src.dir_mode),
+		 mount_tmp_tmpfs_exec(src.mount_tmp_tmpfs_exec) {}
 
 	MountNamespaceOptions(AllocatorPtr alloc,
 			      const MountNamespaceOptions &src) noexcept;

@@ -229,8 +229,11 @@ Serialize(Serializer &s, const MountNamespaceOptions &ns)
 	s.WriteOptional(ExecCommand::MOUNT_ROOT_TMPFS,
 			ns.mount_root_tmpfs);
 
-	s.WriteOptionalString(ExecCommand::MOUNT_TMP_TMPFS,
+	if (ns.mount_tmp_tmpfs != nullptr) {
+		s.WriteString(ExecCommand::MOUNT_TMP_TMPFS,
 			      ns.mount_tmp_tmpfs);
+		s.WriteBool(ns.mount_tmp_tmpfs_exec);
+	}
 
 	for (const auto &i : ns.mounts) {
 		switch (i.type) {

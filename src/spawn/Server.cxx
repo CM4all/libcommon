@@ -632,6 +632,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 
 		case ExecCommand::MOUNT_TMP_TMPFS:
 			p.ns.mount.mount_tmp_tmpfs = payload.ReadString();
+			p.ns.mount.mount_tmp_tmpfs_exec = payload.ReadBool();
 			break;
 
 		case ExecCommand::MOUNT_TMPFS:

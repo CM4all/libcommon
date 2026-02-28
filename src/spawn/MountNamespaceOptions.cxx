@@ -46,7 +46,8 @@ MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 	 mount_tmp_tmpfs(alloc.CheckDup(src.mount_tmp_tmpfs)),
 	 mount_listen_stream(alloc.Dup(src.mount_listen_stream)),
 	 mounts(Mount::CloneAll(alloc, src.mounts)),
-	 dir_mode(src.dir_mode)
+	 dir_mode(src.dir_mode),
+	 mount_tmp_tmpfs_exec(src.mount_tmp_tmpfs_exec)
 {
 }
 
@@ -190,9 +191,12 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 		vfs_builder.Add("/tmp");
 
+		unsigned long flags = MS_NODEV|MS_NOSUID;
+		if (!mount_tmp_tmpfs_exec)
+			flags |= MS_NOEXEC;
+
 		MountOrThrow("none", "/tmp", "tmpfs",
-			     MS_NODEV|MS_NOEXEC|MS_NOSUID,
-			     options);
+			     flags, options);
 
 		vfs_builder.MakeWritable();
 	}
