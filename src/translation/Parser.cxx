@@ -672,6 +672,23 @@ TranslateParser::HandleMountTmpTmpfs(std::string_view payload)
 }
 
 inline void
+TranslateParser::HandleMountTmpTmpfsExec(std::string_view payload)
+{
+	if (!payload.empty())
+		throw std::runtime_error{"malformed MOUNT_TMP_TMPFS_EXEC packet"};
+
+	auto &options = MakeMountNamespaceOptions("misplaced MOUNT_TMP_TMPFS_EXEC packet");
+
+	if (options.mount_tmp_tmpfs == nullptr)
+		throw std::runtime_error{"misplaced MOUNT_TMP_TMPFS_EXEC packet"};
+
+	if (options.mount_tmp_tmpfs_exec)
+		throw std::runtime_error{"duplicate MOUNT_TMP_TMPFS_EXEC packet"};
+
+	options.mount_tmp_tmpfs_exec = true;
+}
+
+inline void
 TranslateParser::HandleMountHome(std::string_view payload)
 {
 	if (!IsValidAbsolutePath(payload))
@@ -4619,6 +4636,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		}
 
 		throw std::runtime_error{"misplaced ACCESS_CONTROL_ALLOW_ALL packet"};
+#else
+		break;
+#endif
+
+	case TranslationCommand::MOUNT_TMP_TMPFS_EXEC:
+#if TRANSLATION_ENABLE_SPAWN
+		HandleMountTmpTmpfsExec(string_payload);
+		return;
 #else
 		break;
 #endif

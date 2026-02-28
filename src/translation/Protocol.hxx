@@ -1387,6 +1387,12 @@ enum class TranslationCommand : uint16_t {
 	 * methods and headers.
 	 */
 	ACCESS_CONTROL_ALLOW_ALL = 278,
+
+	/**
+	 * Modified for the preceding #MOUNT_TMP_TMPFS packet which
+	 * disables MS_NOEXEC.
+	 */
+	MOUNT_TMP_TMPFS_EXEC = 279,
 };
 
 struct TranslationHeader {

@@ -778,6 +778,11 @@ public:
 			return *this;
 		}
 
+		auto MountTmpTmpfsExec() noexcept {
+			response.Packet(TranslationCommand::MOUNT_TMP_TMPFS_EXEC);
+			return *this;
+		}
+
 		template<typename... Types>
 		auto MountTmpfs(Types... path) noexcept {
 			response.StringPacket(TranslationCommand::MOUNT_TMPFS,
