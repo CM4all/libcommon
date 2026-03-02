@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include <sys/types.h>
 
 /**
@@ -17,7 +19,7 @@
  * if this is "init"
  */
 pid_t
-SpawnInitFork(const char *name=nullptr);
+SpawnInitFork(std::string_view name);
 
 /**
  * An "init" implementation for PID namespaces.
@@ -45,4 +47,4 @@ SpawnInit(pid_t child_pid, bool remain);
  * caller's PID namespace)
  */
 pid_t
-UnshareForkSpawnInit(const char *name);
+UnshareForkSpawnInit(std::string_view name);

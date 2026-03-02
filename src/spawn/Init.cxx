@@ -34,20 +34,19 @@ using std::string_view_literals::operator""sv;
 static sigset_t init_signal_mask;
 
 static void
-SetInitProcessName(const char *name) noexcept
+SetInitProcessName(std::string_view name) noexcept
 {
-	if (name != nullptr) {
-		const std::string_view name_sv{name};
-		const char *prefix = name_sv.size() > 10
+	if (!name.empty()) {
+		const char *prefix = name.size() > 10
 			? "i" : "init";
 
-		SetProcessName(FmtBuffer<16>("{}-{}"sv, prefix, name_sv));
+		SetProcessName(FmtBuffer<16>("{}-{}"sv, prefix, name));
 	} else
 		SetProcessName("init");
 }
 
 pid_t
-SpawnInitFork(const char *name)
+SpawnInitFork(std::string_view name)
 {
 	sigemptyset(&init_signal_mask);
 	sigaddset(&init_signal_mask, SIGINT);
@@ -192,7 +191,7 @@ SpawnInit(pid_t child_pid, bool remain)
 }
 
 pid_t
-UnshareForkSpawnInit(const char *name)
+UnshareForkSpawnInit(std::string_view name)
 {
 	static constexpr struct clone_args ca{
 		.flags = CLONE_CLEAR_SIGHAND|CLONE_NEWPID,

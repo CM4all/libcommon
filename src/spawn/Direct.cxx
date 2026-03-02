@@ -140,7 +140,7 @@ WaitForPipe(FileDescriptor r) noexcept
 static void
 Exec(const char *path, PreparedChildProcess &&p,
      const bool skip_uid_gid,
-     const char *name,
+     const std::string_view name,
      UniqueFileDescriptor &&userns_map_pipe_r,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
@@ -570,9 +570,9 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	/* if a cgroup name is specified, it is used as the name for
 	   the "init" process */
-	const char *const name = params.cgroup != nullptr
-		? params.cgroup->name
-		: nullptr;
+	const std::string_view name = params.cgroup != nullptr
+		? std::string_view{params.cgroup->name}
+		: std::string_view{};
 
 	long pid;
 	for (unsigned retries = 2;;) {
