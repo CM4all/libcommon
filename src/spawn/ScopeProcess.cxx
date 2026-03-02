@@ -55,7 +55,7 @@ LimitSysCalls()
 	   ignores this (to prevent SIGKILL) */
 	sf.AddRule(SCMP_ACT_ERRNO(ENOMEM), SCMP_SYS(brk));
 
-	if (HaveAddressSanitizer()) {
+	if constexpr (HaveAddressSanitizer()) {
 		/* needed by libasan (if AddressSanitizer is
 		   enabled) */
 		sf.AddRule(SCMP_ACT_ALLOW, SCMP_SYS(sigaltstack));

@@ -9,7 +9,7 @@
 static inline bool
 HaveMemoryChecker() noexcept
 {
-	if (HaveAddressSanitizer())
+	if constexpr (HaveAddressSanitizer())
 		return true;
 
 	if (HaveValgrind())
