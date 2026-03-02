@@ -570,7 +570,8 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	/* if a cgroup name is specified, it is used as the name for
 	   the "init" process */
-	const std::string_view name = params.cgroup != nullptr
+	const std::string_view name = params.cgroup != nullptr &&
+		params.cgroup->name != nullptr
 		? std::string_view{params.cgroup->name}
 		: std::string_view{};
 
