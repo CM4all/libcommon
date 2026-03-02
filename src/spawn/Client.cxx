@@ -210,6 +210,11 @@ Serialize(Serializer &s, const CgroupOptions &c)
 static void
 Serialize(Serializer &s, const PidNamespaceOptions &ns)
 {
+	if (ns.fd.IsDefined()) {
+		s.WriteFd(ExecCommand::PID_NS_FD, ns.fd);
+		return;
+	}
+
 	if (ns.mode == PidNamespaceOptions::Mode::DISABLED)
 		return;
 

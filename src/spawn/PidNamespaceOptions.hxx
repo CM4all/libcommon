@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "io/FileDescriptor.hxx"
 #include "util/TagStructs.hxx"
 
 #include <cstdint>
@@ -17,6 +18,14 @@ struct PidNamespaceOptions {
 	 * (Package cm4all-spawn-accessory).
 	 */
 	const char *name = nullptr;
+
+	/**
+	 * If this field is set, then reassociate with this PID
+	 * namespace.
+	 *
+	 * The file descriptor is owned by the caller.
+	 */
+	FileDescriptor fd = FileDescriptor::Undefined();
 
 	/**
 	 * Start the child process in a new PID namespace?
@@ -46,6 +55,7 @@ struct PidNamespaceOptions {
 	constexpr PidNamespaceOptions([[maybe_unused]] ShallowCopy shallow_copy,
 				      const PidNamespaceOptions &src) noexcept
 		:name(src.name),
+		 fd(src.fd),
 		 mode(src.mode)
 	{
 	}

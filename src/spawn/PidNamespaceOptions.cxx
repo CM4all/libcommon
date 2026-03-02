@@ -21,6 +21,7 @@
 PidNamespaceOptions::PidNamespaceOptions(AllocatorPtr alloc,
 					 const PidNamespaceOptions &src) noexcept
 	:name(alloc.CheckDup(src.name)),
+	 fd(src.fd),
 	 mode(src.mode)
 {
 }

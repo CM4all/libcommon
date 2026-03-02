@@ -47,6 +47,7 @@ enum class ExecCommand : uint8_t {
 	TTY,
 	USER_NS,
 	PID_NS,
+	PID_NS_FD,
 	CGROUP_NS,
 	NETWORK_NS,
 	NETWORK_NS_NAME,

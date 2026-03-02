@@ -592,6 +592,10 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 
 			break;
 
+		case ExecCommand::PID_NS_FD:
+			p.ns.pid.fd = fds.Borrow();
+			break;
+
 		case ExecCommand::CGROUP_NS:
 			p.ns.enable_cgroup = true;
 			break;
