@@ -33,6 +33,7 @@
 #include <fcntl.h> // for AT_SYMLINK_NOFOLLOW
 #include <unistd.h>
 #include <string.h>
+#include <sys/prctl.h>
 #include <sys/signal.h>
 #include <sys/socket.h> // for AF_LOCAL
 #include <sys/stat.h> // for fchmodat()
@@ -167,6 +168,14 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 		WriteErrorPipe(error_pipe_w, {}, std::current_exception());
 		return EXIT_FAILURE;
 	}
+
+	/* restore the "dumpable" process flag after it has been
+	   cleared by UidGid::Apply(); this is necessary for things
+	   such as opening "/proc/CHILD_PID/ns/NAME": in the Linux
+	   kernel, proc_ns_get_link() checks ptrace_may_access(), and
+	   if the target process is not dumpable, this fails (because
+	   we lack CAP_SYS_PTRACE superpowers) */
+	prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
 
 	/* ignore all signals which may stop us; shut down only when all
 	   sockets are closed */
