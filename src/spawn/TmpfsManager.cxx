@@ -45,7 +45,7 @@ struct TmpfsManager::Item final
 
 	std::chrono::steady_clock::time_point expires;
 
-	std::string name;
+	const std::string name;
 
 	UniqueFileDescriptor fd;
 
