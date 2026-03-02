@@ -237,7 +237,7 @@ try {
 	if (p.tty)
 		DisconnectTty();
 
-	if (p.ns.pid.enable && p.ns.pid.name == nullptr) {
+	if (p.ns.pid.mode == PidNamespaceOptions::Mode::ANONYMOUS) {
 		setsid();
 
 		const auto pid = SpawnInitFork(name);

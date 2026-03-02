@@ -62,8 +62,9 @@ try {
 		} else if (StringIsEqual(arg, "--userns")) {
 			p.ns.enable_user = true;
 		} else if (StringIsEqual(arg, "--pidns")) {
-			p.ns.pid.enable = true;
+			p.ns.pid.mode = PidNamespaceOptions::Mode::ANONYMOUS;
 		} else if (const char *pidns = StringAfterPrefix(arg, "--pidns=")) {
+			p.ns.pid.mode = PidNamespaceOptions::Mode::ACCESSORY;
 			p.ns.pid.name = pidns;
 		} else if (StringIsEqual(arg, "--netns")) {
 			p.ns.enable_network = true;

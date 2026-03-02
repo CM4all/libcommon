@@ -579,11 +579,17 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			break;
 
 		case ExecCommand::PID_NS:
-			p.ns.pid.enable = true;
-			break;
+			payload.ReadT(p.ns.pid.mode);
+			switch (p.ns.pid.mode) {
+			case PidNamespaceOptions::Mode::DISABLED:
+			case PidNamespaceOptions::Mode::ANONYMOUS:
+				break;
 
-		case ExecCommand::PID_NS_NAME:
-			p.ns.pid.name = payload.ReadString();
+			case PidNamespaceOptions::Mode::ACCESSORY:
+				p.ns.pid.name = payload.ReadString();
+				break;
+			}
+
 			break;
 
 		case ExecCommand::CGROUP_NS:

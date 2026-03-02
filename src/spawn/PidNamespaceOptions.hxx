@@ -21,14 +21,32 @@ struct PidNamespaceOptions {
 	/**
 	 * Start the child process in a new PID namespace?
 	 */
-	bool enable = false;
+	enum class Mode : uint_least8_t {
+		/**
+		 * No, run the child process in the same PID namespace
+		 * as this process.
+		 */
+		DISABLED,
+
+		/**
+		 * Create a new anonymous PID namespace.
+		 */
+		ANONYMOUS,
+
+		/**
+		 * Reassociate with a PID namespace managed by the
+		 * cm4all-spawn-accessory daemon.  Uses the #name
+		 * field.
+		 */
+		ACCESSORY,
+	} mode = Mode::DISABLED;
 
 	PidNamespaceOptions() noexcept = default;
 
 	constexpr PidNamespaceOptions([[maybe_unused]] ShallowCopy shallow_copy,
 				      const PidNamespaceOptions &src) noexcept
 		:name(src.name),
-		 enable(src.enable)
+		 mode(src.mode)
 	{
 	}
 

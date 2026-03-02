@@ -2738,10 +2738,10 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed PID_NAMESPACE packet");
 
 		if (auto &options = MakeNamespaceOptions("misplaced PID_NAMESPACE packet");
-		    options.pid.name != nullptr)
-			throw std::runtime_error("Can't combine PID_NAMESPACE with PID_NAMESPACE_NAME");
+		    options.pid.mode != PidNamespaceOptions::Mode::DISABLED)
+			throw std::runtime_error{"duplicate PID_NAMESPACE packet"};
 		else
-			options.pid.enable = true;
+			options.pid.mode = PidNamespaceOptions::Mode::ANONYMOUS;
 
 		return;
 #else
@@ -3818,12 +3818,13 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw std::runtime_error("malformed PID_NAMESPACE_NAME packet");
 
 		if (auto &options = MakeNamespaceOptions("misplaced PID_NAMESPACE_NAME packet");
-		    options.pid.name != nullptr)
-			throw std::runtime_error("duplicate PID_NAMESPACE_NAME packet");
-		else if (options.pid.enable)
-			throw std::runtime_error("Can't combine PID_NAMESPACE_NAME with PID_NAMESPACE");
-		else
+		    options.pid.mode != PidNamespaceOptions::Mode::DISABLED)
+			throw std::runtime_error{"duplicate PID_NAMESPACE_NAME packet"};
+		else {
+			options.pid.mode = PidNamespaceOptions::Mode::ACCESSORY;
 			options.pid.name = string_payload.data();
+		}
+
 		return;
 #else
 		break;

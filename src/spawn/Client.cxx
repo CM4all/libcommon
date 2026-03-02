@@ -210,8 +210,21 @@ Serialize(Serializer &s, const CgroupOptions &c)
 static void
 Serialize(Serializer &s, const PidNamespaceOptions &ns)
 {
-	s.WriteOptional(ExecCommand::PID_NS, ns.enable);
-	s.WriteOptionalString(ExecCommand::PID_NS_NAME, ns.name);
+	if (ns.mode == PidNamespaceOptions::Mode::DISABLED)
+		return;
+
+	s.Write(ExecCommand::PID_NS);
+	s.WriteT(ns.mode);
+
+	switch (ns.mode) {
+	case PidNamespaceOptions::Mode::DISABLED:
+	case PidNamespaceOptions::Mode::ANONYMOUS:
+		break;
+
+	case PidNamespaceOptions::Mode::ACCESSORY:
+		s.WriteString(ns.name);
+		break;
+	}
 }
 
 static void
