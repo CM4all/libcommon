@@ -13,8 +13,8 @@ class AllocatorPtr;
 struct PidNamespaceOptions {
 	/**
 	 * The name of the PID namespace to reassociate with.  The
-	 * namespace is requested from the "Spawn" daemon (Package
-	 * cm4all-spawn).
+	 * namespace is requested from the "Spawn-Accessory" daemon
+	 * (Package cm4all-spawn-accessory).
 	 */
 	const char *name = nullptr;
 

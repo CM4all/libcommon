@@ -110,8 +110,8 @@ if get_variable('libcommon_enable_spawn_direct', false)
 endif
 
 if get_variable('libcommon_enable_spawn_daemon', false)
-  # Enable the client implementation for the spawn daemon (package
-  # "cm4all-spawn").
+  # Enable the client implementation for the spawn-accessory daemon
+  # (package "cm4all-spawn-accessory").
 
   spawn_options_sources += [
     'accessory/Client.cxx',
