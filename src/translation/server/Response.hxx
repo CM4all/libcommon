@@ -1112,8 +1112,13 @@ public:
 			return *this;
 		}
 
+		/**
+		 * Wrapper for #PID_NAMESPACE_NAME which obtains a
+		 * shared PID namespace from the
+		 * cm4all-spawn-accessory daemon.
+		 */
 		template<typename... Types>
-		auto PidNamespace(Types... name) noexcept {
+		auto SharedPidNamespace(Types... name) noexcept {
 			response.Packet(TranslationCommand::PID_NAMESPACE_NAME,
 					name...);
 			return *this;
