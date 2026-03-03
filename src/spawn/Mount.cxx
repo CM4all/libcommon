@@ -361,7 +361,7 @@ Mount::ApplySymlink(VfsBuilder &vfs_builder) const
 	assert(source != nullptr);
 	assert(target != nullptr);
 
-	vfs_builder.Add(DirName(target));
+	vfs_builder.MakeDirectory(DirName(target));
 
 	if (symlink(source, target) < 0)
 		throw FmtErrno("Failed to create symlink {:?}", target);
