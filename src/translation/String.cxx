@@ -294,10 +294,11 @@ constexpr auto translation_command_names = std::array{
 	"PEEK"sv, // 276
 	"ALLOW_PTRACE"sv, // 277
 	"ACCESS_CONTROL_ALLOW_ALL"sv, // 278
+	"MOUNT_TMP_TMPFS_EXEC"sv, // 279
 };
 
 // Static assertion to verify the array size matches the highest enum value + 1
-static_assert(translation_command_names.size() == std::to_underlying(TranslationCommand::ACCESS_CONTROL_ALLOW_ALL) + 1);
+static_assert(translation_command_names.size() == std::to_underlying(TranslationCommand::MOUNT_TMP_TMPFS_EXEC) + 1);
 
 // Static assertions to verify specific indexes are placed correctly
 static_assert(translation_command_names[std::to_underlying(TranslationCommand::BEGIN)] == "BEGIN"sv);
@@ -308,6 +309,7 @@ static_assert(translation_command_names[std::to_underlying(TranslationCommand::W
 static_assert(translation_command_names[std::to_underlying(TranslationCommand::HOME)] == "HOME"sv);
 static_assert(translation_command_names[std::to_underlying(TranslationCommand::REALM)] == "REALM"sv);
 static_assert(translation_command_names[std::to_underlying(TranslationCommand::ACCESS_CONTROL_ALLOW_ALL)] == "ACCESS_CONTROL_ALLOW_ALL"sv);
+static_assert(translation_command_names[std::to_underlying(TranslationCommand::MOUNT_TMP_TMPFS_EXEC)] == "MOUNT_TMP_TMPFS_EXEC"sv);
 
 std::string_view
 ToString(TranslationCommand command) noexcept
