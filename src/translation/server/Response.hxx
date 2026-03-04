@@ -37,7 +37,6 @@ class Response {
 		PARAM,
 		SESSION,
 		LISTENER_TAG,
-		LOCAL_ADDRESS,
 		REMOTE_HOST,
 		HOST,
 		LANGUAGE,
@@ -52,7 +51,6 @@ class Response {
 		TranslationCommand::PARAM,
 		TranslationCommand::SESSION,
 		TranslationCommand::LISTENER_TAG,
-		TranslationCommand::LOCAL_ADDRESS,
 		TranslationCommand::REMOTE_HOST,
 		TranslationCommand::HOST,
 		TranslationCommand::LANGUAGE,
@@ -125,11 +123,6 @@ public:
 
 	auto &VaryListenerTag() noexcept {
 		vary[VaryIndex::LISTENER_TAG] = true;
-		return *this;
-	}
-
-	auto &VaryLocalAddress() noexcept {
-		vary[VaryIndex::LOCAL_ADDRESS] = true;
 		return *this;
 	}
 

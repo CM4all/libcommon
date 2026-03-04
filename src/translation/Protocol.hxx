@@ -59,8 +59,13 @@ enum class TranslationCommand : uint16_t {
 	DELEGATE = 41,
 
 	INVALIDATE = 42,
+
+	/** deprecated */
 	LOCAL_ADDRESS = 43,
+
+	/** deprecated */
 	LOCAL_ADDRESS_STRING = 44,
+
 	APPEND = 45,
 	DISCARD_SESSION = 46,
 	SCHEME = 47,
