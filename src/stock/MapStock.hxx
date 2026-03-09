@@ -91,11 +91,7 @@ public:
 	/**
 	 * @see Stock::FadeAll()
 	 */
-	void FadeAll() noexcept {
-		map.for_each([](auto &i){
-			i.FadeAll();
-		});
-	}
+	void FadeAll() noexcept;
 
 	/**
 	 * @see Stock::FadeIf()

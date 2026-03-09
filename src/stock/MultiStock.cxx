@@ -746,6 +746,14 @@ MultiStock::DiscardOldestIdle(std::size_t n_requested) noexcept
 	return n_removed;
 }
 
+void
+MultiStock::FadeAll() noexcept
+{
+	map.for_each([](auto &i){
+		i.FadeAll();
+	});
+}
+
 inline MultiStock::MapItem &
 MultiStock::MakeMapItem(StockKey key, const void *request) noexcept
 {

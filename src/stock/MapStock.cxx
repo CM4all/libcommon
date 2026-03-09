@@ -25,6 +25,14 @@ StockMap::~StockMap() noexcept
 }
 
 void
+StockMap::FadeAll() noexcept
+{
+	map.for_each([](auto &i){
+		i.FadeAll();
+	});
+}
+
+void
 StockMap::Erase(Item &item) noexcept
 {
 	counters += item.GetCounters();
