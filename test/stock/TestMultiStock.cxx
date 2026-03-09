@@ -1261,3 +1261,187 @@ TEST(MultiStock, UncleanDiscardOldestIdleBug)
 	ASSERT_EQ(foo.ready, 1);
 	ASSERT_EQ(foo.failed, 0);
 }
+
+/**
+ * Test FadeKey() with a key that does not exist in the map.
+ * Should be a no-op.
+ */
+TEST(MultiStock, FadeKeyNonexistent)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+
+	/* create one item under "foo" */
+	foo.Get(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 1);
+
+	/* fade a key that doesn't exist; should be a no-op */
+	instance.multi_stock.FadeKey(StockKey{"nonexistent"});
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 1);
+}
+
+/**
+ * Test FadeKey() on idle items: only the targeted key's items are
+ * destroyed, items under other keys remain.
+ */
+TEST(MultiStock, FadeKeyIdle)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+	Partition bar{instance, "bar"};
+
+	/* create one item under each key */
+	foo.Get(1);
+	bar.Get(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.ready, 1);
+
+	ASSERT_EQ(bar.factory_created, 1);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 1);
+	ASSERT_EQ(bar.ready, 1);
+
+	/* release both items; they will remain idle */
+	foo.PutReady(1);
+	bar.PutReady(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.ready, 0);
+
+	ASSERT_EQ(bar.factory_created, 1);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 0);
+	ASSERT_EQ(bar.ready, 0);
+
+	/* fade only "foo"; the idle item under "foo" is destroyed,
+	   "bar" remains */
+	instance.multi_stock.FadeKey(StockKey{"foo"});
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 1);
+
+	ASSERT_EQ(bar.factory_created, 1);
+	ASSERT_EQ(bar.destroyed, 0);
+
+	/* request a new "foo" item; a fresh one should be created */
+	foo.Get(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 2);
+	ASSERT_EQ(foo.destroyed, 1);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 1);
+
+	/* request a new "bar" item; the existing idle item should be
+	   reused (no new creation) */
+	bar.Get(1);
+	instance.RunSome();
+
+	ASSERT_EQ(bar.factory_created, 1);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 1);
+	ASSERT_EQ(bar.waiting, 0);
+	ASSERT_EQ(bar.ready, 1);
+}
+
+/**
+ * Test FadeKey() on busy items: the targeted key's items are
+ * faded but not destroyed until released; items under other keys
+ * remain unaffected.
+ */
+TEST(MultiStock, FadeKeyBusy)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+	Partition bar{instance, "bar"};
+
+	/* create items under each key */
+	foo.Get(2);
+	bar.Get(2);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 2);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 2);
+
+	ASSERT_EQ(bar.factory_created, 1);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 2);
+	ASSERT_EQ(bar.waiting, 0);
+	ASSERT_EQ(bar.ready, 2);
+
+	/* fade only "foo" while items are still busy */
+	instance.multi_stock.FadeKey(StockKey{"foo"});
+	instance.RunSome();
+
+	/* nothing destroyed yet because items are busy */
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 2);
+	ASSERT_EQ(foo.ready, 2);
+
+	ASSERT_EQ(bar.factory_created, 1);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 2);
+	ASSERT_EQ(bar.ready, 2);
+
+	/* release foo items; the faded outer item should be destroyed */
+	foo.PutReady(2);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 1);
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.ready, 0);
+
+	/* bar items should still be usable */
+	ASSERT_EQ(bar.factory_created, 1);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 2);
+	ASSERT_EQ(bar.ready, 2);
+
+	/* release bar items normally */
+	bar.PutReady(2);
+	instance.RunSome();
+
+	ASSERT_EQ(bar.factory_created, 1);
+	ASSERT_EQ(bar.destroyed, 0);
+	ASSERT_EQ(bar.total, 0);
+	ASSERT_EQ(bar.ready, 0);
+
+	/* request new foo item; a fresh one should be created */
+	foo.Get(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 2);
+	ASSERT_EQ(foo.destroyed, 1);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 1);
+}

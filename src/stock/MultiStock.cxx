@@ -747,6 +747,13 @@ MultiStock::DiscardOldestIdle(std::size_t n_requested) noexcept
 }
 
 void
+MultiStock::FadeKey(StockKey key) noexcept
+{
+	if (auto i = map.find(key); i != map.end())
+		i->FadeAll();
+}
+
+void
 MultiStock::FadeAll() noexcept
 {
 	map.for_each([](auto &i){

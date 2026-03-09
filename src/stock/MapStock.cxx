@@ -25,6 +25,13 @@ StockMap::~StockMap() noexcept
 }
 
 void
+StockMap::FadeKey(StockKey key) noexcept
+{
+	if (auto i = map.find(key); i != map.end())
+		i->FadeAll();
+}
+
+void
 StockMap::FadeAll() noexcept
 {
 	map.for_each([](auto &i){

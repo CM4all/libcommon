@@ -421,6 +421,8 @@ public:
 	 */
 	std::size_t DiscardOldestIdle(std::size_t n) noexcept;
 
+	void FadeKey(StockKey key) noexcept;
+
 	/**
 	 * @see Stock::FadeAll()
 	 */

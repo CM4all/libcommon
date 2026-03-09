@@ -88,6 +88,8 @@ public:
 		return cls;
 	}
 
+	void FadeKey(StockKey key) noexcept;
+
 	/**
 	 * @see Stock::FadeAll()
 	 */
