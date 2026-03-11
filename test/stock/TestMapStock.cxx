@@ -552,7 +552,6 @@ TEST(StockMap, Sticky)
 	StockMap map{
 		instance.event_loop, cls,
 		{
-			.limit = 3,
 			.max_idle = 8,
 		},
 	};
