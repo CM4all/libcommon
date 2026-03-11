@@ -4,6 +4,7 @@ test(
     'TestStock',
     'TestStock.cxx',
     'TestMultiStock.cxx',
+    'TestMapStock.cxx',
     include_directories: inc,
     dependencies: [
       gtest,
