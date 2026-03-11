@@ -13,6 +13,7 @@
 #include "Stats.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
+#include "event/FineTimerEvent.hxx"
 #include "util/Cancellable.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
@@ -228,6 +229,11 @@ class MultiStock {
 
 		Event::TimePoint reject_wait_until;
 
+		/**
+		 * Timer for Expire().
+		 */
+		FineTimerEvent expire_timer;
+
 	public:
 		/**
 		 * For MultiStock::chronological_list.
@@ -289,6 +295,8 @@ class MultiStock {
 				i.FadeIf(predicate);
 		}
 
+		void Expire(Event::TimePoint time) noexcept;
+
 	private:
 		[[gnu::pure]]
 		OuterItem &ToOuterItem(StockItem &shared_item) noexcept;
@@ -317,6 +325,8 @@ class MultiStock {
 		bool ScheduleRetryWaiting() noexcept;
 
 		void Create(StockRequest request) noexcept;
+
+		void OnExpireTimer() noexcept;
 
 		/* virtual methods from class StockGetHandler */
 		void OnStockItemReady(StockItem &item) noexcept override;
@@ -436,6 +446,11 @@ public:
 			i.FadeIf(predicate);
 		});
 	}
+
+	/**
+	 * Schedule expiry of all items with the specified key.
+	 */
+	void ExpireKey(StockKey key, Event::TimePoint time) noexcept;
 
 	void Get(StockKey key, StockRequest request,
 		 std::size_t concurrency,

@@ -333,7 +333,8 @@ MultiStock::MapItem::MapItem(MultiStock &_parent,
 	 limit(options.limit),
 	 clear_interval(options.clear_interval),
 	 max_wait(options.max_wait),
-	 retry_event(_event_loop, BIND_THIS_METHOD(RetryWaiting))
+	 retry_event(_event_loop, BIND_THIS_METHOD(RetryWaiting)),
+	 expire_timer(_event_loop, BIND_THIS_METHOD(OnExpireTimer))
 {
 }
 
@@ -684,6 +685,18 @@ MultiStock::MapItem::OnLeaseReleased(OuterItem &item) noexcept
 		RemoveItem(item);
 }
 
+inline void
+MultiStock::MapItem::OnExpireTimer() noexcept
+{
+	FadeAll();
+}
+
+inline void
+MultiStock::MapItem::Expire(Event::TimePoint time) noexcept
+{
+	expire_timer.ScheduleEarlier(time);
+}
+
 MultiStock::MultiStock(EventLoop &_event_loop, StockClass &_outer_cls,
 		       StockOptions _options,
 		       MultiStockClass &_inner_class) noexcept
@@ -759,6 +772,13 @@ MultiStock::FadeAll() noexcept
 	map.for_each([](auto &i){
 		i.FadeAll();
 	});
+}
+
+void
+MultiStock::ExpireKey(StockKey key, Event::TimePoint time) noexcept
+{
+	if (auto i = map.find(key); i != map.end())
+		i->Expire(time);
 }
 
 inline MultiStock::MapItem &

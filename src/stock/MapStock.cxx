@@ -12,6 +12,18 @@ StockMap::Item::OnDeferredEmpty() noexcept
 		map.Erase(*this);
 }
 
+inline void
+StockMap::Item::OnExpireTimer() noexcept
+{
+	FadeAll();
+}
+
+inline void
+StockMap::Item::Expire(Event::TimePoint time) noexcept
+{
+	expire_timer.ScheduleEarlier(time);
+}
+
 StockMap::StockMap(EventLoop &_event_loop, StockClass &_cls,
 		   StockOptions _options) noexcept
 	:event_loop(_event_loop), cls(_cls),
@@ -37,6 +49,13 @@ StockMap::FadeAll() noexcept
 	map.for_each([](auto &i){
 		i.FadeAll();
 	});
+}
+
+void
+StockMap::ExpireKey(StockKey key, Event::TimePoint time) noexcept
+{
+	if (auto i = map.find(key); i != map.end())
+		i->Expire(time);
 }
 
 void

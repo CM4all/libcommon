@@ -9,6 +9,7 @@
 #include "Stats.hxx"
 #include "Stock.hxx"
 #include "event/DeferEvent.hxx"
+#include "event/FineTimerEvent.hxx"
 #include "util/IntrusiveHashSet.hxx"
 
 #include <concepts> // for std::predicate
@@ -26,11 +27,18 @@ class StockMap {
 
 		DeferEvent defer_empty{GetEventLoop(), BIND_THIS_METHOD(OnDeferredEmpty)};
 
+		/**
+		 * Timer for Expire().
+		 */
+		FineTimerEvent expire_timer{GetEventLoop(), BIND_THIS_METHOD(OnExpireTimer)};
+
 		bool sticky = false;
 
 		template<typename... Args>
 		explicit Item(StockMap &_map, std::size_t _hash, Args&&... args) noexcept
 			:Stock(std::forward<Args>(args)...), map(_map), hash(_hash) {}
+
+		void Expire(Event::TimePoint time) noexcept;
 
 	protected:
 		virtual void OnEmpty() noexcept override {
@@ -39,6 +47,7 @@ class StockMap {
 
 	private:
 		void OnDeferredEmpty() noexcept;
+		void OnExpireTimer() noexcept;
 
 	public:
 		struct GetKeyFunction {
@@ -103,6 +112,11 @@ public:
 			i.FadeIf(predicate);
 		});
 	}
+
+	/**
+	 * Schedule expiry of all items with the specified key.
+	 */
+	void ExpireKey(StockKey key, Event::TimePoint time) noexcept;
 
 	/**
 	 * Obtain statistics.
