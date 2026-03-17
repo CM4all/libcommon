@@ -232,7 +232,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 char *
 MountNamespaceOptions::MakeId(char *p) const noexcept
 {
-	p = (char *)(char *)mempcpy(p, ";mns", 4);
+	p = (char *)mempcpy(p, ";mns", 4);
 
 	if (pivot_root != nullptr) {
 		p = (char *)mempcpy(p, ";pvr=", 5);
