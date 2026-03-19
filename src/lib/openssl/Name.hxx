@@ -10,15 +10,15 @@
 class AllocatedString;
 
 AllocatedString
-ToString(X509_NAME *name);
+ToString(const X509_NAME *name);
 
 AllocatedString
-NidToString(X509_NAME &name, int nid);
+NidToString(const X509_NAME &name, int nid);
 
 AllocatedString
-GetCommonName(X509 &cert);
+GetCommonName(const X509 &cert);
 
 AllocatedString
-GetIssuerCommonName(X509 &cert);
+GetIssuerCommonName(const X509 &cert);
 
 #endif

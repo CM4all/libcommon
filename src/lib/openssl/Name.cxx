@@ -8,7 +8,7 @@
 #include <openssl/x509.h>
 
 AllocatedString
-ToString(X509_NAME *name)
+ToString(const X509_NAME *name)
 {
 	if (name == nullptr)
 		return nullptr;
@@ -20,7 +20,7 @@ ToString(X509_NAME *name)
 }
 
 AllocatedString
-NidToString(X509_NAME &name, int nid)
+NidToString(const X509_NAME &name, int nid)
 {
 	char buffer[1024];
 	int len = X509_NAME_get_text_by_NID(&name, nid, buffer, sizeof(buffer));
@@ -32,24 +32,24 @@ NidToString(X509_NAME &name, int nid)
 }
 
 static AllocatedString
-GetCommonName(X509_NAME &name)
+GetCommonName(const X509_NAME &name)
 {
 	return NidToString(name, NID_commonName);
 }
 
 AllocatedString
-GetCommonName(X509 &cert)
+GetCommonName(const X509 &cert)
 {
-	X509_NAME *subject = X509_get_subject_name(&cert);
+	const X509_NAME *subject = X509_get_subject_name(&cert);
 	return subject != nullptr
 		? GetCommonName(*subject)
 		: nullptr;
 }
 
 AllocatedString
-GetIssuerCommonName(X509 &cert)
+GetIssuerCommonName(const X509 &cert)
 {
-	X509_NAME *subject = X509_get_issuer_name(&cert);
+	const X509_NAME *subject = X509_get_issuer_name(&cert);
 	return subject != nullptr
 		? GetCommonName(*subject)
 		: nullptr;
