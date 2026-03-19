@@ -13,14 +13,17 @@ MakeSelfIssuedDummyCert(std::string_view common_name)
 	if (cert == nullptr)
 		throw SslError("X509_new() failed");
 
-	auto *name = X509_get_subject_name(cert.get());
+	UniqueX509_NAME name{X509_NAME_new()};
+	if (name == nullptr)
+		throw SslError("X509_NAME_new() failed");
 
-	if (!X509_NAME_add_entry_by_NID(name, NID_commonName, MBSTRING_ASC,
+	if (!X509_NAME_add_entry_by_NID(name.get(), NID_commonName, MBSTRING_ASC,
 					reinterpret_cast<const unsigned char *>(common_name.data()),
 					common_name.size(), -1, 0))
 		throw SslError("X509_NAME_add_entry_by_NID() failed");
 
-	X509_set_issuer_name(cert.get(), name);
+	X509_set_subject_name(cert.get(), name.get());
+	X509_set_issuer_name(cert.get(), name.get());
 
 	X509_set_version(cert.get(), 2);
 	ASN1_INTEGER_set(X509_get_serialNumber(cert.get()), 1);
