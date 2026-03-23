@@ -38,12 +38,7 @@ ThreadWorker::ThreadWorker(ThreadQueue &_queue)
 	AtScopeExit(&attr) { pthread_attr_destroy(&attr); };
 
 	/* 64 kB stack ought to be enough */
-#ifdef __aarch64__
-	/* PTHREAD_STACK_MIN is 128 kB on ARM64 */
-	pthread_attr_setstacksize(&attr, 128 * 1024);
-#else
-	pthread_attr_setstacksize(&attr, 65536);
-#endif
+	pthread_attr_setstacksize(&attr, std::max<std::size_t>(65536, PTHREAD_STACK_MIN));
 
 	int error = pthread_create(&thread, &attr, Run, this);
 	if (error != 0)
