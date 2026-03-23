@@ -24,7 +24,7 @@ ThreadWorker::Run(void *ctx) noexcept
 	/* reduce glibc's thread cancellation overhead */
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, nullptr);
 
-	auto &w = *(ThreadWorker *)ctx;
+	auto &w = *static_cast<ThreadWorker *>(ctx);
 	w.Run();
 
 	return nullptr;
