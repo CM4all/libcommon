@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <span>
+#include <string_view>
 
 #include <assert.h>
 #include <stdint.h>
@@ -60,14 +61,21 @@ public:
 		ReadT(value_r);
 	}
 
-	const char *ReadString() {
+	std::string_view ReadStringView() {
 		auto n = std::find(begin, end, std::byte{0});
 		if (n == end)
 			throw MalformedPayloadError{};
 
 		const char *value = (const char *)begin;
 		begin = n + 1;
-		return value;
+		return {value, reinterpret_cast<const char *>(n)};
+	}
+
+	const char *ReadString() {
+		/* returning data() is valid here because the
+		   std::string_view returned by ReadString() points to
+		   a null-terminated string */
+		return ReadStringView().data();
 	}
 };
 
