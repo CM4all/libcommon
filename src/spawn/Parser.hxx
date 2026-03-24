@@ -41,7 +41,7 @@ public:
 
 	void Read(void *p, size_t size) {
 		if (GetSize() < size)
-			throw MalformedPayloadError();
+			throw MalformedPayloadError{};
 
 		memcpy(p, begin, size);
 		begin += size;
@@ -63,7 +63,7 @@ public:
 	const char *ReadString() {
 		auto n = std::find(begin, end, std::byte{0});
 		if (n == end)
-			throw MalformedPayloadError();
+			throw MalformedPayloadError{};
 
 		const char *value = (const char *)begin;
 		begin = n + 1;
