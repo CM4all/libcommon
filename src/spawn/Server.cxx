@@ -117,7 +117,7 @@ public:
 				  std::forward_list<SharedLease> &&_leases,
 				  unsigned _id, UniqueFileDescriptor &&_pidfd,
 				  UniqueFileDescriptor &&_accessory_lease_pipe,
-				  const char *_name) noexcept
+				  std::string_view _name) noexcept
 		:connection(_connection),
 		 leases(std::move(_leases)),
 		 id(_id),
@@ -197,7 +197,7 @@ private:
 
 	void SendExecComplete(unsigned id, std::string &&error) noexcept;
 	void SendExit(unsigned id, int status) noexcept;
-	void SpawnChild(unsigned id, const char *name,
+	void SpawnChild(unsigned id, std::string_view name,
 			PreparedChildProcess &&p);
 
 	void HandleExecMessage(Payload payload, SpawnFdList &&fds);
@@ -410,7 +410,7 @@ PrepareNamedTmpfs(TmpfsManager &tmpfs_manager,
 }
 
 inline void
-SpawnServerConnection::SpawnChild(unsigned id, const char *name,
+SpawnServerConnection::SpawnChild(unsigned id, std::string_view name,
 				  PreparedChildProcess &&p)
 {
 	const auto &config = process.GetConfig();
@@ -481,7 +481,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 {
 	unsigned id;
 	payload.ReadUnsigned(id);
-	const char *name = payload.ReadString();
+	const std::string_view name = payload.ReadStringView();
 
 	PreparedChildProcess p;
 	CgroupOptions cgroup;
