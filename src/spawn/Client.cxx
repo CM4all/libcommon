@@ -597,7 +597,14 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 			error = nullptr;
 
 		if (const auto i = processes.find(pid);
-		    i != processes.end() && i->completion_handler) {
+		    i == processes.end()) {
+			/* we do not know this process; it was
+			   probably killed before spawning has
+			   completed; therefore, don't log errors
+			   (that may have occurred due to the kill
+			   command) */
+			error = nullptr;
+		} else if (i->completion_handler) {
 			if (error == nullptr) {
 				i->completion_handler->OnSpawnSuccess();
 			} else {
