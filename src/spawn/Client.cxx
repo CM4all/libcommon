@@ -594,20 +594,18 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 		payload.ReadUnsigned(pid);
 		const char *error = payload.ReadString();
 
-		if (const auto i = processes.find(pid); i != processes.end()) {
-			if (i->completion_handler) {
-				if (*error == 0) {
-					i->completion_handler->OnSpawnSuccess();
-				} else {
-					++stats.errors;
-					i->completion_handler->OnSpawnError(std::make_exception_ptr(std::runtime_error{error}));
-				}
-
-				/* if there is a completion handler,
-				   don't log error message to
-				   stderr */
-				continue;
+		if (const auto i = processes.find(pid);
+		    i != processes.end() && i->completion_handler) {
+			if (*error == 0) {
+				i->completion_handler->OnSpawnSuccess();
+			} else {
+				++stats.errors;
+				i->completion_handler->OnSpawnError(std::make_exception_ptr(std::runtime_error{error}));
 			}
+
+			/* if there is a completion handler, don't log
+			   error message to stderr */
+			continue;
 		}
 
 		if (*error != 0)
