@@ -613,7 +613,7 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 
 		if (*error != 0)
 			fmt::print(stderr, "Failed to spawn child process {}: {}\n",
-					   pid, error);
+				   pid, error);
 	}
 
 	if (!IsUnderPressure() && !spawn_queue.empty())
