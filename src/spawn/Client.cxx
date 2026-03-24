@@ -595,7 +595,6 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 		const char *error = payload.ReadString();
 
 		if (const auto i = processes.find(pid); i != processes.end()) {
-			// TODO forward errors
 			if (i->completion_handler) {
 				if (*error == 0) {
 					i->completion_handler->OnSpawnSuccess();
