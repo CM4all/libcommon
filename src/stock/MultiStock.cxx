@@ -297,7 +297,6 @@ struct MultiStock::MapItem::Waiting final
 	StockRequest request;
 	const Event::TimePoint start_time;
 	StockGetHandler &handler;
-	CancellablePointer &caller_cancel_ptr;
 
 	const bool is_create;
 
@@ -305,11 +304,10 @@ struct MultiStock::MapItem::Waiting final
 		Event::TimePoint _start_time,
 		bool _is_create,
 		StockGetHandler &_handler,
-		CancellablePointer &_cancel_ptr) noexcept
+		CancellablePointer &caller_cancel_ptr) noexcept
 		:parent(_parent), request(std::move(_request)),
 		 start_time(_start_time),
 		 handler(_handler),
-		 caller_cancel_ptr(_cancel_ptr),
 		 is_create(_is_create)
 	{
 		caller_cancel_ptr = *this;
