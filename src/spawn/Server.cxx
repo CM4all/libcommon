@@ -489,7 +489,6 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 	auto mount_tail = p.ns.mount.mounts.before_begin();
 
 	std::forward_list<Mount> mounts;
-	std::forward_list<std::string> strings;
 	std::forward_list<AssignmentList::Item> assignments;
 
 	while (!payload.empty()) {
@@ -833,10 +832,6 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			if (p.cgroup != nullptr) {
 				const char *set_name = payload.ReadString();
 				const char *set_value = payload.ReadString();
-				strings.emplace_front(set_name);
-				set_name = strings.front().c_str();
-				strings.emplace_front(set_value);
-				set_value = strings.front().c_str();
 
 				assignments.emplace_front(set_name, set_value);
 				auto &set = assignments.front();
@@ -850,10 +845,6 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			if (p.cgroup != nullptr) {
 				const char *_name = payload.ReadString();
 				const char *_value = payload.ReadString();
-				strings.emplace_front(_name);
-				_name = strings.front().c_str();
-				strings.emplace_front(_value);
-				_value = strings.front().c_str();
 
 				assignments.emplace_front(_name, _value);
 				cgroup.xattr.Add(assignments.front());
