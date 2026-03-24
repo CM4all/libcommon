@@ -603,11 +603,12 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 			} else {
 				++stats.errors;
 				i->completion_handler->OnSpawnError(std::make_exception_ptr(std::runtime_error{error}));
-			}
 
-			/* if there is a completion handler, don't log
-			   error message to stderr */
-			continue;
+				/* if there is a completion handler,
+				   don't log error message to
+				   stderr */
+				error = nullptr;
+			}
 		}
 
 		if (error != nullptr)
