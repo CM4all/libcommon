@@ -593,10 +593,12 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 		unsigned pid;
 		payload.ReadUnsigned(pid);
 		const char *error = payload.ReadString();
+		if (*error == '\0')
+			error = nullptr;
 
 		if (const auto i = processes.find(pid);
 		    i != processes.end() && i->completion_handler) {
-			if (*error == 0) {
+			if (error == nullptr) {
 				i->completion_handler->OnSpawnSuccess();
 			} else {
 				++stats.errors;
@@ -608,7 +610,7 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 			continue;
 		}
 
-		if (*error != 0)
+		if (error != nullptr)
 			fmt::print(stderr, "Failed to spawn child process {}: {}\n",
 				   pid, error);
 	}
