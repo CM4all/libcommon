@@ -81,7 +81,7 @@ class StockMap {
 	 * Tracks the counters of #Item instances that have been
 	 * removed.
 	 */
-	StockCounters counters;
+	StockCounters counters{};
 
 public:
 	StockMap(EventLoop &_event_loop, StockClass &_cls,
