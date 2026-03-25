@@ -194,12 +194,15 @@ try {
 	if (early_uid_gid && !skip_uid_gid)
 		p.uid_gid.Apply();
 
-	p.ns.Apply(p.uid_gid);
-
+	/* apply resource limits before NamespaceOptions::Apply()
+	   drops CAP_SYS_RESOURCE; after that, we'd be unable to raise
+	   limits */
 	if (!wait_pipe_r.IsDefined())
 		/* if the wait_pipe exists, then the parent process
 		   will apply the resource limits */
 		p.rlimits.Apply(0);
+
+	p.ns.Apply(p.uid_gid);
 
 	if (userns_create_pipe_w.IsDefined()) {
 		/* user namespace allocation was postponed to allow
