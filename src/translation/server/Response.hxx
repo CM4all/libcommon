@@ -1242,6 +1242,20 @@ public:
 		}
 
 		template<typename... Types>
+		auto DocumentRoot(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::DOCUMENT_ROOT,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
+		auto ExpandDocumentRoot(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
 		auto ExpandPath(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::EXPAND_PATH,
 					      value...);
@@ -1388,20 +1402,6 @@ public:
 			return *this;
 		}
 
-		template<typename... Types>
-		auto DocumentRoot(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::DOCUMENT_ROOT,
-					      value...);
-			return *this;
-		}
-
-		template<typename... Types>
-		auto ExpandDocumentRoot(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
-					      value...);
-			return *this;
-		}
-
 		auto Parallelism(uint16_t value) noexcept {
 			response.PacketT(TranslationCommand::PARALLELISM,
 					 value);
@@ -1428,20 +1428,6 @@ public:
 		template<typename... Types>
 		auto Interpreter(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::INTERPRETER,
-					      value...);
-			return *this;
-		}
-
-		template<typename... Types>
-		auto DocumentRoot(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::DOCUMENT_ROOT,
-					      value...);
-			return *this;
-		}
-
-		template<typename... Types>
-		auto ExpandDocumentRoot(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
 					      value...);
 			return *this;
 		}
