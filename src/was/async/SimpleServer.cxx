@@ -8,6 +8,7 @@
 #include "net/SocketProtocolError.hxx"
 #include "util/SpanCast.hxx"
 #include "util/StringSplit.hxx"
+#include "util/Unaligned.hxx"
 
 #include <array>
 
@@ -115,7 +116,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		}
 
 		{
-			auto method = static_cast<HttpMethod>(*(const uint32_t *)(const void *)payload.data());
+			auto method = static_cast<HttpMethod>(LoadUnaligned<uint32_t>(payload.data()));
 			if (request.request->method != HttpMethod::GET &&
 			    method != request.request->method) {
 				/* sending that packet twice is illegal */
@@ -232,17 +233,14 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
-		{
-			auto length_p = (const uint64_t *)(const void *)payload.data();
-			if (payload.size() != sizeof(*length_p)) {
-				AbortProtocolError("malformed LENGTH packet");
-				return false;
-			}
+		if (payload.size() != sizeof(uint64_t)) {
+			AbortProtocolError("malformed LENGTH packet");
+			return false;
+		}
 
-			if (!input.SetLength(*length_p)) {
-				AbortProtocolError("invalid LENGTH packet");
-				return false;
-			}
+		if (!input.SetLength(LoadUnaligned<uint64_t>(payload.data()))) {
+			AbortProtocolError("invalid LENGTH packet");
+			return false;
 		}
 
 		break;
@@ -257,19 +255,16 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 					  output.Stop());
 
 	case WAS_COMMAND_PREMATURE:
-		{
-			auto length_p = (const uint64_t *)(const void *)payload.data();
-			if (payload.size() != sizeof(*length_p)) {
-				AbortProtocolError("malformed PREMATURE packet");
-				return false;
-			}
+		if (payload.size() != sizeof(uint64_t)) {
+			AbortProtocolError("malformed PREMATURE packet");
+			return false;
+		}
 
-			try {
-				input.Premature(*length_p);
-			} catch (...) {
-				AbortError(std::current_exception());
-				return false;
-			}
+		try {
+			input.Premature(LoadUnaligned<uint64_t>(payload.data()));
+		} catch (...) {
+			AbortError(std::current_exception());
+			return false;
 		}
 
 		return false;
