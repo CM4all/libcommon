@@ -665,7 +665,7 @@ MultiStock::MapItem::ItemCreateError(StockGetHandler &get_handler,
 {
 	++counters.failed_creates;
 
-	get_handler.OnStockItemError(ep);
+	get_handler.OnStockItemError(std::move(ep));
 }
 
 inline void
