@@ -33,7 +33,7 @@ StockMap::StockMap(EventLoop &_event_loop, StockClass &_cls,
 
 StockMap::~StockMap() noexcept
 {
-	map.clear_and_dispose(DeleteDisposer());
+	map.clear_and_dispose(DeleteDisposer{});
 }
 
 void
@@ -63,7 +63,7 @@ StockMap::Erase(Item &item) noexcept
 {
 	counters += item.GetCounters();
 	auto i = map.iterator_to(item);
-	map.erase_and_dispose(i, DeleteDisposer());
+	map.erase_and_dispose(i, DeleteDisposer{});
 }
 
 void
