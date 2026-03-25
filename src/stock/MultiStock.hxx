@@ -227,7 +227,14 @@ class MultiStock {
 
 		StockCounters counters{};
 
-		Event::TimePoint reject_wait_until;
+		/**
+		 * All waits for an item (when all items are busy
+		 * currently) will be rejected with
+		 * #StockOverloadedError.  This is set by
+		 * WaitingEnded() if a wait was longer than #max_wait
+		 * to throttle the wait queue.
+		 */
+		Event::TimePoint reject_wait_until{};
 
 		/**
 		 * Timer for Expire().
@@ -295,6 +302,11 @@ class MultiStock {
 				i.FadeIf(predicate);
 		}
 
+		/**
+		 * Expire this item at the specified time: all of its
+		 * #OuterItem instances will be faded (marked for
+		 * disposal) and new ones will be created on demand.
+		 */
 		void Expire(Event::TimePoint time) noexcept;
 
 	private:

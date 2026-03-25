@@ -170,7 +170,7 @@ MultiStock::OuterItem::GetIdle(StockGetHandler &handler) noexcept
 
 bool
 MultiStock::OuterItem::GetLease(MultiStockClass &_inner_class,
-				 StockGetHandler &handler) noexcept
+				StockGetHandler &handler) noexcept
 {
 	assert(CanUse());
 
@@ -402,6 +402,9 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 			return;
 	}
 
+	/* always overwrite #get_concurrency; the last call wins (but
+	   it would not make sense for callers to pass different
+	   values) */
 	get_concurrency = concurrency;
 
 	const auto now = GetEventLoop().SteadyNow();
@@ -515,7 +518,7 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 	   found */
 	if (!ScheduleRetryWaiting())
 		/* no more waiting: we can now remove all
-		   remaining idle items which havn't been
+		   remaining idle items which haven't been
 		   removed while there were still waiting
 		   items, but we had more empty items than we
 		   really needed */
@@ -595,6 +598,7 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 			WaitingEnded(*w);
 		}
 
+		/* copy the #std::exception_ptr for each handler */
 		w->handler.OnStockItemError(error);
 		delete w;
 	});
@@ -674,7 +678,7 @@ MultiStock::MapItem::OnLeaseReleased(OuterItem &item) noexcept
 	/* now that a lease was released, schedule the "waiting" list
 	   again */
 	if (ScheduleRetryWaiting() && item.CanUse())
-		/* somebody's waiting and the iten can be reused for
+		/* somebody's waiting and the item can be reused for
 		   them - don't try to delete the item, even if it's
 		   empty */
 		return;
@@ -798,7 +802,6 @@ MultiStock::MakeMapItem(StockKey key, const void *request) noexcept
 
 		return *i;
 	}
-
 }
 
 void
