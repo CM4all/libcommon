@@ -374,6 +374,8 @@ MultiStock::MapItem::Create(StockRequest request) noexcept
 
 	++counters.total_creates;
 
+	continue_on_cancel = outer_class.ShouldContinueOnCancel(request.get());
+
 	try {
 		outer_class.Create({*this}, std::move(request),
 				   *this, get_cancel_ptr);
@@ -474,12 +476,13 @@ MultiStock::MapItem::RemoveWaiting(Waiting &w) noexcept
 		DeleteEmptyItems();
 	}
 
-	if (items.empty())
-		parent.Erase(*this);
-	else if (get_cancel_ptr) {
+	if (get_cancel_ptr && !continue_on_cancel) {
 		++counters.canceled_creates;
 		get_cancel_ptr.Cancel();
 	}
+
+	if (items.empty() && !get_cancel_ptr)
+		parent.Erase(*this);
 }
 
 inline void
@@ -572,7 +575,6 @@ MultiStock::MapItem::ScheduleRetryWaiting() noexcept
 void
 MultiStock::MapItem::OnStockItemReady(StockItem &stock_item) noexcept
 {
-	assert(!waiting.empty());
 	get_cancel_ptr = nullptr;
 
 	retry_event.Cancel();
@@ -581,13 +583,18 @@ MultiStock::MapItem::OnStockItemReady(StockItem &stock_item) noexcept
 				   clear_interval);
 	items.push_back(*item);
 
+	if (waiting.empty())
+		/* the create was continued after all waiters were
+		   canceled (ShouldContinueOnCancel); keep the new
+		   item for future use */
+		return;
+
 	FinishWaiting(*item);
 }
 
 void
 MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 {
-	assert(!waiting.empty());
 	get_cancel_ptr = nullptr;
 
 	retry_event.Cancel();

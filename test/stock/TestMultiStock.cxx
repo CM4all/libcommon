@@ -96,6 +96,8 @@ public:
 		    StockGetHandler &handler,
 		    CancellablePointer &cancel_ptr) override;
 
+	bool ShouldContinueOnCancel(const void *request) const noexcept override;
+
 	/* virtual methods from class MultiStockClass */
 	StockItem *Create(CreateStockItem c, StockItem &outer_item) override {
 		return new MyInnerStockItem(c, outer_item);
@@ -143,7 +145,7 @@ struct Partition {
 	 */
 	std::exception_ptr next_error;
 
-	bool defer_create = false, never_create = false;
+	bool defer_create = false, never_create = false, should_continue_on_cancel = false;
 
 	Partition(Instance &_instance, const char *_key) noexcept
 		:instance(_instance), key(_key) {}
@@ -353,6 +355,13 @@ MyStockClass::Create(CreateStockItem c,
 		auto *item = new MyStockItem(c, std::move(request));
 		item->InvokeCreateSuccess(handler);
 	}
+}
+
+bool
+MyStockClass::ShouldContinueOnCancel(const void *request) const noexcept
+{
+	auto &partition = *(const Partition *)request;
+	return partition.should_continue_on_cancel;
 }
 
 MyStockItem::~MyStockItem() noexcept
@@ -1444,4 +1453,204 @@ TEST(MultiStock, FadeKeyBusy)
 	ASSERT_EQ(foo.total, 1);
 	ASSERT_EQ(foo.waiting, 0);
 	ASSERT_EQ(foo.ready, 1);
+}
+
+/**
+ * Test ShouldContinueOnCancel(): cancel all waiters while a
+ * deferred outer create is in progress.  The create should not be
+ * canceled and the resulting item should be available for future
+ * requests.
+ */
+TEST(MultiStock, ContinueOnCancel)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+	foo.defer_create = true;
+	foo.should_continue_on_cancel = true;
+
+	/* request 2 items; outer create is deferred */
+	foo.Get(2);
+
+	ASSERT_EQ(foo.factory_created, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 2);
+	ASSERT_EQ(foo.waiting, 2);
+	ASSERT_EQ(foo.ready, 0);
+
+	/* cancel all waiters before the deferred create completes */
+	foo.leases.clear();
+
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.waiting, 0);
+
+	/* run event loop: the deferred create should still complete
+	   because ShouldContinueOnCancel() returned true */
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+
+	/* request a new item: should reuse the continued outer item
+	   without creating a new one */
+	foo.defer_create = false;
+	foo.should_continue_on_cancel = false;
+	foo.Get(1);
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 1);
+
+	/* clean up: release the lease and discard the unused item */
+	foo.PutReady(1);
+	instance.multi_stock.DiscardUnused();
+
+	ASSERT_EQ(foo.destroyed, 1);
+}
+
+/**
+ * Test ShouldContinueOnCancel() when the continued create fails:
+ * the error should be silently discarded since there are no
+ * waiters.
+ */
+TEST(MultiStock, ContinueOnCancelError)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+	foo.defer_create = true;
+	foo.should_continue_on_cancel = true;
+	foo.next_error = std::make_exception_ptr(std::runtime_error{"Error"});
+
+	/* request items; outer create is deferred */
+	foo.Get(2);
+
+	ASSERT_EQ(foo.factory_created, 0);
+	ASSERT_EQ(foo.factory_failed, 0);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 2);
+	ASSERT_EQ(foo.waiting, 2);
+
+	/* cancel all waiters */
+	foo.leases.clear();
+
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.waiting, 0);
+
+	/* run event loop: the deferred create fails, the error is
+	   silently discarded because there are no waiters */
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 0);
+	ASSERT_EQ(foo.factory_failed, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.failed, 0);
+}
+
+/**
+ * Test ShouldContinueOnCancel(): cancel all waiters, then add a
+ * new waiter before the continued create completes.  The new
+ * waiter should receive the item.
+ */
+TEST(MultiStock, ContinueOnCancelNewWaiter)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+	foo.defer_create = true;
+	foo.should_continue_on_cancel = true;
+
+	/* request one item; outer create is deferred */
+	foo.Get(1);
+
+	ASSERT_EQ(foo.factory_created, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 1);
+
+	/* cancel the waiter; the deferred create continues */
+	foo.leases.clear();
+
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.waiting, 0);
+
+	/* a new request arrives before the deferred create
+	   completes; it should attach to the ongoing create */
+	foo.Get(1);
+
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 1);
+
+	/* the deferred create completes; the new waiter gets the
+	   item */
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 1);
+
+	/* clean up */
+	foo.PutReady(1);
+	instance.multi_stock.DiscardUnused();
+
+	ASSERT_EQ(foo.destroyed, 1);
+}
+
+/**
+ * Test ShouldContinueOnCancel(): cancel the waiter, let the
+ * continued create complete, then verify that the next request is
+ * fulfilled immediately (without running the event loop) because
+ * an idle outer item already exists.
+ */
+TEST(MultiStock, ContinueOnCancelIdleReuse)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+	foo.defer_create = true;
+	foo.should_continue_on_cancel = true;
+
+	/* request one item; outer create is deferred */
+	foo.Get(1);
+
+	ASSERT_EQ(foo.factory_created, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 1);
+
+	/* cancel the waiter; the deferred create continues */
+	foo.leases.clear();
+
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.waiting, 0);
+
+	/* let the deferred create complete; the item is kept with
+	   no waiters */
+	instance.RunSome();
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+
+	/* a new request must complete immediately (synchronously)
+	   because FindUsable() finds the already-created outer
+	   item */
+	foo.defer_create = false;
+	foo.should_continue_on_cancel = false;
+	foo.Get(1);
+
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 0);
+	ASSERT_EQ(foo.total, 1);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 1);
+
+	/* clean up */
+	foo.PutReady(1);
+	instance.multi_stock.DiscardUnused();
+
+	ASSERT_EQ(foo.destroyed, 1);
 }
