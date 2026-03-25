@@ -99,6 +99,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		assert(!request.request);
 		request.request.emplace();
 		request.method = request.request->method = HttpMethod::GET;
+		request.request->tls = false;
 		request.state = Request::State::HEADERS;
 		//response.body = nullptr;
 		output.ResetPosition();
@@ -275,6 +276,18 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 
 		request.request->remote_host.assign((const char *)payload.data(),
 						    payload.size());
+		break;
+
+	case WAS_COMMAND_DOCUMENT_ROOT:
+		if (request.state != Request::State::HEADERS)
+			AbortProtocolError("misplaced DOCUMENT_ROOT packet");
+
+		request.request->document_root.assign((const char *)payload.data(),
+						      payload.size());
+		break;
+
+	case WAS_COMMAND_TLS:
+		request.request->tls = true;
 		break;
 
 	case WAS_COMMAND_METRIC:

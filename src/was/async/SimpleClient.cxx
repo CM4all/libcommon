@@ -126,6 +126,8 @@ SimpleClient::OnWasControlPacket(enum was_command cmd,
 	case WAS_COMMAND_QUERY_STRING:
 	case WAS_COMMAND_PARAMETER:
 	case WAS_COMMAND_REMOTE_HOST:
+	case WAS_COMMAND_DOCUMENT_ROOT:
+	case WAS_COMMAND_TLS:
 		AbortProtocolError("misplaced request packet");
 		return false;
 
