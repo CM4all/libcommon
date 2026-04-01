@@ -1,5 +1,5 @@
-if not sodium_dep.found()
-  jwt_dep = sodium_dep
+if not sodium_dep.found() or not crypto_dep.found() or not nlohmann_json_dep.found()
+  jwt_dep = dependency('', required: false)
   subdir_done()
 endif
 
