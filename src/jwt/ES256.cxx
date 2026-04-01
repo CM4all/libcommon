@@ -22,9 +22,8 @@ namespace JWT {
  *
  * Throws on (OpenSSL/libcrypto) error.
  *
- * @param header_dot_payload the concatentation of
- * UrlSafeBase64(header) "." UrlSafeBase64(payload)
- * @return UrlSafeBase64 of the RSA signature
+ * @param digest the SHA-256 digest of the signing input
+ * @return UrlSafeBase64 of the JOSE signature
  */
 static AllocatedString
 SignES256(EVP_PKEY &key, const SHA256DigestView digest)
