@@ -16,19 +16,27 @@
 #include <openssl/evp.h>
 #include <openssl/ec.h>
 
+#include <stdexcept>
+
 namespace JWT {
 
-AllocatedArray<std::byte>
+std::array<std::byte, 64>
 EncodeES256Signature(const ECDSA_SIG &esig)
 {
+	constexpr std::size_t es256_component_size = 32;
+
 	const BIGNUM *r, *s;
 	ECDSA_SIG_get0(&esig, &r, &s);
 
-	const std::size_t r_size = BN_num_bytes(r), s_size = BN_num_bytes(s);
-	AllocatedArray<std::byte> sig{r_size + s_size};
+	if (BN_num_bytes(r) > (int)es256_component_size ||
+	    BN_num_bytes(s) > (int)es256_component_size)
+		throw std::invalid_argument{"ES256 signature component too large"};
 
-	BN_bn2bin(*r, sig.data());
-	BN_bn2bin(*s, sig.data() + r_size);
+	std::array<std::byte, es256_component_size * 2> sig;
+
+	if (BN_bn2binpad(*r, std::span{sig}.first<es256_component_size>()) != (int)es256_component_size ||
+	    BN_bn2binpad(*s, std::span{sig}.subspan<es256_component_size, es256_component_size>()) != (int)es256_component_size)
+		throw SslError{"BN_bn2binpad() failed"};
 
 	return sig;
 }

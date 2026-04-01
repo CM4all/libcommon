@@ -6,10 +6,11 @@
 
 #include <openssl/ossl_typ.h>
 
+#include <array>
+#include <cstddef>
 #include <string_view>
 
 typedef struct ECDSA_SIG_st ECDSA_SIG;
-template<typename T> class AllocatedArray;
 class AllocatedString;
 
 namespace JWT {
@@ -17,7 +18,7 @@ namespace JWT {
 /**
  * Convert an ECDSA signature to the fixed-width JOSE ES256 format.
  */
-AllocatedArray<std::byte>
+std::array<std::byte, 64>
 EncodeES256Signature(const ECDSA_SIG &esig);
 
 /**
