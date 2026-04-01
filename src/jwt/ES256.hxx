@@ -8,9 +8,17 @@
 
 #include <string_view>
 
+typedef struct ECDSA_SIG_st ECDSA_SIG;
+template<typename T> class AllocatedArray;
 class AllocatedString;
 
 namespace JWT {
+
+/**
+ * Convert an ECDSA signature to the fixed-width JOSE ES256 format.
+ */
+AllocatedArray<std::byte>
+EncodeES256Signature(const ECDSA_SIG &esig);
 
 /**
  * Create a JWT ES256 signature.

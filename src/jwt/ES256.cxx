@@ -18,10 +18,7 @@
 
 namespace JWT {
 
-/**
- * Convert an ECDSA signature to the fixed-width JOSE ES256 format.
- */
-static AllocatedArray<std::byte>
+AllocatedArray<std::byte>
 EncodeES256Signature(const ECDSA_SIG &esig)
 {
 	const BIGNUM *r, *s;
