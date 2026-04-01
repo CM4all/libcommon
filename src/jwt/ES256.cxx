@@ -19,6 +19,24 @@
 namespace JWT {
 
 /**
+ * Convert an ECDSA signature to the fixed-width JOSE ES256 format.
+ */
+static AllocatedArray<std::byte>
+EncodeES256Signature(const ECDSA_SIG &esig)
+{
+	const BIGNUM *r, *s;
+	ECDSA_SIG_get0(&esig, &r, &s);
+
+	const std::size_t r_size = BN_num_bytes(r), s_size = BN_num_bytes(s);
+	AllocatedArray<std::byte> sig{r_size + s_size};
+
+	BN_bn2bin(*r, sig.data());
+	BN_bn2bin(*s, sig.data() + r_size);
+
+	return sig;
+}
+
+/**
  * Create a JWT-ES256 signature.
  *
  * Throws on (OpenSSL/libcrypto) error.
@@ -47,16 +65,7 @@ SignES256(EVP_PKEY &key, const SHA256DigestView digest)
 	if (esig == nullptr)
 		throw SslError{"d2i_ECDSA_SIG() failed"};
 
-	const BIGNUM *r, *s;
-	ECDSA_SIG_get0(esig.get(), &r, &s);
-
-	const std::size_t r_size = BN_num_bytes(r), s_size = BN_num_bytes(s);
-	AllocatedArray<std::byte> sig{r_size + s_size};
-
-	BN_bn2bin(*r, sig.data());
-	BN_bn2bin(*s, sig.data() + r_size);
-
-	return UrlSafeBase64(sig);
+	return UrlSafeBase64(EncodeES256Signature(*esig));
 }
 
 AllocatedString
