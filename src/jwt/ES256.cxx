@@ -5,6 +5,7 @@
 #include "ES256.hxx"
 #include "lib/sodium/Base64Alloc.hxx"
 #include "lib/sodium/SHA256.hxx"
+#include "lib/openssl/BN.hxx"
 #include "lib/openssl/Error.hxx"
 #include "lib/openssl/UniqueEVP.hxx"
 #include "lib/openssl/UniqueEC.hxx"
@@ -52,8 +53,8 @@ SignES256(EVP_PKEY &key, const SHA256DigestView digest)
 	const std::size_t r_size = BN_num_bytes(r), s_size = BN_num_bytes(s);
 	AllocatedArray<std::byte> sig{r_size + s_size};
 
-	BN_bn2bin(r, reinterpret_cast<unsigned char *>(sig.data()));
-	BN_bn2bin(s, reinterpret_cast<unsigned char *>(sig.data() + r_size));
+	BN_bn2bin(*r, sig.data());
+	BN_bn2bin(*s, sig.data() + r_size);
 
 	return UrlSafeBase64(sig);
 }

@@ -32,6 +32,12 @@ BN_bin2bn(std::span<const std::byte> src)
 	return bn;
 }
 
+inline int
+BN_bn2bin(const BIGNUM &bn, std::byte *to) noexcept
+{
+	return BN_bn2bin(&bn, reinterpret_cast<unsigned char *>(to));
+}
+
 template<bool clear>
 inline UniqueBIGNUM<clear>
 BN_sub(const BIGNUM &a, const BIGNUM &b)
