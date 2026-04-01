@@ -44,7 +44,7 @@ SignES256(EVP_PKEY &key, const SHA256DigestView digest)
 	auto ossl_sig_data = reinterpret_cast<const unsigned char *>(ossl_sig.data());
 	const UniqueECDSA_SIG esig{d2i_ECDSA_SIG(nullptr, &ossl_sig_data,
 						 ossl_sig.size())};
-        if (esig == nullptr)
+	if (esig == nullptr)
 		throw SslError{"d2i_ECDSA_SIG() failed"};
 
 	const BIGNUM *r, *s;
