@@ -22,10 +22,11 @@ Node::Update(const InetAddress &address,
 
 void
 Node::Update(const InetAddress &address,
-	     AvahiStringList *txt) noexcept
+	     AvahiStringList *txt, Avahi::ObjectFlags _flags) noexcept
 {
 	Update(address, Avahi::GetArchFromTxt(txt),
 	       Avahi::GetWeightFromTxt(txt));
+	flags = _flags;
 }
 
 double

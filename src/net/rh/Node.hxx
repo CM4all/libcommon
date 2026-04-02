@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "lib/avahi/ObjectFlags.hxx"
 #include "system/Arch.hxx"
 
 #include <cstddef>
@@ -43,6 +44,8 @@ class Node {
 	 */
 	uint32_t address_hash;
 
+	Avahi::ObjectFlags flags;
+
 	Arch arch;
 
 public:
@@ -52,7 +55,7 @@ public:
 		    Arch _arch, double _weight) noexcept;
 
 	void Update(const InetAddress &address,
-		    AvahiStringList *txt) noexcept;
+		    AvahiStringList *txt, Avahi::ObjectFlags _flags) noexcept;
 
 	[[gnu::pure]]
 	double CalculateRendezvousScore(std::span<const std::byte> sticky_source) const noexcept;
@@ -63,6 +66,10 @@ public:
 
 	constexpr Arch GetArch() const noexcept {
 		return arch;
+	}
+
+	constexpr const Avahi::ObjectFlags &GetFlags() const noexcept {
+		return flags;
 	}
 
 	constexpr double GetRendezvousScore() const noexcept {
