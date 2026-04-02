@@ -62,6 +62,7 @@ public:
 private:
 	void ServiceResolverCallback(AvahiIfIndex interface,
 				     AvahiResolverEvent event,
+				     const char *host_name,
 				     const AvahiAddress *a,
 				     uint16_t port,
 				     AvahiStringList *txt) noexcept;
@@ -162,6 +163,7 @@ Import(AvahiIfIndex interface, const AvahiAddress &src, uint_least16_t port) noe
 inline void
 ServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 						 AvahiResolverEvent event,
+						 const char *host_name,
 						 const AvahiAddress *a,
 						 uint16_t port,
 						 AvahiStringList *txt) noexcept
@@ -169,7 +171,8 @@ ServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 	switch (event) {
 	case AVAHI_RESOLVER_FOUND:
 		address = Import(interface, *a, port);
-		explorer.listener.OnAvahiNewObject(GetKey(), address, txt, flags);
+		explorer.listener.OnAvahiNewObject(GetKey(), host_name, address,
+						   txt, flags);
 		break;
 
 	case AVAHI_RESOLVER_FAILURE:
@@ -197,7 +200,7 @@ ServiceExplorer::Object::ServiceResolverCallback(AvahiServiceResolver *,
 						 [[maybe_unused]] const char *name,
 						 [[maybe_unused]] const char *type,
 						 [[maybe_unused]] const char *domain,
-						 [[maybe_unused]] const char *host_name,
+						 const char *host_name,
 						 const AvahiAddress *a,
 						 uint16_t port,
 						 AvahiStringList *txt,
@@ -205,7 +208,7 @@ ServiceExplorer::Object::ServiceResolverCallback(AvahiServiceResolver *,
 						 void *userdata) noexcept
 {
 	auto &object = *(ServiceExplorer::Object *)userdata;
-	object.ServiceResolverCallback(interface, event, a, port, txt);
+	object.ServiceResolverCallback(interface, event, host_name, a, port, txt);
 }
 
 ServiceExplorer::ServiceExplorer(Client &_avahi_client,

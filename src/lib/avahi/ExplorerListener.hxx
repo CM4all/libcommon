@@ -18,6 +18,7 @@ struct ObjectFlags;
 class ServiceExplorerListener {
 public:
 	virtual void OnAvahiNewObject(const std::string &key,
+				      const char *host_name,
 				      const InetAddress &address,
 				      AvahiStringList *txt,
 				      ObjectFlags flags) noexcept = 0;
