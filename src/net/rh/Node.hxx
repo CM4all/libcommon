@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <span>
 
+typedef struct AvahiStringList AvahiStringList;
 union InetAddress;
 
 /**
@@ -49,6 +50,9 @@ public:
 
 	void Update(const InetAddress &address,
 		    Arch _arch, double _weight) noexcept;
+
+	void Update(const InetAddress &address,
+		    AvahiStringList *txt) noexcept;
 
 	[[gnu::pure]]
 	double CalculateRendezvousScore(std::span<const std::byte> sticky_source) const noexcept;

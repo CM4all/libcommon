@@ -5,6 +5,7 @@ net_rh = static_library(
   dependencies: [
     net_dep,
     util_dep,
+    avahi_dep,
   ],
 )
 

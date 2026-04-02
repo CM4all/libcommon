@@ -5,6 +5,8 @@
 #include "Node.hxx"
 #include "HashAlgorithm.hxx"
 #include "UintToDouble.hxx"
+#include "lib/avahi/Arch.hxx"
+#include "lib/avahi/Weight.hxx"
 #include "net/InetAddress.hxx"
 
 namespace RendezvousHashing {
@@ -16,6 +18,14 @@ Node::Update(const InetAddress &address,
 	arch = _arch;
 	negative_weight = -_weight;
 	address_hash = HashAlgorithm::BinaryHash(address.GetSteadyPart());
+}
+
+void
+Node::Update(const InetAddress &address,
+	     AvahiStringList *txt) noexcept
+{
+	Update(address, Avahi::GetArchFromTxt(txt),
+	       Avahi::GetWeightFromTxt(txt));
 }
 
 double
