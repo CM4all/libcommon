@@ -47,11 +47,6 @@ class Node {
 public:
 	constexpr Node() noexcept = default;
 
-	explicit constexpr Node(const InetAddress &address,
-				Arch _arch, double _weight) noexcept {
-		Update(address, _arch, _weight);
-	}
-
 	void Update(const InetAddress &address,
 		    Arch _arch, double _weight) noexcept;
 
