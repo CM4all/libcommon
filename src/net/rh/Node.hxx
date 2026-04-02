@@ -22,12 +22,6 @@ namespace RendezvousHashing {
 
 class Node {
 	/**
-	 * The precalculated hash of #address for Rendezvous
-	 * Hashing.
-	 */
-	uint32_t address_hash;
-
-	/**
 	 * The weight of this node (received in a Zeroconf TXT
 	 * record).  We store the negative value because this
 	 * eliminates one minus operator from the method
@@ -41,6 +35,12 @@ class Node {
 	 * "Host" header) and this server address.
 	 */
 	double rendezvous_score;
+
+	/**
+	 * The precalculated hash of #address for Rendezvous
+	 * Hashing.
+	 */
+	uint32_t address_hash;
 
 	Arch arch;
 
