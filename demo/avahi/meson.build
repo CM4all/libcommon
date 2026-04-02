@@ -12,3 +12,16 @@ executable(
     io_dep,
   ],
 )
+
+executable(
+  'RunRendezvousHash',
+  'RunRendezvousHash.cxx',
+  include_directories: inc,
+  dependencies: [
+    fmt_dep,
+    avahi_dep,
+    net_rh_dep,
+    net_dep,
+    io_dep,
+  ],
+)
