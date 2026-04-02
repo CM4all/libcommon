@@ -6,6 +6,9 @@
 
 #include <avahi-common/strlst.h>
 
+#include <cstdint>
+
+enum class Arch : uint_least8_t;
 class SocketAddress;
 
 namespace Avahi {
@@ -29,5 +32,9 @@ AddArchTxt(AvahiStringList *txt) noexcept
 	/* more architectures to be added once we have them */
 	return txt;
 }
+
+[[gnu::pure]]
+Arch
+GetArchFromTxt(AvahiStringList *txt) noexcept;
 
 } // namespace Avahi

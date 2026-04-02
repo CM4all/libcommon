@@ -17,6 +17,7 @@ endif
 
 avahi = static_library(
   'avahi',
+  'Arch.cxx',
   'Check.cxx',
   'Client.cxx',
   'Error.cxx',
@@ -24,6 +25,7 @@ avahi = static_library(
   'Publisher.cxx',
   'Service.cxx',
   'Explorer.cxx',
+  'Weight.cxx',
   avahi_sources,
   include_directories: inc,
   dependencies: [
