@@ -7,6 +7,7 @@
 #include "Error.hxx"
 #include "ErrorHandler.hxx"
 #include "Client.hxx"
+#include "ObjectFlags.hxx"
 #include "Resolver.hxx"
 #include "net/InetAddress.hxx"
 #include "util/Cast.hxx"
@@ -25,7 +26,7 @@ class ServiceExplorer::Object {
 
 	InetAddress address;
 
-	const ServiceExplorerListener::Flags flags;
+	const ObjectFlags flags;
 
 public:
 	explicit Object(ServiceExplorer &_explorer, AvahiLookupResultFlags _flags) noexcept
