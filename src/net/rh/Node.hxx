@@ -6,6 +6,7 @@
 
 #include "lib/avahi/ObjectFlags.hxx"
 #include "system/Arch.hxx"
+#include "net/InetAddress.hxx"
 
 #include <cstddef>
 #include <cstdint>
@@ -23,6 +24,8 @@ union InetAddress;
 namespace RendezvousHashing {
 
 class Node {
+	InetAddress address;
+
 	/**
 	 * The weight of this node (received in a Zeroconf TXT
 	 * record).  We store the negative value because this
@@ -51,10 +54,10 @@ class Node {
 public:
 	constexpr Node() noexcept = default;
 
-	void Update(const InetAddress &address,
+	void Update(const InetAddress &_address,
 		    Arch _arch, double _weight) noexcept;
 
-	void Update(const InetAddress &address,
+	void Update(const InetAddress &_address,
 		    AvahiStringList *txt, Avahi::ObjectFlags _flags) noexcept;
 
 	[[gnu::pure]]
@@ -62,6 +65,10 @@ public:
 
 	void UpdateRendezvousScore(std::span<const std::byte> sticky_source) noexcept {
 		rendezvous_score = CalculateRendezvousScore(sticky_source);
+	}
+
+	constexpr const InetAddress &GetAddress() const noexcept {
+		return address;
 	}
 
 	constexpr Arch GetArch() const noexcept {

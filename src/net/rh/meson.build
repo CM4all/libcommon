@@ -11,4 +11,7 @@ net_rh = static_library(
 
 net_rh_dep = declare_dependency(
   link_with: net_rh,
+  dependencies: [
+    net_dep,
+  ],
 )
