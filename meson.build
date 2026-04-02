@@ -165,6 +165,10 @@ if not get_option('fuzzer')
   subdir('src/thread')
 
   subdir('src/lib/avahi')
+  if avahi_dep.found()
+    subdir('src/net/rh')
+  endif
+
   subdir('src/lib/cap')
   subdir('src/lib/curl')
   subdir('src/lib/zlib')

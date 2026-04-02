@@ -90,6 +90,7 @@ Each directory below ``src`` contains a sub-library:
 - ``net/djb``: implementations of protocols designed by
   `D. J. Bernstein <https://cr.yp.to/>`__
 - ``net/linux``: Linux-specific networking utilities
+- ``net/rh``: Rendezvous-Hashing implementation
 - ``net/log``: our multicast-based logging protocol
 - ``pg``: `libpq <https://www.postgresql.org/>`__ C++ wrappers
 - ``spawn``: a process spawner
