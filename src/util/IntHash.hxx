@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
+#include <type_traits>
 
 static constexpr std::size_t INT_HASH_INIT = 17;
 
