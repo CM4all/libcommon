@@ -45,6 +45,7 @@ crypto = static_library(
   'MemBio.cxx',
   'LoadFile.cxx',
   'Name.cxx',
+  'PemKey.cxx',
   'SHA1.cxx',
   'SHA3.cxx',
   'Time.cxx',

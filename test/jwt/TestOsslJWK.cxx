@@ -8,9 +8,7 @@
 #include "lib/openssl/Error.hxx"
 #include "lib/openssl/EvpParam.hxx"
 #include "lib/openssl/Key.hxx"
-#include "lib/openssl/MemBio.hxx"
-#include "lib/openssl/UniqueBIO.hxx"
-#include "lib/openssl/UniqueEVP.hxx"
+#include "lib/openssl/PemKey.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/SpanCast.hxx"
 
@@ -23,18 +21,6 @@
 #include <nlohmann/json.hpp>
 
 using std::string_view_literals::operator""sv;
-
-static UniqueEVP_PKEY
-LoadPrivateKeyFromPem(std::string_view pem)
-{
-	const auto bio = BIO_new_mem_buf(AsBytes(pem));
-
-	UniqueEVP_PKEY key{PEM_read_bio_PrivateKey(bio.get(), nullptr, nullptr, nullptr)};
-	if (!key)
-		throw SslError{"PEM_read_bio_PrivateKey() failed"};
-
-	return key;
-}
 
 static AllocatedArray<std::byte>
 GetPaddedCoordinate(const EVP_PKEY &key, const char *name, std::size_t size)
@@ -96,7 +82,7 @@ TEST(JWTOsslJWK, PadsLeadingZeroCoordinate)
 		"QK8g9HvXrGEH/o8vwDTU/V9aPYRHWf59Lr8odk0/P365VQWG+zqJngZS\n"
 		"-----END PRIVATE KEY-----\n"sv;
 
-	const auto key = LoadPrivateKeyFromPem(pem);
+	const auto key = DecodePemPrivateKey(pem);
 	const auto expected_x = GetPaddedCoordinate(*key, OSSL_PKEY_PARAM_EC_PUB_X, 32);
 	const auto expected_y = GetPaddedCoordinate(*key, OSSL_PKEY_PARAM_EC_PUB_Y, 32);
 	ASSERT_TRUE(expected_x.front() == std::byte{0} || expected_y.front() == std::byte{0});
