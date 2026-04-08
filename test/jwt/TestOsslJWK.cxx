@@ -76,6 +76,18 @@ TEST(JWTOsslJWK, P256)
 	ExpectEcJWK(*key, "P-256"sv, 32);
 }
 
+TEST(JWTOsslJWK, P384)
+{
+	const auto key = GenerateEcKey(NID_secp384r1);
+	ExpectEcJWK(*key, "P-384"sv, 48);
+}
+
+TEST(JWTOsslJWK, P521)
+{
+	const auto key = GenerateEcKey(NID_secp521r1);
+	ExpectEcJWK(*key, "P-521"sv, 66);
+}
+
 TEST(JWTOsslJWK, PadsLeadingZeroCoordinate)
 {
 	static constexpr std::string_view pem =
