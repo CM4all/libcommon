@@ -8,7 +8,15 @@
 #include "UniqueBIO.hxx"
 #include "util/AllocatedString.hxx"
 
+#include <span>
 #include <string_view>
+
+/**
+ * Wrapper for OpenSSL's BIO_new_mem_buf() which takes a std::span and
+ * throws on error.
+ */
+UniqueBIO
+BIO_new_mem_buf(std::span<const std::byte> buffer);
 
 [[gnu::pure]]
 inline std::string_view

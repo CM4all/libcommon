@@ -8,6 +8,7 @@
 #include "lib/openssl/Error.hxx"
 #include "lib/openssl/EvpParam.hxx"
 #include "lib/openssl/Key.hxx"
+#include "lib/openssl/MemBio.hxx"
 #include "lib/openssl/UniqueBIO.hxx"
 #include "lib/openssl/UniqueEVP.hxx"
 #include "util/AllocatedArray.hxx"
@@ -26,9 +27,7 @@ using std::string_view_literals::operator""sv;
 static UniqueEVP_PKEY
 LoadPrivateKeyFromPem(std::string_view pem)
 {
-	UniqueBIO bio{BIO_new_mem_buf(pem.data(), static_cast<int>(pem.size()))};
-	if (!bio)
-		throw SslError{"BIO_new_mem_buf() failed"};
+	const auto bio = BIO_new_mem_buf(AsBytes(pem));
 
 	UniqueEVP_PKEY key{PEM_read_bio_PrivateKey(bio.get(), nullptr, nullptr, nullptr)};
 	if (!key)

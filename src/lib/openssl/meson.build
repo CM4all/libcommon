@@ -42,6 +42,7 @@ crypto = static_library(
   'Error.cxx',
   'Hash.cxx',
   'Key.cxx',
+  'MemBio.cxx',
   'LoadFile.cxx',
   'Name.cxx',
   'SHA1.cxx',
