@@ -6,12 +6,11 @@
 #include "lib/fmt/RuntimeError.hxx"
 #include "event/SocketEvent.hxx"
 #include "net/ConnectSocket.hxx"
+#include "net/InetAddress.hxx"
 #include "net/LocalSocketAddress.hxx"
 #include "net/SocketError.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "net/IPv4Address.hxx"
-#include "net/IPv6Address.hxx"
 #include "util/IntrusiveList.hxx"
 #include "util/Cancellable.hxx"
 #include "util/SpanCast.hxx"
@@ -157,10 +156,8 @@ ResolveHostnameRequest::OnResponse(std::string_view s)
 	   overhead of a heap allocation here; 32 should be enough for
 	   everybody (?) */
 	constexpr std::size_t MAX_ADDRESSES = 32;
-	std::array<SocketAddress, MAX_ADDRESSES> socket_addresses;
-	std::array<IPv4Address, MAX_ADDRESSES> ipv4_addresses;
-	std::array<IPv6Address, MAX_ADDRESSES> ipv6_addresses;
-	std::size_t n = 0, n_ipv4 = 0, n_ipv6 = 0;
+	std::array<InetAddress, MAX_ADDRESSES> socket_addresses;
+	std::size_t n = 0;
 
 	const auto &addresses = j.at("parameters"sv).at("addresses"sv);
 	for (const auto &a : addresses) {
@@ -172,13 +169,11 @@ ResolveHostnameRequest::OnResponse(std::string_view s)
 
 		switch (a.at("family"sv).get<int>()) {
 		case AF_INET:
-			socket_addresses[n++] = ipv4_addresses[n_ipv4++] =
-				ToIPv4Address(address, port);
+			socket_addresses[n++] = ToIPv4Address(address, port);
 			break;
 
 		case AF_INET6:
-			socket_addresses[n++] = ipv6_addresses[n_ipv6++] =
-				ToIPv6Address(address, port, ifindex);
+			socket_addresses[n++] = ToIPv6Address(address, port, ifindex);
 			break;
 
 		default:

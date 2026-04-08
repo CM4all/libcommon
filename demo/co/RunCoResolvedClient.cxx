@@ -36,7 +36,7 @@ struct Instance final {
 };
 
 static void
-PrintResult(const std::vector<AllocatedSocketAddress> &result) noexcept
+PrintResult(const std::span<const InetAddress> result) noexcept
 {
 	for (const auto &i : result) {
 		char buffer[256];

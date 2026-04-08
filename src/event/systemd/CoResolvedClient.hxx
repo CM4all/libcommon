@@ -6,7 +6,7 @@
 
 #include "ResolvedClient.hxx"
 #include "co/AwaitableHelper.hxx"
-#include "net/AllocatedSocketAddress.hxx"
+#include "net/InetAddress.hxx"
 #include "util/Cancellable.hxx"
 
 #include <vector>
@@ -16,7 +16,7 @@ namespace Systemd {
 class CoResolveHostname final : ResolveHostnameHandler {
 	std::coroutine_handle<> continuation;
 
-	std::vector<AllocatedSocketAddress> value;
+	std::vector<InetAddress> value;
 
 	std::exception_ptr error;
 
@@ -47,17 +47,15 @@ private:
 		return !cancel_ptr;
 	}
 
-	std::vector<AllocatedSocketAddress> TakeValue() noexcept {
+	std::vector<InetAddress> TakeValue() noexcept {
 		return std::move(value);
 	}
 
 	/* virtual methods from ResolveHostnameHandler */
-	void OnResolveHostname(std::span<const SocketAddress> addresses) noexcept override {
+	void OnResolveHostname(std::span<const InetAddress> addresses) noexcept override {
 		cancel_ptr = nullptr;
 
-		value.reserve(addresses.size());
-		for (const SocketAddress i : addresses)
-			value.emplace_back(i);
+		value.assign(addresses.begin(), addresses.end());
 
 		if (continuation)
 			continuation.resume();

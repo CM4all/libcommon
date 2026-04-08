@@ -8,15 +8,15 @@
 #include <span>
 #include <string_view>
 
-class SocketAddress;
 class EventLoop;
 class CancellablePointer;
+union InetAddress;
 
 namespace Systemd {
 
 class ResolveHostnameHandler {
 public:
-	virtual void OnResolveHostname(std::span<const SocketAddress> addresses) noexcept = 0;
+	virtual void OnResolveHostname(std::span<const InetAddress> addresses) noexcept = 0;
 	virtual void OnResolveHostnameError(std::exception_ptr error) noexcept = 0;
 };
 

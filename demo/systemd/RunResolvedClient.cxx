@@ -5,6 +5,7 @@
 #include "lib/fmt/SocketAddressFormatter.hxx"
 #include "event/systemd/ResolvedClient.hxx"
 #include "event/Loop.hxx"
+#include "net/InetAddress.hxx"
 #include "util/Cancellable.hxx"
 #include "util/PrintException.hxx"
 
@@ -24,7 +25,7 @@ try {
 		std::exception_ptr error;
 
 		/* virtual methods from ResolveHostnameHandler */
-		void OnResolveHostname(std::span<const SocketAddress> addresses) noexcept override {
+		void OnResolveHostname(std::span<const InetAddress> addresses) noexcept override {
 			for (const SocketAddress i : addresses)
 				fmt::print("{}\n", i);
 		}
