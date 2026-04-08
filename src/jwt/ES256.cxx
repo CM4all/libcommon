@@ -18,6 +18,8 @@
 
 #include <stdexcept>
 
+using std::string_view_literals::operator""sv;
+
 namespace JWT {
 
 std::array<std::byte, 64>
@@ -79,7 +81,7 @@ SignES256(EVP_PKEY &key, std::string_view protected_header_b64,
 {
 	SHA256State sha256;
 	sha256.Update(AsBytes(protected_header_b64));
-	sha256.Update(AsBytes(std::string_view{"."}));
+	sha256.Update(AsBytes("."sv));
 	sha256.Update(AsBytes(payload_b64));
 
 	return SignES256(key, sha256.Final());
