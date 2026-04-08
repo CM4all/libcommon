@@ -47,6 +47,14 @@ SerializeResolveHostname(std::string_view hostname, int family)
 	return s;
 }
 
+static void
+SendOrThrow(SocketDescriptor s, std::span<const std::byte> payload)
+{
+	const auto nbytes = s.Send(payload);
+	if (nbytes < 0) [[unlikely]]
+		throw MakeSocketError("Failed to send");
+}
+
 class ResolveHostnameRequest final : Cancellable {
 	SocketEvent socket;
 	const uint_least16_t port;
@@ -66,9 +74,7 @@ public:
 
 	void Start(std::string_view hostname, int family,
 		   CancellablePointer &cancel_ptr) {
-		auto nbytes = socket.GetSocket().Send(AsBytes(SerializeResolveHostname(hostname, family)));
-		if (nbytes < 0)
-			throw MakeSocketError("Failed to send");
+		SendOrThrow(socket.GetSocket(), AsBytes(SerializeResolveHostname(hostname, family)));
 
 		socket.ScheduleRead();
 		cancel_ptr = *this;
