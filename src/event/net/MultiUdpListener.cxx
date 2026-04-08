@@ -65,10 +65,7 @@ MultiUdpListener::Reply(SocketAddress address,
 {
 	assert(event.IsDefined());
 
-	ssize_t nbytes = sendto(event.GetSocket().Get(),
-				payload.data(), payload.size(),
-				MSG_DONTWAIT|MSG_NOSIGNAL,
-				address.GetAddress(), address.GetSize());
+	ssize_t nbytes = GetSocket().WriteNoWait(payload, address);
 	if (nbytes < 0) [[unlikely]]
 		throw MakeSocketError("Failed to send UDP packet");
 

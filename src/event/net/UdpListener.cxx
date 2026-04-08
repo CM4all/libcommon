@@ -10,7 +10,6 @@
 #include "net/SocketError.hxx"
 
 #include <assert.h>
-#include <unistd.h>
 
 UdpListener::UdpListener(EventLoop &event_loop, UniqueSocketDescriptor &&_fd,
 			 UdpHandler &_handler) noexcept
@@ -90,10 +89,7 @@ UdpListener::Reply(SocketAddress address,
 {
 	assert(event.IsDefined());
 
-	ssize_t nbytes = sendto(GetSocket().Get(),
-				payload.data(), payload.size_bytes(),
-				MSG_DONTWAIT|MSG_NOSIGNAL,
-				address.GetAddress(), address.GetSize());
+	ssize_t nbytes = GetSocket().WriteNoWait(payload, address);
 	if (nbytes < 0) [[unlikely]]
 		throw MakeSocketError("Failed to send UDP packet");
 
