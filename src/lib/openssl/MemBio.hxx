@@ -2,12 +2,25 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#ifndef SSL_MEM_BIO_HXX
-#define SSL_MEM_BIO_HXX
+#pragma once
 
 #include "Error.hxx"
 #include "UniqueBIO.hxx"
 #include "util/AllocatedString.hxx"
+
+#include <string_view>
+
+[[gnu::pure]]
+inline std::string_view
+BIO_get_mem_string_view(BIO &bio) noexcept
+{
+	char *data;
+	long length = BIO_get_mem_data(&bio, &data);
+	if (length < 0)
+		return {};
+
+	return {data, static_cast<std::size_t>(length)};
+}
 
 /**
  * Call a function that writes into a memory BIO and return the BIO
@@ -23,10 +36,5 @@ BioWriterToString(W &&writer)
 
 	writer(*bio);
 
-	char *data;
-	long length = BIO_get_mem_data(bio.get(), &data);
-	const std::string_view src(data, length);
-	return AllocatedString(src);
+	return AllocatedString{BIO_get_mem_string_view(*bio)};
 }
-
-#endif
