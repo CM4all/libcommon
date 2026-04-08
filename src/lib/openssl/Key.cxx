@@ -31,7 +31,7 @@ GenerateRsaKey(unsigned bits)
 }
 
 UniqueEVP_PKEY
-GenerateEcKey()
+GenerateEcKey(int curve_nid)
 {
 	const UniqueEVP_PKEY_CTX ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_EC, nullptr));
 	if (!ctx)
@@ -40,8 +40,7 @@ GenerateEcKey()
 	if (EVP_PKEY_keygen_init(ctx.get()) <= 0)
 		throw SslError("EVP_PKEY_keygen_init() failed");
 
-	if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx.get(),
-						   NID_X9_62_prime256v1) <= 0)
+	if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx.get(), curve_nid) <= 0)
 		throw SslError("EVP_PKEY_CTX_set_ec_paramgen_curve_nid() failed");
 
 	EVP_PKEY *pkey = nullptr;
@@ -49,6 +48,12 @@ GenerateEcKey()
 		throw SslError("EVP_PKEY_keygen() failed");
 
 	return UniqueEVP_PKEY{pkey};
+}
+
+UniqueEVP_PKEY
+GenerateEcKey()
+{
+	return GenerateEcKey(NID_X9_62_prime256v1);
 }
 
 UniqueEVP_PKEY

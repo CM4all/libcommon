@@ -23,6 +23,12 @@ GenerateRsaKey(unsigned bits=4096);
  * Throws #SslError on error.
  */
 UniqueEVP_PKEY
+GenerateEcKey(int curve_nid);
+
+/**
+ * This overload uses the default curve `NID_X9_62_prime256v1`.
+ */
+UniqueEVP_PKEY
 GenerateEcKey();
 
 /**
