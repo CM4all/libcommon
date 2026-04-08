@@ -47,15 +47,3 @@ SslBuffer::SslBuffer(const EVP_PKEY &key)
 
 	span = {data, static_cast<std::size_t>(result)};
 }
-
-SslBuffer::SslBuffer(const BIGNUM &bn)
-{
-	const std::size_t size = BN_num_bytes(&bn);
-	unsigned char *data = (unsigned char *)OPENSSL_malloc(size);
-	if (data == nullptr)
-		throw std::bad_alloc();
-
-	BN_bn2bin(&bn, data);
-
-	span = {data, size};
-}

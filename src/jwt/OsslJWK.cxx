@@ -4,8 +4,9 @@
 
 #include "OsslJWK.hxx"
 #include "lib/sodium/Base64Alloc.hxx"
-#include "lib/openssl/Buffer.hxx"
+#include "lib/openssl/BNAlloc.hxx"
 #include "lib/openssl/EvpParam.hxx"
+#include "util/AllocatedArray.hxx"
 #include "util/AllocatedString.hxx"
 
 #include <openssl/evp.h>
@@ -26,9 +27,9 @@ RSAToJWK(const EVP_PKEY &key)
 	const auto e = GetBNParam<false>(key, OSSL_PKEY_PARAM_RSA_E);
 
 	return {
-		{ "e"sv, UrlSafeBase64(SslBuffer{*e}.get()).c_str() },
+		{ "e"sv, UrlSafeBase64(BN_bn2bin(*e)).c_str() },
 		{ "kty"sv, "RSA"sv },
-		{ "n"sv, UrlSafeBase64(SslBuffer{*n}.get()).c_str() },
+		{ "n"sv, UrlSafeBase64(BN_bn2bin(*e)).c_str() },
 	};
 }
 
@@ -43,8 +44,8 @@ ECToJWK(const EVP_PKEY &key)
 	return {
 		{ "kty"sv, "EC"sv },
 		{ "crv"sv, "P-256"sv }, // TODO check
-		{ "x"sv, UrlSafeBase64(SslBuffer{*x}.get()).c_str() },
-		{ "y"sv, UrlSafeBase64(SslBuffer{*y}.get()).c_str() },
+		{ "x"sv, UrlSafeBase64(BN_bn2bin(*x)).c_str() },
+		{ "y"sv, UrlSafeBase64(BN_bn2bin(*y)).c_str() },
 	};
 }
 

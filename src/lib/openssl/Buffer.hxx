@@ -5,7 +5,6 @@
 #pragma once
 
 #include <openssl/ssl.h>
-#include <openssl/bn.h>
 
 #include <span>
 #include <utility>
@@ -18,7 +17,6 @@ public:
 	explicit SslBuffer(const X509_NAME &cert);
 	explicit SslBuffer(const X509_REQ &req);
 	explicit SslBuffer(const EVP_PKEY &key);
-	explicit SslBuffer(const BIGNUM &bn);
 
 	SslBuffer(SslBuffer &&src) noexcept
 		:span(std::exchange(src.span, {}))

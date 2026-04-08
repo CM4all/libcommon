@@ -32,6 +32,7 @@ endif
 crypto = static_library(
   'crypto',
   'AltName.cxx',
+  'BNAlloc.cxx',
   'Buffer.cxx',
   'EvpParam.cxx',
   'Request.cxx',
