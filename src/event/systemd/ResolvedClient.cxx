@@ -53,6 +53,9 @@ SendOrThrow(SocketDescriptor s, std::span<const std::byte> payload)
 	const auto nbytes = s.Send(payload);
 	if (nbytes < 0) [[unlikely]]
 		throw MakeSocketError("Failed to send");
+
+	if (static_cast<std::size_t>(nbytes) != payload.size())
+		throw SocketMessageTooLargeError{"Partial send"};
 }
 
 class ResolveHostnameRequest final : Cancellable {
