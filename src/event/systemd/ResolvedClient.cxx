@@ -5,9 +5,9 @@
 #include "ResolvedClient.hxx"
 #include "lib/fmt/RuntimeError.hxx"
 #include "event/SocketEvent.hxx"
-#include "system/Error.hxx"
 #include "net/ConnectSocket.hxx"
 #include "net/LocalSocketAddress.hxx"
+#include "net/SocketError.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/IPv4Address.hxx"
@@ -68,7 +68,7 @@ public:
 		   CancellablePointer &cancel_ptr) {
 		auto nbytes = socket.GetSocket().Send(AsBytes(SerializeResolveHostname(hostname, family)));
 		if (nbytes < 0)
-			throw MakeErrno("Failed to send");
+			throw MakeSocketError("Failed to send");
 
 		socket.ScheduleRead();
 		cancel_ptr = *this;
@@ -195,7 +195,7 @@ try {
 	char buffer[4096];
 	auto nbytes = socket.GetSocket().Receive(std::as_writable_bytes(std::span{buffer}));
 	if (nbytes < 0)
-		throw MakeErrno("Failed to receive");
+		throw MakeSocketError("Failed to receive");
 
 	socket.Close();
 
