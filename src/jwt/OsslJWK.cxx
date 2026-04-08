@@ -38,14 +38,16 @@ ECToJWK(const EVP_PKEY &key)
 {
 	assert(EVP_PKEY_get_base_id(&key) == EVP_PKEY_EC);
 
+	constexpr std::size_t coordinate_size = 32;
+
 	const auto x = GetBNParam<false>(key, OSSL_PKEY_PARAM_EC_PUB_X);
 	const auto y = GetBNParam<false>(key, OSSL_PKEY_PARAM_EC_PUB_Y);
 
 	return {
 		{ "kty"sv, "EC"sv },
 		{ "crv"sv, "P-256"sv }, // TODO check
-		{ "x"sv, UrlSafeBase64(BN_bn2bin(*x)).c_str() },
-		{ "y"sv, UrlSafeBase64(BN_bn2bin(*y)).c_str() },
+		{ "x"sv, UrlSafeBase64(BN_bn2binpad(*x, coordinate_size)).c_str() },
+		{ "y"sv, UrlSafeBase64(BN_bn2binpad(*y, coordinate_size)).c_str() },
 	};
 }
 
