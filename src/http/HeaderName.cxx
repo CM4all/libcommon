@@ -3,10 +3,9 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "HeaderName.hxx"
+#include "util/StringAPI.hxx"
 
 #include <cassert>
-
-#include <string.h>
 
 static constexpr bool
 http_header_name_char_valid(char ch) noexcept
@@ -45,28 +44,29 @@ http_header_is_hop_by_hop(const char *name) noexcept
 
 	switch (*name) {
 	case 'c':
-		return strcmp(name, "connection") == 0 ||
-			strcmp(name, "content-length") == 0;
+		return StringIsEqual(name, "connection") ||
+			StringIsEqual(name, "content-length");
 
 	case 'e':
 		/* RFC 2616 14.20 */
-		return strcmp(name, "expect") == 0;
+		return StringIsEqual(name, "expect");
 
 	case 'k':
-		return strcmp(name, "keep-alive") == 0;
+		return StringIsEqual(name, "keep-alive");
 
 	case 'p':
-		return strcmp(name, "proxy-authenticate") == 0 ||
-			strcmp(name, "proxy-authorization") == 0;
+		return StringIsEqual(name, "proxy-authenticate") ||
+			StringIsEqual(name, "proxy-authorization");
 
 	case 't':
-		return strcmp(name, "te") == 0 ||
+		return StringIsEqual(name, "te") ||
 			/* typo in RFC 2616? */
-			strcmp(name, "trailer") == 0 || strcmp(name, "trailers") == 0 ||
-			strcmp(name, "transfer-encoding") == 0;
+			StringIsEqual(name, "trailer") ||
+			StringIsEqual(name, "trailers") ||
+			StringIsEqual(name, "transfer-encoding");
 
 	case 'u':
-		return strcmp(name, "upgrade") == 0;
+		return StringIsEqual(name, "upgrade");
 
 	default:
 		return false;
