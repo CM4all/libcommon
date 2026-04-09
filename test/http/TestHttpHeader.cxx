@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "http/HeaderName.hxx"
+#include "http/HeaderValue.hxx"
 
 #include <gtest/gtest.h>
 
@@ -48,4 +49,15 @@ TEST(HttpHeader, NameValid)
 
 	for (std::string_view i : invalid_http_headers2)
 		EXPECT_FALSE(http_header_name_valid(i));
+}
+
+TEST(HttpHeader, ValueValid)
+{
+	EXPECT_TRUE(IsValidHttpHeaderValue(""sv));
+	EXPECT_TRUE(IsValidHttpHeaderValue("foo-bar"sv));
+	EXPECT_TRUE(IsValidHttpHeaderValue("foo bar"sv));
+	EXPECT_TRUE(IsValidHttpHeaderValue("foo\tbar"sv));
+	EXPECT_FALSE(IsValidHttpHeaderValue("foo\rbar"sv));
+	EXPECT_FALSE(IsValidHttpHeaderValue("foo\0"sv));
+	EXPECT_FALSE(IsValidHttpHeaderValue("\0"sv));
 }
