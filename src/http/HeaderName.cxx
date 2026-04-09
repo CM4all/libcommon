@@ -3,27 +3,22 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "HeaderName.hxx"
+#include "Token.hxx"
 #include "util/StringAPI.hxx"
 #include "util/StringVerify.hxx"
 
 #include <cassert>
 
-static constexpr bool
-http_header_name_char_valid(char ch) noexcept
-{
-	return (signed char)ch > 0x20 && ch != ':';
-}
-
 bool
 http_header_name_valid(const char *name) noexcept
 {
-	return CheckCharsNonEmpty(name, http_header_name_char_valid);
+	return IsHttpToken(name);
 }
 
 bool
 http_header_name_valid(std::string_view name) noexcept
 {
-	return CheckCharsNonEmpty(name, http_header_name_char_valid);
+	return IsHttpToken(name);
 }
 
 bool
