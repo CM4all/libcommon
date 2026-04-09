@@ -47,7 +47,9 @@ Run(CurlGlobal &global, const char *url)
 	for (const auto &[key, value] : response.headers)
 		fprintf(stderr, "%s: %s\n", key.c_str(), value.c_str());
 	fprintf(stderr, "\n");
-	fputs(response.body.c_str(), stdout);
+	fflush(stderr);
+
+	(void)write(STDOUT_FILENO, response.body.data(), response.body.size());
 }
 
 int
