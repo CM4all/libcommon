@@ -3,12 +3,15 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "CoRequest.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "util/SpanCast.hxx"
 
 namespace Curl {
 
-CoRequest::CoRequest(CurlGlobal &global, CurlEasy easy)
-	:request(global, std::move(easy), *this)
+CoRequest::CoRequest(CurlGlobal &global, CurlEasy easy,
+		     CoOptions _options)
+	:request(global, std::move(easy), *this),
+	 options(_options)
 {
 	request.Start();
 }
@@ -23,6 +26,9 @@ CoRequest::OnHeaders(HttpStatus status, Headers &&headers)
 void
 CoRequest::OnData(std::span<const std::byte> data)
 {
+	if (response.body.size() + data.size() > options.max_size)
+		throw SocketMessageTooLargeError{"Response body is too large"};
+
 	response.body.append(ToStringView(data));
 }
 

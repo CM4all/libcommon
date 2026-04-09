@@ -9,6 +9,7 @@
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
 #include "util/PrintException.hxx"
+#include "util/StringCompare.hxx"
 
 #include <fmt/core.h>
 
@@ -42,9 +43,9 @@ struct Instance final {
 };
 
 static Co::InvokeTask
-Run(CurlGlobal &global, const char *url)
+Run(CurlGlobal &global, const char *url, Curl::CoOptions options)
 {
-	const auto response = co_await Curl::CoRequest(global, CurlEasy(url));
+	const auto response = co_await Curl::CoRequest(global, CurlEasy{url}, options);
 
 	fmt::print(stderr, "status={}\n"sv, std::to_underlying(response.status));
 
@@ -60,13 +61,25 @@ Run(CurlGlobal &global, const char *url)
 int
 main(int argc, char **argv) noexcept
 try {
-	if (argc != 2) {
-		fmt::print(stderr, "Usage: %s URL\n"sv, argv[0]);
+	Curl::CoOptions options;
+
+	int pos;
+	for (pos = 1; pos < argc; ++pos) {
+		if (const char *max_size = StringAfterPrefix(argv[pos], "--max-size="sv)) {
+			options.max_size = strtoull(max_size, nullptr, 10);
+		} else
+			break;
+	}
+
+	if (pos + 1 != argc) {
+		fmt::print(stderr, "Usage: %s [--max-size=BYTES] URL\n"sv, argv[0]);
 		return EXIT_FAILURE;
 	}
 
+	const char *const url = argv[pos];
+
 	Instance instance;
-	instance.task = Run(instance.curl_global, argv[1]);
+	instance.task = Run(instance.curl_global, url, options);
 	instance.task.Start(BIND_METHOD(instance, &Instance::OnCompletion));
 
 	instance.event_loop.Run();

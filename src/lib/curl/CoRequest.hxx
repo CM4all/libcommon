@@ -20,6 +20,10 @@ struct CoResponse {
 	std::string body;
 };
 
+struct CoOptions {
+	std::size_t max_size = SIZE_MAX;
+};
+
 /**
  * A CURL HTTP request as a C++20 coroutine.
  */
@@ -31,13 +35,15 @@ class CoRequest final : CurlResponseHandler {
 
 	std::coroutine_handle<> continuation;
 
+	const CoOptions options;
+
 	bool ready = false;
 
 	using Awaitable = Co::AwaitableHelper<CoRequest>;
 	friend Awaitable;
 
 public:
-	CoRequest(CurlGlobal &global, CurlEasy easy);
+	CoRequest(CurlGlobal &global, CurlEasy easy, CoOptions _options={});
 
 	Awaitable operator co_await() noexcept {
 		return *this;
