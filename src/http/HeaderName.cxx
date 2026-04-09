@@ -4,6 +4,7 @@
 
 #include "HeaderName.hxx"
 #include "util/StringAPI.hxx"
+#include "util/StringVerify.hxx"
 
 #include <cassert>
 
@@ -16,25 +17,13 @@ http_header_name_char_valid(char ch) noexcept
 bool
 http_header_name_valid(const char *name) noexcept
 {
-	do {
-		if (!http_header_name_char_valid(*name))
-			return false;
-	} while (*++name != 0);
-
-	return true;
+	return CheckCharsNonEmpty(name, http_header_name_char_valid);
 }
 
 bool
 http_header_name_valid(std::string_view name) noexcept
 {
-	if (name.empty())
-		return false;
-
-	for (char ch : name)
-		if (!http_header_name_char_valid(ch))
-			return false;
-
-	return true;
+	return CheckCharsNonEmpty(name, http_header_name_char_valid);
 }
 
 bool
