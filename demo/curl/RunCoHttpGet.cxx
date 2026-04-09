@@ -10,8 +10,11 @@
 #include "event/ShutdownListener.hxx"
 #include "util/PrintException.hxx"
 
-#include <cstdio>
+#include <fmt/core.h>
+
 #include <cstdlib>
+
+using std::string_view_literals::operator""sv;
 
 struct Instance final {
 	EventLoop event_loop;
@@ -43,10 +46,12 @@ Run(CurlGlobal &global, const char *url)
 {
 	const auto response = co_await Curl::CoRequest(global, CurlEasy(url));
 
-	fprintf(stderr, "status %u\n", static_cast<unsigned>(response.status));
-	for (const auto &[key, value] : response.headers)
-		fprintf(stderr, "%s: %s\n", key.c_str(), value.c_str());
-	fprintf(stderr, "\n");
+	fmt::print(stderr, "status={}\n"sv, std::to_underlying(response.status));
+
+	for (const auto &i : response.headers)
+		fmt::print(stderr, "{}: {}\n"sv, i.first, i.second);
+
+	fmt::print(stderr, "\n"sv);
 	fflush(stderr);
 
 	(void)write(STDOUT_FILENO, response.body.data(), response.body.size());
@@ -56,7 +61,7 @@ int
 main(int argc, char **argv) noexcept
 try {
 	if (argc != 2) {
-		fprintf(stderr, "Usage: %s URL\n", argv[0]);
+		fmt::print(stderr, "Usage: %s URL\n"sv, argv[0]);
 		return EXIT_FAILURE;
 	}
 

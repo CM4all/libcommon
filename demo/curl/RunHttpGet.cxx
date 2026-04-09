@@ -11,11 +11,14 @@
 #include "util/IntrusiveList.hxx"
 #include "util/PrintException.hxx"
 
-#include <cstdio>
+#include <fmt/core.h>
+
 #include <cstdlib>
 #include <memory>
 
 #include <fcntl.h>
+
+using std::string_view_literals::operator""sv;
 
 struct Instance;
 
@@ -38,13 +41,13 @@ private:
 	/* virtual methods from CurlResponseHandler */
 	void OnHeaders(HttpStatus status,
 		       Curl::Headers &&headers) override {
-		fprintf(stderr, "status %u\n", static_cast<unsigned>(status));
+		fmt::print(stderr, "status {}\n"sv, std::to_underlying(status));
 
 		for (const auto &i : headers)
-			fprintf(stderr, "%s: %s\n",
-				i.first.c_str(), i.second.c_str());
+			fmt::print(stderr, "{}: {}\n"sv, i.first, i.second);
 
-		fprintf(stderr, "\n");
+		fmt::print(stderr, "\n"sv);
+		fflush(stderr);
 	}
 
 	void OnData(std::span<const std::byte> data) override {
@@ -120,7 +123,7 @@ int
 main(int argc, char **argv) noexcept
 try {
 	if (argc < 2) {
-		fprintf(stderr, "Usage: %s URL...\n", argv[0]);
+		fmt::print(stderr, "Usage: {} URL...\n"sv, argv[0]);
 		return EXIT_FAILURE;
 	}
 

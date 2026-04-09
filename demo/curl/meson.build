@@ -8,6 +8,7 @@ executable(
   include_directories: inc,
   dependencies: [
     curl_dep,
+    fmt_dep,
   ],
 )
 
@@ -18,6 +19,7 @@ if coroutines_dep.found()
     include_directories: inc,
     dependencies: [
       curl_dep,
+      fmt_dep,
     ],
   )
 endif
