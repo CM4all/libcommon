@@ -23,6 +23,13 @@
 using std::string_view_literals::operator""sv;
 
 static AllocatedArray<std::byte>
+GetUnpaddedCoordinate(const EVP_PKEY &key, const char *name)
+{
+	const auto coordinate = GetBNParam<false>(key, name);
+	return BN_bn2bin(*coordinate);
+}
+
+static AllocatedArray<std::byte>
 GetPaddedCoordinate(const EVP_PKEY &key, const char *name, std::size_t size)
 {
 	const auto coordinate = GetBNParam<false>(key, name);
@@ -33,6 +40,22 @@ static AllocatedArray<std::byte>
 DecodeJWKCoordinate(const nlohmann::json &jwk, std::string_view name)
 {
 	return DecodeUrlSafeBase64(jwk.at(name).get<std::string_view>());
+}
+
+static void
+ExpectRsaJWK(const EVP_PKEY &key)
+{
+	const auto jwk = ToJWK(key);
+
+	EXPECT_EQ(jwk.at("kty"sv).get<std::string_view>(), "RSA"sv);
+
+	const auto expected_n = GetUnpaddedCoordinate(key, OSSL_PKEY_PARAM_RSA_N);
+	const auto expected_e = GetUnpaddedCoordinate(key, OSSL_PKEY_PARAM_RSA_E);
+	const auto actual_n = DecodeJWKCoordinate(jwk, "n"sv);
+	const auto actual_e = DecodeJWKCoordinate(jwk, "e"sv);
+
+	EXPECT_EQ(ToStringView(actual_n), ToStringView(expected_n));
+	EXPECT_EQ(ToStringView(actual_e), ToStringView(expected_e));
 }
 
 static void
@@ -59,6 +82,12 @@ TEST(JWTOsslJWK, P256)
 {
 	const auto key = GenerateEcKey(NID_X9_62_prime256v1);
 	ExpectEcJWK(*key, "P-256"sv, 32);
+}
+
+TEST(JWTOsslJWK, RSA)
+{
+	const auto key = GenerateRsaKey(2048);
+	ExpectRsaJWK(*key);
 }
 
 TEST(JWTOsslJWK, P384)
