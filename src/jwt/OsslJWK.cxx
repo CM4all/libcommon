@@ -30,7 +30,7 @@ RSAToJWK(const EVP_PKEY &key)
 	return {
 		{ "e"sv, UrlSafeBase64(BN_bn2bin(*e)).c_str() },
 		{ "kty"sv, "RSA"sv },
-		{ "n"sv, UrlSafeBase64(BN_bn2bin(*e)).c_str() },
+		{ "n"sv, UrlSafeBase64(BN_bn2bin(*n)).c_str() },
 	};
 }
 
