@@ -28,6 +28,7 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <time.h> // for time()
 
 inline
 Mount::Mount(AllocatorPtr alloc, const Mount &src) noexcept
