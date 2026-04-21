@@ -16,7 +16,7 @@ TEST(MimeType, Base)
 	EXPECT_EQ("foo/bar", GetMimeTypeBase("foo/bar;x=y"));
 }
 
-TEST(UriUtil, Parameters)
+TEST(MimeType, Parameters)
 {
 	EXPECT_TRUE(ParseMimeTypeParameters("").empty());
 	EXPECT_TRUE(ParseMimeTypeParameters("foo/bar").empty());
