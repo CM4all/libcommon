@@ -91,6 +91,10 @@ AsyncConnection::CheckError(std::exception_ptr e) noexcept
 void
 AsyncConnection::Poll(PostgresPollingStatusType status) noexcept
 try {
+	/* this method is only called from PollConnect() and
+	   PollReconnect() */
+	assert(state == State::CONNECTING || state == State::RECONNECTING);
+
 	switch (status) {
 	case PGRES_POLLING_FAILED:
 		throw std::runtime_error(GetErrorMessage());
@@ -106,8 +110,7 @@ try {
 		break;
 
 	case PGRES_POLLING_OK:
-		if (!config.schema.empty() &&
-		    (state == State::CONNECTING || state == State::RECONNECTING)) {
+		if (!config.schema.empty()) {
 			try {
 				SetSchema(config.schema.c_str());
 			} catch (...) {
