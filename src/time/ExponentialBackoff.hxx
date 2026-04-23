@@ -8,7 +8,7 @@
 
 /**
  * Configuration for #ExponentialBackoff.  To avoid bloating the
- * #ExponentialBackoff class, this must be called to each method call.
+ * #ExponentialBackoff class, this must be passed to each method call.
  */
 struct ExponentialBackoffConfig {
 	std::chrono::steady_clock::duration min_delay;
