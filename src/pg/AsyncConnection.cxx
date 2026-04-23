@@ -116,8 +116,6 @@ try {
 			} catch (...) {
 				std::throw_with_nested(std::runtime_error("Failed to set schema"));
 			}
-
-			delayed_reconnect = false;
 		}
 
 		state = State::READY;
@@ -129,8 +127,12 @@ try {
 		/* check the connection status, just in case the handler
 		   method has done awful things */
 		if (state == State::READY &&
-		    GetStatus() == CONNECTION_BAD)
+		    GetStatus() == CONNECTION_BAD) {
 			Error();
+			return;
+		}
+
+		delayed_reconnect = false;
 		break;
 
 	case PGRES_POLLING_ACTIVE:
