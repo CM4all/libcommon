@@ -7,6 +7,7 @@ test_lua_sources = [
   'TestChrono.cxx',
   'TestCoroutine.cxx',
   'TestCoRunner.cxx',
+  'TestError.cxx',
   'TestForEach.cxx',
 ]
 
