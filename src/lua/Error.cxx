@@ -13,8 +13,23 @@ extern "C" {
 
 namespace Lua {
 
+/**
+ * Attempt to extract an error string from the stack; if the stack
+ * item cannot be converted to a string, return the Lua type name
+ * instead.
+ */
+[[gnu::pure]]
+static const char *
+GetErrorMessage(lua_State *L, int idx) noexcept
+{
+	if (const char *const s = lua_tostring(L, idx); s != nullptr)
+		return s;
+
+	return lua_typename(L, lua_type(L, idx));
+}
+
 Error::Error(lua_State *L, int idx) noexcept
-	:Error(lua_tostring(L, idx))
+	:Error(GetErrorMessage(L, idx))
 {
 }
 
