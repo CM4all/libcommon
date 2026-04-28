@@ -65,6 +65,10 @@ VerifyEmailLocalPart(std::string_view s) noexcept
 	if (s.empty())
 		return false;
 
+	if (s.size() > 64)
+		// RFC5321 section 4.5.3.1.1
+		return false;
+
 	if (s.front() == '"')
 		return VerifyQuotedString(s);
 	else
@@ -74,6 +78,10 @@ VerifyEmailLocalPart(std::string_view s) noexcept
 bool
 VerifyEmailAddress(std::string_view name) noexcept
 {
+	if (name.size() > 254)
+		// RFC5321 section 4.5.3.1.3
+		return false;
+
 	const auto [local_part, domain] = SplitLast(name, '@');
 	return VerifyEmailLocalPart(local_part) &&
 		VerifyDomainName(domain);
