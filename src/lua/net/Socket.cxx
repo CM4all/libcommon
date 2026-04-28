@@ -109,7 +109,7 @@ constexpr struct luaL_Reg Socket::methods[] = {
 
 static int
 NewConnectedSocket(lua_State *L)
-{
+try {
 	const int top = lua_gettop(L);
 	if (top < 2)
 		return luaL_error(L, "Not enough parameters");
@@ -153,6 +153,10 @@ NewConnectedSocket(lua_State *L)
 
 	SocketClass::New(L, std::move(s));
 	return 1;
+} catch (...) {
+	/* this may be a C++ exception thrown by ParseSocketAddress()
+	   via ToSocketAddress() */
+	RaiseCurrent(L);
 }
 
 void
