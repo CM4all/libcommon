@@ -109,6 +109,9 @@ struct Class {
 	static pointer Check(lua_State *L, int idx) {
 		const ScopeCheckStack check_stack(L);
 
+		if (lua_type(L, idx) != LUA_TUSERDATA)
+			return nullptr;
+
 		void *p = lua_touserdata(L, idx);
 		if (p == nullptr)
 			return nullptr;
