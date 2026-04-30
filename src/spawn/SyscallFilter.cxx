@@ -4,8 +4,9 @@
 
 #include "SyscallFilter.hxx"
 #include "SeccompFilter.hxx"
+#include "util/SortedArray.hxx"
 
-#include <set>
+#include <array>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -110,11 +111,11 @@ static constexpr int forbidden_syscalls[] = {
 	//SCMP_SYS(quotactl),
 };
 
-/* using a std::set to make sure the list is sorted; now if only there
-   was a way to sort a constexpr array at compile time... */
-static const std::set<scmp_datum_t> allowed_socket_domains = {
+static constexpr scmp_datum_t unsorted_allowed_socket_domains[] = {
 	AF_LOCAL, AF_INET, AF_INET6
 };
+
+static constexpr auto allowed_socket_domains = SortedArray(std::span{unsorted_allowed_socket_domains});
 
 static void
 AddRange(Seccomp::Filter &sf, uint32_t action, int syscall,
@@ -126,7 +127,7 @@ AddRange(Seccomp::Filter &sf, uint32_t action, int syscall,
 
 static void
 AddInverted(Seccomp::Filter &sf, uint32_t action, int syscall,
-	    Seccomp::Arg arg, const std::set<scmp_datum_t> &whitelist)
+	    Seccomp::Arg arg, std::span<const scmp_datum_t> whitelist)
 {
 	auto i = whitelist.begin();
 
