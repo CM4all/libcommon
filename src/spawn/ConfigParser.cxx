@@ -17,6 +17,8 @@
 #include <grp.h>
 #include <unistd.h> // for sysconf()
 
+using std::string_view_literals::operator""sv;
+
 static uid_t
 ParseUser(const char *name)
 {
@@ -55,7 +57,7 @@ ParseUint64(const char *s)
 	char *endptr;
 	const auto value = strtoull(s, &endptr, 10);
 	if (endptr == s || *endptr != 0)
-		throw FmtRuntimeError("Failed to parse number: '{}'", s);
+		throw FmtRuntimeError("Failed to parse number: {:?}"sv, s);
 
 	return value;
 }
@@ -146,7 +148,7 @@ ParsePositiveBytes(const char *s)
 	char *endptr;
 	uint64_t value = strtoull(s, &endptr, 10);
 	if (endptr == s)
-		throw FmtRuntimeError("Failed to parse number: '{}'", s);
+		throw FmtRuntimeError("Failed to parse number: {:?}"sv, s);
 
 	if (value == 0)
 		throw std::runtime_error("Value must not be zero");
@@ -155,7 +157,7 @@ ParsePositiveBytes(const char *s)
 	if (*s != 0) {
 		auto unit = ParseByteUnit(s);
 		if (unit == 0)
-			throw FmtRuntimeError("Unknown byte unit: '{}'", s);
+			throw FmtRuntimeError("Unknown byte unit: {:?}"sv, s);
 		value *= unit;
 	}
 
@@ -184,7 +186,7 @@ ParsePhysicalMemoryLimit(const char *s)
 		char *endptr;
 		uint64_t value = strtoull(s, &endptr, 10);
 		if (endptr == s || *endptr != '%' || endptr[1] != 0)
-			throw FmtRuntimeError("Failed to parse percent number: '{}'", s);
+			throw FmtRuntimeError("Failed to parse percent number: {:?}"sv, s);
 
 		if (value == 0)
 			throw std::runtime_error("Value must not be zero");

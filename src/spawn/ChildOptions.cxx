@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+using std::string_view_literals::operator""sv;
+
 ChildOptions::ChildOptions(AllocatorPtr alloc,
 			   const ChildOptions &src) noexcept
 	:tag(alloc.Dup(src.tag)),
@@ -198,7 +200,7 @@ ChildOptions::OpenStderrPath() const
 
 	UniqueFileDescriptor fd;
 	if (!fd.Open(stderr_path, O_CREAT|O_WRONLY|O_APPEND, 0600))
-		throw FmtErrno("open('{}') failed", stderr_path);
+		throw FmtErrno("open({:?}) failed"sv, stderr_path);
 
 	return fd;
 }
