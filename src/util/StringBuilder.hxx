@@ -83,6 +83,22 @@ public:
 		CheckAppend(src.size());
 		UnsafeAppend(src);
 	}
+
+	/**
+	 * Like Fill(), but do not check whether there is enough space
+	 * in the buffer.
+	 */
+	void UnsafeFill(T ch, std::size_t n) noexcept;
+
+	/**
+	 * Append #n copies of the specified characters.
+	 *
+	 * May throw #TooLargeError.
+	 */
+	void Fill(T ch, std::size_t n) {
+		CheckAppend(n);
+		UnsafeFill(ch, n);
+	}
 };
 
 class StringBuilder : public BasicStringBuilder<char> {
