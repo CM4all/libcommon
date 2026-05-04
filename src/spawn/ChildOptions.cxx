@@ -12,6 +12,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/djb_hash.hxx"
 #include "util/SpanCast.hxx"
+#include "util/StringSplit.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
@@ -116,8 +117,10 @@ ChildOptions::MakeId(char *p) const noexcept
 	p = AppendOptional(p, 'j', stderr_jailed);
 	p = AppendOptional(p, 'p', stderr_pond);
 
-	for (auto i : env) {
-		p = AppendValue(p, "$"sv, i);
+	for (const std::string_view i : env) {
+		const auto [name, value] = Split(i, '=');
+		p = AppendValue(p, "$"sv, name);
+		p = AppendDjbHash(p, "="sv, AsBytes(value));
 	}
 
 	p = cgroup.MakeId(p);

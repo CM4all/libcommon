@@ -48,6 +48,15 @@ AppendOptional(char *p, char ch, bool append) noexcept
 
 [[nodiscard]]
 inline char *
+AppendValue(char *p, std::string_view prefix, std::string_view value) noexcept
+{
+	p = AppendString(p, prefix);
+	p = AppendString(p, value);
+	return p;
+}
+
+[[nodiscard]]
+inline char *
 AppendValue(char *p, std::string_view prefix, const char *value) noexcept
 {
 	p = AppendString(p, prefix);
