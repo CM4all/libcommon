@@ -29,12 +29,15 @@ class BasicStringBuilder {
 	static constexpr value_type SENTINEL = '\0';
 
 public:
-	constexpr explicit BasicStringBuilder(std::span<value_type> b) noexcept
+	[[nodiscard]]
+	explicit constexpr BasicStringBuilder(std::span<value_type> b) noexcept
 		:p(b.data()), end(p + b.size()) {}
 
+	[[nodiscard]]
 	constexpr BasicStringBuilder(pointer _p, pointer _end) noexcept
 		:p(_p), end(_end) {}
 
+	[[nodiscard]]
 	constexpr BasicStringBuilder(pointer _p, size_type size) noexcept
 		:p(_p), end(p + size) {}
 
@@ -50,11 +53,12 @@ public:
 		return p >= end - 1;
 	}
 
-	std::span<value_type> Write() const noexcept {
+	[[nodiscard]]
+	constexpr std::span<value_type> Write() const noexcept {
 		return {p, end};
 	}
 
-	void Extend(size_type length) noexcept {
+	constexpr void Extend(size_type length) noexcept {
 		p += length;
 	}
 
@@ -62,12 +66,12 @@ public:
 		return p + length < end;
 	}
 
-	void CheckAppend(size_type length) const {
+	constexpr void CheckAppend(size_type length) const {
 		if (!CanAppend(length))
 			throw TooLargeError{};
 	}
 
-	void Append(T ch) {
+	constexpr void Append(T ch) {
 		CheckAppend(1);
 
 		*p++ = ch;
