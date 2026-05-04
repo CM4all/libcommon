@@ -68,6 +68,14 @@ public:
 		*p = SENTINEL;
 	}
 
+	[[nodiscard]]
+	constexpr bool TryAppend(T ch) noexcept {
+		const bool success = CanAppend(1);
+		if (success) [[likely]]
+			UnsafeAppend(ch);
+		return success;
+	}
+
 	constexpr void Append(T ch) {
 		CheckAppend(1);
 		UnsafeAppend(ch);
@@ -78,6 +86,14 @@ public:
 	 * space in the buffer.
 	 */
 	void UnsafeAppend(std::basic_string_view<T> src) noexcept;
+
+	[[nodiscard]]
+	constexpr bool TryAppend(std::basic_string_view<T> src) noexcept {
+		const bool success = CanAppend(src.size());
+		if (success) [[likely]]
+			UnsafeAppend(src);
+		return success;
+	}
 
 	void Append(std::basic_string_view<T> src) {
 		CheckAppend(src.size());
