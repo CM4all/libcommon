@@ -9,7 +9,10 @@
 
 /**
  * Fills a string buffer incrementally by appending more data to the
- * end, truncating the string if the buffer is full.
+ * end.
+ *
+ * Append methods throw #Overflow when the buffer would overflow by an
+ * operation.  The buffer is then in an undefined state.
  */
 template<typename T=char>
 class BasicStringBuilder {
