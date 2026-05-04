@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstddef>
+#include <span>
 
 class FileDescriptor;
 
@@ -62,7 +63,7 @@ struct OneLineOptions {
  * @return a pointer to the end of the line
  */
 char *
-FormatOneLine(char *buffer, std::size_t buffer_size,
+FormatOneLine(std::span<char> buffer,
 	      const Datagram &d, OneLineOptions options) noexcept;
 
 /**

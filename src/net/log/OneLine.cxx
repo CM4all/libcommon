@@ -131,11 +131,11 @@ AppendFmt(StringBuilder &b,
 }
 
 static char *
-FormatOneLineHttp(char *buffer, size_t buffer_size,
+FormatOneLineHttp(std::span<char> buffer,
 		  const Datagram &d,
 		  const OneLineOptions options) noexcept
 try {
-	StringBuilder b(buffer, buffer_size);
+	StringBuilder b{buffer};
 
 	if (options.iso8601) {
 		if (d.HasTimestamp())
@@ -232,15 +232,15 @@ try {
 
 	return b.GetTail();
 } catch (TooLargeError) {
-	return buffer;
+	return buffer.data();
 }
 
 static char *
-FormatOneLineMessage(char *buffer, size_t buffer_size,
+FormatOneLineMessage(std::span<char> buffer,
 		     const Datagram &d,
 		     const OneLineOptions options) noexcept
 try {
-	StringBuilder b(buffer, buffer_size);
+	StringBuilder b{buffer};
 
 	if (options.iso8601) {
 		if (d.HasTimestamp())
@@ -291,21 +291,21 @@ try {
 
 	return b.GetTail();
 } catch (TooLargeError) {
-	return buffer;
+	return buffer.data();
 }
 
 char *
-FormatOneLine(char *buffer, size_t buffer_size,
+FormatOneLine(std::span<char> buffer,
 	      const Datagram &d,
 	      const OneLineOptions options) noexcept
 {
 	if (d.IsHttpAccess())
-		return FormatOneLineHttp(buffer, buffer_size, d,
+		return FormatOneLineHttp(buffer, d,
 					 options);
 	else if (d.message.data() != nullptr || d.json.data() != nullptr)
-		return FormatOneLineMessage(buffer, buffer_size, d, options);
+		return FormatOneLineMessage(buffer, d, options);
 	else
-		return buffer;
+		return buffer.data();
 }
 
 bool
@@ -313,7 +313,7 @@ LogOneLine(FileDescriptor fd, const Datagram &d,
 	   const OneLineOptions options) noexcept
 {
 	char buffer[16384];
-	char *end = FormatOneLine(buffer, sizeof(buffer) - 1, d, options);
+	char *end = FormatOneLine({buffer, sizeof(buffer) - 1}, d, options);
 	if (end == buffer)
 		return true;
 
