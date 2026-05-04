@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Mount.hxx"
+#include "MakeId.hxx"
 #include "TmpfsCreate.hxx"
 #include "VfsBuilder.hxx"
 #include "lib/fmt/RuntimeError.hxx"
@@ -27,8 +28,9 @@
 #include <fcntl.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
-#include <string.h>
 #include <time.h> // for time()
+
+using std::string_view_literals::operator""sv;
 
 inline
 Mount::Mount(AllocatorPtr alloc, const Mount &src) noexcept
@@ -410,54 +412,40 @@ Mount::MakeId(char *p) const noexcept
 {
 	switch (type) {
 	case Type::BIND:
-		*p++ = ';';
-		*p++ = 'm';
+		p = AppendString(p, ";m"sv);
 		break;
 
 	case Type::BIND_FILE:
-		*p++ = ';';
-		*p++ = 'f';
+		p = AppendString(p, ";f"sv);
 		break;
 
 	case Type::TMPFS:
-		p = (char *)mempcpy(p, ";t:", 3);
-		p = stpcpy(p, target);
+		p = AppendValue(p, ";t:"sv, target);
 		return p;
 
 	case Type::NAMED_TMPFS:
-		p = (char *)mempcpy(p, ";nt:", 4);
-		p = stpcpy(p, source);
-		*p++ = '>';
-		p = stpcpy(p, target);
+		p = AppendValue(p, ";nt:"sv, source);
+		p = AppendValue(p, ">"sv, target);
 		return p;
 
 	case Type::WRITE_FILE:
-		p = (char *)mempcpy(p, ";wf:", 4);
-		p = stpcpy(p, target);
-		*p++ = '=';
-		p = stpcpy(p, source);
+		p = AppendValue(p, ";wf:"sv, target);
+		p = AppendValue(p, "="sv, source);
 		*p++ = ';';
 		return p;
 
 	case Type::SYMLINK:
-		p = (char *)mempcpy(p, ";sy:", 4);
-		p = stpcpy(p, target);
-		*p++ = '>';
-		p = stpcpy(p, source);
+		p = AppendValue(p, ";sy:"sv, target);
+		p = AppendValue(p, ">"sv, source);
 		*p++ = ';';
 		return p;
 	}
 
-	if (writable)
-		*p++ = 'w';
+	p = AppendOptional(p, 'w', writable);
+	p = AppendOptional(p, 'x', exec);
 
-	if (exec)
-		*p++ = 'x';
-
-	*p++ = ':';
-	p = stpcpy(p, source);
-	*p++ = '>';
-	p = stpcpy(p, target);
+	p = AppendValue(p, ":"sv, source);
+	p = AppendValue(p, ">"sv, target);
 
 	return p;
 }

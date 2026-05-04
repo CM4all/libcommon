@@ -3,14 +3,16 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "ResourceLimits.hxx"
+#include "MakeId.hxx"
 #include "lib/fmt/SystemError.hxx"
-#include "util/Base32.hxx"
 #include "util/CharUtil.hxx"
 #include "util/IntHash.hxx"
 #include "util/Sanitizer.hxx"
 
 #include <cassert>
 #include <charconv>
+
+using std::string_view_literals::operator""sv;
 
 /**
  * glibc has a "__rlimit_resource_t" typedef which maps to "int" in
@@ -80,9 +82,8 @@ ResourceLimits::MakeId(char *p) const noexcept
 	if (IsEmpty())
 		return p;
 
-	*p++ = ';';
-	*p++ = 'r';
-	return FormatIntBase32(p, GetHash());
+	p = AppendIntBase32(p, ";r"sv, GetHash());
+	return p;
 }
 
 /**

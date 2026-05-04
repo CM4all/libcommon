@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "MountNamespaceOptions.hxx"
+#include "MakeId.hxx"
 #include "Mount.hxx"
 #include "VfsBuilder.hxx"
 #include "UidGid.hxx"
@@ -12,8 +13,6 @@
 #include "system/linux/pivot_root.h"
 #include "system/Mount.hxx"
 #include "io/FileDescriptor.hxx"
-#include "util/Base32.hxx"
-#include "util/djb_hash.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"
 
@@ -26,9 +25,10 @@
 #include <assert.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+
+using std::string_view_literals::operator""sv;
 
 MountNamespaceOptions::MountNamespaceOptions(AllocatorPtr alloc,
 					     const MountNamespaceOptions &src) noexcept
@@ -232,42 +232,20 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 char *
 MountNamespaceOptions::MakeId(char *p) const noexcept
 {
-	p = (char *)mempcpy(p, ";mns", 4);
-
-	if (pivot_root != nullptr) {
-		p = (char *)mempcpy(p, ";pvr=", 5);
-		p = stpcpy(p, pivot_root);
-	}
-
-	if (mount_root_tmpfs)
-		p = (char *)mempcpy(p, ";rt", 3);
+	p = AppendString(p, ";mns"sv);
+	p = AppendOptionalValue(p, ";pvr="sv, pivot_root);
+	p = AppendOptional(p, ";rt"sv, mount_root_tmpfs);
 
 	if (mount_proc) {
-		p = (char *)mempcpy(p, ";proc", 5);
-		if (writable_proc)
-			*p++ = 'w';
+		p = AppendString(p, ";proc"sv);
+		p = AppendOptional(p, 'w', writable_proc);
 	}
 
-	if (mount_dev)
-		p = (char *)mempcpy(p, ";dev", 4);
-
-	if (mount_pts)
-		p = (char *)mempcpy(p, ";pts", 4);
-
-	if (bind_mount_pts)
-		p = (char *)mempcpy(p, ";bpts", 4);
-
-	if (mount_tmp_tmpfs != nullptr) {
-		p = (char *)mempcpy(p, ";tt:", 3);
-		p = stpcpy(p, mount_tmp_tmpfs);
-	}
-
-	if (mount_listen_stream.data() != nullptr) {
-		*p++ = ';';
-		*p++ = 'l';
-		*p++ = 's';
-		p = FormatIntBase32(p, djb_hash(mount_listen_stream));
-	}
+	p = AppendOptional(p, ";dev"sv, mount_dev);
+	p = AppendOptional(p, ";pts"sv, mount_pts);
+	p = AppendOptional(p, ";bpts"sv, bind_mount_pts);
+	p = AppendOptionalValue(p, ";tt:"sv, mount_tmp_tmpfs);
+	p = AppendOptionalDjbHash(p, ";ls"sv, mount_listen_stream);
 
 	p = Mount::MakeIdAll(p, mounts);
 

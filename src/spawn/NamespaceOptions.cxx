@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "NamespaceOptions.hxx"
+#include "MakeId.hxx"
 #include "NetworkNamespace.hxx"
 #include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
@@ -16,7 +17,8 @@
 #include <assert.h>
 #include <sched.h>
 #include <unistd.h>
-#include <string.h>
+
+using std::string_view_literals::operator""sv;
 
 NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 				   const NamespaceOptions &src) noexcept
@@ -194,23 +196,15 @@ NamespaceOptions::ApplyNetwork() const
 char *
 NamespaceOptions::MakeId(char *p) const noexcept
 {
-	if (enable_user)
-		p = (char *)mempcpy(p, ";uns", 4);
-
-	if (enable_cgroup)
-		p = (char *)mempcpy(p, ";cns", 4);
+	p = AppendOptional(p, ";uns"sv, enable_user);
+	p = AppendOptional(p, ";cns"sv, enable_cgroup);
 
 	if (enable_network) {
-		p = (char *)mempcpy(p, ";nns", 4);
-
-		if (network_namespace_name != nullptr) {
-			*p++ = '=';
-			p = stpcpy(p, network_namespace_name);
-		}
+		p = AppendString(p, ";nns"sv);
+		p = AppendOptionalValue(p, "="sv, network_namespace_name);
 	}
 
-	if (enable_ipc)
-		p = (char *)mempcpy(p, ";ins", 4);
+	p = AppendOptional(p, ";ins"sv, enable_ipc);
 
 	if (mapped_real_uid > 0)
 		p = fmt::format_to(p, ";mru{}", mapped_real_uid);
@@ -221,10 +215,7 @@ NamespaceOptions::MakeId(char *p) const noexcept
 	p = pid.MakeId(p);
 	p = mount.MakeId(p);
 
-	if (hostname != nullptr) {
-		p = (char *)mempcpy(p, ";uts=", 5);
-		p = stpcpy(p, hostname);
-	}
+	p = AppendOptionalValue(p, ";uts="sv, hostname);
 
 	return p;
 }

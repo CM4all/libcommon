@@ -3,10 +3,12 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "PidNamespaceOptions.hxx"
+#include "MakeId.hxx"
 #include "AllocatorPtr.hxx"
 
 #include <sched.h> // for CLONE_NEWPID
-#include <string.h>
+
+using std::string_view_literals::operator""sv;
 
 PidNamespaceOptions::PidNamespaceOptions(AllocatorPtr alloc,
 					 const PidNamespaceOptions &src) noexcept
@@ -45,12 +47,11 @@ PidNamespaceOptions::MakeId(char *p) const noexcept
 		break;
 
 	case Mode::ANONYMOUS:
-		p = (char *)mempcpy(p, ";pns", 4);
+		p = AppendString(p, ";pns"sv);
 		break;
 
 	case Mode::ACCESSORY:
-		p = (char *)mempcpy(p, ";pns=", 5);
-		p = (char *)stpcpy(p, name);
+		p = AppendValue(p, ";pns="sv, name);
 		break;
 	}
 

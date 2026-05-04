@@ -5,11 +5,11 @@
 #include "ChildOptions.hxx"
 #include "ResourceLimits.hxx"
 #include "Prepared.hxx"
+#include "MakeId.hxx"
 #include "AllocatorPtr.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "io/FdHolder.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
 #include "util/SpanCast.hxx"
 
@@ -20,7 +20,6 @@
 #include <stdexcept>
 
 #include <assert.h>
-#include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
 
@@ -111,28 +110,14 @@ ChildOptions::MakeId(char *p) const noexcept
 	if (umask >= 0)
 		p = fmt::format_to(p, ";u{:o}", umask);
 
-	if (chdir != nullptr) {
-		*p++ = ';';
-		*p++ = 'c';
-		*p++ = 'd';
-		p = FormatIntBase32(p, djb_hash_string(chdir));
-	}
+	p = AppendOptionalDjbHash(p, ";cd"sv, chdir);
+	p = AppendOptionalDjbHash(p, ";e"sv, stderr_path);
 
-	if (stderr_path != nullptr) {
-		*p++ = ';';
-		*p++ = 'e';
-		p = FormatIntBase32(p, djb_hash_string(stderr_path));
-	}
-
-	if (stderr_jailed)
-		*p++ = 'j';
-
-	if (stderr_pond)
-		*p++ = 'p';
+	p = AppendOptional(p, 'j', stderr_jailed);
+	p = AppendOptional(p, 'p', stderr_pond);
 
 	for (auto i : env) {
-		*p++ = '$';
-		p = stpcpy(p, i);
+		p = AppendValue(p, "$"sv, i);
 	}
 
 	p = cgroup.MakeId(p);
@@ -141,50 +126,20 @@ ChildOptions::MakeId(char *p) const noexcept
 	p = ns.MakeId(p);
 	p = uid_gid.MakeId(p);
 
-	if (stderr_null) {
-		*p++ = ';';
-		*p++ = 'e';
-		*p++ = 'n';
-	}
+	p = AppendOptional(p, ";en"sv, stderr_null);
 
 #ifdef HAVE_LIBSECCOMP
-	if (allow_ptrace) {
-		*p++ = ';';
-		*p++ = 'a';
-		*p++ = 'p';
-	}
-
-	if (forbid_user_ns) {
-		*p++ = ';';
-		*p++ = 'f';
-		*p++ = 'u';
-	}
-
-	if (forbid_multicast) {
-		*p++ = ';';
-		*p++ = 'f';
-		*p++ = 'm';
-	}
-
-	if (forbid_bind) {
-		*p++ = ';';
-		*p++ = 'f';
-		*p++ = 'b';
-	}
+	p = AppendOptional(p, ";ap"sv, allow_ptrace);
+	p = AppendOptional(p, ";fu"sv, forbid_user_ns);
+	p = AppendOptional(p, ";fm"sv, forbid_multicast);
+	p = AppendOptional(p, ";fb"sv, forbid_bind);
 #endif // HAVE_LIBSECCOMP
 
 #ifdef HAVE_LIBCAP
-	if (cap_sys_resource) {
-		*p++ = ';';
-		*p++ = 's';
-		*p++ = 'r';
-	}
+	p = AppendOptional(p, ";sr"sv, cap_sys_resource);
 #endif // HAVE_LIBCAP
 
-	if (no_new_privs) {
-		*p++ = ';';
-		*p++ = 'n';
-	}
+	p = AppendOptional(p, ";n"sv, no_new_privs);
 
 	return p;
 }

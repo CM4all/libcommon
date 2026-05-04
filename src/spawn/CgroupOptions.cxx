@@ -4,6 +4,7 @@
 
 #include "CgroupOptions.hxx"
 #include "CgroupState.hxx"
+#include "MakeId.hxx"
 #include "AllocatorPtr.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "io/FileAt.hxx"
@@ -19,6 +20,8 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/xattr.h>
+
+using std::string_view_literals::operator""sv;
 
 CgroupOptions::CgroupOptions(AllocatorPtr alloc,
 			     const CgroupOptions &src) noexcept
@@ -95,10 +98,6 @@ CgroupOptions::Create2(const CgroupState &state, const char *session) const
 char *
 CgroupOptions::MakeId(char *p) const noexcept
 {
-	if (name != nullptr) {
-		p = (char *)mempcpy(p, ";cg", 3);
-		p = stpcpy(p, name);
-	}
-
+	p = AppendOptionalValue(p, ";cg"sv, name);
 	return p;
 }
