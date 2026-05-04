@@ -63,14 +63,26 @@ public:
 			throw TooLargeError{};
 	}
 
-	constexpr void Append(T ch) {
-		CheckAppend(1);
-
+	constexpr void UnsafeAppend(T ch) noexcept {
 		*p++ = ch;
 		*p = SENTINEL;
 	}
 
-	void Append(std::basic_string_view<T> src);
+	constexpr void Append(T ch) {
+		CheckAppend(1);
+		UnsafeAppend(ch);
+	}
+
+	/**
+	 * Like Append(), but do not check whether there is enough
+	 * space in the buffer.
+	 */
+	void UnsafeAppend(std::basic_string_view<T> src) noexcept;
+
+	void Append(std::basic_string_view<T> src) {
+		CheckAppend(src.size());
+		UnsafeAppend(src);
+	}
 };
 
 class StringBuilder : public BasicStringBuilder<char> {

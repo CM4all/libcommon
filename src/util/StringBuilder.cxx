@@ -7,9 +7,8 @@
 
 template<typename T>
 void
-BasicStringBuilder<T>::Append(std::basic_string_view<T> src)
+BasicStringBuilder<T>::UnsafeAppend(std::basic_string_view<T> src) noexcept
 {
-	CheckAppend(src.size());
 	p = std::copy(src.begin(), src.end(), p);
 	*p = SENTINEL;
 }
