@@ -8,5 +8,9 @@
 
 class CurlEasy;
 
-StringCurlResponse
-StringCurlRequest(CurlEasy easy);
+namespace Curl {
+
+StringResponse
+StringRequest(CurlEasy easy);
+
+} // namespace Curl

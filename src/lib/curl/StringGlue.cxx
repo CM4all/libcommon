@@ -7,10 +7,12 @@
 #include "Adapter.hxx"
 #include "Easy.hxx"
 
-StringCurlResponse
-StringCurlRequest(CurlEasy easy)
+namespace Curl {
+
+StringResponse
+StringRequest(CurlEasy easy)
 {
-	StringCurlResponseHandler handler;
+	StringResponseHandler handler;
 	CurlResponseHandlerAdapter adapter{handler};
 	adapter.Install(easy);
 
@@ -24,3 +26,5 @@ StringCurlRequest(CurlEasy easy)
 
 	return std::move(handler).TakeResponse();
 }
+
+} // namespace Curl

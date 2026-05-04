@@ -11,8 +11,12 @@
 
 enum class HttpStatus : uint_least16_t;
 
-struct StringCurlResponse {
+namespace Curl {
+
+struct StringResponse {
 	HttpStatus status;
 	Curl::Headers headers;
 	std::string body;
 };
+
+} // namespace Curl
