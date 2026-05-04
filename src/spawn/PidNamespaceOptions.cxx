@@ -3,19 +3,9 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "PidNamespaceOptions.hxx"
-#include "NetworkNamespace.hxx"
-#include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
-#include "system/Error.hxx"
-#include "io/linux/UserNamespace.hxx"
 
-#include <fmt/core.h>
-
-#include <set>
-
-#include <assert.h>
-#include <sched.h>
-#include <unistd.h>
+#include <sched.h> // for CLONE_NEWPID
 #include <string.h>
 
 PidNamespaceOptions::PidNamespaceOptions(AllocatorPtr alloc,
