@@ -116,7 +116,7 @@ public:
 		UnsafeFill(ch, n);
 	}
 
-	constexpr std::string_view ToStringView(std::span<value_type> buffer) const noexcept {
+	constexpr std::string_view ToStringView(std::span<const value_type> buffer) const noexcept {
 		return {buffer.data(), p};
 	}
 };
