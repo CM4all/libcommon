@@ -115,6 +115,10 @@ public:
 		CheckAppend(n);
 		UnsafeFill(ch, n);
 	}
+
+	constexpr std::string_view ToStringView(std::span<value_type> buffer) const noexcept {
+		return {buffer.data(), p};
+	}
 };
 
 class StringBuilder : public BasicStringBuilder<char> {
