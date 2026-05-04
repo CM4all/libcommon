@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "TooLargeError.hxx"
+
 #include <cstddef>
 #include <span>
 #include <string_view>
@@ -11,8 +13,8 @@
  * Fills a string buffer incrementally by appending more data to the
  * end.
  *
- * Append methods throw #Overflow when the buffer would overflow by an
- * operation.  The buffer is then in an undefined state.
+ * Append methods throw #TooLargeError when the buffer would overflow
+ * by an operation.  The buffer is then in an undefined state.
  */
 template<typename T=char>
 class BasicStringBuilder {
@@ -56,19 +58,13 @@ public:
 		p += length;
 	}
 
-	/**
-	 * This class gets thrown when the buffer would overflow by an
-	 * operation.  The buffer is then in an undefined state.
-	 */
-	class Overflow {};
-
 	constexpr bool CanAppend(size_type length) const noexcept {
 		return p + length < end;
 	}
 
 	void CheckAppend(size_type length) const {
 		if (!CanAppend(length))
-			throw Overflow();
+			throw TooLargeError{};
 	}
 
 	void Append(T ch) {

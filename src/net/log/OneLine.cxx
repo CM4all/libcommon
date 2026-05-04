@@ -30,7 +30,7 @@ AppendTimestamp(StringBuilder &b, TimePoint value)
 	size_t n = strftime(b.GetTail(), b.GetRemainingSize(),
 			    "%d/%b/%Y:%H:%M:%S %z", localtime_r(&t, &tm));
 	if (n == 0)
-		throw StringBuilder::Overflow();
+		throw TooLargeError{};
 
 	b.Extend(n);
 }
@@ -71,7 +71,7 @@ static void
 AppendEscape(StringBuilder &b, std::string_view value)
 {
 	if (b.GetRemainingSize() <= value.size() * 4)
-		throw StringBuilder::Overflow();
+		throw TooLargeError{};
 
 	char *const p0 = b.GetTail(), *p = p0;
 
@@ -231,7 +231,7 @@ try {
 		b.Append('-');
 
 	return b.GetTail();
-} catch (StringBuilder::Overflow) {
+} catch (TooLargeError) {
 	return buffer;
 }
 
@@ -290,7 +290,7 @@ try {
 	}
 
 	return b.GetTail();
-} catch (StringBuilder::Overflow) {
+} catch (TooLargeError) {
 	return buffer;
 }
 
