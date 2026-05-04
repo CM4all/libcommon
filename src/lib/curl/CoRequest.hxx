@@ -6,16 +6,13 @@
 
 #include "Request.hxx"
 #include "Handler.hxx"
+#include "StringOptions.hxx"
 #include "StringResponse.hxx"
 #include "co/AwaitableHelper.hxx"
 
 #include <exception>
 
 namespace Curl {
-
-struct CoOptions {
-	std::size_t max_size = SIZE_MAX;
-};
 
 /**
  * A CURL HTTP request as a C++20 coroutine.
@@ -28,7 +25,7 @@ class CoRequest final : CurlResponseHandler {
 
 	std::coroutine_handle<> continuation;
 
-	const CoOptions options;
+	const StringOptions options;
 
 	bool ready = false;
 
@@ -36,7 +33,7 @@ class CoRequest final : CurlResponseHandler {
 	friend Awaitable;
 
 public:
-	CoRequest(CurlGlobal &global, CurlEasy easy, CoOptions _options={});
+	CoRequest(CurlGlobal &global, CurlEasy easy, StringOptions _options={});
 
 	Awaitable operator co_await() noexcept {
 		return *this;

@@ -43,7 +43,7 @@ struct Instance final {
 };
 
 static Co::InvokeTask
-Run(CurlGlobal &global, const char *url, Curl::CoOptions options)
+Run(CurlGlobal &global, const char *url, Curl::StringOptions options)
 {
 	const auto response = co_await Curl::CoRequest(global, CurlEasy{url}, options);
 
@@ -61,7 +61,7 @@ Run(CurlGlobal &global, const char *url, Curl::CoOptions options)
 int
 main(int argc, char **argv) noexcept
 try {
-	Curl::CoOptions options;
+	Curl::StringOptions options;
 
 	int pos;
 	for (pos = 1; pos < argc; ++pos) {
