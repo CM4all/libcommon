@@ -33,14 +33,6 @@ public:
 	explicit constexpr BasicStringBuilder(std::span<value_type> b) noexcept
 		:p(b.data()), end(p + b.size()) {}
 
-	[[nodiscard]]
-	constexpr BasicStringBuilder(pointer _p, pointer _end) noexcept
-		:p(_p), end(_end) {}
-
-	[[nodiscard]]
-	constexpr BasicStringBuilder(pointer _p, size_type size) noexcept
-		:p(_p), end(p + size) {}
-
 	constexpr pointer GetTail() const noexcept {
 		return p;
 	}
