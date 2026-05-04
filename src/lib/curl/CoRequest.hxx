@@ -6,19 +6,12 @@
 
 #include "Request.hxx"
 #include "Handler.hxx"
+#include "StringResponse.hxx"
 #include "co/AwaitableHelper.hxx"
 
 #include <exception>
 
 namespace Curl {
-
-struct CoResponse {
-	HttpStatus status = {};
-
-	Headers headers;
-
-	std::string body;
-};
 
 struct CoOptions {
 	std::size_t max_size = SIZE_MAX;
@@ -30,7 +23,7 @@ struct CoOptions {
 class CoRequest final : CurlResponseHandler {
 	CurlRequest request;
 
-	CoResponse response;
+	StringResponse response;
 	std::exception_ptr error;
 
 	std::coroutine_handle<> continuation;
@@ -54,7 +47,7 @@ private:
 		return ready;
 	}
 
-	CoResponse TakeValue() noexcept {
+	StringResponse TakeValue() noexcept {
 		return std::move(response);
 	}
 
