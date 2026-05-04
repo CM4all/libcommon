@@ -26,8 +26,6 @@ class BasicStringBuilder {
 	pointer p;
 	const pointer end;
 
-	static constexpr value_type SENTINEL = '\0';
-
 public:
 	[[nodiscard]]
 	explicit constexpr BasicStringBuilder(std::span<value_type> b) noexcept
@@ -42,7 +40,7 @@ public:
 	}
 
 	constexpr bool IsFull() const noexcept {
-		return p >= end - 1;
+		return p >= end;
 	}
 
 	[[nodiscard]]
@@ -55,7 +53,7 @@ public:
 	}
 
 	constexpr bool CanAppend(size_type length) const noexcept {
-		return p + length < end;
+		return p + length <= end;
 	}
 
 	constexpr void CheckAppend(size_type length) const {
@@ -65,7 +63,6 @@ public:
 
 	constexpr void UnsafeAppend(T ch) noexcept {
 		*p++ = ch;
-		*p = SENTINEL;
 	}
 
 	[[nodiscard]]
