@@ -10,9 +10,9 @@
 namespace Curl {
 
 StringResponse
-StringRequest(CurlEasy easy)
+StringRequest(CurlEasy easy, StringOptions options)
 {
-	StringResponseHandler handler;
+	StringResponseHandler handler{options};
 	CurlResponseHandlerAdapter adapter{handler};
 	adapter.Install(easy);
 

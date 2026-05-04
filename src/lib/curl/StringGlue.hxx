@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "StringOptions.hxx"
 #include "StringResponse.hxx"
 
 class CurlEasy;
@@ -11,6 +12,6 @@ class CurlEasy;
 namespace Curl {
 
 StringResponse
-StringRequest(CurlEasy easy);
+StringRequest(CurlEasy easy, StringOptions options={});
 
 } // namespace Curl
