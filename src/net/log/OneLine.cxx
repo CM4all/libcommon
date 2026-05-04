@@ -27,7 +27,8 @@ AppendTimestamp(StringBuilder &b, TimePoint value)
 	using namespace std::chrono;
 	time_t t = duration_cast<seconds>(value.time_since_epoch()).count();
 	struct tm tm;
-	size_t n = strftime(b.GetTail(), b.GetRemainingSize(),
+	const auto dest = b.Write();
+	size_t n = strftime(dest.data(), dest.size(),
 			    "%d/%b/%Y:%H:%M:%S %z", localtime_r(&t, &tm));
 	if (n == 0)
 		throw TooLargeError{};
