@@ -99,6 +99,9 @@ ChildOptions::GetHash() const noexcept
 	if (ns.mount.home != nullptr)
 		hash = djb_hash_string(ns.mount.home, hash);
 
+	for (const char *i : env)
+		hash = djb_hash_string(i, hash);
+
 	return hash;
 }
 
