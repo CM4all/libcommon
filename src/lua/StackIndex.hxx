@@ -27,10 +27,17 @@ struct RelativeStackIndex : StackIndex {
 };
 
 /**
+ * A wrapper for a Lua stack index, i.e. either #StackIndex or
+ * #RelativeStackIndex.
+ */
+template<class T>
+concept WrappedStackIndex = std::convertible_to<T, StackIndex>;
+
+/**
  * Types satisfying this concept can be used as Lua stack index.
  */
 template<class T>
-concept AnyStackIndex = std::convertible_to<T, StackIndex> ||
+concept AnyStackIndex = WrappedStackIndex<T> ||
 	std::is_same_v<T, int>;
 
 static constexpr int
