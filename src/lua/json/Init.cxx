@@ -4,6 +4,7 @@
 
 #include "Init.hxx"
 #include "Dump.hxx"
+#include "Parse.hxx"
 #include "lua/Util.hxx"
 
 extern "C" {
@@ -17,6 +18,7 @@ InitJson(lua_State *L) noexcept
 {
 	lua_newtable(L);
 	SetTable(L, RelativeStackIndex{-1}, "dump", DumpJson);
+	SetTable(L, RelativeStackIndex{-1}, "parse", ParseJson);
 	lua_setglobal(L, "json");
 }
 
