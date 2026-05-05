@@ -7,7 +7,7 @@
 #include "lua/Error.hxx"
 #include "lua/Resume.hxx"
 #include "lua/State.hxx"
-#include "lua/json/ToJson.hxx"
+#include "lua/json/Init.hxx"
 #include "lua/event/Init.hxx"
 #include "lua/pg/Init.hxx"
 #include "lua/sodium/Init.hxx"
@@ -148,7 +148,7 @@ try {
 	InitSocketAddress(L);
 	InitSocket(L);
 	InitControlClient(L);
-	InitToJson(L);
+	InitJson(L);
 
 	for (int i = 1; i < argc; ++i)
 		instance.threads.push_back(*new Thread(instance, L, event_loop, argv[i]));

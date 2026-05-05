@@ -2,6 +2,8 @@ lua_json = static_library(
   'lua_json',
   'Push.cxx',
   'ToJson.cxx',
+  'Dump.cxx',
+  'Init.cxx',
   include_directories: inc,
   dependencies: [
     lua_dep,

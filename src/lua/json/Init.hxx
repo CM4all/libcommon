@@ -4,14 +4,11 @@
 
 #pragma once
 
-#include <nlohmann/json_fwd.hpp>
-
 struct lua_State;
 
 namespace Lua {
 
-[[gnu::pure]]
-nlohmann::json
-ToJson(lua_State *L, int idx) noexcept;
+void
+InitJson(lua_State *L) noexcept;
 
 } // namespace Lua

@@ -4,7 +4,7 @@
 
 #include "lua/RunFile.hxx"
 #include "lua/State.hxx"
-#include "lua/json/ToJson.hxx"
+#include "lua/json/Init.hxx"
 #include "lua/net/Socket.hxx"
 #include "lua/net/SocketAddress.hxx"
 #include "lua/net/ControlClient.hxx"
@@ -31,7 +31,7 @@ try {
 	lua_State *const L = state.get();
 
 	luaL_openlibs(L);
-	Lua::InitToJson(L);
+	Lua::InitJson(L);
 	Lua::InitSodium(L);
 	Lua::InitSocketAddress(L);
 	Lua::InitSocket(L);

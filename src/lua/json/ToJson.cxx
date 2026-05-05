@@ -100,25 +100,4 @@ ToJson(lua_State *L, int idx) noexcept
 	return {};
 }
 
-static int
-ToJson(lua_State *L)
-{
-	if (lua_gettop(L) < 1)
-		return luaL_error(L, "Not enough parameters");
-
-	if (lua_gettop(L) > 1)
-		return luaL_error(L, "Too many parameters");
-
-	const auto json = ToJson(L, 1).dump();
-	lua_pushlstring(L, json.data(), json.size());
-	return 1;
-}
-
-void
-InitToJson(lua_State *L) noexcept
-{
-	lua_pushcfunction(L, ToJson);
-	lua_setglobal(L, "to_json");
-}
-
 } // namespace Lua
