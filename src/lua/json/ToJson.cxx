@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "ToJson.hxx"
+#include "lua/AbsoluteStackIndex.hxx"
 #include "lua/ForEach.hxx"
 #include "lua/StringView.hxx"
 #include "util/ScopeExit.hxx"
@@ -46,8 +47,12 @@ ThreadToJson(lua_State *L, int idx) noexcept
 }
 
 static nlohmann::json
-TableToJson(lua_State *L, int idx) noexcept
+TableToJson(lua_State *L, int _idx) noexcept
 {
+	/* if the caller passes a negative number, convert it to an
+	   absolute stack index because ForEach() requires that */
+	const auto idx = ToAbsoluteStackIndex(L, _idx);
+
 	// TODO array?
 
         auto o = nlohmann::json::object();
