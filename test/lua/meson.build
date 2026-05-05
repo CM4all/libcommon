@@ -19,6 +19,10 @@ if lua_sodium_dep.found()
   test_lua_sources += 'TestLuaSodium.cxx'
 endif
 
+if lua_json_dep.found()
+  test_lua_sources += 'TestLuaJson.cxx'
+endif
+
 test(
   'TestLua',
   executable(
@@ -29,6 +33,7 @@ test(
       gtest,
       lua_dep,
       lua_event_dep,
+      lua_json_dep,
       lua_sodium_dep,
     ],
   ),
