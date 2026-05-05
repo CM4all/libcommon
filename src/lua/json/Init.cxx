@@ -4,6 +4,7 @@
 
 #include "Init.hxx"
 #include "Dump.hxx"
+#include "lua/Util.hxx"
 
 extern "C" {
 #include <lua.h>
@@ -14,8 +15,9 @@ namespace Lua {
 void
 InitJson(lua_State *L) noexcept
 {
-	lua_pushcfunction(L, DumpJson);
-	lua_setglobal(L, "to_json");
+	lua_newtable(L);
+	SetTable(L, RelativeStackIndex{-1}, "dump", DumpJson);
+	lua_setglobal(L, "json");
 }
 
 } // namespace Lua
