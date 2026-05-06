@@ -1,16 +1,24 @@
-if not sodium_dep.found() or not crypto_dep.found() or not nlohmann_json_dep.found()
+if not sodium_dep.found() or not nlohmann_json_dep.found()
   jwt_dep = dependency('', required: false)
   subdir_done()
 endif
 
+jwt_sources = []
+
+if crypto_dep.found()
+  jwt_sources += [
+    'ES256.cxx',
+    'RS256.cxx',
+    'OsslJWK.cxx',
+    'OsslJWS.cxx',
+  ]
+endif
+
 jwt = static_library(
   'jwt',
+  jwt_sources,
   'String.cxx',
-  'ES256.cxx',
-  'RS256.cxx',
   'EdDSA.cxx',
-  'OsslJWK.cxx',
-  'OsslJWS.cxx',
   include_directories: inc,
   dependencies: [
     crypto_dep,
