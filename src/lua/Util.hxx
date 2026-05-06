@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include <cstddef>
+#include <span>
 #include <string_view>
 
 namespace Lua {
@@ -46,6 +47,13 @@ static inline void
 Push(lua_State *L, std::string_view value) noexcept
 {
 	lua_pushlstring(L, value.data(), value.size());
+}
+
+[[gnu::nonnull]]
+static inline void
+Push(lua_State *L, std::span<const std::byte> value) noexcept
+{
+	lua_pushlstring(L, reinterpret_cast<const char *>(value.data()), value.size());
 }
 
 [[gnu::nonnull]]

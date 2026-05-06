@@ -5,6 +5,7 @@
 #include "Box.hxx"
 #include "CheckKey.hxx"
 #include "lua/CheckArg.hxx"
+#include "lua/Util.hxx"
 #include "lib/sodium/Box.hxx"
 
 extern "C" {
@@ -26,8 +27,8 @@ crypto_box_keypair(lua_State *L)
 	CryptoBoxSecretKey sk;
 	::crypto_box_keypair(pk, sk);
 
-	lua_pushlstring(L, reinterpret_cast<const char *>(pk.data()), pk.size());
-	lua_pushlstring(L, reinterpret_cast<const char *>(sk.data()), sk.size());
+	Push(L, pk);
+	Push(L, sk);
 	return 2;
 }
 
