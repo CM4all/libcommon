@@ -2,6 +2,8 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
+#pragma once
+
 extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
