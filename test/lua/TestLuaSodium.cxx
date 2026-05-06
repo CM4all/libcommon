@@ -135,3 +135,24 @@ message = sodium.crypto_box_seal_open(ciphertext, pk, sk)
 	ASSERT_EQ(Lua::ToStringView(L, -1), Lua::ToStringView(L, -2));
 	lua_pop(L, 2);
 }
+
+TEST(LuaSodium, Sign)
+{
+	const Lua::State main{luaL_newstate()};
+	lua_State *const L = main.get();
+	const Lua::ScopeCheckStack check_stack{L};
+	Lua::InitSodium(L);
+
+	if (luaL_dostring(L, R"(
+pk, sk = sodium.crypto_sign_keypair()
+m = 'hello world'
+sig = sodium.crypto_sign_detached(m, sk)
+ok = sodium.crypto_sign_verify_detached(sig, m, pk)
+)"))
+		throw Lua::PopError(L);
+
+	lua_getglobal(L, "ok");
+	ASSERT_TRUE(lua_isboolean(L, -1));
+	ASSERT_TRUE(lua_toboolean(L, -1));
+	lua_pop(L, 1);
+}

@@ -6,6 +6,7 @@
 #include "Box.hxx"
 #include "RandomBytes.hxx"
 #include "ScalarMult.hxx"
+#include "Sign.hxx"
 #include "Utils.hxx"
 
 extern "C" {
@@ -24,6 +25,9 @@ static constexpr struct luaL_Reg lua_sodium[] = {
 	{"crypto_box_seal", crypto_box_seal},
 	{"crypto_box_seal_open", crypto_box_seal_open},
 	{"crypto_scalarmult_base", crypto_scalarmult_base},
+	{"crypto_sign_keypair", crypto_sign_keypair},
+	{"crypto_sign_detached", crypto_sign_detached},
+	{"crypto_sign_verify_detached", crypto_sign_verify_detached},
 	{"bin2hex", bin2hex},
 	{"hex2bin", hex2bin},
 	{"randombytes", randombytes},
