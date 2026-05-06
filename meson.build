@@ -146,6 +146,10 @@ subdir('src/jwt')
 
 if lua_dep.found() and nlohmann_json_dep.found()
   subdir('src/lua/json')
+
+  if sodium_dep.found()
+    subdir('src/lua/jwt')
+  endif
 endif
 
 subdir('src/net')

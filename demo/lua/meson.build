@@ -9,6 +9,7 @@ executable(
   dependencies: [
     lua_dep,
     lua_json_dep,
+    lua_jwt_dep,
     lua_mariadb_dep,
     lua_net_dep,
     lua_sodium_dep,
@@ -25,6 +26,7 @@ if lua_pg_dep.found()
       lua_dep,
       lua_event_dep,
       lua_json_dep,
+      lua_jwt_dep,
       lua_pg_dep,
       lua_sodium_dep,
       lua_net_dep,
