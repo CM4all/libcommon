@@ -12,7 +12,6 @@
 #include "net/AllocatedSocketAddress.hxx"
 #include "net/SocketError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
-#include "util/SpanCast.hxx"
 
 extern "C" {
 #include <lauxlib.h>
@@ -65,7 +64,7 @@ Socket::Send(lua_State *L)
 	else if (top > 4)
 		return luaL_error(L, "Too many parameters");
 
-	std::string_view src = CheckStringView(L, 2);
+	auto src = CheckByteSpan(L, 2);
 
 	if (top >= 4) {
 		int i = luaL_checkinteger(L, 4);
@@ -74,7 +73,7 @@ Socket::Send(lua_State *L)
 		if (i < 1 || static_cast<std::size_t>(i) > src.size())
 			luaL_argerror(L, 4, "Bad string position");
 
-		src = src.substr(0, i);
+		src = src.first(i);
 	}
 
 	if (top >= 3) {
@@ -84,12 +83,12 @@ Socket::Send(lua_State *L)
 		if (i < 1 || static_cast<std::size_t>(i) > src.size())
 			luaL_argerror(L, 3, "Bad string position");
 
-		src = src.substr(i - 1);
+		src = src.subspan(i - 1);
 	}
 
 	ssize_t nbytes = 0;
 	if (!src.empty()) {
-		nbytes = socket.Send(AsBytes(src));
+		nbytes = socket.Send(src);
 		if (nbytes < 0)
 			return PushSocketError(L);
 	}

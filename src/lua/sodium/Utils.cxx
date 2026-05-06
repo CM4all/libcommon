@@ -22,7 +22,7 @@ bin2hex(lua_State *L)
 	if (lua_gettop(L) > 1)
 		return luaL_error(L, "Too many parameters");
 
-	const auto src = CheckStringView(L, 1);
+	const auto src = CheckByteSpan(L, 1);
 
 	const std::size_t dest_length = src.size() * 2;
 	const std::size_t dest_capacity = dest_length + 1;

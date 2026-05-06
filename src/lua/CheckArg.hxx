@@ -9,6 +9,8 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include <cstddef>
+#include <span>
 #include <string_view>
 
 namespace Lua {
@@ -19,6 +21,14 @@ CheckStringView(lua_State *L, int arg)
 	std::size_t size;
 	const char *data = luaL_checklstring(L, arg, &size);
 	return {data, size};
+}
+
+inline std::span<const std::byte>
+CheckByteSpan(lua_State *L, int arg)
+{
+	std::size_t size;
+	const char *data = luaL_checklstring(L, arg, &size);
+	return {reinterpret_cast<const std::byte *>(data), size};
 }
 
 } // namespace Lua
