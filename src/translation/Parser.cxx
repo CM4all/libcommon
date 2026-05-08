@@ -4650,7 +4650,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::DIRECTORY_INDEX_SLASH:
-#if TRANSLATION_ENABLE_HTTP
+#if TRANSLATION_ENABLE_RADDRESS
 		if (!payload.empty())
 			throw std::runtime_error{"malformed DIRECTORY_INDEX_SLASH packet"};
 
