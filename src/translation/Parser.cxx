@@ -4648,6 +4648,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::DIRECTORY_INDEX_SLASH:
+#if TRANSLATION_ENABLE_HTTP
+		if (!payload.empty())
+			throw std::runtime_error{"malformed DIRECTORY_INDEX_SLASH packet"};
+
+		if (response.directory_index.data() == nullptr)
+			throw std::runtime_error{"misplaced DIRECTORY_INDEX_SLASH packet"};
+
+		if (response.directory_index_slash)
+			throw std::runtime_error{"duplicate DIRECTORY_INDEX_SLASH packet"};
+
+		response.directory_index_slash = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

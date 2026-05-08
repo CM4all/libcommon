@@ -1398,6 +1398,13 @@ enum class TranslationCommand : uint16_t {
 	 * disables MS_NOEXEC.
 	 */
 	MOUNT_TMP_TMPFS_EXEC = 279,
+
+	/**
+	 * If #DIRECTORY_INDEX applies but the request URI path does
+	 * not end with a slash, automatically send a redirect
+	 * appending the slash.
+	 */
+	DIRECTORY_INDEX_SLASH = 280,
 };
 
 struct TranslationHeader {

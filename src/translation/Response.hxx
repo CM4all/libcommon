@@ -434,6 +434,7 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_RADDRESS
 	bool auto_base;
+	bool directory_index_slash;
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET

@@ -1559,6 +1559,11 @@ public:
 			return *this;
 		}
 
+		auto &DirectoryIndexSlash() noexcept {
+			response.Packet(TranslationCommand::DIRECTORY_INDEX_SLASH);
+			return *this;
+		}
+
 		template<typename P>
 		auto Enotdir(P payload) noexcept {
 			response.Packet(TranslationCommand::ENOTDIR_,

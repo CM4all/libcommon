@@ -156,6 +156,7 @@ TranslateResponse::Clear() noexcept
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 	auto_base = false;
+	directory_index_slash = false;
 #endif
 #if TRANSLATION_ENABLE_WIDGET
 	widget_info = false;
@@ -416,6 +417,7 @@ TranslateResponse::CopyFrom(AllocatorPtr alloc, const TranslateResponse &src) no
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
 	auto_base = src.auto_base;
+	directory_index_slash = src.directory_index_slash;
 #endif
 #if TRANSLATION_ENABLE_WIDGET
 	widget_info = src.widget_info;
