@@ -1405,6 +1405,12 @@ enum class TranslationCommand : uint16_t {
 	 * appending the slash.
 	 */
 	DIRECTORY_INDEX_SLASH = 280,
+
+	/**
+	 * Append this string to the #PATH (after applying #BASE or
+	 * #EXPAND_PATH).
+	 */
+	APPEND_PATH = 281,
 };
 
 struct TranslationHeader {

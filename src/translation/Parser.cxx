@@ -4665,6 +4665,22 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::APPEND_PATH:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (!IsValidString(string_payload))
+			throw std::runtime_error{"malformed APPEND_PATH packet"};
+
+		if (response.base == nullptr) {
+			throw std::runtime_error{"misplaced APPEND_PATH packet"};
+		} else if (file_address != nullptr) {
+			file_address->append_path = string_payload.data();
+			return;
+		} else
+			throw std::runtime_error("misplaced EXPAND_PATH packet");
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

@@ -1519,6 +1519,13 @@ public:
 		}
 
 		template<typename... Types>
+		auto AppendPath(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::APPEND_PATH,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
 		auto ContentType(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::CONTENT_TYPE,
 					      value...);
