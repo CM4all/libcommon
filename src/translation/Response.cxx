@@ -768,3 +768,11 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 }
 
 #endif
+
+void
+TranslateResponse::Finalize([[maybe_unused]] AllocatorPtr alloc) noexcept
+{
+#if TRANSLATION_ENABLE_RADDRESS
+	address.Finalize(alloc);
+#endif
+}

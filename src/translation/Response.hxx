@@ -600,4 +600,9 @@ struct TranslateResponse {
 	 */
 	void Expand(AllocatorPtr alloc, const MatchData &match_data);
 #endif
+
+	/**
+	 * Finalize pending edits to this object before it will be used.
+	 */
+	void Finalize(AllocatorPtr alloc) noexcept;
 };
