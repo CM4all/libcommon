@@ -13,7 +13,13 @@
 static constexpr bool
 IsValidHttpHeaderValueChar(char ch) noexcept
 {
-	return IsPrintableASCII(ch) || ch == '\t';
+	/* the IsNonPrintableASCII() function disallows only
+	   0x00..0x1f; it allows all printable ASCII characters and
+	   also non-ASCII characters (e.g. UTF-8); the htab is allowed
+	   in HTTP header values, so we have to mention it explicitly
+	   here */
+
+	return !IsNonPrintableASCII(ch) || ch == '\t';
 }
 
 /**
