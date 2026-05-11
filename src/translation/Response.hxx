@@ -428,6 +428,7 @@ struct TranslateResponse {
 
 #if TRANSLATION_ENABLE_HTTP
 	bool discard_query_string;
+	bool no_query_string;
 	bool redirect_query_string;
 	bool redirect_full_uri;
 #endif

@@ -4681,6 +4681,20 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::NO_QUERY_STRING:
+#if TRANSLATION_ENABLE_HTTP
+		if (!payload.empty())
+			throw std::runtime_error{"malformed NO_QUERY_STRING packet"};
+
+		if (response.no_query_string)
+			throw std::runtime_error{"duplicate NO_QUERY_STRING packet"};
+
+		response.no_query_string = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);

@@ -381,6 +381,10 @@ public:
 		return Packet(TranslationCommand::DISCARD_QUERY_STRING);
 	}
 
+	auto &NoQueryString() noexcept {
+		return Packet(TranslationCommand::NO_QUERY_STRING);
+	}
+
 	auto &AllowRemoteNetwork(SocketAddress address,
 				 const uint8_t &prefix_length) noexcept {
 		return MultiPacket(TranslationCommand::ALLOW_REMOTE_NETWORK,

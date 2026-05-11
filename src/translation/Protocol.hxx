@@ -1411,6 +1411,13 @@ enum class TranslationCommand : uint16_t {
 	 * #EXPAND_PATH).
 	 */
 	APPEND_PATH = 281,
+
+	/**
+	 * No query string is allowed/supported on this request URI.
+	 * The webserver is allowed to reject requests with a query
+	 * string.
+	 */
+	NO_QUERY_STRING = 282,
 };
 
 struct TranslationHeader {
