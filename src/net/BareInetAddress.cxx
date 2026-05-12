@@ -17,7 +17,7 @@ BareInetAddress::CopyFrom(SocketAddress src) noexcept
 		const auto &v4 = IPv4Address::Cast(src);
 		array[0] = 0;
 		array[1] = 0;
-		array[2] = 0xffff;
+		array[2] = ToBE32(0xffff);
 		array[3] = v4.GetNumericAddressBE();
 		return true;
 #ifdef HAVE_IPV6
