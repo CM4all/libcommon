@@ -11,7 +11,7 @@ class SocketAddress;
 /**
  * A class that can store either an IPv4 or an IPv6 address.  It is
  * similar to #InetAddress, but stores only the bare IP address, and
- * no port.
+ * no port (and no IPv6 scope id).
  */
 class BareInetAddress {
 	uint32_t array[4];
