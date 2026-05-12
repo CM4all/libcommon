@@ -14,6 +14,10 @@ class SocketAddress;
  * no port (and no IPv6 scope id).
  */
 class BareInetAddress {
+	/**
+	 * This is effectively an #in6_addr, or a V4-mapped IPv4
+	 * address and network byte order.
+	 */
 	uint32_t array[4];
 
 public:
