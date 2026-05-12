@@ -20,6 +20,7 @@ test(
     'TestHostParser.cxx',
     'TestFormatAddress.cxx',
     'TestMaskedSocketAddress.cxx',
+    'TestMaskedInetAddress.cxx',
     'TestEasyMessage.cxx',
     test_net_sources,
     include_directories: inc,

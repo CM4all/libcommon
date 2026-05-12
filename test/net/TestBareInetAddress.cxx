@@ -65,3 +65,30 @@ TEST(BareInetAddress, Format)
 	EXPECT_STREQ(v6.Format(buffer), "::");
 #endif // HAVE_IPV6
 }
+
+TEST(BareInetAddress, ToNetwork)
+{
+	char buffer[256];
+
+	BareInetAddress v4;
+	ASSERT_TRUE(v4.CopyFrom(IPv4Address{192, 168, 255, 255, 42}));
+	EXPECT_STREQ(v4.ToNetwork(96).Format(buffer), "0.0.0.0");
+	EXPECT_STREQ(v4.ToNetwork(112).Format(buffer), "192.168.0.0");
+	EXPECT_STREQ(v4.ToNetwork(113).Format(buffer), "192.168.128.0");
+	EXPECT_STREQ(v4.ToNetwork(120).Format(buffer), "192.168.255.0");
+	EXPECT_STREQ(v4.ToNetwork(124).Format(buffer), "192.168.255.240");
+	EXPECT_STREQ(v4.ToNetwork(127).Format(buffer), "192.168.255.254");
+	EXPECT_STREQ(v4.ToNetwork(128).Format(buffer), "192.168.255.255");
+
+#ifdef HAVE_IPV6
+	BareInetAddress v6;
+	ASSERT_TRUE(v6.CopyFrom(IPv6Address{0x2a00, 0x1450, 0x4001, 0x816, 0xffff, 0, 0, 0xffff, 0}));
+	EXPECT_STREQ(v6.ToNetwork(0).Format(buffer), "::");
+	EXPECT_STREQ(v6.ToNetwork(48).Format(buffer), "2a00:1450:4001::");
+	EXPECT_STREQ(v6.ToNetwork(64).Format(buffer), "2a00:1450:4001:816::");
+	EXPECT_STREQ(v6.ToNetwork(72).Format(buffer), "2a00:1450:4001:816:ff00::");
+	EXPECT_STREQ(v6.ToNetwork(120).Format(buffer), "2a00:1450:4001:816:ffff::ff00");
+	EXPECT_STREQ(v6.ToNetwork(127).Format(buffer), "2a00:1450:4001:816:ffff::fffe");
+	EXPECT_STREQ(v6.ToNetwork(128).Format(buffer), "2a00:1450:4001:816:ffff::ffff");
+#endif // HAVE_IPV6
+}

@@ -5,6 +5,7 @@ net_sources = [
   'SocketAddress.cxx',
   'StaticSocketAddress.cxx',
   'AllocatedSocketAddress.cxx',
+  'MaskedInetAddress.cxx',
   'MaskedSocketAddress.cxx',
   'IPv4Address.cxx',
   'IPv6Address.cxx',

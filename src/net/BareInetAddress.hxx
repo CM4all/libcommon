@@ -5,8 +5,10 @@
 
 #include "util/ByteOrder.hxx"
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <iterator> // for std::begin(), std::end()
 #include <span>
 
 class SocketAddress;
@@ -50,6 +52,30 @@ public:
 
 	[[gnu::pure]]
 	std::size_t Hash() const noexcept;
+
+	constexpr void ClearBitsAfter(unsigned keep_bits) noexcept {
+		assert(keep_bits <= sizeof(array) * 8);
+
+		static constexpr unsigned bits_per_word = sizeof(array[0]) * 8;
+
+		auto *p = std::begin(array), *end = std::end(array);
+
+		p += keep_bits / bits_per_word;
+		keep_bits %= bits_per_word;
+
+		if (keep_bits > 0) {
+			assert(p < end);
+			*p++ &= ToBE32(~(~uint32_t{} >> keep_bits));
+		}
+
+		std::fill(p, end, 0);
+	}
+
+	constexpr BareInetAddress ToNetwork(unsigned prefix_length) const noexcept {
+		auto result = *this;
+		result.ClearBitsAfter(prefix_length);
+		return result;
+	}
 
 	constexpr bool operator==(const BareInetAddress &other) const noexcept = default;
 

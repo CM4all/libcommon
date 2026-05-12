@@ -1,0 +1,162 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// Copyright CM4all GmbH
+// author: Max Kellermann <max.kellermann@ionos.com>
+
+#include "net/MaskedInetAddress.hxx"
+#include "net/AllocatedSocketAddress.hxx"
+#include "net/IPv4Address.hxx"
+#include "net/Parser.hxx"
+#include "net/Features.hxx"
+
+#ifdef HAVE_IPV6
+#include "net/IPv6Address.hxx"
+#endif
+
+#include <gtest/gtest.h>
+
+static BareInetAddress
+MakeBareInet4Address(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
+{
+	BareInetAddress address;
+	if (!address.CopyFrom(IPv4Address{a, b, c, d, 42}))
+		throw std::runtime_error{"BareInetAddress::CopyFrom(IPv4Address) failed"};
+	return address;
+}
+
+static MaskedInetAddress
+MakeMaskedInet4Address(uint8_t a, uint8_t b, uint8_t c, uint8_t d,
+		       uint_least8_t prefix_length=32)
+{
+	assert(prefix_length <= 32);
+
+	return {MakeBareInet4Address(a, b, c, d), static_cast<uint_least8_t>(96 + prefix_length)};
+}
+
+TEST(MaskedInetAddress, IPv4)
+{
+	const auto a = MakeMaskedInet4Address(192, 168, 1, 2);
+	EXPECT_TRUE(a.Matches(ParseSocketAddress("192.168.1.2", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("192.168.1.3", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("10.0.0.1", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("::", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("::1", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("@foo", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("/run/foo", 42, false)));
+
+	const auto b = MakeMaskedInet4Address(192, 168, 1, 0, 24);
+	EXPECT_TRUE(b.Matches(ParseSocketAddress("192.168.1.2", 42, false)));
+	EXPECT_TRUE(b.Matches(ParseSocketAddress("192.168.1.3", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("10.0.0.1", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("::", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("::1", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("@foo", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("/run/foo", 42, false)));
+
+	const auto c = MakeMaskedInet4Address(0, 0, 0, 0);
+	EXPECT_TRUE(c.Matches(ParseSocketAddress("0.0.0.0", 42, false)));
+	EXPECT_FALSE(c.Matches(ParseSocketAddress("192.168.1.2", 42, false)));
+	EXPECT_FALSE(c.Matches(ParseSocketAddress("192.168.1.3", 42, false)));
+	EXPECT_FALSE(c.Matches(ParseSocketAddress("10.0.0.1", 42, false)));
+	EXPECT_FALSE(c.Matches(ParseSocketAddress("::", 42, false)));
+	EXPECT_FALSE(c.Matches(ParseSocketAddress("::1", 42, false)));
+	EXPECT_FALSE(c.Matches(ParseSocketAddress("@foo", 42, false)));
+	EXPECT_FALSE(c.Matches(ParseSocketAddress("/run/foo", 42, false)));
+
+	const auto d = MakeMaskedInet4Address(0, 0, 0, 0, 0);
+	EXPECT_TRUE(d.Matches(ParseSocketAddress("0.0.0.0", 42, false)));
+	EXPECT_TRUE(d.Matches(ParseSocketAddress("192.168.1.2", 42, false)));
+	EXPECT_TRUE(d.Matches(ParseSocketAddress("192.168.1.3", 42, false)));
+	EXPECT_TRUE(d.Matches(ParseSocketAddress("10.0.0.1", 42, false)));
+	EXPECT_FALSE(d.Matches(ParseSocketAddress("::", 42, false)));
+	EXPECT_FALSE(d.Matches(ParseSocketAddress("::1", 42, false)));
+	EXPECT_FALSE(d.Matches(ParseSocketAddress("@foo", 42, false)));
+	EXPECT_FALSE(d.Matches(ParseSocketAddress("/run/foo", 42, false)));
+}
+
+TEST(MaskedInetAddress, ParseV4)
+{
+	const auto a = MakeMaskedInet4Address(192, 168, 1, 2);
+	const auto b = MakeMaskedInet4Address(192, 168, 1, 0, 24);
+	const auto c = MakeMaskedInet4Address(0, 0, 0, 0, 0);
+
+	MaskedInetAddress x;
+	ASSERT_TRUE(x.Parse("192.168.1.2"));
+	EXPECT_EQ(x, a);
+	ASSERT_TRUE(x.Parse("192.168.1.2/32"));
+	EXPECT_EQ(x, a);
+	ASSERT_TRUE(x.Parse("192.168.1.0/24"));
+	EXPECT_EQ(x, b);
+	ASSERT_TRUE(x.Parse("0.0.0.0/0"));
+	EXPECT_EQ(x, c);
+
+	ASSERT_FALSE(x.Parse("192.168.1.2/24"));
+	ASSERT_FALSE(x.Parse("192.168.1.2/33"));
+}
+
+TEST(MaskedInetAddress, FormatV4)
+{
+	char buffer[256];
+
+	const auto a = MakeMaskedInet4Address(192, 168, 1, 2);
+	EXPECT_STREQ(a.Format(buffer), "192.168.1.2");
+
+	const auto b = MakeMaskedInet4Address(192, 168, 1, 0, 24);
+	EXPECT_STREQ(b.Format(buffer), "192.168.1.0/24");
+
+	const auto c = MakeMaskedInet4Address(0, 0, 0, 0, 0);
+	EXPECT_STREQ(c.Format(buffer), "0.0.0.0/0");
+}
+
+#ifdef HAVE_IPV6
+
+TEST(MaskedInetAddress, IPv6)
+{
+	const MaskedInetAddress a{IPv6Address{0x1234, 0x5678, 0x90ab, 0, 0, 0, 0, 0xcdef, 0}, 128};
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("192.168.1.2", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("192.168.1.3", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("::", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("::1", 42, false)));
+	EXPECT_TRUE(a.Matches(ParseSocketAddress("1234:5678:90ab::cdef", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("@foo", 42, false)));
+	EXPECT_FALSE(a.Matches(ParseSocketAddress("/run/foo", 42, false)));
+
+	const MaskedInetAddress b{IPv6Address{0x1234, 0x5678, 0, 0, 0, 0, 0, 0, 0}, 32};
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("192.168.1.2", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("192.168.1.3", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("::", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("::1", 42, false)));
+	EXPECT_TRUE(b.Matches(ParseSocketAddress("1234:5678:90ab::cdef", 42, false)));
+	EXPECT_TRUE(b.Matches(ParseSocketAddress("1234:5678:90ab::1", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("@foo", 42, false)));
+	EXPECT_FALSE(b.Matches(ParseSocketAddress("/run/foo", 42, false)));
+}
+
+TEST(MaskedInetAddress, ParseV6)
+{
+	const MaskedInetAddress a{IPv6Address{0x1234, 0x5678, 0x90ab, 0, 0, 0, 0, 0xcdef, 0}, 128};
+	const MaskedInetAddress b{IPv6Address{0x1234, 0x5678, 0x90ab, 0, 0, 0, 0, 0, 0}, 48};
+
+	MaskedInetAddress x;
+	ASSERT_TRUE(x.Parse("1234:5678:90ab::cdef"));
+	EXPECT_EQ(x, a);
+	ASSERT_TRUE(x.Parse("1234:5678:90ab::cdef/128"));
+	EXPECT_EQ(x, a);
+	ASSERT_TRUE(x.Parse("1234:5678:90ab::/48"));
+	EXPECT_EQ(x, b);
+
+	ASSERT_FALSE(x.Parse("1234:5678:90ab::cdef/127"));
+	ASSERT_FALSE(x.Parse("1234:5678:90ab::cdef/129"));
+}
+
+TEST(MaskedInetAddress, FormatV6)
+{
+	char buffer[256];
+
+	const MaskedInetAddress a{IPv6Address{0x1234, 0x5678, 0x90ab, 0, 0, 0, 0, 0xcdef, 0}, 128};
+	EXPECT_STREQ(a.Format(buffer), "1234:5678:90ab::cdef");
+
+	const MaskedInetAddress b{IPv6Address{0x1234, 0x5678, 0x90ab, 0, 0, 0, 0, 0, 0}, 48};
+	EXPECT_STREQ(b.Format(buffer), "1234:5678:90ab::/48");
+}
+
+#endif // HAVE_IPV6
