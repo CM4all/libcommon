@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: BSD-2-Clause
+// author: Max Kellermann <max.kellermann@gmail.com>
+
+#include "net/BareInetAddress.hxx"
+#include "net/IPv4Address.hxx"
+#include "net/Features.hxx"
+
+#ifdef HAVE_IPV6
+#include "net/IPv6Address.hxx"
+#endif
+
+#include <gtest/gtest.h>
+
+TEST(BareInetAddress, IsV4Mapped)
+{
+	BareInetAddress v4;
+	ASSERT_TRUE(v4.CopyFrom(IPv4Address{192, 168, 1, 2, 42}));
+	EXPECT_TRUE(v4.IsV4Mapped());
+
+#ifdef HAVE_IPV6
+	BareInetAddress v6;
+	ASSERT_TRUE(v6.CopyFrom(IPv6Address{0x2a00, 0x1450, 0x4001, 0x816, 0, 0, 0, 0x200e, 0}));
+	EXPECT_FALSE(v6.IsV4Mapped());
+#endif // HAVE_IPV6
+}

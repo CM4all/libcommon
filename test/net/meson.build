@@ -12,6 +12,7 @@ test(
   executable(
     'TestNet',
     'TestAnonymize.cxx',
+    'TestBareInetAddress.cxx',
     'TestIPv4Address.cxx',
     'TestIPv6Address.cxx',
     'TestLiterals.cxx',
