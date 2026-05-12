@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <span>
 
 class SocketAddress;
 
@@ -43,4 +44,18 @@ public:
 	std::size_t Hash() const noexcept;
 
 	constexpr bool operator==(const BareInetAddress &other) const noexcept = default;
+
+	/**
+	 * Parse a C string as a IPv4/IPv6 address into this object.
+	 *
+	 * @return true on success, false on error
+	 */
+	bool Parse(const char *s) noexcept;
+
+	/**
+	 * Format this object as a C string into the given buffer.
+	 *
+	 * @return the C string on success, nullptr on error
+	 */
+	const char *Format(std::span<char> buffer) const noexcept;
 };

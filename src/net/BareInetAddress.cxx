@@ -10,6 +10,14 @@
 #include "IPv6Address.hxx"
 #endif
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#endif
+
 bool
 BareInetAddress::CopyFrom(SocketAddress src) noexcept
 {
@@ -38,4 +46,48 @@ std::size_t
 BareInetAddress::Hash() const noexcept
 {
 	return IntHash(std::span{array});
+}
+
+bool
+BareInetAddress::Parse(const char *s) noexcept
+{
+	static_assert(sizeof(array[3]) == sizeof(struct in_addr));
+	static_assert(alignof(decltype(array[3])) >= alignof(struct in_addr));
+
+	if (inet_pton(AF_INET, s, &array[3]) == 1) {
+		array[0] = 0;
+		array[1] = 0;
+		array[2] = ToBE32(0xffff);
+		return true;
+	}
+
+#ifdef HAVE_IPV6
+	static_assert(sizeof(array) == sizeof(struct in6_addr));
+	static_assert(alignof(decltype(array)) >= alignof(struct in6_addr));
+
+	if (inet_pton(AF_INET6, s, &array[0]) == 1) {
+		return true;
+	}
+#endif // HAVE_IPV6
+
+	return false;
+}
+
+const char *
+BareInetAddress::Format(std::span<char> buffer) const noexcept
+{
+	static_assert(sizeof(array[3]) == sizeof(struct in_addr));
+	static_assert(alignof(decltype(array[3])) >= alignof(struct in_addr));
+
+	if (IsV4Mapped())
+		return inet_ntop(AF_INET, &array[3], buffer.data(), buffer.size());
+
+#ifdef HAVE_IPV6
+	static_assert(sizeof(array) == sizeof(struct in6_addr));
+	static_assert(alignof(decltype(array)) >= alignof(struct in6_addr));
+
+	return inet_ntop(AF_INET6, &array[0], buffer.data(), buffer.size());
+#else
+	return nullptr;
+#endif
 }
