@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "util/ByteOrder.hxx"
+
 #include <cstddef>
 #include <cstdint>
 
@@ -25,6 +27,10 @@ public:
 	 * Leave the object uninitialized.
 	 */
 	constexpr BareInetAddress() noexcept = default;
+
+	constexpr bool IsV4Mapped() const noexcept {
+		return array[0] == 0 && array[1] == 0 && array[2] == ToBE32(0xffff);
+	}
 
 	/**
 	 * @return true on success, false the the specified
