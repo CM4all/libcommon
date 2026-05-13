@@ -84,6 +84,7 @@ public:
 	 *
 	 * @return true on success, false on error
 	 */
+	[[nodiscard]]
 	bool Parse(const char *s) noexcept;
 
 	/**
@@ -91,5 +92,6 @@ public:
 	 *
 	 * @return the C string on success, nullptr on error
 	 */
+	[[nodiscard]]
 	const char *Format(std::span<char> buffer) const noexcept;
 };
