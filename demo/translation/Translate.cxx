@@ -116,7 +116,7 @@ main(int argc, char **argv)
 try {
 	if (argc < 2) {
 		fmt::print(stderr,
-			   "Usage: {} SOCKET_PATH [COMMAND=PAYLOAD] ...\nExample: {} /tmp/translation.sock HOST=example.com URI=/path"sv,
+			   "Usage: {} SOCKET_PATH [COMMAND=PAYLOAD] ...\nExample: {} /tmp/translation.sock HOST=example.com URI=/path\n"sv,
 			   argv[0], argv[0]);
 		return EX_USAGE;
 	}
