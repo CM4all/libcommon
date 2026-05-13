@@ -18,24 +18,32 @@
 #include <netinet/in.h>
 #endif
 
+BareInetAddress::BareInetAddress(const IPv4Address &src) noexcept
+{
+	array[0] = 0;
+	array[1] = 0;
+	array[2] = ToBE32(0xffff);
+	array[3] = src.GetNumericAddressBE();
+}
+
+BareInetAddress::BareInetAddress(const IPv6Address &_src) noexcept
+{
+	const auto &src = _src.GetAddress();
+	array[0] = src.s6_addr32[0];
+	array[1] = src.s6_addr32[1];
+	array[2] = src.s6_addr32[2];
+	array[3] = src.s6_addr32[3];
+}
+
 bool
 BareInetAddress::CopyFrom(SocketAddress src) noexcept
 {
 	if (src.GetFamily() == AF_INET) {
-		const auto &v4 = IPv4Address::Cast(src);
-		array[0] = 0;
-		array[1] = 0;
-		array[2] = ToBE32(0xffff);
-		array[3] = v4.GetNumericAddressBE();
+		*this = IPv4Address::Cast(src);
 		return true;
 #ifdef HAVE_IPV6
 	} else if (src.GetFamily() == AF_INET6) {
-		const auto &v6 = IPv6Address::Cast(src);
-		const auto &a = v6.GetAddress();
-		array[0] = a.s6_addr32[0];
-		array[1] = a.s6_addr32[1];
-		array[2] = a.s6_addr32[2];
-		array[3] = a.s6_addr32[3];
+		*this = IPv6Address::Cast(src);
 		return true;
 #endif // HAVE_IPV6
 	} else

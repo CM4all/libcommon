@@ -10,6 +10,8 @@
 #include <span>
 
 class SocketAddress;
+class IPv4Address;
+class IPv6Address;
 
 /**
  * A class that can store either an IPv4 or an IPv6 address.  It is
@@ -28,6 +30,12 @@ public:
 	 * Leave the object uninitialized.
 	 */
 	constexpr BareInetAddress() noexcept = default;
+
+	[[nodiscard]]
+	BareInetAddress(const IPv4Address &src) noexcept;
+
+	[[nodiscard]]
+	BareInetAddress(const IPv6Address &src) noexcept;
 
 	constexpr bool IsV4Mapped() const noexcept {
 		return array[0] == 0 && array[1] == 0 && array[2] == ToBE32(0xffff);
