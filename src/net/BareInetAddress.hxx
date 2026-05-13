@@ -5,6 +5,7 @@
 
 #include "util/ByteOrder.hxx"
 
+#include <algorithm> // for std::fill()
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
