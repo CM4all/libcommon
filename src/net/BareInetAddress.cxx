@@ -26,6 +26,8 @@ BareInetAddress::BareInetAddress(const IPv4Address &src) noexcept
 	array[3] = src.GetNumericAddressBE();
 }
 
+#ifdef HAVE_IPV6
+
 BareInetAddress::BareInetAddress(const IPv6Address &_src) noexcept
 {
 	const auto &src = _src.GetAddress();
@@ -34,6 +36,8 @@ BareInetAddress::BareInetAddress(const IPv6Address &_src) noexcept
 	array[2] = src.s6_addr32[2];
 	array[3] = src.s6_addr32[3];
 }
+
+#endif // HAVE_IPV6
 
 bool
 BareInetAddress::CopyFrom(SocketAddress src) noexcept
