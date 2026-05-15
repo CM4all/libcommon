@@ -42,8 +42,10 @@ TEST(MaskedInetAddress, IPv4)
 	EXPECT_TRUE(a.Matches(SocketAddress{"192.168.1.2"_ipv4}));
 	EXPECT_FALSE(a.Matches(SocketAddress{"192.168.1.3"_ipv4}));
 	EXPECT_FALSE(a.Matches(SocketAddress{"10.0.0.1"_ipv4}));
+#ifdef HAVE_IPV6
 	EXPECT_FALSE(a.Matches(ParseSocketAddress("::", 42, false)));
 	EXPECT_FALSE(a.Matches(ParseSocketAddress("::1", 42, false)));
+#endif
 	EXPECT_FALSE(a.Matches(LocalSocketAddress{"@foo"sv}));
 	EXPECT_FALSE(a.Matches(LocalSocketAddress{"/run/foo"sv}));
 
@@ -51,8 +53,10 @@ TEST(MaskedInetAddress, IPv4)
 	EXPECT_TRUE(b.Matches(SocketAddress{"192.168.1.2"_ipv4}));
 	EXPECT_TRUE(b.Matches(SocketAddress{"192.168.1.3"_ipv4}));
 	EXPECT_FALSE(b.Matches(SocketAddress{"10.0.0.1"_ipv4}));
+#ifdef HAVE_IPV6
 	EXPECT_FALSE(b.Matches(ParseSocketAddress("::", 42, false)));
 	EXPECT_FALSE(b.Matches(ParseSocketAddress("::1", 42, false)));
+#endif
 	EXPECT_FALSE(b.Matches(LocalSocketAddress{"@foo"sv}));
 	EXPECT_FALSE(b.Matches(LocalSocketAddress{"/run/foo"sv}));
 
@@ -61,8 +65,10 @@ TEST(MaskedInetAddress, IPv4)
 	EXPECT_FALSE(c.Matches(SocketAddress{"192.168.1.2"_ipv4}));
 	EXPECT_FALSE(c.Matches(SocketAddress{"192.168.1.3"_ipv4}));
 	EXPECT_FALSE(c.Matches(SocketAddress{"10.0.0.1"_ipv4}));
+#ifdef HAVE_IPV6
 	EXPECT_FALSE(c.Matches(ParseSocketAddress("::", 42, false)));
 	EXPECT_FALSE(c.Matches(ParseSocketAddress("::1", 42, false)));
+#endif
 	EXPECT_FALSE(c.Matches(LocalSocketAddress{"@foo"sv}));
 	EXPECT_FALSE(c.Matches(LocalSocketAddress{"/run/foo"sv}));
 
@@ -71,8 +77,10 @@ TEST(MaskedInetAddress, IPv4)
 	EXPECT_TRUE(d.Matches(SocketAddress{"192.168.1.2"_ipv4}));
 	EXPECT_TRUE(d.Matches(SocketAddress{"192.168.1.3"_ipv4}));
 	EXPECT_TRUE(d.Matches(SocketAddress{"10.0.0.1"_ipv4}));
+#ifdef HAVE_IPV6
 	EXPECT_FALSE(d.Matches(ParseSocketAddress("::", 42, false)));
 	EXPECT_FALSE(d.Matches(ParseSocketAddress("::1", 42, false)));
+#endif
 	EXPECT_FALSE(d.Matches(LocalSocketAddress{"@foo"sv}));
 	EXPECT_FALSE(d.Matches(LocalSocketAddress{"/run/foo"sv}));
 }
