@@ -16,7 +16,6 @@
 #include "util/SpanCast.hxx"
 #include "util/StringAPI.hxx"
 #include "util/StringCompare.hxx"
-#include "util/StringSplit.hxx"
 #include "AllocatorPtr.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
@@ -31,6 +30,17 @@
 #include <time.h> // for time()
 
 using std::string_view_literals::operator""sv;
+
+[[gnu::pure]]
+static std::string_view
+DirName(const char *path) noexcept
+{
+	const char *slash = strrchr(path, '/');
+	if (slash == nullptr)
+		return {};
+
+	return {path, std::size_t(slash - path)};
+}
 
 inline
 Mount::Mount(AllocatorPtr alloc, const Mount &src) noexcept
@@ -191,8 +201,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 	} else {
 		/* target does not exist: first ensure that its parent
 		   directory exists, then create an empty target */
-		const auto parent = SplitLast(std::string_view{target}, '/').first;
-		vfs_builder.MakeDirectory(parent);
+		vfs_builder.MakeDirectory(DirName(target));
 
 		UniqueFileDescriptor fd;
 		if (!fd.Open(target, O_CREAT|O_WRONLY, 0666))
@@ -273,17 +282,6 @@ Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder) const
 
 	if (!writable)
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
-}
-
-[[gnu::pure]]
-static std::string_view
-DirName(const char *path) noexcept
-{
-	const char *slash = strrchr(path, '/');
-	if (slash == nullptr)
-		return {};
-
-	return {path, std::size_t(slash - path)};
 }
 
 static const char *
