@@ -116,7 +116,7 @@ TEST(MaskedInetAddress, CopyFromV4)
 {
 	MaskedInetAddress m;
 
-	static constexpr IPv4Address zero{};
+	static constexpr IPv4Address zero{0, 0, 0, 0, 42};
 	EXPECT_TRUE(m.CopyFrom(zero, 0));
 	EXPECT_TRUE(m.CopyFrom(zero, 16));
 	EXPECT_TRUE(m.CopyFrom(zero, 32));
@@ -205,7 +205,7 @@ TEST(MaskedInetAddress, CopyFromV6)
 {
 	MaskedInetAddress m;
 
-	static constexpr IPv6Address zero{};
+	static constexpr IPv6Address zero{0, 0, 0, 0, 0, 0, 0, 0, 42};
 	EXPECT_TRUE(m.CopyFrom(zero, 0));
 	EXPECT_TRUE(m.CopyFrom(zero, 16));
 	EXPECT_TRUE(m.CopyFrom(zero, 32));
@@ -221,12 +221,15 @@ TEST(MaskedInetAddress, CopyFromV6)
 	EXPECT_FALSE(m.CopyFrom(src, 47));
 
 	/* valid net mask */
-	EXPECT_TRUE(m.CopyFrom(src, 24));
-	EXPECT_TRUE(m.CopyFrom(src, 25));
-	EXPECT_TRUE(m.CopyFrom(src, 32));
+	EXPECT_TRUE(m.CopyFrom(src, 48));
+	EXPECT_TRUE(m.CopyFrom(src, 49));
+	EXPECT_TRUE(m.CopyFrom(src, 64));
+	EXPECT_TRUE(m.CopyFrom(src, 80));
+	EXPECT_TRUE(m.CopyFrom(src, 127));
+	EXPECT_TRUE(m.CopyFrom(src, 128));
 
 	/* prefix too long */
-	EXPECT_FALSE(m.CopyFrom(src, 33));
+	EXPECT_FALSE(m.CopyFrom(src, 129));
 	EXPECT_FALSE(m.CopyFrom(src, 255));
 }
 
