@@ -1276,6 +1276,9 @@ TranslateParser::HandleAllowRemoteNetwork(std::span<const std::byte> payload)
 		static_cast<SocketAddress::size_type>(payload.size() - 1),
 	};
 
+	if (!address.IsValid())
+		throw std::runtime_error{"malformed ALLOW_REMOTE_NETWORK packet"};
+
 	response.allow_remote_networks.Add(alloc, address, prefix_length);
 }
 
@@ -1979,7 +1982,11 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (payload.size() < 2)
 			throw std::runtime_error("malformed ADDRESS packet");
 
-		address_list_builder.Add(alloc, SocketAddress{payload});
+		if (const SocketAddress address{payload}; address.IsValid())
+			address_list_builder.Add(alloc, SocketAddress{payload});
+		else
+			throw std::runtime_error{"malformed ALLOW packet"};
+
 		return;
 #else
 		break;
