@@ -7,6 +7,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <errno.h>
+#include <fcntl.h> // for AT_FDCWD
 
 #ifndef FSOPEN_CLOEXEC
 /* fallback definitions for glibc < 2.36 */
