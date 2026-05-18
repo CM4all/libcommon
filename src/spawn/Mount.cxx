@@ -184,10 +184,10 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 	if (struct stat st; lstat(target, &st) == 0) {
 		/* target exists already */
 		if (!S_ISREG(st.st_mode))
-			throw FmtRuntimeError("Not a regular file: {}",
+			throw FmtRuntimeError("Not a regular file: {:?}"sv,
 					      target);
 	} else if (const int e = errno; e != ENOENT) {
-		throw FmtErrno(e, "Failed to stat {}", target);
+		throw FmtErrno(e, "Failed to stat {:?}"sv, target);
 	} else {
 		/* target does not exist: first ensure that its parent
 		   directory exists, then create an empty target */
@@ -196,7 +196,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 
 		UniqueFileDescriptor fd;
 		if (!fd.Open(target, O_CREAT|O_WRONLY, 0666))
-			throw FmtErrno("Failed to create {}", target);
+			throw FmtErrno("Failed to create {:?}"sv, target);
 	}
 
 	uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY, attr_clr = 0;
