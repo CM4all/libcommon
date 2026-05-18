@@ -444,6 +444,9 @@ parse_header(AllocatorPtr alloc,
  */
 static void
 FinishTranslateResponse(AllocatorPtr alloc,
+#if TRANSLATION_ENABLE_HTTP
+			std::span<const MaskedInetAddress> allow_remote_networks,
+#endif
 #if TRANSLATION_ENABLE_RADDRESS
 			const char *base_suffix,
 			std::shared_ptr<std::vector<TranslationLayoutItem>> &&layout_items,
@@ -511,6 +514,9 @@ FinishTranslateResponse(AllocatorPtr alloc,
 	   to the front; reverse them now */
 	response.request_headers.Reverse();
 	response.response_headers.Reverse();
+
+	if (!allow_remote_networks.empty())
+		response.allow_remote_networks = NetworkList{alloc.Dup(allow_remote_networks)};
 #endif
 
 	if (probe_suffixes.data() != nullptr)
@@ -1276,10 +1282,11 @@ TranslateParser::HandleAllowRemoteNetwork(std::span<const std::byte> payload)
 		static_cast<SocketAddress::size_type>(payload.size() - 1),
 	};
 
-	if (!address.IsValid())
+	MaskedInetAddress inet_address;
+	if (!inet_address.CopyFrom(address, prefix_length))
 		throw std::runtime_error{"malformed ALLOW_REMOTE_NETWORK packet"};
 
-	response.allow_remote_networks.Add(alloc, address, prefix_length);
+	allow_remote_networks_builder.emplace_back(inet_address);
 }
 
 inline void
@@ -4726,6 +4733,9 @@ TranslateParser::HandlePacket(TranslationCommand command,
 #endif
 
 		FinishTranslateResponse(alloc,
+#if TRANSLATION_ENABLE_HTTP
+					allow_remote_networks_builder,
+#endif
 #if TRANSLATION_ENABLE_RADDRESS
 					base_suffix,
 					std::move(layout_items_builder),

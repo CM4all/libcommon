@@ -10,6 +10,10 @@
 #include "util/IntrusiveForwardList.hxx"
 #include "util/TrivialArray.hxx"
 
+#if TRANSLATION_ENABLE_HTTP
+#include "net/MaskedInetAddress.hxx"
+#endif
+
 #if TRANSLATION_ENABLE_RADDRESS
 #include "ResourceAddress.hxx"
 #include "cluster/AddressListBuilder.hxx"
@@ -107,6 +111,10 @@ class TranslateParser {
 	IntrusiveForwardList<Mount>::iterator mount_list;
 
 	ExpandableStringList::Builder env_builder, args_builder;
+#endif
+
+#if TRANSLATION_ENABLE_HTTP
+	std::vector<MaskedInetAddress> allow_remote_networks_builder;
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS

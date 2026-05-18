@@ -235,7 +235,7 @@ TranslateResponse::Clear() noexcept
 	expand_request_headers.Clear();
 	response_headers.Clear();
 	expand_response_headers.Clear();
-	allow_remote_networks.clear();
+	allow_remote_networks = {};
 #endif
 
 #if TRANSLATION_ENABLE_WIDGET
