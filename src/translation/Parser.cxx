@@ -1992,7 +1992,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (const SocketAddress address{payload}; address.IsValid())
 			address_list_builder.Add(alloc, SocketAddress{payload});
 		else
-			throw std::runtime_error{"malformed ALLOW packet"};
+			throw std::runtime_error{"malformed ADDRESS packet"};
 
 		return;
 #else
