@@ -8,6 +8,8 @@
 #include "util/StringAPI.hxx"
 #include "util/TagStructs.hxx"
 
+#include <string_view>
+
 /**
  * A simple mapping with C string pointers as keys.  It is meant to be
  * used with items allocated from an #AllocatorPtr.
@@ -67,6 +69,15 @@ public:
 	const T *Get(const char *key) const noexcept {
 		for (const auto &i : list)
 			if (StringIsEqual(key, i.key))
+				return &i.value;
+
+		return nullptr;
+	}
+
+	[[gnu::pure]]
+	const T *Get(std::string_view key) const noexcept {
+		for (const auto &i : list)
+			if (key == i.key)
 				return &i.value;
 
 		return nullptr;
