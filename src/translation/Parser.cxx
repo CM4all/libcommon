@@ -3354,9 +3354,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!IsValidNonEmptyString(string_payload))
 			throw std::runtime_error{"malformed SERVICE packet"};
 
-		if (response.execute_options == nullptr)
-			throw std::runtime_error{"misplaced SERVICE packet"};
-
 		execute_options = &response.service_execute_options.Add(alloc, string_payload.data());
 		SetChildOptions(execute_options->child_options);
 		return;
