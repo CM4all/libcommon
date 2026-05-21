@@ -1716,3 +1716,62 @@ TEST(MultiStock, ReentrantGetFromReadyHandler)
 	ASSERT_EQ(foo.waiting, 0);
 	ASSERT_EQ(foo.ready, 2);
 }
+
+TEST(MultiStock, ReleaseFromReadyHandlerDeletesMapItem)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+	foo.defer_create = true;
+	foo.should_continue_on_cancel = true;
+
+	/* Start an outer create, then cancel its original waiter.  The
+	   create continues, leaving the MapItem alive with get_cancel_ptr
+	   set but no Waiting entries. */
+	foo.Get(1);
+	foo.leases.clear();
+
+	ASSERT_EQ(foo.total, 0);
+	ASSERT_EQ(foo.waiting, 0);
+
+	struct ReleasingLease final : StockGetHandler {
+		bool ready = false;
+
+		CancellablePointer get_cancel_ptr;
+
+		~ReleasingLease() noexcept {
+			if (get_cancel_ptr)
+				get_cancel_ptr.Cancel();
+		}
+
+		void OnStockItemReady(StockItem &_item) noexcept override {
+			get_cancel_ptr = nullptr;
+			ready = true;
+
+			auto &item = (MyInnerStockItem &)_item;
+			item.outer_item.Fade();
+			item.Put(PutAction::DESTROY);
+		}
+
+		void OnStockItemError(std::exception_ptr) noexcept override {
+			get_cancel_ptr = nullptr;
+			ADD_FAILURE();
+		}
+	};
+
+	ReleasingLease lease;
+	instance.multi_stock.Get(StockKey{foo.key}, ToNopPointer(&foo), 2,
+				 lease, lease.get_cancel_ptr);
+
+	ASSERT_TRUE(lease.get_cancel_ptr);
+
+	/* Completing the continued create invokes ReleasingLease from
+	   FinishWaiting().  The handler releases the only lease and fades
+	   the outer item, which lets OnLeaseReleased() erase the MapItem
+	   before FinishWaiting() resumes and updates the wait counters. */
+	instance.RunSome();
+
+	ASSERT_TRUE(lease.ready);
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.destroyed, 1);
+}
