@@ -225,12 +225,6 @@ class MultiStock {
 
 		std::size_t get_concurrency;
 
-		/**
-		 * Was #StockClass::ShouldContinueOnCancel() true
-		 * for the current ongoing create operation?
-		 */
-		bool continue_on_cancel = false;
-
 		StockCounters counters{};
 
 		/**
@@ -246,6 +240,12 @@ class MultiStock {
 		 * Timer for Expire().
 		 */
 		FineTimerEvent expire_timer;
+
+		/**
+		 * Was #StockClass::ShouldContinueOnCancel() true
+		 * for the current ongoing create operation?
+		 */
+		bool continue_on_cancel = false;
 
 	public:
 		/**
