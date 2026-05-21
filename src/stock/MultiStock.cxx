@@ -439,7 +439,7 @@ MultiStock::MapItem::RemoveItem(OuterItem &item) noexcept
 		delete j;
 	});
 
-	if (items.empty() && !ScheduleRetryWaiting())
+	if (items.empty() && !ScheduleRetryWaiting() && !in_finish_waiting)
 		parent.Erase(*this);
 }
 
@@ -482,7 +482,7 @@ MultiStock::MapItem::RemoveWaiting(Waiting &w) noexcept
 		get_cancel_ptr.Cancel();
 	}
 
-	if (items.empty() && !get_cancel_ptr)
+	if (items.empty() && !get_cancel_ptr && !in_finish_waiting)
 		parent.Erase(*this);
 }
 
@@ -547,6 +547,11 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 	}
 
 	in_finish_waiting = false;
+
+	if (items.empty() && waiting.empty() && !get_cancel_ptr)
+		/* if this call has been suppressed (from inside the
+		   StockGetHandler), do it now */
+		parent.Erase(*this);
 }
 
 inline void
@@ -623,7 +628,7 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 		delete w;
 	});
 
-	if (items.empty())
+	if (items.empty() && !in_finish_waiting)
 		parent.Erase(*this);
 }
 
