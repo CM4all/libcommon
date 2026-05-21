@@ -1654,3 +1654,65 @@ TEST(MultiStock, ContinueOnCancelIdleReuse)
 
 	ASSERT_EQ(foo.destroyed, 1);
 }
+
+TEST(MultiStock, ReentrantGetFromReadyHandler)
+{
+	Instance instance{2};
+
+	Partition foo{instance, "foo"};
+
+	struct ReentrantLease final : StockGetHandler {
+		Partition &partition;
+		bool did_reenter = false;
+
+		CancellablePointer get_cancel_ptr;
+		MyInnerStockItem *item = nullptr;
+
+		explicit ReentrantLease(Partition &_partition) noexcept
+			:partition(_partition) {}
+
+		~ReentrantLease() noexcept {
+			if (get_cancel_ptr)
+				get_cancel_ptr.Cancel();
+			else if (item != nullptr)
+				item->Put(PutAction::REUSE);
+		}
+
+		void OnStockItemReady(StockItem &_item) noexcept override {
+			get_cancel_ptr = nullptr;
+			item = (MyInnerStockItem *)&_item;
+
+			if (!did_reenter) {
+				did_reenter = true;
+				partition.Get();
+			}
+		}
+
+		void OnStockItemError(std::exception_ptr) noexcept override {
+			get_cancel_ptr = nullptr;
+		}
+	};
+
+	/* Queue one normal create, then put the reentrant waiter behind
+	   it.  This makes the reentrant waiter a real waiter even though
+	   the MultiStock still has room for one more outer item. */
+	foo.defer_create = true;
+	foo.Get(1);
+
+	ReentrantLease lease{foo};
+	instance.multi_stock.Get(StockKey{foo.key}, ToNopPointer(&foo), 2,
+				 lease, lease.get_cancel_ptr);
+
+	ASSERT_TRUE(lease.get_cancel_ptr);
+
+	/* Complete the pending create, then let the reentrant handler's
+	   nested Get() create another outer item synchronously. */
+	foo.defer_create = false;
+	instance.RunSome();
+
+	ASSERT_TRUE(lease.did_reenter);
+	ASSERT_NE(lease.item, nullptr);
+	ASSERT_EQ(foo.factory_created, 2);
+	ASSERT_EQ(foo.waiting, 0);
+	ASSERT_EQ(foo.ready, 2);
+}
