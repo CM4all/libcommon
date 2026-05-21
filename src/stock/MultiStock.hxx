@@ -247,6 +247,13 @@ class MultiStock {
 		 */
 		bool continue_on_cancel = false;
 
+		/**
+		 * Are we currently inside FinishWaiting()?  This flag
+		 * prevents entering the method again through
+		 * OnStockItemReady().
+		 */
+		bool in_finish_waiting = false;
+
 	public:
 		/**
 		 * For MultiStock::chronological_list.

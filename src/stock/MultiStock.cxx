@@ -340,6 +340,7 @@ MultiStock::MapItem::~MapItem() noexcept
 {
 	assert(items.empty());
 	assert(waiting.empty());
+	assert(!in_finish_waiting);
 
 	if (get_cancel_ptr)
 		get_cancel_ptr.Cancel();
@@ -513,6 +514,7 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 	assert(item.CanUse());
 	assert(!waiting.empty());
 	assert(!retry_event.IsPending());
+	assert(!in_finish_waiting);
 
 	auto &w = waiting.pop_front();
 	auto &get_handler = w.handler;
@@ -526,6 +528,8 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		   items, but we had more empty items than we
 		   really needed */
 		DeleteEmptyItems(&item);
+
+	in_finish_waiting = true;
 
 	if (item.GetLease(inner_class, get_handler)) {
 		if (!w.is_create) {
@@ -541,6 +545,8 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		waiting.push_front(w);
 		retry_event.Cancel();
 	}
+
+	in_finish_waiting = false;
 }
 
 inline void
@@ -588,6 +594,13 @@ MultiStock::MapItem::OnStockItemReady(StockItem &stock_item) noexcept
 		   canceled (ShouldContinueOnCancel); keep the new
 		   item for future use */
 		return;
+
+	if (in_finish_waiting) {
+		/* this was called from within FinishWaiting();
+		   instead of calling it again, defer the call */
+		retry_event.Schedule();
+		return;
+	}
 
 	FinishWaiting(*item);
 }
