@@ -113,6 +113,22 @@ public:
 		});
 	}
 
+	void TerminateKey(StockKey key) noexcept;
+
+	/**
+	 * @see Stock::TerminateAll()
+	 */
+	void TerminateAll() noexcept;
+
+	/**
+	 * @see Stock::TerminateIf()
+	 */
+	void TerminateIf(std::predicate<const StockItem &> auto predicate) noexcept {
+		map.for_each([&predicate](auto &i){
+			i.TerminateIf(predicate);
+		});
+	}
+
 	/**
 	 * Schedule expiry of all items with the specified key.
 	 */

@@ -120,6 +120,16 @@ public:
 	}
 
 	/**
+	 * Attempt to terminate the underlying resource immediately,
+	 * making the current borrower fail.
+	 *
+	 * Do not call InvokeBusyDisconnect().
+	 *
+	 * This method may only be called if the #StockItem is busy.
+	 */
+	virtual void Terminate() noexcept {}
+
+	/**
 	 * Announce that the creation of this item has finished
 	 * successfully, and it is ready to be used.
 	 */

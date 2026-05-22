@@ -84,6 +84,20 @@ BasicStock::FadeAll() noexcept
 }
 
 void
+BasicStock::TerminateAll() noexcept
+{
+	for (auto &i : busy) {
+		i.Fade();
+		i.Terminate();
+	}
+
+	ClearIdle();
+	CheckEmpty();
+
+	// TODO: restart the "num_create" list?
+}
+
+void
 BasicStock::Shutdown() noexcept
 {
 	FadeAll();

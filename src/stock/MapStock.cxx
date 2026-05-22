@@ -52,6 +52,21 @@ StockMap::FadeAll() noexcept
 }
 
 void
+StockMap::TerminateKey(StockKey key) noexcept
+{
+	if (auto i = map.find(key); i != map.end())
+		i->TerminateAll();
+}
+
+void
+StockMap::TerminateAll() noexcept
+{
+	map.for_each([](auto &i){
+		i.TerminateAll();
+	});
+}
+
+void
 StockMap::ExpireKey(StockKey key, Event::TimePoint time) noexcept
 {
 	if (auto i = map.find(key); i != map.end())

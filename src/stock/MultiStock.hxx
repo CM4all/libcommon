@@ -128,6 +128,13 @@ class MultiStock {
 				Fade();
 		}
 
+		void Terminate() noexcept;
+
+		void TerminateIf(std::predicate<const StockItem &> auto predicate) noexcept {
+			if (predicate(shared_item))
+				Terminate();
+		}
+
 		void CreateLease(MultiStockClass &_cls,
 				 StockGetHandler &handler) noexcept;
 
@@ -315,6 +322,16 @@ class MultiStock {
 				i.FadeIf(predicate);
 		}
 
+		void TerminateAll() noexcept {
+			for (auto &i : items)
+				i.Terminate();
+		}
+
+		void TerminateIf(std::predicate<const StockItem &> auto predicate) noexcept {
+			for (auto &i : items)
+				i.TerminateIf(predicate);
+		}
+
 		/**
 		 * Expire this item at the specified time: all of its
 		 * #OuterItem instances will be faded (marked for
@@ -469,6 +486,22 @@ public:
 	void FadeIf(std::predicate<const StockItem &> auto predicate) noexcept {
 		map.for_each([&predicate](auto &i){
 			i.FadeIf(predicate);
+		});
+	}
+
+	void TerminateKey(StockKey key) noexcept;
+
+	/**
+	 * @see Stock::TerminateAll()
+	 */
+	void TerminateAll() noexcept;
+
+	/**
+	 * @see Stock::TerminateIf()
+	 */
+	void TerminateIf(std::predicate<const StockItem &> auto predicate) noexcept {
+		map.for_each([&predicate](auto &i){
+			i.TerminateIf(predicate);
 		});
 	}
 

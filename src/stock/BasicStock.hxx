@@ -153,6 +153,28 @@ public:
 	}
 
 	/**
+	 * Like FadeAll(), but also call StockItem::Terminate().
+	 */
+	void TerminateAll() noexcept;
+
+	/**
+	 * Like FadeIf(), but also call StockItem::Terminate().
+	 */
+	void TerminateIf(std::predicate<const StockItem &> auto predicate) noexcept {
+		for (auto &i : busy) {
+			if (predicate(i)) {
+				i.Fade();
+				i.Terminate();
+			}
+		}
+
+		ClearIdleIf(predicate);
+
+		CheckEmpty();
+		// TODO: restart the "create" list?
+	}
+
+	/**
 	 * Enable shutdown mode where all returned items will be
 	 * destroyed and all events will be deregistered.
 	 */

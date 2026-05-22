@@ -99,6 +99,17 @@ MultiStock::OuterItem::Fade() noexcept
 		ScheduleCleanupNow();
 }
 
+void
+MultiStock::OuterItem::Terminate() noexcept
+{
+	shared_item.Terminate();
+	DiscardUnused();
+
+	if (IsEmpty())
+		/* let the parent destroy us */
+		ScheduleCleanupNow();
+}
+
 inline void
 MultiStock::OuterItem::CreateLease(MultiStockClass &_inner_class,
 				   StockGetHandler &handler) noexcept
@@ -798,6 +809,21 @@ MultiStock::FadeAll() noexcept
 {
 	map.for_each([](auto &i){
 		i.FadeAll();
+	});
+}
+
+void
+MultiStock::TerminateKey(StockKey key) noexcept
+{
+	if (auto i = map.find(key); i != map.end())
+		i->TerminateAll();
+}
+
+void
+MultiStock::TerminateAll() noexcept
+{
+	map.for_each([](auto &i){
+		i.TerminateAll();
 	});
 }
 
