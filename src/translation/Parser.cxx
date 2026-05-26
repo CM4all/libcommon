@@ -1738,7 +1738,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			assert(layout_items_builder);
 
 			layout_items_builder->emplace_back(TranslationLayoutItem::Type::EXACT,
-							   string_payload);
+							   string_payload,
+							   pcre_cache);
 			return;
 		}
 #endif
@@ -2088,7 +2089,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			assert(layout_items_builder);
 
 			layout_items_builder->emplace_back(TranslationLayoutItem::Type::BASE,
-							   string_payload);
+							   string_payload,
+							   pcre_cache);
 			return;
 		}
 
@@ -2150,7 +2152,8 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			assert(layout_items_builder);
 
 			layout_items_builder->emplace_back(TranslationLayoutItem::Type::REGEX,
-							   string_payload);
+							   string_payload,
+							   pcre_cache);
 			return;
 		}
 

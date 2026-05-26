@@ -46,12 +46,17 @@ struct AddressList;
 struct Transformation;
 struct FilterTransformation;
 struct TranslationLayoutItem;
+namespace Pcre { class Cache; }
 
 /**
  * Parse translation response packets.
  */
 class TranslateParser {
 	AllocatorPtr alloc;
+
+#if TRANSLATION_ENABLE_EXPAND
+	Pcre::Cache &pcre_cache;
+#endif
 
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
 	struct FromRequest {
@@ -170,11 +175,17 @@ class TranslateParser {
 
 public:
 	explicit TranslateParser(AllocatorPtr _alloc,
+#if TRANSLATION_ENABLE_EXPAND
+				 Pcre::Cache &_pcre_cache,
+#endif
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
 				 const TranslateRequest &r,
 #endif
 				 TranslateResponse &_response)
 		:alloc(_alloc),
+#if TRANSLATION_ENABLE_EXPAND
+		 pcre_cache(_pcre_cache),
+#endif
 #if TRANSLATION_ENABLE_RADDRESS || TRANSLATION_ENABLE_HTTP || TRANSLATION_ENABLE_WANT || TRANSLATION_ENABLE_RADDRESS
 		 from_request(r),
 #endif
