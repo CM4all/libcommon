@@ -14,6 +14,7 @@ pcre = static_library(
   'pcre',
   'Error.cxx',
   'UniqueRegex.cxx',
+  'Cache.cxx',
   include_directories: inc,
   dependencies: [
     libpcre,
