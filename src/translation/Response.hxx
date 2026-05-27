@@ -44,10 +44,10 @@ enum class TranslationCommand : uint16_t;
 enum class Arch : uint_least8_t;
 struct TranslationLayoutItem;
 class AllocatorPtr;
-class UniqueRegex;
 class MatchData;
 struct ExecuteOptions;
 struct ServiceExecuteOptions;
+namespace Pcre { class Cache; class SharedRegex; }
 
 struct TranslateResponse {
 	/**
@@ -582,8 +582,8 @@ struct TranslateResponse {
 	/**
 	 * Throws std::runtime_error on error.
 	 */
-	UniqueRegex CompileRegex() const;
-	UniqueRegex CompileInverseRegex() const;
+	Pcre::SharedRegex CompileRegex(Pcre::Cache &pcre_cache) const;
+	Pcre::SharedRegex CompileInverseRegex(Pcre::Cache &pcre_cache) const;
 
 #if TRANSLATION_ENABLE_EXPAND
 	/**

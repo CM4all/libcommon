@@ -19,7 +19,9 @@
 #endif
 #include "AllocatorPtr.hxx"
 #if TRANSLATION_ENABLE_EXPAND
-#include "lib/pcre/UniqueRegex.hxx"
+#include "lib/pcre/Cache.hxx"
+#include "lib/pcre/Options.hxx"
+#include "lib/pcre/SharedRegex.hxx"
 #include "pexpand.hxx"
 #endif
 #if TRANSLATION_ENABLE_SESSION
@@ -662,20 +664,29 @@ TranslateResponse::CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
 
 #if TRANSLATION_ENABLE_EXPAND
 
-UniqueRegex
-TranslateResponse::CompileRegex() const
+Pcre::SharedRegex
+TranslateResponse::CompileRegex(Pcre::Cache &pcre_cache) const
 {
 	assert(regex != nullptr);
 
-	return {regex, {.anchored=protocol_version >= 3, .capture=IsExpandable()}};
+	const Pcre::CompileOptions options{
+		.anchored=protocol_version >= 3,
+		.capture=IsExpandable(),
+	};
+
+	return pcre_cache.Get(regex, static_cast<int>(options));
 }
 
-UniqueRegex
-TranslateResponse::CompileInverseRegex() const
+Pcre::SharedRegex
+TranslateResponse::CompileInverseRegex(Pcre::Cache &pcre_cache) const
 {
 	assert(inverse_regex != nullptr);
 
-	return {inverse_regex, {.anchored=protocol_version >= 3}};
+	const Pcre::CompileOptions options{
+		.anchored=protocol_version >= 3,
+	};
+
+	return pcre_cache.Get(inverse_regex, static_cast<int>(options));
 }
 
 bool
