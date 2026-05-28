@@ -235,6 +235,11 @@ class MultiStock {
 		StockCounters counters{};
 
 		/**
+		 * When did the Create operation start?
+		 */
+		Event::TimePoint create_start_time;
+
+		/**
 		 * All waits for an item (when all items are busy
 		 * currently) will be rejected with
 		 * #StockOverloadedError.  This is set by

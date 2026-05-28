@@ -386,6 +386,7 @@ MultiStock::MapItem::Create(StockRequest request) noexcept
 
 	++counters.total_creates;
 
+	create_start_time = GetEventLoop().SteadyNow();
 	continue_on_cancel = outer_class.ShouldContinueOnCancel(request.get());
 
 	try {
@@ -490,6 +491,7 @@ MultiStock::MapItem::RemoveWaiting(Waiting &w) noexcept
 
 	if (get_cancel_ptr && !continue_on_cancel) {
 		++counters.canceled_creates;
+		counters.total_create_duration += GetEventLoop().SteadyNow() - create_start_time;
 		get_cancel_ptr.Cancel();
 	}
 
@@ -599,6 +601,8 @@ MultiStock::MapItem::OnStockItemReady(StockItem &stock_item) noexcept
 {
 	get_cancel_ptr = nullptr;
 
+	counters.total_create_duration += GetEventLoop().SteadyNow() - create_start_time;
+
 	retry_event.Cancel();
 
 	auto *item = new OuterItem(*this, stock_item, get_concurrency,
@@ -625,6 +629,8 @@ void
 MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 {
 	get_cancel_ptr = nullptr;
+
+	counters.total_create_duration += GetEventLoop().SteadyNow() - create_start_time;
 
 	retry_event.Cancel();
 

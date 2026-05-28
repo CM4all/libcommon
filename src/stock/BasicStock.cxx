@@ -6,6 +6,7 @@
 #include "Options.hxx"
 #include "Class.hxx"
 #include "GetHandler.hxx"
+#include "event/Loop.hxx"
 #include "util/Cancellable.hxx"
 
 #include <cassert>
@@ -14,6 +15,8 @@ struct BasicStock::Create final
 	: IntrusiveListHook<>, StockGetHandler, Cancellable
 {
 	BasicStock &stock;
+
+	const Event::TimePoint start_time;
 
 	/**
 	 * Request was canceled if this field is nullptr.
@@ -25,9 +28,12 @@ struct BasicStock::Create final
 	const bool continue_on_cancel;
 
 	Create(BasicStock &_stock,
+	       Event::TimePoint _start_time,
 	       bool _continue_on_cancel,
 	       StockGetHandler &_handler, CancellablePointer &_cancel_ptr) noexcept
-		:stock(_stock), handler(&_handler),
+		:stock(_stock),
+		 start_time(_start_time),
+		 handler(&_handler),
 		 continue_on_cancel(_continue_on_cancel)
 	{
 		_cancel_ptr = *this;
@@ -282,6 +288,7 @@ BasicStock::GetCreate(StockRequest request,
 	++counters.total_creates;
 
 	auto *c = new Create(*this,
+			     GetEventLoop().SteadyNow(),
 			     cls.ShouldContinueOnCancel(request.get()),
 			     get_handler, cancel_ptr);
 	create.push_front(*c);
@@ -418,6 +425,8 @@ inline void
 BasicStock::DeleteCreate(Create &c) noexcept
 {
 	assert(!create.empty());
+
+	counters.total_create_duration += GetEventLoop().SteadyNow() - c.start_time;
 
 	create.erase_and_dispose(create.iterator_to(c),
 				 DeleteDisposer{});
