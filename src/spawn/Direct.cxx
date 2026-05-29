@@ -129,11 +129,11 @@ WaitForPipe(FileDescriptor r) noexcept
 	assert(r.IsDefined());
 
 	/* expect one byte to indicate success, and then the pipe will
-	   be closed by the parent */
-	std::byte buffer[1];
+	   be closed by the parent; the pipe has two bytes because it
+	   allows us to check whether there is too much data */
+	std::byte buffer[2];
 
-	return r.Read(buffer) == sizeof(buffer) &&
-		r.Read(buffer) == 0;
+	return r.Read(buffer) == 1;
 }
 
 [[noreturn]]
