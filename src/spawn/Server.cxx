@@ -384,19 +384,15 @@ SpawnServerConnection::RemoveConnection() noexcept
 inline void
 SpawnServerConnection::SendExecComplete(unsigned id, std::string &&error) noexcept
 {
-	if (exec_complete_queue.empty())
-		ScheduleWrite();
-
 	exec_complete_queue.emplace_front(id, std::move(error));
+	ScheduleWrite();
 }
 
 void
 SpawnServerConnection::SendExit(unsigned id, int status) noexcept
 {
-	if (exit_queue.empty())
-		ScheduleWrite();
-
 	exit_queue.push_front({id, status});
+	ScheduleWrite();
 }
 
 /**
