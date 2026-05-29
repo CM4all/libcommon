@@ -207,6 +207,11 @@ private:
 	void HandleMessage(ReceiveMessageResult &&result);
 
 	void ReceiveAndHandle();
+
+	bool WantWrite() const noexcept {
+		return !exec_complete_queue.empty() || !exit_queue.empty();
+	}
+
 	void FlushExecCompleteQueue();
 	void FlushExitQueue();
 	void FlushOutput();
@@ -1019,7 +1024,7 @@ try {
 	if (events & event.WRITE) {
 		FlushOutput();
 
-		if (exec_complete_queue.empty() && exit_queue.empty())
+		if (!WantWrite())
 			event.CancelWrite();
 	}
 
