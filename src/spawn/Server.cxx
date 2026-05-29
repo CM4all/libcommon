@@ -212,6 +212,10 @@ private:
 		return !exec_complete_queue.empty() || !exit_queue.empty();
 	}
 
+	void ScheduleWrite() noexcept {
+		event.ScheduleWrite();
+	}
+
 	void FlushExecCompleteQueue();
 	void FlushExitQueue();
 	void FlushOutput();
@@ -381,7 +385,7 @@ inline void
 SpawnServerConnection::SendExecComplete(unsigned id, std::string &&error) noexcept
 {
 	if (exec_complete_queue.empty())
-		event.ScheduleWrite();
+		ScheduleWrite();
 
 	exec_complete_queue.emplace_front(id, std::move(error));
 }
@@ -390,7 +394,7 @@ void
 SpawnServerConnection::SendExit(unsigned id, int status) noexcept
 {
 	if (exit_queue.empty())
-		event.ScheduleWrite();
+		ScheduleWrite();
 
 	exit_queue.push_front({id, status});
 }
