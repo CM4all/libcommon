@@ -20,6 +20,7 @@
 #include "PidfdEvent.hxx"
 #include "spawn/config.h"
 #include "event/CoarseTimerEvent.hxx"
+#include "event/DeferEvent.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/Loop.hxx"
 #include "net/EasyMessage.hxx"
@@ -155,6 +156,8 @@ class SpawnServerConnection final
 
 	SocketEvent event;
 
+	DeferEvent defer_flush_output;
+
 	using ChildIdMap =
 		IntrusiveHashSet<SpawnServerChild, 1024,
 				 IntrusiveHashSetOperators<SpawnServerChild,
@@ -213,13 +216,15 @@ private:
 	}
 
 	void ScheduleWrite() noexcept {
-		event.ScheduleWrite();
+		if (!event.IsWritePending())
+			defer_flush_output.ScheduleIdle();
 	}
 
 	void FlushExecCompleteQueue();
 	void FlushExitQueue();
 	void FlushOutput();
 
+	void DeferredFlushOutput() noexcept;
 	void OnSocketEvent(unsigned events) noexcept;
 };
 
@@ -359,7 +364,8 @@ SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
 	:process(_process), socket(std::move(_socket)),
 	 logger("spawn"),
 	 event(process.GetEventLoop(), BIND_THIS_METHOD(OnSocketEvent),
-	       socket)
+	       socket),
+	 defer_flush_output(process.GetEventLoop(), BIND_THIS_METHOD(DeferredFlushOutput))
 {
 	event.ScheduleRead();
 }
@@ -1008,6 +1014,20 @@ SpawnServerConnection::FlushOutput()
 {
 	FlushExecCompleteQueue();
 	FlushExitQueue();
+}
+
+inline void
+SpawnServerConnection::DeferredFlushOutput() noexcept
+try {
+	FlushOutput();
+
+	if (WantWrite())
+		/* consult epoll_wait() before flushing the rest, to
+		   avoid running into EAGAIN */
+		event.ScheduleWrite();
+} catch (...) {
+	logger(2, std::current_exception());
+	RemoveConnection();
 }
 
 inline void
