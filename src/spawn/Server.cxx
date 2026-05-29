@@ -209,6 +209,7 @@ private:
 	void ReceiveAndHandle();
 	void FlushExecCompleteQueue();
 	void FlushExitQueue();
+	void FlushOutput();
 
 	void OnSocketEvent(unsigned events) noexcept;
 };
@@ -998,6 +999,13 @@ SpawnServerConnection::FlushExitQueue()
 }
 
 inline void
+SpawnServerConnection::FlushOutput()
+{
+	FlushExecCompleteQueue();
+	FlushExitQueue();
+}
+
+inline void
 SpawnServerConnection::OnSocketEvent(unsigned events) noexcept
 try {
 	if (events & event.ERROR)
@@ -1009,8 +1017,7 @@ try {
 	}
 
 	if (events & event.WRITE) {
-		FlushExecCompleteQueue();
-		FlushExitQueue();
+		FlushOutput();
 
 		if (exec_complete_queue.empty() && exit_queue.empty())
 			event.CancelWrite();
