@@ -13,6 +13,8 @@
 struct PreparedChildProcess;
 struct CgroupState;
 class UniqueFileDescriptor;
+class EventLoop;
+namespace Co { template <typename T> class Task; }
 
 struct SpawnChildProcessResult {
 	UniqueFileDescriptor pidfd;
@@ -39,8 +41,9 @@ struct SpawnChildProcessResult {
  * @param is_sys_admin are we CAP_SYS_ADMIN?
  */
 [[nodiscard]]
-SpawnChildProcessResult
-SpawnChildProcess(PreparedChildProcess &&params,
+Co::Task<SpawnChildProcessResult>
+SpawnChildProcess(EventLoop &event_loop,
+		  PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
 		  bool is_sys_admin);

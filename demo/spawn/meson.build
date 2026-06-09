@@ -16,6 +16,7 @@ executable(
   include_directories: inc,
   dependencies: [
     alloc_dep,
+    event_dep,
     spawn_dep,
     net_dep,
     system_dep,

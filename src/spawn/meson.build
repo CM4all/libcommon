@@ -100,6 +100,11 @@ if get_variable('libcommon_enable_spawn_direct', false)
     'ErrorPipe.cxx',
   ]
 
+  spawn_dependencies += [
+    event_dep,
+    coroutines_dep,
+  ]
+
   if libseccomp.found()
     spawn_sources += 'SyscallFilter.cxx'
   endif

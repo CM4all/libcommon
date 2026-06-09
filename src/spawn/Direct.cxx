@@ -11,6 +11,7 @@
 #include "accessory/Client.hxx"
 #include "lib/fmt/ExceptionFormatter.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "event/AwaitableSocketEvent.hxx"
 #include "net/EasyMessage.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Pipe.hxx"
@@ -20,6 +21,7 @@
 #include "system/linux/clone3.h"
 #include "system/linux/CoreScheduling.hxx"
 #include "system/linux/IOPrio.hxx"
+#include "co/Task.hxx"
 #include "util/Exception.hxx"
 #include "util/ScopeExit.hxx"
 
@@ -134,6 +136,23 @@ WaitForPipe(FileDescriptor r) noexcept
 	std::byte buffer[2];
 
 	return r.Read(buffer) == 1;
+}
+
+/**
+ * Like WaitForPipe(), but as non-blocking coroutine.
+ */
+static Co::Task<bool>
+CoWaitForPipe(EventLoop &event_loop, FileDescriptor r) noexcept
+{
+	assert(r.IsDefined());
+
+	const unsigned events = co_await AwaitableSocketEvent{
+		event_loop,
+		SocketDescriptor::FromFileDescriptor(r),
+		SocketEvent::READ,
+	};
+
+	co_return (events & SocketEvent::READ) != 0 && WaitForPipe(r);
 }
 
 [[noreturn]]
@@ -407,23 +426,22 @@ try {
  * Read an error message from the pipe and if there is one, throw it
  * as a C++ exception.
  */
-static void
-ReadErrorPipeTimeout(FileDescriptor error_pipe_r)
+static Co::Task<void>
+CoReadErrorPipe(EventLoop &event_loop, FileDescriptor error_pipe_r)
 {
-	if (int p = error_pipe_r.WaitReadable(250);
-	    p <= 0 || (p & POLLIN) == 0)
-		/* this can time out if the execve() takes a long time
-		   to finish (maybe because the shrinker runs) and the
-		   other side of the pipe doesn't get closed early
-		   enough through O_CLOEXEC */
-		// TODO find a better solution
-		return;
+	const unsigned events = co_await AwaitableSocketEvent{
+		event_loop,
+		SocketDescriptor::FromFileDescriptor(error_pipe_r),
+		SocketEvent::READ,
+	};
 
-	ReadErrorPipe(error_pipe_r);
+	if (events & SocketEvent::READ)
+		ReadErrorPipe(error_pipe_r);
 }
 
-SpawnChildProcessResult
-SpawnChildProcess(PreparedChildProcess &&params,
+Co::Task<SpawnChildProcessResult>
+SpawnChildProcess(EventLoop &event_loop,
+		  PreparedChildProcess &&params,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
 		  bool is_sys_admin)
@@ -675,10 +693,10 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 		/* expect one byte to indicate success, and then the
 		   pipe will be closed by the child */
-		if (!WaitForPipe(userns_create_pipe_r)) {
+		if (!co_await CoWaitForPipe(event_loop, userns_create_pipe_r)) {
 			/* read the error_pipe, it may have more
 			   details */
-			ReadErrorPipeTimeout(error_pipe_r);
+			co_await CoReadErrorPipe(event_loop, error_pipe_r);
 			throw std::runtime_error("User namespace setup failed");
 		}
 	}
@@ -698,7 +716,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		WakeUpPipe(std::move(wait_pipe_w));
 	}
 
-	ReadErrorPipeTimeout(error_pipe_r);
+	co_await CoReadErrorPipe(event_loop, error_pipe_r);
 
 	if (params.return_pidfd.IsDefined()) {
 		EasySendMessage(params.return_pidfd, pidfd);
@@ -707,7 +725,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	/* TODO don't return the "classic" pid_t as soon as all
 	   callers have been fully migrated to pidfd */
-	return {
+	co_return SpawnChildProcessResult{
 		.pidfd = std::move(pidfd),
 		.pid = static_cast<pid_t>(pid),
 		.accessory_lease_pipe = std::move(accessory_lease_pipe),

@@ -30,6 +30,8 @@
 #include "io/FileAt.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "co/InvokeTask.hxx"
+#include "co/Task.hxx"
 #include "util/DeleteDisposer.hxx"
 #include "util/IntrusiveHashSet.hxx"
 #include "util/IntrusiveList.hxx"
@@ -108,32 +110,36 @@ class SpawnServerChild final : public ExitListener,
 
 	const unsigned id;
 
+	const std::string name;
+
+	Co::InvokeTask invoke_task;
+
 	std::unique_ptr<PidfdEvent> pidfd;
 
-	const UniqueFileDescriptor accessory_lease_pipe;
+	UniqueFileDescriptor accessory_lease_pipe;
 
 public:
-	explicit SpawnServerChild(EventLoop &event_loop,
-				  SpawnServerConnection &_connection,
+	explicit SpawnServerChild(SpawnServerConnection &_connection,
 				  std::forward_list<SharedLease> &&_leases,
-				  unsigned _id, UniqueFileDescriptor &&_pidfd,
-				  UniqueFileDescriptor &&_accessory_lease_pipe,
+				  unsigned _id,
 				  std::string_view _name) noexcept
 		:connection(_connection),
 		 leases(std::move(_leases)),
 		 id(_id),
-		 pidfd(std::make_unique<PidfdEvent>(event_loop,
-						    std::move(_pidfd),
-						    _name,
-						    (ExitListener &)*this)),
-		 accessory_lease_pipe(std::move(_accessory_lease_pipe)) {}
+		 name(_name) {}
 
 	SpawnServerChild(const SpawnServerChild &) = delete;
 	SpawnServerChild &operator=(const SpawnServerChild &) = delete;
 
+	void Start(Co::Task<SpawnChildProcessResult> &&task) {
+		invoke_task = Await(std::move(task));
+		invoke_task.Start(BIND_THIS_METHOD(OnCompletion));
+	}
+
 	void Kill(ChildProcessRegistry &child_process_registry,
 		  int signo) noexcept {
-		child_process_registry.Kill(std::move(pidfd), signo);
+		if (pidfd)
+			child_process_registry.Kill(std::move(pidfd), signo);
 	}
 
 	/* virtual methods from ExitListener */
@@ -144,6 +150,10 @@ public:
 			return child.id;
 		}
 	};
+
+private:
+	Co::InvokeTask Await(Co::Task<SpawnChildProcessResult> task);
+	void OnCompletion(std::exception_ptr &&error) noexcept;
 };
 
 class SpawnServerConnection final
@@ -195,11 +205,12 @@ public:
 	void OnChildProcessExit(unsigned id, int status,
 				SpawnServerChild *child) noexcept;
 
+	void SendExecComplete(unsigned id, std::string &&error) noexcept;
+	void SendExit(unsigned id, int status) noexcept;
+
 private:
 	void RemoveConnection() noexcept;
 
-	void SendExecComplete(unsigned id, std::string &&error) noexcept;
-	void SendExit(unsigned id, int status) noexcept;
 	void SpawnChild(unsigned id, std::string_view name,
 			PreparedChildProcess &&p);
 
@@ -227,6 +238,30 @@ private:
 	void DeferredFlushOutput() noexcept;
 	void OnSocketEvent(unsigned events) noexcept;
 };
+
+inline Co::InvokeTask
+SpawnServerChild::Await(Co::Task<SpawnChildProcessResult> task)
+{
+	auto result = co_await task;
+
+	ExitListener &exit_listener = *this;
+	pidfd = std::make_unique<PidfdEvent>(connection.GetEventLoop(),
+					     std::move(result.pidfd),
+					     name,
+					     exit_listener);
+	accessory_lease_pipe = std::move(result.accessory_lease_pipe);
+}
+
+inline void
+SpawnServerChild::OnCompletion(std::exception_ptr &&error) noexcept
+{
+	if (error) {
+		connection.SendExecComplete(id, GetFullMessage(std::move(error)));
+		connection.SendExit(id, W_EXITCODE(0xff, 0));
+	} else {
+		connection.SendExecComplete(id, {});
+	}
+}
 
 void
 SpawnServerChild::OnChildProcessExit(int status) noexcept
@@ -446,18 +481,19 @@ SpawnServerConnection::SpawnChild(unsigned id, std::string_view name,
                 PrepareNamedTmpfs(*tmpfs_manager,
                                   p.ns.mount, leases, fds);
 
-	auto result = SpawnChildProcess(std::move(p),
-					process.GetCgroupState(),
-					config.cgroups_writable_by_gid > 0,
-					process.IsSysAdmin());
+	auto task = SpawnChildProcess(GetEventLoop(),
+				      std::move(p),
+				      process.GetCgroupState(),
+				      config.cgroups_writable_by_gid > 0,
+				      process.IsSysAdmin());
 
-	auto *child = new SpawnServerChild(GetEventLoop(), *this,
+	auto *child = new SpawnServerChild(*this,
 					   std::move(leases),
 					   id,
-					   std::move(result.pidfd),
-					   std::move(result.accessory_lease_pipe),
 					   name);
 	children.insert(*child);
+
+	child->Start(std::move(task));
 }
 
 static void
@@ -885,7 +921,6 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 
 	try {
 		SpawnChild(id, name, std::move(p));
-		SendExecComplete(id, {});
 	} catch (...) {
 		SendExecComplete(id, GetFullMessage(std::current_exception()));
 		SendExit(id, W_EXITCODE(0xff, 0));

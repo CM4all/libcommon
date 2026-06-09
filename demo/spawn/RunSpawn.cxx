@@ -8,7 +8,10 @@
 #include "spawn/CgroupOptions.hxx"
 #include "spawn/Mount.hxx"
 #include "spawn/Systemd.hxx"
+#include "event/Loop.hxx"
 #include "system/Error.hxx"
+#include "co/InvokeTask.hxx"
+#include "co/Task.hxx"
 #include "util/PrintException.hxx"
 #include "util/StringCompare.hxx"
 #include "util/StringSplit.hxx"
@@ -23,6 +26,49 @@
 #include <sys/wait.h>
 
 struct Usage {};
+
+static SpawnChildProcessResult
+SpawnChildProcess(PreparedChildProcess &&params,
+		  const CgroupState &cgroup_state,
+		  bool cgroups_group_writable,
+		  bool is_sys_admin)
+{
+	struct Instance {
+		Co::InvokeTask invoke_task;
+		SpawnChildProcessResult result;
+		std::exception_ptr error;
+
+		void Start(Co::Task<SpawnChildProcessResult> &&task) {
+			invoke_task = Await(std::move(task));
+			invoke_task.Start(BIND_THIS_METHOD(OnCompletion));
+		}
+
+		SpawnChildProcessResult Finish() && {
+			if (error)
+				std::rethrow_exception(std::move(error));
+
+			return std::move(result);
+		}
+
+	private:
+		Co::InvokeTask Await(Co::Task<SpawnChildProcessResult> task) {
+			result = co_await task;
+		}
+
+		void OnCompletion(std::exception_ptr &&_error) noexcept {
+			error = std::move(_error);
+		}
+	};
+
+	EventLoop event_loop;
+	Instance instance;
+
+	instance.Start(SpawnChildProcess(event_loop, std::move(params), cgroup_state, cgroups_group_writable, is_sys_admin));
+	event_loop.Run();
+
+	return std::move(instance).Finish();
+}
+
 
 int
 main(int argc, char **argv)
