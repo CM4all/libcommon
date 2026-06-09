@@ -13,6 +13,7 @@
 #include "Mount.hxx"
 #include "ExitListener.hxx"
 #include "lib/fmt/ExceptionFormatter.hxx"
+#include "event/Loop.hxx"
 #include "net/SocketError.hxx"
 #include "net/SocketPair.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
@@ -61,6 +62,11 @@ struct SpawnServerClient::ChildProcess final
 	: ChildProcessHandle, IntrusiveHashSetHook<IntrusiveHookMode::TRACK>
 {
 	SpawnServerClient &client;
+
+	/**
+	 * Used to calculate SpawnStats::total_spawn_duration.
+	 */
+	const Event::TimePoint spawn_start_time = client.GetEventLoop().SteadyNow();
 
 	const unsigned pid;
 
@@ -604,17 +610,21 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 			   (that may have occurred due to the kill
 			   command) */
 			error = nullptr;
-		} else if (i->completion_handler) {
-			if (error == nullptr) {
-				i->completion_handler->OnSpawnSuccess();
-			} else {
-				++stats.errors;
-				i->completion_handler->OnSpawnError(std::make_exception_ptr(std::runtime_error{error}));
+		} else {
+			stats.total_spawn_duration += GetEventLoop().SteadyNow() - i->spawn_start_time;
 
-				/* if there is a completion handler,
-				   don't log error message to
-				   stderr */
-				error = nullptr;
+			if (i->completion_handler) {
+				if (error == nullptr) {
+					i->completion_handler->OnSpawnSuccess();
+				} else {
+					++stats.errors;
+					i->completion_handler->OnSpawnError(std::make_exception_ptr(std::runtime_error{error}));
+
+					/* if there is a completion handler,
+					   don't log error message to
+					   stderr */
+					error = nullptr;
+				}
 			}
 		}
 

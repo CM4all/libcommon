@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 
 struct SpawnStats {
@@ -33,4 +34,9 @@ struct SpawnStats {
 	 * How many child processse are alive right now?
 	 */
 	std::size_t alive;
+
+	/**
+	 * The total duration of all SpawnChildProcess() calls.
+	 */
+	std::chrono::steady_clock::duration total_spawn_duration;
 };
