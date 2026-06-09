@@ -2,8 +2,6 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#include "spawn/Direct.hxx"
-#include "spawn/Prepared.hxx"
 #include "spawn/CgroupState.hxx"
 #include "spawn/CgroupKill.hxx"
 #include "event/Loop.hxx"
