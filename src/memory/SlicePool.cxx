@@ -299,8 +299,12 @@ SlicePool::Populate() noexcept
 {
 	populate = true;
 
-	if (areas.empty() && empty_areas.empty() && full_areas.empty())
-		CreateArea().CollapseHugePages();
+	if (areas.empty() && empty_areas.empty() && full_areas.empty()) {
+		assert(keep_area == nullptr);
+		auto &area = CreateArea();
+		area.CollapseHugePages();
+		keep_area = &area;
+	}
 }
 
 void
@@ -312,11 +316,13 @@ SlicePool::Compress() noexcept
 
 	if (!empty_areas.empty()) {
 		SliceArea *tmp = nullptr;
-		if (populate && areas.empty() && full_areas.empty())
-			/* with "populate" enabled, keep one area;
-			   remove it from the list and re-add it
+		if (keep_area != nullptr && keep_area->IsEmpty()) {
+			/* exclude "keep_area" from the
+			   clear_and_dispose() call; re-add it
 			   later */
-			tmp = &empty_areas.pop_front();
+			tmp = keep_area;
+			empty_areas.erase(empty_areas.iterator_to(*tmp));
+		}
 
 		empty_areas.clear_and_dispose(SliceArea::Disposer());
 

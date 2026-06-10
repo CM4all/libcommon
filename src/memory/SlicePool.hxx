@@ -59,6 +59,12 @@ class SlicePool {
 	 */
 	AreaList full_areas;
 
+	/**
+	 * If not nullptr, then never free this area, even if it is
+	 * empty.
+	 */
+	SliceArea *keep_area = nullptr;
+
 	bool fork_cow = true;
 
 	bool populate = false;
