@@ -709,6 +709,8 @@ SpawnChildProcess(EventLoop &event_loop,
 			co_await CoReadErrorPipe(event_loop, error_pipe_r);
 			throw std::runtime_error("User namespace setup failed");
 		}
+
+		userns_create_pipe_r.Close();
 	}
 
 	if (wait_pipe_w.IsDefined()) {
@@ -724,9 +726,12 @@ SpawnChildProcess(EventLoop &event_loop,
 		/* after success (no exception was thrown), wake up
 		   the child */
 		WakeUpPipe(std::move(wait_pipe_w));
+
+		wait_pipe_w.Close();
 	}
 
 	co_await CoReadErrorPipe(event_loop, error_pipe_r);
+	error_pipe_r.Close();
 
 	if (params.return_pidfd.IsDefined()) {
 		EasySendMessage(params.return_pidfd, pidfd);
