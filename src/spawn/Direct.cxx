@@ -663,6 +663,16 @@ SpawnChildProcess(EventLoop &event_loop,
 		     std::move(error_pipe_w));
 	}
 
+	if (old_pidns.IsDefined()) {
+		/* restore the old PID namespace as early as possible,
+		   before this coroutine can be suspended, because
+		   that may leak the PID namespace to other parts of
+		   this process; it's not enough to wait for the
+		   AtScopeExit() to run */
+		setns(old_pidns.Get(), CLONE_NEWPID);
+		old_pidns.Close();
+	}
+
 	error_pipe_w.Close();
 
 	UniqueFileDescriptor pidfd{AdoptTag{}, _pidfd};
