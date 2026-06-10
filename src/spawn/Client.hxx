@@ -116,6 +116,7 @@ public:
 
 	const SpawnStats &GetStats() const noexcept {
 		stats.alive = processes.size();
+		stats.pending = n_pending_execs;
 		return stats;
 	}
 

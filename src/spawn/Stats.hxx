@@ -36,6 +36,11 @@ struct SpawnStats {
 	std::size_t alive;
 
 	/**
+	 * The current number of pending (incomplete) spawn calls.
+	 */
+	std::size_t pending;
+
+	/**
 	 * The total duration of all SpawnChildProcess() calls.
 	 */
 	std::chrono::steady_clock::duration total_spawn_duration;
