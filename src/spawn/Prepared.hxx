@@ -176,6 +176,8 @@ struct PreparedChildProcess {
 	PreparedChildProcess() noexcept;
 	~PreparedChildProcess() noexcept;
 
+	PreparedChildProcess(PreparedChildProcess &&) noexcept = default;
+
 	PreparedChildProcess(const PreparedChildProcess &) = delete;
 	PreparedChildProcess &operator=(const PreparedChildProcess &) = delete;
 

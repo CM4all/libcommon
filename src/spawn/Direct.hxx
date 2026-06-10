@@ -43,7 +43,7 @@ struct SpawnChildProcessResult {
 [[nodiscard]]
 Co::Task<SpawnChildProcessResult>
 SpawnChildProcess(EventLoop &event_loop,
-		  PreparedChildProcess &&params,
+		  PreparedChildProcess params,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
 		  bool is_sys_admin);
