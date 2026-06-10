@@ -110,6 +110,15 @@ class SpawnServerChild final : public ExitListener,
 
 	const unsigned id;
 
+	/**
+	 * When did spawning of this child start?  This is used to
+	 * update SpawnStats::total_spawn_duration.
+	 * 
+	 * Note: not using EventLoop::SteadyNow() because we want
+	 * precise time stamps.
+	 */
+	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+
 	const std::string name;
 
 	Co::InvokeTask invoke_task;
@@ -178,6 +187,7 @@ class SpawnServerConnection final
 
 	struct ExecCompleteItem {
 		unsigned id;
+		std::chrono::steady_clock::duration duration;
 		std::string error;
 	};
 
@@ -205,7 +215,8 @@ public:
 	void OnChildProcessExit(unsigned id, int status,
 				SpawnServerChild *child) noexcept;
 
-	void SendExecComplete(unsigned id, std::string &&error) noexcept;
+	void SendExecComplete(unsigned id, std::chrono::steady_clock::duration duration,
+			      std::string &&error) noexcept;
 	void SendExit(unsigned id, int status) noexcept;
 
 private:
@@ -255,11 +266,13 @@ SpawnServerChild::Await(Co::Task<SpawnChildProcessResult> task)
 inline void
 SpawnServerChild::OnCompletion(std::exception_ptr &&error) noexcept
 {
+	const auto duration = std::chrono::steady_clock::now() - start_time;
+
 	if (error) {
-		connection.SendExecComplete(id, GetFullMessage(std::move(error)));
+		connection.SendExecComplete(id, duration, GetFullMessage(std::move(error)));
 		connection.SendExit(id, W_EXITCODE(0xff, 0));
 	} else {
-		connection.SendExecComplete(id, {});
+		connection.SendExecComplete(id, duration, {});
 	}
 }
 
@@ -423,9 +436,11 @@ SpawnServerConnection::RemoveConnection() noexcept
 }
 
 inline void
-SpawnServerConnection::SendExecComplete(unsigned id, std::string &&error) noexcept
+SpawnServerConnection::SendExecComplete(unsigned id,
+					std::chrono::steady_clock::duration duration,
+					std::string &&error) noexcept
 {
-	exec_complete_queue.emplace_front(id, std::move(error));
+	exec_complete_queue.emplace_front(id, duration, std::move(error));
 	ScheduleWrite();
 }
 
@@ -922,7 +937,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 	try {
 		SpawnChild(id, name, std::move(p));
 	} catch (...) {
-		SendExecComplete(id, GetFullMessage(std::current_exception()));
+		SendExecComplete(id, {}, GetFullMessage(std::current_exception()));
 		SendExit(id, W_EXITCODE(0xff, 0));
 	}
 }
@@ -1017,6 +1032,7 @@ SpawnServerConnection::FlushExecCompleteQueue()
 	for (std::size_t n = 0; n < 64 && !exec_complete_queue.empty(); ++n) {
 		const auto &i = exec_complete_queue.front();
 		s.WriteUnsigned(i.id);
+		s.WriteT(i.duration);
 		s.WriteString(i.error);
 		exec_complete_queue.pop_front();
 	}

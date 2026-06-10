@@ -98,9 +98,12 @@ enum class ExecCommand : uint8_t {
 
 enum class ResponseCommand : uint8_t {
 	/**
-	 * An EXEC request has completed.  This exists to allow the
-	 * #SpawnServerClient to count the number of pending requests,
-	 * which may then be used to throttle further requests.
+	 * One (or more) EXEC request has completed.  Payload is a
+	 * list of:
+	 *
+	 * - pid
+	 * - duration (as std::chrono::steady_clock::duration)
+	 * - error message (or empty string if successful)
 	 */
 	EXEC_COMPLETE,
 

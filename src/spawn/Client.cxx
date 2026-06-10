@@ -63,11 +63,6 @@ struct SpawnServerClient::ChildProcess final
 {
 	SpawnServerClient &client;
 
-	/**
-	 * Used to calculate SpawnStats::total_spawn_duration.
-	 */
-	const Event::TimePoint spawn_start_time = client.GetEventLoop().SteadyNow();
-
 	const unsigned pid;
 
 	SpawnCompletionHandler *completion_handler = nullptr;
@@ -598,6 +593,11 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 
 		unsigned pid;
 		payload.ReadUnsigned(pid);
+
+		std::chrono::steady_clock::duration duration;
+		payload.ReadT(duration);
+		stats.total_spawn_duration += duration;
+
 		const char *error = payload.ReadString();
 		if (*error == '\0')
 			error = nullptr;
@@ -611,8 +611,6 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 			   command) */
 			error = nullptr;
 		} else {
-			stats.total_spawn_duration += GetEventLoop().SteadyNow() - i->spawn_start_time;
-
 			if (i->completion_handler) {
 				if (error == nullptr) {
 					i->completion_handler->OnSpawnSuccess();
