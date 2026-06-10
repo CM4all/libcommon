@@ -3,7 +3,6 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "UserNamespace.hxx"
-#include "ProcPid.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "io/FileAt.hxx"
 #include "io/WriteFile.hxx"
@@ -17,9 +16,9 @@
 using std::string_view_literals::operator""sv;
 
 void
-DenySetGroups(unsigned pid) noexcept
+DenySetGroups(FileDescriptor proc_pid) noexcept
 try {
-	TryWriteExistingFile({OpenProcPid(pid), "setgroups"}, "deny");
+	TryWriteExistingFile({proc_pid, "setgroups"}, "deny");
 } catch (...) {
 	// silently ignore errors
 }
@@ -69,39 +68,39 @@ WriteFileOrThrow(FileDescriptor directory, const char *path, std::string_view da
 }
 
 void
-SetupUidMap(unsigned pid, const IdMap &map)
+SetupUidMap(FileDescriptor proc_pid, const IdMap &map)
 {
 	char buffer[256];
 	char *end = FormatIdMap(buffer, map);
 
-	WriteFileOrThrow(OpenProcPid(pid), "uid_map", {buffer, end});
+	WriteFileOrThrow(proc_pid, "uid_map", {buffer, end});
 }
 
 void
-SetupUidMap(unsigned pid, unsigned uid)
+SetupUidMap(FileDescriptor proc_pid, unsigned uid)
 {
 	char buffer[256];
 	char *end = FormatIdMap(buffer, uid);
 
-	WriteFileOrThrow(OpenProcPid(pid), "uid_map", {buffer, end});
+	WriteFileOrThrow(proc_pid, "uid_map", {buffer, end});
 }
 
 void
-SetupGidMap(unsigned pid, unsigned gid)
+SetupGidMap(FileDescriptor proc_pid, unsigned gid)
 {
 	char buffer[256];
 	char *end = FormatIdMap(buffer, gid);
 
-	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {buffer, end});
+	WriteFileOrThrow(proc_pid, "gid_map", {buffer, end});
 }
 
 void
-SetupGidMap(unsigned pid, const std::set<unsigned> &gids)
+SetupGidMap(FileDescriptor proc_pid, const std::set<unsigned> &gids)
 {
 	assert(!gids.empty());
 
 	char buffer[1024];
 	char *end = FormatIdMap(buffer, gids);
 
-	WriteFileOrThrow(OpenProcPid(pid), "gid_map", {buffer, end});
+	WriteFileOrThrow(proc_pid, "gid_map", {buffer, end});
 }

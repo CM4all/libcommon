@@ -6,6 +6,8 @@
 
 #include <set>
 
+class FileDescriptor;
+
 /**
  * Write "deny" to /proc/self/setgroups which is necessary for
  * unprivileged processes to set up a gid_map.  See Linux commits
@@ -14,7 +16,7 @@
  * Errors are ignored silently.
  */
 void
-DenySetGroups(unsigned pid) noexcept;
+DenySetGroups(FileDescriptor proc_pid) noexcept;
 
 /**
  * Uid/gid mapping for Linux user namespaces.
@@ -65,35 +67,32 @@ FormatIdMap(char *dest, const std::set<unsigned> &ids) noexcept;
  *
  * Throws on error.
  *
- * @param pid the process id whose user namespace shall be modified; 0
- * for current process
+ * @param proc_pid a /proc/PID O_PATH file descriptor
  */
 void
-SetupUidMap(unsigned pid, const IdMap &map);
+SetupUidMap(FileDescriptor proc_pid, const IdMap &map);
 
 void
-SetupUidMap(unsigned pid, unsigned uid);
+SetupUidMap(FileDescriptor proc_pid, unsigned uid);
 
 /**
  * Set up a gid mapping for a user namespace.
  *
  * Throws on error.
  *
- * @param pid the process id whose user namespace shall be modified; 0
- * for current process
+ * @param proc_pid a /proc/PID O_PATH file descriptor
  * @param gid the group id to be mapped inside the user namespace
  */
 void
-SetupGidMap(unsigned pid, unsigned gid);
+SetupGidMap(FileDescriptor proc_pid, unsigned gid);
 
 /**
  * Set up a gid mapping for a user namespace.
  *
  * Throws on error.
  *
- * @param pid the process id whose user namespace shall be modified; 0
- * for current process
+ * @param proc_pid a /proc/PID O_PATH file descriptor
  * @param gids the group ids to be mapped inside the user namespace
  */
 void
-SetupGidMap(unsigned pid, const std::set<unsigned> &gids);
+SetupGidMap(FileDescriptor proc_pid, const std::set<unsigned> &gids);

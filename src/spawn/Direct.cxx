@@ -17,6 +17,7 @@
 #include "io/Pipe.hxx"
 #include "io/ScopeUmask.hxx"
 #include "io/WriteFile.hxx"
+#include "io/linux/ProcPid.hxx"
 #include "io/linux/UserNamespace.hxx"
 #include "system/linux/clone3.h"
 #include "system/linux/CoreScheduling.hxx"
@@ -687,7 +688,7 @@ SpawnChildProcess(EventLoop &event_loop,
 			   it, we can't call setgroups() in the new
 			   child process because of this
 			   self-inflicted restriction */
-			DenySetGroups(pid);
+			DenySetGroups(OpenProcPid(pid));
 
 		params.ns.SetupUidGidMap(params.uid_gid, pid);
 

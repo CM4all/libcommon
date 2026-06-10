@@ -8,6 +8,8 @@
 #include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
+#include "io/UniqueFileDescriptor.hxx"
+#include "io/linux/ProcPid.hxx"
 #include "io/linux/UserNamespace.hxx"
 
 #include <fmt/core.h>
@@ -126,8 +128,10 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned _pid) const
 	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
 		gids.emplace(uid_gid.supplementary_groups[i]);
 
+	const auto proc_pid = OpenProcPid(_pid);
+
 	if (!gids.empty())
-		SetupGidMap(_pid, gids);
+		SetupGidMap(proc_pid, gids);
 
 	const IdMap map{
 		.first = {
@@ -140,7 +144,7 @@ NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned _pid) const
 		},
 	};
 
-	SetupUidMap(_pid, map);
+	SetupUidMap(proc_pid, map);
 }
 
 void
@@ -155,7 +159,8 @@ void
 NamespaceOptions::Apply(const UidGid &uid_gid) const
 {
 	if (enable_user || user_namespace.IsDefined())
-		DenySetGroups(0);
+		// TODO eliminate this OpenProcPid() call
+		DenySetGroups(OpenProcPid(0));
 
 	/* set up UID/GID mapping in the old /proc */
 	if (enable_user)
