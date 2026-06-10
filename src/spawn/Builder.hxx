@@ -77,7 +77,7 @@ public:
 	}
 
 	template<typename T>
-	void Write(std::span<const T> value) noexcept {
+	void Write(std::span<const T> value) {
 		Write(std::as_bytes(value));
 	}
 
