@@ -302,6 +302,7 @@ SlicePool::Populate() noexcept
 	if (areas.empty() && empty_areas.empty() && full_areas.empty()) {
 		assert(keep_area == nullptr);
 		auto &area = CreateArea();
+		area.Populate();
 		area.CollapseHugePages();
 		keep_area = &area;
 	}
@@ -352,8 +353,6 @@ SlicePool::CreateArea() noexcept
 {
 	auto *area = SliceArea::New(*this);
 	area->ForkCow(fork_cow);
-	if (populate)
-		area->Populate();
 	empty_areas.push_front(*area);
 	return *area;
 }
