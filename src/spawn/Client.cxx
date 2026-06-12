@@ -157,6 +157,16 @@ SpawnServerClient::CheckOrAbort() noexcept
 }
 
 inline void
+SpawnServerClient::RemovePendingExec() noexcept
+{
+	assert(n_pending_execs > 0);
+	--n_pending_execs;
+
+	if (!IsUnderPressure() && !spawn_queue.empty())
+		defer_spawn_queue.Schedule();
+}
+
+inline void
 SpawnServerClient::Send(std::span<const std::byte> payload,
 			std::span<const FileDescriptor> fds)
 {
@@ -588,8 +598,7 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 	assert(!payload.empty());
 
 	while (!payload.empty()) {
-		assert(n_pending_execs > 0);
-		--n_pending_execs;
+		RemovePendingExec();
 
 		unsigned pid;
 		payload.ReadUnsigned(pid);
@@ -630,9 +639,6 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 			fmt::print(stderr, "Failed to spawn child process {}: {}\n",
 				   pid, error);
 	}
-
-	if (!IsUnderPressure() && !spawn_queue.empty())
-		defer_spawn_queue.Schedule();
 }
 
 inline void

@@ -149,6 +149,12 @@ private:
 	 */
 	void CheckOrAbort() noexcept;
 
+	/**
+	 * Decrement #n_pending_execs.  Schedule the #spawn_queue if
+	 * it is non-empty.
+	 */
+	void RemovePendingExec() noexcept;
+
 	void Send(std::span<const std::byte> payload,
 		  std::span<const FileDescriptor> fds);
 	void Send(const Spawn::Serializer &s);
