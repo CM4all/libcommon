@@ -155,6 +155,11 @@ private:
 	 */
 	void RemovePendingExec() noexcept;
 
+	/**
+	 * Remove the #ChildProcess from #processes.
+	 */
+	void Remove(ChildProcess &child) noexcept;
+
 	void Send(std::span<const std::byte> payload,
 		  std::span<const FileDescriptor> fds);
 	void Send(const Spawn::Serializer &s);

@@ -172,6 +172,17 @@ SpawnServerClient::RemovePendingExec() noexcept
 }
 
 inline void
+SpawnServerClient::Remove(ChildProcess &child) noexcept
+{
+	assert(child.is_linked());
+
+	processes.erase(processes.iterator_to(child));
+
+	if (!child.complete)
+		RemovePendingExec();
+}
+
+inline void
 SpawnServerClient::Send(std::span<const std::byte> payload,
 			std::span<const FileDescriptor> fds)
 {
@@ -583,8 +594,7 @@ SpawnServerClient::Kill(ChildProcess &child, int signo) noexcept
 {
 	CheckOrAbort();
 
-	assert(child.is_linked());
-	processes.erase(processes.iterator_to(child));
+	Remove(child);
 
 	if (ShutdownComplete())
 		return;
@@ -603,8 +613,6 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 	assert(!payload.empty());
 
 	while (!payload.empty()) {
-		RemovePendingExec();
-
 		unsigned pid;
 		payload.ReadUnsigned(pid);
 
@@ -627,6 +635,8 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 		} else {
 			assert(!i->complete);
 			i->complete = true;
+
+			RemovePendingExec();
 
 			if (i->completion_handler) {
 				if (error == nullptr) {
@@ -663,7 +673,7 @@ SpawnServerClient::HandleOneExit(Payload &payload)
 	if (i == processes.end())
 		return;
 
-	processes.erase(i);
+	Remove(*i);
 
 	if (i->listener != nullptr)
 		i->listener->OnChildProcessExit(status);
