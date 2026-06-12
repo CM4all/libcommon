@@ -65,6 +65,11 @@ struct SpawnServerClient::ChildProcess final
 
 	const unsigned pid;
 
+	/**
+	 * Did we receive an EXEC_COMPLETE for this process yet?
+	 */
+	bool complete = false;
+
 	SpawnCompletionHandler *completion_handler = nullptr;
 
 	ExitListener *listener = nullptr;
@@ -620,6 +625,9 @@ SpawnServerClient::HandleExecCompleteMessage(Payload payload)
 			   command) */
 			error = nullptr;
 		} else {
+			assert(!i->complete);
+			i->complete = true;
+
 			if (i->completion_handler) {
 				if (error == nullptr) {
 					i->completion_handler->OnSpawnSuccess();
