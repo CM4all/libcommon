@@ -115,18 +115,21 @@ AppendAnonymize(StringBuilder &b, const char *value)
 
 static constexpr void
 VAppendFmt(StringBuilder &b,
-	   fmt::string_view format_str, fmt::format_args args) noexcept
+	   fmt::string_view format_str, fmt::format_args args)
 {
 	const auto w = b.Write();
-	auto [p, _] = fmt::vformat_to_n(w.data(), w.size(),
-					format_str, args);
+	auto [p, size] = fmt::vformat_to_n(w.data(), w.size(),
+					   format_str, args);
+	if (size > w.size())
+		throw TooLargeError{};
+
 	b.Extend(std::distance(w.data(), p));
 }
 
 template<typename S, typename... Args>
 static constexpr void
 AppendFmt(StringBuilder &b,
-	  const S &format_str, Args&&... args) noexcept
+	  const S &format_str, Args&&... args)
 {
 	VAppendFmt(b, format_str, fmt::make_format_args(args...));
 }
