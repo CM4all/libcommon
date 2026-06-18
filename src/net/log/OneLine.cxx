@@ -8,12 +8,10 @@
 #include "http/Method.hxx"
 #include "net/Anonymize.hxx"
 #include "io/FileDescriptor.hxx"
-#include "time/ISO8601.hxx"
 #include "util/SpanCast.hxx"
-#include "util/StringBuffer.hxx"
 #include "util/StringBuilder.hxx"
 
-#include <fmt/core.h>
+#include <fmt/chrono.h>
 
 #include <time.h>
 
@@ -143,7 +141,7 @@ try {
 
 	if (options.iso8601) {
 		if (d.HasTimestamp())
-			b.Append(FormatISO8601(ToSystem(d.timestamp)).c_str());
+			AppendFmt(b, "{:%FT%TZ}"sv, d.timestamp);
 		else
 			b.Append('-');
 		b.Append(' ');
@@ -248,7 +246,7 @@ try {
 
 	if (options.iso8601) {
 		if (d.HasTimestamp())
-			b.Append(FormatISO8601(ToSystem(d.timestamp)).c_str());
+			AppendFmt(b, "{:%FT%TZ}"sv, d.timestamp);
 		else
 			b.Append('-');
 		b.Append(' ');
