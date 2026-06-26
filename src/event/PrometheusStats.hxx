@@ -9,7 +9,7 @@
 #include <string>
 #include <string_view>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 inline std::string
 ToPrometheusString(const EventLoopStats &stats, std::string_view process) noexcept
