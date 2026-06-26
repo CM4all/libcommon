@@ -6,8 +6,6 @@
 
 #include <curl/curl.h>
 
-#include <stdexcept>
-
 void
 CurlInit()
 {
