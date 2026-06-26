@@ -296,11 +296,12 @@ constexpr auto translation_command_names = std::array{
 	"ACCESS_CONTROL_ALLOW_ALL"sv, // 278
 	"MOUNT_TMP_TMPFS_EXEC"sv, // 279
 	"DIRECTORY_INDEX_SLASH"sv, // 280
-	"APPEND_PATH"sv, // 280
+	"APPEND_PATH"sv, // 281
+	"NO_QUERY_STRING"sv, // 282
 };
 
 // Static assertion to verify the array size matches the highest enum value + 1
-static_assert(translation_command_names.size() == std::to_underlying(TranslationCommand::APPEND_PATH) + 1);
+static_assert(translation_command_names.size() == std::to_underlying(TranslationCommand::NO_QUERY_STRING) + 1);
 
 // Static assertions to verify specific indexes are placed correctly
 static_assert(translation_command_names[std::to_underlying(TranslationCommand::BEGIN)] == "BEGIN"sv);
