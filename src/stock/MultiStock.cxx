@@ -91,7 +91,7 @@ MultiStock::OuterItem::DiscardUnused() noexcept
 void
 MultiStock::OuterItem::Fade() noexcept
 {
-	shared_item.Fade();
+	shared_item.FadeOrTerminate();
 	DiscardUnused();
 
 	if (IsEmpty())

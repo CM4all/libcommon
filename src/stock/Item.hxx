@@ -44,6 +44,13 @@ class StockItem
 	AbstractStock &stock;
 
 	/**
+	 * If true, then Fade() on a busy object will not wait for the
+	 * item to become idle, but instead invoke Terminate()
+	 * immediately.
+	 */
+	bool instant_fade = false;
+
+	/**
 	 * If true, then this object will never be reused.
 	 */
 	bool fade = false;
@@ -111,12 +118,28 @@ public:
 	 */
 	virtual bool Release() noexcept = 0;
 
+	/**
+	 * Enables the #instant_fade flag.
+	 *
+	 * Note that this will not call Terminate() if #fade is
+	 * already true.
+	 */
+	void EnableInstantFade() noexcept {
+		instant_fade = true;
+	}
+
 	bool IsFading() const noexcept {
 		return fade;
 	}
 
 	void Fade() noexcept {
 		fade = true;
+	}
+
+	void FadeOrTerminate() noexcept {
+		Fade();
+		if (instant_fade)
+			Terminate();
 	}
 
 	/**

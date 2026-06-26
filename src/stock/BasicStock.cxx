@@ -81,7 +81,7 @@ void
 BasicStock::FadeAll() noexcept
 {
 	for (auto &i : busy)
-		i.Fade();
+		i.FadeOrTerminate();
 
 	ClearIdle();
 	CheckEmpty();
