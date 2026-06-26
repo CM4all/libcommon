@@ -298,10 +298,11 @@ constexpr auto translation_command_names = std::array{
 	"DIRECTORY_INDEX_SLASH"sv, // 280
 	"APPEND_PATH"sv, // 281
 	"NO_QUERY_STRING"sv, // 282
+	"INSTANT_FADE"sv, // 283
 };
 
 // Static assertion to verify the array size matches the highest enum value + 1
-static_assert(translation_command_names.size() == std::to_underlying(TranslationCommand::NO_QUERY_STRING) + 1);
+static_assert(translation_command_names.size() == std::to_underlying(TranslationCommand::INSTANT_FADE) + 1);
 
 // Static assertions to verify specific indexes are placed correctly
 static_assert(translation_command_names[std::to_underlying(TranslationCommand::BEGIN)] == "BEGIN"sv);

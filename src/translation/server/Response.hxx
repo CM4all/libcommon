@@ -975,6 +975,11 @@ public:
 			return *this;
 		}
 
+		auto InstantFade() noexcept {
+			response.Packet(TranslationCommand::INSTANT_FADE);
+			return *this;
+		}
+
 		template<typename... Types>
 		auto Chroot(Types... path) noexcept {
 			response.StringPacket(TranslationCommand::CHROOT,

@@ -1418,6 +1418,13 @@ enum class TranslationCommand : uint16_t {
 	 * string.
 	 */
 	NO_QUERY_STRING = 282,
+
+	/**
+	 * Child processes marked with this flag will be terminated
+	 * instantly on #FADE_CHILDREN instead of waiting for all
+	 * requests to finish.
+	 */
+	INSTANT_FADE = 283,
 };
 
 struct TranslationHeader {

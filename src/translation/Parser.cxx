@@ -4709,6 +4709,23 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::INSTANT_FADE:
+#if TRANSLATION_ENABLE_RADDRESS
+		if (!payload.empty())
+			throw std::runtime_error{"malformed INSTANT_FADE packet"};
+
+		if (cgi_address != nullptr)
+			cgi_address->instant_fade = true;
+		else if (lhttp_address != nullptr)
+			lhttp_address->instant_fade = true;
+		else
+			throw std::runtime_error("misplaced INSTANT_FADE packet");
+
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
