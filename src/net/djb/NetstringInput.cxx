@@ -7,7 +7,7 @@
 #include "io/FileDescriptor.hxx"
 #include "system/Error.hxx"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <charconv>
 #include <string_view>

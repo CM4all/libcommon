@@ -6,7 +6,7 @@
 #include "util/StringCompare.hxx"
 #include "AllocatorPtr.hxx"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <string.h>
 #include <unistd.h>

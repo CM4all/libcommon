@@ -6,7 +6,7 @@
 
 #include <mysql.h>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 MysqlError::MysqlError(struct st_mysql &connection,
 		       const char *prefix) noexcept

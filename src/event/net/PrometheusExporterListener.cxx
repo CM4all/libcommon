@@ -10,7 +10,7 @@
 #include "util/DeleteDisposer.hxx"
 #include "util/SpanCast.hxx"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <array>
 

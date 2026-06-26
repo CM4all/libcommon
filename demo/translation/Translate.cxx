@@ -15,7 +15,7 @@
 #include "util/StringSplit.hxx"
 #include "util/PrintException.hxx"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <sysexits.h> // for EX_*
 

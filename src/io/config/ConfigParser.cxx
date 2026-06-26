@@ -10,6 +10,8 @@
 #include "io/UniqueFileDescriptor.hxx"
 #include "lib/fmt/SystemError.hxx"
 
+#include <fmt/format.h>
+
 #include <algorithm>
 #include <exception>
 #include <vector>
