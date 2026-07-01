@@ -606,6 +606,12 @@ SpawnServerClient::Kill(ChildProcess &child, int signo) noexcept
 	kill_queue.push_front({child.pid, signo});
 
 	++stats.killed;
+
+	/* increment this field; the authoritative value is managed by
+	   class ChildProcessTerminator, but incrementing it here
+	   gives us a slightly more accurate view on the scene until
+	   we receive new values from the SpawnServer */
+	++terminator_stats.n_signals;
 }
 
 inline void
