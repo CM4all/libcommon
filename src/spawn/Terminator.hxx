@@ -4,11 +4,11 @@
 
 #pragma once
 
+#include "Stats.hxx"
 #include "util/IntrusiveList.hxx"
 
 #include <memory>
 
-class ExitListener;
 class PidfdEvent;
 
 /**
@@ -18,9 +18,15 @@ class ChildProcessTerminator {
 	class KilledChildProcess;
 	IntrusiveList<KilledChildProcess> killed_list;
 
+	ChildProcessTerminatorStats stats{};
+
 public:
 	ChildProcessTerminator() noexcept;
 	~ChildProcessTerminator() noexcept;
+
+	const ChildProcessTerminatorStats &GetStats() const noexcept {
+		return stats;
+	}
 
 	/**
 	 * Send a signal to the given child process and expect it to

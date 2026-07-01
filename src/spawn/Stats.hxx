@@ -7,6 +7,36 @@
 #include <chrono>
 #include <cstdint>
 
+struct ChildProcessTerminatorStats {
+	/**
+	 * The number of Kill() calls.
+	 */
+	uint_least64_t n_signals;
+
+	/**
+	 * The number of failed Kill() calls.
+	 */
+	uint_least64_t n_failed_signals;
+
+	/**
+	 * The number of times a process has exited properly after
+	 * Kill().
+	 */
+	uint_least64_t n_exits;
+
+	/**
+	 * The number of times SIGKILL was sent due to shutdown
+	 * timeout.
+	 */
+	uint_least64_t n_timeouts;
+
+	/**
+	 * The total duration between sending SIGTERM and the child
+	 * process actually exiting.
+	 */
+	std::chrono::steady_clock::duration total_shutdown_duration;
+};
+
 struct SpawnStats {
 	/**
 	 * The total number of SpawnChildProcess() calls (include
