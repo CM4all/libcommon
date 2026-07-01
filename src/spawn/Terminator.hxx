@@ -28,6 +28,10 @@ public:
 		return stats;
 	}
 
+	bool empty() const noexcept {
+		return killed_list.empty();
+	}
+
 	/**
 	 * Send a signal to the given child process and expect it to
 	 * exit.  If it does not, a timer will trigger sending SIGKILL

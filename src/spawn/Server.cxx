@@ -177,6 +177,14 @@ class SpawnServerConnection final
 
 	DeferEvent defer_flush_output;
 
+	/**
+	 * This timer sends the current #ChildProcessTerminatorStats
+	 * even if no other write is pending.  This shall keep the
+	 * client up-to-date even if it's idle (or throttled), to let
+	 * it know of processes that have exited meanwhile.
+	 */
+	CoarseTimerEvent stats_send_timer;
+
 	Event::TimePoint next_stats_send;
 
 	using ChildIdMap =
@@ -250,6 +258,12 @@ private:
 
 	void DeferredFlushOutput() noexcept;
 	void OnSocketEvent(unsigned events) noexcept;
+
+	void ScheduleStatsSendTimer() noexcept {
+		stats_send_timer.Schedule(std::chrono::seconds{1});
+	}
+
+	void OnStatsSendTimer() noexcept;
 };
 
 inline Co::InvokeTask
@@ -415,7 +429,8 @@ SpawnServerConnection::SpawnServerConnection(SpawnServerProcess &_process,
 	 logger("spawn"),
 	 event(process.GetEventLoop(), BIND_THIS_METHOD(OnSocketEvent),
 	       socket),
-	 defer_flush_output(process.GetEventLoop(), BIND_THIS_METHOD(DeferredFlushOutput))
+	 defer_flush_output(process.GetEventLoop(), BIND_THIS_METHOD(DeferredFlushOutput)),
+	 stats_send_timer(process.GetEventLoop(), BIND_THIS_METHOD(OnStatsSendTimer))
 {
 	event.ScheduleRead();
 }
@@ -1008,6 +1023,8 @@ SpawnServerConnection::HandleMessage(ReceiveMessageResult &&result)
 inline void
 SpawnServerConnection::ReceiveAndHandle()
 {
+	ScheduleStatsSendTimer();
+
 	ReceiveMessageBuffer<MAX_DATAGRAM_SIZE, CMSG_SPACE(sizeof(int) * 32)> rmb;
 
 	auto result = ReceiveMessage(socket, rmb, MSG_DONTWAIT);
@@ -1113,6 +1130,17 @@ try {
 } catch (...) {
 	logger(2, std::current_exception());
 	RemoveConnection();
+}
+
+inline void
+SpawnServerConnection::OnStatsSendTimer() noexcept
+{
+	ScheduleWrite();
+
+	if (!process.GetChildProcessTerminator().empty())
+		/* if we're still waiting for child processe to exit,
+		   keep resending the stats */
+		ScheduleStatsSendTimer();
 }
 
 void
