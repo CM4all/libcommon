@@ -108,6 +108,12 @@ enum class ResponseCommand : uint8_t {
 	EXEC_COMPLETE,
 
 	EXIT,
+
+	/**
+	 * Contains #ChildProcessTerminatorStats.  This gets sent
+	 * periodically.
+	 */
+	TERMINATOR_STATS,
 };
 
 struct MemoryWarningPayload {

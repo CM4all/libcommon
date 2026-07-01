@@ -70,6 +70,8 @@ class SpawnServerClient final : public SpawnService {
 
 	mutable SpawnStats stats{};
 
+	ChildProcessTerminatorStats terminator_stats{};
+
 	unsigned last_pid = 0;
 
 	/**
@@ -120,6 +122,10 @@ public:
 		return stats;
 	}
 
+	const ChildProcessTerminatorStats &GetTerminatorStats() const noexcept {
+		return terminator_stats;
+	}
+
 	void Shutdown() noexcept;
 
 	UniqueSocketDescriptor Connect();
@@ -167,6 +173,7 @@ private:
 	void HandleExecCompleteMessage(Spawn::Payload payload);
 	void HandleOneExit(Spawn::Payload &payload);
 	void HandleExitMessage(Spawn::Payload payload);
+	void HandleTerminatorStats(std::span<const std::byte> payload) noexcept;
 	void HandleMessage(std::span<const std::byte> payload,
 			   std::span<UniqueFileDescriptor> fds);
 

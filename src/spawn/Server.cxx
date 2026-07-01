@@ -177,6 +177,8 @@ class SpawnServerConnection final
 
 	DeferEvent defer_flush_output;
 
+	Event::TimePoint next_stats_send;
+
 	using ChildIdMap =
 		IntrusiveHashSet<SpawnServerChild, 1024,
 				 IntrusiveHashSetOperators<SpawnServerChild,
@@ -1065,6 +1067,13 @@ SpawnServerConnection::FlushOutput()
 {
 	FlushExecCompleteQueue();
 	FlushExitQueue();
+
+	if (const auto now = GetEventLoop().SteadyNow(); now >= next_stats_send) {
+		next_stats_send = now + std::chrono::milliseconds{200};
+		Serializer s(ResponseCommand::TERMINATOR_STATS);
+		s.WriteT(process.GetChildProcessTerminator().GetStats());
+		::Send<1>(socket, s);
+	}
 }
 
 inline void

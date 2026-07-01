@@ -18,6 +18,7 @@
 #include "net/SocketPair.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/Cancellable.hxx"
+#include "util/Unaligned.hxx"
 
 #include <fmt/core.h>
 
@@ -689,6 +690,14 @@ SpawnServerClient::HandleExitMessage(Payload payload)
 }
 
 inline void
+SpawnServerClient::HandleTerminatorStats(std::span<const std::byte> payload) noexcept
+{
+	assert(payload.size() == sizeof(terminator_stats));
+
+	LoadUnaligned(terminator_stats, payload.data());
+}
+
+inline void
 SpawnServerClient::HandleMessage(std::span<const std::byte> payload,
 				 [[maybe_unused]] std::span<UniqueFileDescriptor> fds)
 {
@@ -702,6 +711,10 @@ SpawnServerClient::HandleMessage(std::span<const std::byte> payload,
 
 	case ResponseCommand::EXIT:
 		HandleExitMessage(Payload(payload));
+		break;
+
+	case ResponseCommand::TERMINATOR_STATS:
+		HandleTerminatorStats(payload);
 		break;
 	}
 }
