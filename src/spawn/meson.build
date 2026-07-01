@@ -33,7 +33,7 @@ if get_variable('libcommon_enable_spawn_server', true)
     'TmpfsManager.cxx',
   ]
 
-  libcommon_enable_spawn_registry = true
+  libcommon_enable_spawn_terminator = true
   libcommon_enable_spawn_direct = true
   libcommon_enable_spawn_config = true
 
@@ -61,17 +61,17 @@ if get_variable('libcommon_enable_spawn_local', true)
     'Local.cxx',
   ]
 
-  libcommon_enable_spawn_registry = true
+  libcommon_enable_spawn_terminator = true
   libcommon_enable_spawn_direct = true
   libcommon_enable_spawn_config = true
 endif
 
-if get_variable('libcommon_enable_spawn_registry', false)
-  # Enable the ChildProcessRegistry class.
+if get_variable('libcommon_enable_spawn_terminator', false)
+  # Enable the ChildProcessTerminator class.
 
   spawn_sources += [
     'PidfdEvent.cxx',
-    'Registry.cxx',
+    'Terminator.cxx',
   ]
 
   spawn_internal_dependencies += [

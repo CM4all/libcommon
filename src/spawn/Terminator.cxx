@@ -2,7 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#include "Registry.hxx"
+#include "Terminator.hxx"
 #include "ExitListener.hxx"
 #include "PidfdEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
@@ -14,7 +14,7 @@
 
 static constexpr Event::Duration child_kill_timeout = std::chrono::minutes(1);
 
-class ChildProcessRegistry::KilledChildProcess final
+class ChildProcessTerminator::KilledChildProcess final
 	: public AutoUnlinkIntrusiveListHook, ExitListener
 {
 	std::unique_ptr<PidfdEvent> pidfd;
@@ -51,16 +51,16 @@ private:
 };
 
 inline void
-ChildProcessRegistry::KilledChildProcess::KillTimeoutCallback() noexcept
+ChildProcessTerminator::KilledChildProcess::KillTimeoutCallback() noexcept
 {
 	pidfd->GetLogger()(3, "sending SIGKILL to due to timeout");
 	KillNow();
 	delete this;
 }
 
-ChildProcessRegistry::ChildProcessRegistry() noexcept = default;
+ChildProcessTerminator::ChildProcessTerminator() noexcept = default;
 
-ChildProcessRegistry::~ChildProcessRegistry() noexcept
+ChildProcessTerminator::~ChildProcessTerminator() noexcept
 {
 	killed_list.clear_and_dispose([](auto *k){
 		k->KillNow();
@@ -69,7 +69,7 @@ ChildProcessRegistry::~ChildProcessRegistry() noexcept
 }
 
 void
-ChildProcessRegistry::Kill(std::unique_ptr<PidfdEvent> pidfd,
+ChildProcessTerminator::Kill(std::unique_ptr<PidfdEvent> pidfd,
 			   int signo) noexcept
 {
 	if (!pidfd->Kill(signo))

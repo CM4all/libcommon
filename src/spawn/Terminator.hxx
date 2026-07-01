@@ -12,15 +12,15 @@ class ExitListener;
 class PidfdEvent;
 
 /**
- * Manage child processes.
+ * Manage child process termination.
  */
-class ChildProcessRegistry {
+class ChildProcessTerminator {
 	class KilledChildProcess;
 	IntrusiveList<KilledChildProcess> killed_list;
 
 public:
-	ChildProcessRegistry() noexcept;
-	~ChildProcessRegistry() noexcept;
+	ChildProcessTerminator() noexcept;
+	~ChildProcessTerminator() noexcept;
 
 	/**
 	 * Send a signal to the given child process and expect it to

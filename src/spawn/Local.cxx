@@ -9,7 +9,7 @@
 #include "ExitListener.hxx"
 #include "Config.hxx"
 #include "Direct.hxx"
-#include "Registry.hxx"
+#include "Terminator.hxx"
 #include "Prepared.hxx"
 #include "CgroupState.hxx"
 #include "event/PipeEvent.hxx"
@@ -27,7 +27,7 @@
 
 class LocalChildProcess final : public ChildProcessHandle, ExitListener {
 	EventLoop &event_loop;
-	ChildProcessRegistry &registry;
+	ChildProcessTerminator &terminator;
 
 	const std::string name;
 
@@ -43,9 +43,9 @@ class LocalChildProcess final : public ChildProcessHandle, ExitListener {
 
 public:
 	LocalChildProcess(EventLoop &_event_loop,
-			  ChildProcessRegistry &_registry,
+			  ChildProcessTerminator &_terminator,
 			  std::string_view _name) noexcept
-		:event_loop(_event_loop), registry(_registry),
+		:event_loop(_event_loop), terminator(_terminator),
 		 name(_name)
 	{
 	}
@@ -115,7 +115,7 @@ void
 LocalChildProcess::Kill(int signo) noexcept
 {
 	if (pidfd)
-		registry.Kill(std::move(pidfd), signo);
+		terminator.Kill(std::move(pidfd), signo);
 }
 
 std::unique_ptr<ChildProcessHandle>
@@ -130,7 +130,7 @@ LocalSpawnService::SpawnChildProcess(std::string_view name,
 					false,
 					false /* TODO? */);
 
-	auto handle = std::make_unique<LocalChildProcess>(event_loop, registry,
+	auto handle = std::make_unique<LocalChildProcess>(event_loop, terminator,
 							  name);
 	handle->Start(std::move(task));
 	return handle;

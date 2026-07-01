@@ -13,7 +13,7 @@
 #include "Mount.hxx"
 #include "CgroupState.hxx"
 #include "Direct.hxx"
-#include "Registry.hxx"
+#include "Terminator.hxx"
 #include "TmpfsManager.hxx"
 #include "ZombieReaper.hxx"
 #include "ExitListener.hxx"
@@ -145,10 +145,10 @@ public:
 		invoke_task.Start(BIND_THIS_METHOD(OnCompletion));
 	}
 
-	void Kill(ChildProcessRegistry &child_process_registry,
+	void Kill(ChildProcessTerminator &child_process_terminator,
 		  int signo) noexcept {
 		if (pidfd)
-			child_process_registry.Kill(std::move(pidfd), signo);
+			child_process_terminator.Kill(std::move(pidfd), signo);
 	}
 
 	/* virtual methods from ExitListener */
@@ -313,7 +313,7 @@ class SpawnServerProcess {
 
 	std::optional<TmpfsManager> tmpfs_manager;
 
-	ChildProcessRegistry child_process_registry;
+	ChildProcessTerminator child_process_terminator;
 
 	ZombieReaper zombie_reaper{loop};
 
@@ -361,8 +361,8 @@ public:
 		return loop;
 	}
 
-	ChildProcessRegistry &GetChildProcessRegistry() noexcept {
-		return child_process_registry;
+	ChildProcessTerminator &GetChildProcessTerminator() noexcept {
+		return child_process_terminator;
 	}
 
 	bool Verify(const PreparedChildProcess &p) const {
@@ -422,9 +422,9 @@ SpawnServerConnection::~SpawnServerConnection() noexcept
 {
 	event.Cancel();
 
-	auto &registry = process.GetChildProcessRegistry();
-	children.clear_and_dispose([&registry](SpawnServerChild *child){
-			child->Kill(registry, SIGTERM);
+	auto &terminator = process.GetChildProcessTerminator();
+	children.clear_and_dispose([&terminator](SpawnServerChild *child){
+			child->Kill(terminator, SIGTERM);
 			delete child;
 		});
 }
@@ -957,7 +957,7 @@ SpawnServerConnection::HandleOneKill(Payload &payload)
 	SpawnServerChild *child = &*i;
 	children.erase(i);
 
-	child->Kill(process.GetChildProcessRegistry(), signo);
+	child->Kill(process.GetChildProcessTerminator(), signo);
 	delete child;
 }
 

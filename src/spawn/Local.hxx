@@ -8,21 +8,21 @@
 
 struct SpawnConfig;
 class EventLoop;
-class ChildProcessRegistry;
+class ChildProcessTerminator;
 
 class LocalSpawnService final : public SpawnService {
 	const SpawnConfig &config;
 
 	EventLoop &event_loop;
-	ChildProcessRegistry &registry;
+	ChildProcessTerminator &terminator;
 
 public:
 	explicit LocalSpawnService(const SpawnConfig &_config,
 				   EventLoop &_event_loop,
-				   ChildProcessRegistry &_registry) noexcept
+				   ChildProcessTerminator &_terminator) noexcept
 		:config(_config),
 		 event_loop(_event_loop),
-		 registry(_registry) {}
+		 terminator(_terminator) {}
 
 	/* virtual methods from class SpawnService */
 	std::unique_ptr<ChildProcessHandle> SpawnChildProcess(std::string_view name,
