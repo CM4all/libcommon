@@ -35,6 +35,10 @@ struct ChildProcessTerminatorStats {
 	 * process actually exiting.
 	 */
 	std::chrono::steady_clock::duration total_shutdown_duration;
+
+	constexpr uint_least64_t GetPendingExits() const noexcept {
+		return n_signals - n_failed_signals - n_exits - n_timeouts;
+	}
 };
 
 struct SpawnStats {
