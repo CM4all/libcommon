@@ -30,6 +30,7 @@
 #include "io/FileAt.hxx"
 #include "io/MakeDirectory.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "io/WriteFile.hxx"
 #include "co/InvokeTask.hxx"
 #include "co/Task.hxx"
 #include "util/DeleteDisposer.hxx"
@@ -54,6 +55,7 @@
 
 class SpawnServerProcess;
 
+using std::string_view_literals::operator""sv;
 using namespace Spawn;
 
 class SpawnFdList {
@@ -125,17 +127,22 @@ class SpawnServerChild final : public ExitListener,
 
 	std::unique_ptr<PidfdEvent> pidfd;
 
+	UniqueFileDescriptor session_cgroup_fd;
 	UniqueFileDescriptor accessory_lease_pipe;
+
+	const bool sigkill;
 
 public:
 	explicit SpawnServerChild(SpawnServerConnection &_connection,
 				  std::forward_list<SharedLease> &&_leases,
 				  unsigned _id,
-				  std::string_view _name) noexcept
+				  std::string_view _name,
+				  bool _sigkill) noexcept
 		:connection(_connection),
 		 leases(std::move(_leases)),
 		 id(_id),
-		 name(_name) {}
+		 name(_name),
+		 sigkill(_sigkill) {}
 
 	SpawnServerChild(const SpawnServerChild &) = delete;
 	SpawnServerChild &operator=(const SpawnServerChild &) = delete;
@@ -147,6 +154,11 @@ public:
 
 	void Kill(ChildProcessTerminator &child_process_terminator,
 		  int signo) noexcept {
+		if (sigkill && session_cgroup_fd.IsDefined() &&
+		    TryWriteExistingFile({session_cgroup_fd, "cgroup.kill"},
+					 "1"sv) == WriteFileResult::SUCCESS)
+			return;
+
 		if (pidfd)
 			child_process_terminator.Kill(std::move(pidfd), signo);
 	}
@@ -276,6 +288,10 @@ SpawnServerChild::Await(Co::Task<SpawnChildProcessResult> task)
 					     std::move(result.pidfd),
 					     name,
 					     exit_listener);
+
+	if (sigkill)
+		session_cgroup_fd = std::move(result.session_cgroup_fd);
+
 	accessory_lease_pipe = std::move(result.accessory_lease_pipe);
 }
 
@@ -522,7 +538,8 @@ SpawnServerConnection::SpawnChild(unsigned id, std::string_view name,
 	auto *child = new SpawnServerChild(*this,
 					   std::move(leases),
 					   id,
-					   name);
+					   name,
+					   p.sigkill);
 	children.insert(*child);
 
 	child->Start(std::move(task));
@@ -855,6 +872,10 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 
 		case ExecCommand::MAPPED_EFFECTIVE_UID:
 			payload.ReadT(p.ns.mapped_effective_uid);
+			break;
+
+		case ExecCommand::SIGKILL_:
+			p.sigkill = true;
 			break;
 
 		case ExecCommand::SCHED_IDLE_:

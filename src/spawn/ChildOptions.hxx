@@ -71,6 +71,12 @@ struct ChildOptions {
 	int umask = -1;
 
 	/**
+	 * Terminate the child process with SIGKILL instead of
+	 * SIGTERM?
+	 */
+	bool sigkill = false;
+
+	/**
 	 * Redirect STDERR to /dev/null?
 	 */
 	bool stderr_null = false;
@@ -125,6 +131,7 @@ struct ChildOptions {
 		 ns(shallow_copy, src.ns),
 		 uid_gid(src.uid_gid),
 		 umask(src.umask),
+		 sigkill(src.sigkill),
 		 stderr_null(src.stderr_null),
 		 stderr_jailed(src.stderr_jailed),
 		 stderr_pond(src.stderr_pond),

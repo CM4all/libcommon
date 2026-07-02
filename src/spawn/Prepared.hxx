@@ -123,6 +123,12 @@ struct PreparedChildProcess {
 	const char *chdir = nullptr;
 
 	/**
+	 * Terminate the child process with SIGKILL instead of
+	 * SIGTERM?
+	 */
+	bool sigkill = false;
+
+	/**
 	 * Select the "idle" CPU scheduling policy.  With this policy, the
 	 * "priority" value is ignored.
 	 *

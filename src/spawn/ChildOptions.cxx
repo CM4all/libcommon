@@ -40,6 +40,7 @@ ChildOptions::ChildOptions(AllocatorPtr alloc,
 	 ns(alloc, src.ns),
 	 uid_gid(src.uid_gid),
 	 umask(src.umask),
+	 sigkill(src.sigkill),
 	 stderr_null(src.stderr_null),
 	 stderr_jailed(src.stderr_jailed),
 	 stderr_pond(src.stderr_pond),
@@ -196,6 +197,7 @@ ChildOptions::CopyTo(PreparedChildProcess &dest, FdHolder &close_fds) const
 	if (rlimits != nullptr)
 		dest.rlimits = *rlimits;
 	dest.uid_gid = uid_gid;
+	dest.sigkill = sigkill;
 #ifdef HAVE_LIBSECCOMP
 	dest.allow_ptrace = allow_ptrace;
 	dest.forbid_user_ns = forbid_user_ns;

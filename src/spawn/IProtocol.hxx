@@ -89,6 +89,7 @@ enum class ExecCommand : uint8_t {
 	CGROUP_SET,
 	CGROUP_XATTR,
 	PRIORITY,
+	SIGKILL_,
 	SCHED_IDLE_,
 	IOPRIO_IDLE,
 	CHROOT,

@@ -486,6 +486,9 @@ Serialize(Serializer &s, const PreparedChildProcess &p)
 	s.WriteOptionalString(ExecCommand::CHROOT, p.chroot);
 	s.WriteOptionalString(ExecCommand::CHDIR, p.chdir);
 
+	if (p.sigkill)
+		s.Write(ExecCommand::SIGKILL_);
+
 	if (p.sched_idle)
 		s.Write(ExecCommand::SCHED_IDLE_);
 

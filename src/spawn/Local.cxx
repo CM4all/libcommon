@@ -13,8 +13,10 @@
 #include "Prepared.hxx"
 #include "CgroupState.hxx"
 #include "event/PipeEvent.hxx"
+#include "io/FileAt.hxx"
 #include "io/Logger.hxx"
 #include "io/UniqueFileDescriptor.hxx"
+#include "io/WriteFile.hxx"
 #include "co/InvokeTask.hxx"
 #include "co/Task.hxx"
 
@@ -24,6 +26,8 @@
 
 #include <signal.h>
 #include <sys/wait.h>
+
+using std::string_view_literals::operator""sv;
 
 class LocalChildProcess final : public ChildProcessHandle, ExitListener {
 	EventLoop &event_loop;
@@ -36,23 +40,27 @@ class LocalChildProcess final : public ChildProcessHandle, ExitListener {
 
 	std::unique_ptr<PidfdEvent> pidfd;
 
+	UniqueFileDescriptor session_cgroup_fd;
 	UniqueFileDescriptor accessory_lease_pipe;
 
 	SpawnCompletionHandler *completion_handler = nullptr;
 	ExitListener *exit_listener = nullptr;
 
+	const bool sigkill;
+
 public:
 	LocalChildProcess(EventLoop &_event_loop,
 			  ChildProcessTerminator &_terminator,
-			  std::string_view _name) noexcept
+			  std::string_view _name,
+			  bool _sigkill) noexcept
 		:event_loop(_event_loop), terminator(_terminator),
-		 name(_name)
+		 name(_name),
+		 sigkill(_sigkill)
 	{
 	}
 
 	~LocalChildProcess() noexcept override {
-		if (pidfd)
-			Kill(SIGTERM);
+		Kill(SIGTERM);
 	}
 
 	void Start(Co::Task<SpawnChildProcessResult> &&task) {
@@ -69,6 +77,10 @@ private:
 						     std::move(result.pidfd),
 						     name,
 						     _exit_listener);
+
+		if (sigkill)
+			session_cgroup_fd = std::move(result.session_cgroup_fd);
+
 		accessory_lease_pipe = std::move(result.accessory_lease_pipe);
 	}
 
@@ -114,6 +126,11 @@ LocalChildProcess::OnChildProcessExit(int status) noexcept
 void
 LocalChildProcess::Kill(int signo) noexcept
 {
+	if (sigkill && session_cgroup_fd.IsDefined() &&
+	    TryWriteExistingFile({session_cgroup_fd, "cgroup.kill"},
+				 "1"sv) == WriteFileResult::SUCCESS)
+		return;
+
 	if (pidfd)
 		terminator.Kill(std::move(pidfd), signo);
 }
@@ -131,7 +148,7 @@ LocalSpawnService::SpawnChildProcess(std::string_view name,
 					false /* TODO? */);
 
 	auto handle = std::make_unique<LocalChildProcess>(event_loop, terminator,
-							  name);
+							  name, params.sigkill);
 	handle->Start(std::move(task));
 	return handle;
 }
