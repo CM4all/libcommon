@@ -1222,6 +1222,11 @@ public:
 			response.Packet(TranslationCommand::NO_NEW_PRIVS);
 			return *this;
 		}
+
+		auto SigKill() noexcept {
+			response.Packet(TranslationCommand::SIGKILL_);
+			return *this;
+		}
 	};
 
 	template<typename... Types>

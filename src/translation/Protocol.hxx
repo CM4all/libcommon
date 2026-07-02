@@ -1425,6 +1425,12 @@ enum class TranslationCommand : uint16_t {
 	 * requests to finish.
 	 */
 	INSTANT_FADE = 283,
+
+	/**
+	 * Terminate the child process with SIGKILL instead of
+	 * SIGTERM.
+	 */
+	SIGKILL_ = 284,
 };
 
 struct TranslationHeader {

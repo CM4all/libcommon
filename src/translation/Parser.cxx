@@ -4726,6 +4726,21 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #else
 		break;
 #endif
+
+	case TranslationCommand::SIGKILL_:
+#if TRANSLATION_ENABLE_SPAWN
+		if (!payload.empty())
+			throw std::runtime_error("malformed SIGKILL packet");
+
+		if (auto &options = MakeChildOptions("misplaced SIGKILL packet");
+		    options.sigkill)
+			throw std::runtime_error("duplicate SIGKILL packet");
+		else
+			options.sigkill = true;
+		return;
+#else
+		break;
+#endif
 	}
 
 	throw FmtRuntimeError("unknown translation packet: {}", (unsigned)command);
