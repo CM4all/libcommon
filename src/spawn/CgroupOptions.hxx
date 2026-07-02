@@ -5,9 +5,11 @@
 #pragma once
 
 #include "adata/AssignmentList.hxx"
+#include "io/UniqueFileDescriptor.hxx"
 #include "util/TagStructs.hxx"
 
 #include <string_view>
+
 
 class AllocatorPtr;
 class UniqueFileDescriptor;
@@ -63,17 +65,20 @@ struct CgroupOptions {
 	void Set(AllocatorPtr alloc,
 		 std::string_view name, std::string_view value) noexcept;
 
+	struct CreateResult {
+		UniqueFileDescriptor main_fd, session_fd;
+	};
+
 	/**
 	 * Create a cgroup2 group.  Returns an undefined
 	 * #UniqueFileDescriptor if this instance is not enabled.
 	 *
 	 * Throws on error.
 	 *
-	 * @param session if not nullptr, create one child cgroupbelow
+	 * @param session if not nullptr, create one child cgroup below
 	 * the one created by #name
 	 */
-	UniqueFileDescriptor Create2(const CgroupState &state,
-				     const char *session) const;
+	CreateResult Create2(const CgroupState &state, const char *session) const;
 
 	char *MakeId(char *p) const noexcept;
 };

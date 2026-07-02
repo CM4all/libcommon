@@ -69,8 +69,9 @@ struct PreparedChildProcess {
 
 	/**
 	 * If defined, then this is a socket where the spawner shall
-	 * send a cgroup O_PATH file descriptor.  This is useful for
-	 * watching resource usage.
+	 * send a cgroup O_PATH file descriptor (of the main cgroup,
+	 * not the #cgroup_session).  This is useful for watching
+	 * resource usage.
 	 */
 	UniqueSocketDescriptor return_cgroup;
 

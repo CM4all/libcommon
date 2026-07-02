@@ -608,17 +608,21 @@ SpawnChildProcess(EventLoop &event_loop,
 	long pid;
 	for (unsigned retries = 2;;) {
 		try {
-			UniqueFileDescriptor cgroup_fd;
+			CgroupOptions::CreateResult cgroup_fds;
+
 			if (params.cgroup != nullptr) {
 				const ScopeUmask scope_umask{
 					cgroups_group_writable ? mode_t{0002} : mode_t{0022}
 				};
 
-				cgroup_fd = params.cgroup->Create2(cgroup_state,
-								   params.cgroup_session);
-				if (cgroup_fd.IsDefined()) {
+				cgroup_fds = params.cgroup->Create2(cgroup_state,
+								    params.cgroup_session);
+				if (cgroup_fds.session_fd.IsDefined()) {
 					ca.flags |= CLONE_INTO_CGROUP;
-					ca.cgroup = cgroup_fd.Get();
+					ca.cgroup = cgroup_fds.session_fd.Get();
+				} else if (cgroup_fds.main_fd.IsDefined()) {
+					ca.flags |= CLONE_INTO_CGROUP;
+					ca.cgroup = cgroup_fds.main_fd.Get();
 				}
 			}
 
@@ -626,8 +630,8 @@ SpawnChildProcess(EventLoop &event_loop,
 			if (pid < 0)
 				throw MakeErrno("clone() failed");
 
-			if (pid > 0 && cgroup_fd.IsDefined() && params.return_cgroup.IsDefined())
-				EasySendMessage(params.return_cgroup, cgroup_fd);
+			if (pid > 0 && cgroup_fds.main_fd.IsDefined() && params.return_cgroup.IsDefined())
+				EasySendMessage(params.return_cgroup, cgroup_fds.main_fd);
 
 			break;
 		} catch (const std::system_error &e) {

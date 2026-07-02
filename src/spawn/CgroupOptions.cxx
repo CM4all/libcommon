@@ -63,7 +63,7 @@ WriteCgroupFile(FileDescriptor group_fd,
 	WriteFile(group_fd, filename, value);
 }
 
-UniqueFileDescriptor
+CgroupOptions::CreateResult
 CgroupOptions::Create2(const CgroupState &state, const char *session) const
 {
 	if (name == nullptr)
@@ -89,10 +89,11 @@ CgroupOptions::Create2(const CgroupState &state, const char *session) const
 	for (const auto &s : set)
 		WriteCgroupFile(fd, s.name, s.value);
 
-	if (session != nullptr)
-		return MakeDirectory({fd, session});
-	else
-		return fd;
+	if (session != nullptr) {
+		auto session_fd = MakeDirectory({fd, session});
+		return {std::move(fd), std::move(session_fd)};
+	} else
+		return {std::move(fd), {}};
 }
 
 char *
