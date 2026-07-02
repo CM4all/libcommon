@@ -26,6 +26,11 @@ struct SpawnChildProcessResult {
 	pid_t pid;
 
 	/**
+	 * An O_PATH file descriptor of the session cgroup.
+	 */
+	UniqueFileDescriptor session_cgroup_fd;
+
+	/**
 	 * A pipe the holds a lease for resources received from the
 	 * spawn-accessory daemon (e.g. namespace handles).
 	 */

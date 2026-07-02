@@ -590,6 +590,8 @@ SpawnChildProcess(EventLoop &event_loop,
 		params.ns.enable_user = false;
 	}
 
+	UniqueFileDescriptor session_cgroup_fd;
+
 	int _pidfd;
 
 	struct clone_args ca{
@@ -632,6 +634,8 @@ SpawnChildProcess(EventLoop &event_loop,
 
 			if (pid > 0 && cgroup_fds.main_fd.IsDefined() && params.return_cgroup.IsDefined())
 				EasySendMessage(params.return_cgroup, cgroup_fds.main_fd);
+
+			session_cgroup_fd = std::move(cgroup_fds.session_fd);
 
 			break;
 		} catch (const std::system_error &e) {
@@ -748,6 +752,7 @@ SpawnChildProcess(EventLoop &event_loop,
 	co_return SpawnChildProcessResult{
 		.pidfd = std::move(pidfd),
 		.pid = static_cast<pid_t>(pid),
+		.session_cgroup_fd = std::move(session_cgroup_fd),
 		.accessory_lease_pipe = std::move(accessory_lease_pipe),
 	};
 }
