@@ -69,5 +69,11 @@ TEST(VCircularBuffer, Basic)
 	}
 
 	cb.emplace_back(sizeof(Foo), i++);
+
+	if (sizeof(void*) < 8)
+		/* dirty kludge: on 32 bit systems, we need another
+		   item to displace the front item */
+		cb.emplace_back(sizeof(Foo), i++);
+
 	ASSERT_EQ(cb.front().value, new_front.value + 1);
 }
