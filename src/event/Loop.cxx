@@ -73,6 +73,8 @@ public:
 	explicit UringWake(EventLoop &_event_loop) noexcept
 		:event_loop(_event_loop) {}
 
+	using Uring::Operation::IsUringPending;
+
 	void Start() {
 		assert(!IsUringPending());
 		assert(event_loop.GetUring());
