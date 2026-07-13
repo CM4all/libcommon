@@ -9,7 +9,6 @@
 #include <memory>
 #include <string>
 
-class SocketAddress;
 class FileLineParser;
 
 namespace Avahi {

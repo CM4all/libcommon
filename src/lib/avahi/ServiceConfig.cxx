@@ -6,7 +6,6 @@
 #include "Service.hxx"
 #include "Arch.hxx"
 #include "Check.hxx"
-#include "net/SocketAddress.hxx"
 #include "io/config/FileLineParser.hxx"
 #include "util/StringAPI.hxx"
 
