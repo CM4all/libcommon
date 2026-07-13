@@ -9,7 +9,6 @@
 #include <cstdint>
 
 enum class Arch : uint_least8_t;
-class SocketAddress;
 
 namespace Avahi {
 
