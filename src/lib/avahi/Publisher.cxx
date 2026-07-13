@@ -7,7 +7,6 @@
 #include "Client.hxx"
 #include "Error.hxx"
 #include "ErrorHandler.hxx"
-#include "net/SocketAddress.hxx"
 
 #include <avahi-common/error.h>
 #include <avahi-common/malloc.h>
