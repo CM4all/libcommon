@@ -38,7 +38,7 @@ ParseConfigFile(ConfigParser &parser, const char *const*lines)
     parser.Finish();
 }
 
-static const char *const v_data[] = {
+static constexpr const char *v_data[] = {
     "@set foo='bar'",
     "@set bar=\"${foo}\"",
     "${foo} ",
@@ -52,7 +52,7 @@ static const char *const v_data[] = {
     nullptr
 };
 
-static const char *const v_output[] = {
+static constexpr const char *v_output[] = {
     "bar",
     "${foo}",
     "bar",
