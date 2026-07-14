@@ -185,8 +185,13 @@ VariableConfigParser::ExpandQuoted(std::string &dest,
 
 		dest.append(src, dollar);
 
-		src = dollar;
-		ExpandOne(dest, src, end);
+		if (dollar + 1 < end && dollar[1] == '{') {
+			src = dollar;
+			ExpandOne(dest, src, end);
+		} else {
+			dest.push_back('$');
+			src = dollar + 1;
+		}
 	}
 
 	dest.append(src, end);
