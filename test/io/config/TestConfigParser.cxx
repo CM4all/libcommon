@@ -49,6 +49,11 @@ static constexpr const char *v_data[] = {
     "@set foo=\"with space\"",
     "\"${foo}\"",
     "  ${foo}  ",
+    "'$'",
+    "'$$'",
+    "\"$\"",
+    "\"$$\"",
+    "\"$${bar}\"",
     nullptr
 };
 
@@ -60,6 +65,11 @@ static constexpr const char *v_output[] = {
     "abarb",
     "with space",
     "with space",
+    "$",
+    "$$",
+    "$",
+    "$$",
+    "$bar",
     nullptr
 };
 
