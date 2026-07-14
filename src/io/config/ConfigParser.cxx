@@ -135,7 +135,8 @@ VariableConfigParser::Finish()
 	ConfigParser::Finish();
 }
 
-void VariableConfigParser::SetVariable(std::string name, std::string value)
+void
+VariableConfigParser::SetVariable(std::string &&name, std::string &&value) noexcept
 {
 	variables.insert_or_assign(std::move(name), std::move(value));
 }

@@ -82,7 +82,7 @@ public:
 	void ParseLine(FileLineParser &line) final;
 	void Finish() override;
 
-	void SetVariable(std::string name, std::string value);
+	void SetVariable(std::string &&name, std::string &&value) noexcept;
 
 private:
 	void ExpandOne(std::string &dest,
