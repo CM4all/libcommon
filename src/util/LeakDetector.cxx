@@ -19,12 +19,12 @@ public:
 	}
 
 	void Add(LeakDetector &l) noexcept {
-		const std::scoped_lock lock{mutex};
+		const std::lock_guard lock{mutex};
 		list.push_back(l);
 	}
 
 	void Remove(LeakDetector &l) noexcept {
-		const std::scoped_lock lock{mutex};
+		const std::lock_guard lock{mutex};
 		list.erase(list.iterator_to(l));
 	}
 };
