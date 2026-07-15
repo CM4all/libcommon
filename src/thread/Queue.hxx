@@ -104,7 +104,7 @@ private:
 	}
 
 	void LockCheckDisableNotify() noexcept {
-		const std::scoped_lock lock{mutex};
+		const std::lock_guard lock{mutex};
 		CheckDisableNotify();
 	}
 
