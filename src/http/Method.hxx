@@ -44,6 +44,9 @@ enum class HttpMethod : uint_least8_t {
 	/* Versioning Extensions to WebDAV methods (RFC3253) */
 	REPORT,
 
+	/* RFC 10008 */
+	QUERY,
+
 	INVALID,
 };
 
@@ -72,6 +75,9 @@ constexpr const char *http_method_to_string_data[] = {
 
 	/* Versioning Extensions to WebDAV methods (RFC3253) */
 	"REPORT",
+
+	/* RFC 10008 */
+	"QUERY",
 };
 
 static_assert(sizeof(http_method_to_string_data) / sizeof(http_method_to_string_data[0]) == static_cast<unsigned>(HttpMethod::INVALID));
@@ -116,6 +122,7 @@ IsSafeMethod(HttpMethod method) noexcept
 	case HttpMethod::TRACE:
 	case HttpMethod::PROPFIND:
 	case HttpMethod::REPORT:
+	case HttpMethod::QUERY:
 		return true;
 
 	default:
