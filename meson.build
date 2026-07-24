@@ -7,7 +7,6 @@ project('CM4all libcommon', 'cpp', version: '0.1',
     'fmt:cpp_std=c++23',
 
     'libwas:apreq2=disabled',
-    'libwas:xios=disabled',
     'libwas:documentation=disabled',
   ],
 )
