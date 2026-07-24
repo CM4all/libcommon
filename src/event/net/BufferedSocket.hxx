@@ -705,8 +705,21 @@ public:
 		base.ScheduleReadAndAnyHangup();
 	}
 
+	/**
+	 * Undo the effect of ScheduleRead().  This may also
+	 * implicitly unschedule hangup events.
+	 */
 	void UnscheduleRead() noexcept {
 		base.UnscheduleRead();
+		defer_read.Cancel();
+	}
+
+	/**
+	 * Like UnscheduleRead(), but keep listening for hangup
+	 * events.
+	 */
+	void UnscheduleOnlyRead() noexcept {
+		base.UnscheduleOnlyRead();
 		defer_read.Cancel();
 	}
 

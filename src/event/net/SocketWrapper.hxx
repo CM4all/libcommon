@@ -134,8 +134,20 @@ public:
 		socket_event.Schedule(SocketEvent::READ|SocketEvent::ANY_HANGUP);
 	}
 
+	/**
+	 * Undo the effect of ScheduleRead().  This may also
+	 * implicitly unschedule hangup events.
+	 */
 	void UnscheduleRead() noexcept {
 		socket_event.CancelRead();
+	}
+
+	/**
+	 * Like UnscheduleRead(), but keep listening for hangup
+	 * events.
+	 */
+	void UnscheduleOnlyRead() noexcept {
+		socket_event.CancelOnlyRead();
 	}
 
 	/**
