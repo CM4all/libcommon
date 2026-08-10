@@ -174,18 +174,6 @@ CancelOtherTaskWaiter(Co::MultiValue<T> &task, std::optional<T> &value_r,
 	value_r.emplace(std::move(value));
 }
 
-static Co::EagerTask<void>
-CancelOtherTaskWaiter(auto &&task, bool &complete_r, auto &cancel_task)
-{
-	assert(!complete_r);
-	co_await task;
-
-	cancel_task = {};
-
-	assert(!complete_r);
-	complete_r = true;
-}
-
 /**
  * One resumed task cancels another (suspended) task.
  */
