@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <concepts> // for std::integral
 #include <cstddef>
 #include <cstdint>
 #include <span>
