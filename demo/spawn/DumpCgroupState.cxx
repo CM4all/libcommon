@@ -7,6 +7,7 @@
 #include "util/PrintException.hxx"
 
 #include <cstdio>
+#include <cstdlib> // for EXIT_*
 
 struct Usage {};
 
