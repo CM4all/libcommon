@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <span>
 
@@ -22,3 +23,16 @@ UrandomRead(std::span<std::byte> dest);
  */
 void
 UrandomFill(std::span<std::byte> dest);
+
+/**
+ * Return an array filled with pseudo-random data.  May block.  Throws
+ * on error.
+ */
+template<std::size_t size>
+std::array<std::byte, size>
+UrandomArray()
+{
+	std::array<std::byte, size> array;
+	UrandomFill(array);
+	return array;
+}
