@@ -224,6 +224,9 @@ try {
 		   will apply the resource limits */
 		p.rlimits.Apply(0);
 
+	/* call PrepareApply() before unmounting /proc */
+	auto proc_sys_user = p.ns.user.limits.PrepareApply();
+
 	p.ns.Apply(p.uid_gid);
 
 	if (userns_create_pipe_w.IsDefined()) {
@@ -242,6 +245,9 @@ try {
 		   the parent */
 		WakeUpPipe(std::move(userns_create_pipe_w));
 	}
+
+	p.ns.user.limits.Apply(proc_sys_user);
+	proc_sys_user.Close();
 
 	/* wait for the parent to set us up */
 	if (wait_pipe_r.IsDefined() && !WaitForPipe(wait_pipe_r))

@@ -5,10 +5,15 @@
 #include "UserNamespaceOptions.hxx"
 #include "MakeId.hxx"
 #include "UidGid.hxx"
+#include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/linux/ProcPid.hxx"
 #include "io/linux/UserNamespace.hxx"
 #include "AllocatorPtr.hxx"
+#include "io/FileAt.hxx"
+#include "io/WriteFile.hxx"
+
+#include <fmt/format.h>
 
 #include <fmt/core.h>
 
@@ -19,6 +24,7 @@ using std::string_view_literals::operator""sv;
 UserNamespaceOptions::UserNamespaceOptions([[maybe_unused]] AllocatorPtr alloc,
 					   const UserNamespaceOptions &src) noexcept
 	:fd(src.fd),
+	 limits(src.limits),
 	 mapped_real_uid(src.mapped_real_uid),
 	 mapped_effective_uid(src.mapped_effective_uid),
 	 create(src.create)
@@ -32,6 +38,29 @@ UserNamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 		flags |= CLONE_NEWUSER;
 
 	return flags;
+}
+
+UniqueFileDescriptor
+UserNamespaceOptions::Limits::PrepareApply() const
+{
+	if (!IsDefined())
+		return {};
+
+	return OpenDirectoryPath({FileDescriptor::Undefined(), "/proc/sys/user"});
+}
+
+void
+UserNamespaceOptions::Limits::Apply(FileDescriptor proc_sys_user) const
+{
+	assert(proc_sys_user.IsDefined() == IsDefined());
+
+	if (max_inotify_instances != UINT_LEAST32_MAX)
+		WriteExistingFile({proc_sys_user, "max_inotify_instances"},
+				  fmt::format_int{max_inotify_instances}.c_str());
+
+	if (max_inotify_watches != UINT_LEAST32_MAX)
+		WriteExistingFile({proc_sys_user, "max_inotify_watches"},
+				  fmt::format_int{max_inotify_watches}.c_str());
 }
 
 char *

@@ -674,6 +674,10 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			p.ns.user.create = true;
 			break;
 
+		case ExecCommand::USER_NS_LIMITS:
+			payload.ReadT(p.ns.user.limits);
+			break;
+
 		case ExecCommand::PID_NS:
 			payload.ReadT(p.ns.pid.mode);
 			switch (p.ns.pid.mode) {

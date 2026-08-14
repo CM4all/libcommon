@@ -352,6 +352,12 @@ Serialize(Serializer &s, const NamespaceOptions &ns)
 	assert(!ns.ipc_namespace.IsDefined());
 
 	s.WriteOptional(ExecCommand::USER_NS, ns.user.create);
+
+	if (ns.user.limits.IsDefined()) {
+		s.Write(ExecCommand::USER_NS_LIMITS);
+		s.WriteT(ns.user.limits);
+	}
+
 	s.WriteOptional(ExecCommand::CGROUP_NS, ns.enable_cgroup);
 	s.WriteOptional(ExecCommand::NETWORK_NS, ns.enable_network);
 	s.WriteOptionalString(ExecCommand::NETWORK_NS_NAME,
