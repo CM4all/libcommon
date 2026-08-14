@@ -3,12 +3,11 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "UserNamespace.hxx"
-#include "lib/fmt/SystemError.hxx"
 #include "io/FileAt.hxx"
 #include "io/WriteFile.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <algorithm> // for std::copy()
 #include <cassert>
@@ -59,20 +58,13 @@ FormatIdMap(char *p, const std::set<unsigned> &ids) noexcept
 	return p;
 }
 
-static void
-WriteFileOrThrow(FileDescriptor directory, const char *path, std::string_view data)
-{
-	if (TryWriteExistingFile({directory, path}, data) == WriteFileResult::ERROR)
-		throw FmtErrno("write({:?}) failed", path);
-}
-
 void
 SetupUidMap(FileDescriptor proc_pid, const IdMap &map)
 {
 	char buffer[256];
 	char *end = FormatIdMap(buffer, map);
 
-	WriteFileOrThrow(proc_pid, "uid_map", {buffer, end});
+	WriteExistingFile({proc_pid, "uid_map"}, {buffer, end});
 }
 
 void
@@ -81,7 +73,7 @@ SetupUidMap(FileDescriptor proc_pid, unsigned uid)
 	char buffer[256];
 	char *end = FormatIdMap(buffer, uid);
 
-	WriteFileOrThrow(proc_pid, "uid_map", {buffer, end});
+	WriteExistingFile({proc_pid, "uid_map"}, {buffer, end});
 }
 
 void
@@ -90,7 +82,7 @@ SetupGidMap(FileDescriptor proc_pid, unsigned gid)
 	char buffer[256];
 	char *end = FormatIdMap(buffer, gid);
 
-	WriteFileOrThrow(proc_pid, "gid_map", {buffer, end});
+	WriteExistingFile({proc_pid, "gid_map"}, {buffer, end});
 }
 
 void
@@ -101,5 +93,5 @@ SetupGidMap(FileDescriptor proc_pid, const std::set<unsigned> &gids)
 	char buffer[1024];
 	char *end = FormatIdMap(buffer, gids);
 
-	WriteFileOrThrow(proc_pid, "gid_map", {buffer, end});
+	WriteExistingFile({proc_pid, "gid_map"}, {buffer, end});
 }

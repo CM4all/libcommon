@@ -30,13 +30,6 @@ CgroupState::CgroupState() noexcept {}
 CgroupState::~CgroupState() noexcept = default;
 
 static void
-WriteFile(FileDescriptor fd, const char *path, std::string_view data)
-{
-	if (TryWriteExistingFile({fd, path}, data) == WriteFileResult::ERROR)
-		throw FmtErrno("write({:?}) failed", path);
-}
-
-static void
 ForEachController(FileDescriptor group_fd,
 		  std::invocable<std::string_view> auto callback)
 {
@@ -59,7 +52,7 @@ CgroupState::EnableAllControllers(unsigned pid) const
 	   we can't enable other controllers */
 
 	const auto leaf_group = MakeDirectory({group_fd, "_"}, {.mode=0770});
-	WriteFile(leaf_group, "cgroup.procs", fmt::format_int{pid}.c_str());
+	WriteExistingFile({leaf_group, "cgroup.procs"}, fmt::format_int{pid}.c_str());
 
 	/* now enable all other controllers in subtree_control */
 
@@ -78,7 +71,7 @@ CgroupState::EnableAllControllers(unsigned pid) const
 		subtree_control += controller;
 	});
 
-	WriteFile(group_fd, "cgroup.subtree_control", subtree_control);
+	WriteExistingFile({group_fd, "cgroup.subtree_control"}, subtree_control);
 }
 
 [[gnu::pure]]

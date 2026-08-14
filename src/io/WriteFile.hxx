@@ -47,4 +47,10 @@ WriteFileResult
 TryWriteExistingFile(FileAt file,
 		     std::string_view value) noexcept;
 
+/**
+ * Like TryWriteExistingFile(), but throw on error.
+ */
+void
+WriteExistingFile(FileAt file, std::string_view value);
+
 #endif // __linux__

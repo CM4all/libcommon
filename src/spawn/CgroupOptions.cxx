@@ -46,13 +46,6 @@ CgroupOptions::Set(AllocatorPtr alloc,
 }
 
 static void
-WriteFile(FileDescriptor fd, const char *path, std::string_view data)
-{
-	if (TryWriteExistingFile({fd, path}, data) == WriteFileResult::ERROR)
-		throw FmtErrno("write({:?}) failed", path);
-}
-
-static void
 WriteCgroupFile(FileDescriptor group_fd,
 		const char *filename, std::string_view value)
 {
@@ -60,7 +53,7 @@ WriteCgroupFile(FileDescriptor group_fd,
 	if (StringIsEqual(filename, "memory.limit_in_bytes"))
 		filename = "memory.max";
 
-	WriteFile(group_fd, filename, value);
+	WriteExistingFile({group_fd, filename}, value);
 }
 
 CgroupOptions::CreateResult
