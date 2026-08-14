@@ -45,4 +45,4 @@ WriteFileResult
 TryWriteExistingFile(FileAt file,
 		     std::string_view value) noexcept;
 
-#endif
+#endif // __linux__

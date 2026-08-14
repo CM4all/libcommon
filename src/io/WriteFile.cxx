@@ -2,9 +2,12 @@
 // author: Max Kellermann <max.kellermann@gmail.com>
 
 #include "WriteFile.hxx"
-#include "FileAt.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "util/SpanCast.hxx"
+
+#ifdef __linux__
+#include "FileAt.hxx"
+#endif
 
 #include <span>
 
@@ -38,6 +41,8 @@ TryWriteExistingFile(const char *path, std::string_view value) noexcept
 	return TryWriteExistingFile(path, AsBytes(value));
 }
 
+#ifdef __linux__
+
 static WriteFileResult
 TryWriteExistingFile(FileAt file,
 		     std::span<const std::byte> value) noexcept
@@ -55,3 +60,5 @@ TryWriteExistingFile(FileAt file,
 {
 	return TryWriteExistingFile(file, AsBytes(value));
 }
+
+#endif // __linux__
