@@ -1364,7 +1364,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_HTTP
 		if (!http_status_is_valid(response.status))
 			throw FmtRuntimeError("invalid HTTP status code {}",
-					      (unsigned)response.status);
+					      std::to_underlying(response.status));
 #endif
 
 		return;
