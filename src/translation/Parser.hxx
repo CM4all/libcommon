@@ -174,6 +174,13 @@ class TranslateParser {
 #endif
 
 public:
+	/**
+	 * Exception classes.
+	 */
+	struct MisplacedPacket {};
+	struct MalformedPacket {};
+	struct DuplicatePacket {};
+
 	explicit TranslateParser(AllocatorPtr _alloc,
 #if TRANSLATION_ENABLE_EXPAND
 				 Pcre::Cache &_pcre_cache,
@@ -317,7 +324,6 @@ private:
 #if TRANSLATION_ENABLE_HTTP
 	void HandleAllowRemoteNetwork(std::span<const std::byte> payload);
 	void HandleTokenBucketParams(TranslateTokenBucketParams &params,
-				     const char *packet_name,
 				     std::span<const std::byte> payload);
 #endif
 
