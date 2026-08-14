@@ -313,6 +313,7 @@ private:
 	void HandleRealUidGid(std::span<const std::byte> payload);
 	void HandleMappedUidGid(std::span<const std::byte> payload);
 	void HandleMappedRealUidGid(std::span<const std::byte> payload);
+	void HandleMaxInotify(std::span<const std::byte> payload);
 	void HandleUmask(std::span<const std::byte> payload);
 
 	void HandleCgroupSet(std::string_view payload);

@@ -1431,6 +1431,12 @@ enum class TranslationCommand : uint16_t {
 	 * SIGTERM.
 	 */
 	SIGKILL_ = 284,
+
+	/**
+	 * Set max_inotify_instances and max_inotify_watches.  Payload
+	 * is two 32 bit integers.
+	 */
+	MAX_INOTIFY = 285,
 };
 
 struct TranslationHeader {

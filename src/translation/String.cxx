@@ -300,10 +300,11 @@ constexpr auto translation_command_names = std::array{
 	"NO_QUERY_STRING"sv, // 282
 	"INSTANT_FADE"sv, // 283
 	"SIGKILL_"sv, // 284
+	"MAX_INOTIFY"sv, // 285
 };
 
 // Static assertion to verify the array size matches the highest enum value + 1
-static_assert(translation_command_names.size() == std::to_underlying(TranslationCommand::SIGKILL_) + 1);
+static_assert(translation_command_names.size() == std::to_underlying(TranslationCommand::MAX_INOTIFY) + 1);
 
 // Static assertions to verify specific indexes are placed correctly
 static_assert(translation_command_names[std::to_underlying(TranslationCommand::BEGIN)] == "BEGIN"sv);

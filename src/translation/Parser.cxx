@@ -1140,6 +1140,24 @@ TranslateParser::HandleRealUidGid(std::span<const std::byte> payload)
 }
 
 inline void
+TranslateParser::HandleMaxInotify(std::span<const std::byte> payload)
+{
+	auto &ns = MakeNamespaceOptions("misplaced MAX_INOTIFY packet");
+	if (!ns.user.create)
+		throw MisplacedPacket{};
+
+	if (payload.size() != sizeof(uint32_t) * 2)
+		throw MalformedPacket{};
+
+	const std::byte *src = payload.data();
+
+	ns.user.limits.max_inotify_instances = LoadUnaligned<uint32_t>(src);
+	src += sizeof(uint32_t);
+
+	ns.user.limits.max_inotify_watches = LoadUnaligned<uint32_t>(src);
+}
+
+inline void
 TranslateParser::HandleUmask(std::span<const std::byte> payload)
 {
 	typedef uint16_t value_type;
@@ -4729,6 +4747,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw DuplicatePacket{};
 		else
 			options.sigkill = true;
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::MAX_INOTIFY:
+#if TRANSLATION_ENABLE_SPAWN
+		HandleMaxInotify(payload);
 		return;
 #else
 		break;

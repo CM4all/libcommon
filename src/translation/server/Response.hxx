@@ -1188,6 +1188,13 @@ public:
 			return *this;
 		}
 
+		auto MaxInotify(const uint32_t &max_inotify_instances, const uint32_t &max_inotify_watches) noexcept {
+			response.MultiPacket(TranslationCommand::MAX_INOTIFY,
+					     std::span{&max_inotify_instances, 1},
+					     std::span{&max_inotify_watches, 1});
+			return *this;
+		}
+
 		auto Umask(uint16_t mask) noexcept {
 			response.PacketT(TranslationCommand::UMASK, mask);
 			return *this;
