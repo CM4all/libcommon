@@ -348,24 +348,24 @@ Serialize(Serializer &s, const MountNamespaceOptions &ns)
 static void
 Serialize(Serializer &s, const NamespaceOptions &ns)
 {
-	assert(!ns.user_namespace.IsDefined());
+	assert(!ns.user.fd.IsDefined());
 	assert(!ns.ipc_namespace.IsDefined());
 
-	s.WriteOptional(ExecCommand::USER_NS, ns.enable_user);
+	s.WriteOptional(ExecCommand::USER_NS, ns.user.create);
 	s.WriteOptional(ExecCommand::CGROUP_NS, ns.enable_cgroup);
 	s.WriteOptional(ExecCommand::NETWORK_NS, ns.enable_network);
 	s.WriteOptionalString(ExecCommand::NETWORK_NS_NAME,
 			      ns.network_namespace_name);
 	s.WriteOptional(ExecCommand::IPC_NS, ns.enable_ipc);
 
-	if (ns.mapped_real_uid > 0) {
+	if (ns.user.mapped_real_uid > 0) {
 		s.Write(ExecCommand::MAPPED_REAL_UID);
-		s.WriteT(ns.mapped_real_uid);
+		s.WriteT(ns.user.mapped_real_uid);
 	}
 
-	if (ns.mapped_effective_uid > 0) {
+	if (ns.user.mapped_effective_uid > 0) {
 		s.Write(ExecCommand::MAPPED_EFFECTIVE_UID);
-		s.WriteT(ns.mapped_effective_uid);
+		s.WriteT(ns.user.mapped_effective_uid);
 	}
 
 	Serialize(s, ns.pid);

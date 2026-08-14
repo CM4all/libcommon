@@ -102,11 +102,11 @@ try {
 		} else if (const char *real_gid = StringAfterPrefix(arg, "--real-gid=")) {
 			p.uid_gid.real_gid = atoi(real_gid);
 		} else if (const char *mapped_real_uid = StringAfterPrefix(arg, "--mapped-real-uid=")) {
-			p.ns.mapped_real_uid = atoi(mapped_real_uid);
+			p.ns.user.mapped_real_uid = atoi(mapped_real_uid);
 		} else if (const char *mapped_effective_uid = StringAfterPrefix(arg, "--mapped-effective-uid=")) {
-			p.ns.mapped_effective_uid = atoi(mapped_effective_uid);
+			p.ns.user.mapped_effective_uid = atoi(mapped_effective_uid);
 		} else if (StringIsEqual(arg, "--userns")) {
-			p.ns.enable_user = true;
+			p.ns.user.create = true;
 		} else if (StringIsEqual(arg, "--pidns")) {
 			p.ns.pid.mode = PidNamespaceOptions::Mode::ANONYMOUS;
 		} else if (const char *pidns = StringAfterPrefix(arg, "--pidns=")) {

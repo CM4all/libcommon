@@ -144,6 +144,7 @@ if get_variable('libcommon_enable_spawn_options', false)
     'PidNamespaceOptions.cxx',
     'Prepared.cxx',
     'TmpfsCreate.cxx',
+    'UserNamespaceOptions.cxx',
 
     # These are really depended on up libcommon_enable_spawn_direct,
     # but the functions are called from ChildOptions/NamespaceOptions

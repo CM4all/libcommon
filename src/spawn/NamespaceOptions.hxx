@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "UserNamespaceOptions.hxx"
 #include "MountNamespaceOptions.hxx"
 #include "PidNamespaceOptions.hxx"
 #include "translation/Features.hxx"
@@ -18,11 +19,6 @@ struct UidGid;
 class MatchData;
 
 struct NamespaceOptions {
-	/**
-	 * Start the child process in a new user namespace?
-	 */
-	bool enable_user = false;
-
 	/**
 	 * Start the child process in a new Cgroup namespace?
 	 */
@@ -39,18 +35,6 @@ struct NamespaceOptions {
 	bool enable_ipc = false;
 
 	/**
-	 * The real uid visible to the spawned process.  If zero, then
-	 * the original real uid is mapped.
-	 */
-	uid_t mapped_real_uid = 0;
-
-	/**
-	 * The effective uid visible to the spawned process.  If zero,
-	 * then the original effective uid is mapped.
-	 */
-	uid_t mapped_effective_uid = 0;
-
-	/**
 	 * The name of the network namespace (/run/netns/X) to reassociate
 	 * with.  Requires #enable_network.
 	 */
@@ -61,6 +45,8 @@ struct NamespaceOptions {
 	 */
 	const char *hostname = nullptr;
 
+	UserNamespaceOptions user;
+
 	PidNamespaceOptions pid;
 
 	MountNamespaceOptions mount;
@@ -68,24 +54,20 @@ struct NamespaceOptions {
 	/**
 	 * Namespace descriptors to reassociate with.
 	 */
-	FileDescriptor user_namespace = FileDescriptor::Undefined(),
-		ipc_namespace = FileDescriptor::Undefined();
+	FileDescriptor ipc_namespace = FileDescriptor::Undefined();
 
 	NamespaceOptions() noexcept = default;
 
 	constexpr NamespaceOptions(ShallowCopy shallow_copy,
 				   const NamespaceOptions &src) noexcept
-		:enable_user(src.enable_user),
-		 enable_cgroup(src.enable_cgroup),
+		:enable_cgroup(src.enable_cgroup),
 		 enable_network(src.enable_network),
 		 enable_ipc(src.enable_ipc),
-		 mapped_real_uid(src.mapped_real_uid),
-		 mapped_effective_uid(src.mapped_effective_uid),
 		 network_namespace_name(src.network_namespace_name),
 		 hostname(src.hostname),
+		 user(shallow_copy, src.user),
 		 pid(shallow_copy, src.pid),
 		 mount(shallow_copy, src.mount),
-		 user_namespace(src.user_namespace),
 		 ipc_namespace(src.ipc_namespace)
 	{
 	}
@@ -134,25 +116,6 @@ struct NamespaceOptions {
 
 	[[gnu::pure]]
 	uint_least64_t GetCloneFlags(uint_least64_t flags) const noexcept;
-
-	/**
-	 * Generate a string for writing to /proc/PID/uid_map.  Use
-	 * this method instead of SetupUidGidMap() if you want to use
-	 * a custom way to create the user namespace.
-	 */
-	[[nodiscard]]
-	char *FormatUidMap(char *dest, const UidGid &uid_gid) const noexcept;
-
-	/**
-	 * Generate a string for writing to /proc/PID/gid_map.  Use
-	 * this method instead of SetupUidGidMap() if you want to use
-	 * a custom way to create the user namespace.
-	 */
-	[[nodiscard]]
-	char *FormatGidMap(char *dest, const UidGid &uid_gid) const noexcept;
-
-	void SetupUidGidMap(const UidGid &uid_gid,
-			    unsigned pid) const;
 
 	/**
 	 * Apply #network_namespace_name.

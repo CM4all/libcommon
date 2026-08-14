@@ -671,7 +671,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			break;
 
 		case ExecCommand::USER_NS:
-			p.ns.enable_user = true;
+			p.ns.user.create = true;
 			break;
 
 		case ExecCommand::PID_NS:
@@ -867,11 +867,11 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			break;
 
 		case ExecCommand::MAPPED_REAL_UID:
-			payload.ReadT(p.ns.mapped_real_uid);
+			payload.ReadT(p.ns.user.mapped_real_uid);
 			break;
 
 		case ExecCommand::MAPPED_EFFECTIVE_UID:
-			payload.ReadT(p.ns.mapped_effective_uid);
+			payload.ReadT(p.ns.user.mapped_effective_uid);
 			break;
 
 		case ExecCommand::SIGKILL_:

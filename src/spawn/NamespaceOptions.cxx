@@ -5,14 +5,11 @@
 #include "NamespaceOptions.hxx"
 #include "MakeId.hxx"
 #include "NetworkNamespace.hxx"
-#include "UidGid.hxx"
 #include "AllocatorPtr.hxx"
 #include "system/Error.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/linux/ProcPid.hxx"
 #include "io/linux/UserNamespace.hxx"
-
-#include <fmt/core.h>
 
 #include <set>
 
@@ -24,17 +21,14 @@ using std::string_view_literals::operator""sv;
 
 NamespaceOptions::NamespaceOptions(AllocatorPtr alloc,
 				   const NamespaceOptions &src) noexcept
-	:enable_user(src.enable_user),
-	 enable_cgroup(src.enable_cgroup),
+	:enable_cgroup(src.enable_cgroup),
 	 enable_network(src.enable_network),
 	 enable_ipc(src.enable_ipc),
-	 mapped_real_uid(src.mapped_real_uid),
-	 mapped_effective_uid(src.mapped_effective_uid),
 	 network_namespace_name(alloc.CheckDup(src.network_namespace_name)),
 	 hostname(alloc.CheckDup(src.hostname)),
+	 user(alloc, src.user),
 	 pid(alloc, src.pid),
 	 mount(alloc, src.mount),
-	 user_namespace(src.user_namespace),
 	 ipc_namespace(src.ipc_namespace)
 {
 }
@@ -58,10 +52,8 @@ NamespaceOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 uint_least64_t
 NamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 {
+	flags = user.GetCloneFlags(flags);
 	flags = pid.GetCloneFlags(flags);
-
-	if (enable_user)
-		flags |= CLONE_NEWUSER;
 	if (enable_cgroup)
 		flags |= CLONE_NEWCGROUP;
 	if (enable_network)
@@ -76,77 +68,6 @@ NamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 	return flags;
 }
 
-char *
-NamespaceOptions::FormatUidMap(char *p, const UidGid &uid_gid) const noexcept
-{
-	const IdMap map{
-		.first = {
-			.id = uid_gid.effective_uid,
-			.mapped_id = mapped_effective_uid > 0 ? mapped_effective_uid : uid_gid.effective_uid,
-		},
-		.second = {
-			.id = uid_gid.real_uid,
-			.mapped_id = mapped_real_uid > 0 ? mapped_real_uid : uid_gid.real_uid,
-		},
-	};
-
-	return FormatIdMap(p, map);
-}
-
-char *
-NamespaceOptions::FormatGidMap(char *p, const UidGid &uid_gid) const noexcept
-{
-	/* collect all gids (including supplementary groups) in a std::set
-	   to eliminate duplicates, and then map them all into the new
-	   user namespace */
-	std::set<unsigned> gids;
-
-	// TODO: map the current effective gid if no gid was given?
-	if (uid_gid.effective_gid != UidGid::UNSET_GID)
-		gids.emplace(uid_gid.effective_gid);
-	if (uid_gid.real_gid != UidGid::UNSET_GID)
-		gids.emplace(uid_gid.real_gid);
-	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
-		gids.emplace(uid_gid.supplementary_groups[i]);
-
-	return FormatIdMap(p, gids);
-}
-
-void
-NamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned _pid) const
-{
-	/* collect all gids (including supplementary groups) in a std::set
-	   to eliminate duplicates, and then map them all into the new
-	   user namespace */
-	std::set<unsigned> gids;
-
-	// TODO: map the current effective gid if no gid was given?
-	if (uid_gid.effective_gid != UidGid::UNSET_GID)
-		gids.emplace(uid_gid.effective_gid);
-	if (uid_gid.real_gid != UidGid::UNSET_GID)
-		gids.emplace(uid_gid.real_gid);
-	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
-		gids.emplace(uid_gid.supplementary_groups[i]);
-
-	const auto proc_pid = OpenProcPid(_pid);
-
-	if (!gids.empty())
-		SetupGidMap(proc_pid, gids);
-
-	const IdMap map{
-		.first = {
-			.id = uid_gid.effective_uid,
-			.mapped_id = mapped_effective_uid > 0 ? mapped_effective_uid : uid_gid.effective_uid,
-		},
-		.second = {
-			.id = uid_gid.real_uid,
-			.mapped_id = mapped_real_uid > 0 ? mapped_real_uid : uid_gid.real_uid,
-		},
-	};
-
-	SetupUidMap(proc_pid, map);
-}
-
 void
 NamespaceOptions::ReassociateNetwork() const
 {
@@ -158,13 +79,13 @@ NamespaceOptions::ReassociateNetwork() const
 void
 NamespaceOptions::Apply(const UidGid &uid_gid) const
 {
-	if (enable_user || user_namespace.IsDefined())
+	if (user.IsEnabled())
 		// TODO eliminate this OpenProcPid() call
 		DenySetGroups(OpenProcPid(0));
 
 	/* set up UID/GID mapping in the old /proc */
-	if (enable_user)
-		SetupUidGidMap(uid_gid, 0);
+	if (user.create)
+		user.SetupUidGidMap(uid_gid, 0);
 
 	if (network_namespace_name != nullptr)
 		ReassociateNetwork();
@@ -182,8 +103,8 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 	/* reassociate with the selected user namespace at the end
 	   after all privileged operations are done, because that will
 	   drop all capabilities */
-	if (user_namespace.IsDefined() &&
-	    setns(user_namespace.Get(), CLONE_NEWUSER) < 0)
+	if (user.fd.IsDefined() &&
+	    setns(user.fd.Get(), CLONE_NEWUSER) < 0)
 		throw MakeErrno("Failed to reassociate with user namespace");
 }
 
@@ -201,7 +122,7 @@ NamespaceOptions::ApplyNetwork() const
 char *
 NamespaceOptions::MakeId(char *p) const noexcept
 {
-	p = AppendOptional(p, ";uns"sv, enable_user);
+	p = user.MakeId(p);
 	p = AppendOptional(p, ";cns"sv, enable_cgroup);
 
 	if (enable_network) {
@@ -210,12 +131,6 @@ NamespaceOptions::MakeId(char *p) const noexcept
 	}
 
 	p = AppendOptional(p, ";ins"sv, enable_ipc);
-
-	if (mapped_real_uid > 0)
-		p = fmt::format_to(p, ";mru{}", mapped_real_uid);
-
-	if (mapped_effective_uid > 0)
-		p = fmt::format_to(p, ";meu{}", mapped_effective_uid);
 
 	p = pid.MakeId(p);
 	p = mount.MakeId(p);

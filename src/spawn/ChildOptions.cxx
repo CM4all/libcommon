@@ -61,7 +61,7 @@ void
 ChildOptions::Check() const
 {
 #ifdef HAVE_LIBCAP
-	if (cap_sys_resource && ns.enable_user)
+	if (cap_sys_resource && ns.user.create)
 		throw std::runtime_error{"CAP_SYS_RESOURCE is not possible with USER_NAMESPACE"};
 #endif
 }

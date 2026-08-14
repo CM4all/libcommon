@@ -1078,17 +1078,17 @@ TranslateParser::HandleMappedUidGid(std::span<const std::byte> payload)
 	auto &options = MakeChildOptions("misplaced MAPPED_UID_GID packet");
 
 	if (options.uid_gid.effective_uid == UidGid::UNSET_UID ||
-	    !options.ns.enable_user)
+	    !options.ns.user.create)
 		throw MisplacedPacket{};
 
 	const auto *value = (const uint32_t *)(const void *)payload.data();
 	if (payload.size() != sizeof(*value) || *value <= 0)
 		throw MalformedPacket{};
 
-	if (options.ns.mapped_effective_uid != 0)
+	if (options.ns.user.mapped_effective_uid != 0)
 		throw DuplicatePacket{};
 
-	options.ns.mapped_effective_uid = *value;
+	options.ns.user.mapped_effective_uid = *value;
 }
 
 inline void
@@ -1097,17 +1097,17 @@ TranslateParser::HandleMappedRealUidGid(std::span<const std::byte> payload)
 	auto &options = MakeChildOptions("misplaced MAPPED_REAL_UID_GID packet");
 
 	if (options.uid_gid.real_uid == UidGid::UNSET_UID ||
-	    !options.ns.enable_user)
+	    !options.ns.user.create)
 		throw MisplacedPacket{};
 
 	const auto *value = (const uint32_t *)(const void *)payload.data();
 	if (payload.size() != sizeof(*value) || *value <= 0)
 		throw MalformedPacket{};
 
-	if (options.ns.mapped_real_uid != 0)
+	if (options.ns.user.mapped_real_uid != 0)
 		throw DuplicatePacket{};
 
-	options.ns.mapped_real_uid = *value;
+	options.ns.user.mapped_real_uid = *value;
 }
 
 inline void
@@ -2739,7 +2739,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (!payload.empty())
 			throw MalformedPacket{};
 
-		MakeNamespaceOptions("misplaced USER_NAMESPACE packet").enable_user = true;
+		MakeNamespaceOptions("misplaced USER_NAMESPACE packet").user.create = true;
 		return;
 #else
 		break;

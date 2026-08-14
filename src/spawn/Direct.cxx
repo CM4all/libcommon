@@ -345,10 +345,10 @@ try {
 
 		/* we need to use the mapped UID because the original
 		   UID isn't valid from inside this user namespace */
-		if (p.ns.mapped_real_uid > 0)
-			uid_gid.real_uid = p.ns.mapped_real_uid;
-		if (p.ns.mapped_effective_uid > 0)
-			uid_gid.effective_uid = p.ns.mapped_effective_uid;
+		if (p.ns.user.mapped_real_uid > 0)
+			uid_gid.real_uid = p.ns.user.mapped_real_uid;
+		if (p.ns.user.mapped_effective_uid > 0)
+			uid_gid.effective_uid = p.ns.user.mapped_effective_uid;
 
 		uid_gid.Apply();
 	}
@@ -493,14 +493,14 @@ SpawnChildProcess(EventLoop &event_loop,
 		};
 
 		char uid_map_buffer[256], gid_map_buffer[256];
-		if (params.ns.enable_user) {
-			request.uid_map = {uid_map_buffer, params.ns.FormatUidMap(uid_map_buffer, params.uid_gid)};
-			request.gid_map = {gid_map_buffer, params.ns.FormatGidMap(gid_map_buffer, params.uid_gid)};
+		if (params.ns.user.create) {
+			request.uid_map = {uid_map_buffer, params.ns.user.FormatUidMap(uid_map_buffer, params.uid_gid)};
+			request.gid_map = {gid_map_buffer, params.ns.user.FormatGidMap(gid_map_buffer, params.uid_gid)};
 
 			/* the user namespace will be applied from the
 			   "user_namespace" field; don't create
 			   another one */
-			params.ns.enable_user = false;
+			params.ns.user.create = false;
 		}
 
 		auto ns = SpawnAccessory::MakeNamespaces(SpawnAccessory::Connect(),
@@ -510,7 +510,7 @@ SpawnChildProcess(EventLoop &event_loop,
 			throw MakeErrno("setns(CLONE_NEWPID) failed");
 
 		params.ns.ipc_namespace = ipc_namespace = std::move(ns.ipc);
-		params.ns.user_namespace = user_namespace = std::move(ns.user);
+		params.ns.user.fd = user_namespace = std::move(ns.user);
 		accessory_lease_pipe = std::move(ns.lease_pipe);
 	}
 
@@ -544,7 +544,7 @@ SpawnChildProcess(EventLoop &event_loop,
 	 */
 	const bool skip_uid_gid = params.uid_gid.IsNop();
 
-	if (params.ns.enable_user && is_sys_admin) {
+	if (params.ns.user.create && is_sys_admin) {
 		/* from inside the new user namespace, we cannot
 		   reassociate with a new network namespace or mount
 		   /proc of a reassociated PID namespace, because at
@@ -568,8 +568,8 @@ SpawnChildProcess(EventLoop &event_loop,
 
 		/* this process will set up the uid/gid maps, so
 		   disable that part in the child process */
-		params.ns.enable_user = false;
-	} else if (params.ns.enable_user && !skip_uid_gid) {
+		params.ns.user.create = false;
+	} else if (params.ns.user.create && !skip_uid_gid) {
 		/* if we have to set a user or group without being
 		   CAP_SYS_ADMIN (only CAP_SETUID/CAP_SETGID,
 		   e.g. inside a container), then the child process
@@ -589,7 +589,7 @@ SpawnChildProcess(EventLoop &event_loop,
 
 		/* this process will set up the uid/gid maps, so
 		   disable that part in the child process */
-		params.ns.enable_user = false;
+		params.ns.user.create = false;
 	}
 
 	UniqueFileDescriptor session_cgroup_fd;
@@ -700,7 +700,7 @@ SpawnChildProcess(EventLoop &event_loop,
 			   self-inflicted restriction */
 			DenySetGroups(OpenProcPid(pid));
 
-		params.ns.SetupUidGidMap(params.uid_gid, pid);
+		params.ns.user.SetupUidGidMap(params.uid_gid, pid);
 
 		/* now the right process is ready to set up its mount
 		   namespace */
@@ -727,7 +727,7 @@ SpawnChildProcess(EventLoop &event_loop,
 	if (wait_pipe_w.IsDefined()) {
 		/* set up the child's uid/gid mapping and wake it up */
 		wait_pipe_r.Close();
-		params.ns.SetupUidGidMap(params.uid_gid, pid);
+		params.ns.user.SetupUidGidMap(params.uid_gid, pid);
 
 		/* apply the resource limits in the parent process, because
 		   the child has lost all root namespace capabilities by
