@@ -17,10 +17,9 @@ using std::string_view_literals::operator""sv;
 
 void
 DenySetGroups(FileDescriptor proc_pid) noexcept
-try {
-	TryWriteExistingFile({proc_pid, "setgroups"}, "deny");
-} catch (...) {
+{
 	// silently ignore errors
+	(void)TryWriteExistingFile({proc_pid, "setgroups"}, "deny");
 }
 
 [[nodiscard]]
