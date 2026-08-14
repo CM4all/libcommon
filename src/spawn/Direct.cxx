@@ -57,6 +57,8 @@
 #define PR_SET_NO_NEW_PRIVS 38
 #endif
 
+using std::string_view_literals::operator""sv;
+
 static void
 CheckedDup2(FileDescriptor oldfd, FileDescriptor newfd) noexcept
 {
@@ -174,12 +176,12 @@ try {
 	if (p.umask >= 0)
 		umask(p.umask);
 
-	TryWriteExistingFile("/proc/self/oom_score_adj",
-			     p.ns.mount.pivot_root == nullptr
-			     ? "700"
-			     /* higher OOM score adjustment for jailed
-				(per-account?) processes */
-			     : "800");
+	(void)TryWriteExistingFile("/proc/self/oom_score_adj",
+				   p.ns.mount.pivot_root == nullptr
+				   ? "700"sv
+				   /* higher OOM score adjustment for jailed
+				      (per-account?) processes */
+				   : "800"sv);
 
 	FileDescriptor stdout_fd = p.stdout_fd, stderr_fd = p.stderr_fd;
 #ifdef HAVE_LIBSYSTEMD

@@ -31,6 +31,7 @@ enum class WriteFileResult {
  * exist, and it is not truncated or appended.  This function is
  * useful to write "special" files like the ones in /proc.
  */
+[[nodiscard]]
 WriteFileResult
 TryWriteExistingFile(const char *path, std::string_view value) noexcept;
 
@@ -41,6 +42,7 @@ TryWriteExistingFile(const char *path, std::string_view value) noexcept;
  * exist, and it is not truncated or appended.  This function is
  * useful to write "special" files like the ones in /proc.
  */
+[[nodiscard]]
 WriteFileResult
 TryWriteExistingFile(FileAt file,
 		     std::string_view value) noexcept;
