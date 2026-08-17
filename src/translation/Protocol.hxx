@@ -1437,6 +1437,11 @@ enum class TranslationCommand : uint16_t {
 	 * is two 32 bit integers.
 	 */
 	MAX_INOTIFY = 285,
+
+	/**
+	 * A string for argv[0], which will become the process name.
+	 */
+	PROCESS_NAME = 286,
 };
 
 struct TranslationHeader {

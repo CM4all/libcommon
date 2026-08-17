@@ -204,6 +204,15 @@ struct PreparedChildProcess {
 		args.push_back(arg);
 	}
 
+	void SetProcessName(const char *process_name) noexcept {
+		assert(process_name != nullptr);
+		assert(!args.empty());
+
+		if (exec_path == nullptr)
+			exec_path = args.front();
+		args.front() = process_name;
+	}
+
 	void PutEnv(const char *p) noexcept {
 		env.push_back(p);
 	}

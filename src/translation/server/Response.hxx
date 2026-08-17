@@ -1070,6 +1070,13 @@ public:
 		}
 
 		template<typename... Types>
+		auto ProcessName(Types... value) noexcept {
+			response.StringPacket(TranslationCommand::PROCESS_NAME,
+					      value...);
+			return *this;
+		}
+
+		template<typename... Types>
 		CgroupContext Cgroup(Types... value) noexcept {
 			response.StringPacket(TranslationCommand::CGROUP,
 					      value...);

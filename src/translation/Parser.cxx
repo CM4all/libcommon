@@ -1270,6 +1270,26 @@ TranslateParser::HandleCgroupXattr(std::string_view payload)
 }
 
 inline void
+TranslateParser::HandleProcessName(std::string_view payload)
+{
+	if (!IsValidNonEmptyString(payload))
+		throw MalformedPacket{};
+
+	if (cgi_address != nullptr) {
+		if (cgi_address->process_name != nullptr)
+			throw DuplicatePacket{};
+
+		cgi_address->process_name = payload.data();
+	} else if (lhttp_address != nullptr) {
+		if (lhttp_address->process_name != nullptr)
+			throw DuplicatePacket{};
+
+		lhttp_address->process_name = payload.data();
+	} else
+		throw MisplacedPacket{};
+}
+
+inline void
 TranslateParser::HandleMountListenStream(std::span<const std::byte> payload)
 {
 	auto &options = MakeMountNamespaceOptions("misplaced MOUNT_LISTEN_STREAM packet");
@@ -4755,6 +4775,14 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 	case TranslationCommand::MAX_INOTIFY:
 #if TRANSLATION_ENABLE_SPAWN
 		HandleMaxInotify(payload);
+		return;
+#else
+		break;
+#endif
+
+	case TranslationCommand::PROCESS_NAME:
+#if TRANSLATION_ENABLE_SPAWN
+		HandleProcessName(string_payload);
 		return;
 #else
 		break;
