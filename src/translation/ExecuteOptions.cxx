@@ -11,6 +11,7 @@
 ExecuteOptions::ExecuteOptions(AllocatorPtr alloc, const ExecuteOptions &src) noexcept
 	:shell(alloc.CheckDup(src.shell)),
 	 execute(alloc.CheckDup(src.execute)),
+	 process_name(alloc.CheckDup(src.process_name)),
 	 args(alloc, src.args),
 	 child_options(alloc, src.child_options)
 {

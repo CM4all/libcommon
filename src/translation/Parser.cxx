@@ -1275,18 +1275,33 @@ TranslateParser::HandleProcessName(std::string_view payload)
 	if (!IsValidNonEmptyString(payload))
 		throw MalformedPacket{};
 
+#if TRANSLATION_ENABLE_RADDRESS
 	if (cgi_address != nullptr) {
 		if (cgi_address->process_name != nullptr)
 			throw DuplicatePacket{};
 
 		cgi_address->process_name = payload.data();
+		return;
 	} else if (lhttp_address != nullptr) {
 		if (lhttp_address->process_name != nullptr)
 			throw DuplicatePacket{};
 
 		lhttp_address->process_name = payload.data();
-	} else
-		throw MisplacedPacket{};
+		return;
+	}
+#endif // TRANSLATION_ENABLE_RADDRESS
+
+#if TRANSLATION_ENABLE_EXECUTE
+	if (execute_options != nullptr) {
+		if (execute_options->process_name != nullptr)
+			throw DuplicatePacket{};
+
+		execute_options->process_name = payload.data();
+		return;
+	}
+#endif // TRANSLATION_ENABLE_EXECUTE
+
+	throw MisplacedPacket{};
 }
 
 inline void

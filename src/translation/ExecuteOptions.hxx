@@ -16,6 +16,11 @@ struct ExecuteOptions {
 	const char *execute = nullptr;
 
 	/**
+	 * A string for argv[0], which will become the process name.
+	 */
+	const char *process_name = nullptr;
+
+	/**
 	 * Command-line arguments for #execute.
 	 */
 	ExpandableStringList args;
@@ -30,6 +35,7 @@ struct ExecuteOptions {
 				 const ExecuteOptions &src) noexcept
 		:shell(src.shell),
 		 execute(src.execute),
+		 process_name(src.process_name),
 		 args(shallow_copy, src.args),
 		 child_options(shallow_copy, src.child_options) {}
 
