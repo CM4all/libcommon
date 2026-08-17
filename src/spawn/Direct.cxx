@@ -518,6 +518,11 @@ SpawnChildProcess(EventLoop &event_loop,
 		params.ns.ipc_namespace = ipc_namespace = std::move(ns.ipc);
 		params.ns.user.fd = user_namespace = std::move(ns.user);
 		accessory_lease_pipe = std::move(ns.lease_pipe);
+
+		/* discard user namespace limits; if some were passed,
+		   we can't apply them to a shared user namespace */
+		// TODO ask spawn-accessory to apply them
+		params.ns.user.limits = {};
 	}
 
 	uint_least64_t clone_flags = CLONE_CLEAR_SIGHAND|CLONE_PIDFD;
