@@ -56,8 +56,8 @@ TEST(UriExtractTest, QueryString)
 	for (auto i : uri_tests) {
 		auto result = UriQuery(i.uri);
 		if (i.query_string == nullptr)
-			ASSERT_EQ(i.query_string, result);
+			ASSERT_EQ(result.data(), nullptr);
 		else
-			ASSERT_EQ(strcmp(i.query_string, result), 0);
+			ASSERT_EQ(result, i.query_string);
 	}
 }

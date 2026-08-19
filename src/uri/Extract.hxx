@@ -45,5 +45,5 @@ std::string_view
 UriPathQueryFragment(std::string_view uri) noexcept;
 
 [[gnu::pure]]
-const char *
-UriQuery(const char *uri) noexcept;
+std::string_view
+UriQuery(std::string_view uri) noexcept;

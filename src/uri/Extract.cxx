@@ -86,14 +86,8 @@ UriPathQueryFragment(std::string_view uri) noexcept
 	return uri;
 }
 
-const char *
-UriQuery(const char *uri) noexcept
+std::string_view
+UriQuery(std::string_view uri) noexcept
 {
-	assert(uri != nullptr);
-
-	const char *p = strchr(uri, '?');
-	if (p == nullptr || *++p == 0)
-		return nullptr;
-
-	return p;
+	return Split(uri, '?').second;
 }
