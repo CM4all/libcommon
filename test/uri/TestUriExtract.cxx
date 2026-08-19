@@ -45,9 +45,9 @@ TEST(UriExtractTest, Path)
 	for (auto i : uri_tests) {
 		auto result = UriPathQueryFragment(i.uri);
 		if (i.path == nullptr)
-			ASSERT_EQ(i.path, result);
+			ASSERT_EQ(result.data(), nullptr);
 		else
-			ASSERT_EQ(strcmp(i.path, result), 0);
+			ASSERT_EQ(result, i.path);
 	}
 }
 

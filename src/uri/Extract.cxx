@@ -73,14 +73,15 @@ UriHostAndPort(std::string_view _uri) noexcept
 	return uri;
 }
 
-const char *
-UriPathQueryFragment(const char *uri) noexcept
+std::string_view 
+UriPathQueryFragment(std::string_view uri) noexcept
 {
-	assert(uri != nullptr);
-
-	const char *ap = UriAfterScheme(uri).data();
-	if (ap != nullptr)
-		return strchr(ap, '/');
+	if (std::string_view ap = UriAfterScheme(uri); ap.data() != nullptr) {
+		auto slash = ap.find('/');
+		if (slash == std::string_view::npos)
+			return {};
+		return ap.substr(slash);
+	}
 
 	return uri;
 }

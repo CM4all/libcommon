@@ -41,8 +41,8 @@ UriHostAndPort(std::string_view uri) noexcept;
  * nullptr if the given URI has no path.
  */
 [[gnu::pure]]
-const char *
-UriPathQueryFragment(const char *uri) noexcept;
+std::string_view
+UriPathQueryFragment(std::string_view uri) noexcept;
 
 [[gnu::pure]]
 const char *
