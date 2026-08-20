@@ -135,7 +135,8 @@ public:
 	 * cleared).
 	 */
 	uint_least64_t Stop() noexcept {
-		Deactivate();
+		if (IsActive())
+			Deactivate();
 		return position;
 	}
 
