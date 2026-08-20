@@ -71,7 +71,7 @@ private:
 	}
 
 	void CancelRead() noexcept {
-		event.CancelRead();
+		event.CancelOnlyRead();
 		defer_read.Cancel();
 	}
 
