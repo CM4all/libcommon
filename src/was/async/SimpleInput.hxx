@@ -70,6 +70,11 @@ private:
 		defer_read.Schedule();
 	}
 
+	void CancelRead() noexcept {
+		event.CancelRead();
+		defer_read.Cancel();
+	}
+
 	void TryRead();
 	void OnPipeReady(unsigned events) noexcept;
 	void OnDeferredRead() noexcept;

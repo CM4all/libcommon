@@ -49,8 +49,7 @@ SimpleInput::SetLength(std::size_t length) noexcept
 		return false;
 
 	if (buffer->IsComplete()) {
-		event.CancelRead();
-		defer_read.Cancel();
+		CancelRead();
 	}
 
 	return true;
@@ -69,8 +68,7 @@ SimpleInput::CheckComplete() noexcept
 void
 SimpleInput::Premature(std::size_t nbytes)
 {
-	event.CancelRead();
-	defer_read.Cancel();
+	CancelRead();
 
 	if (!buffer) {
 		if (nbytes == 0)
@@ -128,8 +126,7 @@ SimpleInput::TryRead()
 	buffer->Append(nbytes);
 
 	if (buffer->IsComplete()) {
-		event.CancelRead();
-		defer_read.Cancel();
+		CancelRead();
 
 		handler.OnWasInput(buffer.release()->ToDisposableBuffer());
 	}
