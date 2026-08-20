@@ -131,7 +131,9 @@ SimpleInput::TryRead()
 		CancelRead();
 
 		handler.OnWasInput(buffer.release()->ToDisposableBuffer());
-	}
+	} else if (static_cast<std::size_t>(nbytes) < w.size())
+		  /* incomplete read - try again later */
+		  event.ScheduleRead();
 }
 
 void
