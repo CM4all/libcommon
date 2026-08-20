@@ -60,9 +60,11 @@ SimpleInput::CheckComplete() noexcept
 {
 	assert(buffer != nullptr);
 
-	return buffer->IsComplete()
-		? buffer.release()->ToDisposableBuffer()
-		: nullptr;
+	if (buffer->IsComplete()) {
+		CancelRead();
+		return buffer.release()->ToDisposableBuffer();
+	} else
+		return nullptr;
 }
 
 void
