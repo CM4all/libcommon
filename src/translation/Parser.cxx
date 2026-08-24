@@ -1049,7 +1049,7 @@ TranslateParser::HandleExpandStderrPath(std::string_view payload)
 inline void
 TranslateParser::HandleUidGid(std::span<const std::byte> _payload)
 {
-	auto &uid_gid = MakeChildOptions("misplaced RLIMITS packet").uid_gid;
+	auto &uid_gid = MakeChildOptions("misplaced UID_GID packet").uid_gid;
 
 	if (!uid_gid.IsEmpty())
 		throw DuplicatePacket{};
