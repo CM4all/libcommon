@@ -268,7 +268,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
-		return false;
+		return true;
 
 	case WAS_COMMAND_REMOTE_HOST:
 		if (request.state != Request::State::HEADERS)
