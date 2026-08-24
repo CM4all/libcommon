@@ -40,7 +40,7 @@ SendMap(Control &control, enum was_command cmd, const auto &map) noexcept
 }
 
 static bool
-SendRequest(Control &control, const SimpleRequest &request) noexcept
+SendRequest(Control &control, const SimpleRequest &request, bool has_body) noexcept
 {
 	return control.Send(WAS_COMMAND_REQUEST) &&
 	       (request.method == HttpMethod::GET ||
@@ -56,7 +56,7 @@ SendRequest(Control &control, const SimpleRequest &request) noexcept
 	       SendMap(control, WAS_COMMAND_PARAMETER, request.parameters) &&
 	       (request.remote_host.empty() ||
 		control.SendString(WAS_COMMAND_REMOTE_HOST, request.remote_host)) &&
-	       control.Send(request.body
+	       control.Send(has_body
 			    ? WAS_COMMAND_DATA
 			    : WAS_COMMAND_NO_DATA);
 }
@@ -73,13 +73,35 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 	state = State::HEADERS;
 	response = {};
 
-	if (!Was::SendRequest(control, request))
+	if (!Was::SendRequest(control, request, !!request.body))
 		return false;
 
 	if (request.body) {
 		if (!output.Activate(std::make_unique<SimpleOutput>(std::move(request.body))))
 			return false;
 	}
+
+	return true;
+}
+
+bool
+SimpleClient::SendRequest(SimpleRequest &&request,
+			  std::unique_ptr<OutputProducer> &&request_body,
+			  SimpleResponseHandler &_response_handler,
+			  CancellablePointer &cancel_ptr) noexcept
+{
+	assert(state == State::IDLE);
+
+	cancel_ptr = *this;
+	response_handler = &_response_handler;
+	state = State::HEADERS;
+	response = {};
+
+	if (!Was::SendRequest(control, request, request_body != nullptr))
+		return false;
+
+	if (request_body && !output.Activate(std::move(request_body)))
+		return false;
 
 	return true;
 }

@@ -81,6 +81,11 @@ public:
 			 SimpleResponseHandler &_response_handler,
 			 CancellablePointer &cancel_ptr) noexcept;
 
+	bool SendRequest(SimpleRequest &&request,
+			 std::unique_ptr<OutputProducer> &&request_body,
+			 SimpleResponseHandler &_response_handler,
+			 CancellablePointer &cancel_ptr) noexcept;
+
 private:
 	void Closed() noexcept;
 
