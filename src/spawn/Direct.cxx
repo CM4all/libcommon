@@ -166,7 +166,8 @@ Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_map_pipe_r,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
-     UniqueFileDescriptor &&error_pipe_w) noexcept
+     UniqueFileDescriptor &&error_pipe_w,
+     const ResourceLimits &current_rlimits) noexcept
 try {
 	assert(error_pipe_w.IsDefined());
 
@@ -222,7 +223,7 @@ try {
 	if (!wait_pipe_r.IsDefined())
 		/* if the wait_pipe exists, then the parent process
 		   will apply the resource limits */
-		p.rlimits.Apply(0);
+		p.rlimits.ApplyRaise(0, current_rlimits);
 
 	/* call PrepareApply() before unmounting /proc */
 	auto proc_sys_user = p.ns.user.limits.PrepareApply();
@@ -377,6 +378,13 @@ try {
 			    0600))
 		throw MakeErrno("Failed to open STDERR_PATH");
 
+	/* apply the ResourceLimits that go below our own limits at
+	   the very end; this doesn't require CAP_SYS_RESOURCE and
+	   avoids exceeding the new limits while we're still working
+	   here (e.g. by opening new files if we happen to already
+	   have too many file descriptors) */
+	p.rlimits.ApplyLower(0, current_rlimits);
+
 	if (p.return_stderr.IsDefined()) {
 		assert(stderr_fd.IsDefined());
 
@@ -451,6 +459,7 @@ CoReadErrorPipe(EventLoop &event_loop, FileDescriptor error_pipe_r)
 Co::Task<SpawnChildProcessResult>
 SpawnChildProcess(EventLoop &event_loop,
 		  PreparedChildProcess params,
+		  const ResourceLimits &current_rlimits,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
 		  bool is_sys_admin)
@@ -682,7 +691,8 @@ SpawnChildProcess(EventLoop &event_loop,
 		     std::move(userns_map_pipe_r),
 		     std::move(userns_create_pipe_w),
 		     std::move(wait_pipe_r),
-		     std::move(error_pipe_w));
+		     std::move(error_pipe_w),
+		     current_rlimits);
 	}
 
 	if (old_pidns.IsDefined()) {
@@ -743,7 +753,7 @@ SpawnChildProcess(EventLoop &event_loop,
 		/* apply the resource limits in the parent process, because
 		   the child has lost all root namespace capabilities by
 		   entering a new user namespace */
-		params.rlimits.Apply(pid);
+		params.rlimits.ApplyRaise(pid, current_rlimits);
 
 		/* after success (no exception was thrown), wake up
 		   the child */

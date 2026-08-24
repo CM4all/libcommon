@@ -142,8 +142,12 @@ LocalSpawnService::SpawnChildProcess(std::string_view name,
 	if (params.uid_gid.IsEmpty())
 		params.uid_gid = config.default_uid_gid;
 
+	ResourceLimits current_rlimits;
+	current_rlimits.Load(0);
+
 	auto task = ::SpawnChildProcess(event_loop,
-					std::move(params), CgroupState(),
+					std::move(params),
+					current_rlimits, CgroupState(),
 					false,
 					false /* TODO? */);
 

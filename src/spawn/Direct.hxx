@@ -11,6 +11,7 @@
 #include <sys/types.h>
 
 struct PreparedChildProcess;
+struct ResourceLimits;
 struct CgroupState;
 class UniqueFileDescriptor;
 class EventLoop;
@@ -49,6 +50,7 @@ struct SpawnChildProcessResult {
 Co::Task<SpawnChildProcessResult>
 SpawnChildProcess(EventLoop &event_loop,
 		  PreparedChildProcess params,
+		  const ResourceLimits &current_rlimits,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
 		  bool is_sys_admin);

@@ -29,6 +29,7 @@ struct Usage {};
 
 static SpawnChildProcessResult
 SpawnChildProcess(PreparedChildProcess &&params,
+		  const ResourceLimits &current_rlimits,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
 		  bool is_sys_admin)
@@ -63,7 +64,9 @@ SpawnChildProcess(PreparedChildProcess &&params,
 	EventLoop event_loop;
 	Instance instance;
 
-	instance.Start(SpawnChildProcess(event_loop, std::move(params), cgroup_state, cgroups_group_writable, is_sys_admin));
+	instance.Start(SpawnChildProcess(event_loop, std::move(params),
+					 current_rlimits, cgroup_state,
+					 cgroups_group_writable, is_sys_admin));
 	event_loop.Run();
 
 	return std::move(instance).Finish();
@@ -200,6 +203,9 @@ try {
 		}
 	}
 
+	ResourceLimits current_rlimits;
+	current_rlimits.Load(0);
+
 	const CgroupState cgroup_state = scope_name != nullptr
 		? CreateSystemdScope(scope_name, scope_name,
 				     {},
@@ -207,7 +213,9 @@ try {
 				     true, nullptr)
 		: CgroupState();
 
-	const auto result = SpawnChildProcess(std::move(p), cgroup_state,
+	const auto result = SpawnChildProcess(std::move(p),
+					      current_rlimits,
+					      cgroup_state,
 					      false,
 					      geteuid() == 0);
 

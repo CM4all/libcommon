@@ -334,6 +334,7 @@ MakeTmpfsMountRoot()
 
 class SpawnServerProcess {
 	const SpawnConfig config;
+	ResourceLimits current_rlimits;
 	const CgroupState &cgroup_state;
 	SpawnHook *const hook;
 
@@ -366,6 +367,8 @@ public:
 		:config(_config), cgroup_state(_cgroup_state), hook(_hook),
 		 logger("spawn")
 	{
+		current_rlimits.Load(0);
+
 		if (has_mount_namespace) {
 			tmpfs_manager.emplace(MakeTmpfsMountRoot());
 
@@ -375,6 +378,10 @@ public:
 
 	const SpawnConfig &GetConfig() const noexcept {
 		return config;
+	}
+
+	const ResourceLimits &GetCurrentRlimits() const noexcept {
+		return current_rlimits;
 	}
 
 	const CgroupState &GetCgroupState() const noexcept {
@@ -531,6 +538,7 @@ SpawnServerConnection::SpawnChild(unsigned id, std::string_view name,
 
 	auto task = SpawnChildProcess(GetEventLoop(),
 				      std::move(p),
+				      process.GetCurrentRlimits(),
 				      process.GetCgroupState(),
 				      config.cgroups_writable_by_gid > 0,
 				      process.IsSysAdmin());
