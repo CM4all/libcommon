@@ -283,7 +283,7 @@ TEST(WasSimpleServer, Cancel)
 	EXPECT_TRUE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
 	if (server_handler.error)
-	std::rethrow_exception(server_handler.error);
+		std::rethrow_exception(server_handler.error);
 }
 
 TEST(WasSimpleServer, ServerClose)
