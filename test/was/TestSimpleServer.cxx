@@ -32,6 +32,46 @@ private:
 	}
 };
 
+/**
+ * An #OutputProducer that pretends there is 1 byte but never actually
+ * sends it.
+ */
+class BlockingProducer final : public Was::OutputProducer {
+public:
+	// virtual methods from class OutputProducer
+	bool OnWasOutputBegin(Was::Output &_output) noexcept override {
+		return _output.SetLength(1);
+	}
+
+	void OnWasOutputReady() override {}
+};
+
+/**
+ * An #OutputProducer that pretends there are 2 bytes but sends only
+ * 1.
+ */
+class Blocking1Producer final : public Was::OutputProducer {
+	Was::Output *output;
+	bool sent = false;
+
+public:
+	// virtual methods from class OutputProducer
+	bool OnWasOutputBegin(Was::Output &_output) noexcept override {
+		output = &_output;
+		return _output.SetLength(2);
+	}
+
+	void OnWasOutputReady() override {
+		if (sent)
+			return;
+
+		sent = true;
+
+		static constexpr std::byte dummy[1]{};
+		output->Write(dummy);
+	}
+};
+
 struct MyServerHandler final :  public Was::SimpleServerHandler {
 	std::exception_ptr error;
 	bool closed = false;
@@ -270,6 +310,121 @@ TEST(WasSimpleServer, Cancel)
 
 	EXPECT_TRUE(request_handler.deferred);
 	EXPECT_TRUE(request_handler.canceled);
+	EXPECT_FALSE(client_handler.closed);
+	EXPECT_FALSE(client_handler.error);
+	EXPECT_FALSE(server_handler.closed);
+	EXPECT_FALSE(server_handler.error);
+
+	// close the client, expect server-side OnWasClosed() call
+	client.Close();
+	event_loop.Run();
+	EXPECT_FALSE(client_handler.closed);
+	EXPECT_FALSE(client_handler.error);
+	EXPECT_TRUE(server_handler.closed);
+	EXPECT_FALSE(server_handler.error);
+	if (server_handler.error)
+		std::rethrow_exception(server_handler.error);
+}
+
+/**
+ * Cancel a POST finishing sending the request body.
+ */
+TEST(WasSimpleServer, CancelEarlyPost)
+{
+	[[maybe_unused]]
+	const ScopeInitDefaultFifoBuffer init_default_fifo_buffer;
+
+	auto [for_client, for_server] = WasSocket::CreatePair();
+	for_client.input.SetNonBlocking();
+	for_client.output.SetNonBlocking();
+	for_server.input.SetNonBlocking();
+	for_server.output.SetNonBlocking();
+
+	EventLoop event_loop;
+
+	MyServerHandler server_handler;
+	MyRequestHandler request_handler{event_loop, MyRequestHandler::Mode::DEFER};
+	Was::SimpleServer server{event_loop, std::move(for_server), server_handler, request_handler};
+
+	MyClientHandler client_handler;
+	Was::SimpleClient client{event_loop, std::move(for_client), client_handler};
+	MyResponseHandler response_handler{event_loop};
+
+	CancellablePointer cancel_ptr;
+
+	// send POST with body but never send a body byte
+	client.SendRequest({
+		.method = HttpMethod::POST,
+		.uri = "/foo",
+	},
+		std::make_unique<BlockingProducer>(),
+		response_handler, cancel_ptr);
+
+	{
+		DeferBreak defer{event_loop};
+		defer.ScheduleBreak();
+		event_loop.Run();
+	}
+
+	EXPECT_TRUE(cancel_ptr);
+	EXPECT_FALSE(request_handler.deferred);
+	EXPECT_FALSE(request_handler.canceled);
+	EXPECT_FALSE(client_handler.closed);
+	EXPECT_FALSE(client_handler.error);
+	EXPECT_FALSE(server_handler.closed);
+	EXPECT_FALSE(server_handler.error);
+
+	// client cancels
+	cancel_ptr.Cancel();
+
+	if (client.IsStopping()) {
+		// wait some more until the server sends PREMATURE
+		DeferBreak defer{event_loop};
+		defer.ScheduleBreak();
+		event_loop.Run();
+	}
+
+	EXPECT_FALSE(request_handler.deferred);
+	EXPECT_FALSE(request_handler.canceled);
+	EXPECT_FALSE(client_handler.closed);
+	EXPECT_FALSE(client_handler.error);
+	EXPECT_FALSE(server_handler.closed);
+	EXPECT_FALSE(server_handler.error);
+
+	// send POST with body but only send 1 byte
+	client.SendRequest({
+		.method = HttpMethod::POST,
+		.uri = "/foo",
+	},
+		std::make_unique<Blocking1Producer>(),
+		response_handler, cancel_ptr);
+
+	{
+		DeferBreak defer{event_loop};
+		defer.ScheduleBreak();
+		event_loop.Run();
+	}
+
+	EXPECT_TRUE(cancel_ptr);
+	EXPECT_FALSE(request_handler.deferred);
+	EXPECT_FALSE(request_handler.canceled);
+	EXPECT_FALSE(client_handler.closed);
+	EXPECT_FALSE(client_handler.error);
+	EXPECT_FALSE(server_handler.closed);
+	EXPECT_FALSE(server_handler.error);
+
+	// client cancels
+	cancel_ptr.Cancel();
+
+	if (client.IsStopping()) {
+		// wait some more until the server sends PREMATURE
+		DeferBreak defer{event_loop};
+		defer.ScheduleBreak();
+		event_loop.Run();
+	}
+
+	EXPECT_FALSE(request_handler.deferred);
+	EXPECT_FALSE(request_handler.canceled);
 	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
