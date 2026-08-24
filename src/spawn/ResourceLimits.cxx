@@ -125,6 +125,22 @@ ResourceLimits::Apply(int pid) const
 		rlimit_apply(pid, i, values[i]);
 }
 
+void
+ResourceLimits::ApplyRaise(int pid, const ResourceLimits &current) const
+{
+	for (unsigned i = 0; i < values.size(); ++i)
+		if (values[i].IsHigherThan(current.values[i]))
+			rlimit_apply(pid, i, values[i]);
+}
+
+void
+ResourceLimits::ApplyLower(int pid, const ResourceLimits &current) const
+{
+	for (unsigned i = 0; i < values.size(); ++i)
+		if (!values[i].IsHigherThan(current.values[i]))
+			rlimit_apply(pid, i, values[i]);
+}
+
 bool
 ResourceLimits::Parse(std::string_view s) noexcept
 {

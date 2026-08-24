@@ -24,6 +24,11 @@ struct ResourceLimit : rlimit {
 		return rlim_cur != UNDEFINED && rlim_max != UNDEFINED;
 	}
 
+	constexpr bool IsHigherThan(const ResourceLimit &other) const noexcept {
+		return (rlim_cur != UNDEFINED && rlim_cur > other.rlim_cur) ||
+			(rlim_max != UNDEFINED && rlim_max > other.rlim_max);
+	}
+
 	/**
 	 * Throws std::system_error on error.
 	 */
@@ -60,6 +65,20 @@ struct ResourceLimits {
 	 * Throws std::system_error on error.
 	 */
 	void Apply(int pid) const;
+
+	/**
+	 * Like Apply(), but only apply those limits that are higher
+	 * than the current set of limits (i.e. those that require
+	 * CAP_SYS_RESOURCE).
+	 */
+	void ApplyRaise(int pid, const ResourceLimits &current) const;
+
+	/**
+	 * Like Apply(), but only apply those limits that are not
+	 * higher than the current set of limits (i.e. those that do
+	 * not require CAP_SYS_RESOURCE).
+	 */
+	void ApplyLower(int pid, const ResourceLimits &current) const;
 
 	bool Parse(std::string_view s) noexcept;
 };
