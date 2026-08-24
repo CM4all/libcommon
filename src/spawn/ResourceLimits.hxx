@@ -61,6 +61,8 @@ struct ResourceLimits {
 
 	char *MakeId(char *p) const noexcept;
 
+	void Load(int pid);
+
 	/**
 	 * Throws std::system_error on error.
 	 */

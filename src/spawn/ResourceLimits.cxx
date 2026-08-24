@@ -86,6 +86,13 @@ ResourceLimits::MakeId(char *p) const noexcept
 	return p;
 }
 
+void
+ResourceLimits::Load(int pid)
+{
+	for (unsigned i = 0; i < values.size(); ++i)
+		values[i].Load(pid, i);
+}
+
 /**
  * Replace ResourceLimit::UNDEFINED with current values.
  */
