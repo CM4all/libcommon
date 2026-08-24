@@ -27,12 +27,12 @@ struct ResourceLimit : rlimit {
 	/**
 	 * Throws std::system_error on error.
 	 */
-	void Get(int pid, int resource);
+	void Load(int pid, int resource);
 
 	/**
 	 * Throws std::system_error on error.
 	 */
-	void Set(int pid, int resource) const;
+	void Apply(int pid, int resource) const;
 
 	void OverrideFrom(const ResourceLimit &src) noexcept;
 

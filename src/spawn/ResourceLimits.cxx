@@ -25,7 +25,7 @@ using std::string_view_literals::operator""sv;
 using my_rlimit_resource_t = decltype(RLIMIT_NLIMITS);
 
 inline void
-ResourceLimit::Get(int pid, int resource)
+ResourceLimit::Load(int pid, int resource)
 {
 	if (prlimit(pid, static_cast<my_rlimit_resource_t>(resource),
 		    nullptr, this) < 0)
@@ -33,7 +33,7 @@ ResourceLimit::Get(int pid, int resource)
 }
 
 inline void
-ResourceLimit::Set(int pid, int resource) const
+ResourceLimit::Apply(int pid, int resource) const
 {
 	if (prlimit(pid, static_cast<my_rlimit_resource_t>(resource),
 		    this, nullptr) < 0)
@@ -54,7 +54,7 @@ ResourceLimit::OverrideFrom(const ResourceLimit &src) noexcept
 inline void
 ResourceLimit::CompleteFrom(int pid, int resource, const ResourceLimit &src)
 {
-	Get(pid, resource);
+	Load(pid, resource);
 	OverrideFrom(src);
 }
 
@@ -115,7 +115,7 @@ rlimit_apply(int pid, int resource, const ResourceLimit &r)
 
 	ResourceLimit buffer;
 	const auto &r2 = complete_rlimit(pid, resource, r, buffer);
-	r2.Set(pid, resource);
+	r2.Apply(pid, resource);
 }
 
 void
