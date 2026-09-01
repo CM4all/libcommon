@@ -87,6 +87,8 @@ public:
 		     SimpleServerHandler &_handler,
 		     SimpleRequestHandler &_request_handler) noexcept;
 
+	~SimpleServer() noexcept;
+
 	auto &GetEventLoop() const noexcept {
 		return control.GetEventLoop();
 	}

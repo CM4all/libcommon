@@ -29,6 +29,11 @@ SimpleServer::SimpleServer(EventLoop &event_loop, WasSocket &&socket,
 	output.ResetPosition();
 }
 
+SimpleServer::~SimpleServer() noexcept
+{
+	CancelRequest();
+}
+
 inline bool
 SimpleServer::SubmitRequest() noexcept
 {
