@@ -326,6 +326,11 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		break;
 
 	case WAS_COMMAND_TLS:
+		if (request.state != Request::State::HEADERS) {
+			AbortProtocolError("misplaced TLS packet");
+			return false;
+		}
+
 		request.request->tls = true;
 		break;
 
