@@ -176,24 +176,30 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		break;
 
 	case WAS_COMMAND_SCRIPT_NAME:
-		if (request.state != Request::State::HEADERS)
+		if (request.state != Request::State::HEADERS) {
 			AbortProtocolError("misplaced SCRIPT_NAME packet");
+			return false;
+		}
 
 		request.request->script_name.assign((const char *)payload.data(),
 						    payload.size());
 		break;
 
 	case WAS_COMMAND_PATH_INFO:
-		if (request.state != Request::State::HEADERS)
+		if (request.state != Request::State::HEADERS) {
 			AbortProtocolError("misplaced PATH_INFO packet");
+			return false;
+		}
 
 		request.request->path_info.assign((const char *)payload.data(),
 						    payload.size());
 		break;
 
 	case WAS_COMMAND_QUERY_STRING:
-		if (request.state != Request::State::HEADERS)
+		if (request.state != Request::State::HEADERS) {
 			AbortProtocolError("misplaced QUERY_STRING packet");
+			return false;
+		}
 
 		request.request->query_string.assign((const char *)payload.data(),
 						     payload.size());
@@ -300,16 +306,20 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		return true;
 
 	case WAS_COMMAND_REMOTE_HOST:
-		if (request.state != Request::State::HEADERS)
+		if (request.state != Request::State::HEADERS) {
 			AbortProtocolError("misplaced REMOTE_HOST packet");
+			return false;
+		}
 
 		request.request->remote_host.assign((const char *)payload.data(),
 						    payload.size());
 		break;
 
 	case WAS_COMMAND_DOCUMENT_ROOT:
-		if (request.state != Request::State::HEADERS)
+		if (request.state != Request::State::HEADERS) {
 			AbortProtocolError("misplaced DOCUMENT_ROOT packet");
+			return false;
+		}
 
 		request.request->document_root.assign((const char *)payload.data(),
 						      payload.size());
