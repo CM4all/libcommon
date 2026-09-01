@@ -303,6 +303,9 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 			return false;
 		}
 
+		if (request.state == Request::State::BODY)
+			CancelRequest();
+
 		return true;
 
 	case WAS_COMMAND_REMOTE_HOST:
