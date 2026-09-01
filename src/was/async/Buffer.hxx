@@ -7,6 +7,7 @@
 #include "util/DisposableBuffer.hxx"
 
 #include <array>
+#include <optional>
 #include <span>
 
 namespace Was {
@@ -28,6 +29,17 @@ public:
 
 	std::size_t GetFill() const noexcept {
 		return fill;
+	}
+
+	/**
+	 * Returns the total length announced by #WAS_COMMAND_LENGTH, or
+	 * std::nullopt if it has not been announced yet.
+	 */
+	std::optional<std::size_t> GetLength() const noexcept {
+		if (length == UNKNOWN_SIZE)
+			return std::nullopt;
+
+		return length;
 	}
 
 	bool SetLength(std::size_t _length) noexcept {

@@ -105,6 +105,22 @@ SimpleInput::Premature(std::size_t nbytes)
 	}
 }
 
+bool
+SimpleInput::Discard()
+{
+	assert(buffer);
+
+	const auto length = buffer->GetLength();
+	if (!length)
+		return false;
+
+	/* everything the peer has announced is already in the pipe (or
+	   on its way), so flushing that many bytes resynchronizes the
+	   pipe */
+	Premature(*length);
+	return true;
+}
+
 void
 SimpleInput::TryRead()
 {

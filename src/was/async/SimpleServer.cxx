@@ -282,6 +282,25 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		break;
 
 	case WAS_COMMAND_STOP:
+		if (input.IsActive()) {
+			/* the request body is still being received;
+			   discard the rest of it, or else its leftovers
+			   in the pipe would be read as the body of the
+			   next request */
+			try {
+				if (!input.Discard()) {
+					/* without LENGTH, the peer has to
+					   send PREMATURE before STOP to
+					   allow resynchronizing the pipe */
+					AbortProtocolError("STOP without LENGTH or PREMATURE");
+					return false;
+				}
+			} catch (...) {
+				AbortError(std::current_exception());
+				return false;
+			}
+		}
+
 		if (CancelRequest())
 			/* the handler was canceled before it could
 			   produce a response */

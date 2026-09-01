@@ -61,6 +61,21 @@ public:
 	 */
 	void Premature(std::size_t nbytes);
 
+	/**
+	 * Discard the rest of the body and deactivate this object, so
+	 * the pipe can be reused for the next request.
+	 *
+	 * This is only possible if the total length has been announced
+	 * with #WAS_COMMAND_LENGTH; if it has not, only the peer can
+	 * tell us how much it has written, by sending
+	 * #WAS_COMMAND_PREMATURE.
+	 *
+	 * Throws on error.
+	 *
+	 * @return false if the total length is unknown
+	 */
+	bool Discard();
+
 private:
 	FileDescriptor GetPipe() const noexcept {
 		return event.GetFileDescriptor();
