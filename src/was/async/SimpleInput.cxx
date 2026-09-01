@@ -95,8 +95,16 @@ SimpleInput::Premature(std::size_t nbytes)
 			dest = dest.first(discard);
 
 		auto n = GetPipe().Read(dest);
-		if (n < 0)
+		if (n < 0) {
+			if (errno == EAGAIN)
+				/* the peer has not written as much as
+				   it claims; since it writes to the
+				   pipe before announcing, those bytes
+				   would have to be here already */
+				throw SocketProtocolError{"Not enough data on WAS pipe"};
+
 			throw MakeErrno("Read error on WAS pipe");
+		}
 
 		if (n == 0)
 			throw std::runtime_error("Hangup on WAS pipe");
