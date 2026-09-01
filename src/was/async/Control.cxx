@@ -314,11 +314,14 @@ Control::Start(enum was_command cmd, size_t payload_length) noexcept
 	};
 
 	output_buffer.AllocateIfNull();
-	auto w = output_buffer.Write();
-	if (w.size() < sizeof(header) + payload_length) {
+
+	if (!output_buffer.WantWrite(sizeof(header) + payload_length)) {
 		InvokeError("control output is too large");
 		return nullptr;
 	}
+
+	auto w = output_buffer.Write();
+	assert(w.size() >= sizeof(header) + payload_length);
 
 	StoreUnaligned(w.data(), header);
 	return w.data() + sizeof(header);
