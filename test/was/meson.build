@@ -7,6 +7,7 @@ test(
   executable(
     'TestWas',
     'TestSimpleServer.cxx',
+    'TestSimpleServerProtocol.cxx',
     include_directories: inc,
     dependencies: [
       gtest,
