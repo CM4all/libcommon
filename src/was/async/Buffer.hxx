@@ -7,6 +7,7 @@
 #include "util/DisposableBuffer.hxx"
 
 #include <array>
+#include <cassert>
 #include <optional>
 #include <span>
 
@@ -43,7 +44,10 @@ public:
 	}
 
 	bool SetLength(std::size_t _length) noexcept {
-		if (length != UNKNOWN_SIZE || _length > MAX_SIZE)
+		if (length != UNKNOWN_SIZE || _length > MAX_SIZE ||
+		    /* we have already received more than that, so this
+		       length can never be reached */
+		    _length < fill)
 			return false;
 
 		length = _length;
@@ -55,7 +59,14 @@ public:
 	}
 
 	constexpr std::span<std::byte> Write() noexcept {
-		return {&buffer[fill], MAX_SIZE - fill};
+		/* never read past the announced length; the rest of the
+		   pipe belongs to whatever the peer sends next */
+		const std::size_t end = length == UNKNOWN_SIZE
+			? MAX_SIZE
+			: length;
+		assert(fill <= end);
+
+		return std::span{buffer}.subspan(fill, end - fill);
 	}
 
 	void Append(std::size_t nbytes) noexcept {
