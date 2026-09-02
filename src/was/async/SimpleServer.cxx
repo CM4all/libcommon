@@ -94,12 +94,14 @@ SimpleServer::OnWasControlMethod(std::span<const std::byte> payload) noexcept
 		return false;
 	}
 
-	if (payload.size() != sizeof(uint32_t)) {
+	HttpMethod method;
+
+	if (payload.size() == sizeof(uint32_t)) {
+		method = static_cast<HttpMethod>(LoadUnaligned<uint32_t>(payload.data()));
+	} else {
 		AbortProtocolError("malformed METHOD packet");
 		return false;
 	}
-
-	auto method = static_cast<HttpMethod>(LoadUnaligned<uint32_t>(payload.data()));
 
 	if (!http_method_is_valid(method)) {
 		AbortProtocolError("invalid METHOD packet");
