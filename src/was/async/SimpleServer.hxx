@@ -74,6 +74,12 @@ class SimpleServer final
 			 */
 			SUBMITTED,
 		} state = State::NONE;
+
+		/**
+		 * Was #WAS_COMMAND_METHOD already received for this
+		 * request?
+		 */
+		bool have_method;
 	} request;
 
 public:

@@ -89,18 +89,17 @@ SimpleServer::OnWasControlMethod(std::span<const std::byte> payload) noexcept
 		return false;
 	}
 
+	if (request.have_method) {
+		AbortProtocolError("duplicate METHOD packet");
+		return false;
+	}
+
 	if (payload.size() != sizeof(uint32_t)) {
 		AbortProtocolError("malformed METHOD packet");
 		return false;
 	}
 
 	auto method = static_cast<HttpMethod>(LoadUnaligned<uint32_t>(payload.data()));
-	if (request.request->method != HttpMethod::GET &&
-	    method != request.request->method) {
-		/* sending that packet twice is illegal */
-		AbortProtocolError("misplaced METHOD packet");
-		return false;
-	}
 
 	if (!http_method_is_valid(method)) {
 		AbortProtocolError("invalid METHOD packet");
@@ -108,6 +107,7 @@ SimpleServer::OnWasControlMethod(std::span<const std::byte> payload) noexcept
 	}
 
 	request.method = request.request->method = method;
+	request.have_method = true;
 	return true;
 }
 
@@ -129,6 +129,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		assert(!request.request);
 		request.request.emplace();
 		request.method = HttpMethod::GET;
+		request.have_method = false;
 		request.state = Request::State::HEADERS;
 		output.ResetPosition();
 		break;
