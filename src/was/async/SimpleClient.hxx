@@ -10,6 +10,7 @@
 #include "SimpleInput.hxx"
 #include "util/Cancellable.hxx"
 
+#include <cassert>
 #include <exception>
 
 struct WasSocket;
@@ -67,7 +68,13 @@ public:
 		return control.GetEventLoop();
 	}
 
+	/**
+	 * Close all sockets/pipes.  There must not be a pending
+	 * request.  Only for (unit) test purposes.
+	 */
 	void Close() noexcept {
+		assert(state == State::IDLE);
+
 		control.Close();
 		input.Close();
 		output.Close();
