@@ -81,6 +81,36 @@ SimpleServer::AbortProtocolError(const char *msg) noexcept
  * Control channel handler
  */
 
+inline bool
+SimpleServer::OnWasControlMethod(std::span<const std::byte> payload) noexcept
+{
+	if (request.state != Request::State::HEADERS) {
+		AbortProtocolError("misplaced METHOD packet");
+		return false;
+	}
+
+	if (payload.size() != sizeof(uint32_t)) {
+		AbortProtocolError("malformed METHOD packet");
+		return false;
+	}
+
+	auto method = static_cast<HttpMethod>(LoadUnaligned<uint32_t>(payload.data()));
+	if (request.request->method != HttpMethod::GET &&
+	    method != request.request->method) {
+		/* sending that packet twice is illegal */
+		AbortProtocolError("misplaced METHOD packet");
+		return false;
+	}
+
+	if (!http_method_is_valid(method)) {
+		AbortProtocolError("invalid METHOD packet");
+		return false;
+	}
+
+	request.method = request.request->method = method;
+	return true;
+}
+
 bool
 SimpleServer::OnWasControlPacket(enum was_command cmd,
 				 std::span<const std::byte> payload) noexcept
@@ -106,34 +136,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		break;
 
 	case WAS_COMMAND_METHOD:
-		if (request.state != Request::State::HEADERS) {
-			AbortProtocolError("misplaced METHOD packet");
-			return false;
-		}
-
-		if (payload.size() != sizeof(uint32_t)) {
-			AbortProtocolError("malformed METHOD packet");
-			return false;
-		}
-
-		{
-			auto method = static_cast<HttpMethod>(LoadUnaligned<uint32_t>(payload.data()));
-			if (request.request->method != HttpMethod::GET &&
-			    method != request.request->method) {
-				/* sending that packet twice is illegal */
-				AbortProtocolError("misplaced METHOD packet");
-				return false;
-			}
-
-			if (!http_method_is_valid(method)) {
-				AbortProtocolError("invalid METHOD packet");
-				return false;
-			}
-
-			request.method = request.request->method = method;
-		}
-
-		break;
+		return OnWasControlMethod(payload);
 
 	case WAS_COMMAND_URI:
 		if (request.state != Request::State::HEADERS ||

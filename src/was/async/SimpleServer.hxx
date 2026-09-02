@@ -116,6 +116,8 @@ private:
 
 	void AbortProtocolError(const char *msg) noexcept;
 
+	bool OnWasControlMethod(std::span<const std::byte> payload) noexcept;
+
 	/* virtual methods from class Was::ControlHandler */
 	bool OnWasControlPacket(enum was_command cmd,
 				std::span<const std::byte> payload) noexcept override;
