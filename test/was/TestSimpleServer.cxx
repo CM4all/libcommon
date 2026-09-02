@@ -351,8 +351,8 @@ TEST(WasSimpleServer, CancelEarlyPost)
 
 	// send POST with body but never send a body byte
 	client.SendRequest({
-		.method = HttpMethod::POST,
 		.uri = "/foo",
+		.method = HttpMethod::POST,
 	},
 		std::make_unique<BlockingProducer>(),
 		response_handler, cancel_ptr);
@@ -390,8 +390,8 @@ TEST(WasSimpleServer, CancelEarlyPost)
 
 	// send POST with body but only send 1 byte
 	client.SendRequest({
-		.method = HttpMethod::POST,
 		.uri = "/foo",
+		.method = HttpMethod::POST,
 	},
 		std::make_unique<Blocking1Producer>(),
 		response_handler, cancel_ptr);
