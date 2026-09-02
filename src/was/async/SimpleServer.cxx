@@ -77,9 +77,28 @@ SimpleServer::AbortProtocolError(const char *msg) noexcept
 	AbortError(std::make_exception_ptr(SocketProtocolError{msg}));
 }
 
-/*
- * Control channel handler
- */
+template<typename E, std::integral I>
+requires std::is_enum_v<E>
+[[nodiscard]]
+static bool
+CastToEnumWithRangeCheck(E &result, I src) noexcept
+{
+	bool success = std::in_range<std::underlying_type_t<E>>(src);
+	if (success)
+		result = static_cast<E>(src);
+	return success;
+}
+
+template<std::unsigned_integral I, typename E>
+requires std::is_enum_v<E>
+[[nodiscard]]
+static bool
+LoadCheckUnalignedEnum(E &result, const void *src) noexcept
+{
+	I i;
+	LoadUnaligned(i, src);
+	return CastToEnumWithRangeCheck(result, i);
+}
 
 inline bool
 SimpleServer::OnWasControlMethod(std::span<const std::byte> payload) noexcept
@@ -95,15 +114,16 @@ SimpleServer::OnWasControlMethod(std::span<const std::byte> payload) noexcept
 	}
 
 	HttpMethod method;
+	bool load_success;
 
 	if (payload.size() == sizeof(uint32_t)) {
-		method = static_cast<HttpMethod>(LoadUnaligned<uint32_t>(payload.data()));
+		load_success = LoadCheckUnalignedEnum<uint32_t>(method, payload.data());
 	} else {
 		AbortProtocolError("malformed METHOD packet");
 		return false;
 	}
 
-	if (!http_method_is_valid(method)) {
+	if (!load_success || !http_method_is_valid(method)) {
 		AbortProtocolError("invalid METHOD packet");
 		return false;
 	}
