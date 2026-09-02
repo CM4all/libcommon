@@ -128,10 +128,8 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 
 		assert(!request.request);
 		request.request.emplace();
-		request.method = request.request->method = HttpMethod::GET;
-		request.request->tls = false;
+		request.method = HttpMethod::GET;
 		request.state = Request::State::HEADERS;
-		//response.body = nullptr;
 		output.ResetPosition();
 		break;
 

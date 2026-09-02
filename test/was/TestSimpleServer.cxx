@@ -229,7 +229,6 @@ TEST(WasSimpleServer, Basic)
 
 	// send bare GET request without headers
 	const auto response1 = Request(client, {
-		.method = HttpMethod::GET,
 		.uri = "/foo",
 	});
 	EXPECT_EQ(response1.status, HttpStatus::OK);
@@ -242,7 +241,6 @@ TEST(WasSimpleServer, Basic)
 
 	// send GET request with one header
 	const auto response2 = Request(client, {
-		.method = HttpMethod::GET,
 		.uri = "/foo",
 		.headers = {
 			{"hello", "world"},
@@ -284,7 +282,6 @@ TEST(WasSimpleServer, Cancel)
 
 	CancellablePointer cancel_ptr;
 	client.SendRequest({
-		.method = HttpMethod::GET,
 		.uri = "/foo",
 	}, response_handler, cancel_ptr);
 	event_loop.Run();

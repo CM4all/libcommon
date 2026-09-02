@@ -21,12 +21,12 @@ struct SimpleRequest {
 	std::string remote_host;
 	std::string document_root;
 	std::map<std::string, std::string, std::less<>> parameters;
-	HttpMethod method;
+	HttpMethod method = HttpMethod::GET;
 	std::string uri;
 	std::string script_name, path_info, query_string;
 	std::multimap<std::string, std::string, std::less<>> headers;
 	DisposableBuffer body;
-	bool tls;
+	bool tls = false;
 
 	/**
 	 * Compare the base of the Content-Type header with the given
