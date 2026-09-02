@@ -44,7 +44,7 @@ class SimpleServer final
 
 		CancellablePointer cancel_ptr{nullptr};
 
-		HttpMethod method = HttpMethod::GET;
+		HttpMethod method;
 
 		enum class State : uint8_t {
 			/**
