@@ -116,7 +116,12 @@ SimpleServer::OnWasControlMethod(std::span<const std::byte> payload) noexcept
 	HttpMethod method;
 	bool load_success;
 
-	if (payload.size() == sizeof(uint32_t)) {
+	if (payload.size() == sizeof(uint16_t)) {
+		/* documented payload size is 16 bit */
+		load_success = LoadCheckUnalignedEnum<uint16_t>(method, payload.data());
+	} else if (payload.size() == sizeof(uint32_t)) {
+		/* accept 32 bit as well (for buggy clients which send the
+		   enum) */
 		load_success = LoadCheckUnalignedEnum<uint32_t>(method, payload.data());
 	} else {
 		AbortProtocolError("malformed METHOD packet");
