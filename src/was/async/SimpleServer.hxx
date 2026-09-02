@@ -40,10 +40,11 @@ class SimpleServer final
 	SimpleRequestHandler &request_handler;
 
 	struct Request {
-		HttpMethod method = HttpMethod::GET;
 		std::optional<SimpleRequest> request;
 
 		CancellablePointer cancel_ptr{nullptr};
+
+		HttpMethod method = HttpMethod::GET;
 
 		enum class State : uint8_t {
 			/**
