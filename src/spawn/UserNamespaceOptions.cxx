@@ -5,6 +5,7 @@
 #include "UserNamespaceOptions.hxx"
 #include "MakeId.hxx"
 #include "UidGid.hxx"
+#include "system/linux/ProcFs.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/linux/ProcPid.hxx"
@@ -46,7 +47,7 @@ UserNamespaceOptions::Limits::PrepareApply() const
 	if (!IsDefined())
 		return {};
 
-	return OpenDirectoryPath({FileDescriptor::Undefined(), "/proc/sys/user"});
+	return OpenDirectoryPath({CreateProcFilesystem(), "sys/user"});
 }
 
 void
