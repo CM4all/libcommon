@@ -1,6 +1,7 @@
 system_linux = static_library(
   'system_linux',
   'Mount.cxx',
+  'ProcFs.cxx',
   include_directories: inc,
   dependencies: [
     fmt_dep,
