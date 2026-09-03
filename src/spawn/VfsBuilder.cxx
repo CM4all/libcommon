@@ -106,7 +106,7 @@ MakeDirs(FileDescriptor fd, std::string_view suffix, mode_t mode)
 				continue;
 
 			throw FmtErrno(e,
-				       "Failed to create mount point {}",
+				       "Failed to create mount point {:?}",
 				       suffix);
 		}
 	}
@@ -120,7 +120,7 @@ VfsBuilder::Add(std::string_view path)
 	const auto fw = FindWritable(path);
 	if (fw.item != nullptr) {
 		if (fw.suffix.empty())
-			throw FmtRuntimeError("Already a mount point: {}",
+			throw FmtRuntimeError("Already a mount point: {:?}",
 					      path);
 
 		if (old_umask == -1)
@@ -176,7 +176,7 @@ void
 VfsBuilder::MakeDirectory(std::string_view path)
 {
 	if (!MakeOptionalDirectory(path))
-		throw FmtRuntimeError("Not writable: {}", path);
+		throw FmtRuntimeError("Not writable: {:?}", path);
 }
 
 void
