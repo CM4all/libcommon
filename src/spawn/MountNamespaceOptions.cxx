@@ -172,13 +172,9 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	if (mount_pts) {
 		vfs_builder.Add("/dev/pts");
-
-		/* the "newinstance" option is only needed with pre-4.7
-		   kernels; from v4.7 on, this is implicit for all new devpts
-		   mounts (kernel commit eedf265aa003) */
 		MountOrThrow("devpts", "/dev/pts", "devpts",
 			     MS_NOEXEC|MS_NOSUID,
-			     "newinstance");
+			     nullptr);
 	}
 
 	if (mount_tmp_tmpfs != nullptr) {
