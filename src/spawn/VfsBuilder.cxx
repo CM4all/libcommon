@@ -8,7 +8,7 @@
 #include "io/FileAt.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
-#include "system/Mount.hxx"
+#include "system/linux/Mount.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/StringCompare.hxx"
 

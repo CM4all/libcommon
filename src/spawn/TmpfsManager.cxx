@@ -5,7 +5,7 @@
 #include "TmpfsManager.hxx"
 #include "TmpfsCreate.hxx"
 #include "system/Error.hxx"
-#include "system/Mount.hxx"
+#include "system/linux/Mount.hxx"
 #include "util/SharedLease.hxx"
 
 #include <cassert>

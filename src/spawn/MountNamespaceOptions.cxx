@@ -11,7 +11,7 @@
 #include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
 #include "system/linux/pivot_root.h"
-#include "system/Mount.hxx"
+#include "system/linux/Mount.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"

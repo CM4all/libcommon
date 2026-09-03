@@ -1,7 +1,6 @@
 system_sources = [
   'PageAllocator.cxx',
   'LargeAllocation.cxx',
-  'Mount.cxx',
   'ProcessName.cxx',
   'KernelVersion.cxx',
   'LinuxFD.cxx',
@@ -14,7 +13,6 @@ system = static_library(
   system_sources,
   include_directories: inc,
   dependencies: [
-    fmt_dep,
   ],
 )
 

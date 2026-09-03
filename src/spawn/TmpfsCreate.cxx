@@ -3,7 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "TmpfsCreate.hxx"
-#include "system/Mount.hxx"
+#include "system/linux/Mount.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <fmt/format.h>

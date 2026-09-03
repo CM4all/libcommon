@@ -49,6 +49,7 @@ if get_variable('libcommon_enable_spawn_server', true)
     spawn_internal_dependencies += [
       libsystemd,
       odbus_dep,
+      system_linux_dep,
     ]
   endif
 endif
@@ -158,6 +159,7 @@ if get_variable('libcommon_enable_spawn_options', false)
   spawn_options_dependencies += [
     alloc_dep,
     adata_dep,
+    system_linux_dep,
   ]
 endif
 

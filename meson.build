@@ -131,6 +131,7 @@ subdir('src/io/config')
 subdir('src/io/linux')
 subdir('src/io/uring')
 subdir('src/system')
+subdir('src/system/linux')
 subdir('src/memory')
 subdir('src/lib/openssl')
 
