@@ -9,30 +9,6 @@
 #include <cstddef> // for std::size_t
 #include <cstdint> // for uint_least64_t
 
-#ifndef MOUNT_ATTR_RDONLY
-/* fallback definitions for glibc < 2.36 */
-#define MOUNT_ATTR_RDONLY 0x00000001
-#define MOUNT_ATTR_NOSUID 0x00000002
-#define MOUNT_ATTR_NODEV 0x00000004
-#define MOUNT_ATTR_NOEXEC 0x00000008
-#define FSCONFIG_SET_STRING 1
-#define FSCONFIG_CMD_CREATE 6
-#define MOVE_MOUNT_F_EMPTY_PATH 0x00000004
-#define OPEN_TREE_CLONE 1
-#endif
-
-#ifndef AT_SYMLINK_NOFOLLOW
-#define AT_SYMLINK_NOFOLLOW 0x100
-#endif
-
-#ifndef AT_NO_AUTOMOUNT
-#define AT_NO_AUTOMOUNT 0x800
-#endif
-
-#ifndef AT_RECURSIVE
-#define AT_RECURSIVE 0x8000
-#endif
-
 class FileDescriptor;
 class UniqueFileDescriptor;
 
