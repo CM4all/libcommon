@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include <assert.h>
+#include <fcntl.h> // for AT_*
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/mount.h>
