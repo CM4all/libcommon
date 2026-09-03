@@ -6,6 +6,7 @@
 #include "TmpfsCreate.hxx"
 #include "system/Error.hxx"
 #include "system/linux/Mount.hxx"
+#include "io/FileAt.hxx"
 #include "util/SharedLease.hxx"
 
 #include <cassert>
@@ -22,7 +23,7 @@ MkdirMount(FileDescriptor from_fd,
 	if (mkdirat(to_fd.Get(), to_path, 0100) < 0)
 		throw MakeErrno("Failed to create tmpfs mountpoint");
 
-	MoveMount(from_fd, "", to_fd, to_path,
+	MoveMount({from_fd, ""}, {to_fd, to_path},
 		  MOVE_MOUNT_F_EMPTY_PATH);
 }
 
@@ -32,7 +33,7 @@ UmountRmdir(FileDescriptor fd, const char *path)
 	// TODO hard-coded path
 	constexpr const char *tmp = "/var/tmp";
 
-	UmountDetachAt(fd, path, 0, tmp);
+	UmountDetachAt({fd, path}, 0, tmp);
 
 	if (unlinkat(fd.Get(), path, AT_REMOVEDIR) < 0)
 		throw MakeErrno("Failed to delete tmpfs mountpoint");
@@ -73,7 +74,7 @@ struct TmpfsManager::Item final
 	 * to move_mount() into a new mount namespace.
 	 */
 	UniqueFileDescriptor Clone() const {
-		return OpenTree(fd, "", AT_EMPTY_PATH|OPEN_TREE_CLONE);
+		return OpenTree({fd, ""}, AT_EMPTY_PATH|OPEN_TREE_CLONE);
 	}
 
 	// virtual methods from SharedAnchor

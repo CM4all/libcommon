@@ -17,6 +17,7 @@
 #include "system/linux/Mount.hxx"
 #include "net/EasyMessage.hxx"
 #include "net/SocketPair.hxx"
+#include "io/FileAt.hxx"
 #include "io/Pipe.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
@@ -89,7 +90,7 @@ SetupPidNamespace()
 	   existing /proc a "slave" mount (to avoid propagating the
 	   new /proc into the parent namespace), and mount the new
 	   /proc */
-	MountSetAttr(FileDescriptor::Undefined(), "/",
+	MountSetAttr({FileDescriptor::Undefined(), "/"},
 		     AT_RECURSIVE|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 		     0, 0, MS_SLAVE);
 	umount2("/proc", MNT_DETACH);

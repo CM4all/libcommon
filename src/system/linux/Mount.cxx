@@ -4,14 +4,15 @@
 
 #include "Mount.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "io/FileAt.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <fcntl.h> // for AT_FDCWD
 
 UniqueFileDescriptor
-OpenTree(FileDescriptor directory, const char *path, unsigned flags)
+OpenTree(FileAt file, unsigned flags)
 {
-	int fd = open_tree(directory.Get(), path, flags|OPEN_TREE_CLOEXEC);
+	int fd = open_tree(file.directory.Get(), file.name, flags|OPEN_TREE_CLOEXEC);
 	if (fd < 0)
 		throw MakeErrno("open_tree() failed");
 
@@ -47,28 +48,26 @@ FSMount(FileDescriptor fs, unsigned flags)
 }
 
 void
-MoveMount(FileDescriptor from_directory, const char *from_path,
-	  FileDescriptor to_directory, const char *to_path,
-	  unsigned flags)
+MoveMount(FileAt from, FileAt to, unsigned flags)
 {
-	if (move_mount(from_directory.Get(), from_path,
-		       to_directory.Get(), to_path,
+	if (move_mount(from.directory.Get(), from.name,
+		       to.directory.Get(), to.name,
 		       flags) < 0)
 		throw MakeErrno("move_mount() failed");
 }
 
 void
-MountSetAttr(FileDescriptor directory, const char *path, unsigned flags,
+MountSetAttr(FileAt file, unsigned flags,
 	     const struct mount_attr *uattr, std::size_t usize)
 {
-	if (mount_setattr(directory.Get(), path, flags,
+	if (mount_setattr(file.directory.Get(), file.name, flags,
 			  const_cast<struct mount_attr *>(uattr),
 			  usize) < 0)
 		throw MakeErrno("mount_setattr() failed");
 }
 
 void
-MountSetAttr(FileDescriptor directory, const char *path, unsigned flags,
+MountSetAttr(FileAt file, unsigned flags,
 	     uint_least64_t attr_set, uint_least64_t attr_clr,
 	     uint_least64_t propagation)
 {
@@ -80,7 +79,7 @@ MountSetAttr(FileDescriptor directory, const char *path, unsigned flags,
 
 	static_assert(sizeof(attr) >= MOUNT_ATTR_SIZE_VER0);
 
-	MountSetAttr(directory, path, flags,
+	MountSetAttr(file, flags,
 		     &attr, MOUNT_ATTR_SIZE_VER0);
 }
 
@@ -108,12 +107,12 @@ Umount(const char *target, int flags)
 }
 
 void
-UmountDetachAt(FileDescriptor fd, const char *path,
+UmountDetachAt(FileAt file,
 	       unsigned flags,
 	       const char *tmp)
 {
-	MoveMount(fd, path,
-		  FileDescriptor{AT_FDCWD}, tmp,
+	MoveMount(file,
+		  {FileDescriptor{AT_FDCWD}, tmp},
 		  flags);
 	Umount(tmp, MNT_DETACH);
 }

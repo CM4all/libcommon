@@ -184,7 +184,7 @@ VfsBuilder::Finish()
 {
 	for (const auto &i : items) {
 		if (i.attr_set != 0 || i.attr_clr != 0)
-			MountSetAttr(i.fd, "",
+			MountSetAttr({i.fd, ""},
 				     AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 				     i.attr_set, i.attr_clr);
 	}

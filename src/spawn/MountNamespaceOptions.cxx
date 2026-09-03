@@ -12,6 +12,7 @@
 #include "lib/fmt/ToBuffer.hxx"
 #include "system/linux/pivot_root.h"
 #include "system/linux/Mount.hxx"
+#include "io/FileAt.hxx"
 #include "io/FileDescriptor.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"
@@ -87,7 +88,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		return;
 
 	/* convert all "shared" mounts to "private" mounts */
-	MountSetAttr(FileDescriptor::Undefined(), "/",
+	MountSetAttr({FileDescriptor::Undefined(), "/"},
 		     AT_RECURSIVE|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 		     0, 0, MS_PRIVATE);
 
@@ -108,7 +109,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 		/* make it read-only and nosuid, but allow executables
 		   and device nodes */
-		MountSetAttr(FileDescriptor::Undefined(), new_root,
+		MountSetAttr({FileDescriptor::Undefined(), new_root},
 			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 			     MS_NOSUID|MS_RDONLY,
 			     MS_NOEXEC|MS_NODEV);

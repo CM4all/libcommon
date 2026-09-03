@@ -9,6 +9,7 @@
 #include <cstddef> // for std::size_t
 #include <cstdint> // for uint_least64_t
 
+struct FileAt;
 class FileDescriptor;
 class UniqueFileDescriptor;
 
@@ -23,21 +24,19 @@ UniqueFileDescriptor
 FSMount(FileDescriptor fs, unsigned flags);
 
 void
-MoveMount(FileDescriptor from_directory, const char *from_path,
-	  FileDescriptor to_directory, const char *to_path,
-	  unsigned flags);
+MoveMount(FileAt from, FileAt to, unsigned flags);
 
 void
-MountSetAttr(FileDescriptor directory, const char *path, unsigned flags,
+MountSetAttr(FileAt file, unsigned flags,
 	     const struct mount_attr *uattr, std::size_t usize);
 
 void
-MountSetAttr(FileDescriptor directory, const char *path, unsigned flags,
+MountSetAttr(FileAt file, unsigned flags,
 	     uint_least64_t attr_set, uint_least64_t attr_clr,
 	     uint_least64_t propagation=0);
 
 UniqueFileDescriptor
-OpenTree(FileDescriptor directory, const char *path, unsigned flags);
+OpenTree(FileAt file, unsigned flags);
 
 void
 MountOrThrow(const char *source, const char *target,
@@ -66,6 +65,6 @@ Umount(const char *target, int flags);
  * @param flags move_mount() flags such as MOVE_MOUNT_F_EMPTY_PATH
  */
 void
-UmountDetachAt(FileDescriptor fd, const char *path,
+UmountDetachAt(FileAt file,
 	       unsigned flags,
 	       const char *tmp);

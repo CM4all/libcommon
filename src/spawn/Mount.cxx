@@ -11,6 +11,7 @@
 #include "lib/fmt/ToBuffer.hxx"
 #include "system/linux/Mount.hxx"
 #include "system/linux/openat2.h"
+#include "io/FileAt.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/SpanCast.hxx"
@@ -141,7 +142,7 @@ OpenDirectoryPathNoFollow(FileDescriptor directory, const char *path)
 static UniqueFileDescriptor
 OpenTreeNoFollow(FileDescriptor directory, const char *path)
 {
-	return OpenTree(OpenDirectoryPathNoFollow(directory, path), "",
+	return OpenTree({OpenDirectoryPathNoFollow(directory, path), ""},
 			AT_EMPTY_PATH|OPEN_TREE_CLONE);
 }
 
@@ -168,15 +169,15 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 		attr_set |= MS_NOEXEC;
 
 	if (source_fd.IsDefined())
-		MoveMount(source_fd, "",
-			  FileDescriptor::Undefined(), target,
+		MoveMount({source_fd, ""},
+			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	else
-		MoveMount(OpenTreeNoFollow(FileDescriptor{AT_FDCWD}, source), "",
-			  FileDescriptor::Undefined(), target,
+		MoveMount({OpenTreeNoFollow(FileDescriptor{AT_FDCWD}, source), ""},
+			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
-	MountSetAttr(FileDescriptor::Undefined(), target,
+	MountSetAttr({FileDescriptor::Undefined(), target},
 		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 		     attr_set, attr_clr);
 }
@@ -215,13 +216,13 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 		attr_set |= MS_NOEXEC;
 
 	if (source_fd.IsDefined())
-		MoveMount(source_fd, "",
-			  FileDescriptor::Undefined(), target,
+		MoveMount({source_fd, ""},
+			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	else
 		BindMount(source, target);
 
-	MountSetAttr(FileDescriptor::Undefined(), target,
+	MountSetAttr({FileDescriptor::Undefined(), target},
 		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 		     attr_set, attr_clr);
 }
@@ -249,8 +250,8 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 
 	FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 
-	MoveMount(FSMount(fs, flags), "",
-		  FileDescriptor::Undefined(), target,
+	MoveMount({FSMount(fs, flags), ""},
+		  {FileDescriptor::Undefined(), target},
 		  MOVE_MOUNT_F_EMPTY_PATH);
 
 	vfs_builder.MakeWritable();
@@ -265,16 +266,16 @@ Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder) const
 	vfs_builder.Add(target);
 
 	if (source_fd.IsDefined()) {
-		MoveMount(source_fd, "",
-			  FileDescriptor::Undefined(), target,
+		MoveMount({source_fd, ""},
+			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	} else {
 		/* we didn't get a "source_fd", so just create a new
 		   one (which will not be shared with anybody, just a
 		   fallback) */
 
-		MoveMount(CreateTmpfs(exec), "",
-			  FileDescriptor::Undefined(), target,
+		MoveMount({CreateTmpfs(exec), ""},
+			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	}
 
@@ -349,7 +350,7 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
 
 		constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
 		BindMount(tmp_path, target);
-		MountSetAttr(FileDescriptor::Undefined(), target,
+		MountSetAttr({FileDescriptor::Undefined(), target},
 			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, attr_set, 0);
 	}
 }
