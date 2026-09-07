@@ -93,6 +93,16 @@ public:
 		return Awaitable{*this};
 	}
 
+	/**
+	 * Is there currently at least one waiter?
+	 *
+	 * This may return false if there are waiters currently
+	 * pending to be called by ResumeAll().
+	 */
+	bool HasWaiter() const noexcept {
+		return !requests.empty();
+	}
+
 	void ResumeAll() noexcept {
 		/* move the request list to the stack because waiters
 		   added later shall not be resumed in this call */
