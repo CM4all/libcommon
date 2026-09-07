@@ -25,7 +25,7 @@ public:
 	Yield(EventLoop &event_loop) noexcept
 		:event(event_loop, BIND_THIS_METHOD(Resume))
 	{
-		event.Schedule();
+		event.ScheduleNext();
 	}
 
 	[[nodiscard]]
