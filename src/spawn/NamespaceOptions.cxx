@@ -77,7 +77,7 @@ NamespaceOptions::ReassociateNetwork() const
 }
 
 void
-NamespaceOptions::Apply(const UidGid &uid_gid) const
+NamespaceOptions::Apply(const UidGid &uid_gid, const SpawnContext &context) const
 {
 	if (user.IsEnabled())
 		// TODO eliminate this OpenProcPid() call
@@ -94,7 +94,7 @@ NamespaceOptions::Apply(const UidGid &uid_gid) const
 	    setns(ipc_namespace.Get(), CLONE_NEWIPC) < 0)
 		throw MakeErrno("Failed to reassociate with IPC namespace");
 
-	mount.Apply(uid_gid);
+	mount.Apply(uid_gid, context);
 
 	if (hostname != nullptr &&
 	    sethostname(hostname, strlen(hostname)) < 0)

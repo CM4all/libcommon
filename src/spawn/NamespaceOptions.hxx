@@ -128,7 +128,7 @@ struct NamespaceOptions {
 	 *
 	 * Throws std::system_error on error.
 	 */
-	void Apply(const UidGid &uid_gid) const;
+	void Apply(const UidGid &uid_gid, const SpawnContext &context) const;
 
 	/**
 	 * Apply only the network namespace options to the current

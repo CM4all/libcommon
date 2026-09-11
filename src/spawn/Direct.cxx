@@ -168,7 +168,8 @@ Exec(const char *path, PreparedChildProcess &&p,
      UniqueFileDescriptor &&userns_create_pipe_w,
      UniqueFileDescriptor &&wait_pipe_r,
      UniqueFileDescriptor &&error_pipe_w,
-     const ResourceLimits &current_rlimits) noexcept
+     const ResourceLimits &current_rlimits,
+     const SpawnContext &context) noexcept
 try {
 	assert(error_pipe_w.IsDefined());
 
@@ -229,7 +230,7 @@ try {
 	/* call PrepareApply() before unmounting /proc */
 	auto proc_sys_user = p.ns.user.limits.PrepareApply();
 
-	p.ns.Apply(p.uid_gid);
+	p.ns.Apply(p.uid_gid, context);
 
 	if (userns_create_pipe_w.IsDefined()) {
 		/* user namespace allocation was postponed to allow
@@ -694,7 +695,7 @@ SpawnChildProcess(EventLoop &event_loop,
 		     std::move(userns_create_pipe_w),
 		     std::move(wait_pipe_r),
 		     std::move(error_pipe_w),
-		     current_rlimits);
+		     current_rlimits, context);
 	}
 
 	if (old_pidns.IsDefined()) {

@@ -9,6 +9,10 @@
 #include <cstddef> // for std::size_t
 #include <cstdint> // for uint_least64_t
 
+#ifndef OPEN_TREE_NAMESPACE
+#define OPEN_TREE_NAMESPACE (1 << 1) /* Clone the target tree into a new mount namespace */
+#endif
+
 struct FileAt;
 class FileDescriptor;
 class UniqueFileDescriptor;

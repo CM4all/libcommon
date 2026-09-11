@@ -7,6 +7,7 @@
 #include "Mount.hxx"
 #include "VfsBuilder.hxx"
 #include "UidGid.hxx"
+#include "Context.hxx"
 #include "AllocatorPtr.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "lib/fmt/ToBuffer.hxx"
@@ -130,7 +131,7 @@ MountNamespaceOptions::OpenRootMount() const
 }
 
 void
-MountNamespaceOptions::Apply(const UidGid &uid_gid) const
+MountNamespaceOptions::Apply(const UidGid &uid_gid, const SpawnContext &context) const
 {
 	if (!IsEnabled())
 		return;
@@ -167,7 +168,8 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		vfs_builder.AddWritableRoot(root_fd);
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
 
-		vfs_builder.Add(put_old);
+		if (!context.have_open_tree_namespace)
+			vfs_builder.Add(put_old);
 	} else {
 		new_root = "/tmp";
 		have_proc = true;
@@ -257,6 +259,27 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 	MoveMount({root_fd, ""},
 		  {FileDescriptor::Undefined(), new_root},
 		  MOVE_MOUNT_F_EMPTY_PATH);
+
+	if (context.have_open_tree_namespace) {
+		/* use OPEN_TREE_NAMESPACE + setns() if available
+		   because pivot_root() is extremely expensive; it
+		   needs to walk all processes while holding the
+		   global task_lock */
+
+		/* note: the MoveMount(root_fd,new_root) call above is
+		   necessary even though mounting something into the
+		   old namespace sounds unnecessary, or else
+		   VfsBuilder::Finish() fails with EINVAL - which
+		   might be a Linux kernel bug */
+
+		vfs_builder.Finish();
+
+		const auto ns = OpenTree({root_fd, ""}, AT_EMPTY_PATH|AT_RECURSIVE|OPEN_TREE_NAMESPACE);
+		if (setns(ns.Get(), CLONE_NEWNS) < 0)
+			throw MakeErrno("setns() failed");
+
+		return;
+	}
 
 	if (new_root != nullptr) {
 		/* enter the new root */

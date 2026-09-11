@@ -13,5 +13,10 @@ struct SpawnContext {
 	 */
 	bool is_sys_admin;
 
+	/**
+	 * Does the kernel implement the #OPEN_TREE_NAMESPACE flag?
+	 */
+	bool have_open_tree_namespace;
+
 	SpawnContext() noexcept;
 };

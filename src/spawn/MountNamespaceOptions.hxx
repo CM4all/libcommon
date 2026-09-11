@@ -15,6 +15,7 @@
 class AllocatorPtr;
 class UniqueFileDescriptor;
 struct UidGid;
+struct SpawnContext;
 struct Mount;
 class MatchData;
 
@@ -143,7 +144,7 @@ struct MountNamespaceOptions {
 	 *
 	 * Throws std::system_error on error.
 	 */
-	void Apply(const UidGid &uid_gid) const;
+	void Apply(const UidGid &uid_gid, const SpawnContext &context) const;
 
 	char *MakeId(char *p) const noexcept;
 
