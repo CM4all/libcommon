@@ -121,14 +121,20 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		   process to pivot_root to it */
 
 		new_root = pivot_root;
-		BindMount(new_root, new_root);
+
+		auto fd = OpenTree({FileDescriptor::Undefined(), new_root},
+				   AT_SYMLINK_NOFOLLOW|OPEN_TREE_CLONE);
 
 		/* make it read-only and nosuid, but allow executables
 		   and device nodes */
-		MountSetAttr({FileDescriptor::Undefined(), new_root},
-			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+		MountSetAttr({fd, ""},
+			     AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 			     MS_NOSUID|MS_RDONLY,
 			     MS_NOEXEC|MS_NODEV);
+
+		MoveMount({fd, ""},
+			{FileDescriptor::Undefined(), new_root},
+			MOVE_MOUNT_F_EMPTY_PATH);
 
 		/* release a reference to the old root */
 		ChdirOrThrow(new_root);
@@ -193,7 +199,11 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		// TODO no bind-mount, just create /dev/null etc.
 		const char *source = "dev";
 		const char *target = "/dev";
-		MountOrThrow(source, target, nullptr, MS_BIND|MS_REC, nullptr);
+
+		MoveMount({OpenTree({FileDescriptor{AT_FDCWD}, source},
+				    AT_SYMLINK_NOFOLLOW|AT_RECURSIVE|OPEN_TREE_CLONE), ""},
+			{FileDescriptor::Undefined(), target},
+			MOVE_MOUNT_F_EMPTY_PATH);
 
 		if (new_root != nullptr)
 			/* back to the new root */
@@ -242,7 +252,10 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 		if (bind_mount_pts) {
 			vfs_builder.Add("/dev/pts");
-			BindMount("dev/pts", "/dev/pts");
+			MoveMount({OpenTree({FileDescriptor{AT_FDCWD}, "dev/pts"},
+					    AT_SYMLINK_NOFOLLOW|OPEN_TREE_CLONE), ""},
+				{FileDescriptor::Undefined(), "/dev/pts"},
+				MOVE_MOUNT_F_EMPTY_PATH);
 		}
 
 		Mount::ApplyAll(mounts, vfs_builder);

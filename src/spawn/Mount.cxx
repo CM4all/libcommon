@@ -220,7 +220,9 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	else
-		BindMount(source, target);
+		MoveMount({OpenTreeNoFollow(FileDescriptor{AT_FDCWD}, source), ""},
+			  {FileDescriptor::Undefined(), target},
+			  MOVE_MOUNT_F_EMPTY_PATH);
 
 	MountSetAttr({FileDescriptor::Undefined(), target},
 		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
