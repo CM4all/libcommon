@@ -176,7 +176,13 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		if (!writable_proc)
 			flags |= MS_RDONLY;
 
-		MountOrThrow("proc", "/proc", "proc", flags, "hidepid=1,subset=pid");
+		const auto fs = FSOpen("proc");
+		FSConfig(fs, FSCONFIG_SET_STRING, "hidepid", "1");
+		FSConfig(fs, FSCONFIG_SET_STRING, "subset", "pid");
+		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
+		MoveMount({FSMount(fs, flags), ""},
+			  {FileDescriptor::Undefined(), "/proc"},
+			  MOVE_MOUNT_F_EMPTY_PATH);
 	}
 
 	if (mount_dev) {
@@ -196,9 +202,13 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	if (mount_pts) {
 		vfs_builder.Add("/dev/pts");
-		MountOrThrow("devpts", "/dev/pts", "devpts",
-			     MS_NOEXEC|MS_NOSUID,
-			     nullptr);
+
+		const auto fs = FSOpen("devpts");
+		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
+
+		MoveMount({FSMount(fs, MS_NOEXEC|MS_NOSUID), ""},
+			  {FileDescriptor::Undefined(), "/dev/pts"},
+			  MOVE_MOUNT_F_EMPTY_PATH);
 	}
 
 	if (mount_tmp_tmpfs != nullptr) {
