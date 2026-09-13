@@ -136,8 +136,15 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		new_root = "/tmp";
 
 		/* create an empty tmpfs as the new filesystem root */
-		MountOrThrow("none", new_root, "tmpfs", MS_NODEV|MS_NOEXEC|MS_NOSUID,
-			     "size=256k,nr_inodes=1024,mode=755");
+		auto fs = FSOpen("tmpfs");
+		FSConfig(fs, FSCONFIG_SET_STRING, "size", "256k");
+		FSConfig(fs, FSCONFIG_SET_STRING, "nr_inodes", "1024");
+		FSConfig(fs, FSCONFIG_SET_STRING, "mode", "755");
+		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
+
+		MoveMount({FSMount(fs, MS_NODEV|MS_NOEXEC|MS_NOSUID), ""},
+			  {FileDescriptor::Undefined(), new_root},
+			  MOVE_MOUNT_F_EMPTY_PATH);
 
 		ChdirOrThrow(new_root);
 
