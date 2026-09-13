@@ -153,6 +153,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 	/* release a reference to the old root */
 	ChdirOrThrow(root_fd);
 
+	bool have_proc = false;
 	if (pivot_root != nullptr) {
 		/* first bind-mount the new root onto itself to "unlock" the
 		   kernel's mount object (flag MNT_LOCKED) in our namespace;
@@ -169,6 +170,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		vfs_builder.Add(put_old);
 	} else {
 		new_root = "/tmp";
+		have_proc = true;
 	}
 
 	MoveMount({root_fd, ""},
@@ -183,7 +185,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 	}
 
 	if (mount_proc) {
-		if (new_root == nullptr)
+		if (have_proc)
 			/* if we're still in the old filesystem root
 			   (no pivot_root()), /proc is already
 			   mounted, so we need to unmount it first to
