@@ -173,17 +173,6 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		have_proc = true;
 	}
 
-	MoveMount({root_fd, ""},
-		  {FileDescriptor::Undefined(), new_root},
-		  MOVE_MOUNT_F_EMPTY_PATH);
-
-	if (new_root != nullptr) {
-		/* enter the new root */
-		int result = my_pivot_root(new_root, put_old + 1);
-		if (result < 0)
-			throw FmtErrno("pivot_root({:?}) failed", new_root);
-	}
-
 	if (mount_proc) {
 		if (have_proc)
 			/* if we're still in the old filesystem root
@@ -265,9 +254,19 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		Mount::ApplyAll(mounts, vfs_builder, root_fd, old_root_fd);
 	}
 
-	if (new_root != nullptr)
-	    /* get rid of the old root */
-	    Umount(put_old, MNT_DETACH);
+	MoveMount({root_fd, ""},
+		  {FileDescriptor::Undefined(), new_root},
+		  MOVE_MOUNT_F_EMPTY_PATH);
+
+	if (new_root != nullptr) {
+		/* enter the new root */
+		int result = my_pivot_root(new_root, put_old + 1);
+		if (result < 0)
+			throw FmtErrno("pivot_root({:?}) failed", new_root);
+
+		/* get rid of the old root */
+		Umount(put_old, MNT_DETACH);
+	}
 
 	if (mount_root_tmpfs) {
 		rmdir(put_old);
