@@ -285,12 +285,13 @@ Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder) const
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
 }
 
-static const char *
-WriteToTempFile(char *buffer, std::span<const std::byte> contents)
+static UniqueFileDescriptor
+WriteToTempFile(std::span<const std::byte> contents)
 {
 	unsigned long n = time(nullptr);
 
 	while (true) {
+		char buffer[64];
 		sprintf(buffer, "/tmp/%lx", n);
 
 		UniqueFileDescriptor fd;
@@ -298,7 +299,7 @@ WriteToTempFile(char *buffer, std::span<const std::byte> contents)
 			if (fd.Write(contents) < 0)
 				throw MakeErrno("Failed to write");
 
-			return buffer;
+			return fd;
 		}
 
 		switch (const int e = errno) {
@@ -345,11 +346,12 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
 		if (optional && !PathExists(target))
 			return;
 
-		char buffer[64];
-		const char *tmp_path = WriteToTempFile(buffer, contents);
+		MoveMount({OpenTree({WriteToTempFile(contents), ""},
+				    AT_EMPTY_PATH|OPEN_TREE_CLONE), ""},
+			  {FileDescriptor::Undefined(), target},
+			  MOVE_MOUNT_F_EMPTY_PATH);
 
 		constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
-		BindMount(tmp_path, target);
 		MountSetAttr({FileDescriptor::Undefined(), target},
 			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, attr_set, 0);
 	}
