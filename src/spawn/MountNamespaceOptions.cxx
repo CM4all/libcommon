@@ -78,10 +78,10 @@ MountNamespaceOptions::Expand(AllocatorPtr alloc, const MatchData &match_data)
 #endif
 
 static void
-ChdirOrThrow(const char *path)
+ChdirOrThrow(FileDescriptor fd)
 {
-	if (chdir(path) < 0)
-		throw FmtErrno("chdir({:?}) failed", path);
+	if (fchdir(fd.Get()) < 0)
+		throw MakeErrno("fchdir() failed");
 }
 
 /**
@@ -150,6 +150,9 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	auto root_fd = OpenRootMount();
 
+	/* release a reference to the old root */
+	ChdirOrThrow(root_fd);
+
 	if (pivot_root != nullptr) {
 		/* first bind-mount the new root onto itself to "unlock" the
 		   kernel's mount object (flag MNT_LOCKED) in our namespace;
@@ -161,17 +164,12 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		MoveMount({root_fd, ""},
 			  {FileDescriptor::Undefined(), new_root},
 			  MOVE_MOUNT_F_EMPTY_PATH);
-
-		/* release a reference to the old root */
-		ChdirOrThrow(new_root);
 	} else if (mount_root_tmpfs) {
 		new_root = "/tmp";
 
 		MoveMount({root_fd, ""},
 			  {FileDescriptor::Undefined(), new_root},
 			  MOVE_MOUNT_F_EMPTY_PATH);
-
-		ChdirOrThrow(new_root);
 
 		vfs_builder.AddWritableRoot(new_root);
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
@@ -183,8 +181,6 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		MoveMount({root_fd, ""},
 			  {FileDescriptor::Undefined(), new_root},
 			  MOVE_MOUNT_F_EMPTY_PATH);
-
-		ChdirOrThrow(new_root);
 	}
 
 	if (new_root != nullptr) {
