@@ -169,18 +169,18 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 	else
 		attr_set |= MS_NOEXEC;
 
-	if (source_fd.IsDefined())
-		MoveMount({source_fd, ""},
-			  {root_fd, target + 1},
-			  MOVE_MOUNT_F_EMPTY_PATH);
-	else
-		MoveMount({OpenTreeNoFollow(old_root_fd, source), ""},
-			  {root_fd, target + 1},
-			  MOVE_MOUNT_F_EMPTY_PATH);
+	UniqueFileDescriptor ufd;
+	FileAt source_at{source_fd, ""};
+	if (!source_fd.IsDefined())
+		source_at.directory = ufd = OpenTreeNoFollow(old_root_fd, source);
 
-	MountSetAttr({root_fd, target + 1},
-		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+	MountSetAttr(source_at,
+		     AT_EMPTY_PATH,
 		     attr_set, attr_clr);
+
+	MoveMount(source_at,
+		  {root_fd, target + 1},
+		  MOVE_MOUNT_F_EMPTY_PATH);
 }
 
 inline void
@@ -217,18 +217,18 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 	else
 		attr_set |= MS_NOEXEC;
 
-	if (source_fd.IsDefined())
-		MoveMount({source_fd, ""},
-			  {root_fd, target + 1},
-			  MOVE_MOUNT_F_EMPTY_PATH);
-	else
-		MoveMount({OpenTreeNoFollow(old_root_fd, source), ""},
-			  {root_fd, target + 1},
-			  MOVE_MOUNT_F_EMPTY_PATH);
+	UniqueFileDescriptor ufd;
+	FileAt source_at{source_fd, ""};
+	if (!source_fd.IsDefined())
+		source_at.directory = ufd = OpenTreeNoFollow(old_root_fd, source);
 
-	MountSetAttr({root_fd, target + 1},
-		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+	MountSetAttr(source_at,
+		     AT_EMPTY_PATH,
 		     attr_set, attr_clr);
+
+	MoveMount(source_at,
+		  {root_fd, target + 1},
+		  MOVE_MOUNT_F_EMPTY_PATH);
 }
 
 inline void
@@ -350,14 +350,12 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 		if (optional && !PathExists(target))
 			return;
 
-		MoveMount({OpenTree({WriteToTempFile(contents), ""},
-				    AT_EMPTY_PATH|OPEN_TREE_CLONE), ""},
-			  {root_fd, target + 1},
-			  MOVE_MOUNT_F_EMPTY_PATH);
+		const auto fd = OpenTree({WriteToTempFile(contents), ""},
+					 AT_EMPTY_PATH|OPEN_TREE_CLONE);
 
 		constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
-		MountSetAttr({root_fd, target + 1},
-			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, attr_set, 0);
+		MountSetAttr({fd, ""}, AT_EMPTY_PATH, attr_set, 0);
+		MoveMount({fd, ""}, {root_fd, target + 1}, MOVE_MOUNT_F_EMPTY_PATH);
 	}
 }
 
