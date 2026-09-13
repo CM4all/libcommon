@@ -189,7 +189,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			   mounted, so we need to unmount it first to
 			   allow mounting a new /proc instance, or
 			   else that will fail with EBUSY */
-			umount2("/proc", MNT_DETACH);
+			umount2("proc", MNT_DETACH);
 
 		vfs_builder.Add("/proc");
 
