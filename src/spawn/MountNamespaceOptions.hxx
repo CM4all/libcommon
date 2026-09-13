@@ -13,6 +13,7 @@
 #include <span>
 
 class AllocatorPtr;
+class UniqueFileDescriptor;
 struct UidGid;
 struct Mount;
 class MatchData;
@@ -166,4 +167,10 @@ private:
 
 	[[gnu::pure]]
 	std::pair<const Mount *, const char *> FindBindMountInSource(const char *source) const noexcept;
+
+	/**
+	 * Open the new root mount.  Helper function for Apply().
+	 * Throws on error.
+	 */
+	UniqueFileDescriptor OpenRootMount() const;
 };

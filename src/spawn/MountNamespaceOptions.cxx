@@ -98,6 +98,37 @@ FSConfigSplit(FileDescriptor fd, std::string_view options)
 	}
 }
 
+inline UniqueFileDescriptor
+MountNamespaceOptions::OpenRootMount() const
+{
+	if (pivot_root != nullptr) {
+		auto fd = OpenTree({FileDescriptor::Undefined(), pivot_root},
+				   AT_SYMLINK_NOFOLLOW|OPEN_TREE_CLONE);
+
+		/* make it read-only and nosuid, but allow executables
+		   and device nodes */
+		MountSetAttr({fd, ""},
+			     AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
+			     MS_NOSUID|MS_RDONLY,
+			     MS_NOEXEC|MS_NODEV);
+
+		return fd;
+	} else if (mount_root_tmpfs) {
+		/* create an empty tmpfs as the new filesystem root */
+		auto fs = FSOpen("tmpfs");
+		FSConfig(fs, FSCONFIG_SET_STRING, "size", "256k");
+		FSConfig(fs, FSCONFIG_SET_STRING, "nr_inodes", "1024");
+		FSConfig(fs, FSCONFIG_SET_STRING, "mode", "755");
+		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
+
+		return FSMount(fs, MS_NODEV|MS_NOEXEC|MS_NOSUID);
+	} else
+		/* no new root; open the original root mount
+		   recursively */
+		return OpenTree({FileDescriptor::Undefined(), "/"},
+				AT_SYMLINK_NOFOLLOW|AT_RECURSIVE|OPEN_TREE_CLONE);
+}
+
 void
 MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 {
@@ -117,6 +148,8 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 	VfsBuilder vfs_builder{uid_gid.effective_uid, uid_gid.effective_gid, dir_mode};
 
+	auto root_fd = OpenRootMount();
+
 	if (pivot_root != nullptr) {
 		/* first bind-mount the new root onto itself to "unlock" the
 		   kernel's mount object (flag MNT_LOCKED) in our namespace;
@@ -125,33 +158,16 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 
 		new_root = pivot_root;
 
-		auto fd = OpenTree({FileDescriptor::Undefined(), new_root},
-				   AT_SYMLINK_NOFOLLOW|OPEN_TREE_CLONE);
-
-		/* make it read-only and nosuid, but allow executables
-		   and device nodes */
-		MountSetAttr({fd, ""},
-			     AT_EMPTY_PATH|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
-			     MS_NOSUID|MS_RDONLY,
-			     MS_NOEXEC|MS_NODEV);
-
-		MoveMount({fd, ""},
-			{FileDescriptor::Undefined(), new_root},
-			MOVE_MOUNT_F_EMPTY_PATH);
+		MoveMount({root_fd, ""},
+			  {FileDescriptor::Undefined(), new_root},
+			  MOVE_MOUNT_F_EMPTY_PATH);
 
 		/* release a reference to the old root */
 		ChdirOrThrow(new_root);
 	} else if (mount_root_tmpfs) {
 		new_root = "/tmp";
 
-		/* create an empty tmpfs as the new filesystem root */
-		auto fs = FSOpen("tmpfs");
-		FSConfig(fs, FSCONFIG_SET_STRING, "size", "256k");
-		FSConfig(fs, FSCONFIG_SET_STRING, "nr_inodes", "1024");
-		FSConfig(fs, FSCONFIG_SET_STRING, "mode", "755");
-		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
-
-		MoveMount({FSMount(fs, MS_NODEV|MS_NOEXEC|MS_NOSUID), ""},
+		MoveMount({root_fd, ""},
 			  {FileDescriptor::Undefined(), new_root},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
@@ -161,6 +177,14 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
 
 		vfs_builder.Add(put_old);
+	} else {
+		new_root = "/tmp";
+
+		MoveMount({root_fd, ""},
+			  {FileDescriptor::Undefined(), new_root},
+			  MOVE_MOUNT_F_EMPTY_PATH);
+
+		ChdirOrThrow(new_root);
 	}
 
 	if (new_root != nullptr) {
