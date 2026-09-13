@@ -160,16 +160,8 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		   process to pivot_root to it */
 
 		new_root = pivot_root;
-
-		MoveMount({root_fd, ""},
-			  {FileDescriptor::Undefined(), new_root},
-			  MOVE_MOUNT_F_EMPTY_PATH);
 	} else if (mount_root_tmpfs) {
 		new_root = "/tmp";
-
-		MoveMount({root_fd, ""},
-			  {FileDescriptor::Undefined(), new_root},
-			  MOVE_MOUNT_F_EMPTY_PATH);
 
 		vfs_builder.AddWritableRoot(root_fd);
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
@@ -177,11 +169,11 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		vfs_builder.Add(put_old);
 	} else {
 		new_root = "/tmp";
-
-		MoveMount({root_fd, ""},
-			  {FileDescriptor::Undefined(), new_root},
-			  MOVE_MOUNT_F_EMPTY_PATH);
 	}
+
+	MoveMount({root_fd, ""},
+		  {FileDescriptor::Undefined(), new_root},
+		  MOVE_MOUNT_F_EMPTY_PATH);
 
 	if (new_root != nullptr) {
 		/* enter the new root */
