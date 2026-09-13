@@ -44,12 +44,12 @@ VfsBuilder::~VfsBuilder() noexcept
 }
 
 void
-VfsBuilder::AddWritableRoot(const char *path)
+VfsBuilder::AddWritableRoot(FileDescriptor mount_fd)
 {
 	assert(items.empty());
 
 	items.emplace_back(std::string_view{});
-	items.back().fd = OpenDirectoryPath({FileDescriptor::Undefined(), path});
+	items.back().fd = OpenDirectoryPath({mount_fd, "."});
 }
 
 struct VfsBuilder::FindWritableResult {

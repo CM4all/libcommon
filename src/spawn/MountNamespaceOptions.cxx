@@ -171,7 +171,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			  {FileDescriptor::Undefined(), new_root},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
-		vfs_builder.AddWritableRoot(new_root);
+		vfs_builder.AddWritableRoot(root_fd);
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
 
 		vfs_builder.Add(put_old);

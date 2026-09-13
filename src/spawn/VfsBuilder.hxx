@@ -8,6 +8,8 @@
 #include <string_view>
 #include <vector>
 
+class FileDescriptor;
+
 /**
  * This class helps with building a new VFS (virtual file system).  It
  * remembers which paths have a writable "tmpfs" and creates mount
@@ -38,7 +40,7 @@ public:
 		return dir_mode;
 	}
 
-	void AddWritableRoot(const char *path);
+	void AddWritableRoot(FileDescriptor mount_fd);
 
 	/**
 	 * Throws if the mount point could not be created.
