@@ -147,7 +147,8 @@ OpenTreeNoFollow(FileDescriptor directory, const char *path)
 }
 
 inline void
-Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const
+Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor root_fd,
+		      FileDescriptor old_root_fd) const
 {
 	if (struct stat st;
 	    optional && !source_fd.IsDefined() &&
@@ -170,20 +171,21 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const
 
 	if (source_fd.IsDefined())
 		MoveMount({source_fd, ""},
-			  {FileDescriptor::Undefined(), target},
+			  {root_fd, target + 1},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	else
 		MoveMount({OpenTreeNoFollow(old_root_fd, source), ""},
-			  {FileDescriptor::Undefined(), target},
+			  {root_fd, target + 1},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
-	MountSetAttr({FileDescriptor::Undefined(), target},
+	MountSetAttr({root_fd, target + 1},
 		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 		     attr_set, attr_clr);
 }
 
 inline void
-Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const
+Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
+			  FileDescriptor old_root_fd) const
 {
 	if (struct stat st;
 	    optional && !source_fd.IsDefined() &&
@@ -217,20 +219,20 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) c
 
 	if (source_fd.IsDefined())
 		MoveMount({source_fd, ""},
-			  {FileDescriptor::Undefined(), target},
+			  {root_fd, target + 1},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	else
 		MoveMount({OpenTreeNoFollow(old_root_fd, source), ""},
-			  {FileDescriptor::Undefined(), target},
+			  {root_fd, target + 1},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
-	MountSetAttr({FileDescriptor::Undefined(), target},
+	MountSetAttr({root_fd, target + 1},
 		     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 		     attr_set, attr_clr);
 }
 
 inline void
-Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
+Mount::ApplyTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 {
 	vfs_builder.Add(target);
 
@@ -253,7 +255,7 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 	FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 
 	MoveMount({FSMount(fs, flags), ""},
-		  {FileDescriptor::Undefined(), target},
+		  {root_fd, target + 1},
 		  MOVE_MOUNT_F_EMPTY_PATH);
 
 	vfs_builder.MakeWritable();
@@ -263,13 +265,13 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder) const
 }
 
 inline void
-Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder) const
+Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 {
 	vfs_builder.Add(target);
 
 	if (source_fd.IsDefined()) {
 		MoveMount({source_fd, ""},
-			  {FileDescriptor::Undefined(), target},
+			  {root_fd, target + 1},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	} else {
 		/* we didn't get a "source_fd", so just create a new
@@ -277,7 +279,7 @@ Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder) const
 		   fallback) */
 
 		MoveMount({CreateTmpfs(exec), ""},
-			  {FileDescriptor::Undefined(), target},
+			  {root_fd, target + 1},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	}
 
@@ -325,7 +327,7 @@ PathExists(const char *path) noexcept
 }
 
 inline void
-Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
+Mount::ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 {
 	assert(type == Type::WRITE_FILE);
 	assert(source != nullptr);
@@ -336,7 +338,7 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
 	if (const auto dir = DirName(target);
 	    vfs_builder.MakeOptionalDirectory(dir)) {
 		/* inside a tmpfs: create the file here */
-		auto fd = OpenWriteOnly(target, O_CREAT|O_TRUNC);
+		auto fd = OpenWriteOnly({root_fd, target + 1}, O_CREAT|O_TRUNC);
 
 		if (fd.Write(contents) < 0)
 			throw MakeErrno("Failed to write");
@@ -350,17 +352,17 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder) const
 
 		MoveMount({OpenTree({WriteToTempFile(contents), ""},
 				    AT_EMPTY_PATH|OPEN_TREE_CLONE), ""},
-			  {FileDescriptor::Undefined(), target},
+			  {root_fd, target + 1},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
 		constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
-		MountSetAttr({FileDescriptor::Undefined(), target},
+		MountSetAttr({root_fd, target + 1},
 			     AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT, attr_set, 0);
 	}
 }
 
 inline void
-Mount::ApplySymlink(VfsBuilder &vfs_builder) const
+Mount::ApplySymlink(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 {
 	assert(type == Type::SYMLINK);
 	assert(source != nullptr);
@@ -368,46 +370,47 @@ Mount::ApplySymlink(VfsBuilder &vfs_builder) const
 
 	vfs_builder.MakeDirectory(DirName(target));
 
-	if (symlink(source, target) < 0)
+	if (symlinkat(source, root_fd.Get(), target + 1) < 0)
 		throw FmtErrno("Failed to create symlink {:?}", target);
 }
 
 inline void
-Mount::Apply(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const
+Mount::Apply(VfsBuilder &vfs_builder, FileDescriptor root_fd, FileDescriptor old_root_fd) const
 {
 	switch (type) {
 	case Type::BIND:
-		ApplyBindMount(vfs_builder, old_root_fd);
+		ApplyBindMount(vfs_builder, root_fd, old_root_fd);
 		break;
 
 	case Type::BIND_FILE:
-		ApplyBindMountFile(vfs_builder, old_root_fd);
+		ApplyBindMountFile(vfs_builder, root_fd, old_root_fd);
 		break;
 
 	case Type::TMPFS:
-		ApplyTmpfs(vfs_builder);
+		ApplyTmpfs(vfs_builder, root_fd);
 		break;
 
 	case Type::NAMED_TMPFS:
-		ApplyNamedTmpfs(vfs_builder);
+		ApplyNamedTmpfs(vfs_builder, root_fd);
 		break;
 
 	case Type::WRITE_FILE:
-		ApplyWriteFile(vfs_builder);
+		ApplyWriteFile(vfs_builder, root_fd);
 		break;
 
 	case Type::SYMLINK:
-		ApplySymlink(vfs_builder);
+		ApplySymlink(vfs_builder, root_fd);
 		break;
 	}
 }
 
 void
 Mount::ApplyAll(const IntrusiveForwardList<Mount> &m,
-		VfsBuilder &vfs_builder, FileDescriptor old_root_fd)
+		VfsBuilder &vfs_builder, FileDescriptor root_fd,
+		FileDescriptor old_root_fd)
 {
 	for (const auto &i : m)
-		i.Apply(vfs_builder, old_root_fd);
+		i.Apply(vfs_builder, root_fd, old_root_fd);
 }
 
 char *

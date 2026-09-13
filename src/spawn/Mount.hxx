@@ -159,18 +159,21 @@ struct Mount : IntrusiveForwardListHook {
 #endif
 
 private:
-	void ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const;
-	void ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const;
-	void ApplyTmpfs(VfsBuilder &vfs_builder) const;
-	void ApplyNamedTmpfs(VfsBuilder &vfs_builder) const;
-	void ApplyWriteFile(VfsBuilder &vfs_builder) const;
-	void ApplySymlink(VfsBuilder &vfs_builder) const;
+	void ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor root_fd,
+			    FileDescriptor old_root_fd) const;
+	void ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
+				FileDescriptor old_root_fd) const;
+	void ApplyTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const;
+	void ApplyNamedTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const;
+	void ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const;
+	void ApplySymlink(VfsBuilder &vfs_builder, FileDescriptor root_fd) const;
 
 public:
 	/**
 	 * Throws std::system_error on error.
 	 */
-	void Apply(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const;
+	void Apply(VfsBuilder &vfs_builder, FileDescriptor root_fd,
+		   FileDescriptor old_root_fd) const;
 
 	static IntrusiveForwardList<Mount> CloneAll(AllocatorPtr alloc,
 						    const IntrusiveForwardList<Mount> &src) noexcept;
@@ -179,7 +182,8 @@ public:
 	 * Throws std::system_error on error.
 	 */
 	static void ApplyAll(const IntrusiveForwardList<Mount> &m,
-			     VfsBuilder &vfs_builder, FileDescriptor old_root_fd);
+			     VfsBuilder &vfs_builder, FileDescriptor root_fd,
+			     FileDescriptor old_root_fd);
 
 	char *MakeId(char *p) const noexcept;
 	static char *MakeIdAll(char *p, const IntrusiveForwardList<Mount> &m) noexcept;

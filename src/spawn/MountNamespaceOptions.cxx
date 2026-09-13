@@ -202,7 +202,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		FSConfig(fs, FSCONFIG_SET_STRING, "subset", "pid");
 		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 		MoveMount({FSMount(fs, flags), ""},
-			  {FileDescriptor::Undefined(), "/proc"},
+			  {root_fd, "proc"},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	}
 
@@ -210,12 +210,9 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		vfs_builder.Add("/dev");
 
 		// TODO no bind-mount, just create /dev/null etc.
-		const char *source = "dev";
-		const char *target = "/dev";
-
-		MoveMount({OpenTree({old_root_fd, source},
+		MoveMount({OpenTree({old_root_fd, "dev"},
 				    AT_SYMLINK_NOFOLLOW|AT_RECURSIVE|OPEN_TREE_CLONE), ""},
-			{FileDescriptor::Undefined(), target},
+			{root_fd, "dev"},
 			MOVE_MOUNT_F_EMPTY_PATH);
 	}
 
@@ -226,7 +223,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 
 		MoveMount({FSMount(fs, MS_NOEXEC|MS_NOSUID), ""},
-			  {FileDescriptor::Undefined(), "/dev/pts"},
+			  {root_fd, "dev/pts"},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	}
 
@@ -248,7 +245,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 
 		MoveMount({FSMount(fs, flags), ""},
-			  {FileDescriptor::Undefined(), "/tmp"},
+			  {root_fd, "tmp"},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
 		vfs_builder.MakeWritable();
@@ -259,11 +256,11 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			vfs_builder.Add("/dev/pts");
 			MoveMount({OpenTree({old_root_fd, "dev/pts"},
 					    AT_SYMLINK_NOFOLLOW|OPEN_TREE_CLONE), ""},
-				{FileDescriptor::Undefined(), "/dev/pts"},
+				{root_fd, "dev/pts"},
 				MOVE_MOUNT_F_EMPTY_PATH);
 		}
 
-		Mount::ApplyAll(mounts, vfs_builder, old_root_fd);
+		Mount::ApplyAll(mounts, vfs_builder, root_fd, old_root_fd);
 	}
 
 	if (new_root != nullptr)
