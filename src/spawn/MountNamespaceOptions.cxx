@@ -13,6 +13,7 @@
 #include "system/linux/pivot_root.h"
 #include "system/linux/Mount.hxx"
 #include "io/FileAt.hxx"
+#include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
@@ -108,6 +109,8 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 		     AT_RECURSIVE|AT_SYMLINK_NOFOLLOW|AT_NO_AUTOMOUNT,
 		     0, 0, MS_PRIVATE);
 
+	const auto old_root_fd = OpenDirectoryPath({FileDescriptor::Undefined(), "/"});
+
 	const char *const put_old = "/mnt";
 
 	const char *new_root = nullptr;
@@ -194,20 +197,14 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 	if (mount_dev) {
 		vfs_builder.Add("/dev");
 
-		ChdirOrThrow(new_root != nullptr ? put_old : "/");
-
 		// TODO no bind-mount, just create /dev/null etc.
 		const char *source = "dev";
 		const char *target = "/dev";
 
-		MoveMount({OpenTree({FileDescriptor{AT_FDCWD}, source},
+		MoveMount({OpenTree({old_root_fd, source},
 				    AT_SYMLINK_NOFOLLOW|AT_RECURSIVE|OPEN_TREE_CLONE), ""},
 			{FileDescriptor::Undefined(), target},
 			MOVE_MOUNT_F_EMPTY_PATH);
-
-		if (new_root != nullptr)
-			/* back to the new root */
-			ChdirOrThrow("/");
 	}
 
 	if (mount_pts) {
@@ -246,23 +243,15 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 	}
 
 	if (HasBindMount()) {
-		/* go to /mnt so we can refer to the old directories with a
-		   relative path */
-		ChdirOrThrow(new_root != nullptr ? put_old : "/");
-
 		if (bind_mount_pts) {
 			vfs_builder.Add("/dev/pts");
-			MoveMount({OpenTree({FileDescriptor{AT_FDCWD}, "dev/pts"},
+			MoveMount({OpenTree({old_root_fd, "dev/pts"},
 					    AT_SYMLINK_NOFOLLOW|OPEN_TREE_CLONE), ""},
 				{FileDescriptor::Undefined(), "/dev/pts"},
 				MOVE_MOUNT_F_EMPTY_PATH);
 		}
 
-		Mount::ApplyAll(mounts, vfs_builder);
-
-		if (new_root != nullptr)
-			/* back to the new root */
-			ChdirOrThrow("/");
+		Mount::ApplyAll(mounts, vfs_builder, old_root_fd);
 	}
 
 	if (new_root != nullptr)

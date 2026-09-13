@@ -147,7 +147,7 @@ OpenTreeNoFollow(FileDescriptor directory, const char *path)
 }
 
 inline void
-Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
+Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const
 {
 	if (struct stat st;
 	    optional && !source_fd.IsDefined() &&
@@ -173,7 +173,7 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	else
-		MoveMount({OpenTreeNoFollow(FileDescriptor{AT_FDCWD}, source), ""},
+		MoveMount({OpenTreeNoFollow(old_root_fd, source), ""},
 			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
@@ -183,7 +183,7 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder) const
 }
 
 inline void
-Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
+Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const
 {
 	if (struct stat st;
 	    optional && !source_fd.IsDefined() &&
@@ -220,7 +220,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder) const
 			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	else
-		MoveMount({OpenTreeNoFollow(FileDescriptor{AT_FDCWD}, source), ""},
+		MoveMount({OpenTreeNoFollow(old_root_fd, source), ""},
 			  {FileDescriptor::Undefined(), target},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
@@ -373,15 +373,15 @@ Mount::ApplySymlink(VfsBuilder &vfs_builder) const
 }
 
 inline void
-Mount::Apply(VfsBuilder &vfs_builder) const
+Mount::Apply(VfsBuilder &vfs_builder, FileDescriptor old_root_fd) const
 {
 	switch (type) {
 	case Type::BIND:
-		ApplyBindMount(vfs_builder);
+		ApplyBindMount(vfs_builder, old_root_fd);
 		break;
 
 	case Type::BIND_FILE:
-		ApplyBindMountFile(vfs_builder);
+		ApplyBindMountFile(vfs_builder, old_root_fd);
 		break;
 
 	case Type::TMPFS:
@@ -404,10 +404,10 @@ Mount::Apply(VfsBuilder &vfs_builder) const
 
 void
 Mount::ApplyAll(const IntrusiveForwardList<Mount> &m,
-		VfsBuilder &vfs_builder)
+		VfsBuilder &vfs_builder, FileDescriptor old_root_fd)
 {
 	for (const auto &i : m)
-		i.Apply(vfs_builder);
+		i.Apply(vfs_builder, old_root_fd);
 }
 
 char *
