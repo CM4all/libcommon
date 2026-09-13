@@ -13,9 +13,11 @@
 #include "system/linux/pivot_root.h"
 #include "system/linux/Mount.hxx"
 #include "io/FileAt.hxx"
-#include "io/FileDescriptor.hxx"
+#include "io/UniqueFileDescriptor.hxx"
+#include "util/IterableSplitString.hxx"
 #include "util/ScopeExit.hxx"
 #include "util/StringAPI.hxx"
+#include "util/StringSplit.hxx"
 
 #if TRANSLATION_ENABLE_EXPAND
 #include "pexpand.hxx"
@@ -79,6 +81,20 @@ ChdirOrThrow(const char *path)
 {
 	if (chdir(path) < 0)
 		throw FmtErrno("chdir({:?}) failed", path);
+}
+
+/**
+ * Split a comma-separated string of mount options and feed it into
+ * fsconfig().  Throws on error.
+ */
+static void
+FSConfigSplit(FileDescriptor fd, std::string_view options)
+{
+	for (const std::string_view i : IterableSplitString(options, ',')) {
+		const auto [name, value] = Split(i, '=');
+		FSConfig(fd, FSCONFIG_SET_STRING,
+			 std::string{name}.c_str(), std::string{value}.c_str());
+	}
 }
 
 void
@@ -179,22 +195,25 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 	}
 
 	if (mount_tmp_tmpfs != nullptr) {
-		const char *options = "size=16M,nr_inodes=256,mode=1777";
-		StringBuffer<256> buffer;
-		if (*mount_tmp_tmpfs != 0) {
-			buffer = FmtBuffer<256>("{},{}",
-						options, mount_tmp_tmpfs);
-			options = buffer;
-		}
-
 		vfs_builder.Add("/tmp");
 
 		unsigned long flags = MS_NODEV|MS_NOSUID;
 		if (!mount_tmp_tmpfs_exec)
 			flags |= MS_NOEXEC;
 
-		MountOrThrow("none", "/tmp", "tmpfs",
-			     flags, options);
+		auto fs = FSOpen("tmpfs");
+		FSConfig(fs, FSCONFIG_SET_STRING, "size", "16M");
+		FSConfig(fs, FSCONFIG_SET_STRING, "nr_inodes", "256");
+		FSConfig(fs, FSCONFIG_SET_STRING, "mode", "1777");
+
+		if (*mount_tmp_tmpfs != '\0')
+			FSConfigSplit(fs, mount_tmp_tmpfs);
+
+		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
+
+		MoveMount({FSMount(fs, flags), ""},
+			  {FileDescriptor::Undefined(), "/tmp"},
+			  MOVE_MOUNT_F_EMPTY_PATH);
 
 		vfs_builder.MakeWritable();
 	}
