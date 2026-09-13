@@ -250,7 +250,7 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid) const
 			  {root_fd, "tmp"},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
-		vfs_builder.MakeWritable();
+		vfs_builder.MakeWritable(root_fd);
 	}
 
 	if (HasBindMount()) {

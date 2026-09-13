@@ -133,14 +133,14 @@ VfsBuilder::Add(std::string_view path)
 }
 
 void
-VfsBuilder::MakeWritable()
+VfsBuilder::MakeWritable(FileDescriptor root_fd)
 {
 	assert(!items.empty());
 
 	auto &item = items.back();
 	assert(!item.fd.IsDefined());
 
-	item.fd = OpenDirectoryPath({FileDescriptor::Undefined(), item.path.c_str()});
+	item.fd = OpenDirectoryPath({root_fd, item.path.c_str() + 1});
 }
 
 void

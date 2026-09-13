@@ -50,7 +50,7 @@ public:
 	/**
 	 * Throws if the mount point could not be opened.
 	 */
-	void MakeWritable();
+	void MakeWritable(FileDescriptor root_fd);
 
 	/**
 	 * Schedule a remount of the most recently added mount point.

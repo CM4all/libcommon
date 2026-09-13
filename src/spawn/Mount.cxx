@@ -150,9 +150,10 @@ inline void
 Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 		      FileDescriptor old_root_fd) const
 {
-	if (struct stat st;
+	if (struct statx st;
 	    optional && !source_fd.IsDefined() &&
-	    lstat(source, &st) < 0 && errno == ENOENT)
+	    statx(old_root_fd.Get(), source, AT_SYMLINK_NOFOLLOW|AT_STATX_DONT_SYNC,
+		  STATX_TYPE, &st) < 0 && errno == ENOENT)
 		/* the source directory doesn't exist, but this is
 		   optional, so just ignore it */
 		return;
@@ -187,16 +188,20 @@ inline void
 Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 			  FileDescriptor old_root_fd) const
 {
-	if (struct stat st;
+	if (struct statx st;
 	    optional && !source_fd.IsDefined() &&
-	    lstat(source, &st) < 0 && errno == ENOENT)
+	    statx(old_root_fd.Get(), source, AT_SYMLINK_NOFOLLOW|AT_STATX_DONT_SYNC,
+		  STATX_TYPE, &st) < 0 && errno == ENOENT)
 		/* the source file doesn't exist, but this is
 		   optional, so just ignore it */
 		return;
 
-	if (struct stat st; lstat(target, &st) == 0) {
+	if (struct statx st;
+	    optional && !source_fd.IsDefined() &&
+	    statx(root_fd.Get(), target + 1, AT_SYMLINK_NOFOLLOW|AT_STATX_DONT_SYNC,
+		  STATX_TYPE, &st) == 0) {
 		/* target exists already */
-		if (!S_ISREG(st.st_mode))
+		if (!S_ISREG(st.stx_mode))
 			throw FmtRuntimeError("Not a regular file: {:?}"sv,
 					      target);
 	} else if (const int e = errno; e != ENOENT) {
@@ -258,7 +263,7 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 		  {root_fd, target + 1},
 		  MOVE_MOUNT_F_EMPTY_PATH);
 
-	vfs_builder.MakeWritable();
+	vfs_builder.MakeWritable(root_fd);
 
 	if (!writable)
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
@@ -283,7 +288,7 @@ Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 			  MOVE_MOUNT_F_EMPTY_PATH);
 	}
 
-	vfs_builder.MakeWritable();
+	vfs_builder.MakeWritable(root_fd);
 
 	if (!writable)
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
@@ -320,10 +325,11 @@ WriteToTempFile(std::span<const std::byte> contents)
 
 [[gnu::pure]]
 static bool
-PathExists(const char *path) noexcept
+PathExists(FileAt file) noexcept
 {
-	struct stat st;
-	return lstat(path, &st) == 0;
+	struct statx st;
+	return statx(file.directory.Get(), file.name, AT_SYMLINK_NOFOLLOW|AT_STATX_DONT_SYNC,
+		     STATX_TYPE, &st) == 0;
 }
 
 inline void
@@ -347,7 +353,7 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 		   and bind-mount it over the existing (read-only)
 		   file */
 
-		if (optional && !PathExists(target))
+		if (optional && !PathExists({root_fd, target + 1}))
 			return;
 
 		const auto fd = OpenTree({WriteToTempFile(contents), ""},
