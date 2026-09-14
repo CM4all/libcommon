@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Direct.hxx"
+#include "Context.hxx"
 #include "ErrorPipe.hxx"
 #include "Prepared.hxx"
 #include "CgroupOptions.hxx"
@@ -462,8 +463,9 @@ SpawnChildProcess(EventLoop &event_loop,
 		  const ResourceLimits &current_rlimits,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
-		  bool is_sys_admin)
+		  const SpawnContext &context)
 {
+	const bool is_sys_admin = context.is_sys_admin;
 	const char *path = params.Finish();
 
 	/**

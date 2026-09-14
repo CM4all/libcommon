@@ -6,6 +6,7 @@
 #include "spawn/Prepared.hxx"
 #include "spawn/CgroupState.hxx"
 #include "spawn/CgroupOptions.hxx"
+#include "spawn/Context.hxx"
 #include "spawn/Mount.hxx"
 #include "spawn/Systemd.hxx"
 #include "event/Loop.hxx"
@@ -32,7 +33,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 		  const ResourceLimits &current_rlimits,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
-		  bool is_sys_admin)
+		  const SpawnContext &context)
 {
 	struct Instance {
 		Co::InvokeTask invoke_task;
@@ -66,7 +67,7 @@ SpawnChildProcess(PreparedChildProcess &&params,
 
 	instance.Start(SpawnChildProcess(event_loop, std::move(params),
 					 current_rlimits, cgroup_state,
-					 cgroups_group_writable, is_sys_admin));
+					 cgroups_group_writable, context));
 	event_loop.Run();
 
 	return std::move(instance).Finish();
@@ -217,7 +218,7 @@ try {
 					      current_rlimits,
 					      cgroup_state,
 					      false,
-					      geteuid() == 0);
+					      SpawnContext{});
 
 	siginfo_t info;
 

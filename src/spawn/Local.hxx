@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Interface.hxx"
+#include "Context.hxx"
 
 struct SpawnConfig;
 class EventLoop;
@@ -12,6 +13,7 @@ class ChildProcessTerminator;
 
 class LocalSpawnService final : public SpawnService {
 	const SpawnConfig &config;
+	const SpawnContext context;
 
 	EventLoop &event_loop;
 	ChildProcessTerminator &terminator;

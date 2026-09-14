@@ -4,6 +4,7 @@
 
 #include "Server.hxx"
 #include "Config.hxx"
+#include "Context.hxx"
 #include "IProtocol.hxx"
 #include "Parser.hxx"
 #include "Builder.hxx"
@@ -353,11 +354,7 @@ class SpawnServerProcess {
 	using ConnectionList = IntrusiveList<SpawnServerConnection>;
 	ConnectionList connections;
 
-#ifdef HAVE_LIBCAP
-	const bool is_sys_admin = ::IsSysAdmin();
-#else
-	const bool is_sys_admin = geteuid() == 0;
-#endif
+	const SpawnContext context;
 
 public:
 	SpawnServerProcess(const SpawnConfig &_config,
@@ -392,8 +389,8 @@ public:
 		return tmpfs_manager;
 	}
 
-	bool IsSysAdmin() const noexcept {
-		return is_sys_admin;
+	const auto &GetContext() const noexcept {
+		return context;
 	}
 
 	EventLoop &GetEventLoop() noexcept {
@@ -541,7 +538,7 @@ SpawnServerConnection::SpawnChild(unsigned id, std::string_view name,
 				      process.GetCurrentRlimits(),
 				      process.GetCgroupState(),
 				      config.cgroups_writable_by_gid > 0,
-				      process.IsSysAdmin());
+				      process.GetContext());
 
 	auto *child = new SpawnServerChild(*this,
 					   std::move(leases),

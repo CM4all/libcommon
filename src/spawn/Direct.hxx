@@ -13,6 +13,7 @@
 struct PreparedChildProcess;
 struct ResourceLimits;
 struct CgroupState;
+struct SpawnContext;
 class UniqueFileDescriptor;
 class EventLoop;
 namespace Co { template <typename T> class Task; }
@@ -53,4 +54,4 @@ SpawnChildProcess(EventLoop &event_loop,
 		  const ResourceLimits &current_rlimits,
 		  const CgroupState &cgroup_state,
 		  bool cgroups_group_writable,
-		  bool is_sys_admin);
+		  const SpawnContext &context);

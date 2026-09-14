@@ -149,7 +149,7 @@ LocalSpawnService::SpawnChildProcess(std::string_view name,
 					std::move(params),
 					current_rlimits, CgroupState(),
 					false,
-					false /* TODO? */);
+					context);
 
 	auto handle = std::make_unique<LocalChildProcess>(event_loop, terminator,
 							  name, params.sigkill);

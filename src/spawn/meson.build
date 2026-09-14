@@ -97,6 +97,7 @@ if get_variable('libcommon_enable_spawn_direct', false)
   # child process directly (without the #SpawnService interface).
 
   spawn_sources += [
+    'Context.cxx',
     'Direct.cxx',
     'ErrorPipe.cxx',
   ]
