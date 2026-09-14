@@ -125,7 +125,7 @@ Mount::ExpandAll(AllocatorPtr alloc,
  * follow any symlinks while resolving the given path.
  */
 static UniqueFileDescriptor
-OpenDirectoryPathNoFollow(FileDescriptor directory, const char *path)
+OpenDirectoryPathNoSymlinks(FileDescriptor directory, const char *path)
 {
 	static constexpr struct open_how how{
 		.flags = O_PATH|O_DIRECTORY|O_NOFOLLOW|O_CLOEXEC,
@@ -140,9 +140,9 @@ OpenDirectoryPathNoFollow(FileDescriptor directory, const char *path)
 }
 
 static UniqueFileDescriptor
-OpenTreeNoFollow(FileDescriptor directory, const char *path)
+OpenTreeNoSymlinks(FileDescriptor directory, const char *path)
 {
-	return OpenTree({OpenDirectoryPathNoFollow(directory, path), ""},
+	return OpenTree({OpenDirectoryPathNoSymlinks(directory, path), ""},
 			AT_EMPTY_PATH|OPEN_TREE_CLONE);
 }
 
@@ -173,7 +173,7 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 	UniqueFileDescriptor ufd;
 	FileAt source_at{source_fd, ""};
 	if (!source_fd.IsDefined())
-		source_at.directory = ufd = OpenTreeNoFollow(old_root_fd, source);
+		source_at.directory = ufd = OpenTreeNoSymlinks(old_root_fd, source);
 
 	MountSetAttr(source_at,
 		     AT_EMPTY_PATH,
@@ -225,7 +225,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 	UniqueFileDescriptor ufd;
 	FileAt source_at{source_fd, ""};
 	if (!source_fd.IsDefined())
-		source_at.directory = ufd = OpenTreeNoFollow(old_root_fd, source);
+		source_at.directory = ufd = OpenTreeNoSymlinks(old_root_fd, source);
 
 	MountSetAttr(source_at,
 		     AT_EMPTY_PATH,
