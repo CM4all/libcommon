@@ -281,16 +281,16 @@ Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 }
 
 static UniqueFileDescriptor
-WriteToTempFile(std::span<const std::byte> contents)
+WriteToTempFile(FileDescriptor root_fd, std::span<const std::byte> contents)
 {
 	unsigned long n = time(nullptr);
 
 	while (true) {
 		char buffer[64];
-		sprintf(buffer, "/tmp/%lx", n);
+		sprintf(buffer, "tmp/%lx", n);
 
 		UniqueFileDescriptor fd;
-		if (fd.Open(buffer, O_CREAT|O_EXCL|O_WRONLY, 0644)) {
+		if (fd.Open({root_fd, buffer}, O_CREAT|O_EXCL|O_WRONLY, 0644)) {
 			if (fd.Write(contents) < 0)
 				throw MakeErrno("Failed to write");
 
@@ -342,7 +342,7 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 		if (optional && !PathExists({root_fd, target + 1}))
 			return;
 
-		const auto fd = OpenTree({WriteToTempFile(contents), ""},
+		const auto fd = OpenTree({WriteToTempFile(root_fd, contents), ""},
 					 AT_EMPTY_PATH|OPEN_TREE_CLONE);
 
 		constexpr uint_least64_t attr_set = MS_NOSUID|MS_NODEV|MS_RDONLY|MS_NOEXEC;
