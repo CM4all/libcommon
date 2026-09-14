@@ -121,31 +121,28 @@ Mount::ExpandAll(AllocatorPtr alloc,
 
 #endif
 
-static UniqueFileDescriptor
-OpenFileTreeNoSymlinks(FileDescriptor directory, const char *path)
-{
-	return OpenTree({OpenPathNoSymlinks({directory, path}), ""},
-			AT_EMPTY_PATH|OPEN_TREE_CLONE);
-}
-
-static UniqueFileDescriptor
-OpenDirectoryTreeNoSymlinks(FileDescriptor directory, const char *path)
-{
-	return OpenTree({OpenDirectoryPathNoSymlinks({directory, path}), ""},
-			AT_EMPTY_PATH|OPEN_TREE_CLONE);
-}
-
 inline void
 Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 		      FileDescriptor old_root_fd) const
 {
-	if (struct statx st;
-	    optional && !source_fd.IsDefined() &&
-	    statx(old_root_fd.Get(), source, AT_SYMLINK_NOFOLLOW|AT_STATX_DONT_SYNC,
-		  STATX_TYPE, &st) < 0 && errno == ENOENT)
-		/* the source directory doesn't exist, but this is
-		   optional, so just ignore it */
-		return;
+	UniqueFileDescriptor ufd;
+	FileAt source_at{source_fd, ""};
+
+	if (!source_fd.IsDefined()) {
+		const auto fd = TryOpenDirectoryPathNoSymlinks({old_root_fd, source});
+		if (!fd.IsDefined()) {
+			const int e = errno;
+			if (optional && e == ENOENT)
+				/* the source directory doesn't exist,
+				   but this is optional, so just
+				   ignore it */
+				return;
+
+			throw FmtErrno(e, "Failed to oepn {:?}"sv, source);
+		}
+
+		source_at.directory = ufd = OpenTree({fd, ""}, AT_EMPTY_PATH|OPEN_TREE_CLONE);
+	}
 
 	vfs_builder.Add(target);
 
@@ -158,11 +155,6 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 		attr_clr |= MS_NOEXEC;
 	else
 		attr_set |= MS_NOEXEC;
-
-	UniqueFileDescriptor ufd;
-	FileAt source_at{source_fd, ""};
-	if (!source_fd.IsDefined())
-		source_at.directory = ufd = OpenDirectoryTreeNoSymlinks(old_root_fd, source);
 
 	MountSetAttr(source_at,
 		     AT_EMPTY_PATH,
@@ -177,13 +169,24 @@ inline void
 Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 			  FileDescriptor old_root_fd) const
 {
-	if (struct statx st;
-	    optional && !source_fd.IsDefined() &&
-	    statx(old_root_fd.Get(), source, AT_SYMLINK_NOFOLLOW|AT_STATX_DONT_SYNC,
-		  STATX_TYPE, &st) < 0 && errno == ENOENT)
-		/* the source file doesn't exist, but this is
-		   optional, so just ignore it */
-		return;
+	UniqueFileDescriptor ufd;
+	FileAt source_at{source_fd, ""};
+
+	if (!source_fd.IsDefined()) {
+		const auto fd = TryOpenPathNoSymlinks({old_root_fd, source});
+		if (!fd.IsDefined()) {
+			const int e = errno;
+			if (optional && e == ENOENT)
+				/* the source file doesn't exist,
+				   but this is optional, so just
+				   ignore it */
+				return;
+
+			throw FmtErrno(e, "Failed to oepn {:?}"sv, source);
+		}
+
+		source_at.directory = ufd = OpenTree({fd, ""}, AT_EMPTY_PATH|OPEN_TREE_CLONE);
+	}
 
 	if (struct statx st;
 	    statx(root_fd.Get(), target + 1, AT_SYMLINK_NOFOLLOW|AT_STATX_DONT_SYNC,
@@ -209,11 +212,6 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 		attr_clr |= MS_NOEXEC;
 	else
 		attr_set |= MS_NOEXEC;
-
-	UniqueFileDescriptor ufd;
-	FileAt source_at{source_fd, ""};
-	if (!source_fd.IsDefined())
-		source_at.directory = ufd = OpenFileTreeNoSymlinks(old_root_fd, source);
 
 	MountSetAttr(source_at,
 		     AT_EMPTY_PATH,
