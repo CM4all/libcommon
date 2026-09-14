@@ -29,6 +29,7 @@
 
 #include <assert.h>
 #include <fcntl.h> // for AT_*
+#include <sched.h> // for setns(), CLONE_NEWNS
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/mount.h>
