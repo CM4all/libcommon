@@ -229,7 +229,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 		vfs_builder.MakeDirectory(DirName(target));
 
 		UniqueFileDescriptor fd;
-		if (!fd.Open(target, O_CREAT|O_EXCL|O_WRONLY, 0666))
+		if (!fd.Open({root_fd, target + 1}, O_CREAT|O_EXCL|O_WRONLY, 0666))
 			throw FmtErrno("Failed to create {:?}"sv, target);
 	}
 
