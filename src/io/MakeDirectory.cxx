@@ -4,6 +4,7 @@
 
 #include "MakeDirectory.hxx"
 #include "FileAt.hxx"
+#include "Open.hxx"
 #include "UniqueFileDescriptor.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "system/linux/openat2.h"
@@ -37,11 +38,7 @@ OpenDirectory(FileAt file,
 		how.resolve |= RESOLVE_NO_SYMLINKS;
 	}
 
-	int fd = openat2(file.directory.Get(), file.name, &how, sizeof(how));
-	if (fd < 0)
-		throw FmtErrno("Failed to open {:?}", file.name);
-
-	return UniqueFileDescriptor{AdoptTag{}, fd};
+	return Open(file, how);
 }
 
 UniqueFileDescriptor
