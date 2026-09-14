@@ -25,7 +25,7 @@ FilterErrno(int e, const MakeDirectoryOptions options) noexcept
 }
 
 static UniqueFileDescriptor
-OpenDirectory(FileDescriptor directory, const char *name,
+OpenDirectory(FileAt file,
 	      const MakeDirectoryOptions options)
 {
 	struct open_how how{
@@ -37,9 +37,9 @@ OpenDirectory(FileDescriptor directory, const char *name,
 		how.resolve |= RESOLVE_NO_SYMLINKS;
 	}
 
-	int fd = openat2(directory.Get(), name, &how, sizeof(how));
+	int fd = openat2(file.directory.Get(), file.name, &how, sizeof(how));
 	if (fd < 0)
-		throw FmtErrno("Failed to open {:?}", name);
+		throw FmtErrno("Failed to open {:?}", file.name);
 
 	return UniqueFileDescriptor{AdoptTag{}, fd};
 }
@@ -59,7 +59,7 @@ MakeDirectory(FileAt file,
 		}
 	}
 
-	return OpenDirectory(file.directory, file.name, options);
+	return OpenDirectory(file, options);
 }
 
 static char *
@@ -82,12 +82,12 @@ RecursiveMakeNestedDirectory(FileDescriptor parent_fd,
 	assert(path[path_length] == 0);
 
 	if (mkdirat(parent_fd.Get(), path, options.mode) == 0)
-		return OpenDirectory(parent_fd, path, options);
+		return OpenDirectory({parent_fd, path}, options);
 
 	const int e = FilterErrno(errno, options);
 	switch (e) {
 	case 0:
-		return OpenDirectory(parent_fd, path, options);
+		return OpenDirectory({parent_fd, path}, options);
 
 	case ENOENT:
 		/* parent directory doesn't exist - we must create it
