@@ -193,7 +193,6 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 		return;
 
 	if (struct statx st;
-	    optional && !source_fd.IsDefined() &&
 	    statx(root_fd.Get(), target + 1, AT_SYMLINK_NOFOLLOW|AT_STATX_DONT_SYNC,
 		  STATX_TYPE, &st) == 0) {
 		/* target exists already */
