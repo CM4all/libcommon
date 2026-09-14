@@ -125,6 +125,28 @@ Mount::ExpandAll(AllocatorPtr alloc,
  * follow any symlinks while resolving the given path.
  */
 static UniqueFileDescriptor
+OpenFilePathNoSymlinks(FileDescriptor directory, const char *path)
+{
+	static constexpr struct open_how how{
+		.flags = O_PATH|O_NOFOLLOW|O_CLOEXEC,
+		.resolve = RESOLVE_IN_ROOT|RESOLVE_NO_MAGICLINKS|RESOLVE_NO_SYMLINKS,
+	};
+
+	return Open({directory, path}, how);
+}
+
+static UniqueFileDescriptor
+OpenFileTreeNoSymlinks(FileDescriptor directory, const char *path)
+{
+	return OpenTree({OpenFilePathNoSymlinks(directory, path), ""},
+			AT_EMPTY_PATH|OPEN_TREE_CLONE);
+}
+
+/**
+ * Open the specified directory as an O_PATH descriptor, but don't
+ * follow any symlinks while resolving the given path.
+ */
+static UniqueFileDescriptor
 OpenDirectoryPathNoSymlinks(FileDescriptor directory, const char *path)
 {
 	static constexpr struct open_how how{
@@ -136,7 +158,7 @@ OpenDirectoryPathNoSymlinks(FileDescriptor directory, const char *path)
 }
 
 static UniqueFileDescriptor
-OpenTreeNoSymlinks(FileDescriptor directory, const char *path)
+OpenDirectoryTreeNoSymlinks(FileDescriptor directory, const char *path)
 {
 	return OpenTree({OpenDirectoryPathNoSymlinks(directory, path), ""},
 			AT_EMPTY_PATH|OPEN_TREE_CLONE);
@@ -169,7 +191,7 @@ Mount::ApplyBindMount(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 	UniqueFileDescriptor ufd;
 	FileAt source_at{source_fd, ""};
 	if (!source_fd.IsDefined())
-		source_at.directory = ufd = OpenTreeNoSymlinks(old_root_fd, source);
+		source_at.directory = ufd = OpenDirectoryTreeNoSymlinks(old_root_fd, source);
 
 	MountSetAttr(source_at,
 		     AT_EMPTY_PATH,
@@ -220,7 +242,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 	UniqueFileDescriptor ufd;
 	FileAt source_at{source_fd, ""};
 	if (!source_fd.IsDefined())
-		source_at.directory = ufd = OpenTreeNoSymlinks(old_root_fd, source);
+		source_at.directory = ufd = OpenFileTreeNoSymlinks(old_root_fd, source);
 
 	MountSetAttr(source_at,
 		     AT_EMPTY_PATH,
