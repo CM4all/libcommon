@@ -7,6 +7,7 @@ io = static_library(
   'Pipe.cxx',
   'Open.cxx',
   'Beneath.cxx',
+  'NoSymlinks.cxx',
   'MakeDirectory.cxx',
   'CopyRegularFile.cxx',
   'RecursiveCopy.cxx',

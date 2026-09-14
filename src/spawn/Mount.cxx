@@ -12,6 +12,7 @@
 #include "system/linux/Mount.hxx"
 #include "system/linux/openat2.h"
 #include "io/FileAt.hxx"
+#include "io/NoSymlinks.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "util/SpanCast.hxx"
@@ -120,47 +121,17 @@ Mount::ExpandAll(AllocatorPtr alloc,
 
 #endif
 
-/**
- * Open the specified directory as an O_PATH descriptor, but don't
- * follow any symlinks while resolving the given path.
- */
-static UniqueFileDescriptor
-OpenFilePathNoSymlinks(FileDescriptor directory, const char *path)
-{
-	static constexpr struct open_how how{
-		.flags = O_PATH|O_NOFOLLOW|O_CLOEXEC,
-		.resolve = RESOLVE_IN_ROOT|RESOLVE_NO_MAGICLINKS|RESOLVE_NO_SYMLINKS,
-	};
-
-	return Open({directory, path}, how);
-}
-
 static UniqueFileDescriptor
 OpenFileTreeNoSymlinks(FileDescriptor directory, const char *path)
 {
-	return OpenTree({OpenFilePathNoSymlinks(directory, path), ""},
+	return OpenTree({OpenPathNoSymlinks({directory, path}), ""},
 			AT_EMPTY_PATH|OPEN_TREE_CLONE);
-}
-
-/**
- * Open the specified directory as an O_PATH descriptor, but don't
- * follow any symlinks while resolving the given path.
- */
-static UniqueFileDescriptor
-OpenDirectoryPathNoSymlinks(FileDescriptor directory, const char *path)
-{
-	static constexpr struct open_how how{
-		.flags = O_PATH|O_DIRECTORY|O_NOFOLLOW|O_CLOEXEC,
-		.resolve = RESOLVE_IN_ROOT|RESOLVE_NO_MAGICLINKS|RESOLVE_NO_SYMLINKS,
-	};
-
-	return Open({directory, path}, how);
 }
 
 static UniqueFileDescriptor
 OpenDirectoryTreeNoSymlinks(FileDescriptor directory, const char *path)
 {
-	return OpenTree({OpenDirectoryPathNoSymlinks(directory, path), ""},
+	return OpenTree({OpenDirectoryPathNoSymlinks({directory, path}), ""},
 			AT_EMPTY_PATH|OPEN_TREE_CLONE);
 }
 
