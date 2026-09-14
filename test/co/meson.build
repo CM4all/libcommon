@@ -6,6 +6,7 @@ test(
     'TestEagerInvokeTask.cxx',
     'TestEagerTask.cxx',
     'TestAll.cxx',
+    'TestAwaitableHelper.cxx',
     'TestCoCache.cxx',
     'TestMultiAwaitable.cxx',
     'TestMultiResume.cxx',
