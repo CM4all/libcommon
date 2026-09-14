@@ -132,11 +132,7 @@ OpenDirectoryPathNoSymlinks(FileDescriptor directory, const char *path)
 		.resolve = RESOLVE_IN_ROOT|RESOLVE_NO_MAGICLINKS|RESOLVE_NO_SYMLINKS,
 	};
 
-	int fd = openat2(directory.Get(), path, &how, sizeof(how));
-	if (fd < 0)
-		throw FmtErrno("Failed to open {:?}", path);
-
-	return UniqueFileDescriptor{AdoptTag{}, fd};
+	return Open({directory, path}, how);
 }
 
 static UniqueFileDescriptor
