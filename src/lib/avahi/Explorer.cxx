@@ -134,6 +134,8 @@ Import(const AvahiIPv4Address &src, uint_least16_t port) noexcept
 	return {{src.address}, port};
 }
 
+#ifdef HAVE_IPV6
+
 static constexpr IPv6Address
 Import(AvahiIfIndex interface, const AvahiIPv6Address &src,
        uint_least16_t port) noexcept
@@ -144,6 +146,8 @@ Import(AvahiIfIndex interface, const AvahiIPv6Address &src,
 	return {address, port, static_cast<uint32_t>(interface)};
 }
 
+#endif // HAVE_IPV6
+
 static constexpr InetAddress
 Import(AvahiIfIndex interface, const AvahiAddress &src, uint_least16_t port) noexcept
 {
@@ -151,8 +155,12 @@ Import(AvahiIfIndex interface, const AvahiAddress &src, uint_least16_t port) noe
 	case AVAHI_PROTO_INET:
 		return Import(src.data.ipv4, port);
 
+#ifdef HAVE_IPV6
 	case AVAHI_PROTO_INET6:
 		return Import(interface, src.data.ipv6, port);
+#else
+		(void)interface;
+#endif
 	}
 
 	InetAddress result;
