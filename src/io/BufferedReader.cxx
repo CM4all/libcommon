@@ -77,7 +77,7 @@ char *
 BufferedReader::ReadLine()
 {
 	do {
-		const auto line = ExtractLine(buffer);
+		const auto line = ExtractLine(buffer, ExtractLineFlush::IF_FULL);
 		if (line.data() != nullptr) {
 			++line_number;
 			line.data()[line.size()] = '\0';

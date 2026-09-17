@@ -51,7 +51,7 @@ PipeLineReader::TryRead(bool flush, bool hangup) noexcept
 	buffer.Append(nbytes);
 
 	while (true) {
-		auto r = ExtractLine(buffer, flush);
+		auto r = ExtractLine(buffer, flush ? ExtractLineFlush::ALWAYS : ExtractLineFlush::IF_FULL);
 		if (r.data() == nullptr)
 			break;
 
