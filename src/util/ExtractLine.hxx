@@ -7,6 +7,7 @@
 #include <cstring>
 
 enum class ExtractLineFlush {
+	NEVER,
 	IF_FULL,
 	ALWAYS,
 };
@@ -23,6 +24,9 @@ ExtractLine(B &buffer, ExtractLineFlush flush)
 			return {};
 
 		switch (flush) {
+		case ExtractLineFlush::NEVER:
+			return {};
+
 		case ExtractLineFlush::IF_FULL:
 			if (!buffer.IsFull())
 				return {};
