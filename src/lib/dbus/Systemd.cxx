@@ -19,8 +19,56 @@ static constexpr const char *manager_service = "org.freedesktop.systemd1";
 static constexpr const char *manager_path = "/org/freedesktop/systemd1";
 static constexpr const char *manager_interface = "org.freedesktop.systemd1.Manager";
 
+/**
+ * Check whether the given message is a signal which was sent by
+ * systemd.
+ */
+[[gnu::pure]]
+static bool
+IsManagerSignal(ODBus::Message &msg, const char *expected_sender,
+		const char *member) noexcept
+{
+	if (!msg.IsSignal(manager_interface, member) ||
+	    !msg.HasPath(manager_path))
+		return false;
+
+	const char *actual_sender = msg.GetSender();
+	return actual_sender != nullptr &&
+		StringIsEqual(actual_sender, expected_sender);
+}
+
+std::string
+GetManagerUniqueName(ODBus::Connection &connection)
+{
+	using namespace ODBus;
+
+	auto msg = Message::NewMethodCall(DBUS_SERVICE_DBUS,
+					  DBUS_PATH_DBUS,
+					  DBUS_INTERFACE_DBUS,
+					  "GetNameOwner");
+
+	AppendMessageIter{*msg.Get()}.Append(manager_service);
+
+	auto pending = PendingCall::SendWithReply(connection, msg.Get());
+
+	dbus_connection_flush(connection);
+
+	pending.Block();
+
+	Message reply = Message::StealReply(*pending.Get());
+	reply.CheckThrowError();
+
+	Error error;
+	const char *unique_name;
+	if (!reply.GetArgs(error, DBUS_TYPE_STRING, &unique_name))
+		error.Throw("GetNameOwner reply failed");
+
+	return unique_name;
+}
+
 void
-WaitJobRemoved(ODBus::Connection &connection, const char *object_path)
+WaitJobRemoved(ODBus::Connection &connection, const char *sender,
+	       const char *object_path)
 {
 	using namespace ODBus;
 
@@ -33,7 +81,7 @@ WaitJobRemoved(ODBus::Connection &connection, const char *object_path)
 				break;
 		}
 
-		if (msg.IsSignal(manager_interface, "JobRemoved")) {
+		if (IsManagerSignal(msg, sender, "JobRemoved")) {
 			Error error;
 			dbus_uint32_t job_id;
 			const char *removed_object_path, *unit_name, *result_string;
@@ -51,8 +99,8 @@ WaitJobRemoved(ODBus::Connection &connection, const char *object_path)
 }
 
 bool
-WaitUnitRemoved(ODBus::Connection &connection, const char *name,
-		int timeout_ms) noexcept
+WaitUnitRemoved(ODBus::Connection &connection, const char *sender,
+		const char *name, int timeout_ms) noexcept
 {
 	using namespace ODBus;
 
@@ -72,7 +120,7 @@ WaitUnitRemoved(ODBus::Connection &connection, const char *name,
 				return false;
 		}
 
-		if (msg.IsSignal(manager_interface, "UnitRemoved")) {
+		if (IsManagerSignal(msg, sender, "UnitRemoved")) {
 			DBusError err;
 			dbus_error_init(&err);
 
@@ -306,7 +354,7 @@ IsUnitActive(ODBus::Connection &connection, const char *name)
 }
 
 void
-StartUnit(ODBus::Connection &connection,
+StartUnit(ODBus::Connection &connection, const char *sender,
 	     const char *name, const char *mode)
 {
 	using namespace ODBus;
@@ -332,11 +380,11 @@ StartUnit(ODBus::Connection &connection,
 	if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
 		error.Throw("StartUnit reply failed");
 
-	WaitJobRemoved(connection, object_path);
+	WaitJobRemoved(connection, sender, object_path);
 }
 
 void
-StopUnit(ODBus::Connection &connection,
+StopUnit(ODBus::Connection &connection, const char *sender,
 	    const char *name, const char *mode)
 {
 	using namespace ODBus;
@@ -362,7 +410,7 @@ StopUnit(ODBus::Connection &connection,
 	if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
 		error.Throw("StopUnit reply failed");
 
-	WaitJobRemoved(connection, object_path);
+	WaitJobRemoved(connection, sender, object_path);
 }
 
 void

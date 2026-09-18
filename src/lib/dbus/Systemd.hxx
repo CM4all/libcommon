@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace ODBus {
 class Connection;
 }
@@ -23,17 +25,36 @@ constexpr auto unit_removed_match = "type='signal',"
 	"path='/org/freedesktop/systemd1'";
 
 /**
+ * Ask the D-Bus daemon which unique name (e.g. ":1.0") currently owns
+ * the "org.freedesktop.systemd1" service.  This will used to verify
+ * whether a signal was really sent by systemd.
+ *
+ * Throws on error.
+ */
+std::string
+GetManagerUniqueName(ODBus::Connection &connection);
+
+/**
+ * Wait for the JobRemoved signal for the specified job object path.
+ *
+ * @param sender systemd's unique name (see GetManagerUniqueName());
+ * signals from other senders are ignored
+ *
  * Throws on error.
  */
 void
-WaitJobRemoved(ODBus::Connection &connection, const char *object_path);
+WaitJobRemoved(ODBus::Connection &connection, const char *sender,
+	       const char *object_path);
 
 /**
  * Wait for the UnitRemoved signal for the specified unit name.
+ *
+ * @param sender systemd's unique name (see GetManagerUniqueName());
+ * signals from other senders are ignored
  */
 bool
-WaitUnitRemoved(ODBus::Connection &connection, const char *name,
-		int timeout_ms) noexcept;
+WaitUnitRemoved(ODBus::Connection &connection, const char *sender,
+		const char *name, int timeout_ms) noexcept;
 
 enum class UnitFileState {
 	ENABLED,
@@ -79,19 +100,23 @@ IsUnitActive(ODBus::Connection &connection, const char *name);
 /**
  * Note: the caller must establish a match on "JobRemoved".
  *
+ * @param sender systemd's unique name (see GetManagerUniqueName())
+ *
  * Throws on error.
  */
 void
-StartUnit(ODBus::Connection &connection,
+StartUnit(ODBus::Connection &connection, const char *sender,
 	  const char *name, const char *mode="replace");
 
 /**
  * Note: the caller must establish a match on "JobRemoved".
  *
+ * @param sender systemd's unique name (see GetManagerUniqueName())
+ *
  * Throws on error.
  */
 void
-StopUnit(ODBus::Connection &connection,
+StopUnit(ODBus::Connection &connection, const char *sender,
 	 const char *name, const char *mode="replace");
 
 /**

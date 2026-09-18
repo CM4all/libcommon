@@ -44,6 +44,8 @@ CreateSystemdScope(const char *name, const char *description,
 	/* the match for WaitUnitRemoved() */
 	const ScopeMatch unit_removed_scope_match{connection, Systemd::unit_removed_match};
 
+	const auto systemd_sender = Systemd::GetManagerUniqueName(connection);
+
 	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
 					  "/org/freedesktop/systemd1",
 					  "org.freedesktop.systemd1.Manager",
@@ -124,7 +126,9 @@ CreateSystemdScope(const char *name, const char *description,
 				   name, std::current_exception());
 		}
 
-		if (!Systemd::WaitUnitRemoved(connection, name, 2000)) {
+		if (!Systemd::WaitUnitRemoved(connection,
+					      systemd_sender.c_str(),
+					      name, 2000)) {
 			/* if the old scope is still alive, stop it
 			   forcefully; this works around a known
 			   problem with LXC and systemd's cgroups1
@@ -137,8 +141,12 @@ CreateSystemdScope(const char *name, const char *description,
 			fmt::print(stderr, "Old unit {:?} didn't disappear; attempting to stop it\n",
 				   name);
 			try {
-				Systemd::StopUnit(connection, name);
-				Systemd::WaitUnitRemoved(connection, name, -1);
+				Systemd::StopUnit(connection,
+						  systemd_sender.c_str(),
+						  name);
+				Systemd::WaitUnitRemoved(connection,
+							 systemd_sender.c_str(),
+							 name, -1);
 			} catch (...) {
 				fmt::print(stderr, "Failed to stop unit {:?}: {}\n",
 					   name, std::current_exception());
@@ -159,7 +167,8 @@ CreateSystemdScope(const char *name, const char *description,
 	if (!reply.GetArgs(error, DBUS_TYPE_OBJECT_PATH, &object_path))
 		error.Throw("StartTransientUnit reply failed");
 
-	Systemd::WaitJobRemoved(connection, object_path);
+	Systemd::WaitJobRemoved(connection, systemd_sender.c_str(),
+				object_path);
 
 	return delegate
 		? CgroupState::FromProcess(local_pid)
