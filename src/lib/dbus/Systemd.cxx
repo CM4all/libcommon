@@ -15,6 +15,10 @@
 
 namespace Systemd {
 
+static constexpr const char *manager_service = "org.freedesktop.systemd1";
+static constexpr const char *manager_path = "/org/freedesktop/systemd1";
+static constexpr const char *manager_interface = "org.freedesktop.systemd1.Manager";
+
 void
 WaitJobRemoved(ODBus::Connection &connection, const char *object_path)
 {
@@ -29,7 +33,7 @@ WaitJobRemoved(ODBus::Connection &connection, const char *object_path)
 				break;
 		}
 
-		if (msg.IsSignal("org.freedesktop.systemd1.Manager", "JobRemoved")) {
+		if (msg.IsSignal(manager_interface, "JobRemoved")) {
 			Error error;
 			dbus_uint32_t job_id;
 			const char *removed_object_path, *unit_name, *result_string;
@@ -68,7 +72,7 @@ WaitUnitRemoved(ODBus::Connection &connection, const char *name,
 				return false;
 		}
 
-		if (msg.IsSignal("org.freedesktop.systemd1.Manager", "UnitRemoved")) {
+		if (msg.IsSignal(manager_interface, "UnitRemoved")) {
 			DBusError err;
 			dbus_error_init(&err);
 
@@ -114,9 +118,9 @@ GetUnitFileState(ODBus::Connection &connection, const char *name)
 {
 	using namespace ODBus;
 
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-					  "/org/freedesktop/systemd1",
-					  "org.freedesktop.systemd1.Manager",
+	auto msg = Message::NewMethodCall(manager_service,
+					  manager_path,
+					  manager_interface,
 					  "GetUnitFileState");
 
 	AppendMessageIter{*msg.Get()}.Append(name);
@@ -157,9 +161,9 @@ EnableUnitFile(ODBus::Connection &connection, const char *name,
 {
 	using namespace ODBus;
 
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-					  "/org/freedesktop/systemd1",
-					  "org.freedesktop.systemd1.Manager",
+	auto msg = Message::NewMethodCall(manager_service,
+					  manager_path,
+					  manager_interface,
 					  "EnableUnitFiles");
 
 	AppendMessageIter args{*msg.Get()};
@@ -185,9 +189,9 @@ DisableUnitFile(ODBus::Connection &connection, const char *name,
 {
 	using namespace ODBus;
 
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-					  "/org/freedesktop/systemd1",
-					  "org.freedesktop.systemd1.Manager",
+	auto msg = Message::NewMethodCall(manager_service,
+					  manager_path,
+					  manager_interface,
 					  "DisableUnitFiles");
 
 	AppendMessageIter args{*msg.Get()};
@@ -231,9 +235,9 @@ GetUnit(ODBus::Connection &connection, const char *name)
 {
 	using namespace ODBus;
 
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-					  "/org/freedesktop/systemd1",
-					  "org.freedesktop.systemd1.Manager",
+	auto msg = Message::NewMethodCall(manager_service,
+					  manager_path,
+					  manager_interface,
 					  "GetUnit");
 
 	AppendMessageIter{*msg.Get()}.Append(name);
@@ -267,7 +271,7 @@ GetUnitActiveState(ODBus::Connection &connection, const char *name)
 	if (path.empty())
 		return ActiveState::INACTIVE;
 
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
+	auto msg = Message::NewMethodCall(manager_service,
 					  path.c_str(),
 					  "org.freedesktop.DBus.Properties",
 					  "Get");
@@ -307,9 +311,9 @@ StartUnit(ODBus::Connection &connection,
 {
 	using namespace ODBus;
 
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-					  "/org/freedesktop/systemd1",
-					  "org.freedesktop.systemd1.Manager",
+	auto msg = Message::NewMethodCall(manager_service,
+					  manager_path,
+					  manager_interface,
 					  "StartUnit");
 
 	AppendMessageIter{*msg.Get()}.Append(name).Append(mode);
@@ -337,9 +341,9 @@ StopUnit(ODBus::Connection &connection,
 {
 	using namespace ODBus;
 
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-					  "/org/freedesktop/systemd1",
-					  "org.freedesktop.systemd1.Manager",
+	auto msg = Message::NewMethodCall(manager_service,
+					  manager_path,
+					  manager_interface,
 					  "StopUnit");
 
 	AppendMessageIter{*msg.Get()}.Append(name).Append(mode);
@@ -366,9 +370,9 @@ ResetFailedUnit(ODBus::Connection &connection, const char *name)
 {
 	using namespace ODBus;
 
-	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
-					  "/org/freedesktop/systemd1",
-					  "org.freedesktop.systemd1.Manager",
+	auto msg = Message::NewMethodCall(manager_service,
+					  manager_path,
+					  manager_interface,
 					  "ResetFailedUnit");
 
 	AppendMessageIter{*msg.Get()}.Append(name);
