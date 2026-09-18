@@ -168,10 +168,10 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 
 		payload = payload.subspan(sizeof(rh));
 
-		if (payload.size() < rh.size)
-			throw SocketProtocolError{"Response datagram too small"};
-
 		const std::size_t padded_size = RoundUpToPowerOfTwo(rh.size, PADDING);
+
+		if (payload.size() < padded_size)
+			throw SocketProtocolError{"Response datagram too small"};
 
 		switch (rh.command) {
 		case ResponseCommand::ERROR:
