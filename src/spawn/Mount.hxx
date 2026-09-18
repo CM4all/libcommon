@@ -166,7 +166,7 @@ private:
 	void ApplyTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const;
 	void ApplyNamedTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const;
 	void ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const;
-	void ApplySymlink(VfsBuilder &vfs_builder, FileDescriptor root_fd) const;
+	void ApplySymlink(VfsBuilder &vfs_builder) const;
 
 public:
 	/**

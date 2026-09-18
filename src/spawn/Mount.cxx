@@ -33,15 +33,14 @@
 
 using std::string_view_literals::operator""sv;
 
-[[gnu::pure]]
-static std::string_view
-DirName(const char *path) noexcept
+static std::pair<std::string_view, const char *>
+SplitPath(const char *path) noexcept
 {
 	const char *slash = strrchr(path, '/');
 	if (slash == nullptr)
-		return {};
+		return {{}, path};
 
-	return {path, slash};
+	return {{path, slash}, slash + 1};
 }
 
 inline
@@ -200,10 +199,11 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 	} else {
 		/* target does not exist: first ensure that its parent
 		   directory exists, then create an empty target */
-		vfs_builder.MakeDirectory(DirName(target));
+		const auto [target_directory, target_filename] = SplitPath(target);
+		const auto target_directory_fd = vfs_builder.MakeDirectory(target_directory);
 
 		UniqueFileDescriptor fd;
-		if (!fd.Open({root_fd, target + 1}, O_CREAT|O_EXCL|O_WRONLY, 0666))
+		if (!fd.Open({target_directory_fd, target_filename}, O_CREAT|O_EXCL|O_WRONLY, 0666))
 			throw FmtErrno("Failed to create {:?}"sv, target);
 	}
 
@@ -327,10 +327,11 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 
 	const auto contents = AsBytes(std::string_view{source});
 
-	if (const auto dir = DirName(target);
-	    vfs_builder.MakeOptionalDirectory(dir).IsDefined()) {
+	const auto [target_directory, target_filename] = SplitPath(target);
+	if (const auto target_directory_fd = vfs_builder.MakeOptionalDirectory(target_directory);
+	    target_directory_fd.IsDefined()) {
 		/* inside a tmpfs: create the file here */
-		auto fd = OpenWriteOnly({root_fd, target + 1}, O_CREAT|O_TRUNC);
+		auto fd = OpenWriteOnly({target_directory_fd, target_filename}, O_CREAT|O_TRUNC);
 
 		if (fd.Write(contents) < 0)
 			throw MakeErrno("Failed to write");
@@ -352,15 +353,16 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 }
 
 inline void
-Mount::ApplySymlink(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
+Mount::ApplySymlink(VfsBuilder &vfs_builder) const
 {
 	assert(type == Type::SYMLINK);
 	assert(source != nullptr);
 	assert(target != nullptr);
 
-	vfs_builder.MakeDirectory(DirName(target));
+	const auto [target_directory, target_filename] = SplitPath(target);
+	const auto target_directory_fd = vfs_builder.MakeDirectory(target_directory);
 
-	if (symlinkat(source, root_fd.Get(), target + 1) < 0)
+	if (symlinkat(source, target_directory_fd.Get(), target_filename) < 0)
 		throw FmtErrno("Failed to create symlink {:?}", target);
 }
 
@@ -389,7 +391,7 @@ Mount::Apply(VfsBuilder &vfs_builder, FileDescriptor root_fd, FileDescriptor old
 		break;
 
 	case Type::SYMLINK:
-		ApplySymlink(vfs_builder, root_fd);
+		ApplySymlink(vfs_builder);
 		break;
 	}
 }
