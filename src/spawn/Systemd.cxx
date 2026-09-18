@@ -30,11 +30,13 @@ CreateSystemdScope(const char *name, const char *description,
 	if (!sd_booted())
 		return CgroupState();
 
-	ODBus::Error error;
+	using namespace ODBus;
+
+	Error error;
 
 	/* use a private DBus connection and auto-close it, because
 	   the spawner will never again need it */
-	auto connection = ODBus::Connection::GetSystemPrivate();
+	auto connection = Connection::GetSystemPrivate();
 	AtScopeExit(&connection) { connection.Close(); };
 
 	const char *match = "type='signal',"
@@ -42,7 +44,7 @@ CreateSystemdScope(const char *name, const char *description,
 		"interface='org.freedesktop.systemd1.Manager',"
 		"member='JobRemoved',"
 		"path='/org/freedesktop/systemd1'";
-	const ODBus::ScopeMatch scope_match(connection, match);
+	const ScopeMatch scope_match(connection, match);
 
 	/* the match for WaitUnitRemoved() */
 	const char *unit_removed_match = "type='signal',"
@@ -50,10 +52,8 @@ CreateSystemdScope(const char *name, const char *description,
 		"interface='org.freedesktop.systemd1.Manager',"
 		"member='UnitRemoved',"
 		"path='/org/freedesktop/systemd1'";
-	const ODBus::ScopeMatch unit_removed_scope_match(connection,
-							 unit_removed_match);
-
-	using namespace ODBus;
+	const ScopeMatch unit_removed_scope_match(connection,
+						  unit_removed_match);
 
 	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
 					  "/org/freedesktop/systemd1",
