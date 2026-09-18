@@ -65,7 +65,8 @@ CgroupOptions::Create2(const CgroupState &state, const char *session) const
 	if (!state.IsEnabled())
 		throw std::runtime_error("Control groups are disabled");
 
-	auto fd = MakeDirectory({state.group_fd, name});
+	auto fd = MakeDirectory({state.group_fd, name},
+				{.follow_symlinks = false});
 
 	if (!xattr.empty()) {
 		/* reopen the directory because fsetxattr() refuses to
