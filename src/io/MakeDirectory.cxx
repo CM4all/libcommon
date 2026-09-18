@@ -29,16 +29,16 @@ static UniqueFileDescriptor
 OpenDirectory(FileAt file,
 	      const MakeDirectoryOptions options)
 {
-	struct open_how how{
+	static constexpr struct open_how how_follow{
 		.flags = O_DIRECTORY|O_PATH|O_RDONLY|O_CLOEXEC,
 	};
 
-	if (!options.follow_symlinks) {
-		how.flags |= O_NOFOLLOW;
-		how.resolve |= RESOLVE_NO_SYMLINKS;
-	}
+	static constexpr struct open_how how_nofollow{
+		.flags = O_DIRECTORY|O_PATH|O_RDONLY|O_CLOEXEC|O_NOFOLLOW,
+		.resolve = RESOLVE_NO_SYMLINKS,
+	};
 
-	return Open(file, how);
+	return Open(file, options.follow_symlinks ? how_follow : how_nofollow);
 }
 
 UniqueFileDescriptor
