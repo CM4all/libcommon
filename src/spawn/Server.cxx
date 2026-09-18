@@ -29,6 +29,7 @@
 #include "net/ReceiveMessage.hxx"
 #include "net/SocketError.hxx"
 #include "io/FileAt.hxx"
+#include "io/FileName.hxx" // for IsSpecialFilename()
 #include "io/MakeDirectory.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
@@ -39,6 +40,7 @@
 #include "util/IntrusiveList.hxx"
 #include "util/Exception.hxx"
 #include "util/SharedLease.hxx"
+#include "util/StringCompare.hxx" // for StringIsEmpty()
 
 #ifdef HAVE_LIBCAP
 #include "lib/cap/Glue.hxx"
@@ -577,6 +579,22 @@ Read(Payload &payload, UidGid &uid_gid)
 		uid_gid.supplementary_groups[n_groups] = UidGid::UNSET_GID;
 }
 
+[[gnu::pure]]
+static bool
+IsSafePathSegment(const char *s) noexcept
+{
+	return !StringIsEmpty(s) && !IsSpecialFilename(s) && strchr(s, '/') == 0;
+}
+
+static const char *
+ReadSafePathSegment(Payload &payload)
+{
+	const char *s = payload.ReadString();
+	if (!IsSafePathSegment(s))
+		throw MalformedPayloadError{};
+	return s;
+}
+
 inline void
 SpawnServerConnection::HandleExecMessage(Payload payload,
 					 SpawnFdList &&fds)
@@ -927,7 +945,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			if (p.cgroup != nullptr)
 				throw MalformedPayloadError();
 
-			cgroup.name = payload.ReadString();
+			cgroup.name = ReadSafePathSegment(payload);
 			p.cgroup = &cgroup;
 			break;
 
@@ -935,12 +953,12 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			if (p.cgroup == nullptr)
 				throw MalformedPayloadError();
 
-			p.cgroup_session = payload.ReadString();
+			p.cgroup_session = ReadSafePathSegment(payload);
 			break;
 
 		case ExecCommand::CGROUP_SET:
 			if (p.cgroup != nullptr) {
-				const char *set_name = payload.ReadString();
+				const char *set_name = ReadSafePathSegment(payload);
 				const char *set_value = payload.ReadString();
 
 				assignments.emplace_front(set_name, set_value);
