@@ -96,7 +96,7 @@ MakeDirs(FileDescriptor fd, std::string_view suffix, mode_t mode)
 			continue;
 
 		if (!name2.empty())
-			fd = ufd = OpenDirectoryPath({fd, name2.c_str()});
+			fd = ufd = OpenDirectoryPath({fd, name2.c_str()}, O_NOFOLLOW);
 
 		name2 = name;
 
@@ -140,7 +140,7 @@ VfsBuilder::MakeWritable(FileDescriptor root_fd)
 	auto &item = items.back();
 	assert(!item.fd.IsDefined());
 
-	item.fd = OpenDirectoryPath({root_fd, item.path.c_str() + 1});
+	item.fd = OpenDirectoryPath({root_fd, item.path.c_str() + 1}, O_NOFOLLOW);
 }
 
 void
