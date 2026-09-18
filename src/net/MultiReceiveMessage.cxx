@@ -35,7 +35,7 @@ MultiReceiveMessage::MultiReceiveMessage(size_t _allocated_datagrams,
 		if (max_cmsg_size > 0)
 			cmsg = {(const std::byte *)GetCmsg(i), max_cmsg_size};
 
-		m[i].msg_hdr = MakeMsgHdr(*a, {v + i, 1}, cmsg);
+		m[i].msg_hdr = MakeMsgHdr(a[i], {v + i, 1}, cmsg);
 	}
 }
 
