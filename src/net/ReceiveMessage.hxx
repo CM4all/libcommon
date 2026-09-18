@@ -57,9 +57,6 @@ ReceiveMessage(SocketDescriptor s,
 	if (nbytes < 0)
 		throw MakeSocketError("recvmsg() failed");
 
-	if (nbytes == 0)
-		return {};
-
 	ReceiveMessageResult result;
 	result.address = {buffer.address, msg.msg_namelen};
 	result.payload = {buffer.payload, size_t(nbytes)};
