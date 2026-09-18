@@ -41,7 +41,7 @@ DirName(const char *path) noexcept
 	if (slash == nullptr)
 		return {};
 
-	return {path, std::size_t(slash - path)};
+	return {path, slash};
 }
 
 inline
