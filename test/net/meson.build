@@ -21,6 +21,7 @@ test(
     'TestFormatAddress.cxx',
     'TestMaskedInetAddress.cxx',
     'TestEasyMessage.cxx',
+    'TestReceiveMessage.cxx',
     test_net_sources,
     include_directories: inc,
     dependencies: [gtest, net_dep] + test_net_dependencies,
