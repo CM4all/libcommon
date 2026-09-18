@@ -510,7 +510,7 @@ SpawnChildProcess(EventLoop &event_loop,
 			.lease_pipe = true,
 		};
 
-		char uid_map_buffer[256], gid_map_buffer[256];
+		char uid_map_buffer[1024], gid_map_buffer[1024];
 		if (params.ns.user.create) {
 			request.uid_map = {uid_map_buffer, params.ns.user.FormatUidMap(uid_map_buffer, params.uid_gid)};
 			request.gid_map = {gid_map_buffer, params.ns.user.FormatGidMap(gid_map_buffer, params.uid_gid)};
