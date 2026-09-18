@@ -82,6 +82,10 @@ Stock::CancelWaiting(Waiting &w) noexcept
 	waiting.erase(waiting.iterator_to(w));
 	WaitingEnded(w);
 	w.Destroy();
+
+	/* this may have been the last thing that kept this stock
+	   alive */
+	CheckEmpty();
 }
 
 void

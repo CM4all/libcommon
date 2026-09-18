@@ -202,12 +202,13 @@ protected:
 	 */
 	virtual void OnEmpty() noexcept {}
 
-private:
+protected:
 	/**
 	 * Check if the stock has become empty, and invoke the handler.
 	 */
 	void CheckEmpty() noexcept;
 
+private:
 	void ScheduleClear() noexcept {
 		if (clear_interval > Event::Duration::zero())
 			clear_event.Schedule(clear_interval);

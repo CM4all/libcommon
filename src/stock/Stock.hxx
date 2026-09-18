@@ -76,6 +76,19 @@ public:
 		return limit > 0 && GetActiveCount() >= limit;
 	}
 
+	/**
+	 * A #Stock with queued callers is not empty: destroying it
+	 * would leave #Waiting objects behind which refer to it.
+	 *
+	 * Note that BasicStock::IsEmpty() is not virtual, and thus
+	 * this does not override it.  This is fine, and "virtual"
+	 * would only add overhead.
+	 */
+	[[gnu::pure]]
+	bool IsEmpty() const noexcept {
+		return BasicStock::IsEmpty() && waiting.empty();
+	}
+
 	void AddStats(StockStats &data) const noexcept {
 		BasicStock::AddStats(data);
 		data.waiting += waiting.size();
