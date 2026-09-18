@@ -52,12 +52,18 @@ public:
 
 	void Start();
 
-	bool MoveBuffer() noexcept {
-		if (buffer.empty())
-			return false;
+	bool IsBufferEmpty() const noexcept {
+		return buffer.empty();
+	}
 
-		parent.input.MoveFromAllowBothNull(buffer);
-		return true;
+	/**
+	 * Move data to the parent's input buffer.
+	 *
+	 * @return true if anything was moved; false if this buffer was
+	 * empty or the destination was full
+	 */
+	bool MoveBuffer() noexcept {
+		return parent.input.MoveFromAllowBothNull(buffer) > 0;
 	}
 
 private:
@@ -567,7 +573,14 @@ BufferedSocket::TryRead2() noexcept
 				assert(IsConnected());
 
 				if (!uring_receive->MoveBuffer()) {
-					if (IsConnected())
+					/* no progress: either our
+					   buffer is empty (then
+					   submit the next receive) or
+					   "input" is full and the
+					   handler has consumed
+					   nothing (then stop) */
+					if (IsConnected() &&
+					    uring_receive->IsBufferEmpty())
 						uring_receive->Start();
 					return result;
 				}
