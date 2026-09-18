@@ -113,6 +113,25 @@ class MultiStock {
 		bool CanUse() const noexcept;
 		bool ShouldDelete() const noexcept;
 
+		/**
+		 * Is there an idle item which can be borrowed right
+		 * now (i.e. one that is not "unclean")?
+		 */
+		[[gnu::pure]]
+		bool HasCleanIdle() const noexcept;
+
+		/**
+		 * Will a GetLease() call succeed right now?  Unlike
+		 * CanUse(), this is false for an item at its
+		 * concurrency limit whose only idle items are
+		 * "unclean" - such an item looks usable but cannot
+		 * actually grant a lease.
+		 */
+		[[gnu::pure]]
+		bool CanGrantLease() const noexcept {
+			return !IsFading() && (CanCreateLease() || HasCleanIdle());
+		}
+
 		const StockCounters &GetCounters() const noexcept {
 			return counters;
 		}

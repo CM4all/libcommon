@@ -13,6 +13,7 @@
 #include "util/DeleteDisposer.hxx"
 #include "util/SpanCast.hxx"
 
+#include <algorithm> // for std::any_of()
 #include <cassert>
 
 StockOptions
@@ -46,6 +47,14 @@ inline bool
 MultiStock::OuterItem::CanUse() const noexcept
 {
 	return !shared_item.IsFading() && !IsFull();
+}
+
+bool
+MultiStock::OuterItem::HasCleanIdle() const noexcept
+{
+       return std::any_of(idle.begin(), idle.end(), [](const auto &item){
+	       return !item.unclean;
+       });
 }
 
 inline bool
@@ -361,7 +370,7 @@ MultiStock::OuterItem *
 MultiStock::MapItem::FindUsable() noexcept
 {
 	for (auto i = items.begin(), end = items.end(); i != end;) {
-		if (i->CanUse())
+		if (i->CanGrantLease())
 			return &*i;
 
 		if (i->IsFading() && !i->IsBusy())
