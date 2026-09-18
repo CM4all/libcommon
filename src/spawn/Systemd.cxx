@@ -39,21 +39,10 @@ CreateSystemdScope(const char *name, const char *description,
 	auto connection = Connection::GetSystemPrivate();
 	AtScopeExit(&connection) { connection.Close(); };
 
-	const char *match = "type='signal',"
-		"sender='org.freedesktop.systemd1',"
-		"interface='org.freedesktop.systemd1.Manager',"
-		"member='JobRemoved',"
-		"path='/org/freedesktop/systemd1'";
-	const ScopeMatch scope_match(connection, match);
+	const ScopeMatch scope_match{connection, Systemd::job_removed_match};
 
 	/* the match for WaitUnitRemoved() */
-	const char *unit_removed_match = "type='signal',"
-		"sender='org.freedesktop.systemd1',"
-		"interface='org.freedesktop.systemd1.Manager',"
-		"member='UnitRemoved',"
-		"path='/org/freedesktop/systemd1'";
-	const ScopeMatch unit_removed_scope_match(connection,
-						  unit_removed_match);
+	const ScopeMatch unit_removed_scope_match{connection, Systemd::unit_removed_match};
 
 	auto msg = Message::NewMethodCall("org.freedesktop.systemd1",
 					  "/org/freedesktop/systemd1",
