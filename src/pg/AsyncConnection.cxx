@@ -27,7 +27,17 @@ AsyncConnection::Error() noexcept
 	       state == State::RECONNECTING ||
 	       state == State::READY);
 
-	socket_event.Abandon();
+	if (socket_event.IsDefined()) {
+		if (GetSocket() < 0)
+			/* libpq has already closed the socket, and
+			   the epoll registration was implicitly
+			   dropped by the kernel */
+			socket_event.Abandon();
+		else
+			/* libpq still has a socket, so unregister it
+			   explicitly */
+			socket_event.ReleaseSocket();
+	}
 
 	const bool was_connected = state == State::READY;
 	state = State::DISCONNECTED;
