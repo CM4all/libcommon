@@ -203,7 +203,7 @@ Mount::ApplyBindMountFile(VfsBuilder &vfs_builder, FileDescriptor root_fd,
 		const auto target_directory_fd = vfs_builder.MakeDirectory(target_directory);
 
 		UniqueFileDescriptor fd;
-		if (!fd.Open({target_directory_fd, target_filename}, O_CREAT|O_EXCL|O_WRONLY, 0666))
+		if (!fd.Open({target_directory_fd, target_filename}, O_CREAT|O_EXCL|O_WRONLY|O_NOFOLLOW, 0666))
 			throw FmtErrno("Failed to create {:?}"sv, target);
 	}
 
@@ -290,7 +290,7 @@ WriteToTempFile(FileDescriptor root_fd, std::span<const std::byte> contents)
 		sprintf(buffer, "tmp/%lx", n);
 
 		UniqueFileDescriptor fd;
-		if (fd.Open({root_fd, buffer}, O_CREAT|O_EXCL|O_WRONLY, 0644)) {
+		if (fd.Open({root_fd, buffer}, O_CREAT|O_EXCL|O_WRONLY|O_NOFOLLOW, 0644)) {
 			if (fd.Write(contents) < 0)
 				throw MakeErrno("Failed to write");
 
@@ -331,7 +331,7 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 	if (const auto target_directory_fd = vfs_builder.MakeOptionalDirectory(target_directory);
 	    target_directory_fd.IsDefined()) {
 		/* inside a tmpfs: create the file here */
-		auto fd = OpenWriteOnly({target_directory_fd, target_filename}, O_CREAT|O_TRUNC);
+		auto fd = OpenWriteOnly({target_directory_fd, target_filename}, O_CREAT|O_TRUNC|O_NOFOLLOW);
 
 		if (fd.Write(contents) < 0)
 			throw MakeErrno("Failed to write");
