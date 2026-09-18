@@ -94,7 +94,8 @@ UserNamespaceOptions::FormatGidMap(char *p, const UidGid &uid_gid) const noexcep
 		gids.emplace(uid_gid.effective_gid);
 	if (uid_gid.real_gid != UidGid::UNSET_GID)
 		gids.emplace(uid_gid.real_gid);
-	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
+	for (unsigned i = 0; i < uid_gid.supplementary_groups.size() &&
+		     uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
 		gids.emplace(uid_gid.supplementary_groups[i]);
 
 	return FormatIdMap(p, gids);
@@ -113,7 +114,8 @@ UserNamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned _pid) const
 		gids.emplace(uid_gid.effective_gid);
 	if (uid_gid.real_gid != UidGid::UNSET_GID)
 		gids.emplace(uid_gid.real_gid);
-	for (unsigned i = 0; uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
+	for (unsigned i = 0; i < uid_gid.supplementary_groups.size() &&
+		     uid_gid.supplementary_groups[i] != UidGid::UNSET_GID; ++i)
 		gids.emplace(uid_gid.supplementary_groups[i]);
 
 	const auto proc_pid = OpenProcPid(_pid);
