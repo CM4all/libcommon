@@ -84,32 +84,33 @@ VfsBuilder::FindWritable(std::string_view path) const noexcept
 	return {nullptr, std::string_view{}};
 }
 
-static void
+static UniqueFileDescriptor
 MakeDirs(FileDescriptor fd, std::string_view suffix, mode_t mode)
 {
 	UniqueFileDescriptor ufd;
-
-	std::string name2;
 
 	for (const auto name : IterableSplitString(suffix, '/')) {
 		if (name.empty())
 			continue;
 
-		if (!name2.empty())
-			fd = ufd = OpenDirectoryPath({fd, name2.c_str()}, O_NOFOLLOW);
-
-		name2 = name;
+		/* null-terminated copy */
+		const std::string name2{name};
 
 		if (mkdirat(fd.Get(), name2.c_str(), mode) < 0) {
 			const int e = errno;
-			if (e == EEXIST)
-				continue;
-
-			throw FmtErrno(e,
-				       "Failed to create mount point {:?}",
-				       suffix);
+			if (e != EEXIST)
+				throw FmtErrno(e,
+					       "Failed to create mount point {:?}",
+					       suffix);
 		}
+
+		fd = ufd = OpenDirectoryPath({fd, name2.c_str()}, O_NOFOLLOW);
 	}
+
+	if (!ufd.IsDefined())
+		ufd = OpenDirectoryPath({fd, "."});
+
+	return ufd;
 }
 
 void
@@ -159,24 +160,26 @@ VfsBuilder::ScheduleRemount(uint_least64_t attr_set,
 	item.attr_clr = attr_clr;
 }
 
-bool
+UniqueFileDescriptor
 VfsBuilder::MakeOptionalDirectory(std::string_view path)
 {
 	assert(path.empty() || path.front() == '/');
 
 	const auto fw = FindWritable(path);
 	if (fw.item == nullptr)
-		return false;
+		return {};
 
-	MakeDirs(fw.item->fd, fw.suffix, dir_mode);
-	return true;
+	return MakeDirs(fw.item->fd, fw.suffix, dir_mode);
 }
 
-void
+UniqueFileDescriptor
 VfsBuilder::MakeDirectory(std::string_view path)
 {
-	if (!MakeOptionalDirectory(path))
+	auto fd = MakeOptionalDirectory(path);
+	if (!fd.IsDefined())
 		throw FmtRuntimeError("Not writable: {:?}", path);
+
+	return fd;
 }
 
 void

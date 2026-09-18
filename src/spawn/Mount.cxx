@@ -328,7 +328,7 @@ Mount::ApplyWriteFile(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 	const auto contents = AsBytes(std::string_view{source});
 
 	if (const auto dir = DirName(target);
-	    vfs_builder.MakeOptionalDirectory(dir)) {
+	    vfs_builder.MakeOptionalDirectory(dir).IsDefined()) {
 		/* inside a tmpfs: create the file here */
 		auto fd = OpenWriteOnly({root_fd, target + 1}, O_CREAT|O_TRUNC);
 

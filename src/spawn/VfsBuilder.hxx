@@ -9,6 +9,7 @@
 #include <vector>
 
 class FileDescriptor;
+class UniqueFileDescriptor;
 
 /**
  * This class helps with building a new VFS (virtual file system).  It
@@ -60,16 +61,19 @@ public:
 
 	/**
 	 * Make sure the specified directory exists inside a writable
-	 * mount.  Throws if that fails.  Returns false if the mount
-	 * point above the given path is not writable.
+	 * mount.  Throws if that fails.
+	 *
+	 * @return an O_PATH file descriptor to the directory on
+	 * success, or an undefined instance if the mount point above
+	 * the given path is not writable.
 	 */
-	bool MakeOptionalDirectory(std::string_view path);
+	UniqueFileDescriptor MakeOptionalDirectory(std::string_view path);
 
 	/**
 	 * Make sure the specified directory exists inside a writable
 	 * mount.  Throws if that fails.
 	 */
-	void MakeDirectory(std::string_view path);
+	UniqueFileDescriptor MakeDirectory(std::string_view path);
 
 	void Finish();
 
