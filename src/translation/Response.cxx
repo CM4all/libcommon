@@ -663,8 +663,25 @@ TranslateResponse::CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
 		if (uri != nullptr)
 			uri = alloc.Concat(uri, tail);
 
-		if (redirect != nullptr)
+		if (redirect != nullptr) {
+			/* was the stored target a path-absolute
+			   reference, i.e. one single leading slash? */
+			const bool was_path_absolute = redirect[0] == '/' &&
+				redirect[1] != '/';
+
 			redirect = alloc.Concat(redirect, tail);
+
+			if (was_path_absolute && redirect[1] == '/')
+				/* the request tail began with another
+				   slash (an empty path segment, which
+				   the URI verifiers allow), so the
+				   result would now start with "//" - a
+				   network-path reference, i.e. a
+				   redirect to a host of the client's
+				   choosing */
+				throw HttpMessageResponse(HttpStatus::BAD_REQUEST,
+							  "Malformed URI tail");
+		}
 
 		if (test_path != nullptr) {
 			char *unescaped = uri_unescape_dup(alloc, tail);
