@@ -6,6 +6,12 @@
 
 struct RecursiveCopyOptions {
 	/**
+	 * The maximum directory nesting depth (to avoid stack
+	 * overflows).
+	 */
+	unsigned max_depth = 64;
+
+	/**
 	 * Overwrite existing files?
 	 */
 	bool overwrite = true;

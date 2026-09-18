@@ -12,6 +12,7 @@
 #include "Open.hxx"
 #include "lib/fmt/RuntimeError.hxx"
 #include "lib/fmt/SystemError.hxx"
+#include "util/ScopeExit.hxx"
 
 #include <array>
 #include <cstddef>
@@ -36,6 +37,11 @@ RecursiveCopyOptionsToStatxMask(RecursiveCopyOptions options) noexcept
 
 struct RecursiveCopyContext {
 	uint_least64_t mnt_id{};
+
+	/**
+	 * The current directory nesting depth.
+	 */
+	unsigned depth = 0;
 
 	const int statx_mask;
 
@@ -143,6 +149,12 @@ static void
 RecursiveCopyDirectory(RecursiveCopyContext &ctx,
 		       DirectoryReader &&src, FileDescriptor dst)
 {
+	if (ctx.depth >= ctx.options.max_depth)
+		throw FmtRuntimeError("Directory hierarchy is too deep");
+
+	++ctx.depth;
+	AtScopeExit(&ctx) { --ctx.depth; };
+
 	while (auto *name = src.Read())
 		if (!IsSpecialFilename(name))
 			RecursiveCopy(ctx,
