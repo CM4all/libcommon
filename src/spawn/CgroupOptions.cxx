@@ -70,7 +70,7 @@ CgroupOptions::Create2(const CgroupState &state, const char *session) const
 
 	if (!xattr.empty()) {
 		/* reopen the directory because fsetxattr() refuses to
-		   work with an O_PATH fildescriptor */
+		   work with an O_PATH file descriptor */
 		auto d = OpenDirectory({fd, "."});
 
 		for (const auto &i : xattr)
