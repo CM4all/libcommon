@@ -8,6 +8,7 @@
 
 #include <mysql.h>
 
+#include <algorithm> // for std::min()
 #include <array>
 #include <cassert>
 #include <string_view>
@@ -104,6 +105,15 @@ struct MysqlResultBind {
 template<typename... Args>
 MysqlResultBind(Args&&... args) -> MysqlResultBind<sizeof...(Args)>;
 
+/**
+ * Note on truncation: if a column value is longer than the buffer,
+ * the connector copies buffer_length bytes but stores the full
+ * (untruncated) value length in *length, and mysql_stmt_fetch()
+ * returns MYSQL_DATA_TRUNCATED (which MysqlStatement::Fetch() reports
+ * as success).  The std::string_view conversion therefore clamps to
+ * the number of bytes that were actually copied; use IsTruncated() to
+ * find out whether that happened.
+ */
 template <std::size_t size>
 class MysqlStaticStringBuffer {
 	std::array<char, size> value;
@@ -118,12 +128,18 @@ public:
 		bind.length = &length;
 	}
 
+	constexpr bool IsTruncated() const noexcept {
+		return length > size;
+	}
+
 	constexpr operator std::string_view() const noexcept {
-		assert(length <= size);
-		return {value.data(), length};
+		return {value.data(), std::min<std::size_t>(length, size)};
 	}
 };
 
+/**
+ * @see MysqlStaticStringBuffer for the truncation semantics
+ */
 class MysqlDynamicStringBuffer {
 	AllocatedArray<char> buffer;
 	unsigned long length;
@@ -141,8 +157,12 @@ public:
 		bind.length = &length;
 	}
 
+	bool IsTruncated() const noexcept {
+		return length > buffer.size();
+	}
+
 	operator std::string_view() const noexcept {
-		assert(length <= buffer.size());
-		return {buffer.data(), length};
+		return {buffer.data(),
+			std::min<std::size_t>(length, buffer.size())};
 	}
 };

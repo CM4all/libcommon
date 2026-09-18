@@ -80,6 +80,15 @@ public:
 
 	void BindResult(const MYSQL_BIND *bind);
 
+	/**
+	 * Fetch the next row.
+	 *
+	 * Note that MYSQL_DATA_TRUNCATED is reported as success; to
+	 * see whether truncation has occurred, consult
+	 * MysqlStaticStringBuffer::IsTruncated()
+	 *
+	 * @return false if there are no more rows
+	 */
 	bool Fetch();
 
 	void FetchAll();
