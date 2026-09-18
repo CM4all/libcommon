@@ -218,3 +218,45 @@ TEST(All, FirstThrows)
 	ASSERT_EQ(j, 1);
 	ASSERT_EQ(k, 2);
 }
+
+static Co::EagerTask<void>
+EagerIncTask(int &i)
+{
+	++i;
+	co_return;
+}
+
+/**
+ * The first task completes synchronously inside All::await_suspend()
+ * while all remaining tasks are already ready.  This used to resume
+ * (and destroy) the awaiting coroutine - and with it the #All object -
+ * while await_suspend() was still iterating over its items.
+ */
+TEST(All, SyncCompletionThenReady)
+{
+	int i = 0, j = 0, k = 0;
+
+	/* this one is already done, so Item::ready is true right
+	   from the start */
+	auto task2 = EagerIncTask(j);
+	ASSERT_EQ(j, 1);
+
+	/* this one is lazy and completes synchronously when
+	   await_suspend() resumes it */
+	auto task1 = IncTask(i);
+
+	auto invoke = AwaitAll(k, task1, task2);
+	ASSERT_TRUE(invoke);
+	ASSERT_EQ(i, 0);
+	ASSERT_EQ(k, 0);
+
+	Completion c;
+	c.Start(invoke);
+
+	ASSERT_FALSE(invoke);
+	ASSERT_TRUE(c.done);
+	ASSERT_FALSE(c.error);
+	ASSERT_EQ(i, 1);
+	ASSERT_EQ(j, 1);
+	ASSERT_EQ(k, 2);
+}

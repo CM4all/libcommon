@@ -183,16 +183,29 @@ public:
 		}, awaitables);
 	}
 
-	void await_suspend(std::coroutine_handle<> _continuation) noexcept {
+	[[nodiscard]]
+	std::coroutine_handle<> await_suspend(std::coroutine_handle<> _continuation) noexcept {
 		/* at least one task is not yet ready - call
 		   await_suspend() on not-yet-ready tasks to install
 		   the completion callback */
 
-		continuation = _continuation;
+		/* while the loop below runs, OnReady() must not
+		   resume the caller, because that would destroy this
+		   object while the loop is still iterating over it;
+		   let it return a no-op coroutine instead */
+		continuation = std::noop_coroutine();
 
 		std::apply([&](auto &...i){
 			(i.await_suspend(), ...);
 		}, awaitables);
+
+		if (await_ready())
+			/* all tasks has completed inside the loop
+			   above: resume the caller now */
+			return _continuation;
+
+		continuation = _continuation;
+		return std::noop_coroutine();
 	}
 
 	void await_resume() noexcept {
