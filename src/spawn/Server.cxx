@@ -556,6 +556,9 @@ static void
 Read(Payload &payload, ResourceLimits &rlimits)
 {
 	unsigned i = (unsigned)payload.ReadByte();
+	if (i >= rlimits.values.size())
+		throw MalformedPayloadError{};
+
 	struct rlimit &data = rlimits.values[i];
 	payload.ReadT(data);
 }
