@@ -39,6 +39,10 @@ public:
 		address.Clear();
 	}
 
+	~Object() noexcept {
+		CancelResolve();
+	}
+
 	Object(const Object &) = delete;
 	Object &operator=(const Object &) = delete;
 
@@ -290,6 +294,10 @@ ServiceExplorer::ServiceBrowserCallback(AvahiServiceBrowser *b,
 				listener.OnAvahiRemoveObject(i->first.c_str());
 
 			objects.erase(i);
+
+			/* the erased object may have had a pending
+			   resolver */
+			CheckAllForNow();
 		}
 	} else if (event == AVAHI_BROWSER_ALL_FOR_NOW) {
 		if (n_resolvers == 0) {
