@@ -6,6 +6,7 @@
 #include "lib/fmt/RuntimeError.hxx"
 #include "lib/fmt/SystemError.hxx"
 #include "io/FileAt.hxx"
+#include "io/MakeDirectory.hxx"
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "system/linux/Mount.hxx"
@@ -96,18 +97,13 @@ MakeDirs(FileDescriptor fd, std::string_view suffix, mode_t mode)
 		/* null-terminated copy */
 		const std::string name2{name};
 
-		if (mkdirat(fd.Get(), name2.c_str(), mode) < 0) {
-			const int e = errno;
-			if (e != EEXIST)
-				throw FmtErrno(e,
-					       "Failed to create mount point {:?}",
-					       suffix);
-		}
-
-		fd = ufd = OpenDirectoryPath({fd, name2.c_str()}, O_NOFOLLOW);
+		fd = ufd = MakeDirectory({fd, name2.c_str()},
+					 {.mode = mode, .follow_symlinks = false});
 	}
 
 	if (!ufd.IsDefined())
+		/* reachable only if the "suffix" path was empty and
+		   the loop didn't run */
 		ufd = OpenDirectoryPath({fd, "."});
 
 	return ufd;
