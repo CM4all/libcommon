@@ -731,7 +731,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			break;
 
 		case ExecCommand::NETWORK_NS_NAME:
-			p.ns.network_namespace_name = payload.ReadString();
+			p.ns.network_namespace_name = ReadSafePathSegment(payload);
 			break;
 
 		case ExecCommand::IPC_NS:
@@ -785,7 +785,7 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 
 		case ExecCommand::MOUNT_NAMED_TMPFS:
 			{
-				const char *source = payload.ReadString();
+				const char *source = ReadSafePathSegment(payload);
 				const char *target = payload.ReadString();
 				bool writable = payload.ReadBool();
 				mounts.emplace_front(Mount::NamedTmpfs{},
