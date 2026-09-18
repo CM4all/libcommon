@@ -80,6 +80,16 @@ struct SpawnConfig {
 	 */
 	bool allow_any_uid_gid = false;
 
+	bool HasAllowedUid() const noexcept {
+		return allow_any_uid_gid || allow_all_uids_from > 0 ||
+			!allowed_uids.empty();
+	}
+
+	bool HasAllowedGid() const noexcept {
+		return allow_any_uid_gid ||
+			!allowed_gids.empty();
+	}
+
 	[[gnu::pure]]
 	bool IsUidAllowed(uid_t uid) const noexcept {
 		return (allow_all_uids_from > 0 &&
