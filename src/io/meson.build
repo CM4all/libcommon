@@ -21,6 +21,7 @@ io = static_library(
   'FdOutputStream.cxx',
   'Reader.cxx',
   'FdReader.cxx',
+  'SizeLimitReader.cxx',
   'BufferedOutputStream.cxx',
   'BufferedReader.cxx',
   'Logger.cxx',
