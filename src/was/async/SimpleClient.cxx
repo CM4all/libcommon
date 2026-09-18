@@ -255,8 +255,11 @@ SimpleClient::OnWasControlPacket(enum was_command cmd,
 		if (stopping)
 			/* this was the expected reply to our STOP */
 			stopping = false;
-		else
+		else {
+			state = State::IDLE;
 			response_handler->OnWasError(std::make_exception_ptr(std::runtime_error{"Premature end of response body"}));
+		}
+
 		return true;
 
 	case WAS_COMMAND_METRIC:
