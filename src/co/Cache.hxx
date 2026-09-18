@@ -51,7 +51,7 @@ class Cache {
 
 	struct Request;
 
-	struct Handler : IntrusiveListHook<IntrusiveHookMode::NORMAL> {
+	struct Handler : IntrusiveListHook<IntrusiveHookMode::TRACK> {
 		Request *request = nullptr;
 
 		std::coroutine_handle<> continuation;
@@ -73,10 +73,13 @@ class Cache {
 		}
 
 		~Handler() noexcept {
-			if (request) {
+			if (is_linked()) {
 				unlink();
 
-				if (request->IsAbandoned())
+				/* delete the Request only while it
+				   still owns us; Resume() may have
+				   cleared it */
+				if (request != nullptr && request->IsAbandoned())
 					delete request;
 			}
 		}
@@ -181,13 +184,19 @@ class Cache {
 		}
 
 		void Resume() noexcept {
-			handlers.remove_and_dispose_if([](const Handler &handler){
-				assert(handler.request != nullptr);
-				return !!handler.continuation;
-			}, [](Handler *handler) {
-				assert(handler->request != nullptr);
-				handler->request = nullptr;
-				handler->Resume();
+			/* move the list to the stack, just in case a
+			   continuation deletes this object */
+			auto pending = std::move(handlers);
+
+			/* detach all handlers from this object before
+			   resuming any of them, to prevent its
+			   destructor from mutating the list */
+			for (auto &handler : pending)
+				handler.request = nullptr;
+
+			pending.clear_and_dispose([](Handler *handler){
+				if (handler->continuation)
+					handler->Resume();
 			});
 		}
 
