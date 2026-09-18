@@ -26,6 +26,7 @@ avahi = static_library(
   'Service.cxx',
   'Explorer.cxx',
   'Weight.cxx',
+  'TxtUtil.cxx',
   avahi_sources,
   include_directories: inc,
   dependencies: [

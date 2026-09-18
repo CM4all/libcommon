@@ -3,7 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Weight.hxx"
-#include "StringListCast.hxx"
+#include "TxtUtil.hxx"
 
 #include <stdlib.h> // for strtod()
 
@@ -15,13 +15,16 @@ namespace Avahi {
 double
 GetWeightFromTxt(AvahiStringList *txt) noexcept
 {
-	constexpr std::string_view prefix = "weight="sv;
 	txt = avahi_string_list_find(txt, "weight");
 	if (txt == nullptr)
 		/* there's no "weight" record */
 		return 1.0;
 
-	const char *s = reinterpret_cast<const char *>(txt->text) + prefix.size();
+	const auto sv = GetValueFromTxt(*txt);
+
+	/* the string is null-terminated */
+	const char *const s = sv.data();
+
 	char *endptr;
 	double value = strtod(s, &endptr);
 	if (endptr == s || *endptr != '\0' || value <= 0 || value > 1e6)
