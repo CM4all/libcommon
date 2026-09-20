@@ -62,11 +62,20 @@ static void
 Preserve(const RecursiveCopyContext &ctx, const struct statx &stx,
 	 FileDescriptor dst, const char *dst_filename)
 {
+	/**
+	 * Mode bits to be cleared for "preserve" mode.
+	 *
+	 * - S_IFMT (file type): cannot copy that
+	 */
+	static constexpr mode_t MODE_CLEAR = S_IFMT;
+
+	static constexpr mode_t MODE_MASK = ~MODE_CLEAR;
+
 	if (ctx.preserve_mode &&
 	    (S_ISDIR(stx.stx_mode)
-	     ? fchmodat(dst.Get(), ".", stx.stx_mode & ~S_IFMT,
+	     ? fchmodat(dst.Get(), ".", stx.stx_mode & MODE_MASK,
 			0)
-	     : fchmod(dst.Get(), stx.stx_mode & ~S_IFMT)) < 0)
+	     : fchmod(dst.Get(), stx.stx_mode & MODE_MASK)) < 0)
 		throw FmtErrno("Failed to set mode of {:?}", dst_filename);
 
 	if (ctx.preserve_time) {
