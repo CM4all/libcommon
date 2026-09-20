@@ -81,4 +81,11 @@ TEST(TestMapQueryString, BadEscape)
 	EXPECT_ANY_THROW(MapQueryString("foo=a%f"));
 	EXPECT_ANY_THROW(MapQueryString("foo=a%fg"));
 	EXPECT_ANY_THROW(MapQueryString("foo=a%gf"));
+
+	/* a bad escape in a non-final '+'-separated segment used to
+	   dereference the nullptr returned by UriUnescape() */
+	EXPECT_ANY_THROW(MapQueryString("foo=a%zz+b"));
+	EXPECT_ANY_THROW(MapQueryString("foo=a%+b"));
+	EXPECT_ANY_THROW(MapQueryString("foo=a%00+b"));
+	EXPECT_ANY_THROW(MapQueryString("foo=+%g+"));
 }
