@@ -17,6 +17,7 @@
 #include "http/Status.hxx"
 #include "HttpMessageResponse.hxx"
 #endif
+#include "http/HeaderValue.hxx"
 #include "AllocatorPtr.hxx"
 #if TRANSLATION_ENABLE_EXPAND
 #include "lib/pcre/Cache.hxx"
@@ -764,11 +765,17 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 
 	for (const auto &i : expand_request_headers) {
 		const char *value = expand_string_unescaped(alloc, i.value, match_data);
+		if (!IsValidHttpHeaderValue(value))
+			throw std::runtime_error{"malformed value in expanded request header"};
+
 		request_headers.Add(alloc, i.key, value);
 	}
 
 	for (const auto &i : expand_response_headers) {
 		const char *value = expand_string_unescaped(alloc, i.value, match_data);
+		if (!IsValidHttpHeaderValue(value))
+			throw std::runtime_error{"malformed value in expanded response header"};
+
 		response_headers.Add(alloc, i.key, value);
 	}
 

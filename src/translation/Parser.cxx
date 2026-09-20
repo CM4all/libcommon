@@ -20,6 +20,7 @@
 #if TRANSLATION_ENABLE_RADDRESS
 #include "translation/Layout.hxx"
 #include "file/Address.hxx"
+#include "http/HeaderValue.hxx"
 #include "http/local/Address.hxx"
 #include "http/Address.hxx"
 #include "cgi/Address.hxx"
@@ -432,6 +433,8 @@ parse_header(AllocatorPtr alloc,
 		throw FmtRuntimeError("malformed name in {} packet", packet_name);
 	else if (http_header_is_hop_by_hop(name))
 		throw FmtRuntimeError("hop-by-hop {} packet", packet_name);
+	else if (!IsValidHttpHeaderValue(value))
+		throw FmtRuntimeError("malformed value in {} packet", packet_name);
 
 	headers.Add(alloc, name, value.data());
 }
