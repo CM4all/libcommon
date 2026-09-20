@@ -19,9 +19,14 @@ FormUnescape(char *dest, std::string_view src) noexcept
 {
 	while (true) {
 		const auto [segment, rest] = Split(src, '+');
+
 		dest = UriUnescape(dest, segment);
+		if (dest == nullptr)
+			// malformed escape
+			return nullptr;
 
 		if (rest.data() == nullptr)
+			// done
 			return dest;
 
 		*dest++ = ' ';
