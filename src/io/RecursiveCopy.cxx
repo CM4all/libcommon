@@ -66,8 +66,11 @@ Preserve(const RecursiveCopyContext &ctx, const struct statx &stx,
 	 * Mode bits to be cleared for "preserve" mode.
 	 *
 	 * - S_IFMT (file type): cannot copy that
+	 * - S_ISUID|S_ISGID: since the owner is now different,
+	 *   copying a set*id bit would be dangerous
+	 * - S_ISVTX (sticky): doesn't appear to make sense
 	 */
-	static constexpr mode_t MODE_CLEAR = S_IFMT;
+	static constexpr mode_t MODE_CLEAR = S_IFMT|S_ISUID|S_ISGID|S_ISVTX;
 
 	static constexpr mode_t MODE_MASK = ~MODE_CLEAR;
 
