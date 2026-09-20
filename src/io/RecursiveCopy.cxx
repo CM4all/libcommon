@@ -173,7 +173,8 @@ RecursiveCopyDirectory(RecursiveCopyContext &ctx,
 		RecursiveCopyDirectory(ctx, std::move(src), dst_parent);
 		Preserve(ctx, stx, dst_parent, "?");
 	} else {
-		auto dst = MakeDirectory({dst_parent, dst_filename});
+		auto dst = MakeDirectory({dst_parent, dst_filename},
+					 {.follow_symlinks = false});
 		RecursiveCopyDirectory(ctx, std::move(src), dst);
 		Preserve(ctx, stx, dst, dst_filename);
 	}
