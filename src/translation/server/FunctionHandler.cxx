@@ -13,8 +13,7 @@ FunctionHandler::OnTranslationRequest(Connection &connection,
 				      const Request &request,
 				      CancellablePointer &) noexcept
 {
-	connection.SendResponse(function(request));
-	return true;
+	return connection.SendResponse(function(request));
 }
 
 } // namespace Translation::Server
