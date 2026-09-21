@@ -83,6 +83,15 @@ public:
 		return stopping;
 	}
 
+	/**
+	 * Send a request.
+	 *
+	 * @return false if the request could not be submitted; this
+	 * includes the case where a previous request is still being
+	 * canceled (see IsStopping()), because the peer's PREMATURE
+	 * reply to our STOP is still outstanding and the body pipe has
+	 * not been resynchronized yet
+	 */
 	bool SendRequest(SimpleRequest &&request,
 			 SimpleResponseHandler &_response_handler,
 			 CancellablePointer &cancel_ptr) noexcept;

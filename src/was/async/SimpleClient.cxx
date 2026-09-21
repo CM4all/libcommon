@@ -68,6 +68,12 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 {
 	assert(state == State::IDLE);
 
+	if (stopping)
+		/* the previous request is still being canceled; the
+		   peer's PREMATURE reply to our STOP is outstanding
+		   and the body pipe is not resynchronized yet */
+		return false;
+
 	cancel_ptr = *this;
 	response_handler = &_response_handler;
 	state = State::HEADERS;
@@ -93,6 +99,12 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 			  CancellablePointer &cancel_ptr) noexcept
 {
 	assert(state == State::IDLE);
+
+	if (stopping)
+		/* the previous request is still being canceled; the
+		   peer's PREMATURE reply to our STOP is outstanding
+		   and the body pipe is not resynchronized yet */
+		return false;
 
 	cancel_ptr = *this;
 	response_handler = &_response_handler;
