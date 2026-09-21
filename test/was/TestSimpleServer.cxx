@@ -95,21 +95,12 @@ struct MyServerHandler final :  public Was::SimpleServerHandler {
 
 struct MyClientHandler final :  public Was::SimpleClientHandler {
 	std::exception_ptr error;
-	bool closed = false;
 
 	// virtual methods from Was::SimpleClientHandler
 	void OnWasError(std::exception_ptr _error) noexcept override {
 		assert(!error);
-		assert(!closed);
 
 		error = std::move(_error);
-	}
-
-	void OnWasClosed() noexcept override {
-		assert(!error);
-		assert(!closed);
-
-		closed = true;
 	}
 };
 
@@ -234,7 +225,6 @@ TEST(WasSimpleServer, Basic)
 	EXPECT_EQ(response1.status, HttpStatus::OK);
 	EXPECT_TRUE(response1.headers.empty());
 	EXPECT_FALSE(response1.body);
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -249,7 +239,6 @@ TEST(WasSimpleServer, Basic)
 	EXPECT_EQ(response2.status, HttpStatus::OK);
 	EXPECT_FALSE(response2.headers.empty());
 	EXPECT_FALSE(response2.body);
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -257,7 +246,6 @@ TEST(WasSimpleServer, Basic)
 	// close the client, expect server-side OnWasClosed() call
 	client.Close();
 	event_loop.Run();
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_TRUE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -289,7 +277,6 @@ TEST(WasSimpleServer, Cancel)
 	EXPECT_TRUE(cancel_ptr);
 	EXPECT_TRUE(request_handler.deferred);
 	EXPECT_FALSE(request_handler.canceled);
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -307,7 +294,6 @@ TEST(WasSimpleServer, Cancel)
 
 	EXPECT_TRUE(request_handler.deferred);
 	EXPECT_TRUE(request_handler.canceled);
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -315,7 +301,6 @@ TEST(WasSimpleServer, Cancel)
 	// close the client, expect server-side OnWasClosed() call
 	client.Close();
 	event_loop.Run();
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_TRUE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -366,7 +351,6 @@ TEST(WasSimpleServer, CancelEarlyPost)
 	EXPECT_TRUE(cancel_ptr);
 	EXPECT_FALSE(request_handler.deferred);
 	EXPECT_FALSE(request_handler.canceled);
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -383,7 +367,6 @@ TEST(WasSimpleServer, CancelEarlyPost)
 
 	EXPECT_FALSE(request_handler.deferred);
 	EXPECT_FALSE(request_handler.canceled);
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -405,7 +388,6 @@ TEST(WasSimpleServer, CancelEarlyPost)
 	EXPECT_TRUE(cancel_ptr);
 	EXPECT_FALSE(request_handler.deferred);
 	EXPECT_FALSE(request_handler.canceled);
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -422,7 +404,6 @@ TEST(WasSimpleServer, CancelEarlyPost)
 
 	EXPECT_FALSE(request_handler.deferred);
 	EXPECT_FALSE(request_handler.canceled);
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -430,7 +411,6 @@ TEST(WasSimpleServer, CancelEarlyPost)
 	// close the client, expect server-side OnWasClosed() call
 	client.Close();
 	event_loop.Run();
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_FALSE(client_handler.error);
 	EXPECT_TRUE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);
@@ -457,7 +437,6 @@ TEST(WasSimpleServer, ServerClose)
 	server.Close();
 	event_loop.Run();
 
-	EXPECT_FALSE(client_handler.closed);
 	EXPECT_TRUE(client_handler.error);
 	EXPECT_FALSE(server_handler.closed);
 	EXPECT_FALSE(server_handler.error);

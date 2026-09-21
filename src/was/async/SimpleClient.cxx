@@ -107,16 +107,6 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 }
 
 void
-SimpleClient::Closed() noexcept
-{
-	if (state != State::IDLE)
-		response_handler->OnWasError(std::make_exception_ptr(SocketClosedPrematurelyError{}));
-
-	Close();
-	handler.OnWasClosed();
-}
-
-void
 SimpleClient::AbortError(std::exception_ptr error) noexcept
 {
 	if (state != State::IDLE)

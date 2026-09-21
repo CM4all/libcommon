@@ -22,7 +22,6 @@ struct SimpleRequest;
 class SimpleClientHandler {
 public:
 	virtual void OnWasError(std::exception_ptr error) noexcept = 0;
-	virtual void OnWasClosed() noexcept = 0;
 };
 
 class SimpleResponseHandler {
@@ -94,8 +93,6 @@ public:
 			 CancellablePointer &cancel_ptr) noexcept;
 
 private:
-	void Closed() noexcept;
-
 	/**
 	 * Abort receiving the response status/headers from the WAS server.
 	 */
