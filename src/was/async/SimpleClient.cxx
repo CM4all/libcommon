@@ -253,7 +253,8 @@ SimpleClient::OnWasControlPacket(enum was_command cmd,
 		}
 
 		if (stopping)
-			stopping = true;
+			/* this was the expected reply to our STOP */
+			stopping = false;
 		else
 			response_handler->OnWasError(std::make_exception_ptr(std::runtime_error{"Premature end of response body"}));
 		return true;
