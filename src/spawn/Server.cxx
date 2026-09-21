@@ -29,7 +29,7 @@
 #include "net/ReceiveMessage.hxx"
 #include "net/SocketError.hxx"
 #include "io/FileAt.hxx"
-#include "io/FileName.hxx" // for IsSpecialFilename()
+#include "io/FileName.hxx" // for IsValidFilename()
 #include "io/MakeDirectory.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
@@ -40,7 +40,6 @@
 #include "util/IntrusiveList.hxx"
 #include "util/Exception.hxx"
 #include "util/SharedLease.hxx"
-#include "util/StringCompare.hxx" // for StringIsEmpty()
 
 #ifdef HAVE_LIBCAP
 #include "lib/cap/Glue.hxx"
@@ -54,7 +53,6 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <string.h>
 
 class SpawnServerProcess;
 
@@ -582,18 +580,11 @@ Read(Payload &payload, UidGid &uid_gid)
 		uid_gid.supplementary_groups[n_groups] = UidGid::UNSET_GID;
 }
 
-[[gnu::pure]]
-static bool
-IsSafePathSegment(const char *s) noexcept
-{
-	return !StringIsEmpty(s) && !IsSpecialFilename(s) && strchr(s, '/') == 0;
-}
-
 static const char *
 ReadSafePathSegment(Payload &payload)
 {
 	const char *s = payload.ReadString();
-	if (!IsSafePathSegment(s))
+	if (!IsValidFilename(s))
 		throw MalformedPayloadError{};
 	return s;
 }

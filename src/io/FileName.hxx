@@ -16,3 +16,12 @@ IsSpecialFilename(const char *s) noexcept
 {
 	return s[0] == '.' && (s[1] == 0 || (s[1] == '.' && s[2] == 0));
 }
+
+/**
+ * Is this a valid filename (that can be created)?  It must be
+ * non-empty, not be a "special" filename as defined by
+ * IsSpecialFilename() and must not contain a slash.
+ */
+[[gnu::pure]]
+bool
+IsValidFilename(const char *s) noexcept;

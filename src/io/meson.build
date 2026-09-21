@@ -29,6 +29,7 @@ io = static_library(
   'StringFile.cxx',
   'StateDirectories.cxx',
   'Temp.cxx',
+  'FileName.cxx',
   io_sources,
   include_directories: inc,
   dependencies: [
