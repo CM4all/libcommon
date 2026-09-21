@@ -176,7 +176,7 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 		switch (rh.command) {
 		case ResponseCommand::ERROR:
 			throw FmtRuntimeError("Spawn server error: {}",
-					      ToStringView(payload));
+					      ToStringView(payload.first(rh.size)));
 
 		case ResponseCommand::NAMESPACE_HANDLES:
 			ParseNamespaceHandles(response, payload.first(rh.size), fds);
