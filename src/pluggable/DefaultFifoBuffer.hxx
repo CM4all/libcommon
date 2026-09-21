@@ -53,13 +53,19 @@ public:
 	void CycleIfEmpty() noexcept {
 	}
 
-	void MoveFromAllowBothNull(DefaultFifoBuffer &src) noexcept {
-		if (empty())
+	/**
+	 * Like MoveFrom(), but allow both to be nulled.
+	 *
+	 * @return the number of bytes moved
+	 */
+	size_type MoveFromAllowBothNull(DefaultFifoBuffer &src) noexcept {
+		if (empty()) {
 			/* optimized special case: swap buffer pointers instead of
 			   copying data */
 			swap(src);
-		else
-			MoveFrom(src);
+			return GetAvailable();
+		} else
+			return MoveFrom(src);
 	}
 };
 
