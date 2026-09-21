@@ -109,8 +109,10 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 void
 SimpleClient::AbortError(std::exception_ptr error) noexcept
 {
-	if (state != State::IDLE)
+	if (state != State::IDLE) {
+		state = State::IDLE;
 		response_handler->OnWasError(error);
+	}
 
 	Close();
 	handler.OnWasError(error);
