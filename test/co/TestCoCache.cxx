@@ -435,3 +435,80 @@ TEST(CoCache, IsCacheable)
 	ASSERT_EQ(cache.GetIfCached(3), nullptr);
 	ASSERT_EQ(*cache.GetIfCached(4), 4);
 }
+
+/**
+ * A waiter whose continuation destroys another waiter for the same key.
+ */
+struct DestroyingWork {
+	TestCache<SleepFactory> &cache;
+
+	Co::InvokeTask &victim;
+
+	Co::InvokeTask task;
+
+	std::exception_ptr error;
+
+	int value = -1;
+
+	DestroyingWork(TestCache<SleepFactory> &_cache,
+		       Co::InvokeTask &_victim) noexcept
+		:cache(_cache), victim(_victim) {}
+
+	Co::InvokeTask Run(int key) {
+		value = co_await cache.Get(key);
+
+		/* destroy the sibling waiter from inside the
+		   continuation, i.e. from inside Request::Resume() */
+		victim = {};
+	}
+
+	void Start(int key) {
+		task = Run(key);
+		task.Start(BIND_THIS_METHOD(OnCompletion));
+	}
+
+	void OnCompletion(std::exception_ptr &&_error) noexcept {
+		error = std::move(_error);
+	}
+};
+
+/**
+ * Resuming the first waiter destroys the second one.  Request::Resume()
+ * used to run the continuations from inside
+ * IntrusiveList::remove_and_dispose_if(), whose disposer must not
+ * modify the list: ~Handler unlinked the second waiter from the list
+ * being traversed and, being the last one left, deleted the #Request
+ * whose Resume() was still on the stack - after which the loop
+ * continued on freed memory and OnCompletion() deleted it again.
+ */
+TEST(CoCache, ResumeDestroysSibling)
+{
+	using Factory = SleepFactory;
+	using Cache = TestCache<Factory>;
+
+	EventLoop event_loop;
+	Cache cache(event_loop);
+
+	n_started = n_finished = 0;
+
+	Work<Factory> w2(cache);
+	DestroyingWork w1(cache, w2.task);
+
+	/* both wait for the same key; w1 is resumed first */
+	w1.Start(42);
+	w2.Start(42);
+
+	ASSERT_EQ(n_started, 1u);
+	ASSERT_EQ(n_finished, 0u);
+
+	event_loop.Run();
+
+	ASSERT_EQ(n_started, 1u);
+	ASSERT_EQ(n_finished, 1u);
+
+	EXPECT_FALSE(w1.error);
+	EXPECT_EQ(w1.value, 42);
+
+	/* the second waiter was canceled and never completed */
+	EXPECT_EQ(w2.value, -1);
+}
