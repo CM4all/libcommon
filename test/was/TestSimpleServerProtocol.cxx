@@ -1271,3 +1271,44 @@ TEST(WasServerProtocol, RoundTrip)
 	EXPECT_TRUE(FindPacket(packets, WAS_COMMAND_HEADER));
 	EXPECT_TRUE(FindPacket(packets, WAS_COMMAND_NO_DATA));
 }
+
+/**
+ * SimpleInput's "position" must not survive into the next request: a
+ * PREMATURE(0) for a request which never had a body used to be
+ * rejected, because it was compared against the position left over
+ * from the previous request's body.
+ */
+TEST(WasServerProtocol, PrematureAfterCompletedRequestBody)
+{
+	[[maybe_unused]] const ScopeInitDefaultFifoBuffer init;
+
+	Fixture f{RecordingRequestHandler::Mode::RESPOND};
+
+	/* request 1, with a body */
+	f.peer.Send(WAS_COMMAND_REQUEST);
+	f.peer.SendString(WAS_COMMAND_URI, "/foo");
+	f.peer.Send(WAS_COMMAND_DATA);
+	f.peer.SendU64(WAS_COMMAND_LENGTH, 5);
+	f.peer.WriteBody("hello");
+	f.server.Run();
+
+	ASSERT_TRUE(f.server.IsAlive());
+	EXPECT_EQ(f.request_handler.n_requests, 1u);
+	EXPECT_EQ(f.request_handler.body, "hello");
+
+	/* request 2, without a body */
+	f.peer.Send(WAS_COMMAND_REQUEST);
+	f.peer.SendString(WAS_COMMAND_URI, "/bar");
+	f.peer.Send(WAS_COMMAND_NO_DATA);
+	f.server.Run();
+
+	ASSERT_TRUE(f.server.IsAlive());
+	EXPECT_EQ(f.request_handler.n_requests, 2u);
+
+	/* the peer aborts a request body it never started */
+	f.peer.SendU64(WAS_COMMAND_PREMATURE, 0);
+	f.server.Run();
+
+	EXPECT_FALSE(f.server.error);
+	EXPECT_TRUE(f.server.IsAlive());
+}

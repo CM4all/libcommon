@@ -6,6 +6,7 @@ test(
   'TestWas',
   executable(
     'TestWas',
+    'TestSimpleClient.cxx',
     'TestSimpleServer.cxx',
     'TestSimpleServerProtocol.cxx',
     include_directories: inc,
