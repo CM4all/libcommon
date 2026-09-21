@@ -84,7 +84,7 @@ SimpleInput::Premature(std::size_t nbytes)
 	if (fill > nbytes)
 		/* we have already received more data than that, which
 		   should not be possible */
-		throw SocketProtocolError{"Too much data on WAS pipe"};
+		throw SocketGarbageReceivedError{"Too much data on WAS pipe"};
 
 	std::size_t discard = nbytes - fill;
 
@@ -107,7 +107,7 @@ SimpleInput::Premature(std::size_t nbytes)
 		}
 
 		if (n == 0)
-			throw std::runtime_error("Hangup on WAS pipe");
+			throw SocketClosedPrematurelyError{"Hangup on WAS pipe"};
 
 		discard -= n;
 	}
@@ -136,12 +136,12 @@ SimpleInput::TryRead()
 
 	auto w = buffer->Write();
 	if (w.empty())
-		throw std::runtime_error("Unexpected data on WAS pipe");
+		throw SocketGarbageReceivedError{"Unexpected data on WAS pipe"};
 
 	auto nbytes = GetPipe().Read(w);
 	if (nbytes <= 0) {
 		if (nbytes == 0)
-			throw std::runtime_error("Hangup on WAS pipe");
+			throw SocketClosedPrematurelyError{"Hangup on WAS pipe"};
 		else if (errno == EAGAIN) {
 			event.ScheduleRead();
 			return;
