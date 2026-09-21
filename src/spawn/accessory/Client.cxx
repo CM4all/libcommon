@@ -13,6 +13,7 @@
 #include "net/SendMessage.hxx"
 #include "net/SocketProtocolError.hxx"
 #include "util/CRC32.hxx"
+#include "util/RoundPowerOfTwo.hxx"
 #include "util/SpanCast.hxx"
 
 #include <sched.h>
@@ -170,7 +171,7 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 		if (payload.size() < rh.size)
 			throw SocketProtocolError{"Response datagram too small"};
 
-		const size_t padded_size = (rh.size + 3) & (~3u);
+		const std::size_t padded_size = RoundUpToPowerOfTwo(rh.size, PADDING);
 
 		switch (rh.command) {
 		case ResponseCommand::ERROR:

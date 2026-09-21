@@ -37,6 +37,8 @@ namespace SpawnAccessory {
  */
 static const uint32_t MAGIC = 0x63046173;
 
+static constexpr uint16_t PADDING = 4;
+
 struct DatagramHeader {
 	uint32_t magic;
 	uint32_t crc;
@@ -97,6 +99,8 @@ struct RequestHeader {
 	RequestCommand command;
 };
 
+static_assert(PADDING >= alignof(RequestHeader));
+
 enum class ResponseCommand : uint16_t {
 	/**
 	 * The request has failed.
@@ -127,5 +131,7 @@ struct ResponseHeader {
 	uint16_t size;
 	ResponseCommand command;
 };
+
+static_assert(PADDING >= alignof(ResponseCommand));
 
 }
