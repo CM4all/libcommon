@@ -11,6 +11,7 @@
 #include "net/LocalSocketAddress.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "net/SendMessage.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "util/CRC32.hxx"
 #include "util/SpanCast.hxx"
 
@@ -84,15 +85,15 @@ ReceiveDatagram(SocketDescriptor s,
 	auto payload = response.payload;
 	const auto &dh = *(const DatagramHeader *)(const void *)payload.data();
 	if (payload.size() < sizeof(dh))
-		throw std::runtime_error("Response datagram too small");
+		throw SocketProtocolError{"Response datagram too small"};
 
 	if (dh.magic != MAGIC)
-		throw std::runtime_error("Wrong magic in response datagram");
+		throw SocketProtocolError{"Wrong magic in response datagram"};
 
 	payload = payload.subspan(sizeof(dh));
 
 	if (dh.crc != CRC32(payload))
-		throw std::runtime_error("Bad CRC in response datagram");
+		throw SocketProtocolError{"Bad CRC in response datagram"};
 
 	return {payload, std::move(response.fds)};
 }
@@ -103,11 +104,11 @@ ParseNamespaceHandles(NamespacesResponse &response,
 		      std::span<UniqueFileDescriptor> &fds)
 {
 	if (raw_payload.size() % sizeof(uint32_t) != 0)
-		throw std::runtime_error{"Odd NAMESPACE_HANDLES payload"};
+		throw SocketProtocolError{"Odd NAMESPACE_HANDLES payload"};
 
 	const auto payload = FromBytesStrict<const uint32_t>(raw_payload);
 	if (fds.size() < payload.size())
-		throw std::runtime_error{"Not enough file descriptors in NAMESPACE_HANDLES response"};
+		throw SocketProtocolError{"Not enough file descriptors in NAMESPACE_HANDLES response"};
 
 	for (std::size_t i = 0; i < payload.size(); ++i) {
 		switch (payload[i]) {
@@ -124,7 +125,7 @@ ParseNamespaceHandles(NamespacesResponse &response,
 			break;
 
 		default:
-			throw std::runtime_error{"Unsupported namespace in NAMESPACE_HANDLES response"};
+			throw SocketProtocolError{"Unsupported namespace in NAMESPACE_HANDLES response"};
 		}
 	}
 
@@ -137,10 +138,10 @@ ParseLeasePipe(NamespacesResponse &response,
 	       std::span<UniqueFileDescriptor> &fds)
 {
 	if (!raw_payload.empty())
-		throw std::runtime_error{"Bad LEASE_PIPE payload"};
+		throw SocketProtocolError{"Bad LEASE_PIPE payload"};
 
 	if (fds.empty())
-		throw std::runtime_error{"LEASE_PIPE without file descriptor"};
+		throw SocketProtocolError{"LEASE_PIPE without file descriptor"};
 
 	response.lease_pipe = std::move(fds.front());
 	fds = fds.subspan(1);
@@ -162,12 +163,12 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 	while (!payload.empty()) {
 		const auto &rh = *(const ResponseHeader *)(const void *)payload.data();
 		if (payload.size() < sizeof(rh))
-			throw std::runtime_error("Response datagram too small");
+			throw SocketProtocolError{"Response datagram too small"};
 
 		payload = payload.subspan(sizeof(rh));
 
 		if (payload.size() < rh.size)
-			throw std::runtime_error("Response datagram too small");
+			throw SocketProtocolError{"Response datagram too small"};
 
 		const size_t padded_size = (rh.size + 3) & (~3u);
 
@@ -182,7 +183,7 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 
 		case ResponseCommand::LEASE_PIPE:
 			if (!request.lease_pipe)
-				throw std::runtime_error("Unexpected LEASE_PIPE response");
+				throw SocketProtocolError{"Unexpected LEASE_PIPE response"};
 
 			ParseLeasePipe(response, payload.first(rh.size), fds);
 			break;
@@ -192,20 +193,20 @@ MakeNamespaces(SocketDescriptor s, std::string_view name,
 	}
 
 	if (!fds.empty())
-		throw std::runtime_error{"Too many file descriptors"};
+		throw SocketProtocolError{"Too many file descriptors"};
 
 	if (request.ipc && !response.ipc.IsDefined())
-		throw std::runtime_error{"IPC namespace missing in response"};
+		throw SocketProtocolError{"IPC namespace missing in response"};
 
 	if (request.pid && !response.pid.IsDefined())
-		throw std::runtime_error{"PID namespace missing in response"};
+		throw SocketProtocolError{"PID namespace missing in response"};
 
 	const bool user_requested = request.uid_map.data() != nullptr || request.gid_map.data() != nullptr;
 	if (user_requested && !response.user.IsDefined())
-		throw std::runtime_error{"User namespace missing in response"};
+		throw SocketProtocolError{"User namespace missing in response"};
 
 	if (request.lease_pipe && !response.lease_pipe.IsDefined())
-		throw std::runtime_error{"LEASE_PIPE missing in response"};
+		throw SocketProtocolError{"LEASE_PIPE missing in response"};
 
 	return response;
 }
