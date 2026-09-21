@@ -322,7 +322,12 @@ SimpleClient::OnWasOutputError(std::exception_ptr &&error) noexcept
 void
 SimpleClient::OnWasInput(DisposableBuffer body) noexcept
 {
-	assert(state == State::BODY);
+	if (state != State::BODY) {
+		assert(response_handler == nullptr);
+		/* the request was canceled; drop the body and let the
+		   peer's PREMATURE finish the handshake */
+		return;
+	}
 
 	response.body = std::make_unique<SimpleOutput>(std::move(body));
 	state = State::IDLE;
@@ -352,13 +357,21 @@ SimpleClient::Cancel() noexcept
 			return;
 	}
 
-	// TODO cancel input?
-
 	if (!control.Send(WAS_COMMAND_STOP))
 		return;
 
 	stopping = true;
 	state = State::IDLE;
+
+	/* suppress the response_handler invocation in
+	   OnWasInputError() */
+	response_handler = nullptr;
+
+	/* our `input` is left active: only the peer's PREMATURE reply
+	   to our STOP can resynchronize the pipe, because only then
+	   has it really written the bytes it announced with LENGTH;
+	   until that arrives, OnWasInput() drops whatever
+	   completes */
 }
 
 } // namespace Was
