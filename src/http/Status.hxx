@@ -187,6 +187,13 @@ http_status_to_string(HttpStatus _status) noexcept
 }
 
 static constexpr bool
+http_status_is_info(HttpStatus _status) noexcept
+{
+	const auto status = static_cast<unsigned>(_status);
+	return status >= 100 && status < 200;
+}
+
+static constexpr bool
 http_status_is_success(HttpStatus _status) noexcept
 {
 	const auto status = static_cast<unsigned>(_status);
