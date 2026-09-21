@@ -38,6 +38,7 @@ SimpleInput::Activate() noexcept
 	assert(!buffer);
 
 	buffer = std::make_unique<Buffer>();
+	position = 0;
 
 	defer_read.Schedule();
 }
@@ -55,6 +56,15 @@ SimpleInput::SetLength(std::size_t length) noexcept
 	return true;
 }
 
+inline DisposableBuffer
+SimpleInput::ReleaseBuffer() noexcept
+{
+	assert(buffer);
+
+	position = buffer->GetFill();
+	return buffer.release()->ToDisposableBuffer();
+}
+
 DisposableBuffer
 SimpleInput::CheckComplete() noexcept
 {
@@ -62,7 +72,7 @@ SimpleInput::CheckComplete() noexcept
 
 	if (buffer->IsComplete()) {
 		CancelRead();
-		return buffer.release()->ToDisposableBuffer();
+		return ReleaseBuffer();
 	} else
 		return nullptr;
 }
@@ -73,7 +83,10 @@ SimpleInput::Premature(std::size_t nbytes)
 	CancelRead();
 
 	if (!buffer) {
-		if (nbytes == 0)
+		if (nbytes == position)
+			/* the body has already been received
+			   completely (or was never activated); there
+			   is nothing left to discard */
 			return;
 		else
 			throw SocketProtocolError{"Malformed PREMATURE packet"};
@@ -154,7 +167,7 @@ SimpleInput::TryRead()
 	if (buffer->IsComplete()) {
 		CancelRead();
 
-		handler.OnWasInput(buffer.release()->ToDisposableBuffer());
+		handler.OnWasInput(ReleaseBuffer());
 	} else if (static_cast<std::size_t>(nbytes) < w.size())
 		  /* incomplete read - try again later */
 		  event.ScheduleRead();

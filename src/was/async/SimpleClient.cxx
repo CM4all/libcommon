@@ -73,6 +73,8 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 	state = State::HEADERS;
 	response = {};
 
+	input.ResetPosition();
+
 	if (!Was::SendRequest(control, request, !!request.body))
 		return false;
 
@@ -96,6 +98,8 @@ SimpleClient::SendRequest(SimpleRequest &&request,
 	response_handler = &_response_handler;
 	state = State::HEADERS;
 	response = {};
+
+	input.ResetPosition();
 
 	if (!Was::SendRequest(control, request, request_body != nullptr))
 		return false;

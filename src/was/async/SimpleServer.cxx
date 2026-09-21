@@ -163,6 +163,7 @@ SimpleServer::OnWasControlPacket(enum was_command cmd,
 		request.method = HttpMethod::GET;
 		request.have_method = false;
 		request.state = Request::State::HEADERS;
+		input.ResetPosition();
 		output.ResetPosition();
 		break;
 

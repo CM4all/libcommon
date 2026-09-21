@@ -7,6 +7,7 @@
 #include "event/PipeEvent.hxx"
 #include "event/DeferEvent.hxx"
 
+#include <cstddef>
 #include <exception> // for std::exception_ptr
 #include <memory>
 
@@ -32,6 +33,14 @@ class SimpleInput final {
 
 	std::unique_ptr<Buffer> buffer;
 
+	/**
+	 * The number of body bytes already read from the pipe.  Unlike
+	 * Buffer::GetFill(), this remains valid after #buffer has been
+	 * released, so that a #WAS_COMMAND_PREMATURE packet arriving
+	 * later can still be validated.
+	 */
+	std::size_t position = 0;
+
 public:
 	SimpleInput(EventLoop &event_loop, UniqueFileDescriptor pipe,
 		    SimpleInputHandler &_handler) noexcept;
@@ -51,6 +60,16 @@ public:
 	}
 
 	void Activate() noexcept;
+
+	/**
+	 * Set the "position" field to zero.  This must be called when a
+	 * new request/response cycle begins, because #position is only
+	 * meaningful for the current body; a stale value would make the
+	 * check in Premature() compare against the previous body.
+	 */
+	void ResetPosition() noexcept {
+		position = 0;
+	}
 
 	bool SetLength(std::size_t length) noexcept;
 
@@ -77,6 +96,12 @@ public:
 	bool Discard();
 
 private:
+	/**
+	 * Hand out the buffer, remembering how much of the pipe it has
+	 * consumed (see #position).
+	 */
+	DisposableBuffer ReleaseBuffer() noexcept;
+
 	FileDescriptor GetPipe() const noexcept {
 		return event.GetFileDescriptor();
 	}
