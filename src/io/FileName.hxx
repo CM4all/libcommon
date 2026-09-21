@@ -4,6 +4,12 @@
 
 #pragma once
 
+/**
+ * Is this a "special" filename, i.e. a filename with a special
+ * meaning defined by the operating system.  These files should
+ * usually be ignored in directory listings and such file names cannot
+ * be created manually.
+ */
 [[gnu::pure]]
 constexpr bool
 IsSpecialFilename(const char *s) noexcept
