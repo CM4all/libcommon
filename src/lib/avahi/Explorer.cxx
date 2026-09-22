@@ -194,10 +194,7 @@ ServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 	}
 
 	if (resolver) {
-		assert(explorer.n_resolvers > 0);
-
-		resolver.reset();
-		--explorer.n_resolvers;
+		CancelResolve();
 		explorer.CheckAllForNow();
 	}
 }
