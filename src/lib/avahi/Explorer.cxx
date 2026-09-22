@@ -125,7 +125,13 @@ ServiceExplorer::Object::Resolve(AvahiClient *client, AvahiIfIndex interface,
 void
 ServiceExplorer::Object::CancelResolve() noexcept
 {
+	if (resolver == nullptr)
+		return;
+
 	resolver.reset();
+
+	assert(explorer.n_resolvers > 0);
+	--explorer.n_resolvers;
 }
 
 static constexpr IPv4Address
@@ -336,7 +342,7 @@ ServiceExplorer::OnAvahiDisconnect() noexcept
 {
 	for (auto &i : objects)
 		i.second.CancelResolve();
-	n_resolvers = 0;
+	assert(n_resolvers == 0);
 
 	avahi_browser.reset();
 }
