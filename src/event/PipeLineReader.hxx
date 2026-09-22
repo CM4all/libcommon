@@ -55,7 +55,8 @@ public:
 	 * ensure that everything in the pipe is handled.
 	 */
 	void Flush() noexcept {
-		TryRead(true, false);
+		if (event.IsDefined())
+			TryRead(true, false);
 	}
 
 private:
