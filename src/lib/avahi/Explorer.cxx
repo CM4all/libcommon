@@ -191,12 +191,8 @@ ServiceExplorer::Object::ServiceResolverCallback(AvahiIfIndex interface,
 		assert(explorer.n_resolvers > 0);
 
 		resolver.reset();
-
-		if (--explorer.n_resolvers == 0 &&
-		    explorer.all_for_now_pending) {
-			explorer.all_for_now_pending = false;
-			explorer.listener.OnAvahiAllForNow();
-		}
+		--explorer.n_resolvers;
+		explorer.CheckAllForNow();
 	}
 }
 
@@ -239,6 +235,15 @@ ServiceExplorer::ServiceExplorer(Client &_avahi_client,
 ServiceExplorer::~ServiceExplorer() noexcept
 {
 	avahi_client.RemoveListener(*this);
+}
+
+inline void
+ServiceExplorer::CheckAllForNow() noexcept
+{
+	if (n_resolvers == 0 && all_for_now_pending) {
+		all_for_now_pending = false;
+		listener.OnAvahiAllForNow();
+	}
 }
 
 static std::string

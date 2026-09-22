@@ -56,6 +56,13 @@ public:
 	~ServiceExplorer() noexcept;
 
 private:
+	/**
+	 * If no resolver is pending anymore and #all_for_now_pending
+	 * is true, invoke
+	 * ServiceExplorerListener::OnAvahiAllForNow().
+	 */
+	void CheckAllForNow() noexcept;
+
 	void ServiceBrowserCallback(AvahiServiceBrowser *b,
 				    AvahiIfIndex interface,
 				    AvahiProtocol protocol,
