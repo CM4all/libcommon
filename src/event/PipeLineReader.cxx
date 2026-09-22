@@ -38,6 +38,7 @@ PipeLineReader::TryRead(bool flush, bool hangup) noexcept
 
 		event.Close();
 		flush = true;
+		nbytes = 0;
 	}
 
 	if (hangup && static_cast<std::size_t>(nbytes) < w.size()) {
