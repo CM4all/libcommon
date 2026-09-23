@@ -14,6 +14,8 @@
 #include "uri/Base.hxx"
 #include "uri/Compare.hxx"
 #include "uri/PEscape.hxx"
+#include "uri/PNormalize.hxx"
+#include "uri/Verify.hxx"
 #include "http/Status.hxx"
 #include "HttpMessageResponse.hxx"
 #endif
@@ -635,15 +637,29 @@ TranslateResponse::CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
 {
 	const bool expandable = src.IsExpandable();
 
-	address.CacheLoad(alloc, src.address, request_uri, src.base,
-			  src.unsafe_base, expandable);
+	const char *tail = nullptr;
+
+	if (src.base != nullptr && !expandable) {
+		tail = require_base_tail(request_uri, src.base);
+
+		/* strip leading slashes before normalizing the URI;
+		   merging adjacent slashes is part of normalization,
+		   but "tail" already comes after a slash */
+		while (*tail == '/')
+			++tail;
+
+		tail = NormalizeUriPath(alloc, tail);
+
+		if (!src.unsafe_base && !uri_path_verify_paranoid(tail))
+			throw HttpMessageResponse(HttpStatus::BAD_REQUEST, "Malformed URI");
+	}
+
+	address.CacheLoad(alloc, src.address, tail);
 
 	if (this != &src)
 		CopyFrom(alloc, src);
 
-	if (base != nullptr && !expandable) {
-		const char *tail = require_base_tail(request_uri, base);
-
+	if (tail != nullptr) {
 		if (uri != nullptr)
 			uri = alloc.Concat(uri, tail);
 
