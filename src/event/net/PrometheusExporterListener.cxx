@@ -4,6 +4,8 @@
 
 #include "PrometheusExporterListener.hxx"
 #include "PrometheusExporterHandler.hxx"
+#include "event/CoarseTimerEvent.hxx"
+#include "event/SocketEvent.hxx"
 #include "net/SocketAddress.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "io/Iovec.hxx"
@@ -42,15 +44,18 @@ class PrometheusExporterListener::Connection : public IntrusiveListHook<Intrusiv
 {
 	PrometheusExporterHandler &handler;
 	SocketEvent socket;
+	CoarseTimerEvent timeout;
 
 public:
 	Connection(EventLoop &event_loop, UniqueSocketDescriptor &&_socket,
 		   PrometheusExporterHandler &_handler) noexcept
 		:handler(_handler),
 		 socket(event_loop, BIND_THIS_METHOD(OnSocketReady),
-			_socket.Release())
+			_socket.Release()),
+		 timeout(event_loop, BIND_THIS_METHOD(OnTimeout))
 	{
 		socket.ScheduleRead();
+		timeout.Schedule(std::chrono::seconds{30});
 	}
 
 	~Connection() noexcept {
@@ -59,6 +64,10 @@ public:
 
 private:
 	void OnSocketReady(unsigned events) noexcept;
+
+	void OnTimeout() noexcept {
+		delete this;
+	}
 };
 
 inline void
