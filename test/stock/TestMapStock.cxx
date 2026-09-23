@@ -590,3 +590,115 @@ TEST(StockMap, Sticky)
 
 	item2->Put(PutAction::DESTROY);
 }
+
+/**
+ * A #Stock with queued callers must not be erased when its last item is
+ * destroyed; the caller must still be served.
+ *
+ * BasicStock::Put() schedules the "stock is empty" event before
+ * Stock::Put() schedules the retry, and deferred events run FIFO, so
+ * the erase used to win the race.
+ */
+TEST(StockMap, WaitingPreventsErase)
+{
+	Instance instance;
+	MyStockClass cls;
+	StockMap map{
+		instance.event_loop, cls,
+		{
+			.limit = 1,
+			.max_idle = 8,
+		},
+	};
+
+	num_borrow = num_release = num_destroy = 0;
+
+	/* occupy the one item this stock is allowed to have */
+
+	MyStockGetHandler handler1;
+	CancellablePointer cancel_ptr1;
+	map.Get(StockKey{"a"}, nullptr, handler1, cancel_ptr1);
+	ASSERT_TRUE(handler1.got_item);
+	ASSERT_NE(handler1.last_item, nullptr);
+	ASSERT_EQ(cls.n_create, 1);
+
+	/* the next caller has to wait */
+
+	MyStockGetHandler handler2;
+	CancellablePointer cancel_ptr2;
+	map.Get(StockKey{"a"}, nullptr, handler2, cancel_ptr2);
+	ASSERT_FALSE(handler2.got_item);
+
+	/* returning the item with DESTROY leaves the stock without any
+	   item, but with a queued caller */
+
+	handler1.last_item->Put(PutAction::DESTROY);
+	instance.RunSome();
+
+	ASSERT_EQ(num_destroy, 1);
+
+	/* the queued caller must have been served by a new item */
+
+	ASSERT_TRUE(handler2.got_item);
+	ASSERT_NE(handler2.last_item, nullptr);
+	ASSERT_EQ(cls.n_create, 2);
+
+	handler2.last_item->Put(PutAction::DESTROY);
+	instance.RunSome();
+}
+
+/**
+ * Cancelling a queued caller after the stock has run out of items must
+ * not write into a freed #Stock.
+ */
+TEST(StockMap, CancelWaitingAfterEmpty)
+{
+	Instance instance;
+	MyStockClass cls;
+	StockMap map{
+		instance.event_loop, cls,
+		{
+			.limit = 1,
+			.max_idle = 8,
+		},
+	};
+
+	num_borrow = num_release = num_destroy = 0;
+
+	MyStockGetHandler handler1;
+	CancellablePointer cancel_ptr1;
+	map.Get(StockKey{"a"}, nullptr, handler1, cancel_ptr1);
+	ASSERT_TRUE(handler1.got_item);
+	ASSERT_NE(handler1.last_item, nullptr);
+
+	/* two more callers have to wait */
+
+	MyStockGetHandler handler2, handler3;
+	CancellablePointer cancel_ptr2, cancel_ptr3;
+	map.Get(StockKey{"a"}, nullptr, handler2, cancel_ptr2);
+	map.Get(StockKey{"a"}, nullptr, handler3, cancel_ptr3);
+	ASSERT_FALSE(handler2.got_item);
+	ASSERT_FALSE(handler3.got_item);
+
+	handler1.last_item->Put(PutAction::DESTROY);
+	instance.RunSome();
+
+	/* the first waiter was served, the second one is still queued;
+	   these are not fatal so that the cancellation below is
+	   reached either way */
+
+	EXPECT_TRUE(handler2.got_item);
+	EXPECT_NE(handler2.last_item, nullptr);
+	EXPECT_FALSE(handler3.got_item);
+	ASSERT_TRUE(cancel_ptr3);
+
+	cancel_ptr3.Cancel();
+	instance.RunSome();
+
+	EXPECT_FALSE(handler3.got_item);
+
+	if (handler2.last_item != nullptr) {
+		handler2.last_item->Put(PutAction::DESTROY);
+		instance.RunSome();
+	}
+}
