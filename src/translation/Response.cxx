@@ -719,6 +719,8 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 	if (expand_redirect) {
 		expand_redirect = false;
 		redirect = expand_string_unescaped(alloc, redirect, match_data);
+		if (!IsValidHttpHeaderValue(redirect))
+			throw std::runtime_error{"Malformed REDIRECT"};
 	}
 
 	if (expand_site) {
