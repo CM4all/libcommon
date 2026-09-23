@@ -1775,3 +1775,92 @@ TEST(MultiStock, ReleaseFromReadyHandlerDeletesMapItem)
 	ASSERT_EQ(foo.factory_created, 1);
 	ASSERT_EQ(foo.destroyed, 1);
 }
+
+/**
+ * Regression test for the "consumed request" stall/crash.
+ *
+ * A #Waiting created with is_create hands its request to
+ * StockClass::Create() immediately.  If FinishWaiting() then picked an
+ * OuterItem that looked usable (CanUse()) but could not actually grant
+ * a lease - one at its concurrency limit holding only "unclean" idle
+ * items - it pushed that waiter back with a now-empty request and, once
+ * the remaining items disappeared, RetryWaiting() fed the null request
+ * to the factory (a null dereference, guarded only by an assert()).
+ *
+ * FindUsable() now skips items that cannot grant a lease, so the waiter
+ * is served by an item that can (here: the item that has spare
+ * concurrency), and is never stranded.
+ */
+TEST(MultiStock, RetryWaitingConsumedRequest)
+{
+	Instance instance{3};
+
+	Partition foo{instance, "foo"};
+
+	/* build an OuterItem "A" at its concurrency limit (2) holding
+	   only "unclean" idle leases: it satisfies CanUse(), but
+	   cannot grant a lease */
+	foo.Get(2);
+	instance.RunSome();
+	ASSERT_EQ(foo.factory_created, 1);
+	ASSERT_EQ(foo.ready, 2);
+
+	for (auto &l : foo.leases)
+		if (l.item != nullptr)
+			l.item->stopping = true;
+	foo.PutReady(2);
+	ASSERT_EQ(foo.ready, 0);
+	ASSERT_EQ(foo.total, 0);
+
+	/* a lease whose ready-handler re-enters Get() for the same
+	   key, from inside FinishWaiting() (in_finish_waiting) */
+	struct ReentrantLease final : StockGetHandler {
+		Partition &partition;
+		bool did_reenter = false;
+		CancellablePointer get_cancel_ptr;
+		MyInnerStockItem *item = nullptr;
+
+		explicit ReentrantLease(Partition &_p) noexcept :partition(_p) {}
+
+		~ReentrantLease() noexcept {
+			if (get_cancel_ptr)
+				get_cancel_ptr.Cancel();
+			else if (item != nullptr)
+				item->Put(PutAction::REUSE);
+		}
+
+		void OnStockItemReady(StockItem &_item) noexcept override {
+			get_cancel_ptr = nullptr;
+			item = (MyInnerStockItem *)&_item;
+
+			if (!did_reenter) {
+				did_reenter = true;
+				partition.Get();
+			}
+		}
+
+		void OnStockItemError(std::exception_ptr) noexcept override {
+			get_cancel_ptr = nullptr;
+		}
+	};
+
+	ReentrantLease c1{foo};
+	instance.multi_stock.Get(StockKey{foo.key}, ToNopPointer(&foo), 2,
+				 c1, c1.get_cancel_ptr);
+	instance.RunSome();
+
+	ASSERT_TRUE(c1.did_reenter);
+	ASSERT_NE(c1.item, nullptr);
+
+	/* prior to the fix, A's cleanup timer now fires and reaches
+	   RetryWaiting() with the consumed-request waiter at the
+	   front and no usable item, resulting in failure of
+	   assert(w.request) */
+	instance.multi_stock.FadeKey(StockKey{foo.key});
+	instance.RunSome();
+
+	/* the waiter was served, not stranded, and no create was
+	   started from a null request */
+	ASSERT_EQ(foo.factory_created, 2);
+	ASSERT_EQ(foo.failed, 0);
+}
