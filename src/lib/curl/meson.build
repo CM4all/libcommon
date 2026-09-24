@@ -1,4 +1,4 @@
-libcurl = dependency('libcurl', version: '>= 7.38',
+libcurl = dependency('libcurl', version: '>= 7.85',
                      required: get_variable('libcommon_require_curl', true))
 if not libcurl.found()
   curl_dep = libcurl
