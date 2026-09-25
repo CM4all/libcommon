@@ -39,6 +39,7 @@ pg = static_library(
   'Connection.cxx',
   'Result.cxx',
   'Error.cxx',
+  'QuoteIdentifier.cxx',
   'Reflection.cxx',
   pg_sources,
   include_directories: inc,
