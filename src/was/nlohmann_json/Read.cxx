@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Read.hxx"
+#include "was/ExceptionResponse.hxx"
 #include "was/ExpectRequestBody.hxx"
 #include "was/StringRequestBody.hxx"
 
@@ -15,7 +16,12 @@ ReadJsonRequestBody(struct was_simple &w, std::size_t limit)
 {
 	ExpectRequestBody(&w, "application/json");
 	const auto s = RequestBodyToString(&w, limit);
-	return nlohmann::json::parse(s);
+
+	try {
+		return nlohmann::json::parse(s);
+	} catch (...) {
+		throw BadRequest{"JSON parser error\n"};
+	}
 }
 
 } // namespace Was
