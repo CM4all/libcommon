@@ -588,7 +588,24 @@ MultiStock::MapItem::RetryWaiting() noexcept
 	}
 
 	auto &w = waiting.front();
-	assert(w.request);
+
+	if (!w.request) [[unlikely]] {
+		/* this waiter's request was already consumed to create
+		   an OuterItem which was then faded/removed (e.g. by a
+		   FadeAll) before it could be served; it can neither be
+		   served (no usable item) nor re-created (no request),
+		   so fail it */
+		auto &handler = w.handler;
+		waiting.erase_and_dispose(waiting.iterator_to(w),
+					  DeleteDisposer{});
+		handler.OnStockItemError(std::make_exception_ptr(StockOverloadedError{"Overloaded"}));
+
+		if (!waiting.empty())
+			ScheduleRetryWaiting();
+		else if (items.empty() && !get_cancel_ptr && !in_finish_waiting)
+			parent.Erase(*this);
+		return;
+	}
 
 	if (!IsFull() && !get_cancel_ptr)
 		Create(std::move(w.request));
