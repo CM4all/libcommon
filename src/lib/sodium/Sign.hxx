@@ -31,7 +31,7 @@ crypto_sign(std::byte *sm,
 		    reinterpret_cast<const unsigned char *>(sk.data()));
 }
 
-static inline bool
+static inline int
 crypto_sign_open(std::byte *m,
 		 std::span<const std::byte> sm,
 		 CryptoSignPublicKeyView pk) noexcept
