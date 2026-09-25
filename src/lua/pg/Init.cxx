@@ -15,12 +15,16 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include <cassert>
+
 namespace Lua {
 
 static int
 NewPg(lua_State *L)
 {
 	auto &event_loop = *(EventLoop *)lua_touserdata(L, lua_upvalueindex(1));
+	auto *const main_L = lua_tothread(L, lua_upvalueindex(2));
+	assert(main_L != nullptr);
 
 	if (lua_gettop(L) > 3)
 		return luaL_error(L, "Too many parameters");
@@ -28,7 +32,8 @@ NewPg(lua_State *L)
 	const char *conninfo = luaL_checkstring(L, 2);
 	const char *schema = luaL_optstring(L, 3, "");
 
-	NewPgConnection(L, event_loop, {.connect = conninfo, .schema = schema});
+	NewPgConnection(L, main_L, event_loop,
+			{.connect = conninfo, .schema = schema});
 	return 1;
 }
 
@@ -40,7 +45,8 @@ InitPg(lua_State *L, EventLoop &event_loop)
 
 	lua_newtable(L);
 	SetTable(L, RelativeStackIndex{-1}, "new",
-		 MakeCClosure(NewPg, LightUserData{&event_loop}));
+		 MakeCClosure(NewPg, LightUserData{&event_loop},
+			      CurrentThread{}));
 	SetTable(L, RelativeStackIndex{-1}, "encode_array", EncodeArray);
 	SetTable(L, RelativeStackIndex{-1}, "decode_array", DecodeArray);
 	lua_setglobal(L, "pg");

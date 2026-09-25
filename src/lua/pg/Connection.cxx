@@ -37,6 +37,12 @@ namespace Lua {
 class PgRequest;
 
 class PgConnection final : Pg::SharedConnectionHandler {
+	/**
+	 * The main #lua_State, which outlives every coroutine and is
+	 * therefore safe for long-lived NOTIFY registrations.
+	 */
+	lua_State *const main_L;
+
 	Pg::SharedConnection connection;
 
 	/**
@@ -68,8 +74,14 @@ class PgConnection final : Pg::SharedConnectionHandler {
 		bool registered = false;
 
 		template<typename H>
-		explicit NotifyRegistration(lua_State *L, H &&_handler) noexcept
-			:handler(L, std::forward<H>(_handler)), thread(L) {}
+		explicit NotifyRegistration(lua_State *main_L, lua_State *L,
+					    H &&_handler) noexcept
+			:handler(main_L), thread(main_L) {
+			/* store the handler using the main thread (which
+			   outlives this registration), reading the value
+			   off the calling thread's stack */
+			handler.Set(L, std::forward<H>(_handler));
+		}
 
 		void Start() noexcept;
 
@@ -123,8 +135,9 @@ class PgConnection final : Pg::SharedConnectionHandler {
 
 public:
 	template<typename... Args>
-	explicit PgConnection(Args&&... args) noexcept
-		:connection(std::forward<Args>(args)...,
+	explicit PgConnection(lua_State *_main_L, Args&&... args) noexcept
+		:main_L(_main_L),
+		 connection(std::forward<Args>(args)...,
 			    static_cast<Pg::SharedConnectionHandler &>(*this)) {}
 
 	auto &GetEventLoop() const noexcept {
@@ -288,7 +301,8 @@ PgConnection::Listen(lua_State *L)
 	const char *name = luaL_checkstring(L, name_idx);
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
-	auto [_, inserted] = notify_registrations.try_emplace(name, L,
+	auto [_, inserted] = notify_registrations.try_emplace(name,
+							      main_L, L,
 							      StackIndex{handler_idx});
 	if (!inserted)
 		luaL_argerror(L, name_idx, "Duplicate notify name");
@@ -473,10 +487,11 @@ InitPgConnection(lua_State *L) noexcept
 }
 
 void
-NewPgConnection(struct lua_State *L, EventLoop &event_loop,
+NewPgConnection(struct lua_State *L, struct lua_State *main_L,
+		EventLoop &event_loop,
 		Pg::Config &&config) noexcept
 {
-	PgConnectionClass::New(L, event_loop, std::move(config));
+	PgConnectionClass::New(L, main_L, event_loop, std::move(config));
 }
 
 } // namespace Lua

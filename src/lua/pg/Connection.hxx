@@ -15,7 +15,8 @@ void
 InitPgConnection(lua_State *L) noexcept;
 
 void
-NewPgConnection(struct lua_State *L, EventLoop &event_loop,
+NewPgConnection(struct lua_State *L, struct lua_State *main_L,
+		EventLoop &event_loop,
 		Pg::Config &&config) noexcept;
 
 } // namespace Lua
