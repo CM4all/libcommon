@@ -39,7 +39,7 @@ ExpandableStringList::IsExpandable() const noexcept
 }
 
 void
-ExpandableStringList::Expand(AllocatorPtr alloc, const MatchData &match_data) noexcept
+ExpandableStringList::Expand(AllocatorPtr alloc, const MatchData &match_data)
 {
 	for (auto &i : list) {
 		if (!i.expandable)
