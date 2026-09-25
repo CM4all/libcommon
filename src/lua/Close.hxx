@@ -32,7 +32,9 @@ Close(lua_State *L, AnyStackIndex auto idx)
 
 	/* call __close(obj), ignore return values and errors */
 	lua_pushvalue(L, GetStackIndex(idx));
-	lua_pcall(L, 1, 0, 0);
+	if (lua_pcall(L, 1, 0, 0) != LUA_OK)
+		/* pop the error object */
+		lua_pop(L, 1);
 
 	/* pop metatable */
 	lua_pop(L, 1);
