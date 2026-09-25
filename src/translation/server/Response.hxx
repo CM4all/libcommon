@@ -33,6 +33,12 @@ class Response {
 	std::byte *buffer = nullptr;
 	std::size_t capacity = 0, size = 0;
 
+	/**
+	 * Has a packet with a payload larger than the 16 bit wire
+	 * length field been added?  Such a response must not be sent.
+	 */
+	bool overflow = false;
+
 	enum VaryIndex {
 		PARAM,
 		SESSION,
@@ -74,6 +80,7 @@ public:
 		:buffer(std::exchange(other.buffer, nullptr)),
 		 capacity(other.capacity),
 		 size(other.size),
+		 overflow(other.overflow),
 		 vary(other.vary) {}
 
 	~Response() noexcept {
@@ -85,6 +92,7 @@ public:
 		swap(buffer, src.buffer);
 		swap(capacity, src.capacity);
 		swap(size, src.size);
+		swap(overflow, src.overflow);
 		swap(vary, src.vary);
 		return *this;
 	}

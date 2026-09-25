@@ -174,6 +174,15 @@ Connection::SendResponse(Response &&_response) noexcept
 
 	state = State::RESPONSE;
 	output = _response.Finish();
+	if (output.data() == nullptr) [[unlikely]] {
+		/* the response could not be framed (a packet payload
+		   exceeded the 16 bit length field); close the
+		   connection rather than send a desynchronized
+		   stream */
+		Destroy();
+		return false;
+	}
+
 	response = output.data();
 	cancel_ptr = nullptr;
 

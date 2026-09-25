@@ -41,7 +41,11 @@ Response::Write(std::size_t nbytes) noexcept
 void *
 Response::WriteHeader(TranslationCommand cmd, std::size_t payload_size) noexcept
 {
-	assert(payload_size <= 0xffff);
+	if (payload_size > 0xffff) [[unlikely]]
+		/* too large for the 16 bit wire length field; remember
+		   it and let Finish() fail instead of emitting a header
+		   that does not describe the bytes that follow */
+		overflow = true;
 
 	const TranslationHeader header{uint16_t(payload_size), cmd};
 	void *p = Write(sizeof(header) + payload_size);
@@ -59,6 +63,15 @@ Response::Packet(TranslationCommand cmd, std::span<const std::byte> payload) noe
 std::span<std::byte>
 Response::Finish() noexcept
 {
+	if (overflow) [[unlikely]] {
+		/* this response had a packet that was too large to be
+		   represented */
+		delete[] buffer;
+		buffer = nullptr;
+		capacity = size = 0;
+		return {};
+	}
+
 	/* generate a VARY packet? */
 	std::size_t n_vary = std::accumulate(vary.begin(), vary.end(), 0,
 					     std::plus<std::size_t>{});
