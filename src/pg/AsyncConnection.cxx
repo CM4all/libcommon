@@ -282,7 +282,7 @@ AsyncConnection::Disconnect() noexcept
 	if (!IsDefined())
 		return;
 
-	socket_event.Abandon();
+	socket_event.ReleaseSocket();
 	Connection::Disconnect();
 	state = State::DISCONNECTED;
 }
