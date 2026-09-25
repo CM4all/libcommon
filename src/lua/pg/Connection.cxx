@@ -13,6 +13,7 @@
 #include "lua/Value.hxx"
 #include "lua/CoOperation.hxx"
 #include "lua/CoRunner.hxx"
+#include "pg/QuoteIdentifier.hxx"
 #include "pg/SharedConnection.hxx"
 #include "util/AllocatedArray.hxx"
 #include "util/Cancellable.hxx"
@@ -28,6 +29,8 @@ extern "C" {
 #include <string>
 
 #include <stdio.h>
+
+using std::string_view_literals::operator""sv;
 
 namespace Lua {
 
@@ -103,7 +106,8 @@ class PgConnection final : Pg::SharedConnectionHandler {
 				if (registration.registered)
 					continue;
 
-				const auto sql = fmt::format("LISTEN \"{}\"", name);
+				const auto sql = fmt::format("LISTEN {}"sv,
+							     Pg::QuoteIdentifier(name));
 				c.Execute(sql.c_str());
 				registration.registered = true;
 			}
