@@ -160,9 +160,15 @@ try {
 	Push(L, true);
 	return 1;
 } catch (...) {
+	auto e = std::current_exception();
+	if (!e)
+		/* a LuaJIT error (foreign exception): rethrow it as a
+		   Lua error */
+		throw;
+
 	// return [nil, error_message] for assert()
 	Push(L, nullptr);
-	Push(L, std::current_exception());
+	Push(L, std::move(e));
 	return 2;
 }
 
@@ -192,9 +198,15 @@ try {
 		return 1;
 	}
 } catch (...) {
+	auto e = std::current_exception();
+	if (!e)
+		/* a LuaJIT error (foreign exception): rethrow it as a
+		   Lua error */
+		throw;
+
 	// return [nil, error_message] for assert()
 	Push(L, nullptr);
-	Push(L, std::current_exception());
+	Push(L, std::move(e));
 	return 2;
 }
 
