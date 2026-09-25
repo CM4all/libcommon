@@ -22,6 +22,12 @@ SpawnConfig::VerifyGid(gid_t gid) const
 void
 SpawnConfig::Verify(const UidGid &uid_gid) const
 {
+	if (uid_gid.real_uid == UidGid::ILLEGAL_UID ||
+	    uid_gid.effective_uid == UidGid::ILLEGAL_UID ||
+	    uid_gid.real_gid == UidGid::ILLEGAL_GID ||
+	    uid_gid.effective_gid == UidGid::ILLEGAL_GID)
+		throw std::runtime_error{"uid/gid -1 is illegal"};
+
 	if (allow_any_uid_gid)
 		return;
 

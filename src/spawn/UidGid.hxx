@@ -16,6 +16,13 @@ struct UidGid {
 	static constexpr uid_t UNSET_UID = 0;
 	static constexpr gid_t UNSET_GID = 0;
 
+	/**
+	 * These uid/gid values must not be used because they are
+	 * special setreuid()/setregid() parameter values.
+	 */
+	static constexpr uid_t ILLEGAL_UID = -1;
+	static constexpr gid_t ILLEGAL_GID = -1;
+
 	uid_t real_uid{UNSET_UID};
 	gid_t real_gid{UNSET_GID};
 

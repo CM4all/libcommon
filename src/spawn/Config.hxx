@@ -12,6 +12,7 @@
 #endif
 
 #include <set>
+#include <stdexcept>
 #include <string>
 
 /**
@@ -92,14 +93,16 @@ struct SpawnConfig {
 
 	[[gnu::pure]]
 	bool IsUidAllowed(uid_t uid) const noexcept {
-		return (allow_all_uids_from > 0 &&
-			uid >= allow_all_uids_from) ||
-			allowed_uids.find(uid) != allowed_uids.end();
+		return uid != UidGid::ILLEGAL_UID &&
+			((allow_all_uids_from > 0 &&
+			  uid >= allow_all_uids_from) ||
+			 allowed_uids.find(uid) != allowed_uids.end());
 	}
 
 	[[gnu::pure]]
 	bool IsGidAllowed(gid_t gid) const noexcept {
-		return allowed_gids.find(gid) != allowed_gids.end();
+		return gid != UidGid::ILLEGAL_GID &&
+			allowed_gids.find(gid) != allowed_gids.end();
 	}
 
 	void VerifyUid(uid_t uid) const;
