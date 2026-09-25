@@ -4,6 +4,7 @@
 
 #include "Init.hxx"
 #include "lua/CheckArg.hxx"
+#include "lua/Error.hxx"
 #include "lua/Util.hxx"
 #include "lua/sodium/CheckKey.hxx"
 #include "lua/json/ToJson.hxx"
@@ -19,7 +20,7 @@ namespace Lua {
 
 static int
 SignJwt(lua_State *L)
-{
+try {
 	if (lua_gettop(L) < 3)
 		return luaL_error(L, "Not enough parameters");
 
@@ -43,6 +44,8 @@ SignJwt(lua_State *L)
 
 	lua_pushstring(L, AllocatedString{header_b64, "."sv, payload_b64, "."sv, signature}.c_str());
 	return 1;
+} catch (...) {
+	RaiseCurrent(L);
 }
 
 void

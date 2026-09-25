@@ -4,6 +4,7 @@
 
 #include "Dump.hxx"
 #include "ToJson.hxx"
+#include "lua/Error.hxx"
 
 #include <nlohmann/json.hpp>
 
@@ -16,7 +17,7 @@ namespace Lua {
 
 int
 DumpJson(lua_State *L)
-{
+try {
 	if (lua_gettop(L) < 1)
 		return luaL_error(L, "Not enough parameters");
 
@@ -26,6 +27,8 @@ DumpJson(lua_State *L)
 	const auto json = ToJson(L, 1).dump();
 	lua_pushlstring(L, json.data(), json.size());
 	return 1;
+} catch (...) {
+	RaiseCurrent(L);
 }
 
 } // namespace Lua
