@@ -21,6 +21,9 @@ GetWeightFromTxt(AvahiStringList *txt) noexcept
 		return 1.0;
 
 	const auto sv = GetValueFromTxt(*txt);
+	if (sv.data() == nullptr)
+		/* a bare "weight" key without a value */
+		return 1.0;
 
 	/* the string is null-terminated */
 	const char *const s = sv.data();
