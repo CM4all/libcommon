@@ -61,4 +61,14 @@ Raise(lua_State *L, std::exception_ptr e);
 void
 RaiseCurrent(lua_State *L);
 
+/**
+ * Return the current C++ exception as Lua error in the form
+ * [nil,message].  If the current exception is a LuaJIT error, rethrow
+ * it.
+ *
+ * @return 2 (because 2 items have been pushed to the Lua stack)
+ */
+int
+ReturnCurrentException(lua_State *L);
+
 }

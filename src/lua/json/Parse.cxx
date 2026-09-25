@@ -33,13 +33,7 @@ try {
 	Push(L, j);
 	return 1;
 } catch (...) {
-	if (auto e = std::current_exception()) {
-		// return [nil, error_message] for assert()
-		Push(L, nullptr);
-		Push(L, std::current_exception());
-		return 2;
-	} else
-		throw;
+	return ReturnCurrentException(L);
 }
 
 } // namespace Lua

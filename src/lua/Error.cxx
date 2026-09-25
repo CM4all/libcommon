@@ -70,4 +70,19 @@ RaiseCurrent(lua_State *L)
 		throw;
 }
 
+int
+ReturnCurrentException(lua_State *L)
+{
+	auto e = std::current_exception();
+	if (!e)
+		/* a LuaJIT error (foreign exception): rethrow it as a
+		   Lua error */
+		throw;
+
+	// return [nil, error_message] for assert()
+	lua_pushnil(L);
+	Push(L, std::move(e));
+	return 2;
+}
+
 } // namespace Lua
