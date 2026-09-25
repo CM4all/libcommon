@@ -20,12 +20,12 @@ crypto_onetimeauth_poly1305(std::span<std::byte, crypto_onetimeauth_poly1305_BYT
 }
 
 [[nodiscard]] [[gnu::pure]]
-static bool
+static int
 crypto_onetimeauth_poly1305_verify(std::span<const std::byte, crypto_onetimeauth_poly1305_BYTES> h,
 				   std::span<const std::byte> in,
 				   std::span<const std::byte, crypto_onetimeauth_poly1305_KEYBYTES> k) noexcept
 {
 	return crypto_onetimeauth_poly1305_verify(reinterpret_cast<const unsigned char *>(h.data()),
 						  reinterpret_cast<const unsigned char *>(in.data()), in.size(),
-						  reinterpret_cast<const unsigned char *>(k.data())) == 0;
+						  reinterpret_cast<const unsigned char *>(k.data()));
 }

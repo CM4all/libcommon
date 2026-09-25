@@ -24,7 +24,7 @@ crypto_secretbox_easy(std::byte *ciphertext,
 			      reinterpret_cast<const unsigned char *>(key.data()));
 }
 
-static inline bool
+static inline int
 crypto_secretbox_open_easy(std::byte *message,
 			   std::span<const std::byte> ciphertext,
 			   CryptoSecretBoxNonceView nonce,
@@ -34,5 +34,5 @@ crypto_secretbox_open_easy(std::byte *message,
 					  reinterpret_cast<const unsigned char *>(ciphertext.data()),
 					  ciphertext.size(),
 					  reinterpret_cast<const unsigned char *>(nonce.data()),
-					  reinterpret_cast<const unsigned char *>(key.data())) == 0;
+					  reinterpret_cast<const unsigned char *>(key.data()));
 }
