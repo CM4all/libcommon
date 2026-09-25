@@ -3,10 +3,9 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "JsonLinesOutputProducer.hxx"
+#include "lib/nlohmann_json/Dump.hxx"
 #include "was/async/Output.hxx"
 #include "util/SpanCast.hxx"
-
-#include <nlohmann/json.hpp>
 
 #include <cassert>
 
@@ -29,7 +28,7 @@ JsonLinesOutputProducer::Push(const nlohmann::json &j) noexcept
 	if (IsFull())
 		return false;
 
-	lines.emplace_back(j.dump());
+	lines.emplace_back(Json::DumpSloppy(j));
 	size += lines.back().value.size();
 
 	if (output != nullptr)

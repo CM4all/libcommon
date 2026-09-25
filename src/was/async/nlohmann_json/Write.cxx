@@ -3,11 +3,10 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Write.hxx"
+#include "lib/nlohmann_json/Dump.hxx"
 #include "was/ExceptionResponse.hxx"
 #include "was/async/SimpleResponse.hxx"
 #include "was/async/StringOutputProducer.hxx"
-
-#include <nlohmann/json.hpp>
 
 using std::string_view_literals::operator""sv;
 
@@ -17,7 +16,7 @@ void
 WriteJson(SimpleResponse &response, const nlohmann::json &j) noexcept
 {
 	response.headers.emplace("content-type"sv, "application/json"sv);
-	response.body = std::make_unique<StringOutputProducer>(j.dump());
+	response.body = std::make_unique<StringOutputProducer>(Json::DumpSloppy(j));
 }
 
 SimpleResponse

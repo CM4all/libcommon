@@ -3,9 +3,8 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "ToDisposableBuffer.hxx"
+#include "Dump.hxx"
 #include "util/DisposableBuffer.hxx"
-
-#include <nlohmann/json.hpp>
 
 namespace Json {
 
@@ -20,7 +19,7 @@ ToDisposableBuffer(std::string_view src) noexcept
 DisposableBuffer
 ToDisposableBuffer(const nlohmann::json &j) noexcept
 {
-	return ToDisposableBuffer(static_cast<std::string_view>(j.dump()));
+	return ToDisposableBuffer(static_cast<std::string_view>(DumpSloppy(j)));
 }
 
 } // namespace Json
