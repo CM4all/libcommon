@@ -4,11 +4,11 @@
 
 #pragma once
 
-enum RecursiveCopyOptions : unsigned {
+struct RecursiveCopyOptions {
 	/**
-	 * Do not overwrite existing files.
+	 * Overwrite existing files?
 	 */
-	RECURSIVE_COPY_NO_OVERWRITE = 0x1U,
+	bool overwrite = true;
 
 	/**
 	 * Stay in the initial filesystem, don't cross mount points
@@ -16,17 +16,17 @@ enum RecursiveCopyOptions : unsigned {
 	 *
 	 * This is implemented by comparing the mount id.
 	 */
-	RECURSIVE_COPY_ONE_FILESYSTEM = 0x2U,
+	bool one_filesystem = false;
 
 	/**
 	 * Preserve file modes (permissions).
 	 */
-	RECURSIVE_COPY_PRESERVE_MODE = 0x4U,
+	bool preserve_mode = false;
 
 	/**
 	 * Preserve the modification time stamp.
 	 */
-	RECURSIVE_COPY_PRESERVE_TIME = 0x8U,
+	bool preserve_time = false;
 };
 
 class FileDescriptor;
@@ -46,4 +46,4 @@ struct FileAt;
  */
 void
 RecursiveCopy(FileAt src_file, FileAt dst_file,
-	      unsigned options=0);
+	      RecursiveCopyOptions options={});

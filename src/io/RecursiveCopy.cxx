@@ -22,14 +22,14 @@
 #include <sys/stat.h>
 
 static constexpr int
-RecursiveCopyOptionsToStatxMask(unsigned options) noexcept
+RecursiveCopyOptionsToStatxMask(RecursiveCopyOptions options) noexcept
 {
 	int mask = STATX_TYPE|STATX_SIZE;
-	if (options & RECURSIVE_COPY_ONE_FILESYSTEM)
+	if (options.one_filesystem)
 		mask |= STATX_MNT_ID;
-	if (options & RECURSIVE_COPY_PRESERVE_MODE)
+	if (options.preserve_mode)
 		mask |= STATX_MODE;
-	if (options & RECURSIVE_COPY_PRESERVE_TIME)
+	if (options.preserve_time)
 		mask |= STATX_MTIME;
 	return mask;
 }
@@ -39,21 +39,11 @@ struct RecursiveCopyContext {
 
 	const int statx_mask;
 
-	/**
-	 * @see RECURSIVE_COPY_NO_OVERWRITE
-	 */
-	const bool overwrite;
+	const RecursiveCopyOptions options;
 
-	const bool one_filesystem;
-
-	const bool preserve_mode, preserve_time;
-
-	constexpr RecursiveCopyContext(unsigned options) noexcept
-		:statx_mask(RecursiveCopyOptionsToStatxMask(options)),
-		 overwrite(!(options & RECURSIVE_COPY_NO_OVERWRITE)),
-		 one_filesystem(options & RECURSIVE_COPY_ONE_FILESYSTEM),
-		 preserve_mode(options & RECURSIVE_COPY_PRESERVE_MODE),
-		 preserve_time(options & RECURSIVE_COPY_PRESERVE_TIME)
+	constexpr RecursiveCopyContext(RecursiveCopyOptions _options) noexcept
+		:statx_mask(RecursiveCopyOptionsToStatxMask(_options)),
+		 options(_options)
 	{
 	}
 };
@@ -74,14 +64,14 @@ Preserve(const RecursiveCopyContext &ctx, const struct statx &stx,
 
 	static constexpr mode_t MODE_MASK = ~MODE_CLEAR;
 
-	if (ctx.preserve_mode &&
+	if (ctx.options.preserve_mode &&
 	    (S_ISDIR(stx.stx_mode)
 	     ? fchmodat(dst.Get(), ".", stx.stx_mode & MODE_MASK,
 			0)
 	     : fchmod(dst.Get(), stx.stx_mode & MODE_MASK)) < 0)
 		throw FmtErrno("Failed to set mode of {:?}", dst_filename);
 
-	if (ctx.preserve_time) {
+	if (ctx.options.preserve_time) {
 		struct timespec times[2];
 		times[0].tv_nsec = UTIME_OMIT;
 		times[1].tv_sec = stx.stx_mtime.tv_sec;
@@ -193,7 +183,7 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 	else if (S_ISREG(stx.stx_mode)) {
 		auto dst = CopyRegularFile(src, dst_parent, dst_filename,
 					   stx.stx_size,
-					   ctx.overwrite);
+					   ctx.options.overwrite);
 		if (dst.IsDefined())
 			Preserve(ctx, stx, dst, dst_filename);
 	} else {
@@ -259,7 +249,7 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 			   ELOOP, so copy the symlink */
 			CopySymlink(src_file.directory, src_file.name,
 				    dst_file.directory, dst_file.name,
-				    ctx.overwrite);
+				    ctx.options.overwrite);
 			return;
 
 		default:
@@ -274,7 +264,7 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 		  ctx.statx_mask, &stx) < 0)
 		throw FmtErrno("Failed to stat {:?}", src_file.name);
 
-	if (ctx.one_filesystem) {
+	if (ctx.options.one_filesystem) {
 		if (ctx.mnt_id == 0)
 			/* this is the top-level call - initialize the
 			   "device" field */
@@ -290,7 +280,7 @@ RecursiveCopy(RecursiveCopyContext &ctx,
 
 void
 RecursiveCopy(FileAt src_file, FileAt dst_file,
-	      unsigned options)
+	      const RecursiveCopyOptions options)
 {
 	RecursiveCopyContext ctx{options};
 	RecursiveCopy(ctx, src_file, dst_file);
