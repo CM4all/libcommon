@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 
 #include <forward_list>
+#include <functional>
 #include <list>
 
 namespace {
@@ -1863,4 +1864,88 @@ TEST(MultiStock, RetryWaitingConsumedRequest)
 	   started from a null request */
 	ASSERT_EQ(foo.factory_created, 2);
 	ASSERT_EQ(foo.failed, 0);
+}
+
+/**
+ * Regression test for the deferred-FinishWaiting route: a re-entrant
+ * Get() at concurrency 1 leaves an is_create waiter whose request was
+ * consumed to create an OuterItem; if that item is faded before the
+ * deferred RetryWaiting() runs, the waiter must be failed, not fed to
+ * Create() with a null request.
+ */
+TEST(MultiStock, RetryWaitingConsumedRequestDeferred)
+{
+	Instance instance{3};
+
+	Partition foo{instance, "foo"};
+
+	struct Lease final : StockGetHandler {
+		Partition &partition;
+		std::function<void()> on_ready;
+		CancellablePointer get_cancel_ptr;
+		MyInnerStockItem *item = nullptr;
+		bool error = false;
+
+		explicit Lease(Partition &_p) noexcept :partition(_p) {}
+
+		~Lease() noexcept {
+			if (get_cancel_ptr)
+				get_cancel_ptr.Cancel();
+			else if (item != nullptr)
+				item->Put(PutAction::REUSE);
+		}
+
+		void Get(std::size_t concurrency) noexcept {
+			partition.instance.multi_stock.Get(StockKey{partition.key},
+							   ToNopPointer(&partition),
+							   concurrency,
+							   *this, get_cancel_ptr);
+		}
+
+		void OnStockItemReady(StockItem &_item) noexcept override {
+			get_cancel_ptr = nullptr;
+			item = (MyInnerStockItem *)&_item;
+			if (on_ready)
+				std::exchange(on_ready, {})();
+		}
+
+		void OnStockItemError(std::exception_ptr) noexcept override {
+			get_cancel_ptr = nullptr;
+			error = true;
+		}
+	};
+
+	/* build OuterItem A at concurrency 1 with one "unclean" idle
+	   lease (at its limit, cannot grant) */
+	Lease a{foo};
+	a.Get(1);
+	instance.RunSome();
+	ASSERT_NE(a.item, nullptr);
+	a.item->stopping = true;
+	a.item->Put(PutAction::REUSE);
+	a.item = nullptr;
+
+	Lease c2{foo};
+
+	/* c1's ready-handler re-enters Get() (c2) from inside
+	   FinishWaiting(); at concurrency 1 the fresh item B is full,
+	   so c2 is queued and its create (C) is deferred */
+	Lease c1{foo};
+	c1.on_ready = [&]{
+		c2.Get(1);
+
+		/* fade everything now, in the same event-loop
+		   iteration, before the deferred RetryWaiting() runs:
+		   the fresh item created for c2 is removed by its
+		   cleanup timer (HandleTimers) before RunDeferred */
+		instance.multi_stock.FadeKey(StockKey{foo.key});
+	};
+	c1.Get(1);
+	instance.RunSome();
+
+	ASSERT_NE(c1.item, nullptr);
+
+	/* c2 was failed, not served from a null request */
+	EXPECT_EQ(c2.item, nullptr);
+	EXPECT_TRUE(c2.error);
 }
