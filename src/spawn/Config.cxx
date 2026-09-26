@@ -18,3 +18,21 @@ SpawnConfig::VerifyGid(gid_t gid) const
 	if (!IsGidAllowed(gid))
 		throw FmtRuntimeError("gid {} is not allowed", gid);
 }
+
+void
+SpawnConfig::Verify(const UidGid &uid_gid) const
+{
+	if (allow_any_uid_gid)
+		return;
+
+	if (uid_gid.real_uid != UidGid::UNSET_UID)
+		VerifyUid(uid_gid.real_uid);
+
+	if (uid_gid.real_gid != UidGid::UNSET_GID)
+		VerifyGid(uid_gid.real_gid);
+
+	VerifyUid(uid_gid.effective_uid);
+	VerifyGid(uid_gid.effective_gid);
+	VerifyGroups(uid_gid.supplementary_groups.begin(),
+		     uid_gid.supplementary_groups.end());
+}
