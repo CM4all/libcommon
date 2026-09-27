@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Response.hxx"
+#include "ValidateString.hxx"
 #if TRANSLATION_ENABLE_EXECUTE
 #include "ExecuteOptions.hxx"
 #endif
@@ -34,6 +35,8 @@
 #if TRANSLATION_ENABLE_RADDRESS
 #include "translation/Layout.hxx"
 #endif
+
+using namespace Translation; // import functions from ValidateString.hxx
 
 void
 TranslateResponse::Clear() noexcept
@@ -759,6 +762,8 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 	if (expand_site) {
 		expand_site = false;
 		site = expand_string_unescaped(alloc, site, match_data);
+		if (!IsValidSite(site))
+			throw std::runtime_error{"Malformed SITE"};
 	}
 
 	if (expand_document_root) {
@@ -770,6 +775,8 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 	if (expand_uri) {
 		expand_uri = false;
 		uri = expand_string_unescaped(alloc, uri, match_data);
+		if (!IsValidAbsoluteUriPath(uri))
+			throw std::runtime_error{"Malformed URI"};
 	}
 
 	if (expand_test_path) {
@@ -796,6 +803,8 @@ TranslateResponse::Expand(AllocatorPtr alloc, const MatchData &match_data)
 	if (expand_cookie_host) {
 		expand_cookie_host = false;
 		cookie_host = expand_string_unescaped(alloc, cookie_host, match_data);
+		if (!VerifyDomainName(cookie_host))
+			throw std::runtime_error{"Malformed COOKIE_HOST"};
 	}
 
 	for (const auto &i : expand_request_headers) {
