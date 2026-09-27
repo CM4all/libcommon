@@ -82,6 +82,13 @@ SimpleInput::Premature(std::size_t nbytes)
 {
 	CancelRead();
 
+	if (nbytes > Buffer::max_size())
+		/* a well-behaved peer never announces more than the
+		   client is willing to buffer; this bounds the
+		   synchronous discard loop below so a peer that keeps
+		   the pipe filled cannot hold the event loop */
+		throw SocketProtocolError{"PREMATURE count too large"};
+
 	if (!buffer) {
 		if (nbytes == position)
 			/* the body has already been received
