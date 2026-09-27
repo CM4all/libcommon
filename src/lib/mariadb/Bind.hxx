@@ -120,19 +120,29 @@ class MysqlStaticStringBuffer {
 
 	unsigned long length;
 
+	my_bool is_null;
+
 public:
 	void Bind(MYSQL_BIND& bind) noexcept {
 		bind.buffer_type = MYSQL_TYPE_STRING;
 		bind.buffer = value.data();
 		bind.buffer_length = value.size();
 		bind.length = &length;
+		bind.is_null = &is_null;
+	}
+
+	constexpr bool IsNull() const noexcept {
+		return is_null;
 	}
 
 	constexpr bool IsTruncated() const noexcept {
-		return length > size;
+		return !is_null && length > size;
 	}
 
 	constexpr operator std::string_view() const noexcept {
+		if (is_null)
+			return {};
+
 		return {value.data(), std::min<std::size_t>(length, size)};
 	}
 };
@@ -143,6 +153,7 @@ public:
 class MysqlDynamicStringBuffer {
 	AllocatedArray<char> buffer;
 	unsigned long length;
+	my_bool is_null;
 
 public:
 	MysqlDynamicStringBuffer(size_t cap)
@@ -155,13 +166,21 @@ public:
 		bind.buffer = buffer.data();
 		bind.buffer_length = buffer.size();
 		bind.length = &length;
+		bind.is_null = &is_null;
+	}
+
+	bool IsNull() const noexcept {
+		return is_null;
 	}
 
 	bool IsTruncated() const noexcept {
-		return length > buffer.size();
+		return !is_null && length > buffer.size();
 	}
 
 	operator std::string_view() const noexcept {
+		if (is_null)
+			return {};
+
 		return {buffer.data(),
 			std::min<std::size_t>(length, buffer.size())};
 	}
