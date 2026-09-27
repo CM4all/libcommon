@@ -30,6 +30,7 @@ using std::string_view_literals::operator""sv;
 ChildOptions::ChildOptions(AllocatorPtr alloc,
 			   const ChildOptions &src) noexcept
 	:tag(alloc.Dup(src.tag)),
+	 chroot(alloc.CheckDup(src.chroot)),
 	 chdir(alloc.CheckDup(src.chdir)),
 	 stderr_path(alloc.CheckDup(src.stderr_path)),
 	 expand_stderr_path(alloc.CheckDup(src.expand_stderr_path)),
