@@ -662,6 +662,11 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 
 	retry_event.Cancel();
 
+	/* protect against re-entrant cancellation of a sibling waiter
+	   from inside the OnStockItemError() callback */
+	assert(!in_finish_waiting);
+	in_finish_waiting = true;
+
 	waiting.clear_and_dispose([this, &error](auto *w){
 		if (!w->is_create) {
 			++counters.failed_waits;
@@ -673,7 +678,11 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 		delete w;
 	});
 
-	if (items.empty() && !in_finish_waiting)
+	assert(in_finish_waiting);
+	in_finish_waiting = false;
+
+	if (items.empty() && waiting.empty() && !get_cancel_ptr &&
+	    !retry_event.IsPending())
 		parent.Erase(*this);
 }
 
