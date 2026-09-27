@@ -369,8 +369,16 @@ try {
 	/* unlike pivot_root(), chroot() needs search permissions on
 	   the target directory, therefore we chroot() after switching
 	   to the final uid/gid */
-	if (p.chroot != nullptr && chroot(p.chroot) < 0)
-		throw FmtErrno("chroot({:?}) failed", p.chroot);
+	if (p.chroot != nullptr) {
+		if (chroot(p.chroot) < 0)
+			throw FmtErrno("chroot({:?}) failed", p.chroot);
+
+		/* chroot() does not move the working directory; to
+		   prevent it from staying outside of the new root,
+		   force a CHDIR */
+		if (p.chdir == nullptr)
+			p.chdir = "/";
+	}
 
 	if (p.chdir != nullptr && chdir(p.chdir) < 0)
 		throw FmtErrno("chdir({:?}) failed", p.chdir);
