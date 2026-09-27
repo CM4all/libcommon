@@ -7,6 +7,7 @@
 #include "system/Error.hxx"
 #include "system/linux/Mount.hxx"
 #include "io/FileAt.hxx"
+#include "util/PrintException.hxx"
 #include "util/SharedLease.hxx"
 
 #include <cassert>
@@ -63,7 +64,13 @@ struct TmpfsManager::Item final
 
 	~Item() noexcept {
 		/* unmount the tmpfs and delete it */
-		UmountRmdir(manager.mnt, name.c_str());
+		try {
+			UmountRmdir(manager.mnt, name.c_str());
+		} catch (...) {
+			/* we can't handle it from here, so just log
+			   it */
+			PrintException(std::current_exception());
+		}
 	}
 
 	Item(const Item &) = delete;
