@@ -48,6 +48,19 @@ UidGid::MakeId(char *p) const noexcept
 	if (effective_gid != UNSET_GID)
 		p = fmt::format_to(p, ";gid{}", effective_gid);
 
+	if (real_uid != UNSET_UID)
+		p = fmt::format_to(p, ";ruid{}", real_uid);
+
+	if (real_gid != UNSET_GID)
+		p = fmt::format_to(p, ";rgid{}", real_gid);
+
+	for (const gid_t g : supplementary_groups) {
+		if (g == UNSET_GID)
+			break;
+
+		p = fmt::format_to(p, ";sg{}", g);
+	}
+
 	return p;
 }
 

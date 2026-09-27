@@ -315,6 +315,9 @@ MountNamespaceOptions::MakeId(char *p) const noexcept
 	p = AppendOptional(p, ";pts"sv, mount_pts);
 	p = AppendOptional(p, ";bpts"sv, bind_mount_pts);
 	p = AppendOptionalValue(p, ";tt:"sv, mount_tmp_tmpfs);
+	p = AppendOptional(p, ";tte"sv, mount_tmp_tmpfs_exec);
+	if (dir_mode != 0711)
+		p = fmt::format_to(p, ";dm{:o}", dir_mode);
 	p = AppendOptionalDjbHash(p, ";ls"sv, mount_listen_stream);
 
 	p = Mount::MakeIdAll(p, mounts);

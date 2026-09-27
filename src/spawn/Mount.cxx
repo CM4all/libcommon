@@ -419,11 +419,15 @@ Mount::MakeId(char *p) const noexcept
 
 	case Type::TMPFS:
 		p = AppendValue(p, ";t:"sv, target);
+		p = AppendOptional(p, 'w', writable);
+		p = AppendOptional(p, 'x', exec);
 		return p;
 
 	case Type::NAMED_TMPFS:
 		p = AppendValue(p, ";nt:"sv, source);
 		p = AppendValue(p, ">"sv, target);
+		p = AppendOptional(p, 'w', writable);
+		p = AppendOptional(p, 'x', exec);
 		return p;
 
 	case Type::WRITE_FILE:

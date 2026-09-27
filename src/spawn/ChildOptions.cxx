@@ -114,6 +114,7 @@ ChildOptions::MakeId(char *p) const noexcept
 	if (umask >= 0)
 		p = fmt::format_to(p, ";u{:o}", umask);
 
+	p = AppendOptionalDjbHash(p, ";cr"sv, chroot);
 	p = AppendOptionalDjbHash(p, ";cd"sv, chdir);
 	p = AppendOptionalDjbHash(p, ";e"sv, stderr_path);
 
