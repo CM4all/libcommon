@@ -38,6 +38,16 @@ MakeIovecAttribute()
 	return MakeIovecStatic<Attribute, value>();
 }
 
+template<Attribute a>
+static constexpr auto
+MakeIovecTruncated() noexcept
+{
+	static constexpr struct {
+		Attribute truncated, attribute;
+	} value{Attribute::TRUNCATED, a};
+	return MakeIovecT(value);
+}
+
 void
 Send(SocketDescriptor s, const Datagram &d)
 {
@@ -183,6 +193,21 @@ Send(SocketDescriptor s, const Datagram &d)
 		content_type.value = d.content_type;
 		v.push_back(MakeIovecT(content_type));
 	}
+
+	if (d.truncated_host)
+		v.push_back(MakeIovecTruncated<Attribute::HOST>());
+
+	if (d.truncated_http_uri)
+		v.push_back(MakeIovecTruncated<Attribute::HTTP_URI>());
+
+	if (d.truncated_http_referer)
+		v.push_back(MakeIovecTruncated<Attribute::HTTP_REFERER>());
+
+	if (d.truncated_user_agent)
+		v.push_back(MakeIovecTruncated<Attribute::USER_AGENT>());
+
+	if (d.truncated_message)
+		v.push_back(MakeIovecTruncated<Attribute::MESSAGE>());
 
 	Crc crc;
 

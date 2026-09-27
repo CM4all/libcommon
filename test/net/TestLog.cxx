@@ -58,7 +58,12 @@ operator==(const Net::Log::Datagram &a, const Net::Log::Datagram &b) noexcept
 		(!a.valid_duration || a.duration == b.duration) &&
 		a.http_method == b.http_method &&
 		a.http_status == b.http_status &&
-		a.type == b.type;
+		a.type == b.type &&
+		a.truncated_host == b.truncated_host &&
+		a.truncated_http_uri == b.truncated_http_uri &&
+		a.truncated_http_referer == b.truncated_http_referer &&
+		a.truncated_user_agent == b.truncated_user_agent &&
+		a.truncated_message == b.truncated_message;
 }
 
 TEST(Log, Serializer)
@@ -148,5 +153,12 @@ TEST(Log, Send)
 	d.traffic_sent = 2;
 	d.valid_duration = true;
 	d.duration = Net::Log::Duration(3);
+	EXPECT_TRUE(SendReceive(d) == d);
+
+	d.truncated_host = true;
+	d.truncated_http_uri = true;
+	d.truncated_http_referer = true;
+	d.truncated_user_agent = true;
+	d.truncated_message = true;
 	EXPECT_TRUE(SendReceive(d) == d);
 }
