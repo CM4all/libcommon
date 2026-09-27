@@ -131,10 +131,21 @@ TmpfsManager::MakeTmpfs(std::string_view name, bool exec)
 
 	if (inserted) {
 		auto *item = new Item(*this, name, CreateTmpfs(exec));
-		i = items.insert_commit(i, *item);
-	} else if (i->IsAbandoned()) {
-		abandoned.erase(abandoned.iterator_to(*i));
-	}
 
-	return {i->Clone(), *i};
+		try {
+			auto clone = item->Clone();
+			i = items.insert_commit(i, *item);
+			return {std::move(clone), *i};
+		} catch (...) {
+			delete item;
+			throw;
+		}
+	} else {
+		auto clone = i->Clone();
+
+		if (i->IsAbandoned())
+			abandoned.erase(abandoned.iterator_to(*i));
+
+		return {std::move(clone), *i};
+	}
 }
