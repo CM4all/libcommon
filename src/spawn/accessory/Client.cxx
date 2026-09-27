@@ -9,6 +9,7 @@
 #include "net/ConnectSocket.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "net/LocalSocketAddress.hxx"
+#include "net/PeerCredentials.hxx"
 #include "net/ReceiveMessage.hxx"
 #include "net/SendMessage.hxx"
 #include "net/SocketProtocolError.hxx"
@@ -29,7 +30,14 @@ UniqueSocketDescriptor
 Connect()
 {
 	static constexpr LocalSocketAddress address{"@cm4all-spawn"sv};
-	return CreateConnectSocket(address, SOCK_SEQPACKET);
+	auto s = CreateConnectSocket(address, SOCK_SEQPACKET);
+
+	/* trust the daemon only if it's root */
+	const auto cred = s.GetPeerCredentials();
+	if (!cred.IsDefined() || cred.GetUid() != 0)
+		throw std::runtime_error{"spawn-accessory daemon is not root"};
+
+	return s;
 }
 
 static void
