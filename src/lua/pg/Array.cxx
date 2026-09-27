@@ -39,11 +39,10 @@ EncodeArray(lua_State *L)
 		if (idx < 1 || (std::size_t)idx > n)
 			throw std::invalid_argument{"Key out of range"};
 
-		const auto value = ToStringView(L, GetStackIndex(value_idx));
-		if (value.data() == nullptr)
+		if (lua_type(L, GetStackIndex(value_idx)) != LUA_TSTRING)
 			throw std::invalid_argument{"Bad value"};
 
-		list[idx - 1] = value;
+		list[idx - 1] = ToStringView(L, GetStackIndex(value_idx));
 	});
 
 	Push(L, Pg::EncodeArray(list));
