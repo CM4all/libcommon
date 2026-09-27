@@ -51,7 +51,7 @@ struct TmpfsManager::Item final
 	UniqueFileDescriptor fd;
 
 	Item(TmpfsManager &_manager,
-	     std::string_view _name, UniqueFileDescriptor &&_fd) noexcept
+	     std::string_view _name, UniqueFileDescriptor &&_fd)
 		:manager(_manager),
 		 name(_name),
 		 fd(std::move(_fd))
