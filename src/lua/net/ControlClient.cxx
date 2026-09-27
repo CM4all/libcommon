@@ -78,7 +78,7 @@ ControlBuilder::AddSimple(lua_State *L, BengControl::Command command)
 		return luaL_error(L, "Not enough parameters");
 
 	for (int i = 2; i <= top; ++i)
-		Add(command, ToStringView(L, i));
+		Add(command, CheckStringView(L, i));
 
 	// return self
 	lua_settop(L, 1);
