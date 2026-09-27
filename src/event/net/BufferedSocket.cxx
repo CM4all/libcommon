@@ -63,6 +63,12 @@ public:
 	 * empty or the destination was full
 	 */
 	bool MoveBuffer() noexcept {
+		if (IsUringPending() || buffer.empty())
+			/* while an io_uring recv is in flight, the
+			   kernel still writes into this buffer's
+			   memory, so it must not be swapped away */
+			return false;
+
 		return parent.input.MoveFromAllowBothNull(buffer) > 0;
 	}
 
