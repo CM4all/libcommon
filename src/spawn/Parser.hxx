@@ -8,7 +8,6 @@
 #include <span>
 #include <string_view>
 
-#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -31,12 +30,13 @@ public:
 		return end - begin;
 	}
 
-	std::byte ReadByte() noexcept {
-		assert(!empty());
+	std::byte ReadByte() {
+		if (empty())
+			throw MalformedPayloadError{};
 		return *begin++;
 	}
 
-	bool ReadBool() noexcept {
+	bool ReadBool() {
 		return (bool)ReadByte();
 	}
 
