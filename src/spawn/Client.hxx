@@ -6,6 +6,7 @@
 
 #include "Interface.hxx"
 #include "Config.hxx"
+#include "IProtocol.hxx"
 #include "Stats.hxx"
 #include "event/DeferEvent.hxx"
 #include "event/SocketEvent.hxx"
@@ -66,7 +67,12 @@ class SpawnServerClient final : public SpawnService {
 
 	DeferEvent defer_spawn_queue;
 
-	MultiReceiveMessage receive{16, 1024, CMSG_SPACE(sizeof(int)), 1};
+	MultiReceiveMessage receive{
+		4,
+		Spawn::MAX_DATAGRAM_SIZE,
+		CMSG_SPACE(sizeof(int)),
+		1,
+	};
 
 	mutable SpawnStats stats{};
 
