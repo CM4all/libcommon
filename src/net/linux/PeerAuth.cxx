@@ -23,6 +23,13 @@ ReadPidfdCgroup(FileDescriptor pidfd, pid_t expected_pid)
 	if (pid < 0)
 		throw std::runtime_error{"Client process has already exited"};
 
+	if (pid == 0)
+		/* the peer lives in a PID namespace that is not visible
+		   here, so its fdinfo "Pid:" is 0; reading /proc/0
+		   would resolve to /proc/self and misreport the daemon's
+		   own cgroup as the peer's identity */
+		throw std::runtime_error{"Client is in a foreign PID namespace"};
+
 	/* must be the same PID as the one from SO_PEERCRED */
 	if (expected_pid > 0 && expected_pid != pid)
 		throw std::runtime_error{"PID mismatch"};
