@@ -10,6 +10,7 @@
 
 #include <array>
 #include <concepts>
+#include <stdexcept>
 #include <string_view>
 
 template<std::size_t buffer_size>
@@ -23,6 +24,11 @@ public:
 			const auto nbytes = fd.ReadAt(0, std::as_writable_bytes(std::span(buffer)));
 			if (nbytes < 0)
 				throw MakeErrno("Failed to read file");
+
+			if (static_cast<std::size_t>(nbytes) >= buffer.size())
+				/* a full buffer means the file did not
+				   fit and was silently truncated */
+				throw std::runtime_error{"File is too large"};
 
 			return static_cast<std::size_t>(nbytes);
 		});
