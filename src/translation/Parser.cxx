@@ -815,7 +815,8 @@ inline void
 TranslateParser::HandleWriteFile(std::string_view payload)
 {
 	const auto [path, contents] = Split(payload, '\0');
-	if (!IsValidAbsolutePath(path) || !IsValidString(contents))
+	if (!IsValidAbsolutePath(path) || contents.data() == nullptr ||
+	    !IsValidString(contents))
 		throw MalformedPacket{};
 
 	auto *m = alloc.New<Mount>(Mount::WriteFile{},
