@@ -289,6 +289,9 @@ AllocatedRequest::Parse(TranslationCommand cmd, std::span<const std::byte> paylo
 		break;
 
 	case TranslationCommand::APPEND:
+		if (append_buffer.size() >= 256)
+			throw std::runtime_error{"Too many APPEND packets"};
+
 		strings.emplace_front(ToStringView(payload));
 		append_buffer.push_back(strings.front().c_str());
 		append = append_buffer;
