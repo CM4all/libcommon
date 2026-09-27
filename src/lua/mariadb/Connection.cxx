@@ -210,6 +210,9 @@ InitConnection(lua_State *L)
 }
 
 struct Params {
+	/* these string pointers point into Lua strings owned by the
+	   options table (which stays on the stack), so they remain
+	   valid until Connect() reads them */
 	const char *host = nullptr, *user = nullptr, *passwd = nullptr;
 	const char *db = nullptr;
 	const char *unix_socket = nullptr;
@@ -227,27 +230,27 @@ Params::Apply(lua_State *L, const char *name, int value_idx)
 	const ScopeCheckStack check_stack{L};
 
 	if (StringIsEqual(name, "host")) {
-		if (!lua_isstring(L, value_idx))
+		if (lua_type(L, value_idx) != LUA_TSTRING)
 			throw ArgError{"Bad host type"};
 
 		host = lua_tostring(L, value_idx);
 	} else if (StringIsEqual(name, "user")) {
-		if (!lua_isstring(L, value_idx))
+		if (lua_type(L, value_idx) != LUA_TSTRING)
 			throw ArgError{"Bad user type"};
 
 		user = lua_tostring(L, value_idx);
 	} else if (StringIsEqual(name, "passwd")) {
-		if (!lua_isstring(L, value_idx))
+		if (lua_type(L, value_idx) != LUA_TSTRING)
 			throw ArgError{"Bad passwd type"};
 
 		passwd = lua_tostring(L, value_idx);
 	} else if (StringIsEqual(name, "db")) {
-		if (!lua_isstring(L, value_idx))
+		if (lua_type(L, value_idx) != LUA_TSTRING)
 			throw ArgError{"Bad db type"};
 
 		db = lua_tostring(L, value_idx);
 	} else if (StringIsEqual(name, "unix_socket")) {
-		if (!lua_isstring(L, value_idx))
+		if (lua_type(L, value_idx) != LUA_TSTRING)
 			throw ArgError{"Bad unix_socket type"};
 
 		unix_socket = lua_tostring(L, value_idx);
