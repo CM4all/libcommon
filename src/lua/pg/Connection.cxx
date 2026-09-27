@@ -10,6 +10,7 @@
 #include "lua/Class.hxx"
 #include "lua/Error.hxx"
 #include "lua/Resume.hxx"
+#include "lua/StringView.hxx"
 #include "lua/Value.hxx"
 #include "lua/CoOperation.hxx"
 #include "lua/CoRunner.hxx"
@@ -438,7 +439,15 @@ PgRequest::SendQuery(Pg::AsyncConnection &c)
 				break;
 
 			case LUA_TSTRING:
-				p[i] = lua_tostring(L, -1);
+				if (const auto value = ToStringView(L, -1);
+				    value.contains('\0'))
+					/* the value is sent as a
+					   text-format C string, so an
+					   embedded NUL would silently
+					   truncate it */
+					throw FmtRuntimeError("Query parameter contains a null byte");
+				else
+					p[i] = value.data();
 				break;
 
 			default:
