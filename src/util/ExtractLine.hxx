@@ -37,6 +37,7 @@ ExtractLine(B &buffer, ExtractLineFlush flush)
 			break;
 		}
 
+		buffer.Clear();
 		return {data, r.size()};
 	}
 
