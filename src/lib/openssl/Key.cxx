@@ -69,9 +69,6 @@ DecodeDerKey(std::span<const std::byte> der)
 	return key;
 }
 
-/**
- * Are both public keys equal?
- */
 bool
 MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2) noexcept
 {
@@ -82,9 +79,6 @@ MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2) noexcept
 #endif
 }
 
-/**
- * Does the certificate belong to the given key?
- */
 bool
 MatchModulus(X509 &cert, EVP_PKEY &key) noexcept
 {
