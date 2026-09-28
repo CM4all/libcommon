@@ -2,8 +2,7 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#ifndef SSL_NAME_HXX
-#define SSL_NAME_HXX
+#pragma once
 
 #include <openssl/ossl_typ.h>
 
@@ -12,13 +11,14 @@ class AllocatedString;
 AllocatedString
 ToString(const X509_NAME *name);
 
+[[gnu::pure]]
 AllocatedString
-NidToString(const X509_NAME &name, int nid);
+NidToString(const X509_NAME &name, int nid) noexcept;
 
+[[gnu::pure]]
 AllocatedString
-GetCommonName(const X509 &cert);
+GetCommonName(const X509 &cert) noexcept;
 
+[[gnu::pure]]
 AllocatedString
-GetIssuerCommonName(const X509 &cert);
-
-#endif
+GetIssuerCommonName(const X509 &cert) noexcept;

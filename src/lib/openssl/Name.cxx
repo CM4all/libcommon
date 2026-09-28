@@ -20,7 +20,7 @@ ToString(const X509_NAME *name)
 }
 
 AllocatedString
-NidToString(const X509_NAME &name, int nid)
+NidToString(const X509_NAME &name, int nid) noexcept
 {
 	char buffer[1024];
 	int len = X509_NAME_get_text_by_NID(&name, nid, buffer, sizeof(buffer));
@@ -32,13 +32,13 @@ NidToString(const X509_NAME &name, int nid)
 }
 
 static AllocatedString
-GetCommonName(const X509_NAME &name)
+GetCommonName(const X509_NAME &name) noexcept
 {
 	return NidToString(name, NID_commonName);
 }
 
 AllocatedString
-GetCommonName(const X509 &cert)
+GetCommonName(const X509 &cert) noexcept
 {
 	const X509_NAME *subject = X509_get_subject_name(&cert);
 	return subject != nullptr
@@ -47,7 +47,7 @@ GetCommonName(const X509 &cert)
 }
 
 AllocatedString
-GetIssuerCommonName(const X509 &cert)
+GetIssuerCommonName(const X509 &cert) noexcept
 {
 	const X509_NAME *subject = X509_get_issuer_name(&cert);
 	return subject != nullptr
