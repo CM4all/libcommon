@@ -13,6 +13,8 @@
 UniqueEVP_PKEY
 GenerateRsaKey(unsigned bits)
 {
+	ERR_clear_error();
+
 	const UniqueEVP_PKEY_CTX ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr));
 	if (!ctx)
 		throw SslError("EVP_PKEY_CTX_new_id() failed");
@@ -33,6 +35,8 @@ GenerateRsaKey(unsigned bits)
 UniqueEVP_PKEY
 GenerateEcKey(int curve_nid)
 {
+	ERR_clear_error();
+
 	const UniqueEVP_PKEY_CTX ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_EC, nullptr));
 	if (!ctx)
 		throw SslError("EVP_PKEY_CTX_new_id() failed");
