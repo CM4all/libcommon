@@ -52,4 +52,4 @@ MatchModulus(const EVP_PKEY &key1, const EVP_PKEY &key2) noexcept;
  */
 [[gnu::pure]]
 bool
-MatchModulus(X509 &cert, const EVP_PKEY &key) noexcept;
+MatchModulus(const X509 &cert, const EVP_PKEY &key) noexcept;

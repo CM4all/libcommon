@@ -80,9 +80,9 @@ MatchModulus(const EVP_PKEY &key1, const EVP_PKEY &key2) noexcept
 }
 
 bool
-MatchModulus(X509 &cert, const EVP_PKEY &key) noexcept
+MatchModulus(const X509 &cert, const EVP_PKEY &key) noexcept
 {
-	UniqueEVP_PKEY public_key(X509_get_pubkey(&cert));
+	const EVP_PKEY *public_key = X509_get0_pubkey(&cert);
 	if (public_key == nullptr)
 		return false;
 
