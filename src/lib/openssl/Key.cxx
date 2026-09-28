@@ -70,13 +70,13 @@ DecodeDerKey(std::span<const std::byte> der)
 }
 
 bool
-MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2) noexcept
+MatchModulus(const EVP_PKEY &key1, const EVP_PKEY &key2) noexcept
 {
 	return EVP_PKEY_eq(&key1, &key2) == 1;
 }
 
 bool
-MatchModulus(X509 &cert, EVP_PKEY &key) noexcept
+MatchModulus(X509 &cert, const EVP_PKEY &key) noexcept
 {
 	UniqueEVP_PKEY public_key(X509_get_pubkey(&cert));
 	if (public_key == nullptr)
