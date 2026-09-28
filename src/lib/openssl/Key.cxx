@@ -72,11 +72,7 @@ DecodeDerKey(std::span<const std::byte> der)
 bool
 MatchModulus(EVP_PKEY &key1, EVP_PKEY &key2) noexcept
 {
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	return EVP_PKEY_eq(&key1, &key2) == 1;
-#else
-	return EVP_PKEY_cmp(&key1, &key2) == 1;
-#endif
 }
 
 bool

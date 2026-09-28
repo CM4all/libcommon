@@ -1,9 +1,9 @@
 if not is_variable('openssl_min_version')
-  openssl_min_version = '1.1.1'
+  openssl_min_version = '3'
 endif
 
 if not is_variable('openssl_api_compat')
-  openssl_api_compat = '0x10100000L'
+  openssl_api_compat = '0x30000000L'
 endif
 
 libcrypto = dependency('libcrypto', version: '>= ' + openssl_min_version,
