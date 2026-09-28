@@ -65,7 +65,7 @@ LoadCertChainFile(const char *path, bool first_is_ca)
 		if (X509_check_ca(cert.get()) != 1)
 			throw SslError(std::string("Not a CA certificate: ") + path);
 
-		EVP_PKEY *key = X509_get_pubkey(cert.get());
+		EVP_PKEY *key = X509_get0_pubkey(cert.get());
 		if (key == nullptr)
 			throw SslError(std::string("CA certificate has no pubkey in ") + path);
 
