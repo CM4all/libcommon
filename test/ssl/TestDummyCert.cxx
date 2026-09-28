@@ -16,10 +16,10 @@ TEST(TestDummyCert, RSA)
 	const auto key2 = GenerateRsaKey(1024);
 	const auto cert2 = MakeSelfSignedDummyCert(*key2, "foo");
 
-	EXPECT_TRUE(MatchModulus(*cert1, *key1));
-	EXPECT_TRUE(MatchModulus(*cert2, *key2));
-	EXPECT_FALSE(MatchModulus(*cert1, *key2));
-	EXPECT_FALSE(MatchModulus(*cert2, *key1));
+	EXPECT_EQ(X509_check_private_key(cert1.get(), key1.get()), 1);
+	EXPECT_EQ(X509_check_private_key(cert2.get(), key2.get()), 1);
+	EXPECT_EQ(X509_check_private_key(cert1.get(), key2.get()), 0);
+	EXPECT_EQ(X509_check_private_key(cert2.get(), key1.get()), 0);
 }
 
 TEST(TestDummyCert, EC)
@@ -30,8 +30,8 @@ TEST(TestDummyCert, EC)
 	const auto key2 = GenerateEcKey();
 	const auto cert2 = MakeSelfSignedDummyCert(*key2, "foo");
 
-	EXPECT_TRUE(MatchModulus(*cert1, *key1));
-	EXPECT_TRUE(MatchModulus(*cert2, *key2));
-	EXPECT_FALSE(MatchModulus(*cert1, *key2));
-	EXPECT_FALSE(MatchModulus(*cert2, *key1));
+	EXPECT_EQ(X509_check_private_key(cert1.get(), key1.get()), 1);
+	EXPECT_EQ(X509_check_private_key(cert2.get(), key2.get()), 1);
+	EXPECT_EQ(X509_check_private_key(cert1.get(), key2.get()), 0);
+	EXPECT_EQ(X509_check_private_key(cert2.get(), key1.get()), 0);
 }

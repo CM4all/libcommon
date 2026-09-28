@@ -39,17 +39,3 @@ GenerateEcKey();
  */
 UniqueEVP_PKEY
 DecodeDerKey(std::span<const std::byte> der);
-
-/**
- * Are both public keys equal?
- */
-[[gnu::pure]]
-bool
-MatchModulus(const EVP_PKEY &key1, const EVP_PKEY &key2) noexcept;
-
-/**
- * Does the certificate belong to the given key?
- */
-[[gnu::pure]]
-bool
-MatchModulus(const X509 &cert, const EVP_PKEY &key) noexcept;

@@ -4,7 +4,6 @@
 
 #include "LoadFile.hxx"
 #include "UniqueCertKey.hxx"
-#include "Key.hxx"
 #include "Error.hxx"
 #include "UniqueBIO.hxx"
 #include "lib/fmt/RuntimeError.hxx"
@@ -103,8 +102,9 @@ LoadCertKeyFile(const char *cert_path, const char *key_path)
 		LoadKeyFile(key_path),
 	};
 
-	if (!MatchModulus(*ck.cert, *ck.key))
-		throw std::runtime_error("Key does not match certificate");
+	ERR_clear_error();
+	if (X509_check_private_key(ck.cert.get(), ck.key.get()) != 1)
+		throw SslError{"Key does not match certificate"};
 
 	return ck;
 }
@@ -113,8 +113,10 @@ std::pair<std::forward_list<UniqueX509>, UniqueEVP_PKEY>
 LoadCertChainKeyFile(const char *cert_path, const char *key_path)
 {
 	std::pair pair{LoadCertChainFile(cert_path, false), LoadKeyFile(key_path)};
-	if (!MatchModulus(*pair.first.front(), *pair.second))
-		throw std::runtime_error("Key does not match certificate");
+
+	ERR_clear_error();
+	if (X509_check_private_key(pair.first.front().get(), pair.second.get()) != 1)
+		throw SslError{"Key does not match certificate"};
 
 	return pair;
 }

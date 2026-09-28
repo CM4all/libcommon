@@ -5,9 +5,9 @@
 #include "Key.hxx"
 #include "Error.hxx"
 
+#include <openssl/ec.h>
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
-#include <openssl/x509.h>
 #include <openssl/err.h>
 
 UniqueEVP_PKEY
@@ -71,20 +71,4 @@ DecodeDerKey(std::span<const std::byte> der)
 		throw SslError("d2i_AutoPrivateKey() failed");
 
 	return key;
-}
-
-bool
-MatchModulus(const EVP_PKEY &key1, const EVP_PKEY &key2) noexcept
-{
-	return EVP_PKEY_eq(&key1, &key2) == 1;
-}
-
-bool
-MatchModulus(const X509 &cert, const EVP_PKEY &key) noexcept
-{
-	const EVP_PKEY *public_key = X509_get0_pubkey(&cert);
-	if (public_key == nullptr)
-		return false;
-
-	return MatchModulus(*public_key, key);
 }
