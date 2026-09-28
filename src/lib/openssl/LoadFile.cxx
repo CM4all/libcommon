@@ -9,11 +9,12 @@
 #include "UniqueBIO.hxx"
 #include "lib/fmt/RuntimeError.hxx"
 
+#include <fmt/format.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
 #include <openssl/ts.h>
 
-#include <string>
+using std::string_view_literals::operator""sv;
 
 UniqueX509
 LoadCertFile(const char *path)
@@ -34,7 +35,7 @@ LoadCertChainFile(const char *path, bool first_is_ca)
 
 	UniqueBIO bio(BIO_new_file(path, "r"));
 	if (!bio)
-		throw SslError(std::string("Failed to open ") + path);
+		throw SslError(fmt::format("Failed to open {:?}"sv, path));
 
 	std::forward_list<UniqueX509> list;
 	auto i = list.before_begin();
@@ -42,10 +43,10 @@ LoadCertChainFile(const char *path, bool first_is_ca)
 	UniqueX509 cert(PEM_read_bio_X509_AUX(bio.get(), nullptr,
 					      nullptr, nullptr));
 	if (!cert)
-		throw SslError(std::string("Failed to read certificate from ") + path);
+		throw SslError(fmt::format("Failed to read certificate from {:?}"sv, path));
 
 	if (first_is_ca && X509_check_ca(cert.get()) != 1)
-		throw SslError(std::string("Not a CA certificate: ") + path);
+		throw SslError(fmt::format("Not a CA certificate: {:?}"sv, path));
 
 	i = list.emplace_after(i, std::move(cert));
 
@@ -59,22 +60,21 @@ LoadCertChainFile(const char *path, bool first_is_ca)
 				break;
 			}
 
-			throw SslError(std::string("Failed to read certificate chain from ") + path);
+			throw SslError(fmt::format("Failed to read certificate chain from {:?}"sv, path));
 		}
 
 		if (X509_check_ca(cert.get()) != 1)
-			throw SslError(std::string("Not a CA certificate: ") + path);
+			throw SslError(fmt::format("Not a CA certificate: {:?}"sv, path));
 
 		EVP_PKEY *key = X509_get0_pubkey(cert.get());
 		if (key == nullptr)
-			throw SslError(std::string("CA certificate has no pubkey in ") + path);
+			throw SslError(fmt::format("CA certificate has no pubkey in {:?}"sv, path));
 
 		if (int result = X509_verify(i->get(), key); result <= 0) {
 			if (result < 0)
 				throw SslError("Failed to verify CA chain");
 			else
-				throw FmtRuntimeError("CA chain mismatch in {}",
-						      path);
+				throw SslError(fmt::format("CA chain mismatch in {:?}"sv, path));
 		}
 
 		i = list.emplace_after(i, std::move(cert));
