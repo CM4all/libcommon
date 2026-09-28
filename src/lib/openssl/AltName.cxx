@@ -21,7 +21,7 @@ FillNameList(std::forward_list<std::string> &list,
 }
 
 std::forward_list<std::string>
-GetSubjectAltNames(X509 &cert) noexcept
+GetSubjectAltNames(const X509 &cert) noexcept
 {
 	std::forward_list<std::string> list;
 
