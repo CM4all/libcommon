@@ -4,6 +4,7 @@
 
 #include "ChildOptions.hxx"
 #include "ResourceLimits.hxx"
+#include "OpenStderrPath.hxx"
 #include "Prepared.hxx"
 #include "MakeId.hxx"
 #include "AllocatorPtr.hxx"
@@ -160,11 +161,7 @@ ChildOptions::OpenStderrPath() const
 {
 	assert(stderr_path != nullptr);
 
-	UniqueFileDescriptor fd;
-	if (!fd.Open(stderr_path, O_CREAT|O_WRONLY|O_APPEND, 0600))
-		throw FmtErrno("open({:?}) failed"sv, stderr_path);
-
-	return fd;
+	return ::OpenStderrPath(stderr_path);
 }
 
 void

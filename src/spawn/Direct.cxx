@@ -5,6 +5,7 @@
 #include "Direct.hxx"
 #include "Context.hxx"
 #include "ErrorPipe.hxx"
+#include "OpenStderrPath.hxx"
 #include "Prepared.hxx"
 #include "CgroupOptions.hxx"
 #include "Init.hxx"
@@ -374,11 +375,8 @@ try {
 	if (p.chdir != nullptr && chdir(p.chdir) < 0)
 		throw FmtErrno("chdir({:?}) failed", p.chdir);
 
-	if (!stderr_fd.IsDefined() && p.stderr_path != nullptr &&
-	    !stderr_fd.Open(p.stderr_path,
-			    O_CREAT|O_WRONLY|O_APPEND,
-			    0600))
-		throw MakeErrno("Failed to open STDERR_PATH");
+	if (!stderr_fd.IsDefined() && p.stderr_path != nullptr)
+		stderr_fd = OpenStderrPath(p.stderr_path);
 
 	/* apply the ResourceLimits that go below our own limits at
 	   the very end; this doesn't require CAP_SYS_RESOURCE and
