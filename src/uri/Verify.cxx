@@ -189,40 +189,45 @@ uri_path_verify(std::string_view uri) noexcept
 }
 
 static constexpr bool
-IsEncodedNul(const char *p) noexcept
+IsEncodedNul(std::string_view s) noexcept
 {
-	return p[0] == '%' && p[1] == '0' && p[2] == '0';
+	return s.starts_with("%00"sv);
 }
 
 static constexpr bool
-IsEncodedDot(const char *p) noexcept
+IsEncodedDot(std::string_view p) noexcept
 {
-	return p[0] == '%' && p[1] == '2' &&
+	return p.size() >= 3 &&
+		p[0] == '%'  && p[1] == '2' &&
 		(p[2] == 'e' || p[2] == 'E');
 }
 
 static constexpr bool
-IsEncodedSlash(const char *p) noexcept
+IsEncodedSlash(std::string_view p) noexcept
 {
-	return p[0] == '%' && p[1] == '2' &&
+	return p.size() >= 3 &&
+		p[0] == '%'  && p[1] == '2' &&
 		(p[2] == 'f' || p[2] == 'F');
 }
 
 bool
-uri_path_verify_paranoid(const char *uri) noexcept
+uri_path_verify_paranoid(std::string_view uri) noexcept
 {
+	if (uri.empty())
+		return true;
+
 	if (uri[0] == '.' &&
-	    (uri[1] == 0 || uri[1] == '/' ||
-	     (uri[1] == '.' && (uri[2] == 0 || uri[2] == '/')) ||
-	     IsEncodedDot(uri + 1)))
+	    (uri.size() == 1 || uri[1] == '/' ||
+	     (uri[1] == '.' && (uri.size() == 2 || uri[2] == '/')) ||
+	     IsEncodedDot(uri.substr(1))))
 		/* no ".", "..", "./", "../" */
 		return false;
 
 	if (IsEncodedDot(uri))
 		return false;
 
-	while (*uri != 0) {
-		if (*uri == '%') {
+	while (!uri.empty()) {
+		if (uri.front() == '%') {
 			if (/* don't allow an encoded NUL character */
 			    IsEncodedNul(uri) ||
 			    /* don't allow an encoded slash (somebody trying to
@@ -230,33 +235,36 @@ uri_path_verify_paranoid(const char *uri) noexcept
 			    IsEncodedSlash(uri))
 				return false;
 
-			++uri;
-		} else if (*uri == '/') {
-			++uri;
+			uri.remove_prefix(1);
+		} else if (uri.front() == '/') {
+			uri.remove_prefix(1);
 
 			if (IsEncodedDot(uri))
 				/* encoded dot after a slash - what's this client
 				   trying to hide? */
 				return false;
 
-			if (*uri == '.') {
-				++uri;
+			if (uri.empty())
+				return true;
+
+			if (uri.front() == '.') {
+				uri.remove_prefix(1);
 
 				if (IsEncodedDot(uri))
 					/* encoded dot after a real dot - smells fishy */
 					return false;
 
-				if (*uri == 0 || *uri == '/')
+				if (uri.empty() || uri.front() == '/')
 					return false;
 
-				if (*uri == '.')
+				if (uri.front() == '.')
 					/* disallow two dots after a slash, even if
 					   something else follows - this is the paranoid
 					   function after all! */
 					return false;
 			}
 		} else
-			++uri;
+			uri.remove_prefix(1);
 	}
 
 	return true;

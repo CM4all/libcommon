@@ -78,7 +78,7 @@ uri_path_verify(std::string_view uri) noexcept;
  */
 [[gnu::pure]]
 bool
-uri_path_verify_paranoid(const char *uri) noexcept;
+uri_path_verify_paranoid(std::string_view uri) noexcept;
 
 /**
  * Quickly verify the validity of an URI (path plus query).  This may
