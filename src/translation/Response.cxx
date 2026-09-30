@@ -596,8 +596,8 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 		address = nullptr;
 
 	if (base != nullptr && !expandable && !easy_base) {
-		const char *tail = base_tail(request_uri, base);
-		if (tail != nullptr) {
+		if (const std::string_view tail = base_tail(request_uri, base);
+		    tail.data() != nullptr) {
 			if (uri != nullptr) {
 				size_t length = base_string(uri, tail);
 				uri = length != (size_t)-1

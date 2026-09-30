@@ -452,7 +452,7 @@ FinishTranslateResponse(AllocatorPtr alloc,
 			std::span<const MaskedInetAddress> allow_remote_networks,
 #endif
 #if TRANSLATION_ENABLE_RADDRESS
-			const char *base_suffix,
+			std::string_view base_suffix,
 			std::shared_ptr<std::vector<TranslationLayoutItem>> &&layout_items,
 #endif
 			TranslateResponse &response,
@@ -485,7 +485,7 @@ FinishTranslateResponse(AllocatorPtr alloc,
 				file.base = file.path;
 				file.path = ".";
 			} else {
-				assert(base_suffix != nullptr);
+				assert(base_suffix.data() != nullptr);
 
 				if (!file.SplitBase(alloc, base_suffix))
 					throw std::runtime_error("Base mismatch");
@@ -2155,7 +2155,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			throw MisplacedPacket{};
 
 		base_suffix = base_tail(from_request.uri, string_payload);
-		if (base_suffix == nullptr)
+		if (base_suffix.data() == nullptr)
 			throw std::runtime_error("BASE mismatches request URI");
 
 		response.base = string_payload.data();

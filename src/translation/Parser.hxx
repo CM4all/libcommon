@@ -123,7 +123,7 @@ class TranslateParser {
 #endif
 
 #if TRANSLATION_ENABLE_RADDRESS
-	const char *base_suffix = nullptr;
+	std::string_view base_suffix{};
 
 	std::shared_ptr<std::vector<TranslationLayoutItem>> layout_items_builder;
 
