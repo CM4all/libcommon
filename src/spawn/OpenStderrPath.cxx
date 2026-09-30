@@ -15,8 +15,9 @@ OpenStderrPath(const char *path)
 	assert(path != nullptr);
 
 	static constexpr struct open_how how{
-		.flags = O_CREAT|O_WRONLY|O_APPEND|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
+		.flags = O_CREAT|O_WRONLY|O_APPEND|O_NOFOLLOW|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
 		.mode = 0600,
+		.resolve = RESOLVE_NO_SYMLINKS,
 	};
 
 	return Open({FileDescriptor{AT_FDCWD}, path}, how);
