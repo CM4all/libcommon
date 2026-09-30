@@ -376,7 +376,7 @@ try {
 		throw FmtErrno("chdir({:?}) failed", p.chdir);
 
 	if (!stderr_fd.IsDefined() && p.stderr_path != nullptr)
-		stderr_fd = OpenStderrPath(p.stderr_path);
+		stderr_fd = OpenStderrPath(p.stderr_path).Release();
 
 	/* apply the ResourceLimits that go below our own limits at
 	   the very end; this doesn't require CAP_SYS_RESOURCE and
