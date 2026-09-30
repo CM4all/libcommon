@@ -576,7 +576,7 @@ struct TranslateResponse {
 	 * Throws std::runtime_error on error.
 	 */
 	void CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
-		       const char *uri);
+		       std::string_view request_uri);
 #endif
 
 	/**

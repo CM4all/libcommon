@@ -633,11 +633,11 @@ TranslateResponse::CacheStore(AllocatorPtr alloc, const TranslateResponse &src,
 
 void
 TranslateResponse::CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
-			     const char *request_uri)
+			     std::string_view request_uri)
 {
 	const bool expandable = src.IsExpandable();
 
-	const char *tail = nullptr;
+	std::string_view tail{};
 
 	if (src.base != nullptr && !expandable) {
 		tail = require_base_tail(request_uri, src.base);
@@ -645,8 +645,8 @@ TranslateResponse::CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
 		/* strip leading slashes before normalizing the URI;
 		   merging adjacent slashes is part of normalization,
 		   but "tail" already comes after a slash */
-		while (*tail == '/')
-			++tail;
+		while (tail.starts_with('/'))
+			tail.remove_prefix(1);
 
 		tail = NormalizeUriPath(alloc, tail);
 
@@ -654,12 +654,12 @@ TranslateResponse::CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
 			throw HttpMessageResponse(HttpStatus::BAD_REQUEST, "Malformed URI");
 	}
 
-	address.CacheLoad(alloc, src.address, tail != nullptr ? std::string_view{tail} : std::string_view{});
+	address.CacheLoad(alloc, src.address, tail);
 
 	if (this != &src)
 		CopyFrom(alloc, src);
 
-	if (tail != nullptr) {
+	if (!tail.empty()) {
 		if (uri != nullptr)
 			uri = alloc.Concat(uri, tail);
 
