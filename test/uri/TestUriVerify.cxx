@@ -126,6 +126,11 @@ TEST(UriVerify, Paranoid)
 	EXPECT_FALSE(uri_path_verify_paranoid("f%00"));
 	EXPECT_TRUE(uri_path_verify_paranoid("f%20"));
 	EXPECT_TRUE(uri_path_verify_paranoid("index%2ehtml"));
+
+	// no null bytes
+	EXPECT_FALSE(uri_path_verify_paranoid("\0"sv));
+	EXPECT_FALSE(uri_path_verify_paranoid("/\0"sv));
+	EXPECT_FALSE(uri_path_verify_paranoid(" \0"sv));
 }
 
 TEST(UriVerify, Query)

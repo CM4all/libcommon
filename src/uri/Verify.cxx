@@ -263,6 +263,8 @@ uri_path_verify_paranoid(std::string_view uri) noexcept
 					   function after all! */
 					return false;
 			}
+		} else if (uri.front() == '\0') {
+			return false;
 		} else
 			uri.remove_prefix(1);
 	}
