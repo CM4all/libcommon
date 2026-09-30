@@ -3,21 +3,21 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "OpenStderrPath.hxx"
-#include "lib/fmt/SystemError.hxx"
+#include "io/FileAt.hxx"
+#include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <fcntl.h>
-
-using std::string_view_literals::operator""sv;
 
 UniqueFileDescriptor
 OpenStderrPath(const char *path)
 {
 	assert(path != nullptr);
 
-	UniqueFileDescriptor fd;
-	if (!fd.Open(path, O_CREAT|O_WRONLY|O_APPEND, 0600))
-		throw FmtErrno("open({:?}) failed"sv, path);
+	static constexpr struct open_how how{
+		.flags = O_CREAT|O_WRONLY|O_APPEND|O_NOCTTY|O_CLOEXEC|O_NONBLOCK,
+		.mode = 0600,
+	};
 
-	return fd;
+	return Open({FileDescriptor{AT_FDCWD}, path}, how);
 }
