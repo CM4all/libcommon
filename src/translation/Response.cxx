@@ -654,7 +654,7 @@ TranslateResponse::CacheLoad(AllocatorPtr alloc, const TranslateResponse &src,
 			throw HttpMessageResponse(HttpStatus::BAD_REQUEST, "Malformed URI");
 	}
 
-	address.CacheLoad(alloc, src.address, tail);
+	address.CacheLoad(alloc, src.address, tail != nullptr ? std::string_view{tail} : std::string_view{});
 
 	if (this != &src)
 		CopyFrom(alloc, src);
