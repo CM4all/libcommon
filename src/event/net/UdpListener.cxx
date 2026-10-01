@@ -49,6 +49,10 @@ UdpListener::ReceiveOne()
 {
 	ReceiveMessageBuffer<4096, 1024> buffer;
 	auto result = ReceiveMessage(GetSocket(), buffer, MSG_DONTWAIT);
+	if (result.truncated)
+		// ignore truncated datagrams
+		return true;
+
 	int uid = result.cred != nullptr
 		? result.cred->uid
 		: -1;

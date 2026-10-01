@@ -42,7 +42,9 @@ try {
 	}
 
 	for (auto &d : multi)
-		if (!handler.OnUdpDatagram(d.payload,
+		// ignore truncated datagrams
+		if (!d.truncated &&
+		    !handler.OnUdpDatagram(d.payload,
 					   d.fds,
 					   d.address,
 					   d.cred != nullptr
