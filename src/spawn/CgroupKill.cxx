@@ -5,6 +5,8 @@
 #include "CgroupKill.hxx"
 #include "CgroupState.hxx"
 #include "system/Error.hxx"
+#include "io/BufferedReader.hxx"
+#include "io/FdReader.hxx"
 #include "io/FileAt.hxx"
 #include "io/Open.hxx"
 #include "io/SmallTextFile.hxx"
@@ -112,36 +114,34 @@ CgroupKill::OnInotifyError(std::exception_ptr error) noexcept
 	handler.OnCgroupKillError(std::move(error));
 }
 
-static size_t
-LoadCgroupPids(FileDescriptor cgroup_procs_fd, std::span<pid_t> pids)
+static void
+KillCgroup(FileDescriptor cgroup_procs_fd, int sig)
 {
-	size_t n = 0;
+	(void)cgroup_procs_fd.Rewind();
 
-	for (const std::string_view line : IterableSmallTextFile<8192>(cgroup_procs_fd)) {
+	FdReader r{cgroup_procs_fd};
+	BufferedReader br{r};
+
+	bool found = false;
+
+	while (true) {
+		const std::string_view line = br.ReadLineView();
+		if (line.data() == nullptr)
+			break;
+
 		if (line.empty())
 			continue;
 
 		if (auto pid = ParseInteger<pid_t>(line)) {
-			pids[n++] = *pid;
-			if (n >= pids.size())
-				break;
+			found = true;
+
+			// TODO: check for kill() failures?
+			kill(*pid, sig);
 		}
 	}
 
-	return n;
-}
-
-static void
-KillCgroup(FileDescriptor cgroup_procs_fd, int sig)
-{
-	std::array<pid_t, 256> pids;
-	size_t n = LoadCgroupPids(cgroup_procs_fd, pids);
-	if (n == 0)
+	if (!found)
 		throw std::runtime_error("Populated cgroup has no tasks");
-
-	for (size_t i = 0; i < n; ++i)
-		// TODO: check for kill() failures?
-		kill(pids[i], sig);
 }
 
 void
