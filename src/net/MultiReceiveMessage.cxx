@@ -80,6 +80,8 @@ MultiReceiveMessage::Receive(SocketDescriptor s)
 
 		d.fds = {fds_p, 0};
 
+		d.truncated = (mh.msg_flags & MSG_TRUNC) != 0;
+
 #ifdef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"

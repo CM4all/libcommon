@@ -35,6 +35,11 @@ struct ReceiveMessageResult {
 	const struct ucred *cred = nullptr;
 
 	std::vector<UniqueFileDescriptor> fds;
+
+	/**
+	 * Was the datagram larger than the payload buffer (MSG_TRUNC)?
+	 */
+	bool truncated;
 };
 
 template<size_t PAYLOAD_SIZE, size_t CMSG_SIZE>
@@ -60,6 +65,7 @@ ReceiveMessage(SocketDescriptor s,
 	ReceiveMessageResult result;
 	result.address = {buffer.address, msg.msg_namelen};
 	result.payload = {buffer.payload, size_t(nbytes)};
+	result.truncated = (msg.msg_flags & MSG_TRUNC) != 0;
 
 #ifdef __clang__
 #pragma GCC diagnostic push

@@ -36,6 +36,11 @@ public:
 		std::span<std::byte> payload;
 		const struct ucred *cred;
 		std::span<UniqueFileDescriptor> fds;
+
+		/**
+		 * Was the datagram larger than the payload buffer (MSG_TRUNC)?
+		 */
+		bool truncated;
 	};
 
 	typedef Datagram *iterator;
