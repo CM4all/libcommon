@@ -8,6 +8,7 @@
 #include "io/UniqueFileDescriptor.hxx"
 
 #include <fcntl.h>
+#include <linux/openat2.h> // for struct open_how
 
 UniqueFileDescriptor
 OpenStderrPath(const char *path)
