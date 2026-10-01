@@ -55,6 +55,16 @@ public:
 	void StartOpenStatReadOnlyBeneath(FileAt file) noexcept;
 
 	/**
+	 * Opens an O_PATH file descriptor and statx() it.  Call this
+	 * if you're not interested in the file descriptor, only in
+	 * the statx() result.
+	 *
+	 * This is an (expensive) trick to use RESOLVE_BENEATH with
+	 * statx().
+	 */
+	void StartStatBeneath(FileAt file) noexcept;
+
+	/**
 	 * Cancel this operation.  This works only if this instance
 	 * was allocated on the heap using `new`.  It will be freed
 	 * using `delete` after the kernel has finished cancellation,

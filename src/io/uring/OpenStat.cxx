@@ -20,6 +20,11 @@ static constexpr struct open_how ro_beneath{
 	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
 };
 
+static constexpr struct open_how path_beneath{
+	.flags = O_PATH|O_CLOEXEC,
+	.resolve = RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS,
+};
+
 namespace Uring {
 
 void
@@ -63,6 +68,19 @@ OpenStat::StartOpenStatReadOnlyBeneath(FileAt file) noexcept
 	io_uring_prep_openat2(&s, file.directory.Get(), file.name,
 			      /* why is this parameter not const? */
 			      const_cast<struct open_how *>(&ro_beneath));
+	queue.Push(s, *this);
+}
+
+void
+OpenStat::StartStatBeneath(FileAt file) noexcept
+{
+	assert(!fd.IsDefined());
+
+	auto &s = queue.RequireSubmitEntry();
+
+	io_uring_prep_openat2(&s, file.directory.Get(), file.name,
+			      /* why is this parameter not const? */
+			      const_cast<struct open_how *>(&path_beneath));
 	queue.Push(s, *this);
 }
 
