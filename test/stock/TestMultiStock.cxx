@@ -1949,3 +1949,69 @@ TEST(MultiStock, RetryWaitingConsumedRequestDeferred)
 	EXPECT_EQ(c2.item, nullptr);
 	EXPECT_TRUE(c2.error);
 }
+
+/**
+ * Regression test: a #StockGetHandler is allowed to cancel a sibling
+ * waiter from within its OnStockItemError() callback.  When that
+ * sibling is the last remaining waiter, the cancel (RemoveWaiting())
+ * used to erase the MapItem while OnStockItemError()'s
+ * clear_and_dispose() loop was still iterating over it - a
+ * use-after-free followed by a double free from the post-loop
+ * parent.Erase().  OnStockItemError() now sets the in_finish_waiting
+ * guard the erase paths honour and decides on Erase once afterwards.
+ */
+TEST(MultiStock, CancelSiblingFromErrorHandler)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+
+	/* defer the create so both Get() calls become waiters before the
+	   single create fails and OnStockItemError() is delivered to
+	   both via clear_and_dispose() */
+	foo.defer_create = true;
+	foo.next_error = std::make_exception_ptr(std::runtime_error{"Error"});
+
+	struct CancellingLease final : StockGetHandler {
+		CancellablePointer get_cancel_ptr;
+		CancellablePointer *sibling = nullptr;
+		bool failed = false;
+
+		~CancellingLease() noexcept {
+			if (get_cancel_ptr)
+				get_cancel_ptr.Cancel();
+		}
+
+		void OnStockItemReady(StockItem &) noexcept override {
+			get_cancel_ptr = nullptr;
+			ADD_FAILURE();
+		}
+
+		void OnStockItemError(std::exception_ptr) noexcept override {
+			get_cancel_ptr = nullptr;
+			failed = true;
+
+			/* cancel the other (still-waiting) sibling; if it
+			   is the last remaining waiter this reaches the
+			   MapItem-erase path */
+			if (sibling != nullptr && *sibling)
+				sibling->Cancel();
+		}
+	};
+
+	CancellingLease a, b;
+	a.sibling = &b.get_cancel_ptr;
+	b.sibling = &a.get_cancel_ptr;
+
+	instance.multi_stock.Get(StockKey{foo.key}, ToNopPointer(&foo), 2,
+				 a, a.get_cancel_ptr);
+	instance.multi_stock.Get(StockKey{foo.key}, ToNopPointer(&foo), 2,
+				 b, b.get_cancel_ptr);
+
+	instance.RunSome();
+
+	/* whichever waiter the dispose loop reached first ran its error
+	   handler and cancelled the other, so exactly one of them failed
+	   and neither was served */
+	EXPECT_NE(a.failed, b.failed);
+}
