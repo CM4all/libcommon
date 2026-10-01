@@ -16,6 +16,7 @@
 #include "event/Loop.hxx"
 #include "net/SocketError.hxx"
 #include "net/SocketPair.hxx"
+#include "net/SocketProtocolError.hxx"
 #include "net/UniqueSocketDescriptor.hxx"
 #include "util/Cancellable.hxx"
 #include "util/Unaligned.hxx"
@@ -554,7 +555,7 @@ try {
 
 		Serialize(s, p);
 	} catch (PayloadTooLargeError) {
-		throw std::runtime_error("Spawn payload is too large");
+		throw SocketMessageTooLargeError{"Spawn payload is too large"};
 	}
 
 	try {
@@ -758,14 +759,14 @@ inline void
 SpawnServerClient::ReceiveAndHandle()
 {
 	if (!receive.Receive(event.GetSocket()))
-		throw std::runtime_error("spawner closed the socket");
+		throw SocketClosedPrematurelyError{"spawner closed the socket"};
 
 	for (const auto &i : receive) {
 		if (i.payload.empty())
 			/* when the peer closes the socket, recvmmsg() doesn't
 			   return 0; instead, it fills the mmsghdr array with
 			   empty packets */
-			throw std::runtime_error("spawner closed the socket");
+			throw SocketClosedPrematurelyError{"spawner closed the socket"};
 
 		try {
 			HandleMessage(i.payload, i.fds);
@@ -785,7 +786,7 @@ try {
 				      "Spawner socket error");
 
 	if (events & event.HANGUP)
-		throw std::runtime_error("Spawner hung up");
+		throw SocketClosedPrematurelyError{"Spawner hung up"};
 
 	if (events & event.WRITE) {
 		FlushKillQueue();
