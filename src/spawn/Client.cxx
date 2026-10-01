@@ -768,6 +768,9 @@ SpawnServerClient::ReceiveAndHandle()
 			   empty packets */
 			throw SocketClosedPrematurelyError{"spawner closed the socket"};
 
+		if (i.truncated)
+			throw SocketMessageTooLargeError{"Truncated packet"};
+
 		try {
 			HandleMessage(i.payload, i.fds);
 		} catch (...) {

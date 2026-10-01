@@ -1083,6 +1083,12 @@ SpawnServerConnection::ReceiveAndHandle()
 		return;
 	}
 
+	if (result.truncated) {
+		logger(3, "Truncated packet");
+		RemoveConnection();
+		return;
+	}
+
 	try {
 		HandleMessage(std::move(result));
 	} catch (MalformedPayloadError) {
