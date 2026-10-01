@@ -35,6 +35,12 @@ http_header_is_hop_by_hop(const char *name) noexcept
 		/* RFC 2616 14.20 */
 		return StringIsEqual(name, "expect");
 
+	case 'h':
+		/* this one belongs to the "Upgrade: h2c" request, and
+		   it is hop-by-hop (RFC 7540 3.2) even though it is
+		   not in the RFC 9110 list */
+		return StringIsEqual(name, "http2-settings");
+
 	case 'k':
 		return StringIsEqual(name, "keep-alive");
 
