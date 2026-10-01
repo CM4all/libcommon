@@ -3151,6 +3151,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::SESSION_SITE:
 #if TRANSLATION_ENABLE_SESSION
+		if (!IsValidSite(string_payload))
+			throw MalformedPacket{};
+
 		response.session_site = string_payload.data();
 		return;
 #else
