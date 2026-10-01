@@ -12,7 +12,11 @@
 #include "io/Open.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 #include "io/WriteFile.hxx"
+#include "util/CharUtil.hxx"
 #include "util/StringAPI.hxx"
+#include "util/StringSplit.hxx"
+#include "util/StringVerify.hxx"
+#include "util/StringListVerify.hxx"
 
 #include <fmt/format.h>
 
@@ -29,6 +33,58 @@ CgroupOptions::CgroupOptions(AllocatorPtr alloc,
 	 xattr(alloc, src.xattr),
 	 set(alloc, src.set)
 {
+}
+
+static constexpr bool
+IsValidCgroupNameChar(char ch) noexcept
+{
+	return IsLowerAlphaASCII(ch) || ch == '_';
+}
+
+static constexpr bool
+IsValidCgroupName(std::string_view s) noexcept
+{
+	return CheckCharsNonEmpty(s, IsValidCgroupNameChar);
+}
+
+static constexpr bool
+IsValidCgroupAttributeNameChar(char ch) noexcept
+{
+	return IsLowerAlphaASCII(ch) || ch == '_';
+}
+
+static constexpr bool
+IsValidCgroupAttributeNameSegment(std::string_view s) noexcept
+{
+	return CheckCharsNonEmpty(s, IsValidCgroupAttributeNameChar);
+}
+
+static constexpr bool
+IsValidCgroupAttributeName(std::string_view s) noexcept
+{
+	return IsNonEmptyListOf(s, '.', IsValidCgroupAttributeNameSegment);
+}
+
+bool
+CgroupOptions::IsValidSetName(std::string_view name) noexcept
+{
+	const auto [controller, attribute] = Split(name, '.');
+	if (!IsValidCgroupName(controller) ||
+	    !IsValidCgroupAttributeName(attribute))
+		return false;
+
+	if (controller == "cgroup"sv)
+		/* this is not a controller, this is a core cgroup
+		   attribute */
+		return false;
+
+	return true;
+}
+
+bool
+CgroupOptions::IsValidSetValue(std::string_view value) noexcept
+{
+	return !value.empty() && value.find('/') == value.npos;
 }
 
 void

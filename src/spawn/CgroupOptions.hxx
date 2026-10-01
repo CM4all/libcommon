@@ -59,6 +59,18 @@ struct CgroupOptions {
 		return name != nullptr;
 	}
 
+	/**
+	 * Is this a valid name for Set()?
+	 */
+	[[gnu::pure]]
+	static bool IsValidSetName(std::string_view name) noexcept;
+
+	/**
+	 * Is this a valid value for Set()?
+	 */
+	[[gnu::pure]]
+	static bool IsValidSetValue(std::string_view value) noexcept;
+
 	void SetXattr(AllocatorPtr alloc,
 		      std::string_view name, std::string_view value) noexcept;
 

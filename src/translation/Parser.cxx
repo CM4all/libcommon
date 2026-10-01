@@ -44,7 +44,6 @@
 #include "util/StringCompare.hxx"
 #include "util/StringSplit.hxx"
 #include "util/StringVerify.hxx"
-#include "util/StringListVerify.hxx"
 #include "util/Unaligned.hxx"
 
 #if TRANSLATION_ENABLE_HTTP
@@ -1180,60 +1179,6 @@ TranslateParser::HandleUmask(std::span<const std::byte> payload)
 	options.umask = umask;
 }
 
-static constexpr bool
-IsValidCgroupNameChar(char ch) noexcept
-{
-	return IsLowerAlphaASCII(ch) || ch == '_';
-}
-
-static constexpr bool
-IsValidCgroupName(std::string_view s) noexcept
-{
-	return CheckCharsNonEmpty(s, IsValidCgroupNameChar);
-}
-
-static constexpr bool
-IsValidCgroupAttributeNameChar(char ch) noexcept
-{
-	return IsLowerAlphaASCII(ch) || ch == '_';
-}
-
-static constexpr bool
-IsValidCgroupAttributeNameSegment(std::string_view s) noexcept
-{
-	return CheckCharsNonEmpty(s, IsValidCgroupAttributeNameChar);
-}
-
-static constexpr bool
-IsValidCgroupAttributeName(std::string_view s) noexcept
-{
-	return IsNonEmptyListOf(s, '.', IsValidCgroupAttributeNameSegment);
-}
-
-[[gnu::pure]]
-static bool
-IsValidCgroupSetName(std::string_view name) noexcept
-{
-	const auto [controller, attribute] = Split(name, '.');
-	if (!IsValidCgroupName(controller) ||
-	    !IsValidCgroupAttributeName(attribute))
-		return false;
-
-	if (controller == "cgroup"sv)
-		/* this is not a controller, this is a core cgroup
-		   attribute */
-		return false;
-
-	return true;
-}
-
-[[gnu::pure]]
-static bool
-IsValidCgroupSetValue(std::string_view value) noexcept
-{
-	return !value.empty() && value.find('/') == value.npos;
-}
-
 [[gnu::pure]]
 static std::pair<std::string_view, std::string_view>
 ParseCgroupSet(std::string_view payload)
@@ -1242,7 +1187,7 @@ ParseCgroupSet(std::string_view payload)
 		throw TranslateParser::MalformedPacket{};
 
 	const auto [name, value] = Split(payload, '=');
-	if (!IsValidCgroupSetName(name) || !IsValidCgroupSetValue(value))
+	if (!CgroupOptions::IsValidSetName(name) || !CgroupOptions::IsValidSetValue(value))
 		throw TranslateParser::MalformedPacket{};
 
 	return {name, value};
