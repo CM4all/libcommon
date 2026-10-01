@@ -1239,11 +1239,11 @@ static std::pair<std::string_view, std::string_view>
 ParseCgroupSet(std::string_view payload)
 {
 	if (!IsValidString(payload))
-		return {};
+		throw TranslateParser::MalformedPacket{};
 
 	const auto [name, value] = Split(payload, '=');
 	if (!IsValidCgroupSetName(name) || !IsValidCgroupSetValue(value))
-		return {};
+		throw TranslateParser::MalformedPacket{};
 
 	return {name, value};
 }
@@ -1254,9 +1254,6 @@ TranslateParser::HandleCgroupSet(std::string_view payload)
 	auto &options = MakeChildOptions("misplaced CGROUP_SET packet");
 
 	auto set = ParseCgroupSet(payload);
-	if (set.first.data() == nullptr)
-		throw MalformedPacket{};
-
 	options.cgroup.Set(alloc, set.first, set.second);
 }
 
@@ -1266,9 +1263,6 @@ TranslateParser::HandleCgroupXattr(std::string_view payload)
 	auto &options = MakeChildOptions("misplaced CGROUP_XATTR packet");
 
 	auto xattr = ParseCgroupSet(payload);
-	if (xattr.first.data() == nullptr)
-		throw MalformedPacket{};
-
 	options.cgroup.SetXattr(alloc, xattr.first, xattr.second);
 }
 
