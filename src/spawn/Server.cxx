@@ -952,8 +952,12 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 
 		case ExecCommand::CGROUP_SET:
 			if (p.cgroup != nullptr) {
-				const char *set_name = ReadSafePathSegment(payload);
+				const char *set_name = payload.ReadString();
 				const char *set_value = payload.ReadString();
+
+				if (!CgroupOptions::IsValidSetName(set_name) ||
+				    !CgroupOptions::IsValidSetValue(set_value))
+					throw MalformedPayloadError{};
 
 				assignments.emplace_front(set_name, set_value);
 				auto &set = assignments.front();
@@ -967,6 +971,10 @@ SpawnServerConnection::HandleExecMessage(Payload payload,
 			if (p.cgroup != nullptr) {
 				const char *_name = payload.ReadString();
 				const char *_value = payload.ReadString();
+
+				if (!CgroupOptions::IsValidSetName(_name) ||
+				    !CgroupOptions::IsValidSetValue(_value))
+					throw MalformedPayloadError{};
 
 				assignments.emplace_front(_name, _value);
 				cgroup.xattr.Add(assignments.front());
