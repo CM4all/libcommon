@@ -763,7 +763,7 @@ SpawnServerClient::ReceiveAndHandle()
 	for (const auto &i : receive) {
 		if (i.payload.empty())
 			/* when the peer closes the socket, recvmmsg() doesn't
-			   return 0; insteaed, it fills the mmsghdr array with
+			   return 0; instead, it fills the mmsghdr array with
 			   empty packets */
 			throw std::runtime_error("spawner closed the socket");
 
