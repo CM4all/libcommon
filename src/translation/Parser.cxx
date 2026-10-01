@@ -1648,6 +1648,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::URI:
 #if TRANSLATION_ENABLE_HTTP
+		if (!IsValidAbsoluteUriPath(string_payload))
+			throw MalformedPacket{};
+
 #if TRANSLATION_ENABLE_RADDRESS
 		if (response.layout.data() != nullptr) {
 			assert(layout_items_builder);
@@ -1658,9 +1661,6 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 			return;
 		}
 #endif
-
-		if (!IsValidAbsoluteUriPath(string_payload))
-			throw MalformedPacket{};
 
 		response.uri = string_payload.data();
 		return;
