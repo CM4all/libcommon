@@ -37,6 +37,14 @@
  */
 static constexpr int disable_syscalls[] = {
 	SCMP_SYS(get_mempolicy),
+
+	/* io_uring can be used to bypass this system call filter,
+	   therefore forbid it completely (for now) */
+#ifdef __NR_io_uring_setup
+	SCMP_SYS(io_uring_setup),
+	SCMP_SYS(io_uring_enter),
+	SCMP_SYS(io_uring_register),
+#endif
 };
 
 /**
