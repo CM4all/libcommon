@@ -27,6 +27,7 @@
 #include "cgi/Address.hxx"
 #include "uri/Base.hxx"
 #endif
+#include "uri/Verify.hxx"
 #if TRANSLATION_ENABLE_SPAWN
 #include "spawn/ChildOptions.hxx"
 #include "spawn/Mount.hxx"
@@ -1640,6 +1641,9 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 
 	case TranslationCommand::HOST:
 #if TRANSLATION_ENABLE_HTTP
+		if (!VerifyUriHostPort(string_payload))
+			throw MalformedPacket{};
+
 		response.host = string_payload.data();
 		return;
 #else
@@ -2389,7 +2393,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		if (resource_address == nullptr || !resource_address->IsDefined())
 			throw MisplacedPacket{};
 
-		if (!IsValidNonEmptyString(string_payload))
+		if (!VerifyDomainName(string_payload))
 			throw MalformedPacket{};
 
 		response.cookie_host = string_payload.data();
@@ -2610,7 +2614,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		    lhttp_address->host_and_port != nullptr)
 			throw MisplacedPacket{};
 
-		if (!IsValidNonEmptyString(string_payload))
+		if (!VerifyUriHostPort(string_payload))
 			throw MalformedPacket{};
 
 		lhttp_address->host_and_port = string_payload.data();
@@ -3532,7 +3536,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 		return;
 
 	case TranslationCommand::CANONICAL_HOST:
-		if (!IsValidNonEmptyString(string_payload))
+		if (!VerifyUriHostPort(string_payload))
 			throw MalformedPacket{};
 
 		response.canonical_host = string_payload.data();
@@ -3925,7 +3929,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #endif
 
 	case TranslationCommand::LIKE_HOST:
-		if (!IsValidNonEmptyString(string_payload))
+		if (!VerifyUriHostPort(string_payload))
 			throw MalformedPacket{};
 
 		if (response.like_host != nullptr)
