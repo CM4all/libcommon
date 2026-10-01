@@ -43,6 +43,28 @@ IsValidName(std::string_view s) noexcept
 	return CheckCharsNonEmpty(s, IsValidNameChar);
 }
 
+static constexpr bool
+IsValidSiteFirstChar(char ch) noexcept
+{
+	return IsAlphaNumericASCII(ch) || ch == '_';
+}
+
+static constexpr bool
+IsValidSiteChar(char ch) noexcept
+{
+	return IsValidSiteFirstChar(ch) || ch == '-' || ch == ':';
+}
+
+/**
+ * Is this a valid "SITE" name?
+ */
+static constexpr bool
+IsValidSite(std::string_view s) noexcept
+{
+	return !s.empty() && IsValidSiteFirstChar(s.front()) &&
+		CheckChars(s.substr(1), IsValidSiteChar);
+}
+
 [[gnu::pure]]
 static constexpr bool
 IsValidAbsolutePath(std::string_view p) noexcept

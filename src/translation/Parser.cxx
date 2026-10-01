@@ -1394,7 +1394,7 @@ TranslateParser::HandleRegularPacket(TranslationCommand command,
 #if TRANSLATION_ENABLE_RADDRESS
 		assert(resource_address != nullptr);
 
-		if (!IsValidNonEmptyString(string_payload))
+		if (!IsValidSite(string_payload))
 			throw MalformedPacket{};
 
 		if (resource_address == &response.address)
