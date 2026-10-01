@@ -551,6 +551,7 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		   really needed */
 		DeleteEmptyItems(&item);
 
+	assert(!in_finish_waiting);
 	in_finish_waiting = true;
 
 	if (item.GetLease(inner_class, get_handler)) {
@@ -568,6 +569,7 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		retry_event.Cancel();
 	}
 
+	assert(in_finish_waiting);
 	in_finish_waiting = false;
 
 	if (items.empty() && waiting.empty() && !get_cancel_ptr)
