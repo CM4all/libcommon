@@ -4,6 +4,7 @@
 #include "BufferedReader.hxx"
 #include "Reader.hxx"
 #include "util/ExtractLine.hxx"
+#include "util/SpanCast.hxx"
 
 #include <algorithm> // for std::copy_n()
 #include <cassert>
@@ -102,4 +103,21 @@ BufferedReader::ReadLine()
 	buffer.Clear();
 	++line_number;
 	return line;
+}
+
+std::string_view
+BufferedReader::ReadLineView()
+{
+	do {
+		const auto line = ExtractLine(buffer, ExtractLineFlush::NEVER);
+		if (line.data() != nullptr) {
+			++line_number;
+			return ToStringView(line);
+		}
+	} while (Fill(true));
+
+	if (!eof || buffer.empty())
+		return {};
+
+	return ToStringView(buffer.Read());
 }
