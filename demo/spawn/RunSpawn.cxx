@@ -186,6 +186,8 @@ try {
 				throw "Malformed --cgroup-set value";
 
 			cgroup_options.Set(alloc, name, value);
+		} else if (StringIsEqual(arg, "--no-new-privs")) {
+			p.no_new_privs = true;
 		} else
 			throw Usage();
 	}
