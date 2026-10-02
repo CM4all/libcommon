@@ -51,9 +51,12 @@ public:
 	/**
 	 * Record the most recently added mount point as writable.
 	 *
+	 * @param mount_fd the file descriptor of the mount object
+	 * that was moved onto the mount point
+	 *
 	 * Throws if the mount point could not be opened.
 	 */
-	void MakeWritable(FileDescriptor root_fd);
+	void MakeWritable(FileDescriptor mount_fd);
 
 	/**
 	 * Schedule a remount of the most recently added mount point.

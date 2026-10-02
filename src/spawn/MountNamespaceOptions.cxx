@@ -238,11 +238,13 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid, const SpawnContext &context)
 
 		FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 
-		MoveMount({FSMount(fs, flags), ""},
+		const auto mount_fd = FSMount(fs, flags);
+
+		MoveMount({mount_fd, ""},
 			  {root_fd, "tmp"},
 			  MOVE_MOUNT_F_EMPTY_PATH);
 
-		vfs_builder.MakeWritable(root_fd);
+		vfs_builder.MakeWritable(mount_fd);
 	}
 
 	if (HasBindMount()) {

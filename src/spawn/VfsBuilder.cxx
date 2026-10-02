@@ -130,14 +130,14 @@ VfsBuilder::Add(std::string_view path)
 }
 
 void
-VfsBuilder::MakeWritable(FileDescriptor root_fd)
+VfsBuilder::MakeWritable(FileDescriptor mount_fd)
 {
 	assert(!items.empty());
 
 	auto &item = items.back();
 	assert(!item.fd.IsDefined());
 
-	item.fd = OpenDirectoryPath({root_fd, item.path.c_str() + 1}, O_NOFOLLOW);
+	item.fd = OpenDirectoryPath({mount_fd, "."});
 }
 
 void

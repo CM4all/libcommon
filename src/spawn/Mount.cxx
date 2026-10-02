@@ -245,11 +245,13 @@ Mount::ApplyTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 
 	FSConfig(fs, FSCONFIG_CMD_CREATE, nullptr, nullptr);
 
-	MoveMount({FSMount(fs, flags), ""},
+	const auto mount_fd = FSMount(fs, flags);
+
+	MoveMount({mount_fd, ""},
 		  {root_fd, target + 1},
 		  MOVE_MOUNT_F_EMPTY_PATH);
 
-	vfs_builder.MakeWritable(root_fd);
+	vfs_builder.MakeWritable(mount_fd);
 
 	if (!writable)
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
@@ -260,21 +262,20 @@ Mount::ApplyNamedTmpfs(VfsBuilder &vfs_builder, FileDescriptor root_fd) const
 {
 	vfs_builder.Add(target);
 
-	if (source_fd.IsDefined()) {
-		MoveMount({source_fd, ""},
-			  {root_fd, target + 1},
-			  MOVE_MOUNT_F_EMPTY_PATH);
-	} else {
-		/* we didn't get a "source_fd", so just create a new
-		   one (which will not be shared with anybody, just a
-		   fallback) */
-
-		MoveMount({CreateTmpfs(exec), ""},
-			  {root_fd, target + 1},
-			  MOVE_MOUNT_F_EMPTY_PATH);
+	/* if we didn't get a "source_fd", create a new tmpfs (which
+	   will not be shared with anybody, just a fallback) */
+	UniqueFileDescriptor created_fd;
+	FileDescriptor mount_fd = source_fd;
+	if (!mount_fd.IsDefined()) {
+		created_fd = CreateTmpfs(exec);
+		mount_fd = created_fd;
 	}
 
-	vfs_builder.MakeWritable(root_fd);
+	MoveMount({mount_fd, ""},
+		  {root_fd, target + 1},
+		  MOVE_MOUNT_F_EMPTY_PATH);
+
+	vfs_builder.MakeWritable(mount_fd);
 
 	if (!writable)
 		vfs_builder.ScheduleRemount(MS_RDONLY, 0);
