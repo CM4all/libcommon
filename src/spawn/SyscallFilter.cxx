@@ -12,11 +12,6 @@
 #include <netinet/in.h>
 #include <sched.h>
 
-#ifndef __NR_clone3
-/* this is needed on Debian Buster and older */
-#define __NR_clone3 435
-#endif
-
 #ifndef __SNR_listmount
 #ifndef __NR_listmount
 #include "system/linux/listmount.h"
