@@ -35,11 +35,9 @@ static constexpr int disable_syscalls[] = {
 
 	/* io_uring can be used to bypass this system call filter,
 	   therefore forbid it completely (for now) */
-#ifdef __NR_io_uring_setup
 	SCMP_SYS(io_uring_setup),
 	SCMP_SYS(io_uring_enter),
 	SCMP_SYS(io_uring_register),
-#endif
 };
 
 /**
@@ -50,11 +48,7 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(acct),
 	SCMP_SYS(add_key),
 	SCMP_SYS(adjtimex),
-
-#ifdef __NR_bpf
 	SCMP_SYS(bpf),
-#endif
-
 	SCMP_SYS(clock_adjtime),
 	SCMP_SYS(clock_settime),
 	SCMP_SYS(create_module),
@@ -67,11 +61,7 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(ioperm),
 	SCMP_SYS(iopl),
 	SCMP_SYS(kcmp),
-
-#ifdef __NR_kexec_file_load
 	SCMP_SYS(kexec_file_load),
-#endif
-
 	SCMP_SYS(kexec_load),
 	SCMP_SYS(keyctl),
 	SCMP_SYS(lookup_dcookie),
@@ -95,11 +85,7 @@ static constexpr int forbidden_syscalls[] = {
 	SCMP_SYS(syslog),
 	SCMP_SYS(_sysctl),
 	SCMP_SYS(uselib),
-
-#ifdef __NR_userfaultfd
 	SCMP_SYS(userfaultfd),
-#endif
-
 	SCMP_SYS(ustat),
 	SCMP_SYS(vm86),
 	SCMP_SYS(vm86old),

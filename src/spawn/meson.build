@@ -83,7 +83,7 @@ if get_variable('libcommon_enable_spawn_terminator', false)
 endif
 
 if get_variable('libcommon_enable_spawn_direct', false) or get_variable('libcommon_enable_spawn_init', false)
-  libseccomp = dependency('libseccomp',
+  libseccomp = dependency('libseccomp', version: '>= 2.5.5',
                           required: get_variable('libcommon_enable_seccomp', true))
   spawn_config.set('HAVE_LIBSECCOMP', libseccomp.found())
   if libseccomp.found()
