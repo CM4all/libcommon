@@ -49,6 +49,8 @@ public:
 	void Add(std::string_view path);
 
 	/**
+	 * Record the most recently added mount point as writable.
+	 *
 	 * Throws if the mount point could not be opened.
 	 */
 	void MakeWritable(FileDescriptor root_fd);
