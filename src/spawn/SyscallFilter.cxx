@@ -124,33 +124,17 @@ AddInverted(Seccomp::Filter &sf, uint32_t action, int syscall,
 void
 BuildSyscallFilter(Seccomp::Filter &sf)
 {
-	/* forbid a bunch of dangerous system calls */
+	/* forbid a bunch of dangerous system calls; a failure here
+	   (e.g. EFAULT because libseccomp is too old to translate the
+	   syscall for a secondary architecture) is fatal - it does not
+	   mean the kernel lacks the syscall, so silently skipping the
+	   rule would leave it unfiltered */
 
-	for (auto i : disable_syscalls) {
-		try {
-			sf.AddRule(SCMP_ACT_ERRNO(ENOSYS), i);
-		} catch (const std::system_error &e) {
-			if (IsErrno(e, EFAULT)) {
-				/* system call not supported by this kernel - ignore
-				   this problem silently, because an unsupported
-				   syscall doesn't need to be filtered */
-			} else
-				throw;
-		}
-	}
+	for (auto i : disable_syscalls)
+		sf.AddRule(SCMP_ACT_ERRNO(ENOSYS), i);
 
-	for (auto i : forbidden_syscalls) {
-		try {
-			sf.AddRule(SCMP_ACT_KILL, i);
-		} catch (const std::system_error &e) {
-			if (IsErrno(e, EFAULT)) {
-				/* system call not supported by this kernel - ignore
-				   this problem silently, because an unsupported
-				   syscall doesn't need to be filtered */
-			} else
-				throw;
-		}
-	}
+	for (auto i : forbidden_syscalls)
+		sf.AddRule(SCMP_ACT_KILL, i);
 
 	/* allow only a few socket domains */
 
@@ -172,17 +156,7 @@ ForbidNamespace(Seccomp::Filter &sf, int one_namespace_flag)
 	/* we can't inspect the clone3() flags parameter because we
 	   can't dereference "struct clone_args" - so let's pretend
 	   this kernel doesn't support clone3() */
-	try {
-		sf.AddRule(SCMP_ACT_ERRNO(ENOSYS), SCMP_SYS(clone3));
-	} catch (const std::system_error &e) {
-		if (IsErrno(e, EFAULT)) {
-			/* system call not supported by this kernel -
-			   ignore this problem silently, because an
-			   unsupported syscall doesn't need to be
-			   filtered */
-		} else
-			throw;
-	}
+	sf.AddRule(SCMP_ACT_ERRNO(ENOSYS), SCMP_SYS(clone3));
 }
 
 void
