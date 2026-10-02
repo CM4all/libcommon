@@ -23,5 +23,6 @@ translation_dep = declare_dependency(
     spawn_dep,
     net_dep,
     alloc_dep,
+    uri_dep,
   ],
 )
