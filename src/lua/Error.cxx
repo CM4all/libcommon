@@ -71,6 +71,15 @@ RaiseCurrent(lua_State *L)
 }
 
 int
+ReturnException(lua_State *L, std::exception_ptr &&error)
+{
+	// return [nil, error_message] for assert()
+	lua_pushnil(L);
+	Push(L, std::move(error));
+	return 2;
+}
+
+int
 ReturnCurrentException(lua_State *L)
 {
 	auto e = std::current_exception();
@@ -79,10 +88,7 @@ ReturnCurrentException(lua_State *L)
 		   Lua error */
 		throw;
 
-	// return [nil, error_message] for assert()
-	lua_pushnil(L);
-	Push(L, std::move(e));
-	return 2;
+	return ReturnException(L, std::move(e));
 }
 
 } // namespace Lua
