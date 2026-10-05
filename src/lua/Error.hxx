@@ -37,7 +37,7 @@ PopError(lua_State *L);
  * Pushes a representation of the given C++ exception on the stack.
  */
 void
-Push(lua_State *L, std::exception_ptr e) noexcept;
+Push(lua_State *L, std::exception_ptr &&e) noexcept;
 
 /**
  * Raise a Lua error (using lua_error()) based on the given C++
@@ -50,7 +50,7 @@ Push(lua_State *L, std::exception_ptr e) noexcept;
  */
 [[noreturn]]
 void
-Raise(lua_State *L, std::exception_ptr e);
+Raise(lua_State *L, std::exception_ptr &&e);
 
 /**
  * Wrapper for Raise() which uses std::current_exception.  As a

@@ -42,7 +42,7 @@ PopError(lua_State *L)
 }
 
 void
-Push(lua_State *L, std::exception_ptr e) noexcept
+Push(lua_State *L, std::exception_ptr &&e) noexcept
 {
 	assert(e);
 
@@ -50,7 +50,7 @@ Push(lua_State *L, std::exception_ptr e) noexcept
 }
 
 void
-Raise(lua_State *L, std::exception_ptr e)
+Raise(lua_State *L, std::exception_ptr &&e)
 {
 	Push(L, std::move(e));
 	lua_error(L);

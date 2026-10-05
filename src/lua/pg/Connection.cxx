@@ -214,7 +214,7 @@ public:
 
 		/* return [nil, error_message] for assert() */
 		Push(L, nullptr);
-		Push(L, _error);
+		Push(L, std::move(_error));
 		Resume(L, 2);
 	}
 
