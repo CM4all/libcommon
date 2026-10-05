@@ -23,7 +23,7 @@ EncodeArray(lua_State *L)
 	if (lua_gettop(L) > 2)
 		return luaL_error(L, "Too many parameters");
 
-	luaL_argcheck(L, lua_istable(L, 2), 2, "Table expected");
+	luaL_checktype(L, 2, LUA_TTABLE);
 
 	const std::size_t n = lua_objlen(L, 2);
 
