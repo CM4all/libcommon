@@ -48,6 +48,11 @@ private:
 			   std::span<UniqueFileDescriptor> fds,
 			   SocketAddress address, int uid) override;
 
+	bool OnUdpTruncated() noexcept override {
+		handler.OnMultiWasClosed(*this);
+		return false;
+	}
+
 	bool OnUdpHangup() override {
 		handler.OnMultiWasClosed(*this);
 		return false;

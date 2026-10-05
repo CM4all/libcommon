@@ -28,6 +28,15 @@ public:
 				   SocketAddress address, int uid) = 0;
 
 	/**
+	 * A truncated datagram was received (and discarded).
+	 *
+	 * @return false if the #UdpHandler was destroyed inside this method
+	 */
+	virtual bool OnUdpTruncated() noexcept {
+		return true;
+	}
+
+	/**
 	 * The peer has hung up the (SOCK_SEQPACKET) connection.  The
 	 * implementation has three choices:
 	 *

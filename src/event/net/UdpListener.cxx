@@ -51,7 +51,7 @@ UdpListener::ReceiveOne()
 	auto result = ReceiveMessage(GetSocket(), buffer, MSG_DONTWAIT);
 	if (result.truncated)
 		// ignore truncated datagrams
-		return true;
+		return handler.OnUdpTruncated();
 
 	int uid = result.cred != nullptr
 		? result.cred->uid

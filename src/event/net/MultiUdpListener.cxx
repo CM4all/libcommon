@@ -41,16 +41,23 @@ try {
 		return;
 	}
 
-	for (auto &d : multi)
-		// ignore truncated datagrams
-		if (!d.truncated &&
-		    !handler.OnUdpDatagram(d.payload,
+	for (auto &d : multi) {
+		if (d.truncated) {
+			if (handler.OnUdpTruncated())
+				// ignore truncated datagrams
+				continue;
+			else
+				return;
+		}
+
+		if (!handler.OnUdpDatagram(d.payload,
 					   d.fds,
 					   d.address,
 					   d.cred != nullptr
 					   ? d.cred->uid
 					   : -1))
 			return;
+	}
 
 	multi.Clear();
 } catch (...) {
