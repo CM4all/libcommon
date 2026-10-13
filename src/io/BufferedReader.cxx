@@ -119,5 +119,8 @@ BufferedReader::ReadLineView()
 	if (!eof || buffer.empty())
 		return {};
 
-	return ToStringView(buffer.Read());
+	const std::string_view line = ToStringView(buffer.Read());
+	buffer.Clear();
+	++line_number;
+	return line;
 }
