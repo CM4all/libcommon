@@ -22,6 +22,7 @@ test(
     'TestTokenBucket.cxx',
     'TestUnaligned.cxx',
     'TestUnalignedBigEndian.cxx',
+    'TestUTF8.cxx',
     'TestUuidString.cxx',
     'TestVCircularBuffer.cxx',
     include_directories: inc,
