@@ -5,28 +5,37 @@
 #pragma once
 
 #include "AllocatedSocketAddress.hxx"
+#include "Features.hxx"
 
 #include <cstdint>
-#include <string>
 #include <utility>
+
+#if defined(HAVE_TCP) && defined(__linux__)
+#include <string>
+#endif
 
 class UniqueSocketDescriptor;
 
 struct SocketConfig {
 	AllocatedSocketAddress bind_address;
 
+#ifdef HAVE_MULTICAST
 	AllocatedSocketAddress multicast_group;
+#endif
 
+#if defined(HAVE_TCP) && defined(__linux__)
 	/**
 	 * If non-empty, sets SO_BINDTODEVICE.
 	 */
 	std::string interface;
+#endif
 
 	/**
 	 * If non-zero, calls listen().  Value is the backlog.
 	 */
 	unsigned listen = 0;
 
+#ifdef HAVE_TCP
 	/**
 	 * If non-zero, sets TCP_DEFER_ACCEPT.  Value is a number of
 	 * seconds.
@@ -38,24 +47,34 @@ struct SocketConfig {
 	 * milliseconds.
 	 */
 	unsigned tcp_user_timeout = 0;
+#endif // HAVE_TCP
 
+#ifdef HAVE_UN
 	/**
 	 * If non-zero, sets the socket's file mode (overriding the
 	 * umask).
 	 */
 	uint16_t mode = 0;
+#endif
 
+#ifdef HAVE_TCP
+#ifdef __linux__
 	/**
 	 * Enable Multi-Path TCP?
 	 */
 	bool mptcp = false;
+#endif
 
 	bool reuse_port = false;
 
 	bool free_bind = false;
+#endif
 
+#ifdef HAVE_UN
 	bool pass_cred = false;
+#endif
 
+#ifdef HAVE_TCP
 	/**
 	 * If true, then disable Nagle's algorithm.
 	 *
@@ -67,11 +86,14 @@ struct SocketConfig {
 	 * @see SO_KEEPALIVE
 	 */
 	bool keepalive = false;
+#endif
 
+#ifdef HAVE_IPV6
 	/**
 	 * @see IPV6_V6ONLY
 	 */
 	bool v6only = false;
+#endif
 
 	/**
 	 * Apply fixups after configuration:
