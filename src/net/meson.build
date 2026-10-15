@@ -1,6 +1,7 @@
 net_sources = [
   'Anonymize.cxx',
   'BareInetAddress.cxx',
+  'ChmodLocalSocket.cxx',
   'SocketError.cxx',
   'SocketAddress.cxx',
   'StaticSocketAddress.cxx',
