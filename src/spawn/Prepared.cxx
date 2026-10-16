@@ -31,6 +31,21 @@ PreparedChildProcess::SetEnv(std::string_view name, std::string_view value) noex
 	PutEnv(fmt::format("{}={}", name, value));
 }
 
+/**
+ * Check if the string sets the specified environment variable, and if
+ * so, return its value.  Return nullptr if not.
+ */
+[[gnu::pure]]
+static const char *
+IsEnv(const char *s, std::string_view name) noexcept
+{
+	if (const char *t = StringAfterPrefix(s, name))
+		if (*t == '=')
+			return t + 1;
+
+	return nullptr;
+}
+
 const char *
 PreparedChildProcess::GetEnv(std::string_view name) const noexcept
 {
@@ -38,9 +53,8 @@ PreparedChildProcess::GetEnv(std::string_view name) const noexcept
 		if (i == nullptr)
 			break;
 
-		const char *s = StringAfterPrefix(i, name);
-		if (s != nullptr && *s == '=')
-			return s + 1;
+		if (const char *value = IsEnv(i, name))
+			return value;
 	}
 
 	return nullptr;
