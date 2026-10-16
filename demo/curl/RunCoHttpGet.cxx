@@ -5,6 +5,7 @@
 #include "lib/curl/Global.hxx"
 #include "lib/curl/Handler.hxx"
 #include "lib/curl/CoRequest.hxx"
+#include "lib/curl/Setup.hxx"
 #include "co/InvokeTask.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
@@ -42,10 +43,18 @@ struct Instance final {
 	}
 };
 
+static CurlEasy
+MakeCurlEasy(const char *url)
+{
+	CurlEasy easy{url};
+	Curl::Setup(easy);
+	return easy;
+}
+
 static Co::InvokeTask
 Run(CurlGlobal &global, const char *url, Curl::StringOptions options)
 {
-	const auto response = co_await Curl::CoRequest(global, CurlEasy{url}, options);
+	const auto response = co_await Curl::CoRequest(global, MakeCurlEasy(url), options);
 
 	fmt::print(stderr, "status={}\n"sv, std::to_underlying(response.status));
 

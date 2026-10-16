@@ -22,6 +22,7 @@ AsyncRequest::AsyncRequest(CurlGlobal &_global,
 			   CurlResponseHandler &_handler)
 	:global(_global), handler(_handler)
 {
+	Curl::Setup(easy);
 	SetupEasy();
 }
 
@@ -36,8 +37,6 @@ AsyncRequest::SetupEasy()
 	easy.SetPrivate((void *)this);
 
 	handler.Install(easy);
-
-	Curl::Setup(easy);
 }
 
 void
