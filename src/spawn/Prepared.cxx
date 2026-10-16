@@ -61,6 +61,23 @@ PreparedChildProcess::GetEnv(std::string_view name) const noexcept
 }
 
 const char *
+PreparedChildProcess::RemoveEnv(std::string_view name) noexcept
+{
+	const char *result = nullptr;
+
+	std::erase_if(env, [name, &result](const char *s){
+		if (const char *value = IsEnv(s, name)) {
+			result = value;
+			return true;
+		}
+
+		return false;
+	});
+
+	return result;
+}
+
+const char *
 PreparedChildProcess::ToContainerPath(AllocatorPtr alloc,
 				      const char *host_path) const noexcept
 {

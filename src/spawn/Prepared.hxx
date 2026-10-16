@@ -231,6 +231,12 @@ struct PreparedChildProcess {
 		return GetEnv(name) != nullptr;
 	}
 
+	/**
+	 * Remove the specified environment variable and return its
+	 * value.
+	 */
+	const char *RemoveEnv(std::string_view name) noexcept;
+
 	const char *GetHome() const noexcept {
 		return ns.mount.home;
 	}
