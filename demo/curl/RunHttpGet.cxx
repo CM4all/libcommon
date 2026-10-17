@@ -4,7 +4,7 @@
 
 #include "lib/curl/Global.hxx"
 #include "lib/curl/Handler.hxx"
-#include "lib/curl/Request.hxx"
+#include "lib/curl/AsyncRequest.hxx"
 #include "event/Loop.hxx"
 #include "event/ShutdownListener.hxx"
 #include "util/DeleteDisposer.hxx"
@@ -28,7 +28,7 @@ class Request final
 {
 	Instance &instance;
 
-	CurlRequest r;
+	Curl::AsyncRequest r;
 
 public:
 	Request(Instance &_instance, const char *url) noexcept;

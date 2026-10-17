@@ -23,7 +23,7 @@ curl_deps = [
 if is_variable('event_dep')
   curl_sources += [
     'Adapter.cxx',
-    'Request.cxx',
+    'AsyncRequest.cxx',
     'Setup.cxx',
     'Global.cxx',
   ]

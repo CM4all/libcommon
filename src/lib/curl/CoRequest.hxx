@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Request.hxx"
+#include "AsyncRequest.hxx"
 #include "Handler.hxx"
 #include "StringOptions.hxx"
 #include "StringResponse.hxx"
@@ -18,7 +18,7 @@ namespace Curl {
  * A CURL HTTP request as a C++20 coroutine.
  */
 class CoRequest final : CurlResponseHandler {
-	CurlRequest request;
+	AsyncRequest request;
 
 	StringResponse response;
 	std::exception_ptr error;

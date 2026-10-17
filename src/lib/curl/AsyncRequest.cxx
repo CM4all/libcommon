@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // author: Max Kellermann <max.kellermann@gmail.com>
 
-#include "Request.hxx"
+#include "AsyncRequest.hxx"
 #include "Setup.hxx"
 #include "Global.hxx"
 
@@ -9,27 +9,29 @@
 
 #include <cassert>
 
-CurlRequest::CurlRequest(CurlGlobal &_global, CurlEasy &&_easy,
-			 CurlResponseHandler &_handler)
+namespace Curl {
+
+AsyncRequest::AsyncRequest(CurlGlobal &_global, CurlEasy &&_easy,
+			   CurlResponseHandler &_handler)
 	:global(_global), handler(_handler), easy(std::move(_easy))
 {
 	SetupEasy();
 }
 
-CurlRequest::CurlRequest(CurlGlobal &_global,
-			 CurlResponseHandler &_handler)
+AsyncRequest::AsyncRequest(CurlGlobal &_global,
+			   CurlResponseHandler &_handler)
 	:global(_global), handler(_handler)
 {
 	SetupEasy();
 }
 
-CurlRequest::~CurlRequest() noexcept
+AsyncRequest::~AsyncRequest() noexcept
 {
 	FreeEasy();
 }
 
 void
-CurlRequest::SetupEasy()
+AsyncRequest::SetupEasy()
 {
 	easy.SetPrivate((void *)this);
 
@@ -39,7 +41,7 @@ CurlRequest::SetupEasy()
 }
 
 void
-CurlRequest::Start()
+AsyncRequest::Start()
 {
 	assert(!registered);
 
@@ -48,7 +50,7 @@ CurlRequest::Start()
 }
 
 void
-CurlRequest::Stop() noexcept
+AsyncRequest::Stop() noexcept
 {
 	if (!registered)
 		return;
@@ -58,7 +60,7 @@ CurlRequest::Stop() noexcept
 }
 
 void
-CurlRequest::FreeEasy() noexcept
+AsyncRequest::FreeEasy() noexcept
 {
 	if (!easy)
 		return;
@@ -68,7 +70,7 @@ CurlRequest::FreeEasy() noexcept
 }
 
 void
-CurlRequest::Resume() noexcept
+AsyncRequest::Resume() noexcept
 {
 	assert(registered);
 
@@ -78,9 +80,11 @@ CurlRequest::Resume() noexcept
 }
 
 void
-CurlRequest::Done(CURLcode result) noexcept
+AsyncRequest::Done(CURLcode result) noexcept
 {
 	Stop();
 
 	handler.Done(result);
 }
+
+} // namespace Curl
