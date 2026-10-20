@@ -23,6 +23,13 @@ std::string_view
 UriAfterScheme(std::string_view uri) noexcept;
 
 /**
+ * Returns the "scheme://authority" part of the URI.
+ */
+[[gnu::pure]]
+std::string_view
+UriGetOrigin(std::string_view uri) noexcept;
+
+/**
  * Does this URI have an authority part?
  */
 [[gnu::pure]]
