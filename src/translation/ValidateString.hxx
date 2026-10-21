@@ -61,8 +61,7 @@ IsValidSiteChar(char ch) noexcept
 static constexpr bool
 IsValidSite(std::string_view s) noexcept
 {
-	return !s.empty() && IsValidSiteFirstChar(s.front()) &&
-		CheckChars(s.substr(1), IsValidSiteChar);
+	return CheckCharsNonEmpty(s, IsValidSiteFirstChar, IsValidSiteChar);
 }
 
 [[gnu::pure]]
