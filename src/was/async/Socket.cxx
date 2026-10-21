@@ -4,6 +4,7 @@
 
 #include "Socket.hxx"
 #include "system/Error.hxx"
+#include "util/ByteSizes.hxx"
 
 #include <fcntl.h>
 #include <sys/socket.h>
@@ -28,7 +29,7 @@ WasSocket::CreatePair()
 
 	/* allocate 256 kB for each pipe to reduce the system call and
 	   latency overhead for splicing */
-	static constexpr int PIPE_BUFFER_SIZE = 256 * 1024;
+	static constexpr int PIPE_BUFFER_SIZE = 256_KiB;
 	result.first.input.SetPipeCapacity(PIPE_BUFFER_SIZE);
 	result.first.output.SetPipeCapacity(PIPE_BUFFER_SIZE);
 

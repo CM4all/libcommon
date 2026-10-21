@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "util/ByteSizes.hxx"
 #include "util/DynamicFifoBuffer.hxx"
 
 #include <cstddef>
@@ -12,7 +13,7 @@
 class Reader;
 
 class BufferedReader {
-	static constexpr std::size_t MAX_SIZE = 512 * 1024;
+	static constexpr std::size_t MAX_SIZE = 512_KiB;
 
 	Reader &reader;
 

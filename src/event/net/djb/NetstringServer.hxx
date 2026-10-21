@@ -9,6 +9,7 @@
 #include "net/djb/NetstringGenerator.hxx"
 #include "event/SocketEvent.hxx"
 #include "event/CoarseTimerEvent.hxx"
+#include "util/ByteSizes.hxx"
 #include "util/SpanCast.hxx"
 
 #include <exception>
@@ -33,7 +34,7 @@ class NetstringServer {
 public:
 	NetstringServer(EventLoop &event_loop,
 			UniqueSocketDescriptor _fd,
-			size_t max_size=16*1024*1024) noexcept;
+			size_t max_size=16_MiB) noexcept;
 	~NetstringServer() noexcept;
 
 	auto &GetEventLoop() const noexcept {

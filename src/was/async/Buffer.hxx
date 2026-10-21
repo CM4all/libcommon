@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "util/ByteSizes.hxx"
 #include "util/DisposableBuffer.hxx"
 
 #include <array>
@@ -14,7 +15,7 @@
 namespace Was {
 
 class Buffer {
-	static constexpr std::size_t MAX_SIZE = 256 * 1024;
+	static constexpr std::size_t MAX_SIZE = 256_KiB;
 	static constexpr std::size_t UNKNOWN_SIZE = ~std::size_t{};
 
 	std::size_t length = UNKNOWN_SIZE;

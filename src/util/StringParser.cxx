@@ -3,6 +3,7 @@
 
 #include "StringParser.hxx"
 #include "StringStrip.hxx"
+#include "util/ByteSizes.hxx"
 
 #include <cstdint> // for SIZE_MAX
 #include <cstdlib>
@@ -71,9 +72,9 @@ ParseSize(const char *s)
 	if (endptr == s)
 		throw std::runtime_error("Failed to parse integer");
 
-	static constexpr std::size_t KILO = 1024;
-	static constexpr std::size_t MEGA = 1024 * KILO;
-	static constexpr std::size_t GIGA = 1024 * MEGA;
+	static constexpr std::size_t KILO = 1_KiB;
+	static constexpr std::size_t MEGA = 1_MiB;
+	static constexpr std::size_t GIGA = 1_GiB;
 
 	s = StripLeft(endptr);
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "util/ByteSizes.hxx"
+
 #include <nlohmann/json_fwd.hpp>
 
 #include <cstddef> // for std::size_t
@@ -20,6 +22,6 @@ namespace Was {
  */
 nlohmann::json
 ReadJsonRequestBody(struct was_simple &w,
-		    std::size_t limit=1024*1024);
+		    std::size_t limit=1_MiB);
 
 } // namespace Was

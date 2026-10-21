@@ -26,6 +26,7 @@
 #include "event/FineTimerEvent.hxx"
 #include "event/Loop.hxx"
 #include "net/SocketProtocolError.hxx"
+#include "util/ByteSizes.hxx"
 #include "util/Cancellable.hxx"
 #include "util/DisposableBuffer.hxx"
 #include "util/SpanCast.hxx"
@@ -746,7 +747,7 @@ TEST(WasServerProtocol, LengthTooLarge)
 	f.peer.Send(WAS_COMMAND_REQUEST);
 	f.peer.SendString(WAS_COMMAND_URI, "/foo");
 	f.peer.Send(WAS_COMMAND_DATA);
-	f.peer.SendU64(WAS_COMMAND_LENGTH, 1024 * 1024);
+	f.peer.SendU64(WAS_COMMAND_LENGTH, 1_MiB);
 	f.server.Run();
 
 	ExpectProtocolError(f.server);

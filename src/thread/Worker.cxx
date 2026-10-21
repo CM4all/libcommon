@@ -6,6 +6,7 @@
 #include "Queue.hxx"
 #include "Job.hxx"
 #include "system/Error.hxx"
+#include "util/ByteSizes.hxx"
 #include "util/ScopeExit.hxx"
 
 inline void
@@ -38,7 +39,7 @@ ThreadWorker::ThreadWorker(ThreadQueue &_queue)
 	AtScopeExit(&attr) { pthread_attr_destroy(&attr); };
 
 	/* 64 kB stack ought to be enough */
-	pthread_attr_setstacksize(&attr, std::max<std::size_t>(65536, PTHREAD_STACK_MIN));
+	pthread_attr_setstacksize(&attr, std::max<std::size_t>(64_KiB, PTHREAD_STACK_MIN));
 
 	int error = pthread_create(&thread, &attr, Run, this);
 	if (error != 0)
