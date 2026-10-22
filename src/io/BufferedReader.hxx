@@ -17,7 +17,7 @@ class BufferedReader {
 
 	Reader &reader;
 
-	DynamicFifoBuffer<std::byte> buffer;
+	DynamicFifoBuffer<std::byte> buffer{16_KiB};
 
 	bool eof = false;
 
@@ -25,7 +25,7 @@ class BufferedReader {
 
 public:
 	explicit BufferedReader(Reader &_reader) noexcept
-		:reader(_reader), buffer(16384) {}
+		:reader(_reader) {}
 
 	/**
 	 * Reset the internal state.  Should be called after rewinding
