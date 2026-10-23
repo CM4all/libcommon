@@ -65,8 +65,8 @@ private:
 
 public:
 	VCircularBuffer(std::span<std::byte> buffer) noexcept
-		:list(::new(Align(buffer, alignof(List)).data()) List()),
-		 buffer_size(Align(buffer, alignof(List)).size()) {
+		:list(::new(AlignBuffer(buffer).data()) List()),
+		 buffer_size(AlignBuffer(buffer).size()) {
 		assert(buffer.size() >= sizeof(List) + sizeof(Item));
 	}
 
@@ -226,6 +226,24 @@ private:
 
 	static constexpr std::span<std::byte> Align(std::span<std::byte> src) noexcept {
 		return Align(src, alignof(Item));
+	}
+
+	/**
+	 * Prepare the caller's buffer: move the start up to
+	 * alignof(List) (where the #List is constructed) and round the
+	 * end down to alignof(Item).
+	 *
+	 * Rounding the end down is essential: AfterLast() rounds an
+	 * item's end up to alignof(Item), and if the buffer end were
+	 * not aligned, that could move past EndOfBuffer(), making
+	 * emplace_back() construct an item outside the buffer.
+	 */
+	static constexpr std::span<std::byte> AlignBuffer(std::span<std::byte> buffer) noexcept {
+		buffer = Align(buffer, alignof(List));
+
+		const size_t slack = (size_t)(buffer.data() + buffer.size())
+			% alignof(Item);
+		return buffer.first(buffer.size() - slack);
 	}
 
 	static constexpr size_t ValueSizeToItemSize(size_t value_size) noexcept {
