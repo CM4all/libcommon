@@ -279,11 +279,18 @@ class MultiStock {
 		bool continue_on_cancel = false;
 
 		/**
-		 * Are we currently inside FinishWaiting()?  This flag
-		 * prevents entering the method again through
-		 * OnStockItemReady().
+		 * The nesting depth of handler-invoking frames
+		 * (FinishWaiting(), OnStockItemError() and the
+		 * consumed-request branch of RetryWaiting()).  While this
+		 * is non-zero, a handler is on the stack: OnStockItemReady()
+		 * must not re-enter FinishWaiting(), and the erase paths
+		 * (RemoveItem(), RemoveWaiting()) must not destroy this
+		 * MapItem from under an active frame.  Because a handler may
+		 * re-enter Get() for the same key and fail synchronously
+		 * (nesting another OnStockItemError()), a plain boolean would
+		 * not survive nesting; only the outermost frame erases.
 		 */
-		bool in_finish_waiting = false;
+		unsigned in_finish_waiting = 0;
 
 	public:
 		/**
@@ -364,6 +371,15 @@ class MultiStock {
 		void Expire(Event::TimePoint time) noexcept;
 
 	private:
+		/**
+		 * Is this MapItem unused and safe to erase?  (No items,
+		 * no waiters, no in-flight create and no pending retry.)
+		 */
+		bool IsUnused() const noexcept {
+			return items.empty() && waiting.empty() &&
+				!get_cancel_ptr && !retry_event.IsPending();
+		}
+
 		[[gnu::pure]]
 		OuterItem &ToOuterItem(StockItem &shared_item) noexcept;
 

@@ -2121,3 +2121,145 @@ TEST(MultiStock, RetryWaitingConsumedRequestReleaseSibling)
 	EXPECT_EQ(c1.item, nullptr);
 	EXPECT_EQ(c3.item, nullptr);
 }
+
+namespace {
+
+/**
+ * A #StockGetHandler with hooks for re-entering Get() from inside its
+ * OnStockItemReady()/OnStockItemError() callbacks.
+ */
+struct HookLease final : StockGetHandler {
+	Partition &partition;
+	std::function<void()> on_ready, on_error;
+	CancellablePointer get_cancel_ptr;
+	MyInnerStockItem *item = nullptr;
+	bool ready = false, error = false;
+
+	explicit HookLease(Partition &_p) noexcept :partition(_p) {}
+
+	~HookLease() noexcept {
+		if (get_cancel_ptr)
+			get_cancel_ptr.Cancel();
+		else if (item != nullptr)
+			item->Put(PutAction::REUSE);
+	}
+
+	void Get(std::size_t concurrency) noexcept {
+		partition.instance.multi_stock.Get(StockKey{partition.key},
+						   ToNopPointer(&partition),
+						   concurrency,
+						   *this, get_cancel_ptr);
+	}
+
+	/**
+	 * Fade and release the held lease; when it is the last lease
+	 * of the (now fading) item, this removes the item.
+	 */
+	void FadeRelease() noexcept {
+		assert(item != nullptr);
+		item->outer_item.Fade();
+		item->Put(PutAction::DESTROY);
+		item = nullptr;
+	}
+
+	void OnStockItemReady(StockItem &_item) noexcept override {
+		get_cancel_ptr = nullptr;
+		ready = true;
+		item = (MyInnerStockItem *)&_item;
+		if (on_ready)
+			std::exchange(on_ready, {})();
+	}
+
+	void OnStockItemError(std::exception_ptr) noexcept override {
+		get_cancel_ptr = nullptr;
+		error = true;
+		if (on_error)
+			std::exchange(on_error, {})();
+	}
+};
+
+} // anonymous namespace
+
+/**
+ * Regression test: a consumer whose OnStockItemError() handler
+ * re-enters Get() for the same key, hitting a synchronous create
+ * failure, nests a second MapItem::OnStockItemError() inside the first.
+ * Because the re-entrancy guard is a single counter (previously a
+ * boolean), the nested frame must not erase the MapItem while the outer
+ * frame is still on the stack - only the outermost frame erases it.
+ */
+TEST(MultiStock, NestedOnStockItemErrorFromErrorHandler)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+
+	/* defer the create so the waiter is queued before the create
+	   fails and MapItem::OnStockItemError() (the outer frame) runs */
+	foo.defer_create = true;
+	foo.next_error = std::make_exception_ptr(std::runtime_error{"Error"});
+
+	HookLease a{foo}, d{foo};
+
+	a.on_error = [&]{
+		/* re-enter Get() for the same key from inside the outer
+		   OnStockItemError(); make this create fail synchronously
+		   so a nested OnStockItemError() runs for d */
+		foo.defer_create = false;
+		d.Get(1);
+	};
+
+	a.Get(1);
+	instance.RunSome();
+
+	/* both failed; no use-after-free and the MapItem was erased
+	   exactly once (checked by ASan and ~MultiStock's map.empty()) */
+	EXPECT_TRUE(a.error);
+	EXPECT_TRUE(d.error);
+}
+
+/**
+ * Like above, but the outer frame is FinishWaiting(): a waiter served
+ * from FinishWaiting() re-enters Get() from its OnStockItemReady()
+ * handler and hits a synchronous create failure, nesting
+ * OnStockItemError() inside FinishWaiting().
+ */
+TEST(MultiStock, NestedOnStockItemErrorFromReadyHandler)
+{
+	Instance instance{2};
+
+	Partition foo{instance, "foo"};
+
+	/* defer the create so the waiter is queued and then served from
+	   MapItem::OnStockItemReady() -> FinishWaiting() (the outer
+	   frame) once the create completes */
+	foo.defer_create = true;
+
+	HookLease a{foo}, d{foo};
+
+	a.on_ready = [&]{
+		/* (1) the item a now holds is at its concurrency limit
+		   (1), so this same-key Get() cannot be served from it;
+		   with the stock limit (2) not yet reached, it starts a
+		   fresh create which fails synchronously, nesting
+		   OnStockItemError() inside FinishWaiting() */
+		foo.defer_create = false;
+		foo.next_error = std::make_exception_ptr(std::runtime_error{"Error"});
+		d.Get(1);
+
+		/* (2) now fade and release a's own lease; this empties
+		   the (fading) item and reaches RemoveItem() - still
+		   inside the outer FinishWaiting() frame, which must not
+		   let it erase the MapItem yet */
+		a.FadeRelease();
+	};
+
+	a.Get(1);
+	instance.RunSome();
+
+	/* a was served then released, d failed; no use-after-free and
+	   the MapItem is erased exactly once (ASan + ~MultiStock) */
+	EXPECT_TRUE(a.ready);
+	EXPECT_EQ(a.item, nullptr);
+	EXPECT_TRUE(d.error);
+}

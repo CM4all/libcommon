@@ -552,7 +552,7 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 		DeleteEmptyItems(&item);
 
 	assert(!in_finish_waiting);
-	in_finish_waiting = true;
+	++in_finish_waiting;
 
 	if (item.GetLease(inner_class, get_handler)) {
 		if (!w.is_create) {
@@ -570,11 +570,13 @@ MultiStock::MapItem::FinishWaiting(OuterItem &item) noexcept
 	}
 
 	assert(in_finish_waiting);
-	in_finish_waiting = false;
 
-	if (items.empty() && waiting.empty() && !get_cancel_ptr)
-		/* if this call has been suppressed (from inside the
-		   StockGetHandler), do it now */
+	if (--in_finish_waiting == 0 && IsUnused())
+		/* only the outermost handler-invoking frame may erase
+		   this MapItem (a nested OnStockItemError() reached
+		   through a re-entrant Get() must not free it from under
+		   us); do it now if this call had been suppressed from
+		   inside the StockGetHandler */
 		parent.Erase(*this);
 }
 
@@ -602,20 +604,19 @@ MultiStock::MapItem::RetryWaiting() noexcept
 					  DeleteDisposer{});
 
 		/* protect against the OnStockItemError() callback
-		   deleting this MapItem (by cancelling a sibling
-		   waiter or releasing a sibling lease); decide on
-		   Erase() once afterwards, like OnStockItemError() */
-		assert(!in_finish_waiting);
-		in_finish_waiting = true;
+		   deleting this MapItem (by cancelling a sibling waiter,
+		   releasing a sibling lease or re-entering Get() with a
+		   synchronous create failure); only the outermost frame
+		   erases it, afterwards */
+		++in_finish_waiting;
 
 		handler.OnStockItemError(std::make_exception_ptr(StockOverloadedError{"Overloaded"}));
 
-		assert(in_finish_waiting);
-		in_finish_waiting = false;
+		const bool outermost = --in_finish_waiting == 0;
 
 		if (!waiting.empty())
 			ScheduleRetryWaiting();
-		else if (items.empty() && !get_cancel_ptr)
+		else if (outermost && IsUnused())
 			parent.Erase(*this);
 		return;
 	}
@@ -673,10 +674,12 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 
 	retry_event.Cancel();
 
-	/* protect against re-entrant cancellation of a sibling waiter
-	   from inside the OnStockItemError() callback */
-	assert(!in_finish_waiting);
-	in_finish_waiting = true;
+	/* protect against re-entrant deletion of this MapItem from
+	   inside the OnStockItemError() callback (by cancelling a
+	   sibling waiter, releasing a sibling lease or re-entering Get()
+	   with a synchronous create failure, which nests another
+	   OnStockItemError()); only the outermost frame erases it */
+	++in_finish_waiting;
 
 	waiting.clear_and_dispose([this, &error](auto *w){
 		if (!w->is_create) {
@@ -690,10 +693,8 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 	});
 
 	assert(in_finish_waiting);
-	in_finish_waiting = false;
 
-	if (items.empty() && waiting.empty() && !get_cancel_ptr &&
-	    !retry_event.IsPending())
+	if (--in_finish_waiting == 0 && IsUnused())
 		parent.Erase(*this);
 }
 
