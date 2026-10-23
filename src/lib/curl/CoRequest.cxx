@@ -8,7 +8,7 @@
 
 namespace Curl {
 
-CoRequest::CoRequest(CurlGlobal &global, CurlEasy easy,
+CoRequest::CoRequest(CurlGlobal &global, CurlEasy &&easy,
 		     StringOptions _options)
 	:request(global, std::move(easy), *this),
 	 options(_options)

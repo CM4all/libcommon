@@ -33,7 +33,7 @@ class CoRequest final : CurlResponseHandler {
 	friend Awaitable;
 
 public:
-	CoRequest(CurlGlobal &global, CurlEasy easy, StringOptions _options={});
+	CoRequest(CurlGlobal &global, CurlEasy &&easy, StringOptions _options={});
 
 	Awaitable operator co_await() noexcept {
 		return *this;
