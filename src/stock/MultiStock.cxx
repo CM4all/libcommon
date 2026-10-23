@@ -320,6 +320,14 @@ struct MultiStock::MapItem::Waiting final
 
 	const bool is_create;
 
+	/**
+	 * Set by OnStockItemError() on the waiters it is about to fail,
+	 * so its drain loop stops at the first request re-entered from a
+	 * handler callback (appended to the back) instead of failing it
+	 * with the stale error.
+	 */
+	bool draining = false;
+
 	Waiting(MapItem &_parent, StockRequest &&_request,
 		Event::TimePoint _start_time,
 		bool _is_create,
@@ -679,16 +687,25 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 	   OnStockItemError()); only the outermost frame erases it */
 	++in_finish_waiting;
 
-	waiting.clear_and_dispose([this, &error](auto *w){
-		if (!w->is_create) {
+	/* mark the current waiters; the drain below fails only these and
+	   stops at the first request re-entered from a handler callback
+	   (which Get() appends to the back), leaving it queued to be
+	   served by its own result instead of this stale error */
+	for (auto &w : waiting)
+		w.draining = true;
+
+	while (!waiting.empty() && waiting.front().draining) {
+		auto &w = waiting.pop_front();
+
+		if (!w.is_create) {
 			++counters.failed_waits;
-			WaitingEnded(*w);
+			WaitingEnded(w);
 		}
 
 		/* copy the #std::exception_ptr for each handler */
-		w->handler.OnStockItemError(error);
-		delete w;
-	});
+		w.handler.OnStockItemError(error);
+		delete &w;
+	}
 
 	if (waiting.empty())
 		/* the drain removed the last waiter */
