@@ -2015,3 +2015,109 @@ TEST(MultiStock, CancelSiblingFromErrorHandler)
 	   and neither was served */
 	EXPECT_NE(a.failed, b.failed);
 }
+
+/**
+ * Regression test: RetryWaiting() reaches the consumed-request branch
+ * (the front waiter's request was consumed to create an OuterItem which
+ * was then faded before it could be served) and that waiter's
+ * OnStockItemError() callback releases a sibling lease.  When releasing
+ * that lease empties the last (fading) item, RemoveItem() used to erase
+ * the MapItem while RetryWaiting() was still using it - a use-after-free
+ * followed by a double free from the post-callback parent.Erase().
+ * RetryWaiting() now sets the in_finish_waiting guard the erase paths
+ * honour and decides on Erase once afterwards.
+ */
+TEST(MultiStock, RetryWaitingConsumedRequestReleaseSibling)
+{
+	Instance instance{3};
+
+	Partition foo{instance, "foo"};
+
+	struct Lease final : StockGetHandler {
+		Partition &partition;
+		std::function<void()> on_ready, on_error;
+		CancellablePointer get_cancel_ptr;
+		MyInnerStockItem *item = nullptr;
+		bool error = false;
+
+		explicit Lease(Partition &_p) noexcept :partition(_p) {}
+
+		~Lease() noexcept {
+			if (get_cancel_ptr)
+				get_cancel_ptr.Cancel();
+			else if (item != nullptr)
+				item->Put(PutAction::REUSE);
+		}
+
+		void Get(std::size_t concurrency) noexcept {
+			partition.instance.multi_stock.Get(StockKey{partition.key},
+							   ToNopPointer(&partition),
+							   concurrency,
+							   *this, get_cancel_ptr);
+		}
+
+		void Release() noexcept {
+			assert(item != nullptr);
+			item->Put(PutAction::REUSE);
+			item = nullptr;
+		}
+
+		void OnStockItemReady(StockItem &_item) noexcept override {
+			get_cancel_ptr = nullptr;
+			item = (MyInnerStockItem *)&_item;
+			if (on_ready)
+				std::exchange(on_ready, {})();
+		}
+
+		void OnStockItemError(std::exception_ptr) noexcept override {
+			get_cancel_ptr = nullptr;
+			error = true;
+			if (on_error)
+				std::exchange(on_error, {})();
+		}
+	};
+
+	/* build OuterItem A at concurrency 1 with one "unclean" idle
+	   lease (at its limit, cannot grant) */
+	Lease a{foo};
+	a.Get(1);
+	instance.RunSome();
+	ASSERT_NE(a.item, nullptr);
+	a.item->stopping = true;
+	a.item->Put(PutAction::REUSE);
+	a.item = nullptr;
+
+	Lease c1{foo}, c2{foo}, c3{foo};
+
+	/* c2's error handler releases the sibling leases that c1 and c3
+	   hold; they are the only (busy) leases of the remaining faded
+	   items, so releasing them empties the MapItem and reaches its
+	   erase path (RemoveItem()) from inside RetryWaiting()'s
+	   consumed-request branch */
+	c2.on_error = [&]{
+		if (c3.item != nullptr)
+			c3.Release();
+		if (c1.item != nullptr)
+			c1.Release();
+	};
+
+	/* c1's ready-handler re-enters Get() for c2 and c3 from inside
+	   FinishWaiting(); the create for c2 is consumed into a fresh
+	   item which is faded (before the deferred RetryWaiting() runs),
+	   stranding c2 as a consumed-request waiter, while c3 is served
+	   by another (now faded, busy) item */
+	c1.on_ready = [&]{
+		c2.Get(1);
+		c3.Get(1);
+		instance.multi_stock.FadeKey(StockKey{foo.key});
+	};
+	c1.Get(1);
+	instance.RunSome();
+
+	/* c2 was failed from the consumed-request branch and its handler
+	   released the sibling leases; no access after free, single
+	   erase */
+	EXPECT_TRUE(c2.error);
+	EXPECT_EQ(c1.item, nullptr);
+	EXPECT_EQ(c3.item, nullptr);
+}

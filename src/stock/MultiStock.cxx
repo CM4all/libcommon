@@ -600,11 +600,22 @@ MultiStock::MapItem::RetryWaiting() noexcept
 		auto &handler = w.handler;
 		waiting.erase_and_dispose(waiting.iterator_to(w),
 					  DeleteDisposer{});
+
+		/* protect against the OnStockItemError() callback
+		   deleting this MapItem (by cancelling a sibling
+		   waiter or releasing a sibling lease); decide on
+		   Erase() once afterwards, like OnStockItemError() */
+		assert(!in_finish_waiting);
+		in_finish_waiting = true;
+
 		handler.OnStockItemError(std::make_exception_ptr(StockOverloadedError{"Overloaded"}));
+
+		assert(in_finish_waiting);
+		in_finish_waiting = false;
 
 		if (!waiting.empty())
 			ScheduleRetryWaiting();
-		else if (items.empty() && !get_cancel_ptr && !in_finish_waiting)
+		else if (items.empty() && !get_cancel_ptr)
 			parent.Erase(*this);
 		return;
 	}
