@@ -2016,6 +2016,147 @@ TEST(MultiStock, CancelSiblingFromErrorHandler)
 	EXPECT_NE(a.failed, b.failed);
 }
 
+namespace {
+
+/**
+ * A minimal #StockGetHandler with hooks, for the error-drain tests
+ * below.
+ */
+struct DrainLease final : StockGetHandler {
+	Partition &partition;
+	std::function<void()> on_error;
+	CancellablePointer get_cancel_ptr;
+	StockItem *item = nullptr;
+	bool failed = false;
+
+	explicit DrainLease(Partition &_p) noexcept :partition(_p) {}
+
+	~DrainLease() noexcept {
+		if (get_cancel_ptr)
+			get_cancel_ptr.Cancel();
+		else if (item != nullptr)
+			item->Put(PutAction::REUSE);
+	}
+
+	void Get(std::size_t concurrency=2) noexcept {
+		partition.instance.multi_stock.Get(StockKey{partition.key},
+						   ToNopPointer(&partition),
+						   concurrency,
+						   *this, get_cancel_ptr);
+	}
+
+	void Release() noexcept {
+		assert(item != nullptr);
+		item->Put(PutAction::REUSE);
+		item = nullptr;
+	}
+
+	void OnStockItemReady(StockItem &_item) noexcept override {
+		get_cancel_ptr = nullptr;
+		item = &_item;
+	}
+
+	void OnStockItemError(std::exception_ptr) noexcept override {
+		get_cancel_ptr = nullptr;
+		failed = true;
+		if (on_error)
+			std::exchange(on_error, {})();
+	}
+};
+
+} // anonymous namespace
+
+/**
+ * Regression test: a handler releases a sibling same-key lease from
+ * inside OnStockItemError() while two or more waiters are still being
+ * drained.  Releasing the lease schedules retry_event (there are still
+ * undrained waiters), but the drain then empties the list - leaving a
+ * pending retry over an empty waiting list.  The retry used to pop the
+ * empty list's sentinel on the next event-loop iteration.
+ */
+TEST(MultiStock, ReleaseSiblingLeaseFromErrorHandler)
+{
+	Instance instance{2};
+
+	Partition foo{instance, "foo"};
+
+	/* a ready lease on item A (the sibling to be released) */
+	DrainLease l0{foo};
+	l0.Get();
+	instance.RunSome();
+	ASSERT_NE(l0.item, nullptr);
+	ASSERT_EQ(foo.factory_created, 1u);
+
+	/* fill A's second slot, so the next Get() must create a new item */
+	DrainLease l1{foo};
+	l1.Get();
+	instance.RunSome();
+	ASSERT_NE(l1.item, nullptr);
+	ASSERT_EQ(foo.factory_created, 1u);
+
+	/* the next create (for a second item) fails; two waiters queue */
+	foo.defer_create = true;
+	foo.next_error = std::make_exception_ptr(std::runtime_error{"Error"});
+
+	DrainLease w1{foo}, w2{foo};
+	w1.on_error = [&]{
+		/* release the sibling lease while w2 is still queued */
+		l0.Release();
+	};
+
+	w1.Get();
+	w2.Get();
+
+	/* the deferred create fails and OnStockItemError() drains w1+w2 */
+	instance.RunSome();
+
+	EXPECT_TRUE(w1.failed);
+	EXPECT_TRUE(w2.failed);
+
+	/* a stray retry_event would fire here over the empty list */
+	instance.RunSome();
+}
+
+/**
+ * Regression test: a handler re-enters Get() for the same key from
+ * inside OnStockItemError(), with a create that succeeds synchronously.
+ * The re-entered request must be left queued and served by its own
+ * result, not drained with the stale error, and the deferred retry
+ * (scheduled by the successful create) must not fire over an empty list.
+ */
+TEST(MultiStock, ReenterGetFromErrorHandlerSyncCreate)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+
+	foo.defer_create = true;
+	foo.next_error = std::make_exception_ptr(std::runtime_error{"Error"});
+
+	DrainLease w1{foo}, w2{foo};
+	w1.on_error = [&]{
+		/* re-enter Get() for the same key; this create succeeds
+		   synchronously */
+		foo.defer_create = false;
+		foo.next_error = {};
+		w2.Get(1);
+	};
+
+	w1.Get(1);
+
+	/* the deferred create fails and OnStockItemError() drains w1,
+	   whose handler re-enters Get() (w2) */
+	instance.RunSome();
+
+	EXPECT_TRUE(w1.failed);
+
+	/* the retry serves w2 from its own successful create */
+	instance.RunSome();
+
+	EXPECT_FALSE(w2.failed);
+	EXPECT_NE(w2.item, nullptr);
+}
+
 /**
  * Regression test: RetryWaiting() reaches the consumed-request branch
  * (the front waiter's request was consumed to create an OuterItem which
