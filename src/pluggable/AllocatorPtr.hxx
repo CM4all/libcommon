@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <algorithm> // for std::copy()
 #include <forward_list>
 #include <functional>
 #include <new>
