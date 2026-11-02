@@ -710,6 +710,13 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 	if (waiting.empty())
 		/* the drain removed the last waiter */
 		retry_event.Cancel();
+	else
+		/* a request re-entered during the drain survived with
+		   nothing to drive it (no item, no create in flight, no
+		   pending retry); schedule a retry so RetryWaiting() starts
+		   a create for it instead of leaving it (and every request
+		   queued behind it) hanging forever */
+		ScheduleRetryWaiting();
 
 	assert(in_finish_waiting);
 

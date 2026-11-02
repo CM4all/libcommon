@@ -2158,6 +2158,55 @@ TEST(MultiStock, ReenterGetFromErrorHandlerSyncCreate)
 }
 
 /**
+ * Regression test: a handler re-enters Get() for the same key from inside
+ * OnStockItemError() while another waiter is still queued, so the
+ * re-entered Get() appends a waiter without starting a create.  After the
+ * drain that waiter must not be left orphaned (no item, no create, no
+ * retry), which would hang it - and every later request for the key -
+ * forever.
+ */
+TEST(MultiStock, ReenterGetDuringDrainIsDriven)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+
+	/* the single create for the key fails, with two requests queued */
+	foo.defer_create = true;
+	foo.next_error = std::make_exception_ptr(std::runtime_error{"Error"});
+
+	DrainLease w1{foo}, w2{foo}, w3{foo};
+
+	w1.on_error = [&]{
+		/* re-enter Get() while w2 is still queued, so this does not
+		   start a create; make later creates succeed so w3 can be
+		   served */
+		foo.defer_create = false;
+		foo.next_error = {};
+		w3.Get(1);
+	};
+
+	w1.Get(1);
+	w2.Get(1);
+
+	/* the deferred create fails; OnStockItemError() drains w1 (whose
+	   handler re-enters Get() -> w3) and w2 */
+	instance.RunSome();
+
+	EXPECT_TRUE(w1.failed);
+	EXPECT_TRUE(w2.failed);
+
+	/* w3 must make progress, not hang: a create is started for it and
+	   it is served */
+	instance.RunSome();
+
+	EXPECT_FALSE(static_cast<bool>(w3.get_cancel_ptr));
+	EXPECT_TRUE(w3.failed || w3.item != nullptr);
+	EXPECT_NE(w3.item, nullptr);
+	EXPECT_EQ(foo.factory_created, 1u);
+}
+
+/**
  * Regression test: RetryWaiting() reaches the consumed-request branch
  * (the front waiter's request was consumed to create an OuterItem which
  * was then faded before it could be served) and that waiter's
