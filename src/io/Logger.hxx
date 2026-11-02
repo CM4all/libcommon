@@ -226,8 +226,6 @@ class RootLogger : public BasicLogger<NullLoggerDomain> {
 };
 
 class ChildLoggerDomain : public StringLoggerDomain {
-	std::string name;
-
 public:
 	template<typename P>
 	ChildLoggerDomain(P &&parent, const char *_name) noexcept
