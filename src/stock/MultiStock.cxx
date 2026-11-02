@@ -672,8 +672,6 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 
 	counters.total_create_duration += GetEventLoop().SteadyNow() - create_start_time;
 
-	retry_event.Cancel();
-
 	/* protect against re-entrant deletion of this MapItem from
 	   inside the OnStockItemError() callback (by cancelling a
 	   sibling waiter, releasing a sibling lease or re-entering Get()
@@ -691,6 +689,10 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 		w->handler.OnStockItemError(error);
 		delete w;
 	});
+
+	if (waiting.empty())
+		/* the drain removed the last waiter */
+		retry_event.Cancel();
 
 	assert(in_finish_waiting);
 
