@@ -48,8 +48,7 @@ CoReadTextFile(Queue &queue, FileDescriptor directory_fd, const char *path,
 			   IOSQE_IO_HARDLINK);
 
 	try {
-		co_await CoClose(queue, fd);
-		fd.Release();
+		co_await CoClose(queue, std::move(fd));
 	} catch (...) {
 		/* if CoClose() fails, ~UniqueFileDescriptor() fall
 		   back to regular close() */

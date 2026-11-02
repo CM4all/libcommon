@@ -113,6 +113,9 @@ class CoCloseOperation final {
 public:
 	CoCloseOperation(struct io_uring_sqe &sqe, FileDescriptor fd) noexcept;
 
+	CoCloseOperation(struct io_uring_sqe &sqe,
+			 UniqueFileDescriptor fd) noexcept;
+
 	void GetValue(int value);
 };
 

@@ -49,6 +49,14 @@ CoCloseOperation::CoCloseOperation(struct io_uring_sqe &s,
 	io_uring_prep_close(&s, fd.Get());
 }
 
+CoCloseOperation::CoCloseOperation(struct io_uring_sqe &s,
+				   UniqueFileDescriptor fd) noexcept
+{
+	/* hand the descriptor number to the io_uring close; Release()
+	   empties our #UniqueFileDescriptor so it is not closed again */
+	io_uring_prep_close(&s, fd.Release().Get());
+}
+
 void
 CoCloseOperation::GetValue(int value)
 {
