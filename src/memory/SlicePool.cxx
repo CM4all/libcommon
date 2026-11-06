@@ -34,6 +34,9 @@ inline
 SliceArea::SliceArea(SlicePool &_pool) noexcept
 	:pool(_pool)
 {
+	if (HaveMemoryChecker())
+		return;
+
 	/* build the "free" list */
 	for (unsigned i = 0; i < pool.slices_per_area - 1; ++i)
 		slices[i].next = i + 1;
@@ -47,6 +50,9 @@ SliceArea::SliceArea(SlicePool &_pool) noexcept
 SliceArea *
 SliceArea::New(SlicePool &pool) noexcept
 {
+	if (HaveMemoryChecker())
+		return new SliceArea(pool);
+
 	std::byte *p = AllocatePages(pool.area_size);
 
 	if (pool.vma_name != nullptr)
@@ -72,6 +78,11 @@ void
 SliceArea::Delete() noexcept
 {
 	assert(allocated_count == 0);
+
+	if (HaveMemoryChecker()) {
+		delete this;
+		return;
+	}
 
 #ifndef NDEBUG
 	for (unsigned i = 0; i < pool.slices_per_area; ++i)
@@ -386,10 +397,10 @@ SliceArea::Alloc() noexcept
 SliceAllocation
 SlicePool::Alloc() noexcept
 {
-	if (HaveMemoryChecker())
-		return SliceAllocation{ malloc(slice_size), slice_size };
-
 	auto &area = MakeNonFullArea();
+
+	if (HaveMemoryChecker())
+		return SliceAllocation{area, malloc(slice_size), slice_size};
 
 	const bool was_empty = area.IsEmpty();
 
