@@ -106,10 +106,19 @@ public:
 
 		if constexpr (!lazy) {
 			if (!callback) {
-				/* the coroutine_handle will be
-				   destroyed by the compiler after
-				   rethrowing the exception */
+				/* the coroutine was not started via
+				   Start() yet, so let the exception
+				   propagate synchronously to the
+				   caller of the factory function */
+
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 15
+				/* workaround for GCC < 15 bug: GCC 14
+				   destroys the coroutine in this
+				   path, so we must release the handle
+				   to avoid double-free */
 				(void)task->coroutine.release();
+#endif
+
 				throw;
 			}
 		}
