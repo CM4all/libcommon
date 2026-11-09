@@ -146,9 +146,8 @@ CgroupOptions::Create2(const CgroupState &state, const char *session) const
 		return {std::move(fd), {}};
 }
 
-char *
-CgroupOptions::MakeId(char *p) const noexcept
+void
+CgroupOptions::MakeId(StringBuilder &b) const
 {
-	p = AppendOptionalValue(p, ";cg"sv, name);
-	return p;
+	AppendOptionalValue(b, ";cg"sv, name);
 }

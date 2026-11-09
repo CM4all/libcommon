@@ -119,23 +119,21 @@ NamespaceOptions::ApplyNetwork() const
 	}
 }
 
-char *
-NamespaceOptions::MakeId(char *p) const noexcept
+void
+NamespaceOptions::MakeId(StringBuilder &b) const
 {
-	p = user.MakeId(p);
-	p = AppendOptional(p, ";cns"sv, enable_cgroup);
+	user.MakeId(b);
+	AppendOptional(b, ";cns"sv, enable_cgroup);
 
 	if (enable_network) {
-		p = AppendString(p, ";nns"sv);
-		p = AppendOptionalValue(p, "="sv, network_namespace_name);
+		AppendString(b, ";nns"sv);
+		AppendOptionalValue(b, "="sv, network_namespace_name);
 	}
 
-	p = AppendOptional(p, ";ins"sv, enable_ipc);
+	AppendOptional(b, ";ins"sv, enable_ipc);
 
-	p = pid.MakeId(p);
-	p = mount.MakeId(p);
+	pid.MakeId(b);
+	mount.MakeId(b);
 
-	p = AppendOptionalValue(p, ";uts="sv, hostname);
-
-	return p;
+	AppendOptionalValue(b, ";uts="sv, hostname);
 }

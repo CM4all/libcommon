@@ -76,14 +76,13 @@ ResourceLimits::GetHash() const noexcept
 	return IntHashT(*this);
 }
 
-char *
-ResourceLimits::MakeId(char *p) const noexcept
+void
+ResourceLimits::MakeId(StringBuilder &b) const
 {
 	if (IsEmpty())
-		return p;
+		return;
 
-	p = AppendIntBase32(p, ";r"sv, GetHash());
-	return p;
+	AppendIntBase32(b, ";r"sv, GetHash());
 }
 
 void

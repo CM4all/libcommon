@@ -6,116 +6,122 @@
 
 #include "util/Base32.hxx"
 #include "util/djb_hash.hxx"
+#include "util/StringBuilder.hxx"
 
-#include <algorithm> // for std::copy()
-#include <cstring> // for stpcpy()
+#include <fmt/core.h>
+
 #include <span>
 #include <string_view>
 
-[[nodiscard]]
-inline char *
-AppendString(char *p, std::string_view s) noexcept
+inline void
+AppendString(StringBuilder &b, std::string_view s)
 {
-	return std::copy(s.begin(), s.end(), p);
+	b.Append(s);
 }
 
-[[nodiscard]]
-inline char *
-AppendString(char *p, const char *s) noexcept
+inline void
+AppendString(StringBuilder &b, const char *s)
 {
-	return stpcpy(p, s);
+	b.Append(std::string_view{s});
 }
 
-[[nodiscard]]
-inline char *
-AppendOptional(char *p, std::string_view s, bool append) noexcept
+inline void
+AppendOptional(StringBuilder &b, std::string_view s, bool append)
 {
 	if (append)
-		p = AppendString(p, s);
-
-	return p;
+		AppendString(b, s);
 }
 
-[[nodiscard]]
-inline char *
-AppendOptional(char *p, char ch, bool append) noexcept
+inline void
+AppendOptional(StringBuilder &b, char ch, bool append)
 {
 	if (append)
-		*p++ = ch;
-
-	return p;
+		b.Append(ch);
 }
 
-[[nodiscard]]
-inline char *
-AppendValue(char *p, std::string_view prefix, std::string_view value) noexcept
+inline void
+AppendValue(StringBuilder &b, std::string_view prefix, std::string_view value)
 {
-	p = AppendString(p, prefix);
-	p = AppendString(p, value);
-	return p;
+	AppendString(b, prefix);
+	AppendString(b, value);
 }
 
-[[nodiscard]]
-inline char *
-AppendValue(char *p, std::string_view prefix, const char *value) noexcept
+inline void
+AppendValue(StringBuilder &b, std::string_view prefix, const char *value)
 {
-	p = AppendString(p, prefix);
-	p = AppendString(p, value);
-	return p;
+	AppendString(b, prefix);
+	AppendString(b, value);
 }
 
-[[nodiscard]]
-inline char *
-AppendOptionalValue(char *p, std::string_view prefix, const char *value) noexcept
+inline void
+AppendOptionalValue(StringBuilder &b, std::string_view prefix, const char *value)
 {
 	if (value != nullptr)
-		p = AppendValue(p, prefix, value);
-
-	return p;
+		AppendValue(b, prefix, value);
 }
 
 template<std::integral I>
-[[nodiscard]]
-inline char *
-AppendIntBase32(char *p, std::string_view prefix, I value) noexcept
+inline void
+AppendIntBase32(StringBuilder &b, I value)
 {
-	p = AppendString(p, prefix);
-	p = FormatIntBase32(p, value);
-	return p;
+	b.CheckAppend(MAX_INT_BASE32_LENGTH<I>);
+
+	const auto w = b.Write();
+	char *p = FormatIntBase32(w.data(), value);
+	b.Extend(p - w.data());
 }
 
-[[nodiscard]]
-inline char *
-AppendDjbHash(char *p, std::string_view prefix, const char *value) noexcept
+template<std::integral I>
+inline void
+AppendIntBase32(StringBuilder &b, std::string_view prefix, I value)
 {
-	return AppendIntBase32(p, prefix, djb_hash_string(value));
+	b.Append(prefix);
+	AppendIntBase32(b, value);
 }
 
-[[nodiscard]]
-inline char *
-AppendDjbHash(char *p, std::string_view prefix,
-	      std::span<const std::byte> value) noexcept
+inline void
+AppendDjbHash(StringBuilder &b, std::string_view prefix, const char *value)
 {
-	return AppendIntBase32(p, prefix, djb_hash(value));
+	AppendIntBase32(b, prefix, djb_hash_string(value));
 }
 
-[[nodiscard]]
-inline char *
-AppendOptionalDjbHash(char *p, std::string_view prefix, const char *value) noexcept
+inline void
+AppendDjbHash(StringBuilder &b, std::string_view prefix,
+	      std::span<const std::byte> value)
+{
+	AppendIntBase32(b, prefix, djb_hash(value));
+}
+
+inline void
+AppendOptionalDjbHash(StringBuilder &b, std::string_view prefix, const char *value)
 {
 	if (value != nullptr)
-		p = AppendDjbHash(p, prefix, value);
-
-	return p;
+		AppendDjbHash(b, prefix, value);
 }
 
-[[nodiscard]]
-inline char *
-AppendOptionalDjbHash(char *p, std::string_view prefix,
-		      std::span<const std::byte> value) noexcept
+inline void
+AppendOptionalDjbHash(StringBuilder &b, std::string_view prefix,
+		      std::span<const std::byte> value)
 {
 	if (value.data() != nullptr)
-		p = AppendDjbHash(p, prefix, value);
+		AppendDjbHash(b, prefix, value);
+}
 
-	return p;
+constexpr void
+AppendVFmt(StringBuilder &b,
+	   fmt::string_view format_str, fmt::format_args args)
+{
+	const auto w = b.Write();
+	const auto r = fmt::vformat_to_n(w.begin(), w.size(), format_str, args);
+	if (r.size > w.size())
+		throw TooLargeError{};
+
+	b.Extend(r.size);
+}
+
+template<typename S, typename... Args>
+constexpr void
+AppendFmt(StringBuilder &b, const S &format_str, Args&&... args)
+{
+	AppendVFmt(b, format_str, fmt::make_format_args(args...));
 }

@@ -13,6 +13,7 @@
 class AllocatorPtr;
 class MatchData;
 class VfsBuilder;
+class StringBuilder;
 
 struct Mount : IntrusiveForwardListHook {
 	const char *source;
@@ -185,6 +186,6 @@ public:
 			     VfsBuilder &vfs_builder, FileDescriptor root_fd,
 			     FileDescriptor old_root_fd);
 
-	char *MakeId(char *p) const noexcept;
-	static char *MakeIdAll(char *p, const IntrusiveForwardList<Mount> &m) noexcept;
+	void MakeId(StringBuilder &b) const;
+	static void MakeIdAll(StringBuilder &b, const IntrusiveForwardList<Mount> &m);
 };

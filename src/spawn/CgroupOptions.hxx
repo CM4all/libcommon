@@ -13,6 +13,7 @@
 
 class AllocatorPtr;
 class UniqueFileDescriptor;
+class StringBuilder;
 struct CgroupState;
 
 /**
@@ -92,5 +93,5 @@ struct CgroupOptions {
 	 */
 	CreateResult Create2(const CgroupState &state, const char *session) const;
 
-	char *MakeId(char *p) const noexcept;
+	void MakeId(StringBuilder &b) const;
 };

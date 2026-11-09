@@ -9,6 +9,8 @@
 
 #include <sys/types.h>
 
+class StringBuilder;
+
 struct UidGid {
 	/**
 	 * Special values for "this uid/gid is not set".
@@ -78,7 +80,7 @@ struct UidGid {
 				     std::find(supplementary_groups.begin(), supplementary_groups.end(), UNSET_GID));
 	}
 
-	char *MakeId(char *p) const noexcept;
+	void MakeId(StringBuilder &b) const;
 
 	/**
 	 * Throws std::system_error on error.

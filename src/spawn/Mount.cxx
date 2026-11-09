@@ -406,58 +406,54 @@ Mount::ApplyAll(const IntrusiveForwardList<Mount> &m,
 		i.Apply(vfs_builder, root_fd, old_root_fd);
 }
 
-char *
-Mount::MakeId(char *p) const noexcept
+void
+Mount::MakeId(StringBuilder &b) const
 {
 	switch (type) {
 	case Type::BIND:
-		p = AppendString(p, ";m"sv);
+		AppendString(b, ";m"sv);
 		break;
 
 	case Type::BIND_FILE:
-		p = AppendString(p, ";f"sv);
+		AppendString(b, ";f"sv);
 		break;
 
 	case Type::TMPFS:
-		p = AppendValue(p, ";t:"sv, target);
-		p = AppendOptional(p, 'w', writable);
-		p = AppendOptional(p, 'x', exec);
-		return p;
+		AppendValue(b, ";t:"sv, target);
+		AppendOptional(b, 'w', writable);
+		AppendOptional(b, 'x', exec);
+		return;
 
 	case Type::NAMED_TMPFS:
-		p = AppendValue(p, ";nt:"sv, source);
-		p = AppendValue(p, ">"sv, target);
-		p = AppendOptional(p, 'w', writable);
-		p = AppendOptional(p, 'x', exec);
-		return p;
+		AppendValue(b, ";nt:"sv, source);
+		AppendValue(b, ">"sv, target);
+		AppendOptional(b, 'w', writable);
+		AppendOptional(b, 'x', exec);
+		return;
 
 	case Type::WRITE_FILE:
-		p = AppendValue(p, ";wf:"sv, target);
-		p = AppendValue(p, "="sv, source);
-		*p++ = ';';
-		return p;
+		AppendValue(b, ";wf:"sv, target);
+		AppendValue(b, "="sv, source);
+		b.Append(';');
+		return;
 
 	case Type::SYMLINK:
-		p = AppendValue(p, ";sy:"sv, target);
-		p = AppendValue(p, ">"sv, source);
-		*p++ = ';';
-		return p;
+		AppendValue(b, ";sy:"sv, target);
+		AppendValue(b, ">"sv, source);
+		b.Append(';');
+		return;
 	}
 
-	p = AppendOptional(p, 'w', writable);
-	p = AppendOptional(p, 'x', exec);
+	AppendOptional(b, 'w', writable);
+	AppendOptional(b, 'x', exec);
 
-	p = AppendValue(p, ":"sv, source);
-	p = AppendValue(p, ">"sv, target);
-
-	return p;
+	AppendValue(b, ":"sv, source);
+	AppendValue(b, ">"sv, target);
 }
 
-char *
-Mount::MakeIdAll(char *p, const IntrusiveForwardList<Mount> &m) noexcept
+void
+Mount::MakeIdAll(StringBuilder &b, const IntrusiveForwardList<Mount> &m)
 {
 	for (const auto &i : m)
-		p = i.MakeId(p);
-
-	return p;
+		i.MakeId(b);
 }

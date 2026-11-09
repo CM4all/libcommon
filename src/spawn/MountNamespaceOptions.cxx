@@ -301,30 +301,28 @@ MountNamespaceOptions::Apply(const UidGid &uid_gid, const SpawnContext &context)
 	vfs_builder.Finish();
 }
 
-char *
-MountNamespaceOptions::MakeId(char *p) const noexcept
+void
+MountNamespaceOptions::MakeId(StringBuilder &b) const
 {
-	p = AppendString(p, ";mns"sv);
-	p = AppendOptionalValue(p, ";pvr="sv, pivot_root);
-	p = AppendOptional(p, ";rt"sv, mount_root_tmpfs);
+	AppendString(b, ";mns"sv);
+	AppendOptionalValue(b, ";pvr="sv, pivot_root);
+	AppendOptional(b, ";rt"sv, mount_root_tmpfs);
 
 	if (mount_proc) {
-		p = AppendString(p, ";proc"sv);
-		p = AppendOptional(p, 'w', writable_proc);
+		AppendString(b, ";proc"sv);
+		AppendOptional(b, 'w', writable_proc);
 	}
 
-	p = AppendOptional(p, ";dev"sv, mount_dev);
-	p = AppendOptional(p, ";pts"sv, mount_pts);
-	p = AppendOptional(p, ";bpts"sv, bind_mount_pts);
-	p = AppendOptionalValue(p, ";tt:"sv, mount_tmp_tmpfs);
-	p = AppendOptional(p, ";tte"sv, mount_tmp_tmpfs_exec);
+	AppendOptional(b, ";dev"sv, mount_dev);
+	AppendOptional(b, ";pts"sv, mount_pts);
+	AppendOptional(b, ";bpts"sv, bind_mount_pts);
+	AppendOptionalValue(b, ";tt:"sv, mount_tmp_tmpfs);
+	AppendOptional(b, ";tte"sv, mount_tmp_tmpfs_exec);
 	if (dir_mode != 0711)
-		p = fmt::format_to(p, ";dm{:o}", dir_mode);
-	p = AppendOptionalDjbHash(p, ";ls"sv, mount_listen_stream);
+		AppendFmt(b, ";dm{:o}"sv, dir_mode);
+	AppendOptionalDjbHash(b, ";ls"sv, mount_listen_stream);
 
-	p = Mount::MakeIdAll(p, mounts);
-
-	return p;
+	Mount::MakeIdAll(b, mounts);
 }
 
 bool

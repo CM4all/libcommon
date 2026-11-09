@@ -39,21 +39,19 @@ PidNamespaceOptions::GetCloneFlags(uint_least64_t flags) const noexcept
 	return flags;
 }
 
-char *
-PidNamespaceOptions::MakeId(char *p) const noexcept
+void
+PidNamespaceOptions::MakeId(StringBuilder &b) const
 {
 	switch (mode) {
 	case Mode::DISABLED:
 		break;
 
 	case Mode::ANONYMOUS:
-		p = AppendString(p, ";pns"sv);
+		AppendString(b, ";pns"sv);
 		break;
 
 	case Mode::ACCESSORY:
-		p = AppendValue(p, ";pns="sv, name);
+		AppendValue(b, ";pns="sv, name);
 		break;
 	}
-
-	return p;
 }

@@ -17,6 +17,7 @@
 class AllocatorPtr;
 struct UidGid;
 class MatchData;
+class StringBuilder;
 
 struct NamespaceOptions {
 	/**
@@ -141,5 +142,5 @@ struct NamespaceOptions {
 	 */
 	void ApplyNetwork() const;
 
-	char *MakeId(char *p) const noexcept;
+	void MakeId(StringBuilder &b) const;
 };

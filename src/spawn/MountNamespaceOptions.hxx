@@ -18,6 +18,7 @@ struct UidGid;
 struct SpawnContext;
 struct Mount;
 class MatchData;
+class StringBuilder;
 
 struct MountNamespaceOptions {
 	/**
@@ -146,7 +147,7 @@ struct MountNamespaceOptions {
 	 */
 	void Apply(const UidGid &uid_gid, const SpawnContext &context) const;
 
-	char *MakeId(char *p) const noexcept;
+	void MakeId(StringBuilder &b) const;
 
 	[[gnu::pure]]
 	bool HasMountOn(const char *target) const noexcept;

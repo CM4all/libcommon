@@ -14,6 +14,7 @@
 struct UidGid;
 class AllocatorPtr;
 class UniqueFileDescriptor;
+class StringBuilder;
 
 struct UserNamespaceOptions {
 	/**
@@ -115,5 +116,5 @@ struct UserNamespaceOptions {
 	void SetupUidGidMap(const UidGid &uid_gid,
 			    unsigned pid) const;
 
-	char *MakeId(char *p) const noexcept;
+	void MakeId(StringBuilder &b) const;
 };

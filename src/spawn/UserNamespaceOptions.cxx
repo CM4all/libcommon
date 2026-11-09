@@ -137,16 +137,14 @@ UserNamespaceOptions::SetupUidGidMap(const UidGid &uid_gid, unsigned _pid) const
 	SetupUidMap(proc_pid, map);
 }
 
-char *
-UserNamespaceOptions::MakeId(char *p) const noexcept
+void
+UserNamespaceOptions::MakeId(StringBuilder &b) const
 {
-	p = AppendOptional(p, ";uns"sv, create);
+	AppendOptional(b, ";uns"sv, create);
 
 	if (mapped_real_uid > 0)
-		p = fmt::format_to(p, ";mru{}", mapped_real_uid);
+		AppendFmt(b, ";mru{}", mapped_real_uid);
 
 	if (mapped_effective_uid > 0)
-		p = fmt::format_to(p, ";meu{}", mapped_effective_uid);
-
-	return p;
+		AppendFmt(b, ";meu{}", mapped_effective_uid);
 }

@@ -10,6 +10,8 @@
 #include <cstddef>
 #include <string_view>
 
+class StringBuilder;
+
 struct ResourceLimit : rlimit {
 	static constexpr rlim_t UNDEFINED = rlim_t(-2);
 
@@ -59,7 +61,7 @@ struct ResourceLimits {
 	[[gnu::pure]]
 	std::size_t GetHash() const noexcept;
 
-	char *MakeId(char *p) const noexcept;
+	void MakeId(StringBuilder &b) const;
 
 	void Load(int pid);
 

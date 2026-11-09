@@ -10,6 +10,7 @@
 #include <cstdint>
 
 class AllocatorPtr;
+class StringBuilder;
 
 struct PidNamespaceOptions {
 	/**
@@ -65,5 +66,5 @@ struct PidNamespaceOptions {
 	[[gnu::pure]]
 	uint_least64_t GetCloneFlags(uint_least64_t flags) const noexcept;
 
-	char *MakeId(char *p) const noexcept;
+	void MakeId(StringBuilder &b) const;
 };

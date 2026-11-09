@@ -108,47 +108,45 @@ ChildOptions::GetHash() const noexcept
 	return hash;
 }
 
-char *
-ChildOptions::MakeId(char *p) const noexcept
+void
+ChildOptions::MakeId(StringBuilder &b) const
 {
 	if (umask >= 0)
-		p = fmt::format_to(p, ";u{:o}", umask);
+		AppendFmt(b, ";u{:o}"sv, umask);
 
-	p = AppendOptionalDjbHash(p, ";cr"sv, chroot);
-	p = AppendOptionalDjbHash(p, ";cd"sv, chdir);
-	p = AppendOptionalDjbHash(p, ";e"sv, stderr_path);
+	AppendOptionalDjbHash(b, ";cr"sv, chroot);
+	AppendOptionalDjbHash(b, ";cd"sv, chdir);
+	AppendOptionalDjbHash(b, ";e"sv, stderr_path);
 
-	p = AppendOptional(p, 'j', stderr_jailed);
-	p = AppendOptional(p, 'p', stderr_pond);
+	AppendOptional(b, 'j', stderr_jailed);
+	AppendOptional(b, 'p', stderr_pond);
 
 	for (const std::string_view i : env) {
 		const auto [name, value] = Split(i, '=');
-		p = AppendValue(p, "$"sv, name);
-		p = AppendDjbHash(p, "="sv, AsBytes(value));
+		AppendValue(b, "$"sv, name);
+		AppendDjbHash(b, "="sv, AsBytes(value));
 	}
 
-	p = cgroup.MakeId(p);
+	cgroup.MakeId(b);
 	if (rlimits != nullptr)
-		p = rlimits->MakeId(p);
-	p = ns.MakeId(p);
-	p = uid_gid.MakeId(p);
+		rlimits->MakeId(b);
+	ns.MakeId(b);
+	uid_gid.MakeId(b);
 
-	p = AppendOptional(p, ";en"sv, stderr_null);
+	AppendOptional(b, ";en"sv, stderr_null);
 
 #ifdef HAVE_LIBSECCOMP
-	p = AppendOptional(p, ";ap"sv, allow_ptrace);
-	p = AppendOptional(p, ";fu"sv, forbid_user_ns);
-	p = AppendOptional(p, ";fm"sv, forbid_multicast);
-	p = AppendOptional(p, ";fb"sv, forbid_bind);
+	AppendOptional(b, ";ap"sv, allow_ptrace);
+	AppendOptional(b, ";fu"sv, forbid_user_ns);
+	AppendOptional(b, ";fm"sv, forbid_multicast);
+	AppendOptional(b, ";fb"sv, forbid_bind);
 #endif // HAVE_LIBSECCOMP
 
 #ifdef HAVE_LIBCAP
-	p = AppendOptional(p, ";sr"sv, cap_sys_resource);
+	AppendOptional(b, ";sr"sv, cap_sys_resource);
 #endif // HAVE_LIBCAP
 
-	p = AppendOptional(p, ";n"sv, no_new_privs);
-
-	return p;
+	AppendOptional(b, ";n"sv, no_new_privs);
 }
 
 const char *

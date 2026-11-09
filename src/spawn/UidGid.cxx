@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "UidGid.hxx"
+#include "MakeId.hxx"
 #include "lib/fmt/RuntimeError.hxx"
 #include "lib/fmt/SystemError.hxx"
 
@@ -39,29 +40,27 @@ UidGid::LoadEffective() noexcept
 	effective_gid = getegid();
 }
 
-char *
-UidGid::MakeId(char *p) const noexcept
+void
+UidGid::MakeId(StringBuilder &b) const
 {
 	if (effective_uid != UNSET_UID)
-		p = fmt::format_to(p, ";uid{}", effective_uid);
+		AppendFmt(b, ";uid{}", effective_uid);
 
 	if (effective_gid != UNSET_GID)
-		p = fmt::format_to(p, ";gid{}", effective_gid);
+		AppendFmt(b, ";gid{}", effective_gid);
 
 	if (real_uid != UNSET_UID)
-		p = fmt::format_to(p, ";ruid{}", real_uid);
+		AppendFmt(b, ";ruid{}", real_uid);
 
 	if (real_gid != UNSET_GID)
-		p = fmt::format_to(p, ";rgid{}", real_gid);
+		AppendFmt(b, ";rgid{}", real_gid);
 
 	for (const gid_t g : supplementary_groups) {
 		if (g == UNSET_GID)
 			break;
 
-		p = fmt::format_to(p, ";sg{}", g);
+		AppendFmt(b, ";sg{}", g);
 	}
-
-	return p;
 }
 
 [[gnu::pure]]

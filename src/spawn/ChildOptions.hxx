@@ -21,6 +21,7 @@ struct PreparedChildProcess;
 class MatchData;
 class UniqueFileDescriptor;
 class FdHolder;
+class StringBuilder;
 
 /**
  * Options for launching a child process.
@@ -167,7 +168,11 @@ struct ChildOptions {
 	[[gnu::pure]]
 	std::size_t GetHash() const noexcept;
 
-	char *MakeId(char *p) const noexcept;
+	/**
+	 * Throws #TooLargeError if the #StringBuilder does not have
+	 * enough space.
+	 */
+	void MakeId(StringBuilder &b) const;
 
 	/**
 	 * Throws on error.
