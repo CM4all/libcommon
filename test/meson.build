@@ -9,6 +9,7 @@ endif
 subdir('util')
 subdir('uri')
 subdir('http')
+subdir('io')
 subdir('io/config')
 subdir('net')
 subdir('djb')
