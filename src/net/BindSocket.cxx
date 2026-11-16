@@ -43,7 +43,7 @@ UniqueSocketDescriptor
 BindLoopback(int type, unsigned port)
 {
 	UniqueSocketDescriptor s;
-	if (!s.CreateNonBlock(AF_INET6, SOCK_STREAM, 0))
+	if (!s.CreateNonBlock(AF_INET6, type, 0))
 		throw MakeSocketError("Failed to create socket");
 
 	// TODO do we need a fallback to IPv4?
@@ -68,7 +68,7 @@ UniqueSocketDescriptor
 BindPort(int type, unsigned port)
 {
 	UniqueSocketDescriptor s;
-	if (!s.CreateNonBlock(AF_INET6, SOCK_STREAM, 0))
+	if (!s.CreateNonBlock(AF_INET6, type, 0))
 		throw MakeSocketError("Failed to create socket");
 
 	// TODO do we need a fallback to IPv4?
