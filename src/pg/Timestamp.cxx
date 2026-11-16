@@ -26,7 +26,7 @@ ParsePositiveTimezoneOffset(const char *s)
 	if (*s == ':') {
 		++s;
 		const auto minutes = strtoul(s, &endptr, 10);
-		if (endptr != s + 2 || hours >= 60)
+		if (endptr != s + 2 || minutes >= 60)
 			throw std::runtime_error("Failed to parse time zone offset");
 
 		s = endptr;
