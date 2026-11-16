@@ -6,6 +6,8 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 TEST(PgTest, ParseTimestamp)
 {
 	ASSERT_EQ(Pg::ParseTimestamp("1970-01-01 00:00:00+00"),
@@ -25,4 +27,36 @@ TEST(PgTest, ParseTimestamp)
 		  std::chrono::system_clock::from_time_t(1234567890)
 		  + std::chrono::hours(1)
 		  + std::chrono::minutes(30));
+
+	/* the maximum valid minute offset */
+	ASSERT_EQ(Pg::ParseTimestamp("2009-02-13 23:31:30-01:59"),
+		  std::chrono::system_clock::from_time_t(1234567890)
+		  + std::chrono::hours(1)
+		  + std::chrono::minutes(59));
+}
+
+TEST(PgTest, ParseTimestampInvalid)
+{
+	/* not a timestamp at all */
+	EXPECT_THROW(Pg::ParseTimestamp("hello world"), std::runtime_error);
+
+	/* hour offset out of range */
+	EXPECT_THROW(Pg::ParseTimestamp("2009-02-13 23:31:30+24"),
+		     std::runtime_error);
+
+	/* minute offset out of range; this used to be accepted because
+	   ParsePositiveTimezoneOffset() range-checked the hours variable
+	   instead of the minutes variable */
+	EXPECT_THROW(Pg::ParseTimestamp("2009-02-13 23:31:30-01:60"),
+		     std::runtime_error);
+	EXPECT_THROW(Pg::ParseTimestamp("2009-02-13 23:31:30-01:99"),
+		     std::runtime_error);
+	EXPECT_THROW(Pg::ParseTimestamp("2009-02-13 23:31:30+00:60"),
+		     std::runtime_error);
+
+	/* offsets must have exactly two digits */
+	EXPECT_THROW(Pg::ParseTimestamp("2009-02-13 23:31:30+2"),
+		     std::runtime_error);
+	EXPECT_THROW(Pg::ParseTimestamp("2009-02-13 23:31:30+02:3"),
+		     std::runtime_error);
 }
