@@ -128,4 +128,12 @@ struct SpawnConfig {
 	}
 
 	void Verify(const UidGid &uid_gid) const;
+
+	bool UsesDBus() const noexcept {
+#ifdef HAVE_LIBSYSTEMD
+		return create_systemd_scope != CreateSystemdScope::NO;
+#else
+		return false;
+#endif
+	}
 };
