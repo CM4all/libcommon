@@ -229,7 +229,9 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 	} else if (StringIsEqual(word, "allow_group")) {
 		config.allowed_gids.insert(ParseGroup(line.ExpectValueAndEnd()));
 	} else if (StringIsEqual(word, "cgroups_writable_by_group")) {
+#ifdef HAVE_LIBSYSTEMD
 		config.cgroups_writable_by_gid = ParseGroup(line.ExpectValueAndEnd());
+#endif
 	} else if (StringIsEqual(word, "default_user")) {
 		const char *s = line.ExpectValueAndEnd();
 

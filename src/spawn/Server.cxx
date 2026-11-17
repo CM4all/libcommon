@@ -537,7 +537,11 @@ SpawnServerConnection::SpawnChild(unsigned id, std::string_view name,
 				      std::move(p),
 				      process.GetCurrentRlimits(),
 				      process.GetCgroupState(),
+#ifdef HAVE_LIBSYSTEMD
 				      config.cgroups_writable_by_gid > 0,
+#else
+				      false,
+#endif
 				      process.GetContext());
 
 	auto *child = new SpawnServerChild(*this,

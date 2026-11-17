@@ -53,6 +53,7 @@ struct SpawnConfig {
 	 */
 	uid_t allow_all_uids_from = 0;
 
+#ifdef HAVE_LIBSYSTEMD
 	/**
 	 * If non-zero, then all cgroups can be managed by this gid.
 	 * All cgroups are then owned by this gid and are
@@ -61,20 +62,19 @@ struct SpawnConfig {
 	gid_t cgroups_writable_by_gid = 0;
 
 	/**
+	 * Is a systemd scope optional?  This option is only for
+	 * debugging/development if launched by an unprivileged user.
+	 */
+	bool systemd_scope_optional = false;
+#endif
+
+	/**
 	 * Attempt to run the spawner in a new PID namespace?  This
 	 * means it cannot attach to externally managed PID namespaces
 	 * (e.g. from spawn-accessory via
 	 * NamespaceOptions::pid_namespace).
 	 */
 	bool pid_namespace = true;
-
-#ifdef HAVE_LIBSYSTEMD
-	/**
-	 * Is a systemd scope optional?  This option is only for
-	 * debugging/development if launched by an unprivileged user.
-	 */
-	bool systemd_scope_optional = false;
-#endif
 
 	/**
 	 * Ignore #allowed_uids and #allowed_gids, and allow all uids/gids
