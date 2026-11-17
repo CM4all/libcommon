@@ -4,6 +4,7 @@
 
 #include "PReader.hxx"
 #include "AllocatorPtr.hxx"
+#include "util/Unaligned.hxx"
 
 #include <string.h>
 
@@ -27,7 +28,7 @@ TranslatePacketReader::Feed(AllocatorPtr alloc,
 			/* need more data */
 			return 0;
 
-		memcpy(&header, src.data(), sizeof(header));
+		LoadUnaligned(header, src.data());
 
 		if (header.length == 0) {
 			payload = nullptr;
