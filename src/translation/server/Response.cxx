@@ -3,6 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Response.hxx"
+#include "util/SpanCast.hxx"
 
 #include <algorithm>
 #include <numeric>
@@ -76,12 +77,15 @@ Response::Finish() noexcept
 	std::size_t n_vary = std::accumulate(vary.begin(), vary.end(), 0,
 					     std::plus<std::size_t>{});
 	if (n_vary > 0) {
-		TranslationCommand *dest = (TranslationCommand *)
+		std::byte *dest = (std::byte *)
 			WriteHeader(TranslationCommand::VARY,
 				    n_vary * sizeof(*dest));
-		for (std::size_t i = 0; i < vary.size(); ++i)
-			if (vary[i])
-				*dest++ = vary_cmds[i];
+		for (std::size_t i = 0; i < vary.size(); ++i) {
+			if (vary[i]) {
+				const auto src = ReferenceAsBytes(vary_cmds[i]);
+				dest = std::copy(src.begin(), src.end(), dest);
+			}
+		}
 	}
 
 	Packet(TranslationCommand::END);
