@@ -220,7 +220,7 @@ public:
 	template<typename... Params>
 	auto &MultiPacket(TranslationCommand cmd, Params... params) noexcept {
 		std::size_t total_length = (... + GetParamLength(params));
-		void *p = WriteHeader(cmd, total_length);
+		std::byte *p = WriteHeader(cmd, total_length);
 		WriteParams(p, params...);
 		return *this;
 	}
@@ -233,7 +233,7 @@ public:
 	auto &StringPacket(TranslationCommand cmd, Params... params) noexcept {
 		static_assert(sizeof...(params) > 0);
 		std::size_t total_length = (... + GetParamLength(params));
-		void *p = WriteHeader(cmd, total_length);
+		std::byte *p = WriteHeader(cmd, total_length);
 		WriteStringParams(p, params...);
 		return *this;
 	}
@@ -1830,9 +1830,9 @@ public:
 
 private:
 	void Grow(std::size_t new_capacity) noexcept;
-	void *Write(std::size_t nbytes) noexcept;
+	std::byte *Write(std::size_t nbytes) noexcept;
 
-	void *WriteHeader(TranslationCommand cmd,
+	std::byte *WriteHeader(TranslationCommand cmd,
 			  std::size_t payload_size) noexcept;
 
 	static constexpr std::size_t GetParamLength(std::span<const std::byte> src) noexcept {
@@ -1861,54 +1861,54 @@ private:
 				       });
 	}
 
-	static void *WriteParam(void *dest, std::span<const std::byte> src) noexcept {
-		return mempcpy(dest, src.data(), src.size());
+	static std::byte *WriteParam(std::byte *dest, std::span<const std::byte> src) noexcept {
+		return (std::byte *)mempcpy(dest, src.data(), src.size());
 	}
 
 	template<typename T>
-	static void *WriteParam(void *dest, std::span<const T> src) noexcept {
+	static std::byte *WriteParam(std::byte *dest, std::span<const T> src) noexcept {
 		return WriteParam(dest, std::as_bytes(src));
 	}
 
-	static void *WriteParam(void *dest, std::string_view src) noexcept {
+	static std::byte *WriteParam(std::byte *dest, std::string_view src) noexcept {
 		return WriteParam(dest, std::span{src});
 	}
 
 	template<typename T>
-	static void *WriteParam(void *dest, std::initializer_list<T> l) noexcept {
+	static std::byte *WriteParam(std::byte *dest, std::initializer_list<T> l) noexcept {
 		for (auto &i : l)
 			dest = WriteParam(i);
 		return dest;
 	}
 
 	template<typename P, typename... Params>
-	static void *WriteParams(void *dest, P first, Params... value) noexcept {
+	static std::byte *WriteParams(std::byte *dest, P first, Params... value) noexcept {
 		dest = WriteParam(dest, first);
 		return WriteParams(dest, value...);
 	}
 
-	static void *WriteParams(void *dest) noexcept {
+	static std::byte *WriteParams(std::byte *dest) noexcept {
 		return dest;
 	}
 
-	static void *WriteStringParam(void *dest, std::string_view src) noexcept {
-		return mempcpy(dest, src.data(), src.size());
+	static std::byte *WriteStringParam(std::byte *dest, std::string_view src) noexcept {
+		return (std::byte *)mempcpy(dest, src.data(), src.size());
 	}
 
-	static void *WriteStringParam(void *dest, std::initializer_list<std::string_view> l) noexcept {
+	static std::byte *WriteStringParam(std::byte *dest, std::initializer_list<std::string_view> l) noexcept {
 		for (auto &i : l)
 			dest = WriteStringParam(dest, i);
 		return dest;
 	}
 
 	template<typename P, typename... Params>
-	static void *WriteStringParams(void *dest, P first,
+	static std::byte *WriteStringParams(std::byte *dest, P first,
 				       Params... value) noexcept {
 		dest = WriteStringParam(dest, first);
 		return WriteStringParams(dest, value...);
 	}
 
-	static void *WriteStringParams(void *dest) noexcept {
+	static std::byte *WriteStringParams(std::byte *dest) noexcept {
 		return dest;
 	}
 };

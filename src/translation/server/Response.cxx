@@ -25,7 +25,7 @@ Response::Grow(std::size_t new_capacity) noexcept
 	capacity = new_capacity;
 }
 
-void *
+std::byte *
 Response::Write(std::size_t nbytes) noexcept
 {
 	assert(size <= capacity);
@@ -34,12 +34,12 @@ Response::Write(std::size_t nbytes) noexcept
 	if (new_size > capacity)
 		Grow(((new_size - 1) | 0x7fff) + 1);
 
-	void *result = buffer + size;
+	std::byte *result = buffer + size;
 	size = new_size;
 	return result;
 }
 
-void *
+std::byte *
 Response::WriteHeader(TranslationCommand cmd, std::size_t payload_size) noexcept
 {
 	if (payload_size > 0xffff) [[unlikely]]
@@ -49,14 +49,14 @@ Response::WriteHeader(TranslationCommand cmd, std::size_t payload_size) noexcept
 		overflow = true;
 
 	const TranslationHeader header{uint16_t(payload_size), cmd};
-	void *p = Write(sizeof(header) + payload_size);
-	return mempcpy(p, &header, sizeof(header));
+	std::byte *p = Write(sizeof(header) + payload_size);
+	return (std::byte *)mempcpy(p, &header, sizeof(header));
 }
 
 Response &
 Response::Packet(TranslationCommand cmd, std::span<const std::byte> payload) noexcept
 {
-	void *p = WriteHeader(cmd, payload.size());
+	std::byte *p = WriteHeader(cmd, payload.size());
 	memcpy(p, payload.data(), payload.size());
 	return *this;
 }
@@ -77,7 +77,7 @@ Response::Finish() noexcept
 	std::size_t n_vary = std::accumulate(vary.begin(), vary.end(), 0,
 					     std::plus<std::size_t>{});
 	if (n_vary > 0) {
-		std::byte *dest = (std::byte *)
+		std::byte *dest =
 			WriteHeader(TranslationCommand::VARY,
 				    n_vary * sizeof(*dest));
 		for (std::size_t i = 0; i < vary.size(); ++i) {
