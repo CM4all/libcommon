@@ -239,12 +239,18 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 			throw std::runtime_error("Duplicate 'default_user'");
 
 		config.default_uid_gid.Lookup(s);
-	} else if (StringIsEqual(word, "systemd_scope_optional")) {
+	} else if (StringIsEqual(word, "create_systemd_scope")) {
 #ifdef HAVE_LIBSYSTEMD
-		config.systemd_scope_optional = line.NextBool();
-#endif
-		line.ExpectEnd();
-#ifdef HAVE_LIBSYSTEMD
+		const std::string_view value = line.ExpectValueAndEnd();
+		using enum SpawnConfig::CreateSystemdScope;
+		if (value == "no"sv)
+			config.create_systemd_scope = NO;
+		else if (value == "yes"sv)
+			config.create_systemd_scope = YES;
+		else if (value == "optional"sv)
+			config.create_systemd_scope = OPTIONAL;
+		else
+			throw std::runtime_error{"Invalid `create_systemd_scope` value"};
 	} else if (StringIsEqualIgnoreCase(word, "CPUWeight")) {
 		config.systemd_scope_properties.cpu_weight =
 			ParseCPUWeight(line.ExpectValueAndEnd());

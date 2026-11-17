@@ -190,7 +190,8 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 	CgroupState cgroup_state;
 
 #ifdef HAVE_LIBSYSTEMD
-	if (!config.systemd_scope.empty()) {
+	if (config.create_systemd_scope != SpawnConfig::CreateSystemdScope::NO &&
+	    !config.systemd_scope.empty()) {
 		try {
 			cgroup_state =
 				CreateSystemdScope(config.systemd_scope.c_str(),
@@ -214,7 +215,7 @@ RunSpawnServer2(const SpawnConfig &config, SpawnHook *hook,
 					     S_ISGID|0775, AT_SYMLINK_NOFOLLOW) < 0)
 					throw MakeErrno("Failed to chmod() the cgroup");
 		} catch (...) {
-			if (config.systemd_scope_optional) {
+			if (config.create_systemd_scope == SpawnConfig::CreateSystemdScope::OPTIONAL) {
 				fmt::print(stderr, "Failed to create systemd scope: {}\n",
 					   std::current_exception());
 			} else {

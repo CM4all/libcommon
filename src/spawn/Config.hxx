@@ -11,6 +11,7 @@
 #include "Systemd.hxx"
 #endif
 
+#include <cstdint>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -61,11 +62,17 @@ struct SpawnConfig {
 	 */
 	gid_t cgroups_writable_by_gid = 0;
 
+	enum class CreateSystemdScope : uint_least8_t {
+		NO,
+		YES,
+		OPTIONAL,
+	};
+
 	/**
 	 * Is a systemd scope optional?  This option is only for
 	 * debugging/development if launched by an unprivileged user.
 	 */
-	bool systemd_scope_optional = false;
+	CreateSystemdScope create_systemd_scope = CreateSystemdScope::YES;
 #endif
 
 	/**
