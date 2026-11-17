@@ -3,9 +3,7 @@
 // author: Max Kellermann <max.kellermann@ionos.com>
 
 #include "Response.hxx"
-#include "util/SpanCast.hxx"
 
-#include <algorithm>
 #include <numeric>
 
 #include <assert.h>
@@ -49,15 +47,16 @@ Response::WriteHeader(TranslationCommand cmd, std::size_t payload_size) noexcept
 		overflow = true;
 
 	const TranslationHeader header{uint16_t(payload_size), cmd};
+	const auto src = ReferenceAsBytes(header);
 	std::byte *p = Write(sizeof(header) + payload_size);
-	return (std::byte *)mempcpy(p, &header, sizeof(header));
+	return std::copy(src.begin(), src.end(), p);
 }
 
 Response &
 Response::Packet(TranslationCommand cmd, std::span<const std::byte> payload) noexcept
 {
 	std::byte *p = WriteHeader(cmd, payload.size());
-	memcpy(p, payload.data(), payload.size());
+	std::copy(payload.begin(), payload.end(), p);
 	return *this;
 }
 

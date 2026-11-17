@@ -7,7 +7,9 @@
 #include "../Protocol.hxx"
 #include "http/Status.hxx"
 #include "net/SocketAddress.hxx"
+#include "util/SpanCast.hxx"
 
+#include <algorithm> // for std::copy()
 #include <array>
 #include <chrono>
 #include <cstddef>
@@ -16,8 +18,6 @@
 #include <span>
 #include <string_view>
 #include <utility>
-
-#include <string.h>
 
 namespace Translation::Server {
 
@@ -1862,7 +1862,7 @@ private:
 	}
 
 	static std::byte *WriteParam(std::byte *dest, std::span<const std::byte> src) noexcept {
-		return (std::byte *)mempcpy(dest, src.data(), src.size());
+		return std::copy(src.begin(), src.end(), dest);
 	}
 
 	template<typename T>
@@ -1892,7 +1892,7 @@ private:
 	}
 
 	static std::byte *WriteStringParam(std::byte *dest, std::string_view src) noexcept {
-		return (std::byte *)mempcpy(dest, src.data(), src.size());
+		return WriteParams(dest, AsBytes(src));
 	}
 
 	static std::byte *WriteStringParam(std::byte *dest, std::initializer_list<std::string_view> l) noexcept {
