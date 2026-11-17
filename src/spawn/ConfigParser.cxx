@@ -238,7 +238,9 @@ SpawnConfigParser::ParseLine(FileLineParser &line)
 
 		config.default_uid_gid.Lookup(s);
 	} else if (StringIsEqual(word, "systemd_scope_optional")) {
+#ifdef HAVE_LIBSYSTEMD
 		config.systemd_scope_optional = line.NextBool();
+#endif
 		line.ExpectEnd();
 #ifdef HAVE_LIBSYSTEMD
 	} else if (StringIsEqualIgnoreCase(word, "CPUWeight")) {

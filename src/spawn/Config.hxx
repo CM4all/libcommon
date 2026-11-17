@@ -68,11 +68,13 @@ struct SpawnConfig {
 	 */
 	bool pid_namespace = true;
 
+#ifdef HAVE_LIBSYSTEMD
 	/**
 	 * Is a systemd scope optional?  This option is only for
 	 * debugging/development if launched by an unprivileged user.
 	 */
 	bool systemd_scope_optional = false;
+#endif
 
 	/**
 	 * Ignore #allowed_uids and #allowed_gids, and allow all uids/gids
