@@ -8,6 +8,7 @@
 #include "translation/Protocol.hxx"
 #include "net/SocketError.hxx"
 #include "io/Logger.hxx"
+#include "util/Unaligned.hxx"
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -71,19 +72,20 @@ Connection::OnReceived() noexcept
 
 	while (true) {
 		auto r = input.Read();
-		const void *p = r.data();
-		const auto *header = (const TranslationHeader *)p;
-		if (r.size() < sizeof(*header))
+		TranslationHeader header;
+		if (r.size() < sizeof(header))
 			break;
 
-		const size_t payload_length = header->length;
-		const size_t total_size = sizeof(*header) + payload_length;
+		LoadUnaligned(header, r.data());
+
+		const size_t payload_length = header.length;
+		const size_t total_size = sizeof(header) + payload_length;
 		if (r.size() < total_size)
 			break;
 
-		const auto payload = r.subspan(sizeof(*header),
+		const auto payload = r.subspan(sizeof(header),
 					       payload_length);
-		if (!OnPacket(header->command, payload))
+		if (!OnPacket(header.command, payload))
 			return false;
 
 		input.Consume(total_size);
