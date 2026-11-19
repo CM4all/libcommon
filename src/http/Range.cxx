@@ -49,12 +49,16 @@ HttpRangeRequest::ParseRangeHeader(const char *p) noexcept
 			}
 
 			uint_least64_t v = strtoull(p, &endptr, 10);
-			if (*endptr != 0 || v < skip || v >= size) {
+			if (*endptr != 0 || v < skip) {
 				type = Type::INVALID;
 				return;
 			}
 
-			size = v + 1;
+			/* RFC 9110 14.1.2: a last-pos at or past the
+			   end of the entity is replaced with the
+			   position of its last byte */
+			if (v < size)
+				size = v + 1;
 		}
 	}
 
