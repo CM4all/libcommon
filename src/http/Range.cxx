@@ -28,7 +28,7 @@ HttpRangeRequest::ParseRangeHeader(const char *p) noexcept
 		/* suffix-byte-range-spec */
 		++p;
 
-		uint64_t v = strtoull(p, &endptr, 10);
+		uint_least64_t v = strtoull(p, &endptr, 10);
 		if (v >= size)
 			return;
 
@@ -48,7 +48,7 @@ HttpRangeRequest::ParseRangeHeader(const char *p) noexcept
 				return;
 			}
 
-			uint64_t v = strtoull(p, &endptr, 10);
+			uint_least64_t v = strtoull(p, &endptr, 10);
 			if (*endptr != 0 || v < skip || v >= size) {
 				type = Type::INVALID;
 				return;

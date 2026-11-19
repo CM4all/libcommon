@@ -2,10 +2,9 @@
 // Copyright CM4all GmbH
 // author: Max Kellermann <max.kellermann@ionos.com>
 
-#ifndef HTTP_RANGE_HXX
-#define HTTP_RANGE_HXX
+#pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 struct HttpRangeRequest {
 	enum class Type {
@@ -14,9 +13,9 @@ struct HttpRangeRequest {
 		INVALID,
 	} type = Type::NONE;
 
-	uint64_t skip = 0, size;
+	uint_least64_t skip = 0, size;
 
-	explicit constexpr HttpRangeRequest(uint64_t _size) noexcept
+	explicit constexpr HttpRangeRequest(uint_least64_t _size) noexcept
 		:size(_size) {}
 
 	/**
@@ -24,5 +23,3 @@ struct HttpRangeRequest {
 	 */
 	void ParseRangeHeader(const char *p) noexcept;
 };
-
-#endif
