@@ -78,7 +78,7 @@ Response::Finish() noexcept
 	if (n_vary > 0) {
 		std::byte *dest =
 			WriteHeader(TranslationCommand::VARY,
-				    n_vary * sizeof(*dest));
+				    n_vary * sizeof(TranslationCommand));
 		for (std::size_t i = 0; i < vary.size(); ++i) {
 			if (vary[i]) {
 				const auto src = ReferenceAsBytes(vary_cmds[i]);
