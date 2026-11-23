@@ -9,6 +9,8 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstddef> // for std::byte
+#include <span>
 #include <string_view>
 
 enum class HttpMethod : uint_least8_t;
@@ -19,6 +21,13 @@ namespace Net::Log {
 enum class ContentType : uint8_t;
 
 struct Datagram {
+	/**
+	 * If this object was returned by ParseDatagram(), then this
+	 * field contains a pointer to the time stamp in the raw
+	 * memory block.
+	 */
+	std::span<const std::byte, 8> timestamp_ptr{static_cast<const std::byte *>(nullptr), 8};
+
 	TimePoint timestamp = TimePoint();
 
 	const char *remote_host = nullptr, *host = nullptr, *site = nullptr;

@@ -146,7 +146,8 @@ log_server_apply_attributes(Deserializer d)
 			continue;
 
 		case Attribute::TIMESTAMP:
-			datagram.timestamp = TimePoint{Duration{d.ReadU64()}};
+			datagram.timestamp_ptr = d.ReadSpan<8>();
+			datagram.timestamp = TimePoint{Duration{ReadUnalignedBE64(datagram.timestamp_ptr)}};
 			continue;
 
 		case Attribute::REMOTE_HOST:
