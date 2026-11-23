@@ -8,7 +8,8 @@
 #include "Crc.hxx"
 #include "http/Method.hxx"
 #include "http/Status.hxx"
-#include "util/PackedBigEndian.hxx"
+#include "util/ByteOrder.hxx" // for ToBE32()
+#include "util/UnalignedBigEndian.hxx" // for ReadUnalignedBE*()
 
 #include <assert.h>
 #include <string.h>
@@ -34,7 +35,7 @@ public:
 	template<std::size_t size>
 	requires(size != std::dynamic_extent)
 	std::span<const std::byte, size> ReadSpan() {
-		return {ReadRaw(size), size};
+		return std::span<const std::byte, size>{ReadRaw(size), size};
 	}
 
 	std::byte ReadByte() {
@@ -42,11 +43,11 @@ public:
 	}
 
 	uint16_t ReadU16() {
-		return ReadT<PackedBE16>();
+		return ReadUnalignedBE16(ReadSpan<2>());
 	}
 
 	uint64_t ReadU64() {
-		return ReadT<PackedBE64>();
+		return ReadUnalignedBE64(ReadSpan<8>());
 	}
 
 	std::string_view ReadStringView() {
@@ -256,9 +257,7 @@ ParseDatagram(std::span<const std::byte> d)
 		if (d.size() < sizeof(Crc::value_type))
 			throw ProtocolError();
 
-		auto &expected_crc =
-			*(const PackedBE32 *)
-			(d.data() + d.size() - sizeof(Crc::value_type));
+		const auto expected_crc = ReadUnalignedBE32(d.last<sizeof(Crc::value_type)>());
 		d = d.first(d.size() - sizeof(expected_crc));
 
 		Crc crc;
