@@ -15,6 +15,7 @@
 #endif
 
 class UniqueSocketDescriptor;
+class LineParser;
 
 struct SocketConfig {
 	AllocatedSocketAddress bind_address;
@@ -109,4 +110,14 @@ struct SocketConfig {
 	 * Throws exception on error.
 	 */
 	UniqueSocketDescriptor Create(int type) const;
+
+	/**
+	 * Parse a configuration file line.
+	 *
+	 * Throws on error.
+	 *
+	 * @return false if the word was not recognized
+	 */
+	bool ParseLine(const char *word, LineParser &line,
+		       unsigned default_port);
 };

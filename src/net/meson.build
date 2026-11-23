@@ -37,6 +37,13 @@ net_dependencies = [
   io_dep,
 ]
 
+if is_variable('io_config_dep')
+  net_sources += [
+    'SocketConfigParser.cxx',
+  ]
+  net_dependencies += io_config_dep
+endif
+
 net = static_library(
   'net',
   net_sources,
