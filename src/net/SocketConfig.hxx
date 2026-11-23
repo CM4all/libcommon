@@ -63,11 +63,11 @@ struct SocketConfig {
 	 * Enable Multi-Path TCP?
 	 */
 	bool mptcp = false;
+
+	bool free_bind = false;
 #endif
 
 	bool reuse_port = false;
-
-	bool free_bind = false;
 #endif
 
 #if defined(HAVE_UN) && defined(__linux__)

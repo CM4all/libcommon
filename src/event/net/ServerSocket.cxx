@@ -148,8 +148,8 @@ MakeListener(const SocketAddress address,
 	SocketConfig config{
 		.bind_address = AllocatedSocketAddress{address},
 		.listen = 256,
-		.reuse_port = reuse_port,
 		.free_bind = free_bind,
+		.reuse_port = reuse_port,
 		.pass_cred = true,
 	};
 
