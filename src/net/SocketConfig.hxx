@@ -108,6 +108,8 @@ struct SocketConfig {
 	 * Create a listening socket.
 	 *
 	 * Throws exception on error.
+	 *
+	 * @param type the socket type, e.g. SOCK_STREAM
 	 */
 	UniqueSocketDescriptor Create(int type) const;
 
@@ -116,8 +118,9 @@ struct SocketConfig {
 	 *
 	 * Throws on error.
 	 *
+	 * @param type the socket type, e.g. SOCK_STREAM
 	 * @return false if the word was not recognized
 	 */
 	bool ParseLine(const char *word, LineParser &line,
-		       unsigned default_port);
+		       int type, unsigned default_port);
 };

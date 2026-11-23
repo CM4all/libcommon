@@ -9,7 +9,7 @@
 
 bool
 SocketConfig::ParseLine(const char *word, LineParser &line,
-			unsigned default_port)
+			int type, unsigned default_port)
 {
 	if (StringIsEqual(word, "bind")) {
 		if (!bind_address.IsNull())
@@ -18,11 +18,11 @@ SocketConfig::ParseLine(const char *word, LineParser &line,
 		bind_address = ParseSocketAddress(line.ExpectValueAndEnd(), default_port, true);
 		return true;
 #ifdef HAVE_TCP
-	} else if (StringIsEqual(word, "ack_timeout")) {
+	} else if (type == SOCK_STREAM && StringIsEqual(word, "ack_timeout")) {
 		tcp_user_timeout = line.NextPositiveInteger() * 1000;
 		line.ExpectEnd();
 		return true;
-	} else if (StringIsEqual(word, "keepalive")) {
+	} else if ((type == SOCK_STREAM || type == SOCK_SEQPACKET) && StringIsEqual(word, "keepalive")) {
 		keepalive = line.NextBool();
 		line.ExpectEnd();
 		return true;
@@ -34,7 +34,7 @@ SocketConfig::ParseLine(const char *word, LineParser &line,
 	} else if (StringIsEqual(word, "interface")) {
 		interface = line.ExpectValueAndEnd();
 		return true;
-	} else if (StringIsEqual(word, "mptcp")) {
+	} else if (type == SOCK_STREAM && StringIsEqual(word, "mptcp")) {
 		mptcp = line.NextBool();
 		line.ExpectEnd();
 		return true;
