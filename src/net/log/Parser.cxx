@@ -61,11 +61,16 @@ public:
 	}
 
 private:
-	const std::byte *ReadRaw(size_t size) {
+	const std::byte *PeekRaw(std::size_t size) {
 		const std::byte *result = p;
 		if (result + size > end)
-			throw ProtocolError();
+			throw ProtocolError{};
 
+		return result;
+	}
+
+	const std::byte *ReadRaw(std::size_t size) {
+		const std::byte *result = PeekRaw(size);
 		p += size;
 		return result;
 	}
