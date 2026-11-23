@@ -68,6 +68,15 @@ SocketConfig::ParseLine(const char *word, LineParser &line,
 		line.ExpectEnd();
 		return true;
 #endif
+#ifdef HAVE_MULTICAST
+	} else if (type == SOCK_DGRAM && StringIsEqual(word, "multicast_group")) {
+		if (!multicast_group.IsNull())
+			throw LineParser::Error{"Multicast group already specified"};
+
+		multicast_group = ParseSocketAddress(line.ExpectValueAndEnd(),
+						     0, false);
+		return true;
+#endif
 	} else
 		return false;
 }
