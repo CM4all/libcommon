@@ -31,6 +31,12 @@ public:
 		return p == end;
 	}
 
+	template<std::size_t size>
+	requires(size != std::dynamic_extent)
+	std::span<const std::byte, size> ReadSpan() {
+		return {ReadRaw(size), size};
+	}
+
 	std::byte ReadByte() {
 		return ReadT<std::byte>();
 	}
