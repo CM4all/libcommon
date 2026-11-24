@@ -4,14 +4,14 @@
 
 #pragma once
 
+#include "Error.hxx"
+
 #include <cstddef> // for std::byte
 #include <span>
 
 namespace Net::Log {
 
 struct Datagram;
-
-class ProtocolError {};
 
 /**
  * Throws #ProtocolError on error.
