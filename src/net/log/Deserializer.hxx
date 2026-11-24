@@ -80,12 +80,6 @@ private:
 		p += size;
 		return result;
 	}
-
-	template<typename T>
-	requires(alignof(T) == 1)
-	const T &ReadT() {
-		return *reinterpret_cast<const T *>(ReadRaw(sizeof(T)));
-	}
 };
 
 } // namespace Net::Log
