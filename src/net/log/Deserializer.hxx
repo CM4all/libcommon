@@ -38,7 +38,7 @@ public:
 	}
 
 	std::byte ReadByte() {
-		return ReadT<std::byte>();
+		return *ReadRaw(1);
 	}
 
 	uint16_t ReadU16() {
