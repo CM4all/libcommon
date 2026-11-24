@@ -192,9 +192,8 @@ ParseDatagram(std::span<const std::byte> d)
 			throw ProtocolError();
 
 		return log_server_apply_attributes(d);
-	}
-
-	return log_server_apply_attributes(d);
+	} else
+		throw ProtocolError{};
 }
 
 } // namespace Net::Log
