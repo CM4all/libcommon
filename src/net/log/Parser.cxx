@@ -9,7 +9,6 @@
 #include "Crc.hxx"
 #include "http/Method.hxx"
 #include "http/Status.hxx"
-#include "util/ByteOrder.hxx" // for ToBE32()
 #include "util/UnalignedBigEndian.hxx" // for ReadUnalignedBE*()
 
 namespace Net::Log {
@@ -173,13 +172,13 @@ log_server_apply_attributes(Deserializer d)
 Datagram
 ParseDatagram(std::span<const std::byte> d)
 {
-	auto magic = (const uint32_t *)(const void *)d.data();
-	if (d.size() < sizeof(*magic))
+	if (d.size() < sizeof(MAGIC_V2))
 		throw ProtocolError();
 
-	d = d.subspan(sizeof(*magic));
+	const auto magic = ReadUnalignedBE32(d.first<sizeof(MAGIC_V2)>());
+	d = d.subspan(sizeof(magic));
 
-	if (*magic == ToBE32(MAGIC_V2)) {
+	if (magic == MAGIC_V2) {
 		if (d.size() < sizeof(Crc::value_type))
 			throw ProtocolError();
 
