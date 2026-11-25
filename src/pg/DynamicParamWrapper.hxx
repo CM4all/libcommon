@@ -6,8 +6,9 @@
 
 #include "ParamWrapper.hxx"
 
-#include <vector>
 #include <cstddef>
+#include <numeric> // for std::accumulate()
+#include <vector>
 
 namespace Pg {
 
@@ -38,7 +39,10 @@ struct DynamicParamWrapper<std::vector<T>> {
 		:items(params.begin(), params.end()) {}
 
 	constexpr static size_t Count(const std::vector<T> &v) {
-		return v.size();
+		return std::accumulate(v.begin(), v.end(), std::size_t{0},
+				       [](std::size_t n, const T &i){
+					       return n + DynamicParamWrapper<T>::Count(i);
+				       });
 	}
 
 	template<typename O, typename S, typename F>
