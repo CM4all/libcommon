@@ -7,6 +7,7 @@ test(
   executable(
     'TestPg',
     'TestDecodeArray.cxx',
+    'TestDynamicParamWrapper.cxx',
     'TestEncodeArray.cxx',
     'TestHex.cxx',
     'TestParamWrapper.cxx',
