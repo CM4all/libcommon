@@ -454,9 +454,13 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 			      get_handler, cancel_ptr);
 	waiting.push_back(*w);
 
-	if (create)
+	if (create) {
+		/* a retry scheduled for waiters which are gone by
+		   now must not run while this create is in flight */
+		retry_event.Cancel();
+
 		Create(std::move(w->request));
-	else
+	} else
 		++counters.total_waits;
 }
 
@@ -718,6 +722,7 @@ MultiStock::MapItem::OnStockItemError(std::exception_ptr error) noexcept
 		   queued behind it) hanging forever */
 		ScheduleRetryWaiting();
 
+	assert(!get_cancel_ptr || !retry_event.IsPending());
 	assert(in_finish_waiting);
 
 	if (--in_finish_waiting == 0 && IsUnused())
