@@ -2507,3 +2507,68 @@ TEST(MultiStock, NestedOnStockItemErrorFromReadyHandler)
 	EXPECT_EQ(a.item, nullptr);
 	EXPECT_TRUE(d.error);
 }
+
+/**
+ * Regression test: Get() disposes a faded item (through the
+ * FindUsable() kludge) whose OnLeaseReleased() call the queued
+ * waiters were relying on; they must not be stranded.
+ */
+static void
+TestGetDisposesFadedItem(bool fade_key)
+{
+	Instance instance;
+
+	Partition foo{instance, "foo"};
+
+	/* item A at concurrency 1 with one "unclean" idle lease */
+	HookLease a{foo};
+	a.Get(1);
+	instance.RunSome();
+	ASSERT_NE(a.item, nullptr);
+	auto &shared_item = a.item->outer_item;
+	a.item->stopping = true;
+	a.item->Put(PutAction::REUSE);
+	a.item = nullptr;
+
+	/* A cannot grant a lease and the limit is reached: b waits */
+	HookLease b{foo};
+	b.Get(1);
+	ASSERT_TRUE(b.get_cancel_ptr);
+
+	if (fade_key)
+		/* this schedules A's cleanup timer */
+		instance.multi_stock.FadeKey(StockKey{foo.key});
+	else
+		shared_item.Fade();
+
+	/* disposes A before its cleanup timer runs; c waits behind b */
+	HookLease c{foo};
+	c.Get(1);
+	ASSERT_TRUE(c.get_cancel_ptr);
+
+	instance.RunSome();
+
+	EXPECT_EQ(foo.factory_created, 2u);
+	ASSERT_NE(b.item, nullptr);
+	EXPECT_FALSE(b.error);
+	EXPECT_TRUE(c.get_cancel_ptr);
+
+	/* release b's lease; now c can be served */
+	b.item->Put(PutAction::REUSE);
+	b.item = nullptr;
+
+	instance.RunSome();
+
+	EXPECT_NE(c.item, nullptr);
+	EXPECT_FALSE(c.error);
+}
+
+TEST(MultiStock, GetDisposesFadedItem)
+{
+	TestGetDisposesFadedItem(true);
+}
+
+TEST(MultiStock, GetDisposesFadedSharedItem)
+{
+	TestGetDisposesFadedItem(false);
+}
