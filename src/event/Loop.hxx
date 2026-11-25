@@ -6,7 +6,7 @@
 
 #include "Chrono.hxx"
 #include "TimerWheel.hxx"
-#include "system/EpollFD.hxx"
+#include "Backend.hxx"
 #include "time/ClockCache.hxx"
 #include "util/IntrusiveList.hxx"
 #include "event/config.h"
@@ -52,7 +52,7 @@ class SocketEvent;
  */
 class EventLoop final
 {
-	EpollFD poll_backend;
+	EventPollBackend poll_backend;
 
 #ifdef HAVE_THREADED_EVENT_LOOP
 	WakeFD wake_fd;

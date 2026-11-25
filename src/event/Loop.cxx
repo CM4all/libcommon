@@ -18,8 +18,6 @@
 #include "io/uring/Queue.hxx"
 #endif
 
-#include <array>
-
 #include <limits.h> // for INT_MAX
 
 #ifdef HAVE_URING
@@ -228,6 +226,8 @@ EventLoop::AbandonFD(SocketEvent &event) noexcept
 	assert(event.IsDefined());
 
 	event.unlink();
+
+	poll_backend.Abandon(event.GetSocket().Get());
 }
 
 void
@@ -387,21 +387,19 @@ ExportTimeoutKernelTimespec(Event::Duration timeout, struct __kernel_timespec &b
 inline bool
 EventLoop::Poll(Event::Duration timeout) noexcept
 {
-	std::array<struct epoll_event, 256> received_events;
-	int ret = poll_backend.Wait(received_events.data(),
-				    received_events.size(),
-				    ExportTimeoutMS(timeout));
-	for (int i = 0; i < ret; ++i) {
-		const auto &e = received_events[i];
-		auto &socket_event = *(SocketEvent *)e.data.ptr;
-		socket_event.SetReadyFlags(e.events);
+	const auto poll_result =
+		poll_backend.ReadEvents(ExportTimeoutMS(timeout));
+
+	for (size_t i = 0; i < poll_result.GetSize(); ++i) {
+		auto &socket_event = *(SocketEvent *)poll_result.GetObject(i);
+		socket_event.SetReadyFlags(poll_result.GetEvents(i));
 
 		/* move from "sockets" to "ready_sockets" */
 		socket_event.unlink();
 		ready_sockets.push_back(socket_event);
 	}
 
-	return ret > 0;
+	return poll_result.GetSize() > 0;
 }
 
 #ifdef HAVE_URING
