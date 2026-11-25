@@ -2118,6 +2118,60 @@ TEST(MultiStock, ReleaseSiblingLeaseFromErrorHandler)
 }
 
 /**
+ * Regression test: during the error drain, a handler releases a lease
+ * (scheduling retry_event for the remaining waiter) and the next
+ * handler re-enters Get(), starting a new create.  The stale retry
+ * must not run while that create is in flight.
+ */
+TEST(MultiStock, ReenterGetAfterReleaseFromErrorHandler)
+{
+	Instance instance{2};
+
+	Partition foo{instance, "foo"};
+
+	/* two leases on one item, which is then faded (but stays busy) */
+	DrainLease l0{foo}, l1{foo};
+	l0.Get();
+	l1.Get();
+	instance.RunSome();
+	ASSERT_NE(l0.item, nullptr);
+	ASSERT_NE(l1.item, nullptr);
+	ASSERT_EQ(foo.factory_created, 1u);
+
+	instance.multi_stock.FadeKey(StockKey{foo.key});
+
+	/* the next create (for a second item) fails; two waiters queue */
+	foo.defer_create = true;
+	foo.next_error = std::make_exception_ptr(std::runtime_error{"Error"});
+
+	DrainLease w1{foo}, w2{foo}, w3{foo};
+	w1.on_error = [&]{
+		/* schedules retry_event for w2 */
+		l0.Release();
+	};
+
+	w2.on_error = [&]{
+		/* starts a new (deferred, successful) create */
+		foo.next_error = {};
+		w3.Get();
+	};
+
+	w1.Get();
+	w2.Get();
+
+	instance.RunSome();
+
+	EXPECT_TRUE(w1.failed);
+	EXPECT_TRUE(w2.failed);
+
+	instance.RunSome();
+
+	EXPECT_FALSE(w3.failed);
+	EXPECT_NE(w3.item, nullptr);
+	EXPECT_EQ(foo.factory_created, 2u);
+}
+
+/**
  * Regression test: a handler re-enters Get() for the same key from
  * inside OnStockItemError(), with a create that succeeds synchronously.
  * The re-entered request must be left queued and served by its own
