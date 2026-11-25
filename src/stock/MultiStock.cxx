@@ -429,10 +429,15 @@ MultiStock::MapItem::Get(StockRequest request, std::size_t concurrency,
 			 StockGetHandler &get_handler,
 			 CancellablePointer &cancel_ptr) noexcept
 {
-	if (auto *i = FindUsable()) {
-		if (i->GetLease(inner_class, get_handler))
-			return;
-	}
+	const std::size_t n_items = items.size();
+	auto *usable = FindUsable();
+	if (items.size() < n_items)
+		/* FindUsable() has disposed faded items; this has the
+		   same effect on waiters as RemoveItem() */
+		ScheduleRetryWaiting();
+
+	if (usable != nullptr && usable->GetLease(inner_class, get_handler))
+		return;
 
 	/* always overwrite #get_concurrency; the last call wins (but
 	   it would not make sense for callers to pass different

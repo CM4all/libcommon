@@ -383,7 +383,9 @@ class MultiStock {
 		[[gnu::pure]]
 		OuterItem &ToOuterItem(StockItem &shared_item) noexcept;
 
-		[[gnu::pure]]
+		/**
+		 * Note: this may dispose faded items.
+		 */
 		OuterItem *FindUsable() noexcept;
 
 		/**
