@@ -976,112 +976,112 @@ public:
 			:response(_response) {}
 
 		template<typename... Types>
-		auto Tag(Types... value) noexcept {
+		auto Tag(this auto self, Types... value) noexcept {
 			static_assert(sizeof...(value) > 0);
-			response.StringPacket(TranslationCommand::CHILD_TAG,
-					      value...);
-			return *this;
+			self.response.StringPacket(TranslationCommand::CHILD_TAG,
+						   value...);
+			return self;
 		}
 
-		auto InstantFade() noexcept {
-			response.Packet(TranslationCommand::INSTANT_FADE);
-			return *this;
-		}
-
-		template<typename... Types>
-		auto Chroot(Types... path) noexcept {
-			response.StringPacket(TranslationCommand::CHROOT,
-					      path...);
-			return *this;
+		auto InstantFade(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::INSTANT_FADE);
+			return self;
 		}
 
 		template<typename... Types>
-		auto Chdir(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::CHDIR,
-					      value...);
-			return *this;
-		}
-
-		auto StderrNull() noexcept {
-			response.Packet(TranslationCommand::STDERR_NULL);
-			return *this;
-		}
-
-		auto StderrPond() noexcept {
-			response.Packet(TranslationCommand::STDERR_POND);
-			return *this;
+		auto Chroot(this auto self, Types... path) noexcept {
+			self.response.StringPacket(TranslationCommand::CHROOT,
+						   path...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto StderrPath(Types... value) noexcept {
+		auto Chdir(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::CHDIR,
+						   value...);
+			return self;
+		}
+
+		auto StderrNull(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::STDERR_NULL);
+			return self;
+		}
+
+		auto StderrPond(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::STDERR_POND);
+			return self;
+		}
+
+		template<typename... Types>
+		auto StderrPath(this auto self, Types... value) noexcept {
 			static_assert(sizeof...(value) > 0);
-			response.StringPacket(TranslationCommand::STDERR_PATH,
-					      value...);
-			return *this;
+			self.response.StringPacket(TranslationCommand::STDERR_PATH,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandStderrPath(Types... value) noexcept {
+		auto ExpandStderrPath(this auto self, Types... value) noexcept {
 			static_assert(sizeof...(value) > 0);
-			response.StringPacket(TranslationCommand::EXPAND_STDERR_PATH,
-					      value...);
-			return *this;
+			self.response.StringPacket(TranslationCommand::EXPAND_STDERR_PATH,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto StderrPathJailed(Types... value) noexcept {
+		auto StderrPathJailed(this auto self, Types... value) noexcept {
 			static_assert(sizeof...(value) > 0);
-			response.StringPacket(TranslationCommand::STDERR_PATH_JAILED,
-					      value...);
-			return *this;
+			self.response.StringPacket(TranslationCommand::STDERR_PATH_JAILED,
+						   value...);
+			return self;
 		}
 
-		auto SetEnv(std::string_view s) noexcept {
-			response.StringPacket(TranslationCommand::SETENV, s);
-			return *this;
+		auto SetEnv(this auto self, std::string_view s) noexcept {
+			self.response.StringPacket(TranslationCommand::SETENV, s);
+			return self;
 		}
 
 		template<typename... Types>
-		auto SetEnv(std::string_view name,
+		auto SetEnv(this auto self, std::string_view name,
 			    Types... value) noexcept {
-			response.StringPacket(TranslationCommand::SETENV,
-					      name, "=", value...);
-			return *this;
+			self.response.StringPacket(TranslationCommand::SETENV,
+						   name, "=", value...);
+			return self;
 		}
 
-		auto ExpandSetEnv(std::string_view s) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_SETENV,
-					      s);
-			return *this;
+		auto ExpandSetEnv(this auto self, std::string_view s) noexcept {
+			self.response.StringPacket(TranslationCommand::EXPAND_SETENV,
+						   s);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandSetEnv(std::string_view name,
+		auto ExpandSetEnv(this auto self, std::string_view name,
 				  Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_SETENV,
-					      name, "=", value...);
-			return *this;
+			self.response.StringPacket(TranslationCommand::EXPAND_SETENV,
+						   name, "=", value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto Append(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::APPEND,
-					      value...);
-			return *this;
+		auto Append(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::APPEND,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandAppend(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_APPEND,
-					      value...);
-			return *this;
+		auto ExpandAppend(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::EXPAND_APPEND,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ProcessName(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::PROCESS_NAME,
-					      value...);
-			return *this;
+		auto ProcessName(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::PROCESS_NAME,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
@@ -1092,41 +1092,41 @@ public:
 		}
 
 		template<typename... Types>
-		auto Home(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::HOME,
-					      value...);
-			return *this;
+		auto Home(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::HOME,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandHome(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_HOME,
-					      value...);
-			return *this;
+		auto ExpandHome(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::EXPAND_HOME,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto Shell(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::SHELL,
-					      value...);
-			return *this;
+		auto Shell(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::SHELL,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto Rlimits(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::RLIMITS,
-					      value...);
-			return *this;
+		auto Rlimits(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::RLIMITS,
+						   value...);
+			return self;
 		}
 
-		auto UserNamespace() noexcept {
-			response.Packet(TranslationCommand::USER_NAMESPACE);
-			return *this;
+		auto UserNamespace(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::USER_NAMESPACE);
+			return self;
 		}
 
-		auto PidNamespace() noexcept {
-			response.Packet(TranslationCommand::PID_NAMESPACE);
-			return *this;
+		auto PidNamespace(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::PID_NAMESPACE);
+			return self;
 		}
 
 		/**
@@ -1135,119 +1135,119 @@ public:
 		 * cm4all-spawn-accessory daemon.
 		 */
 		template<typename... Types>
-		auto SharedPidNamespace(Types... name) noexcept {
-			response.Packet(TranslationCommand::PID_NAMESPACE_NAME,
-					name...);
-			return *this;
+		auto SharedPidNamespace(this auto self, Types... name) noexcept {
+			self.response.Packet(TranslationCommand::PID_NAMESPACE_NAME,
+					     name...);
+			return self;
 		}
 
-		auto CgroupNamespace() noexcept {
-			response.Packet(TranslationCommand::CGROUP_NAMESPACE);
-			return *this;
+		auto CgroupNamespace(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::CGROUP_NAMESPACE);
+			return self;
 		}
 
-		auto NetworkNamespace() noexcept {
-			response.Packet(TranslationCommand::NETWORK_NAMESPACE);
-			return *this;
+		auto NetworkNamespace(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::NETWORK_NAMESPACE);
+			return self;
 		}
 
-		auto NetworkNamespace(std::string_view name) noexcept {
-			response.StringPacket(TranslationCommand::NETWORK_NAMESPACE_NAME,
-					      name);
-			return *this;
+		auto NetworkNamespace(this auto self, std::string_view name) noexcept {
+			self.response.StringPacket(TranslationCommand::NETWORK_NAMESPACE_NAME,
+						   name);
+			return self;
 		}
 
-		auto IpcNamespace() noexcept {
-			response.Packet(TranslationCommand::IPC_NAMESPACE);
-			return *this;
+		auto IpcNamespace(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::IPC_NAMESPACE);
+			return self;
 		}
 
-		auto UtsNamespace(std::string_view hostname) noexcept {
-			response.StringPacket(TranslationCommand::UTS_NAMESPACE,
-					      hostname);
-			return *this;
+		auto UtsNamespace(this auto self, std::string_view hostname) noexcept {
+			self.response.StringPacket(TranslationCommand::UTS_NAMESPACE,
+						   hostname);
+			return self;
 		}
 
 		MountNamespaceContext MountNamespace() noexcept {
 			return MountNamespaceContext(response);
 		}
 
-		auto UidGid(const uint32_t &uid, const uint32_t &gid,
+		auto UidGid(this auto self, const uint32_t &uid, const uint32_t &gid,
 			    std::span<const uint32_t> supplementary_groups={}) noexcept {
-			response.MultiPacket(TranslationCommand::UID_GID,
-					     std::span{&uid, 1},
-					     std::span{&gid, 1},
-					     supplementary_groups);
-			return *this;
+			self.response.MultiPacket(TranslationCommand::UID_GID,
+						  std::span{&uid, 1},
+						  std::span{&gid, 1},
+						  supplementary_groups);
+			return self;
 		}
 
-		auto RealUid(const uint32_t &uid) noexcept {
-			response.PacketT(TranslationCommand::REAL_UID_GID, uid);
-			return *this;
+		auto RealUid(this auto self, const uint32_t &uid) noexcept {
+			self.response.PacketT(TranslationCommand::REAL_UID_GID, uid);
+			return self;
 		}
 
-		auto RealUidGid(const uint32_t &uid, const uint32_t &gid) noexcept {
-			response.MultiPacket(TranslationCommand::REAL_UID_GID,
-					     std::span{&uid, 1},
-					     std::span{&gid, 1});
-			return *this;
+		auto RealUidGid(this auto self, const uint32_t &uid, const uint32_t &gid) noexcept {
+			self.response.MultiPacket(TranslationCommand::REAL_UID_GID,
+						  std::span{&uid, 1},
+						  std::span{&gid, 1});
+			return self;
 		}
 
-		auto MappedUid(const uint32_t &uid) noexcept {
-			response.PacketT(TranslationCommand::MAPPED_UID_GID, uid);
-			return *this;
+		auto MappedUid(this auto self, const uint32_t &uid) noexcept {
+			self.response.PacketT(TranslationCommand::MAPPED_UID_GID, uid);
+			return self;
 		}
 
-		auto MappedRealUid(const uint32_t &uid) noexcept {
-			response.PacketT(TranslationCommand::MAPPED_REAL_UID_GID, uid);
-			return *this;
+		auto MappedRealUid(this auto self, const uint32_t &uid) noexcept {
+			self.response.PacketT(TranslationCommand::MAPPED_REAL_UID_GID, uid);
+			return self;
 		}
 
-		auto MaxInotify(const uint32_t &max_inotify_instances, const uint32_t &max_inotify_watches) noexcept {
-			response.MultiPacket(TranslationCommand::MAX_INOTIFY,
-					     std::span{&max_inotify_instances, 1},
-					     std::span{&max_inotify_watches, 1});
-			return *this;
+		auto MaxInotify(this auto self, const uint32_t &max_inotify_instances, const uint32_t &max_inotify_watches) noexcept {
+			self.response.MultiPacket(TranslationCommand::MAX_INOTIFY,
+						  std::span{&max_inotify_instances, 1},
+						  std::span{&max_inotify_watches, 1});
+			return self;
 		}
 
-		auto Umask(uint16_t mask) noexcept {
-			response.PacketT(TranslationCommand::UMASK, mask);
-			return *this;
+		auto Umask(this auto self, uint16_t mask) noexcept {
+			self.response.PacketT(TranslationCommand::UMASK, mask);
+			return self;
 		}
 
-		auto ForbidUserNamespace() noexcept {
-			response.Packet(TranslationCommand::FORBID_USER_NS);
-			return *this;
+		auto ForbidUserNamespace(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::FORBID_USER_NS);
+			return self;
 		}
 
-		auto ForbidMulticast() noexcept {
-			response.Packet(TranslationCommand::FORBID_MULTICAST);
-			return *this;
+		auto ForbidMulticast(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::FORBID_MULTICAST);
+			return self;
 		}
 
-		auto ForbidBind() noexcept {
-			response.Packet(TranslationCommand::FORBID_BIND);
-			return *this;
+		auto ForbidBind(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::FORBID_BIND);
+			return self;
 		}
 
-		auto AllowPtrace() noexcept {
-			response.Packet(TranslationCommand::ALLOW_PTRACE);
-			return *this;
+		auto AllowPtrace(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::ALLOW_PTRACE);
+			return self;
 		}
 
-		auto CapSysResource() noexcept {
-			response.Packet(TranslationCommand::CAP_SYS_RESOURCE);
-			return *this;
+		auto CapSysResource(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::CAP_SYS_RESOURCE);
+			return self;
 		}
 
-		auto NoNewPrivs() noexcept {
-			response.Packet(TranslationCommand::NO_NEW_PRIVS);
-			return *this;
+		auto NoNewPrivs(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::NO_NEW_PRIVS);
+			return self;
 		}
 
-		auto SigKill() noexcept {
-			response.Packet(TranslationCommand::SIGKILL_);
-			return *this;
+		auto SigKill(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::SIGKILL_);
+			return self;
 		}
 	};
 
@@ -1267,91 +1267,91 @@ public:
 	public:
 		using ChildContext::ChildContext;
 
-		auto AutoBase() noexcept {
-			response.Packet(TranslationCommand::AUTO_BASE);
-			return *this;
+		auto AutoBase(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::AUTO_BASE);
+			return self;
 		}
 
-		auto RequestUriVerbatim() noexcept {
-			response.Packet(TranslationCommand::REQUEST_URI_VERBATIM);
-			return *this;
-		}
-
-		template<typename... Types>
-		auto DocumentRoot(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::DOCUMENT_ROOT,
-					      value...);
-			return *this;
+		auto RequestUriVerbatim(this auto self) noexcept {
+			self.response.Packet(TranslationCommand::REQUEST_URI_VERBATIM);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandDocumentRoot(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
-					      value...);
-			return *this;
+		auto DocumentRoot(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::DOCUMENT_ROOT,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandPath(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_PATH,
-					      value...);
-			return *this;
+		auto ExpandDocumentRoot(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::EXPAND_DOCUMENT_ROOT,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto Action(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::ACTION,
-					      value...);
-			return *this;
+		auto ExpandPath(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::EXPAND_PATH,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto Uri(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::URI,
-					      value...);
-			return *this;
+		auto Action(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::ACTION,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandUri(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_URI,
-					      value...);
-			return *this;
+		auto Uri(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::URI,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ScriptName(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::SCRIPT_NAME,
-					      value...);
-			return *this;
+		auto ExpandUri(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::EXPAND_URI,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandScriptName(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_SCRIPT_NAME,
-					      value...);
-			return *this;
+		auto ScriptName(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::SCRIPT_NAME,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto PathInfo(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::PATH_INFO,
-					      value...);
-			return *this;
+		auto ExpandScriptName(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::EXPAND_SCRIPT_NAME,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto ExpandPathInfo(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::EXPAND_PATH_INFO,
-					      value...);
-			return *this;
+		auto PathInfo(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::PATH_INFO,
+						   value...);
+			return self;
 		}
 
 		template<typename... Types>
-		auto QueryString(Types... value) noexcept {
-			response.StringPacket(TranslationCommand::QUERY_STRING,
-					      value...);
-			return *this;
+		auto ExpandPathInfo(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::EXPAND_PATH_INFO,
+						   value...);
+			return self;
+		}
+
+		template<typename... Types>
+		auto QueryString(this auto self, Types... value) noexcept {
+			self.response.StringPacket(TranslationCommand::QUERY_STRING,
+						   value...);
+			return self;
 		}
 	};
 
