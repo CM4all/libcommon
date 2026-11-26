@@ -139,13 +139,25 @@ AddService(AvahiEntryGroup &group, const Service &service,
 		throw MakeError(error, "Failed to add Avahi service");
 }
 
-static void
+/**
+ * @return true if avahi_entry_group_add_service_strlst() was called
+ * at least once, false if no (visible) service was found in the
+ * #services list
+ */
+static bool
 AddServices(AvahiEntryGroup &group,
 	    const IntrusiveList<Service> &services, const char *name)
 {
-	for (const auto &i : services)
-		if (i.visible)
+	bool result = false;
+
+	for (const auto &i : services) {
+		if (i.visible) {
+			result = true;
 			AddService(group, i, name);
+		}
+	}
+
+	return result;
 }
 
 void
@@ -156,9 +168,7 @@ Publisher::RegisterServices(AvahiEntryGroup &g)
 		avahi_entry_group_reset(&g);
 	}
 
-	AddServices(g, services, name.c_str());
-
-	if (!services.empty()) {
+	if (AddServices(g, services, name.c_str())) {
 		should_reset_group = true;
 
 		if (int error = avahi_entry_group_commit(&g);
